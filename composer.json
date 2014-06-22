@@ -3,7 +3,6 @@
 	"description": "Database Migration plugin for CakePHP 3.0 based on Phinx",
 	"license": "MIT",
 	"require": {
-		"cakephp/cakephp": "3.0.*-dev",
 		"robmorgan/phinx": "*"
 	},
 	"autoload": {
