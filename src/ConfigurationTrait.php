@@ -44,7 +44,9 @@ trait ConfigurationTrait {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		$input->setOption('environment', 'default');
+		if (!$input->hasOption('environment') && !empty($this->_requiresEnv)) {
+			$input->setOption('environment', 'default');
+		}
 		parent::execute($input, $output);
 	}
 }

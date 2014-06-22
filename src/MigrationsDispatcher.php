@@ -1,6 +1,6 @@
 <?php
 
-namespace Cake\Migrations\Console;
+namespace Cake\Migrations;
 
 use Cake\Migrations\Command;
 use Symfony\Component\Console\Application;

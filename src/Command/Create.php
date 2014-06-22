@@ -8,4 +8,7 @@ use Phinx\Console\Command\Create as CreateCommand;
 class Create extends CreateCommand {
 
 	use ConfigurationTrait;
+
+	protected $_requiresEnv = false;
+
 }

@@ -17,7 +17,7 @@ class MigrationsShell extends Shell {
 	public function main() {
 		array_shift($_SERVER['argv']);
 		$_SERVER['argv']--;
-		$app = new Migrations(PHINX_VERSION);
+		$app = new MigrationsDispatcher(PHINX_VERSION);
 		$app->run();
 	}
 
