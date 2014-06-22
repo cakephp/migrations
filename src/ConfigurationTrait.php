@@ -19,7 +19,7 @@ trait ConfigurationTrait {
 
 		$dir = APP . 'Config' . DS . 'Migrations';
 		if (!is_dir($dir)) {
-			mkdir($dir, 777, true);
+			mkdir($dir, 1777, true);
 		}
 
 		$config = ConnectionManager::config('default');
