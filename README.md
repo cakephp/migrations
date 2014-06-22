@@ -49,14 +49,14 @@ in phinx's manual.
 
 After modifying the migration file, you can run your changes in the database by executing:
 
-	$ Console/cake Migrations.migration migrate
+	$ Console/cake Migrations.migrations migrate
 
 ### Rollback a migration
 
 If you added any steps to revert a migration in the `down()` callback, you can execute this command
 and have that function executed:
 
-	$ Console/cake Migrations.migration rollback
+	$ Console/cake Migrations.migrations rollback
 
 ### Watch migrations status
 
