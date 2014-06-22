@@ -1,6 +1,6 @@
 <?php
 
-namespace Migrations;
+namespace Cake\Migrations;
 
 use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;

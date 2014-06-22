@@ -1,0 +1,15 @@
+{
+	"name": "cakephp/elastic-search",
+	"description": "Database Migration plugin for CakePHP 3.0 based on Phinx",
+	"license": "MIT",
+	"require": {
+		"php": ">=5.4.19",
+		"cakephp/cakephp": "3.0.*-dev"
+	},
+	"autoload": {
+		"psr-4": {
+			"Cake\\Migrations\\": "src",
+			"Cake\\Migrations\\Test\\": "tests"
+		}
+	}
+}

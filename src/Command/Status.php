@@ -1,8 +1,8 @@
 <?php
 
-namespace Migrations\Command;
+namespace Cake\Migrations\Command;
 
-use Migrations\ConfigurationTrait;
+use Cake\Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Status as StatusCommand;
 
 class Status extends StatusCommand {

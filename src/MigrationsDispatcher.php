@@ -1,13 +1,13 @@
 <?php
 
-namespace Migrations\Console;
+namespace Cake\Migrations\Console;
 
-use Migrations\Command;
+use Cake\Migrations\Command;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Migrations extends Application {
+class MigrationsDispatcher extends Application {
 
 /**
  * Class Constructor.
