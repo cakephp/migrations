@@ -31,7 +31,7 @@ trait ConfigurationTrait {
 				'default_migration_table' => 'phinxlog',
 				'default_database' => 'default',
 				'default' => [
-					'adapter' => 'pgsql',
+					'adapter' => $this->_getAdapterName($config['driver']),
 					'host' => $config['host'],
 					'user' => $config['login'],
 					'pass' => $config['password'],
@@ -43,8 +43,27 @@ trait ConfigurationTrait {
 		]);
 	}
 
+	protected function _getAdapterName($driver) {
+		switch ($driver) {
+			case 'Cake\Database\Driver\Mysql':
+			case is_subclass_of($driver, 'Cake\Database\Driver\Mysql') :
+				return 'mysql';
+			case 'Cake\Database\Driver\Postgres':
+			case is_subclass_of($driver, 'Cake\Database\Driver\Postgres') :
+				return 'pgsql';
+			case 'Cake\Database\Driver\Sqlite':
+			case is_subclass_of($driver, 'Cake\Database\Driver\Sqlite') :
+				return 'sqlite';
+			case 'Cake\Database\Driver\SqlServer':
+			case is_subclass_of($driver, 'Cake\Database\Driver\SqlServer') :
+				return 'sqlsrv';
+		}
+
+		throw new \InvalidArgumentexception('Could not infer databse type from driver');
+	}
+
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		if (!$input->hasOption('environment') && !empty($this->_requiresEnv)) {
+		if ($input->hasOption('environment')) {
 			$input->setOption('environment', 'default');
 		}
 		parent::execute($input, $output);
