@@ -2,6 +2,10 @@
 	"name": "lorenzo/migrations",
 	"description": "Database Migration plugin for CakePHP 3.0 based on Phinx",
 	"license": "MIT",
+	"type": "cakephp-plugin",
+	"extra": {
+        	"installer-name": "Migrations"
+    	},
 	"require": {
 		"robmorgan/phinx": "*",
 		"composer/installers": "*"
