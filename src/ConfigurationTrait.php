@@ -73,6 +73,7 @@ trait ConfigurationTrait {
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$this->_input = $input;
+		$this->addOption('--environment', '-e', InputArgument::OPTIONAL);
 		if ($input->hasOption('environment')) {
 			$input->setOption('environment', 'default');
 		}
