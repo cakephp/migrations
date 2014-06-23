@@ -2,6 +2,7 @@
 
 namespace Cake\Migrations;
 
+use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,14 +13,22 @@ trait ConfigurationTrait {
 
 	protected $_configuration;
 
+	protected $_input;
+
 	public function getConfig() {
 		if ($this->_configuration) {
 			return $this->_configuration;
 		}
 
 		$dir = APP . 'Config' . DS . 'Migrations';
+
+		if ($this->_input->getOption('plugin')) {
+			$plugin = $this->_input->getOption('plugin');
+			$dir = Plugin::path($plugin) . 'Config' .DS . 'Migrations';
+		}
+
 		if (!is_dir($dir)) {
-			mkdir($dir);
+			mkdir($dir, 0777, true);
 		}
 
 		$config = ConnectionManager::config('default');
@@ -63,6 +72,7 @@ trait ConfigurationTrait {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
+		$this->_input = $input;
 		if ($input->hasOption('environment')) {
 			$input->setOption('environment', 'default');
 		}

@@ -7,6 +7,11 @@ use Cake\Console\Shell;
 
 class MigrationsShell extends Shell {
 
+	public function getOptionParser() {
+		return parent::getOptionParser()
+			->addOption('plugin', ['short' => 'p']);
+	}
+
 	public function initialize() {
 		if (!defined('PHINX_VERSION')) {
 			define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.5' : '@PHINX_VERSION@');
