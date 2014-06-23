@@ -78,9 +78,14 @@ trait ConfigurationTrait {
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$this->_input = $input;
 		$this->addOption('--environment', '-e', InputArgument::OPTIONAL);
-		if ($input->hasOption('environment')) {
-			$input->setOption('environment', 'default');
-		}
+		$input->setOption('environment', 'default');
 		parent::execute($input, $output);
 	}
+
+	public function bootstrap(InputInterface $input, OutputInterface $output) {
+		parent::bootstrap($input, $output);
+		$connection = $this->getManager()->getEnvironment('default')->getAdapter()->getConnection();
+		ConnectionManager::get('default')->driver()->connection($connection);
+	}
+
 }
