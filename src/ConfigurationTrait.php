@@ -4,6 +4,7 @@ namespace Cake\Migrations;
 
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
+use Cake\Utility\Inflector;
 use Phinx\Config\Config;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,6 +22,7 @@ trait ConfigurationTrait {
 		}
 
 		$dir = APP . 'Config' . DS . 'Migrations';
+		$plugin = null;
 
 		if ($this->_input->getOption('plugin')) {
 			$plugin = $this->_input->getOption('plugin');
@@ -31,13 +33,15 @@ trait ConfigurationTrait {
 			mkdir($dir, 0777, true);
 		}
 
+		$plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
+
 		$config = ConnectionManager::config('default');
 		return $this->_configuration = new Config([
 			'paths' => [
 				'migrations' => $dir
 			],
 			'environments' => [
-				'default_migration_table' => 'phinxlog',
+				'default_migration_table' => $plugin . 'phinxlog',
 				'default_database' => 'default',
 				'default' => [
 					'adapter' => $this->_getAdapterName($config['driver']),
