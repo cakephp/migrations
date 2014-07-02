@@ -10,6 +10,9 @@
 		"robmorgan/phinx": "*",
 		"composer/installers": "*"
 	},
+	"require-dev": {
+		"cakephp/cakephp": "3.0.x-dev"
+	},
 	"autoload": {
 		"psr-4": {
 			"Cake\\Migrations\\": "src",
