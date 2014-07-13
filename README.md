@@ -53,7 +53,7 @@ This will create a file under `src/Config/Migrations` that you can edit to compl
 After modifying the migration file, you can run your changes in the database by executing:
 
 ```bash
-$ Console/cake Migrations.migration migrate
+$ Console/cake Migrations.migrations migrate
 ```
 
 ### Rollback a migration
@@ -61,7 +61,7 @@ $ Console/cake Migrations.migration migrate
 If you added any steps to revert a migration in the `down()` callback, you can execute this command and have that function executed:
 
 ```bash
-$ Console/cake Migrations.migration rollback
+$ Console/cake Migrations.migrations rollback
 ```
 
 ### Watch migrations status
@@ -69,5 +69,5 @@ $ Console/cake Migrations.migration rollback
 By executing this command you will have an overview of the migrations that have been executed and those still pending to be run:
 
 ```bash
-$ Console/cake Migrations.migration status
+$ Console/cake Migrations.migrations status
 ```
