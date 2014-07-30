@@ -18,7 +18,8 @@ class Migrate extends MigrateCommand {
 			->setDescription('Migrate the database')
 			->addOption('--target', '-t', InputArgument::OPTIONAL, 'The version number to migrate to')
 			->setHelp('runs all available migrations, optionally up to a specific version')
-			->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin containing the migrations');
+			->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin containing the migrations')
+			->addOption('--datasource', '-d', InputArgument::OPTIONAL, 'The datasource to use');
 	}
 
 }
