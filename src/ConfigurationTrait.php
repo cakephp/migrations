@@ -26,7 +26,7 @@ trait ConfigurationTrait {
 
 		if ($this->_input->getOption('plugin')) {
 			$plugin = $this->_input->getOption('plugin');
-			$dir = Plugin::path($plugin) . 'Config' .DS . 'Migrations';
+			$dir = Plugin::path($plugin) . 'src' . DS . 'Config' .DS . 'Migrations';
 		}
 
 		if (!is_dir($dir)) {
