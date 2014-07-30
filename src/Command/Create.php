@@ -23,7 +23,7 @@ class Create extends CreateCommand {
 				PHP_EOL
 			));
 		$this->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin the file should be created for')
-			->addOption('--datasource', '-d', InputArgument::OPTIONAL, 'The datasource to use');
+			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use');
 	}
 
 }

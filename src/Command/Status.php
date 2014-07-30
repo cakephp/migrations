@@ -19,7 +19,7 @@ class Status extends StatusCommand {
 			->addOption('--format', '-f', InputArgument::OPTIONAL, 'The output format: text or json. Defaults to text.')
 			->setHelp('prints a list of all migrations, along with their current status')
 			->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin containing the migrations')
-			->addOption('--datasource', '-d', InputArgument::OPTIONAL, 'The datasource to use');
+			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use');
 	}
 
 }

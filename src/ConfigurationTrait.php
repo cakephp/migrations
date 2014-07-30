@@ -35,12 +35,12 @@ trait ConfigurationTrait {
 
 		$plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
 
-		$datasource = 'default';
-		if ($this->_input->getOption('datasource')) {
-			$datasource = $this->_input->getOption('datasource');
+		$connection = 'default';
+		if ($this->_input->getOption('connection')) {
+			$connection = $this->_input->getOption('connection');
 		}
 
-		$config = ConnectionManager::config($datasource);
+		$config = ConnectionManager::config($connection);
 		return $this->_configuration = new Config([
 			'paths' => [
 				'migrations' => $dir
