@@ -21,12 +21,12 @@ trait ConfigurationTrait {
 			return $this->_configuration;
 		}
 
-		$dir = APP . 'Config' . DS . 'Migrations';
+		$dir = ROOT . 'config' . DS . 'Migrations';
 		$plugin = null;
 
 		if ($this->_input->getOption('plugin')) {
 			$plugin = $this->_input->getOption('plugin');
-			$dir = Plugin::path($plugin) . 'src' . DS . 'Config' .DS . 'Migrations';
+			$dir = Plugin::path($plugin) . 'config' . DS . 'Migrations';
 		}
 
 		if (!is_dir($dir)) {
