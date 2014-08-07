@@ -21,12 +21,12 @@ trait ConfigurationTrait {
 			return $this->_configuration;
 		}
 
-		$dir = APP . 'Config' . DS . 'Migrations';
+		$dir = ROOT . 'config' . DS . 'Migrations';
 		$plugin = null;
 
 		if ($this->_input->getOption('plugin')) {
 			$plugin = $this->_input->getOption('plugin');
-			$dir = Plugin::path($plugin) . 'src' . DS . 'Config' .DS . 'Migrations';
+			$dir = Plugin::path($plugin) . 'config' . DS . 'Migrations';
 		}
 
 		if (!is_dir($dir)) {
@@ -67,12 +67,12 @@ trait ConfigurationTrait {
 			case 'Cake\Database\Driver\Sqlite':
 			case is_subclass_of($driver, 'Cake\Database\Driver\Sqlite') :
 				return 'sqlite';
-			case 'Cake\Database\Driver\SqlServer':
-			case is_subclass_of($driver, 'Cake\Database\Driver\SqlServer') :
+			case 'Cake\Database\Driver\Sqlserver':
+			case is_subclass_of($driver, 'Cake\Database\Driver\Sqlserver') :
 				return 'sqlsrv';
 		}
 
-		throw new \InvalidArgumentexception('Could not infer databse type from driver');
+		throw new \InvalidArgumentexception('Could not infer database type from driver');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
