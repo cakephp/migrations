@@ -26,7 +26,7 @@ You will need to add the following line to your application's bootstrap.php file
 Plugin::load('Migrations', ['namespace' => 'Cake\Migrations']);
 ```
 
-Additionally, you will need to configure the `default` database configuration in your `Config/app.php` file.
+Additionally, you will need to configure the `default` database configuration in your `config/app.php` file.
 
 ## Usage
 
