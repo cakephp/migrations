@@ -10,7 +10,8 @@ class MigrationsShell extends Shell {
 	public function getOptionParser() {
 		return parent::getOptionParser()
 			->addOption('plugin', ['short' => 'p'])
-			->addOption('target', ['short' => 't']);
+			->addOption('target', ['short' => 't'])
+			->addOption('connection', ['short' => 'c']);
 	}
 
 	public function initialize() {

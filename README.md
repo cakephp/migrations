@@ -71,3 +71,19 @@ By executing this command you will have an overview of the migrations that have 
 ```bash
 $ Console/cake Migrations.migrations status
 ```
+
+### Usage for plugins
+
+All the commands from above support the `--plugin` or `-p` option:
+
+```bash
+$ Console/cake Migrations.migrations status -p PluginName
+```
+
+### Usage for connections
+
+All the commands from above support the `--connection` or `-c` option:
+
+```bash
+$ Console/cake Migrations.migrations migrate -c my_datasource
+```
