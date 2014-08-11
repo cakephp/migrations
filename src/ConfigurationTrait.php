@@ -35,7 +35,12 @@ trait ConfigurationTrait {
 
 		$plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
 
-		$config = ConnectionManager::config('default');
+		$connection = 'default';
+		if ($this->_input->getOption('connection')) {
+			$connection = $this->_input->getOption('connection');
+		}
+
+		$config = ConnectionManager::config($connection);
 		return $this->_configuration = new Config([
 			'paths' => [
 				'migrations' => $dir
