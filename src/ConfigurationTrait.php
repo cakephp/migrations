@@ -21,7 +21,7 @@ trait ConfigurationTrait {
 			return $this->_configuration;
 		}
 
-		$dir = ROOT . 'config' . DS . 'Migrations';
+		$dir = ROOT . DS . 'config' . DS . 'Migrations';
 		$plugin = null;
 
 		if ($this->_input->getOption('plugin')) {
