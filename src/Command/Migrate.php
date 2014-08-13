@@ -1,8 +1,8 @@
 <?php
 
-namespace Cake\Migrations\Command;
+namespace Migrations\Command;
 
-use Cake\Migrations\ConfigurationTrait;
+use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Migrate as MigrateCommand;
 use Symfony\Component\Console\Input\InputArgument;
 

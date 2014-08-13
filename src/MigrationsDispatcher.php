@@ -1,8 +1,8 @@
 <?php
 
-namespace Cake\Migrations;
+namespace Migrations;
 
-use Cake\Migrations\Command;
+use Migrations\Command;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
