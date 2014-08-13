@@ -23,7 +23,7 @@ And run `php composer.phar update`
 You will need to add the following line to your application's bootstrap.php file:
 
 ```php
-Plugin::load('Migrations', ['namespace' => 'Cake\Migrations']);
+Plugin::load('Migrations');
 ```
 
 Additionally, you will need to configure the `default` database configuration in your `config/app.php` file.

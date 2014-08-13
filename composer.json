@@ -15,8 +15,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Cake\\Migrations\\": "src",
-			"Cake\\Migrations\\Test\\": "tests"
+			"Migrations\\": "src",
+			"Migrations\\Test\\": "tests"
 		}
 	}
 }

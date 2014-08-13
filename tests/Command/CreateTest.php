@@ -1,8 +1,8 @@
 <?php
 
-namespace Cake\Migrations\Test\Command;
+namespace Migrations\Test\Command;
 
-use Cake\Migrations\Command\Create;
+use Migrations\Command\Create;
 use Cake\TestSuite\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 

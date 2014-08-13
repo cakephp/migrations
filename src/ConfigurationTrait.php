@@ -1,6 +1,6 @@
 <?php
 
-namespace Cake\Migrations;
+namespace Migrations;
 
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;

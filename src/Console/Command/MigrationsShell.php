@@ -1,8 +1,8 @@
 <?php
 
-namespace Cake\Migrations\Console\Command;
+namespace Migrations\Console\Command;
 
-use Cake\Migrations\MigrationsDispatcher;
+use Migrations\MigrationsDispatcher;
 use Cake\Console\Shell;
 
 class MigrationsShell extends Shell {
