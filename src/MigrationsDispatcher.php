@@ -7,6 +7,10 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Used to register all supported subcommand in order to make
+ * them executable by the Symfony Console component
+ */
 class MigrationsDispatcher extends Application {
 
 /**

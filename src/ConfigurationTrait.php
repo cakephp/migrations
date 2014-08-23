@@ -6,10 +6,9 @@ use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Phinx\Config\Config;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 /**
  * Contains a set of methods designed as overrides for
@@ -90,6 +89,8 @@ trait ConfigurationTrait {
  *
  * @param string $driver The driver name as configured for the CakePHP app.
  * @return Phinx\Config\Config
+ * @throws \InvalidArgumentexception when it was not possible to infer the information
+ * out of the provided database configuration
  */
 	protected function _getAdapterName($driver) {
 		switch ($driver) {
