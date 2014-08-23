@@ -10,12 +10,35 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
+
+/**
+ * Contains a set of methods designed as overrides for
+ * the methods in phinx that are responsible for reading the project configuration.
+ * This is needed so that we can use the application configuration instead of having
+ * a configuration yaml file.
+ */
 trait ConfigurationTrait {
 
+/**
+ * The configuration object that phinx uses for connecting to the database
+ *
+ * @var Phinx\Config\Config
+ */
 	protected $_configuration;
 
+/**
+ * The console input instance
+ *
+ * @var Symfony\Component\Console\Input\Input
+ */
 	protected $_input;
 
+/**
+ * Overrides the original method from phinx in order to return a tailored
+ * Config object containing the connection details for the database.
+ *
+ * @return Phinx\Config\Config
+ */
 	public function getConfig() {
 		if ($this->_configuration) {
 			return $this->_configuration;
@@ -61,6 +84,13 @@ trait ConfigurationTrait {
 		]);
 	}
 
+/**
+ * Returns the correct driver name to use in phinx based on the driver class
+ * that was configured for the configuration.
+ *
+ * @param string $driver The driver name as configured for the CakePHP app.
+ * @return Phinx\Config\Config
+ */
 	protected function _getAdapterName($driver) {
 		switch ($driver) {
 			case 'Cake\Database\Driver\Mysql':
@@ -80,6 +110,14 @@ trait ConfigurationTrait {
 		throw new \InvalidArgumentexception('Could not infer database type from driver');
 	}
 
+/**
+ * Overrides the action execute method in order to vanish the idea of environments
+ * from phinx. CakePHP does not beleive in the idea of having in-app environments
+ *
+ * @param Symfony\Component\Console\Input\Inputnterface $input the input object
+ * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+ * @return void
+ */
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$this->_input = $input;
 		$this->addOption('--environment', '-e', InputArgument::OPTIONAL);
@@ -87,6 +125,15 @@ trait ConfigurationTrait {
 		parent::execute($input, $output);
 	}
 
+/**
+ * A callback method that is used to inject the PDO object created from phinx into
+ * the CakePHP connection. This is needed in case the user decides to use tables
+ * from the ORM and executes queries.
+ *
+ * @param Symfony\Component\Console\Input\Inputnterface $input the input object
+ * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+ * @return void
+ */
 	public function bootstrap(InputInterface $input, OutputInterface $output) {
 		parent::bootstrap($input, $output);
 		$connection = $this->getManager()->getEnvironment('default')->getAdapter()->getConnection();

@@ -5,6 +5,11 @@ namespace Migrations\Console\Command;
 use Cake\Console\Shell;
 use Migrations\MigrationsDispatcher;
 
+/**
+ * A wrapper shell for phinx migrations, used to inject our own
+ * console actions so that database configuration already defined
+ * for the application can be reused.
+ */
 class MigrationsShell extends Shell {
 
 /**
