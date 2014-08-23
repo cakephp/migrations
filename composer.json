@@ -15,7 +15,11 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Migrations\\": "src",
+			"Migrations\\": "src"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
 			"Migrations\\Test\\": "tests"
 		}
 	}

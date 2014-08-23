@@ -2,11 +2,18 @@
 
 namespace Migrations\Console\Command;
 
-use Migrations\MigrationsDispatcher;
 use Cake\Console\Shell;
+use Migrations\MigrationsDispatcher;
 
 class MigrationsShell extends Shell {
 
+/**
+ * Defines what options can be passed to the shell.
+ * This is required becuase CakePHP validates the passed options
+ * and would complain if something not configured here is present
+ *
+ * @return Cake\Console\ConsoleOptionParser
+ */
 	public function getOptionParser() {
 		return parent::getOptionParser()
 			->addOption('plugin', ['short' => 'p'])
@@ -14,6 +21,11 @@ class MigrationsShell extends Shell {
 			->addOption('connection', ['short' => 'c']);
 	}
 
+/**
+ * Defines constants that are required by phinx to get running
+ *
+ * @return void
+ */
 	public function initialize() {
 		if (!defined('PHINX_VERSION')) {
 			define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.5' : '@PHINX_VERSION@');
@@ -21,6 +33,13 @@ class MigrationsShell extends Shell {
 		parent::initialize();
 	}
 
+/**
+ * This acts as a front-controller for phinx. It just instantiates the classes
+ * responsible for parsing the command line from phinx and gives full control of
+ * the rest of the flow to it.
+ *
+ * @return void
+ */
 	public function main() {
 		array_shift($_SERVER['argv']);
 		$_SERVER['argv']--;
