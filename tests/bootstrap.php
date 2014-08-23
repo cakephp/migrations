@@ -5,7 +5,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 define('DS', DIRECTORY_SEPARATOR);
 define('APP', sys_get_temp_dir());
-define('ROOT', dirname(__DIR__) . DS);
+define('ROOT', dirname(__DIR__));
 Cake\Core\Configure::write('App', [
 	'namespace' => 'App'
 ]);

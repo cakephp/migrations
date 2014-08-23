@@ -71,7 +71,7 @@ trait ConfigurationTrait {
 				'default_migration_table' => $plugin . 'phinxlog',
 				'default_database' => 'default',
 				'default' => [
-					'adapter' => $this->_getAdapterName($config['driver']),
+					'adapter' => $this->getAdapterName($config['driver']),
 					'host' => $config['host'],
 					'user' => $config['login'],
 					'pass' => $config['password'],
@@ -92,7 +92,7 @@ trait ConfigurationTrait {
  * @throws \InvalidArgumentexception when it was not possible to infer the information
  * out of the provided database configuration
  */
-	protected function _getAdapterName($driver) {
+	public function getAdapterName($driver) {
 		switch ($driver) {
 			case 'Cake\Database\Driver\Mysql':
 			case is_subclass_of($driver, 'Cake\Database\Driver\Mysql') :
@@ -120,10 +120,21 @@ trait ConfigurationTrait {
  * @return void
  */
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		$this->_input = $input;
+		$this->setInput($input);
 		$this->addOption('--environment', '-e', InputArgument::OPTIONAL);
 		$input->setOption('environment', 'default');
 		parent::execute($input, $output);
+	}
+
+/**
+ * Sets the input object that should be used for the command class. This object
+ * is used to inspect the extra options that are needed for CakePHP apps.
+ *
+ * @param Symfony\Component\Console\Input\Inputnterface $input the input object
+ * @return void
+ */
+	public function setInput(InputInterface $input) {
+		$this->_input = $input;
 	}
 
 /**
