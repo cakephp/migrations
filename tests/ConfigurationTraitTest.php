@@ -91,7 +91,6 @@ class ConfigurationTraitTest extends TestCase {
 		$this->assertEquals('mysql', $environment['adapter']);
 		$this->assertEquals('foo.bar', $environment['host']);
 
-		$this->assertEquals('foo.bar', $environment['host']);
 		$this->assertEquals('root', $environment['user']);
 		$this->assertEquals('the_password', $environment['pass']);
 		$this->assertEquals('the_database', $environment['name']);
@@ -125,6 +124,59 @@ class ConfigurationTraitTest extends TestCase {
 			'my_plugin_phinxlog',
 			$config['environments']['default_migration_table']
 		);
+	}
+
+/**
+ * Tests that passing a connection option in the input will configure the environment
+ * to use that connection
+ *
+ * @return void
+ */
+	public function testGetConfigWithConnectionName() {
+		ConnectionManager::config([
+			'custom' => [
+				'className' => 'Cake\Database\Connection',
+				'driver' => 'Cake\Database\Driver\Mysql',
+				'host' => 'foo.bar.baz',
+				'login' => 'rooty',
+				'password' => 'the_password2',
+				'database' => 'the_database2',
+				'encoding' => 'utf-8'
+			]
+		]);
+
+		$input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+		$this->command->setInput($input);
+
+		$input->expects($this->at(1))
+			->method('getOption')
+			->with('connection')
+			->will($this->returnValue('custom'));
+
+		$input->expects($this->at(2))
+			->method('getOption')
+			->with('connection')
+			->will($this->returnValue('custom'));
+
+		$config = $this->command->getConfig();
+		$this->assertInstanceOf('Phinx\Config\Config', $config);
+
+		$expected = ROOT . DS . 'config' . DS . 'Migrations';
+		$this->assertEquals($expected, $config->getMigrationPath());
+
+		$this->assertEquals(
+			'phinxlog',
+			$config['environments']['default_migration_table']
+		);
+
+		$environment = $config['environments']['default'];
+		$this->assertEquals('mysql', $environment['adapter']);
+		$this->assertEquals('foo.bar.baz', $environment['host']);
+
+		$this->assertEquals('rooty', $environment['user']);
+		$this->assertEquals('the_password2', $environment['pass']);
+		$this->assertEquals('the_database2', $environment['name']);
+		$this->assertEquals('utf-8', $environment['charset']);
 	}
 
 }
