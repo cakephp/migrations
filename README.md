@@ -46,7 +46,7 @@ Execute:
 $ Console/cake Migrations.migrations create Initial
 ```
 
-This will create a file under `src/Config/Migrations` that you can edit to complete the migration steps as documented in phinx's manual.
+This will create a file under `config/Migrations` that you can edit to complete the migration steps as documented in phinx's manual.
 
 ### Run the migration
 
