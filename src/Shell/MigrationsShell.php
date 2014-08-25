@@ -9,7 +9,7 @@
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Console\Command;
+namespace Migrations\Shell;
 
 use Cake\Console\Shell;
 use Migrations\MigrationsDispatcher;
