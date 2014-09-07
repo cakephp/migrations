@@ -23,10 +23,10 @@
 	"require": {
 		"php": ">=5.4.19",
 		"cakephp/plugin-installer": "dev-master",
-		"robmorgan/phinx": "*"
+		"robmorgan/phinx": "*",
+		"cakephp/cakephp": "3.0.x-dev"
 	},
 	"require-dev": {
-		"cakephp/cakephp": "3.0.x-dev",
 		"phpunit/phpunit": "*"
 	},
 	"autoload": {
