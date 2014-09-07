@@ -1,17 +1,34 @@
 {
 	"name": "cakephp/migrations",
 	"description": "Database Migration plugin for CakePHP 3.0 based on Phinx",
-	"license": "MIT",
 	"type": "cakephp-plugin",
+	"keywords": ["cakephp", "migrations"],
+	"homepage": "https://github.com/cakephp/migrations",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "CakePHP Community",
+			"homepage": "https://github.com/cakephp/migrations/graphs/contributors"
+		}
+	],
 	"extra": {
         	"installer-name": "Migrations"
     	},
+	"support": {
+		"issues": "https://github.com/cakephp/migrations/issues",
+		"forum": "http://stackoverflow.com/tags/cakephp",
+		"irc": "irc://irc.freenode.org/cakephp",
+		"source": "https://github.com/cakephp/migrations"
+	},
 	"require": {
+		"php": ">=5.4.19",
+		"cakephp/plugin-installer": "dev-master",
 		"robmorgan/phinx": "*",
 		"composer/installers": "*"
 	},
 	"require-dev": {
-		"cakephp/cakephp": "3.0.x-dev"
+		"cakephp/cakephp": "3.0.x-dev",
+		"phpunit/phpunit": "4.1.*"
 	},
 	"autoload": {
 		"psr-4": {
