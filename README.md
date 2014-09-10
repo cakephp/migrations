@@ -30,7 +30,7 @@ Additionally, you will need to configure the `default` database configuration in
 
 ## Usage
 
-This plugins provides the Migrations shell that you can invoke from your application's src folder:
+This plugins provides the Migrations shell that you can invoke from your application's root folder:
 
 ```bash
 $ bin/cake Migrations.migrations
