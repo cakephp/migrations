@@ -30,10 +30,10 @@ Additionally, you will need to configure the `default` database configuration in
 
 ## Usage
 
-This plugins provides the Migrations shell that you can invoke from your application's src folder:
+This plugins provides the Migrations shell that you can invoke from your application's root folder:
 
 ```bash
-$ Console/cake Migrations.migrations
+$ bin/cake Migrations.migrations
 ```
 
 The command above will display a list of available options. Make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
@@ -43,7 +43,7 @@ The command above will display a list of available options. Make sure you read [
 Execute:
 
 ```bash
-$ Console/cake Migrations.migrations create Initial
+$ bin/cake Migrations.migrations create Initial
 ```
 
 This will create a file under `config/Migrations` that you can edit to complete the migration steps as documented in phinx's manual.
@@ -53,7 +53,7 @@ This will create a file under `config/Migrations` that you can edit to complete 
 After modifying the migration file, you can run your changes in the database by executing:
 
 ```bash
-$ Console/cake Migrations.migrations migrate
+$ bin/cake Migrations.migrations migrate
 ```
 
 ### Rollback a migration
@@ -61,7 +61,7 @@ $ Console/cake Migrations.migrations migrate
 If you added any steps to revert a migration in the `down()` callback, you can execute this command and have that function executed:
 
 ```bash
-$ Console/cake Migrations.migrations rollback
+$ bin/cake Migrations.migrations rollback
 ```
 
 ### Watch migrations status
@@ -69,7 +69,7 @@ $ Console/cake Migrations.migrations rollback
 By executing this command you will have an overview of the migrations that have been executed and those still pending to be run:
 
 ```bash
-$ Console/cake Migrations.migrations status
+$ bin/cake Migrations.migrations status
 ```
 
 ### Usage for plugins
@@ -77,7 +77,7 @@ $ Console/cake Migrations.migrations status
 All the commands from above support the `--plugin` or `-p` option:
 
 ```bash
-$ Console/cake Migrations.migrations status -p PluginName
+$ bin/cake Migrations.migrations status -p PluginName
 ```
 
 ### Usage for connections
@@ -85,5 +85,5 @@ $ Console/cake Migrations.migrations status -p PluginName
 All the commands from above support the `--connection` or `-c` option:
 
 ```bash
-$ Console/cake Migrations.migrations migrate -c my_datasource
+$ bin/cake Migrations.migrations migrate -c my_datasource
 ```
