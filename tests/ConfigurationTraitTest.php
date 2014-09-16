@@ -112,7 +112,8 @@ class ConfigurationTraitTest extends TestCase {
  * @return void
  */
 	public function testGetConfigWithPlugin() {
-		Plugin::load('MyPlugin', ['path' => sys_get_temp_dir()]);
+		$tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
+		Plugin::load('MyPlugin', ['path' => $tmpPath]);
 		$input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
 		$this->command->setInput($input);
 
