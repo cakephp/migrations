@@ -1,4 +1,7 @@
-# Database migrations plugin for CakePHP 3.0
+# Database migrations plugin for CakePHP
+
+[![Build Status](https://api.travis-ci.org/cakephp/migrations.png)](https://travis-ci.org/cakephp/migrations)
+[![License](https://poser.pugx.org/cakephp/migrations/license.svg)](https://packagist.org/packages/cakephp/migrations)
 
 This is a pre-alpha version of a Database Migrations system for CakePHP 3.0. It is currently under development and should be considered experimental.
 
