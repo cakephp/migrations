@@ -65,6 +65,7 @@ trait ConfigurationTrait {
 		}
 
 		$plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
+		$plugin = str_replace(array('\\', '/', '.'), '_', $plugin);
 
 		$connection = 'default';
 		if ($this->_input->getOption('connection')) {
