@@ -14,10 +14,14 @@ namespace Migrations\Command;
 use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Rollback as RollbackCommand;
 use Symfony\Component\Console\Input\InputArgument;
+use Cake\Event\EventManagerTrait;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Rollback extends RollbackCommand {
 
 	use ConfigurationTrait;
+	use EventManagerTrait;
 
 /**
  * {@inheritdoc}
@@ -31,4 +35,29 @@ class Rollback extends RollbackCommand {
 			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use');
 	}
 
+/**
+ * Overrides the action execute method in order to vanish the idea of environments
+ * from phinx. CakePHP does not beleive in the idea of having in-app environments
+ *
+ * @param Symfony\Component\Console\Input\Inputnterface $input the input object
+ * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+ * @return void
+ */
+	protected function execute(InputInterface $input, OutputInterface $output) {
+
+		$this->setInput($input);
+		$this->addOption('--environment', '-e', InputArgument::OPTIONAL);
+		$input->setOption('environment', 'default');
+
+		$event = $this->dispatchEvent('Migration.beforeRollback');
+
+		if ($event->isStopped()) {
+			return $event->result;
+		}
+
+		parent::execute($input, $output);
+
+		$this->dispatchEvent('Migration.afterRollback');
+
+	}
 }
