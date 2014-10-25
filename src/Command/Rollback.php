@@ -20,10 +20,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Rollback extends RollbackCommand {
 
-	use ConfigurationTrait;
-	use EventManagerTrait {
+	use ConfigurationTrait {
 		execute as parentExecute;
 	}
+	use EventManagerTrait;
 
 /**
  * {@inheritdoc}

@@ -21,10 +21,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Migrate extends MigrateCommand {
 
-	use ConfigurationTrait;
-	use EventManagerTrait {
+	use ConfigurationTrait {
 		execute as parentExecute;
 	}
+	use EventManagerTrait;
 
 /**
  * {@inheritdoc}
