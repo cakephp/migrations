@@ -51,7 +51,7 @@ class Migrate extends MigrateCommand {
 		if ($event->isStopped()) {
 			return $event->result;
 		}
-		debug($this->parentExecute($input, $output));
+		$this->parentExecute($input, $output);
 		$this->dispatchEvent('Migration.afterMigrate');
 	}
 
