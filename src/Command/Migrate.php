@@ -22,7 +22,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Migrate extends MigrateCommand {
 
 	use ConfigurationTrait;
-	use EventManagerTrait;
+	use EventManagerTrait {
+		execute as parentExecute;
+	}
 
 /**
  * {@inheritdoc}
@@ -45,21 +47,12 @@ class Migrate extends MigrateCommand {
  * @return void
  */
 	protected function execute(InputInterface $input, OutputInterface $output) {
-
-		$this->setInput($input);
-		$this->addOption('--environment', '-e', InputArgument::OPTIONAL);
-		$input->setOption('environment', 'default');
-
 		$event = $this->dispatchEvent('Migration.beforeMigrate');
-
 		if ($event->isStopped()) {
 			return $event->result;
 		}
-
-		parent::execute($input, $output);
-
+		debug($this->parentExecute($input, $output));
 		$this->dispatchEvent('Migration.afterMigrate');
-
 	}
 
 }
