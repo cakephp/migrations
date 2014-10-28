@@ -90,3 +90,23 @@ All the commands from above support the `--connection` or `-c` option:
 ```bash
 $ bin/cake migrations migrate -c my_datasource
 ```
+
+### Usage for custom primary key id in tables
+
+According to phinx's creator robmorgan custom primary key id [can be done](https://github.com/robmorgan/phinx/issues/28#issuecomment-10499743).
+
+To create a table called `statuses` and use a CHAR (36) for the `id` field, this requires you to turn off the id.
+
+See:
+
+```
+    $table = $this->table('statuses', 
+        [
+            'id' => false, 
+            'primary_key' => ['id']
+        ]);
+    $table->addColumn('id', 'char', ['limit' => 36])
+            ->addColumn('name', 'char', ['limit' => 255])
+            ->addColumn('model', 'string', ['limit' => 128])
+            ->create();
+```
