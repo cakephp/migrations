@@ -51,6 +51,10 @@ $ bin/cake migrations create Initial
 
 This will create a file under `config/Migrations` that you can edit to complete the migration steps as documented in phinx's manual.
 
+**Alert for those coming from cakedc/migrations or have been using migrations in Cake 2.x** 
+
+Please note that you need to learn how to write your own migrations. Empty migrations files will be created leaving you to fill in the up() and down(). Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
+
 ### Run the migration
 
 After modifying the migration file, you can run your changes in the database by executing:
