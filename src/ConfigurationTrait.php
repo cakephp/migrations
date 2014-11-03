@@ -83,7 +83,7 @@ trait ConfigurationTrait {
 				'default' => [
 					'adapter' => $this->getAdapterName($config['driver']),
 					'host' => $config['host'],
-					'user' => $config['login'],
+					'user' => $config['username'],
 					'pass' => $config['password'],
 					'port' => isset($config['port']) ? $config['port'] : null,
 					'name' => $config['database'],
