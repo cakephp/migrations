@@ -76,7 +76,7 @@ class ConfigurationTraitTest extends TestCase {
 				'className' => 'Cake\Database\Connection',
 				'driver' => 'Cake\Database\Driver\Mysql',
 				'host' => 'foo.bar',
-				'login' => 'root',
+				'username' => 'root',
 				'password' => 'the_password',
 				'database' => 'the_database',
 				'encoding' => 'utf-8'
@@ -148,7 +148,7 @@ class ConfigurationTraitTest extends TestCase {
 				'className' => 'Cake\Database\Connection',
 				'driver' => 'Cake\Database\Driver\Mysql',
 				'host' => 'foo.bar.baz',
-				'login' => 'rooty',
+				'username' => 'rooty',
 				'password' => 'the_password2',
 				'database' => 'the_database2',
 				'encoding' => 'utf-8'
