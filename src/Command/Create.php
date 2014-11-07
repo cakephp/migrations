@@ -32,7 +32,8 @@ class Create extends CreateCommand {
 				PHP_EOL
 			));
 		$this->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin the file should be created for')
-			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use');
+			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use')
+			->addOption('--source', '-s', InputArgument::OPTIONAL, 'The folder where migration are in');
 	}
 
 }
