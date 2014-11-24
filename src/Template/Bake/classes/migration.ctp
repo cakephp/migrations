@@ -29,7 +29,6 @@ class <%= $name %> extends AbstractMigration {
  */
 	public function change() {
 <% foreach ($tables as $table): %>
-<% if ((!in_array($table, $skipTables)) && (strpos($table, $skipTablesRegex) === false)): %>
 <%= "\n\t\t\$table = \$this->table('$table');"; %>
 <% // Get a single table (instance of Schema\Table) %>
 <% $tableSchema = $collection->describe($table); %>
@@ -46,8 +45,7 @@ class <%= $name %> extends AbstractMigration {
       <%= "])"; %>
 <% endforeach; %>
       <%= "->save();"; %>
-<% endif;
-endforeach; %>
+<% endforeach; %>
 	}
 
 /**

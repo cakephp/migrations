@@ -103,13 +103,21 @@ class MigrationTask extends BakeTask {
 
 		// Get the database collection
 		$collection = $this->getCollection($this->connection);
+
 		// get tables
 		$tables = $collection->listTables();
 		// filter tables
 		foreach ($tables as $num => $table):
-			if (!$this->modelToAdd($table, $this->plugin)):
+			// escape table if it is in skipTables or match skipTablesRegex
+			if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)):
 				unset($tables[$num]);
+				continue;
 			endif;
+			// escape table depending on checkModel param
+			if (!$this->modelToAdd($table, $this->plugin)) {
+				unset($tables[$num]);
+				continue;
+			}
 		endforeach;
 
 		$data = [
