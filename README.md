@@ -63,10 +63,10 @@ Once again, please make sure you read [the official phinx documentation](http://
 Execute:
 
 ```bash
-$ bin/cake bake migration Initial [-p PluginName] [-c connexion]
+$ bin/cake bake migration Initial [-p PluginName] [-c connection]
 ```
 This will create a phinx file with tables found in your database. By default, this
-will just add tables that have models files, but you can create a file with all tables
+will just add tables that have model files, but you can create a file with all tables
 by adding the option `--checkModel false`.
 
 
