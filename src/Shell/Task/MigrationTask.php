@@ -15,6 +15,7 @@ namespace Migrations\Shell\Task;
 
 use Cake\Console\Shell;
 use Cake\Core\Configure;
+use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Cake\Shell\Task\BakeTask;
@@ -76,12 +77,11 @@ class MigrationTask extends BakeTask {
 		$name = $this->_getName($name);
 
 		// replace whitespaces by underscores _
-		$name = str_replace(" ", "_", $name);
+		$name = Inflector::underscore($name);
 
 		// check name of migration
 		if (!preg_match('/^[a-z0-9-]+$/', $name)) {
-			$this->out('The filename is not correct. The filename can only contain "a-z", "0-9" and "-". Also the files must be lowercase.');
-			return true;
+			return $this->out('The filename is not correct. The filename can only contain "a-z", "0-9" and "-".');
 		}
 
 		$this->bake($name);
@@ -107,18 +107,18 @@ class MigrationTask extends BakeTask {
 		// get tables
 		$tables = $collection->listTables();
 		// filter tables
-		foreach ($tables as $num => $table):
+		foreach ($tables as $num => $table) {
 			// escape table if it is in skipTables or match skipTablesRegex
-			if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)):
+			if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
 				unset($tables[$num]);
 				continue;
-			endif;
+			}
 			// escape table depending on checkModel param
 			if (!$this->modelToAdd($table, $this->plugin)) {
 				unset($tables[$num]);
 				continue;
 			}
-		endforeach;
+		}
 
 		$data = [
 			'plugin' => $this->plugin,
@@ -126,7 +126,7 @@ class MigrationTask extends BakeTask {
 			'namespace' => $ns,
 			'collection' => $collection,
 			'tables' => $tables,
-			'name' => $filename,
+			'name' => Inflector::camelize($filename),
 			'skipTables' => $this->skipTables,
 			'skipTablesRegex' => $this->skipTablesRegex
 		];
@@ -141,10 +141,10 @@ class MigrationTask extends BakeTask {
 		}
 		$path = str_replace('/', DS, $path);
 		$filename = $path . date('YmdHis') . '_' . $filename . '.php';
-		$message = "\n" . 'Baking migration class for Connection ' . $this->params['connection'];
-		if (!empty($this->plugin)):
+		$message = "\n" . 'Baking migration class for Connection ' . $this->connection;
+		if (!empty($this->plugin)) {
 			$message .= ' (Plugin : ' . $this->plugin . ')';
-		endif;
+		}
 		$this->out($message, 1, Shell::QUIET);
 		$this->createFile($filename, $out);
 		return $out;
@@ -171,11 +171,11 @@ class MigrationTask extends BakeTask {
  */
 	public function modelToAdd($tableName, $pluginName = null) {
 		// Check only if option set to true
-		if ($this->params['checkModel'] === true):
-			if (!$this->modelExist($tableName, $pluginName)):
+		if ($this->params['checkModel'] === true) {
+			if (!$this->modelExist($tableName, $pluginName)) {
 				return false;
-			endif;
-		endif;
+			}
+		}
 
 		return true;
 	}
@@ -188,10 +188,10 @@ class MigrationTask extends BakeTask {
  * @return bool
  */
 	public function modelExist($tableName, $pluginName = null) {
-		$file = new File($this->getModelPath($pluginName) . Inflector::pluralize(Inflector::classify($tableName)) . 'Table.php');
-		if ($file->exists()):
+		$file = new File($this->getModelPath($pluginName) . Inflector::classify($tableName) . 'Table.php');
+		if ($file->exists()) {
 			return true;
-		endif;
+		}
 		return false;
 	}
 
@@ -202,9 +202,9 @@ class MigrationTask extends BakeTask {
  * @return string : path to Table Folder. Default to App Table Path
  */
 	public function getModelPath($pluginName = null) {
-		if (!is_null($pluginName) && Plugin::loaded($pluginName)):
+		if (!is_null($pluginName) && Plugin::loaded($pluginName)) {
 			return Plugin::classPath($pluginName) . 'Model' . DS . 'Table' . DS;
-		endif;
+		}
 		return APP . 'Model' . DS . 'Table' . DS;
 	}
 
