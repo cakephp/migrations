@@ -126,9 +126,7 @@ class MigrationTask extends BakeTask {
 			'namespace' => $ns,
 			'collection' => $collection,
 			'tables' => $tables,
-			'name' => Inflector::camelize($filename),
-			'skipTables' => $this->skipTables,
-			'skipTablesRegex' => $this->skipTablesRegex
+			'name' => Inflector::camelize($filename)
 		];
 
 		$this->Template->set($data);
@@ -172,7 +170,7 @@ class MigrationTask extends BakeTask {
 	public function modelToAdd($tableName, $pluginName = null) {
 		// Check only if option set to true
 		if ($this->params['checkModel'] === true) {
-			if (!$this->modelExist($tableName, $pluginName)) {
+			if (!$this->modelExist(Inflector::camelize($tableName), $pluginName)) {
 				return false;
 			}
 		}
@@ -188,7 +186,7 @@ class MigrationTask extends BakeTask {
  * @return bool
  */
 	public function modelExist($tableName, $pluginName = null) {
-		$file = new File($this->getModelPath($pluginName) . Inflector::classify($tableName) . 'Table.php');
+		$file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
 		if ($file->exists()) {
 			return true;
 		}
