@@ -52,12 +52,17 @@ trait ConfigurationTrait {
 			return $this->_configuration;
 		}
 
-		$dir = ROOT . DS . 'config' . DS . 'Migrations';
+		$folder = 'Migrations';
+		if ($this->_input->getOption('source')) {
+			$folder = $this->_input->getOption('source');
+		}
+		
+		$dir = ROOT . DS . 'config' . DS . $folder;
 		$plugin = null;
 
 		if ($this->_input->getOption('plugin')) {
 			$plugin = $this->_input->getOption('plugin');
-			$dir = Plugin::path($plugin) . 'config' . DS . 'Migrations';
+			$dir = Plugin::path($plugin) . 'config' . DS . $folder;
 		}
 
 		if (!is_dir($dir)) {

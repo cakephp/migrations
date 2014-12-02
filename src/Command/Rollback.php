@@ -28,7 +28,8 @@ class Rollback extends RollbackCommand {
 			->addOption('--target', '-t', InputArgument::OPTIONAL, 'The version number to rollback to')
 			->setHelp('reverts the last migration, or optionally up to a specific version')
 			->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin containing the migrations')
-			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use');
+			->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use')
+			->addOption('--source', '-s', InputArgument::OPTIONAL, 'The folder where migrations are in');
 	}
 
 }
