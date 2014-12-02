@@ -82,9 +82,9 @@ trait ConfigurationTrait {
 				'default_database' => 'default',
 				'default' => [
 					'adapter' => $this->getAdapterName($config['driver']),
-					'host' => $config['host'],
-					'user' => $config['username'],
-					'pass' => $config['password'],
+					'host' => isset($config['host']) ? $config['host'] : null,
+					'user' => isset($config['username']) ? $config['username'] : null,
+					'pass' => isset($config['password']) ? $config['password'] : null,
 					'port' => isset($config['port']) ? $config['port'] : null,
 					'name' => $config['database'],
 					'charset' => $config['encoding']
