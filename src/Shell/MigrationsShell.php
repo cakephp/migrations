@@ -19,7 +19,8 @@ use Migrations\MigrationsDispatcher;
  * console actions so that database configuration already defined
  * for the application can be reused.
  */
-class MigrationsShell extends Shell {
+class MigrationsShell extends Shell
+{
 
 /**
  * Defines what options can be passed to the shell.
@@ -28,25 +29,27 @@ class MigrationsShell extends Shell {
  *
  * @return Cake\Console\ConsoleOptionParser
  */
-	public function getOptionParser() {
-		return parent::getOptionParser()
-			->addOption('plugin', ['short' => 'p'])
-			->addOption('target', ['short' => 't'])
-			->addOption('connection', ['short' => 'c'])
-			->addOption('source', ['short' => 's']);
-	}
+    public function getOptionParser()
+    {
+        return parent::getOptionParser()
+            ->addOption('plugin', ['short' => 'p'])
+            ->addOption('target', ['short' => 't'])
+            ->addOption('connection', ['short' => 'c'])
+            ->addOption('source', ['short' => 's']);
+    }
 
 /**
  * Defines constants that are required by phinx to get running
  *
  * @return void
  */
-	public function initialize() {
-		if (!defined('PHINX_VERSION')) {
-			define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.5' : '@PHINX_VERSION@');
-		}
-		parent::initialize();
-	}
+    public function initialize()
+    {
+        if (!defined('PHINX_VERSION')) {
+            define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.5' : '@PHINX_VERSION@');
+        }
+        parent::initialize();
+    }
 
 /**
  * This acts as a front-controller for phinx. It just instantiates the classes
@@ -55,21 +58,23 @@ class MigrationsShell extends Shell {
  *
  * @return void
  */
-	public function main() {
-		array_shift($_SERVER['argv']);
-		$_SERVER['argv']--;
-		$app = new MigrationsDispatcher(PHINX_VERSION);
-		$app->run();
-	}
+    public function main()
+    {
+        array_shift($_SERVER['argv']);
+        $_SERVER['argv']--;
+        $app = new MigrationsDispatcher(PHINX_VERSION);
+        $app->run();
+    }
 
 /**
  * Display the help in the correct format
  *
- * @param string $command
+ * @param string $command The command to get help for.
  * @return void
  */
-	protected function _displayHelp($command) {
-		$this->main();
-	}
-
+    protected function _displayHelp($command)
+    {
+        $command;
+        $this->main();
+    }
 }

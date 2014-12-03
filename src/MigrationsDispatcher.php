@@ -20,7 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Used to register all supported subcommand in order to make
  * them executable by the Symfony Console component
  */
-class MigrationsDispatcher extends Application {
+class MigrationsDispatcher extends Application
+{
 
 /**
  * Class Constructor.
@@ -29,12 +30,12 @@ class MigrationsDispatcher extends Application {
  *
  * @param string $version The Application Version
  */
-	public function __construct($version) {
-		parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
-		$this->add(new Command\Create());
-		$this->add(new Command\Migrate());
-		$this->add(new Command\Rollback());
-		$this->add(new Command\Status());
-	}
-
+    public function __construct($version)
+    {
+        parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
+        $this->add(new Command\Create());
+        $this->add(new Command\Migrate());
+        $this->add(new Command\Rollback());
+        $this->add(new Command\Status());
+    }
 }
