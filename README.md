@@ -51,11 +51,24 @@ $ bin/cake migrations create Initial
 
 This will create a file under `config/Migrations` that you can edit to complete the migration steps as documented in phinx's manual.
 
-Please note that you need to learn how to write your own migrations. 
+Please note that you need to learn how to write your own migrations.
 
-Empty migrations files will be created leaving you to fill in the up() and down() or change() if you want automatically reversible migrations. 
+Empty migrations files will be created leaving you to fill in the up() and down() or change() if you want automatically reversible migrations.
 
 Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
+
+
+### Create a migration file with tables from your database
+
+Execute:
+
+```bash
+$ bin/cake bake migration Initial [-p PluginName] [-c connection]
+```
+This will create a phinx file with tables found in your database. By default, this
+will just add tables that have model files, but you can create a file with all tables
+by adding the option `--checkModel false`.
+
 
 ### Run the migration
 
@@ -104,9 +117,9 @@ To create a table called `statuses` and use a CHAR (36) for the `id` field, this
 See:
 
 ```
-    $table = $this->table('statuses', 
+    $table = $this->table('statuses',
         [
-            'id' => false, 
+            'id' => false,
             'primary_key' => ['id']
         ]);
     $table->addColumn('id', 'char', ['limit' => 36])
