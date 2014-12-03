@@ -27,7 +27,7 @@ class <%= $name %> extends AbstractMigration {
  * @return void
  *
  */
-	public function change() {
+    public function change() {
 <% foreach ($tables as $table): %>
 <%= "\n\t\t\$table = \$this->table('$table');"; %>
 <% // Get a single table (instance of Schema\Table) %>
@@ -46,22 +46,22 @@ class <%= $name %> extends AbstractMigration {
 <% endforeach; %>
       <%= "->save();"; %>
 <% endforeach; %>
-	}
+    }
 
 /**
  * Migrate Up.
  *
  * @return void
  */
-	public function up() {
-	}
+    public function up() {
+    }
 
 /**
  * Migrate Down.
  *
  * @return void
  */
-	public function down() {
-	}
+    public function down() {
+    }
 
 }
