@@ -80,8 +80,8 @@ class MigrationTask extends BakeTask {
 		$name = Inflector::underscore($name);
 
 		// check name of migration
-		if (!preg_match('/^[a-z0-9-]+$/', $name)) {
-			return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9" and "-".');
+		if (!preg_match('/^[a-z0-9_]+$/', $name)) {
+			return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9", "_".');
 		}
 
 		$this->bake($name);
