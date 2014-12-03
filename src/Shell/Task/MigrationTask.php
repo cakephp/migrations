@@ -81,7 +81,7 @@ class MigrationTask extends BakeTask {
 
 		// check name of migration
 		if (!preg_match('/^[a-z0-9-]+$/', $name)) {
-			return $this->out('The filename is not correct. The filename can only contain "a-z", "0-9" and "-".');
+			return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9" and "-".');
 		}
 
 		$this->bake($name);
