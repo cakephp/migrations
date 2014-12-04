@@ -12,9 +12,10 @@
  * @since         3.0.0
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-use Phinx\Migration\AbstractMigration;
 %>
 <?php
+use Phinx\Migration\AbstractMigration;
+
 class <%= $name %> extends AbstractMigration {
 
 /**
