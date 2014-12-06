@@ -22,13 +22,13 @@ use Migrations\MigrationsDispatcher;
 class MigrationsShell extends Shell
 {
 
-/**
- * Defines what options can be passed to the shell.
- * This is required becuase CakePHP validates the passed options
- * and would complain if something not configured here is present
- *
- * @return Cake\Console\ConsoleOptionParser
- */
+    /**
+     * Defines what options can be passed to the shell.
+     * This is required becuase CakePHP validates the passed options
+     * and would complain if something not configured here is present
+     *
+     * @return Cake\Console\ConsoleOptionParser
+     */
     public function getOptionParser()
     {
         return parent::getOptionParser()
@@ -38,11 +38,11 @@ class MigrationsShell extends Shell
             ->addOption('source', ['short' => 's']);
     }
 
-/**
- * Defines constants that are required by phinx to get running
- *
- * @return void
- */
+    /**
+     * Defines constants that are required by phinx to get running
+     *
+     * @return void
+     */
     public function initialize()
     {
         if (!defined('PHINX_VERSION')) {
@@ -51,13 +51,13 @@ class MigrationsShell extends Shell
         parent::initialize();
     }
 
-/**
- * This acts as a front-controller for phinx. It just instantiates the classes
- * responsible for parsing the command line from phinx and gives full control of
- * the rest of the flow to it.
- *
- * @return void
- */
+    /**
+     * This acts as a front-controller for phinx. It just instantiates the classes
+     * responsible for parsing the command line from phinx and gives full control of
+     * the rest of the flow to it.
+     *
+     * @return void
+     */
     public function main()
     {
         array_shift($_SERVER['argv']);
@@ -66,12 +66,12 @@ class MigrationsShell extends Shell
         $app->run();
     }
 
-/**
- * Display the help in the correct format
- *
- * @param string $command The command to get help for.
- * @return void
- */
+    /**
+     * Display the help in the correct format
+     *
+     * @param string $command The command to get help for.
+     * @return void
+     */
     protected function _displayHelp($command)
     {
         $command;

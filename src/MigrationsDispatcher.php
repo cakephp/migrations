@@ -23,13 +23,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MigrationsDispatcher extends Application
 {
 
-/**
- * Class Constructor.
- *
- * Initialize the Phinx console application.
- *
- * @param string $version The Application Version
- */
+    /**
+     * Class Constructor.
+     *
+     * Initialize the Phinx console application.
+     *
+     * @param string $version The Application Version
+     */
     public function __construct($version)
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);

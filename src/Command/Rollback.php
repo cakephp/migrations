@@ -26,9 +26,9 @@ class Rollback extends RollbackCommand
     }
     use EventManagerTrait;
 
-/**
- * {@inheritDoc}
- */
+    /**
+     * {@inheritDoc}
+     */
     protected function configure()
     {
         $this->setName('rollback')
@@ -40,14 +40,14 @@ class Rollback extends RollbackCommand
             ->addOption('--source', '-s', InputArgument::OPTIONAL, 'The folder where migrations are in');
     }
 
-/**
- * Overrides the action execute method in order to vanish the idea of environments
- * from phinx. CakePHP does not beleive in the idea of having in-app environments
- *
- * @param Symfony\Component\Console\Input\Inputnterface $input the input object
- * @param Symfony\Component\Console\Input\OutputInterface $output the output object
- * @return void
- */
+    /**
+     * Overrides the action execute method in order to vanish the idea of environments
+     * from phinx. CakePHP does not beleive in the idea of having in-app environments
+     *
+     * @param Symfony\Component\Console\Input\Inputnterface $input the input object
+     * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $event = $this->dispatchEvent('Migration.beforeRollback');

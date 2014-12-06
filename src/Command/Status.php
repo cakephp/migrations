@@ -20,9 +20,9 @@ class Status extends StatusCommand
 
     use ConfigurationTrait;
 
-/**
- * {@inheritDoc}
- */
+    /**
+     * {@inheritDoc}
+     */
     protected function configure()
     {
         $this->setName('status')

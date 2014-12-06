@@ -20,9 +20,9 @@ class Create extends CreateCommand
 
     use ConfigurationTrait;
 
-/**
- * {@inheritdoc}
- */
+    /**
+     * {@inheritdoc}
+     */
     protected function configure()
     {
         $this->setName('create')

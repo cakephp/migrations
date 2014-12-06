@@ -23,23 +23,23 @@ use Migrations\ConfigurationTrait;
 class ConfigurationTraitTest extends TestCase
 {
 
-/**
- * Setup method
- *
- * @return void
- */
+    /**
+     * Setup method
+     *
+     * @return void
+     */
     public function setUp()
     {
         parent::setUp();
         $this->command = new ExampleCommand;
     }
 
-/**
- * Returns the combination of the phinx driver name with
- * the associated cakephp driver instance that should be mapped to it
- *
- * @return void
- */
+    /**
+     * Returns the combination of the phinx driver name with
+     * the associated cakephp driver instance that should be mapped to it
+     *
+     * @return void
+     */
     public function driversProvider()
     {
         return [
@@ -49,13 +49,13 @@ class ConfigurationTraitTest extends TestCase
         ];
     }
 
-/**
- * Tests that the correct driver name is inferred from the driver
- * instance that is passed to getAdapterName()
- *
- * @dataProvider driversProvider
- * @return void
- */
+    /**
+     * Tests that the correct driver name is inferred from the driver
+     * instance that is passed to getAdapterName()
+     *
+     * @dataProvider driversProvider
+     * @return void
+     */
     public function testGetAdapterName($expected, $cakeDriver)
     {
         $this->assertEquals(
@@ -64,12 +64,12 @@ class ConfigurationTraitTest extends TestCase
         );
     }
 
-/**
- * Tests that the configuration object is created out of the database configuration
- * made for the application
- *
- * @return void
- */
+    /**
+     * Tests that the configuration object is created out of the database configuration
+     * made for the application
+     *
+     * @return void
+     */
     public function testGetConfig()
     {
         ConnectionManager::config([
@@ -107,11 +107,11 @@ class ConfigurationTraitTest extends TestCase
         $this->assertEquals('utf-8', $environment['charset']);
     }
 
-/**
- * Tests that another phinxlog table is used when passing the plugin option in the input
- *
- * @return void
- */
+    /**
+     * Tests that another phinxlog table is used when passing the plugin option in the input
+     *
+     * @return void
+     */
     public function testGetConfigWithPlugin()
     {
         $tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
@@ -138,12 +138,12 @@ class ConfigurationTraitTest extends TestCase
         );
     }
 
-/**
- * Tests that passing a connection option in the input will configure the environment
- * to use that connection
- *
- * @return void
- */
+    /**
+     * Tests that passing a connection option in the input will configure the environment
+     * to use that connection
+     *
+     * @return void
+     */
     public function testGetConfigWithConnectionName()
     {
         ConnectionManager::config([

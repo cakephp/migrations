@@ -27,40 +27,40 @@ use Cake\Utility\Inflector;
 class MigrationTask extends BakeTask
 {
 
-/**
- * path to Migration directory
- *
- * @var string
- */
+    /**
+     * path to Migration directory
+     *
+     * @var string
+     */
     public $pathFragment = 'config/Migrations/';
 
-/**
- * tasks
- *
- * @var array
- */
+    /**
+     * tasks
+     *
+     * @var array
+     */
     public $tasks = ['DbConfig', 'Template'];
 
-/**
- * Tables to skip
- *
- * @var array
- */
+    /**
+     * Tables to skip
+     *
+     * @var array
+     */
     public $skipTables = ['i18n', 'phinxlog'];
 
-/**
- * Regex of Table name to skip
- *
- * @var string
- */
+    /**
+     * Regex of Table name to skip
+     *
+     * @var string
+     */
     public $skipTablesRegex = '_phinxlog';
 
-/**
- * Execution method always used for tasks
- *
- * @param string $name The name of the migration file to bake.
- * @return void
- */
+    /**
+     * Execution method always used for tasks
+     *
+     * @param string $name The name of the migration file to bake.
+     * @return void
+     */
     public function main($name = null)
     {
         parent::main();
@@ -84,12 +84,12 @@ class MigrationTask extends BakeTask
         $this->bake($name);
     }
 
-/**
- * Generate code for the given migration name.
- *
- * @param string $filename The migration name to generate.
- * @return void
- */
+    /**
+     * Generate code for the given migration name.
+     *
+     * @param string $filename The migration name to generate.
+     * @return void
+     */
     public function bake($filename)
     {
         $ns = Configure::read('App.namespace');
@@ -146,12 +146,12 @@ class MigrationTask extends BakeTask
         return $out;
     }
 
-/**
- * Get a collection from a database
- *
- * @param string $connection : database connection name
- * @return obj schemaCollection
- */
+    /**
+     * Get a collection from a database
+     *
+     * @param string $connection : database connection name
+     * @return obj schemaCollection
+     */
     public function getCollection($connection)
     {
         $db = ConnectionManager::get($connection);
@@ -159,13 +159,13 @@ class MigrationTask extends BakeTask
         return $db->schemaCollection();
     }
 
-/**
- * To check if a Table Model is to be added in the migration file
- *
- * @param string $tableName Table name in underscore case
- * @param string $pluginName Plugin name if exists
- * @return bool true if the model is to be added
- */
+    /**
+     * To check if a Table Model is to be added in the migration file
+     *
+     * @param string $tableName Table name in underscore case
+     * @param string $pluginName Plugin name if exists
+     * @return bool true if the model is to be added
+     */
     public function modelToAdd($tableName, $pluginName = null)
     {
         // Check only if option set to true
@@ -178,13 +178,13 @@ class MigrationTask extends BakeTask
         return true;
     }
 
-/**
- * To check if a Table Model exists in the path of model
- *
- * @param string $tableName Table name in underscore case
- * @param string $pluginName Plugin name if exists
- * @return bool
- */
+    /**
+     * To check if a Table Model exists in the path of model
+     *
+     * @param string $tableName Table name in underscore case
+     * @param string $pluginName Plugin name if exists
+     * @return bool
+     */
     public function modelExist($tableName, $pluginName = null)
     {
         $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
@@ -194,12 +194,12 @@ class MigrationTask extends BakeTask
         return false;
     }
 
-/**
- * Path for Table folder
- *
- * @param string $pluginName Plugin name if exists
- * @return string : path to Table Folder. Default to App Table Path
- */
+    /**
+     * Path for Table folder
+     *
+     * @param string $pluginName Plugin name if exists
+     * @return string : path to Table Folder. Default to App Table Path
+     */
     public function getModelPath($pluginName = null)
     {
         if (!is_null($pluginName) && Plugin::loaded($pluginName)) {
@@ -208,11 +208,11 @@ class MigrationTask extends BakeTask
         return APP . 'Model' . DS . 'Table' . DS;
     }
 
-/**
- * Gets the option parser instance and configures it.
- *
- * @return \Cake\Console\ConsoleOptionParser
- */
+    /**
+     * Gets the option parser instance and configures it.
+     *
+     * @return \Cake\Console\ConsoleOptionParser
+     */
     public function getOptionParser()
     {
         $parser = parent::getOptionParser();
