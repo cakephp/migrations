@@ -72,9 +72,17 @@ class MigrationsShell extends Shell
      * @param string $command The command to get help for.
      * @return void
      */
-    protected function _displayHelp($command)
+    protected function displayHelp($command)
     {
         $command;
         $this->main();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function _displayHelp($command)
+    {
+        return $this->displayHelp($command);
     }
 }
