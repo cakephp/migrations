@@ -83,8 +83,8 @@ class MigrationsShell extends Shell
      */
     // @codingStandardsIgnoreStart
     protected function _displayHelp($command)
-    // @codingStandardsIgnoreEnd
     {
+        // @codingStandardsIgnoreEnd
         return $this->displayHelp($command);
     }
 }
