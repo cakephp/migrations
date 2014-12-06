@@ -18,17 +18,18 @@ use Phinx\Migration\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration {
 
-/**
- * Change Method.
- *
- * More information on this method is available here:
- * http://docs.phinx.org/en/latest/migrations.html#the-change-method
- *
- * Uncomment this method if you would like to use it.
- * @return void
- *
- */
-	public function change() {
+    /**
+     * Change Method.
+     *
+     * More information on this method is available here:
+     * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+     *
+     * Uncomment this method if you would like to use it.
+     * @return void
+     *
+     */
+    public function change()
+    {
 <% foreach ($tables as $table): %>
 <%= "\n\t\t\$table = \$this->table('$table');"; %>
 <% // Get a single table (instance of Schema\Table) %>
@@ -47,22 +48,24 @@ class <%= $name %> extends AbstractMigration {
 <% endforeach; %>
       <%= "->save();"; %>
 <% endforeach; %>
-	}
+    }
 
-/**
- * Migrate Up.
- *
- * @return void
- */
-	public function up() {
-	}
+    /**
+     * Migrate Up.
+     *
+     * @return void
+     */
+    public function up()
+    {
+    }
 
-/**
- * Migrate Down.
- *
- * @return void
- */
-	public function down() {
-	}
+    /**
+     * Migrate Down.
+     *
+     * @return void
+     */
+    public function down()
+    {
+    }
 
 }

@@ -17,176 +17,178 @@ use Cake\TestSuite\TestCase;
 use Migrations\Command\Create;
 use Migrations\ConfigurationTrait;
 
-class ExampleCommand extends Create {
-
-}
-
 /**
  * Tests the create command
  */
-class ConfigurationTraitTest extends TestCase {
+class ConfigurationTraitTest extends TestCase
+{
 
-/**
- * Setup method
- *
- * @return void
- */
-	public function setUp() {
-		parent::setUp();
-		$this->command = new ExampleCommand;
-	}
+    /**
+     * Setup method
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        $this->command = new ExampleCommand;
+    }
 
-/**
- * Returns the combination of the phinx driver name with
- * the associated cakephp driver instance that should be mapped to it
- *
- * @return void
- */
-	public function driversProvider() {
-		return [
-			['mysql', $this->getMock('Cake\Database\Driver\Mysql')],
-			['pgsql', $this->getMock('Cake\Database\Driver\Postgres')],
-			['sqlite', $this->getMock('Cake\Database\Driver\Sqlite')]
-		];
-	}
+    /**
+     * Returns the combination of the phinx driver name with
+     * the associated cakephp driver instance that should be mapped to it
+     *
+     * @return void
+     */
+    public function driversProvider()
+    {
+        return [
+            ['mysql', $this->getMock('Cake\Database\Driver\Mysql')],
+            ['pgsql', $this->getMock('Cake\Database\Driver\Postgres')],
+            ['sqlite', $this->getMock('Cake\Database\Driver\Sqlite')]
+        ];
+    }
 
-/**
- * Tests that the correct driver name is inferred from the driver
- * instance that is passed to getAdapterName()
- *
- * @dataProvider driversProvider
- * @return void
- */
-	public function testGetAdapterName($expected, $cakeDriver) {
-		$this->assertEquals(
-			$expected,
-			$this->command->getAdapterName($cakeDriver)
-		);
-	}
+    /**
+     * Tests that the correct driver name is inferred from the driver
+     * instance that is passed to getAdapterName()
+     *
+     * @dataProvider driversProvider
+     * @return void
+     */
+    public function testGetAdapterName($expected, $cakeDriver)
+    {
+        $this->assertEquals(
+            $expected,
+            $this->command->getAdapterName($cakeDriver)
+        );
+    }
 
-/**
- * Tests that the configuration object is created out of the database configuration
- * made for the application
- *
- * @return void
- */
-	public function testGetConfig() {
-		ConnectionManager::config([
-			'default' => [
-				'className' => 'Cake\Database\Connection',
-				'driver' => 'Cake\Database\Driver\Mysql',
-				'host' => 'foo.bar',
-				'username' => 'root',
-				'password' => 'the_password',
-				'database' => 'the_database',
-				'encoding' => 'utf-8'
-			]
-		]);
+    /**
+     * Tests that the configuration object is created out of the database configuration
+     * made for the application
+     *
+     * @return void
+     */
+    public function testGetConfig()
+    {
+        ConnectionManager::config([
+            'default' => [
+                'className' => 'Cake\Database\Connection',
+                'driver' => 'Cake\Database\Driver\Mysql',
+                'host' => 'foo.bar',
+                'username' => 'root',
+                'password' => 'the_password',
+                'database' => 'the_database',
+                'encoding' => 'utf-8'
+            ]
+        ]);
 
-		$input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
-		$this->command->setInput($input);
-		$config = $this->command->getConfig();
-		$this->assertInstanceOf('Phinx\Config\Config', $config);
+        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $this->command->setInput($input);
+        $config = $this->command->getConfig();
+        $this->assertInstanceOf('Phinx\Config\Config', $config);
 
-		$expected = ROOT . DS . 'config' . DS . 'Migrations';
-		$this->assertEquals($expected, $config->getMigrationPath());
+        $expected = ROOT . DS . 'config' . DS . 'Migrations';
+        $this->assertEquals($expected, $config->getMigrationPath());
 
-		$this->assertEquals(
-			'phinxlog',
-			$config['environments']['default_migration_table']
-		);
+        $this->assertEquals(
+            'phinxlog',
+            $config['environments']['default_migration_table']
+        );
 
-		$environment = $config['environments']['default'];
-		$this->assertEquals('mysql', $environment['adapter']);
-		$this->assertEquals('foo.bar', $environment['host']);
+        $environment = $config['environments']['default'];
+        $this->assertEquals('mysql', $environment['adapter']);
+        $this->assertEquals('foo.bar', $environment['host']);
 
-		$this->assertEquals('root', $environment['user']);
-		$this->assertEquals('the_password', $environment['pass']);
-		$this->assertEquals('the_database', $environment['name']);
-		$this->assertEquals('utf-8', $environment['charset']);
-	}
+        $this->assertEquals('root', $environment['user']);
+        $this->assertEquals('the_password', $environment['pass']);
+        $this->assertEquals('the_database', $environment['name']);
+        $this->assertEquals('utf-8', $environment['charset']);
+    }
 
-/**
- * Tests that another phinxlog table is used when passing the plugin option in the input
- *
- * @return void
- */
-	public function testGetConfigWithPlugin() {
-		$tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
-		Plugin::load('MyPlugin', ['path' => $tmpPath]);
-		$input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
-		$this->command->setInput($input);
+    /**
+     * Tests that another phinxlog table is used when passing the plugin option in the input
+     *
+     * @return void
+     */
+    public function testGetConfigWithPlugin()
+    {
+        $tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
+        Plugin::load('MyPlugin', ['path' => $tmpPath]);
+        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $this->command->setInput($input);
 
-		$input->expects($this->at(1))
-			->method('getOption')
-			->with('plugin')
-			->will($this->returnValue('MyPlugin'));
+        $input->expects($this->at(1))
+            ->method('getOption')
+            ->with('plugin')
+            ->will($this->returnValue('MyPlugin'));
 
-		$input->expects($this->at(2))
-			->method('getOption')
-			->with('plugin')
-			->will($this->returnValue('MyPlugin'));
+        $input->expects($this->at(2))
+            ->method('getOption')
+            ->with('plugin')
+            ->will($this->returnValue('MyPlugin'));
 
-		$config = $this->command->getConfig();
-		$this->assertInstanceOf('Phinx\Config\Config', $config);
+        $config = $this->command->getConfig();
+        $this->assertInstanceOf('Phinx\Config\Config', $config);
 
-		$this->assertEquals(
-			'my_plugin_phinxlog',
-			$config['environments']['default_migration_table']
-		);
-	}
+        $this->assertEquals(
+            'my_plugin_phinxlog',
+            $config['environments']['default_migration_table']
+        );
+    }
 
-/**
- * Tests that passing a connection option in the input will configure the environment
- * to use that connection
- *
- * @return void
- */
-	public function testGetConfigWithConnectionName() {
-		ConnectionManager::config([
-			'custom' => [
-				'className' => 'Cake\Database\Connection',
-				'driver' => 'Cake\Database\Driver\Mysql',
-				'host' => 'foo.bar.baz',
-				'username' => 'rooty',
-				'password' => 'the_password2',
-				'database' => 'the_database2',
-				'encoding' => 'utf-8'
-			]
-		]);
+    /**
+     * Tests that passing a connection option in the input will configure the environment
+     * to use that connection
+     *
+     * @return void
+     */
+    public function testGetConfigWithConnectionName()
+    {
+        ConnectionManager::config([
+            'custom' => [
+                'className' => 'Cake\Database\Connection',
+                'driver' => 'Cake\Database\Driver\Mysql',
+                'host' => 'foo.bar.baz',
+                'username' => 'rooty',
+                'password' => 'the_password2',
+                'database' => 'the_database2',
+                'encoding' => 'utf-8'
+            ]
+        ]);
 
-		$input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
-		$this->command->setInput($input);
+        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $this->command->setInput($input);
 
-		$input->expects($this->at(2))
-			->method('getOption')
-			->with('connection')
-			->will($this->returnValue('custom'));
+        $input->expects($this->at(2))
+            ->method('getOption')
+            ->with('connection')
+            ->will($this->returnValue('custom'));
 
-		$input->expects($this->at(3))
-			->method('getOption')
-			->with('connection')
-			->will($this->returnValue('custom'));
+        $input->expects($this->at(3))
+            ->method('getOption')
+            ->with('connection')
+            ->will($this->returnValue('custom'));
 
-		$config = $this->command->getConfig();
-		$this->assertInstanceOf('Phinx\Config\Config', $config);
+        $config = $this->command->getConfig();
+        $this->assertInstanceOf('Phinx\Config\Config', $config);
 
-		$expected = ROOT . DS . 'config' . DS . 'Migrations';
-		$this->assertEquals($expected, $config->getMigrationPath());
+        $expected = ROOT . DS . 'config' . DS . 'Migrations';
+        $this->assertEquals($expected, $config->getMigrationPath());
 
-		$this->assertEquals(
-			'phinxlog',
-			$config['environments']['default_migration_table']
-		);
+        $this->assertEquals(
+            'phinxlog',
+            $config['environments']['default_migration_table']
+        );
 
-		$environment = $config['environments']['default'];
-		$this->assertEquals('mysql', $environment['adapter']);
-		$this->assertEquals('foo.bar.baz', $environment['host']);
+        $environment = $config['environments']['default'];
+        $this->assertEquals('mysql', $environment['adapter']);
+        $this->assertEquals('foo.bar.baz', $environment['host']);
 
-		$this->assertEquals('rooty', $environment['user']);
-		$this->assertEquals('the_password2', $environment['pass']);
-		$this->assertEquals('the_database2', $environment['name']);
-		$this->assertEquals('utf-8', $environment['charset']);
-	}
-
+        $this->assertEquals('rooty', $environment['user']);
+        $this->assertEquals('the_password2', $environment['pass']);
+        $this->assertEquals('the_database2', $environment['name']);
+        $this->assertEquals('utf-8', $environment['charset']);
+    }
 }
