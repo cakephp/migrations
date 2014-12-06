@@ -70,13 +70,9 @@ class MigrationTask extends BakeTask
             return true;
         }
 
-        // parse name : separate plugin name if it exists
         $name = $this->_getName($name);
-
-        // replace whitespaces by underscores _
         $name = Inflector::underscore($name);
 
-        // check name of migration
         if (!preg_match('/^[a-z0-9_]+$/', $name)) {
             return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9", "_".');
         }
@@ -99,19 +95,15 @@ class MigrationTask extends BakeTask
             $pluginPath = $this->plugin . '.';
         }
 
-        // Get the database collection
         $collection = $this->getCollection($this->connection);
 
-        // get tables
         $tables = $collection->listTables();
-        // filter tables
         foreach ($tables as $num => $table) {
-            // escape table if it is in skipTables or match skipTablesRegex
             if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
                 unset($tables[$num]);
                 continue;
             }
-            // escape table depending on checkModel param
+
             if (!$this->modelToAdd($table, $this->plugin)) {
                 unset($tables[$num]);
                 continue;
@@ -155,7 +147,6 @@ class MigrationTask extends BakeTask
     public function getCollection($connection)
     {
         $db = ConnectionManager::get($connection);
-        // Create a schema collection.
         return $db->schemaCollection();
     }
 
@@ -168,7 +159,6 @@ class MigrationTask extends BakeTask
      */
     public function modelToAdd($tableName, $pluginName = null)
     {
-        // Check only if option set to true
         if ($this->params['checkModel'] === true) {
             if (!$this->modelExist(Inflector::camelize($tableName), $pluginName)) {
                 return false;
