@@ -160,9 +160,7 @@ class MigrationTask extends BakeTask
     public function modelToAdd($tableName, $pluginName = null)
     {
         if ($this->params['checkModel'] === true) {
-            if (!$this->modelExist(Inflector::camelize($tableName), $pluginName)) {
-                return false;
-            }
+            return $this->modelExist(Inflector::camelize($tableName), $pluginName);
         }
 
         return true;
@@ -178,10 +176,7 @@ class MigrationTask extends BakeTask
     public function modelExist($tableName, $pluginName = null)
     {
         $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
-        if ($file->exists()) {
-            return true;
-        }
-        return false;
+        return $file->exists();
     }
 
     /**
