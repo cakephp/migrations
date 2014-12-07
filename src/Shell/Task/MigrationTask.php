@@ -121,7 +121,7 @@ class MigrationTask extends BakeTask
 
         $this->Template->set($data);
 
-        $out = $this->Template->generate('Migrations.classes/migration');
+        $out = $this->Template->generate('Migrations.config/migration');
 
         $path = dirname(APP) . DS . $this->pathFragment;
         if (isset($this->plugin)) {
