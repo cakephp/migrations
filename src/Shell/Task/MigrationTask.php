@@ -18,6 +18,8 @@ use Cake\Console\Shell;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Cake\Filesystem\File;
 use Cake\Utility\Inflector;
 
@@ -67,6 +69,12 @@ class MigrationTask extends BakeTask
 
         $name = $this->getMigrationName($name);
 
+        EventManager::instance()->attach(function (Event $event) use ($collection) {
+            $event->subject->loadHelper('Migrations.Migration', [
+                'collection' => $collection
+            ]);
+        }, 'Bake.initialize');
+
         if ($this->params['snapshot'] === true) {
             $this->snapshot($name);
         }
@@ -113,7 +121,7 @@ class MigrationTask extends BakeTask
 
         $this->Template->set($data);
 
-        $out = $this->Template->generate('Migrations.config/migration');
+        $out = $this->Template->generate('Migrations.config/initial');
 
         $path = dirname(APP) . DS . $this->pathFragment;
         if (isset($this->plugin)) {

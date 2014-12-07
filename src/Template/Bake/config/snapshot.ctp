@@ -19,13 +19,11 @@ $wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null']);
 use Phinx\Migration\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration {
-
     /**
      * Change Method.
      *
      * More information on this method is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-change-method
-     *
      * @return void
      */
     public function change()
@@ -33,42 +31,18 @@ class <%= $name %> extends AbstractMigration {
     <%- foreach ($tables as $table): %>
         $table = $this->table('<%= $table%>');
         $table
-        <%- $tableSchema = $collection->describe($table); %>
-        <%- foreach ($tableSchema->columns() as $column): %>
-            ->addColumn('<%= $column %>', '<%= $tableSchema->columnType($column) %>', [<%
+        <%- foreach ($this->Migration->columns($table) as $column => $config): %>
+            ->addColumn('<%= $column %>', '<%= $config['columnType'] %>', [<%
                 $options = [];
-                $columnOptions = $tableSchema->column($column);
-                $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
+                $columnOptions = $config['options'];
                 foreach ($columnOptions as $optionName => $option) {
-                    if ($optionName === 'length') {
-                        $optionName = 'limit';
-                    }
-                    $options[$optionName] = $option;
+                    $options[$optionName] = $this->Migration->value($option);
                 }
 
                 echo $this->Bake->stringifyList($options, ['indent' => 4]);
             %>])
         <%- endforeach; %>
-            ->save();
+            ->create();
     <%- endforeach; %>
     }
-
-    /**
-     * Migrate Up.
-     *
-     * @return void
-     */
-    public function up()
-    {
-    }
-
-    /**
-     * Migrate Down.
-     *
-     * @return void
-     */
-    public function down()
-    {
-    }
-
 }
