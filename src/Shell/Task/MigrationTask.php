@@ -65,17 +65,7 @@ class MigrationTask extends BakeTask
     {
         parent::main();
 
-        if (empty($name)) {
-            $this->out('Choose a migration name to bake in underscore format');
-            return true;
-        }
-
-        $name = $this->_getName($name);
-        $name = Inflector::underscore($name);
-
-        if (!preg_match('/^[a-z0-9_]+$/', $name)) {
-            return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9", "_".');
-        }
+        $name = $this->getMigrationName($name);
 
         $this->bake($name);
     }
@@ -177,6 +167,30 @@ class MigrationTask extends BakeTask
     {
         $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
         return $file->exists();
+    }
+
+    /**
+     * Returns a name for the migration class
+     *
+     * If the name is invalid, the task will exit
+     *
+     * @param string $name Name for the generated migration
+     * @return string name of the migration file
+     */
+    protected function getMigrationName($name = null)
+    {
+        if (empty($name)) {
+            return $this->error('Choose a migration name to bake in underscore format');
+        }
+
+        $name = $this->_getName($name);
+        $name = Inflector::underscore($name);
+
+        if (!preg_match('/^[a-z0-9_]+$/', $name)) {
+            return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9", "_".');
+        }
+
+        return $name;
     }
 
     /**
