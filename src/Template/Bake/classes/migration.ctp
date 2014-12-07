@@ -40,8 +40,10 @@ class <%= $name %> extends AbstractMigration {
 <% foreach ($columns as $column): %>
       <%= "->addColumn('" . $column . "', '" . $tableSchema->columnType($column) . "', ["; %>
 <% foreach ($tableSchema->column($column) as $optionName => $option): %>
-<% if (in_array($optionName, ['length', 'limit', 'default', 'unsigned', 'null'])): %>
+<% if (in_array($optionName, ['length', 'limit', 'default', 'null'])): %>
         <%= "'" . str_replace('length', 'limit', $optionName) . "' => '" .  $option . "', "; %>
+<% elseif ($optionName === 'unsigned'): %>
+        <%= "'signed' => " . (($option == true) ? 'false' : 'true') . ', ' %>
 <% endif; %>
 <% endforeach; %>
       <%= "])"; %>
