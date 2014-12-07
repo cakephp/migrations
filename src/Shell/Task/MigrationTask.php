@@ -67,7 +67,9 @@ class MigrationTask extends BakeTask
 
         $name = $this->getMigrationName($name);
 
-        $this->bake($name);
+        if ($this->params['snapshot'] === true) {
+            $this->snapshot($name);
+        }
     }
 
     /**
@@ -76,7 +78,7 @@ class MigrationTask extends BakeTask
      * @param string $filename The migration name to generate.
      * @return void
      */
-    public function bake($filename)
+    public function snapshot($filename)
     {
         $ns = Configure::read('App.namespace');
         $pluginPath = '';
@@ -228,6 +230,10 @@ class MigrationTask extends BakeTask
         ])->addOption('checkModel', [
             'default' => true,
             'help' => 'If model is set to true, check also that the model exists.'
+        ])->addOption('snapshot', [
+            'boolean' => true,
+            'default' => false,
+            'help' => 'If specified, the generated migration is a snapshot of the database schema',
         ])->addOption('theme', [
             'short' => 't',
             'default' => 'Migrations',
