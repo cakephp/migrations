@@ -115,7 +115,14 @@ class MigrationHelper extends Helper
     {
         $collection = $this->config('collection');
         $tableSchema = $collection->describe($table);
-        $validOptions = ['length', 'limit', 'default', 'null', 'precision', 'scale', 'after', 'update', 'comment', 'unsigned', 'signed', 'properties'];
+        $validOptions = [
+            'length', 'limit',
+            'default', 'null',
+            'precision', 'scale',
+            'after', 'update',
+            'comment', 'unsigned',
+            'signed', 'properties'
+        ];
 
         $attributes = [];
         $options = $tableSchema->column($column);
