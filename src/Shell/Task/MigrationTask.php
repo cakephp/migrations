@@ -104,7 +104,7 @@ class MigrationTask extends BakeTask
                 continue;
             }
 
-            if (!$this->modelToAdd($table, $this->plugin)) {
+            if (!$this->tableToAdd($table, $this->plugin)) {
                 unset($tables[$num]);
                 continue;
             }
@@ -157,10 +157,10 @@ class MigrationTask extends BakeTask
      * @param string $pluginName Plugin name if exists
      * @return bool true if the model is to be added
      */
-    public function modelToAdd($tableName, $pluginName = null)
+    public function tableToAdd($tableName, $pluginName = null)
     {
-        if ($this->params['checkModel'] === true) {
-            return $this->modelExist(Inflector::camelize($tableName), $pluginName);
+        if ($this->params['require-table'] === true) {
+            return $this->tableExists(Inflector::camelize($tableName), $pluginName);
         }
 
         return true;
@@ -173,7 +173,7 @@ class MigrationTask extends BakeTask
      * @param string $pluginName Plugin name if exists
      * @return bool
      */
-    public function modelExist($tableName, $pluginName = null)
+    public function tableExists($tableName, $pluginName = null)
     {
         $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
         return $file->exists();
@@ -235,8 +235,9 @@ class MigrationTask extends BakeTask
             'short' => 'c',
             'default' => 'default',
             'help' => 'The datasource connection to get data from.'
-        ])->addOption('checkModel', [
-            'default' => true,
+        ])->addOption('require-table', [
+            'boolean' => true,
+            'default' => false,
             'help' => 'If model is set to true, check also that the model exists.'
         ])->addOption('snapshot', [
             'boolean' => true,
