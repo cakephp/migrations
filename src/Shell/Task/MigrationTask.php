@@ -60,14 +60,15 @@ class MigrationTask extends BakeTask
     /**
      * Execution method always used for tasks
      *
-     * @param string $name The name of the migration file to bake.
      * @return void
      */
-    public function main($name = null)
+    public function main()
     {
         parent::main();
 
-        $name = $this->getMigrationName($name);
+        $name = array_shift($this->args);
+
+        $className = $this->getMigrationName($name);
 
         $Collection = $this->getCollection($this->connection);
         EventManager::instance()->attach(function (Event $event) use ($Collection) {
@@ -77,14 +78,183 @@ class MigrationTask extends BakeTask
         }, 'Bake.initialize');
 
         if ($this->params['snapshot'] === true) {
-            $this->snapshot($name);
+            $this->snapshot($className);
         }
+        $this->fromCommandLine($className);
+    }
+
+    public function fromCommandLine($className)
+    {
+        $ns = Configure::read('App.namespace');
+        $pluginPath = '';
+        if ($this->plugin) {
+            $ns = $this->plugin;
+            $pluginPath = $this->plugin . '.';
+        }
+        $collection = $this->getCollection($this->connection);
+
+        $action = $this->detectAction($className);
+        if ($action === null) {
+            $data = [
+                'plugin' => $this->plugin,
+                'pluginPath' => $pluginPath,
+                'namespace' => $ns,
+                'collection' => $this->getCollection($this->connection),
+                'tables' => [],
+                'action' => null,
+                'name' => $className
+            ];
+            return $this->generate($className, 'Migrations.config/skeleton', $data);
+        }
+
+        $columns = $this->generateFields($this->args);
+
+        list($action, $table) = $action;
+        $data = [
+            'plugin' => $this->plugin,
+            'pluginPath' => $pluginPath,
+            'namespace' => $ns,
+            'collection' => $this->getCollection($this->connection),
+            'tables' => [$table],
+            'action' => $action,
+            'columns' => $columns,
+            'name' => $className
+        ];
+
+        $template = 'skeleton';
+        return $this->generate($className, sprintf('Migrations.config/%s', $template), $data);
+    }
+
+    public function detectAction($name)
+    {
+        if (preg_match('/^(Create|Drop)(.*)/', $name, $matches)) {
+            $action = strtolower($matches[1]) . '_table';
+            $table = Inflector::tableize(Inflector::pluralize($matches[2]));
+        } elseif (preg_match('/^(Add).*(?:To)(.*)/', $name, $matches)) {
+            $action = 'add_field';
+            $table = Inflector::tableize(Inflector::pluralize($matches[2]));
+        } elseif (preg_match('/^(Remove).*(?:From)(.*)/', $name, $matches)) {
+            $action = 'drop_field';
+            $table = Inflector::tableize(Inflector::pluralize($matches[2]));
+        } elseif (preg_match('/^(Alter)(.*)/', $name, $matches)) {
+            $action = 'alter_table';
+            $table = Inflector::tableize(Inflector::pluralize($matches[2]));
+        } else {
+            return null;
+        }
+
+        return [$action, $table];
+    }
+
+    public function generateFields($arguments)
+    {
+        $db = ConnectionManager::get($this->connection);
+        $validTypes = [
+            'biginteger',
+            'binary',
+            'boolean',
+            'date',
+            'datetime',
+            'decimal',
+            'float',
+            'integer',
+            'string',
+            'text',
+            'time',
+            'timestamp',
+        ];
+
+        $fields = [
+            'fields' => [],
+            'indexes' => [],
+        ];
+        foreach ($arguments as $field) {
+            if (preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches)) {
+                $field = $matches[1];
+                $type = empty($matches[2]) ? null : $matches[2];
+                $length = null;
+                $indexType = empty($matches[3]) ? null : $matches[3];
+                $indexName = empty($matches[4]) ? null : $matches[4];
+                $indexUnique = false;
+
+                if ($type === null || !in_array($type, $validTypes)) {
+                    if ($type == 'primary_key') {
+                        $type = 'integer';
+                        $indexType = 'primary';
+                    } elseif ($field == 'id') {
+                        $type = 'integer';
+                    } elseif (in_array($field, ['created', 'modified', 'updated'])) {
+                        $type = 'datetime';
+                    } else {
+                        $type = 'string';
+                    }
+                }
+
+                if ($type == 'primary_key') {
+                    $type = 'integer';
+                    $indexType = 'primary';
+                } elseif ($type == 'string') {
+                    $length = 255;
+                } elseif ($type == 'integer') {
+                    $length = 11;
+                } elseif ($type == 'biginteger') {
+                    $length = 20;
+                }
+
+                if ($indexType !== null) {
+                    if ($indexType == 'primary') {
+                        $indexName = 'PRIMARY';
+                        $indexUnique = true;
+                        $indexType = null;
+                    } elseif ($indexType == 'unique') {
+                        $indexUnique = true;
+                        $indexType = null;
+                    }
+
+                    if (empty($indexName)) {
+                        if ($indexUnique) {
+                            $indexName = strtoupper('UNIQUE_' . $field);
+                        } else {
+                            $indexName = strtoupper('BY_' . $field);
+                        }
+                    }
+
+                    if (!isset($fields['indexes'][$indexName])) {
+                        $fields['indexes'][$indexName] = [
+                            'columns' => [],
+                            'options' => [
+                                'unique' => $indexUnique,
+                                'name' => $indexName,
+                            ],
+                        ];
+                    }
+
+                    $fields['indexes'][$indexName]['columns'][] = $field;
+                    if ($indexType !== null) {
+                        $fields['indexes'][$indexName]['options']['type'] = $indexType;
+                    }
+                }
+
+                $fields['fields'][$field] = [
+                    'columnType' => $type,
+                    'options' => [
+                        'null' => false,
+                        'default' => null,
+                    ]
+                ];
+
+                if ($length !== null) {
+                    $fields['fields'][$field]['options']['limit'] = $length;
+                }
+            }
+        }
+        return $fields;
     }
 
     /**
      * Generate code for the given migration name.
      *
-     * @param string $classname The migration class name to generate.
+     * @param string $className The migration class name to generate.
      * @return void
      */
     public function snapshot($className)
@@ -203,7 +373,7 @@ class MigrationTask extends BakeTask
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
-            return $this->error('The classname is not correct. The classname can only contain "A-Z" and "0-9".');
+            return $this->error('The className is not correct. The className can only contain "A-Z" and "0-9".');
         }
 
         return $name;
@@ -234,10 +404,7 @@ class MigrationTask extends BakeTask
 
         $parser->description(
             'Bake migration class.'
-        )->addArgument('name', [
-            'help' => 'Name of the migration to bake. Can use Plugin.name to bake plugin migrations.',
-            'required' => true
-        ])->addOption('connection', [
+        )->addOption('connection', [
             'short' => 'c',
             'default' => 'default',
             'help' => 'The datasource connection to get data from.'
