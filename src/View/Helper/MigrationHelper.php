@@ -99,7 +99,7 @@ class MigrationHelper extends Helper
             return $value;
         }
 
-        return sprintf("'%s'", $value);
+        return sprintf("'%s'", addslashes($value));
     }
 
     /**
