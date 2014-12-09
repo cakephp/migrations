@@ -77,19 +77,19 @@ You can also use the `bake` command to generate migrations.
 
 ```bash
 # The following will create an initial snapshot migration file:
-bin/cake bake migration initial --snapshot
+bin/cake bake migration Initial --snapshot
 
 # Create an empty migration file
-bin/cake bake migration add_field_to_table
+bin/cake bake migration AddFieldToTable
 
 # You can specify a plugin to bake into
-bin/cake bake migration add_field_to_table --plugin PluginName
+bin/cake bake migration AddFieldToTable --plugin PluginName
 
 # You can specify an alternative connection when generating a migration.
-bin/cake bake migration add_field_to_table --connection connection
+bin/cake bake migration AddFieldToTable --connection connection
 
 # Require that the table class exists before creating a migration
-bin/cake bake migration add_field_to_table --require-table
+bin/cake bake migration AddFieldToTable --require-table
 ```
 
 These commands will create a file under `config/Migrations` with the current database snapshot as the contents of the `change()` method. You may edit this as desired.

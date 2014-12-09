@@ -84,10 +84,10 @@ class MigrationTask extends BakeTask
     /**
      * Generate code for the given migration name.
      *
-     * @param string $filename The migration name to generate.
+     * @param string $classname The migration class name to generate.
      * @return void
      */
-    public function snapshot($filename)
+    public function snapshot($className)
     {
         $ns = Configure::read('App.namespace');
         $pluginPath = '';
@@ -117,7 +117,7 @@ class MigrationTask extends BakeTask
             'namespace' => $ns,
             'collection' => $collection,
             'tables' => $tables,
-            'name' => Inflector::camelize($filename)
+            'name' => $className
         ];
 
         $this->Template->set($data);
@@ -129,7 +129,7 @@ class MigrationTask extends BakeTask
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
         $path = str_replace('/', DS, $path);
-        $filename = $path . date('YmdHis') . '_' . $filename . '.php';
+        $filename = $path . date('YmdHis') . '_' . Inflector::underscore($className) . '.php';
         $message = "\n" . 'Baking migration class for Connection ' . $this->connection;
         if (!empty($this->plugin)) {
             $message .= ' (Plugin : ' . $this->plugin . ')';
@@ -181,7 +181,7 @@ class MigrationTask extends BakeTask
     }
 
     /**
-     * Returns a name for the migration class
+     * Returns a class name for the migration class
      *
      * If the name is invalid, the task will exit
      *
@@ -191,14 +191,14 @@ class MigrationTask extends BakeTask
     protected function getMigrationName($name = null)
     {
         if (empty($name)) {
-            return $this->error('Choose a migration name to bake in underscore format');
+            return $this->error('Choose a migration name to bake in CamelCase format');
         }
 
         $name = $this->_getName($name);
-        $name = Inflector::underscore($name);
+        $name = Inflector::camelize($name);
 
-        if (!preg_match('/^[a-z0-9_]+$/', $name)) {
-            return $this->error('The filename is not correct. The filename can only contain "a-z", "0-9", "_".');
+        if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
+            return $this->error('The classname is not correct. The classname can only contain "A-Z" and "0-9".');
         }
 
         return $name;
