@@ -28,9 +28,7 @@ class MigrationHelper extends Helper
      *
      * ### Settings
      *
-     * - `collection` Either a filename to a config containing templates.
-     *   Or an array of templates to load. See Cake\View\StringTemplate for
-     *   template formatting.
+     * - `collection` \Cake\Database\Schema\Collection
      *
      * @param \Cake\View\View $View The View this helper is being attached to.
      * @param array $config Configuration settings for the helper.
