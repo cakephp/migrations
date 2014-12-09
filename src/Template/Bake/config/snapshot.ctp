@@ -14,11 +14,15 @@
  */
 
 $wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null']);
+$tableMethod = $this->Migration->tableMethod($action);
+$columnMethod = $this->Migration->columnMethod($action);
+$indexMethod = $this->Migration->indexMethod($action);
 %>
 <?php
 use Phinx\Migration\AbstractMigration;
 
-class <%= $name %> extends AbstractMigration {
+class <%= $name %> extends AbstractMigration
+{
     /**
      * Change Method.
      *
@@ -32,9 +36,10 @@ class <%= $name %> extends AbstractMigration {
         $table = $this->table('<%= $table%>');
         $table
         <%- foreach ($this->Migration->columns($table) as $column => $config): %>
-            ->addColumn('<%= $column %>', '<%= $config['columnType'] %>', [<%
+            -><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
                 $options = [];
                 $columnOptions = $config['options'];
+                $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
                 foreach ($columnOptions as $optionName => $option) {
                     $options[$optionName] = $this->Migration->value($option);
                 }
@@ -42,7 +47,7 @@ class <%= $name %> extends AbstractMigration {
                 echo $this->Bake->stringifyList($options, ['indent' => 4]);
             %>])
         <%- endforeach; %>
-            ->create();
+            -><%= $tableMethod %>();
     <%- endforeach; %>
     }
 }

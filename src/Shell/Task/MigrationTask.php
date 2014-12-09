@@ -117,6 +117,7 @@ class MigrationTask extends BakeTask
             'namespace' => $ns,
             'collection' => $collection,
             'tables' => $tables,
+            'action' => 'CreateTable',
             'name' => $className
         ];
         return $this->generate($className, 'Migrations.config/snapshot', $data);
