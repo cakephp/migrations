@@ -69,9 +69,10 @@ class MigrationTask extends BakeTask
 
         $name = $this->getMigrationName($name);
 
-        EventManager::instance()->attach(function (Event $event) use ($collection) {
+        $Collection = $this->getCollection($this->connection);
+        EventManager::instance()->attach(function (Event $event) use ($Collection) {
             $event->subject->loadHelper('Migrations.Migration', [
-                'collection' => $collection
+                'Collection' => $Collection
             ]);
         }, 'Bake.initialize');
 

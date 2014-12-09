@@ -28,7 +28,7 @@ class MigrationHelper extends Helper
      *
      * ### Settings
      *
-     * - `collection` \Cake\Database\Schema\Collection
+     * - `Collection` \Cake\Database\Schema\Collection
      *
      * @param \Cake\View\View $View The View this helper is being attached to.
      * @param array $config Configuration settings for the helper.
@@ -36,8 +36,8 @@ class MigrationHelper extends Helper
     public function __construct(View $View, array $config = array())
     {
         parent::__construct($View, $config);
-        $collection = $this->config('collection');
-        if (empty($collection) || !($collection instanceof Collection)) {
+        $Collection = $this->config('Collection');
+        if (empty($Collection) || !($Collection instanceof Collection)) {
             throw new InvalidArgumentException('Missing Collection object');
         }
     }
@@ -50,8 +50,8 @@ class MigrationHelper extends Helper
      */
     public function columns($table)
     {
-        $collection = $this->config('collection');
-        $tableSchema = $collection->describe($table);
+        $Collection = $this->config('Collection');
+        $tableSchema = $Collection->describe($table);
         $columns = [];
         foreach ($tableSchema->columns() as $column) {
             $columns[$column] = $this->column($tableSchema, $column);
@@ -111,8 +111,8 @@ class MigrationHelper extends Helper
      */
     public function attributes($table, $column)
     {
-        $collection = $this->config('collection');
-        $tableSchema = $collection->describe($table);
+        $Collection = $this->config('Collection');
+        $tableSchema = $Collection->describe($table);
         $validOptions = [
             'length', 'limit',
             'default', 'null',
