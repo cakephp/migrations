@@ -30,7 +30,33 @@ Additionally, you will need to configure the `default` database configuration in
 
 ## Usage
 
-This plugins provides the Migrations shell that you can invoke from your application's root folder:
+After creating/modifying a migration file, you can run your changes in the database by executing:
+
+```bash
+# The following will run migrations against the default database connection
+bin/cake migrations migrate
+
+# Rolling back migrations. If a `change()` method is defined, it will be reversed.
+# Otherwise, the `down()` method will be invoked
+bin/cake migrations rollback
+
+# Retrieve the status of executed and pending migrations
+bin/cake migrations status
+
+# All console commands can take a `--plugin` or `-p` option
+bin/cake migrations status -p PluginName
+
+# You can also scope a command to a connection via the `--connection` or `-c` option
+bin/cake migrations status -c my_datasource
+```
+
+### Creating Migrations
+
+This plugin provides two interfaces to creating migrations: a passthru to the Phinx library and a way to use the `bake` utility.
+
+#### Phinx interface
+
+The Phinx Migrations shell can be invoked via the following command from your application's root folder:
 
 ```bash
 $ bin/cake migrations
@@ -38,78 +64,41 @@ $ bin/cake migrations
 
 The command above will display a list of available options. Make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
-### Create a migration file with tables from your database
+Please note that you need to learn how to write your own migrations.
 
-The [bake](https://github.com/cakephp/bake) command can be used to create a populated migration file based on the tables in your database:
+Empty migrations files will be created leaving you to fill in the up() and down() or change() if you want automatically reversible migrations.
 
-```bash
-$ bin/cake bake migration Initial [-p PluginName] [-c connection]
-```
+Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
-This will create a phinx file with tables found in your database. By default,
-this will just add tables that have model files, but you can create a file with
-all tables by adding the option `--checkModel false`.
 
-### Create an empty migration file
+#### Bake interface
 
-To create an empty migration file, execute:
+You can also use the `bake` command to generate migrations.
 
 ```bash
-$ bin/cake migrations create Name
+# The following will create an initial snapshot migration file:
+bin/cake bake migration initial --snapshot
+
+# Create an empty migration file
+bin/cake bake migration add_field_to_table
+
+# You can specify a plugin to bake into
+bin/cake bake migration add_field_to_table --plugin PluginName
+
+# You can specify an alternative connection when generating a migration.
+bin/cake bake migration add_field_to_table --connection connection
+
+# Require that the table class exists before creating a migration
+bin/cake bake migration add_field_to_table --require-table
 ```
 
-This will create a file under `config/Migrations` that you can edit to complete
-the migration steps as documented in phinx's manual.
+These commands will create a file under `config/Migrations` with the current database snapshot as the contents of the `change()` method. You may edit this as desired.
 
-Please note that you will need to learn how to write your own migrations, you
-need to fill in the up() and down() or change() methods if you want
-automatically reversible migrations.
+Please note that you will need to learn how to write your own migrations, you need to fill in the up() and down() or change() methods if you want automatically reversible migrations.
 
-Once again, please make sure you read [the official phinx
-documentation](http://docs.phinx.org/en/latest/migrations.html) to understand
-how migrations are created and executed in your database.
+Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
-### Run the migration
-
-After modifying the migration file, you can run your changes in the database by executing:
-
-```bash
-$ bin/cake migrations migrate
-```
-
-### Rollback a migration
-
-If you added any steps to revert a migration in the `down()` callback, you can execute this command and have that function executed:
-
-```bash
-$ bin/cake migrations rollback
-```
-
-### Watch migrations status
-
-By executing this command you will have an overview of the migrations that have been executed and those still pending to be run:
-
-```bash
-$ bin/cake migrations status
-```
-
-### Usage for plugins
-
-All the commands from above support the `--plugin` or `-p` option:
-
-```bash
-$ bin/cake migrations status -p PluginName
-```
-
-### Usage for connections
-
-All the commands from above support the `--connection` or `-c` option:
-
-```bash
-$ bin/cake migrations migrate -c my_datasource
-```
-
-### Usage for custom primary key id in tables
+#### Usage for custom primary key id in tables
 
 To create a table called `statuses` and use a CHAR (36) for the `id` field, this requires you to turn off the id.
 
@@ -126,3 +115,5 @@ $table->addColumn('id', 'char', ['limit' => 36])
     ->addColumn('model', 'string', ['limit' => 128])
     ->create();
 ```
+
+> Phinx automatically creates an auto-increment `id` field for *every* table. This will hopefully be fixed in the future.
