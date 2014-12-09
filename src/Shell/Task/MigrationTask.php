@@ -119,10 +119,14 @@ class MigrationTask extends BakeTask
             'tables' => $tables,
             'name' => $className
         ];
+        return $this->generate($className, 'Migrations.config/snapshot', $data);
+    }
 
+    public function generate($className, $template, $data)
+    {
         $this->Template->set($data);
 
-        $out = $this->Template->generate('Migrations.config/snapshot');
+        $out = $this->Template->generate($template);
 
         $path = dirname(APP) . DS . $this->pathFragment;
         if (isset($this->plugin)) {
