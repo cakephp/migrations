@@ -43,6 +43,79 @@ class MigrationHelper extends Helper
     }
 
     /**
+     * Returns the method to be used for the Table::save()
+     *
+     * @param string $action Name of action to take against the table
+     * @return string
+     */
+    public function tableMethod($action)
+    {
+        if ($action == 'drop_table') {
+            return 'drop';
+        }
+
+        if ($action == 'create_table') {
+            return 'create';
+        }
+
+        return 'update';
+    }
+
+    /**
+     * Returns the method to be used for the index manipulation
+     *
+     * @param string $action Name of action to take against the table
+     * @return string
+     */
+    public function indexMethod($action)
+    {
+        if ($action == 'drop_field') {
+            return 'removeIndex';
+        }
+
+        return 'addIndex';
+    }
+
+
+    /**
+     * Returns the method to be used for the column manipulation
+     *
+     * @param string $action Name of action to take against the table
+     * @return string
+     */
+    public function columnMethod($action)
+    {
+        if ($action == 'drop_field') {
+            return 'removeColumn';
+        }
+
+        return 'addColumn';
+    }
+
+/**
+ * Returns an array converted into a formatted single-line string
+ *
+ * @param array $list array of items to be stringified
+ * @param array $options options to use
+ * @return string
+ */
+    public function stringifyList(array $list, array $options = [])
+    {
+        if (!$list) {
+            return '';
+        }
+
+        foreach ($list as $k => &$v) {
+            $v = "'$v'";
+            if (!is_numeric($k)) {
+                $v = "'$k' => $v";
+            }
+        }
+
+        return implode(', ', $list);
+    }
+
+    /**
      * Returns an array of column data for a given table
      *
      * @param string $table Name of the table to retrieve columns for
