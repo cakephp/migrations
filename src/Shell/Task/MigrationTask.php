@@ -210,7 +210,7 @@ class MigrationTask extends BakeTask
         }
 
         $path = str_replace('/', DS, $path);
-        $fileName = Util::mapClassNameToFileName($className) . '.php';
+        $fileName = Util::mapClassNameToFileName($className);
         $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
         $message = "\n" . 'Baking migration class for Connection ' . $this->connection;
         if (!empty($this->plugin)) {
