@@ -24,6 +24,7 @@ use Cake\Event\EventManager;
 use Cake\Filesystem\File;
 use Cake\Utility\Inflector;
 use InvalidArgumentException;
+use Migrations\Util\ColumnParser;
 use Phinx\Migration\Util;
 use ReflectionClass;
 
@@ -112,7 +113,8 @@ class MigrationTask extends BakeTask
             return $this->generate($className, 'Migrations.config/skeleton', $data);
         }
 
-        $columns = $this->generateFields($this->args);
+        $columnParser = new ColumnParser;
+        $columns = $columnParser->parse($this->args);
 
         list($action, $table) = $action;
         $data = [
@@ -149,103 +151,6 @@ class MigrationTask extends BakeTask
         }
 
         return [$action, $table];
-    }
-
-    public function generateFields($arguments)
-    {
-        $db = ConnectionManager::get($this->connection);
-
-        $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
-        $collection = new Collection($reflector->getConstants());
-        $validTypes = array_values($collection->filter(function ($value, $constant) {
-            return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
-        })->toArray());
-
-        $fields = [
-            'fields' => [],
-            'indexes' => [],
-        ];
-        foreach ($arguments as $field) {
-            if (preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches)) {
-                $field = $matches[1];
-                $type = empty($matches[2]) ? null : $matches[2];
-                $length = null;
-                $indexType = empty($matches[3]) ? null : $matches[3];
-                $indexName = empty($matches[4]) ? null : $matches[4];
-                $indexUnique = false;
-
-                if ($type === null || !in_array($type, $validTypes)) {
-                    if ($type == 'primary_key') {
-                        $type = 'integer';
-                        $indexType = 'primary';
-                    } elseif ($field == 'id') {
-                        $type = 'integer';
-                    } elseif (in_array($field, ['created', 'modified', 'updated'])) {
-                        $type = 'datetime';
-                    } else {
-                        $type = 'string';
-                    }
-                }
-
-                if ($type == 'primary_key') {
-                    $type = 'integer';
-                    $indexType = 'primary';
-                } elseif ($type == 'string') {
-                    $length = 255;
-                } elseif ($type == 'integer') {
-                    $length = 11;
-                } elseif ($type == 'biginteger') {
-                    $length = 20;
-                }
-
-                if ($indexType !== null) {
-                    if ($indexType == 'primary') {
-                        $indexName = 'PRIMARY';
-                        $indexUnique = true;
-                        $indexType = null;
-                    } elseif ($indexType == 'unique') {
-                        $indexUnique = true;
-                        $indexType = null;
-                    }
-
-                    if (empty($indexName)) {
-                        if ($indexUnique) {
-                            $indexName = strtoupper('UNIQUE_' . $field);
-                        } else {
-                            $indexName = strtoupper('BY_' . $field);
-                        }
-                    }
-
-                    if (!isset($fields['indexes'][$indexName])) {
-                        $fields['indexes'][$indexName] = [
-                            'columns' => [],
-                            'options' => [
-                                'unique' => $indexUnique,
-                                'name' => $indexName,
-                            ],
-                        ];
-                    }
-
-                    $fields['indexes'][$indexName]['columns'][] = $field;
-                    if ($indexType !== null) {
-                        $fields['indexes'][$indexName]['options']['type'] = $indexType;
-                    }
-                }
-
-                $fields['fields'][$field] = [
-                    'columnType' => $type,
-                    'options' => [
-                        'null' => false,
-                        'default' => null,
-                    ]
-                ];
-
-                if ($length !== null) {
-                    $fields['fields'][$field]['options']['limit'] = $length;
-                }
-            }
-        }
-        return $fields;
     }
 
     /**
