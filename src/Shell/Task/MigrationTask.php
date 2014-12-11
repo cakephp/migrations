@@ -70,10 +70,10 @@ class MigrationTask extends BakeTask
 
         $className = $this->getMigrationName($name);
 
-        $Collection = $this->getCollection($this->connection);
-        EventManager::instance()->attach(function (Event $event) use ($Collection) {
+        $collection = $this->getCollection($this->connection);
+        EventManager::instance()->attach(function (Event $event) use ($collection) {
             $event->subject->loadHelper('Migrations.Migration', [
-                'Collection' => $Collection
+                'collection' => $collection
             ]);
         }, 'Bake.initialize');
 
@@ -91,15 +91,16 @@ class MigrationTask extends BakeTask
             $ns = $this->plugin;
             $pluginPath = $this->plugin . '.';
         }
-        $collection = $this->getCollection($this->connection);
 
+        $collection = $this->getCollection($this->connection);
         $action = $this->detectAction($className);
+
         if ($action === null) {
             $data = [
                 'plugin' => $this->plugin,
                 'pluginPath' => $pluginPath,
                 'namespace' => $ns,
-                'collection' => $this->getCollection($this->connection),
+                'collection' => $collection,
                 'tables' => [],
                 'action' => null,
                 'name' => $className
@@ -114,7 +115,7 @@ class MigrationTask extends BakeTask
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
             'namespace' => $ns,
-            'collection' => $this->getCollection($this->connection),
+            'collection' => $collection,
             'tables' => [$table],
             'action' => $action,
             'columns' => $columns,
