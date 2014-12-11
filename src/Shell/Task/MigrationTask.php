@@ -22,6 +22,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Filesystem\File;
+use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use InvalidArgumentException;
 use Migrations\Util\ColumnParser;
@@ -71,7 +72,7 @@ class MigrationTask extends BakeTask
     {
         parent::main();
 
-        $name = array_shift($this->args);
+        $name = Hash::get($this->args, 0);
 
         $className = $this->getMigrationName($name);
 
@@ -113,8 +114,10 @@ class MigrationTask extends BakeTask
             return $this->generate($className, 'Migrations.config/skeleton', $data);
         }
 
+        $arguments = $this->args;
+        unset($arguments[0]);
         $columnParser = new ColumnParser;
-        $columns = $columnParser->parse($this->args);
+        $columns = $columnParser->parse($arguments);
 
         list($action, $table) = $action;
         $data = [
