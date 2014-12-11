@@ -14,6 +14,7 @@
 namespace Migrations\Shell\Task;
 
 use Bake\Shell\Task\BakeTask;
+use Cake\Collection\Collection;
 use Cake\Console\Shell;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
@@ -22,7 +23,9 @@ use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Filesystem\File;
 use Cake\Utility\Inflector;
+use InvalidArgumentException;
 use Phinx\Migration\Util;
+use ReflectionClass;
 
 /**
  * Task class for generating migrations files.
@@ -151,20 +154,12 @@ class MigrationTask extends BakeTask
     public function generateFields($arguments)
     {
         $db = ConnectionManager::get($this->connection);
-        $validTypes = [
-            'biginteger',
-            'binary',
-            'boolean',
-            'date',
-            'datetime',
-            'decimal',
-            'float',
-            'integer',
-            'string',
-            'text',
-            'time',
-            'timestamp',
-        ];
+
+        $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
+        $collection = new Collection($reflector->getConstants());
+        $validTypes = array_values($collection->filter(function ($value, $constant) {
+            return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
+        })->toArray());
 
         $fields = [
             'fields' => [],
