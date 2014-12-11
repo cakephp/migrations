@@ -12,8 +12,8 @@
         }
     ],
     "extra": {
-            "installer-name": "Migrations"
-        },
+        "installer-name": "Migrations"
+    },
     "support": {
         "issues": "https://github.com/cakephp/migrations/issues",
         "forum": "http://stackoverflow.com/tags/cakephp",
