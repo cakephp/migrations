@@ -162,10 +162,7 @@ class MigrationHelper extends Helper
         }
 
         if (is_bool($value)) {
-            if ($value) {
-                return 'true';
-            }
-            return 'false';
+            return $value ? 'true' : 'false';
         }
 
         if (is_numeric($value) || ctype_digit($value)) {
