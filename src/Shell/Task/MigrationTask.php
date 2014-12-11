@@ -22,6 +22,7 @@ use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Filesystem\File;
 use Cake\Utility\Inflector;
+use Phinx\Migration\Util;
 
 /**
  * Task class for generating migrations files.
@@ -304,14 +305,16 @@ class MigrationTask extends BakeTask
         if (isset($this->plugin)) {
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
+
         $path = str_replace('/', DS, $path);
-        $filename = $path . date('YmdHis') . '_' . Inflector::underscore($className) . '.php';
+        $fileName = Util::mapClassNameToFileName($className) . '.php';
+        $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
         $message = "\n" . 'Baking migration class for Connection ' . $this->connection;
         if (!empty($this->plugin)) {
             $message .= ' (Plugin : ' . $this->plugin . ')';
         }
         $this->out($message, 1, Shell::QUIET);
-        $this->createFile($filename, $out);
+        $this->createFile($filePath, $out);
         return $out;
     }
 
