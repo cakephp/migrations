@@ -24,6 +24,7 @@
         "php": ">=5.4",
         "cakephp/plugin-installer": "*",
         "robmorgan/phinx": "*",
+        "cakephp/bake": "dev-master",
         "cakephp/cakephp": "3.0.x-dev"
     },
     "require-dev": {
