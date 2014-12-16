@@ -13,12 +13,12 @@
  */
 namespace Migrations\Shell\Task;
 
+use Bake\Shell\Task\BakeTask;
 use Cake\Console\Shell;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
-use Cake\Shell\Task\BakeTask;
 use Cake\Utility\Inflector;
 
 /**
