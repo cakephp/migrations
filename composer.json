@@ -24,7 +24,8 @@
         "php": ">=5.4",
         "cakephp/plugin-installer": "*",
         "robmorgan/phinx": "*",
-        "cakephp/cakephp": "3.0.x-dev"
+        "cakephp/cakephp": "3.0.x-dev",
+        "squizlabs/php_codesniffer": "~2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
