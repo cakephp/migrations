@@ -24,11 +24,11 @@
         "php": ">=5.4",
         "cakephp/plugin-installer": "*",
         "robmorgan/phinx": "*",
-        "cakephp/bake": "dev-master",
         "cakephp/cakephp": "3.0.x-dev"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "*",
+        "cakephp/bake": "dev-master"
     },
     "autoload": {
         "psr-4": {
@@ -39,5 +39,8 @@
         "psr-4": {
             "Migrations\\Test\\": "tests"
         }
+    },
+    "suggest": {
+        "cakephp/bake": "Required if you want to generate migrations."
     }
 }
