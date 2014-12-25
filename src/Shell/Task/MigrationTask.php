@@ -39,7 +39,7 @@ class MigrationTask extends BakeTask
      *
      * @var array
      */
-    public $tasks = ['DbConfig', 'Template'];
+    public $tasks = ['Bake.Template'];
 
     /**
      * Tables to skip
