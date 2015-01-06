@@ -117,7 +117,8 @@ class MigrationTask extends BakeTask
         $arguments = $this->args;
         unset($arguments[0]);
         $columnParser = new ColumnParser;
-        $columns = $columnParser->parse($arguments);
+        $fields = $columnParser->parseFields($arguments);
+        $indexes = $columnParser->parseIndexes($arguments);
 
         list($action, $table) = $action;
         $data = [
@@ -127,7 +128,10 @@ class MigrationTask extends BakeTask
             'collection' => $collection,
             'tables' => [$table],
             'action' => $action,
-            'columns' => $columns,
+            'columns' => [
+                'fields' => $fields,
+                'indexes' => $indexes,
+            ],
             'name' => $className
         ];
 

@@ -8,14 +8,6 @@ use ReflectionClass;
 
 class ColumnParser
 {
-    public function parse($arguments)
-    {
-        return [
-            'fields' => $this->parseFields($arguments),
-            'indexes' => $this->parseIndexes($arguments),
-        ];
-    }
-
     public function parseFields($arguments)
     {
         $fields = [];
@@ -24,6 +16,10 @@ class ColumnParser
             preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
+
+            if (in_array($type, ['primary', 'primary_key'])) {
+                $type = 'primary';
+            }
 
             $type = $this->getType($type, $field);
             $length = $this->getLength($type);
@@ -52,8 +48,9 @@ class ColumnParser
             $field = $matches[1];
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
+            $indexName = Hash::get($matches, 4);
 
-            if ($type == 'primary_key') {
+            if (in_array($type, ['primary', 'primary_key'])) {
                 $indexType = 'primary';
             }
 
@@ -63,18 +60,12 @@ class ColumnParser
 
             $indexUnique = false;
             if ($indexType == 'primary') {
-                $indexName = 'PRIMARY';
                 $indexUnique = true;
             } elseif ($indexType == 'unique') {
                 $indexUnique = true;
             }
 
-            if (empty($indexName)) {
-                $indexName = strtoupper('BY_' . $field);
-                if ($indexUnique) {
-                    $indexName = strtoupper('UNIQUE_' . $field);
-                }
-            }
+            $indexName = $this->getIndexName($field, $indexType, $indexName, $indexUnique);
 
             if (empty($indexes[$indexName])) {
                 $indexes[$indexName] = [
@@ -105,13 +96,13 @@ class ColumnParser
     {
         $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
         $collection = new Collection($reflector->getConstants());
-        $validTypes = array_values($collection->filter(function ($_, $constant) {
+        $validTypes = $collection->filter(function ($_, $constant) {
             $_;
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
-        })->toArray());
+        })->toArray();
 
         if ($type === null || !in_array($type, $validTypes)) {
-            if ($type == 'primary_key') {
+            if ($type == 'primary') {
                 $type = 'integer';
             } elseif ($field == 'id') {
                 $type = 'integer';
@@ -137,5 +128,19 @@ class ColumnParser
         }
 
         return $length;
+    }
+
+    public function getIndexName($field, $indexType, $indexName, $indexUnique)
+    {
+        if (empty($indexName)) {
+            $indexName = strtoupper('BY_' . $field);
+            if ($indexType == 'primary') {
+                $indexName = 'PRIMARY';
+            } elseif ($indexUnique) {
+                $indexName = strtoupper('UNIQUE_' . $field);
+            }
+        }
+
+        return $indexName;
     }
 }
