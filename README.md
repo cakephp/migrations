@@ -116,14 +116,14 @@ To create a table called `statuses` and use a CHAR (36) for the `id` field, this
 
 See:
 
-```
-    $table = $this->table('statuses',
-        [
-            'id' => false,
-            'primary_key' => ['id']
-        ]);
-    $table->addColumn('id', 'char', ['limit' => 36])
-            ->addColumn('name', 'char', ['limit' => 255])
-            ->addColumn('model', 'string', ['limit' => 128])
-            ->create();
+```php
+$table = $this->table('statuses',
+    [
+        'id' => false,
+        'primary_key' => ['id']
+    ]);
+$table->addColumn('id', 'char', ['limit' => 36])
+    ->addColumn('name', 'char', ['limit' => 255])
+    ->addColumn('model', 'string', ['limit' => 128])
+    ->create();
 ```
