@@ -35,10 +35,7 @@ class <%= $name %> extends AbstractMigration {
         $table
         <%- $tableSchema = $collection->describe($table); %>
         <%- foreach ($tableSchema->columns() as $column): %>
-            ->addColumn(
-                '<%= $column %>',
-                '<%= $tableSchema->columnType($column) %>',
-                [<%
+            ->addColumn('<%= $column %>', '<%= $tableSchema->columnType($column) %>', [<%
                 $options = [];
                 $columnOptions = $tableSchema->column($column);
                 $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
@@ -49,9 +46,8 @@ class <%= $name %> extends AbstractMigration {
                     $options[$optionName] = $option;
                 }
 
-                echo $this->Bake->stringifyList($options, ['indent' => 5]);
-                %>]
-            )
+                echo $this->Bake->stringifyList($options, ['indent' => 4]);
+            %>])
         <%- endforeach; %>
             ->save();
     <%- endforeach; %>
