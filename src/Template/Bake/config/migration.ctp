@@ -12,6 +12,8 @@
  * @since         3.0.0
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
+
+$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null']);
 %>
 <?php
 use Phinx\Migration\AbstractMigration;
@@ -30,19 +32,26 @@ class <%= $name %> extends AbstractMigration {
     {
     <%- foreach ($tables as $table): %>
         $table = $this->table('<%= $table%>');
-        <%- // Get a single table (instance of Schema\Table) %>
-        <%- $tableSchema = $collection->describe($table); %>
-        <%- // columns of the table %>
-        <%- $columns = $tableSchema->columns(); %>
         $table
-        <%- foreach ($columns as $column): %>
-            ->addColumn('<%= $column %>', '<%= $tableSchema->columnType($column) %>', [
-            <%- foreach ($tableSchema->column($column) as $optionName => $option): %>
-                <%- if (in_array($optionName, ['length', 'limit', 'default', 'unsigned', 'null'])): %>
-                '<%= str_replace('length', 'limit', $optionName) %>' => '<%= $option %>',
-                <%- endif; %>
-            <%- endforeach; %>
-            ])
+        <%- $tableSchema = $collection->describe($table); %>
+        <%- foreach ($tableSchema->columns() as $column): %>
+            ->addColumn(
+                '<%= $column %>',
+                '<%= $tableSchema->columnType($column) %>',
+                [<%
+                $options = [];
+                $columnOptions = $tableSchema->column($column);
+                $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
+                foreach ($columnOptions as $optionName => $option) {
+                    if ($optionName === 'length') {
+                        $optionName = 'limit';
+                    }
+                    $options[$optionName] = $option;
+                }
+
+                echo $this->Bake->stringifyList($options, ['indent' => 5]);
+                %>]
+            )
         <%- endforeach; %>
             ->save();
     <%- endforeach; %>
