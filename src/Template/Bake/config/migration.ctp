@@ -28,24 +28,24 @@ class <%= $name %> extends AbstractMigration {
      */
     public function change()
     {
-<% foreach ($tables as $table): %>
-<%= "\n\t\t\$table = \$this->table('$table');"; %>
-<% // Get a single table (instance of Schema\Table) %>
-<% $tableSchema = $collection->describe($table); %>
-<% // columns of the table %>
-<% $columns = $tableSchema->columns(); %>
-    <%= "\$table"; %>
-<% foreach ($columns as $column): %>
-      <%= "->addColumn('" . $column . "', '" . $tableSchema->columnType($column) . "', ["; %>
-<% foreach ($tableSchema->column($column) as $optionName => $option): %>
-<% if (in_array($optionName, ['length', 'limit', 'default', 'unsigned', 'null'])): %>
-        <%= "'" . str_replace('length', 'limit', $optionName) . "' => '" .  $option . "', "; %>
-<% endif; %>
-<% endforeach; %>
-      <%= "])"; %>
-<% endforeach; %>
-      <%= "->save();"; %>
-<% endforeach; %>
+    <%- foreach ($tables as $table): %>
+        $table = $this->table('<%= $table%>');
+        <%- // Get a single table (instance of Schema\Table) %>
+        <%- $tableSchema = $collection->describe($table); %>
+        <%- // columns of the table %>
+        <%- $columns = $tableSchema->columns(); %>
+        $table
+        <%- foreach ($columns as $column): %>
+            ->addColumn('<%= $column %>', '<%= $tableSchema->columnType($column) %>', [
+            <%- foreach ($tableSchema->column($column) as $optionName => $option): %>
+                <%- if (in_array($optionName, ['length', 'limit', 'default', 'unsigned', 'null'])): %>
+                '<%= str_replace('length', 'limit', $optionName) %>' => '<%= $option %>',
+                <%- endif; %>
+            <%- endforeach; %>
+            ])
+        <%- endforeach; %>
+            ->save();
+    <%- endforeach; %>
     }
 
     /**
