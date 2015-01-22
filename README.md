@@ -41,34 +41,36 @@ $ bin/cake migrations
 
 The command above will display a list of available options. Make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
-### Create a migration file
-
-Execute:
-
-```bash
-$ bin/cake migrations create Initial
-```
-
-This will create a file under `config/Migrations` that you can edit to complete the migration steps as documented in phinx's manual.
-
-Please note that you need to learn how to write your own migrations.
-
-Empty migrations files will be created leaving you to fill in the up() and down() or change() if you want automatically reversible migrations.
-
-Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
-
-
 ### Create a migration file with tables from your database
 
-Execute:
+To create your first migration file, execute:
 
 ```bash
 $ bin/cake bake migration Initial [-p PluginName] [-c connection]
 ```
-This will create a phinx file with tables found in your database. By default, this
-will just add tables that have model files, but you can create a file with all tables
-by adding the option `--checkModel false`.
 
+This will create a phinx file with tables found in your database. By default,
+this will just add tables that have model files, but you can create a file with
+all tables by adding the option `--checkModel false`.
+
+### Create an empty migration file
+
+To create an empty migration file, execute:
+
+```bash
+$ bin/cake migrations create Name
+```
+
+This will create a file under `config/Migrations` that you can edit to complete
+the migration steps as documented in phinx's manual.
+
+Please note that you will need to learn how to write your own migrations, you
+need to fill in the up() and down() or change() methods if you want
+automatically reversible migrations.
+
+Once again, please make sure you read [the official phinx
+documentation](http://docs.phinx.org/en/latest/migrations.html) to understand
+how migrations are created and executed in your database.
 
 ### Run the migration
 
