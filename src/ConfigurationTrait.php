@@ -94,7 +94,7 @@ trait ConfigurationTrait
                     'pass' => isset($config['password']) ? $config['password'] : null,
                     'port' => isset($config['port']) ? $config['port'] : null,
                     'name' => $config['database'],
-                    'charset' => $config['encoding']
+                    'charset' => isset($config['encoding']) ? $config['encoding'] : null,
                 ]
             ]
         ]);
