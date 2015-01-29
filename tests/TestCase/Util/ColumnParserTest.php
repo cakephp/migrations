@@ -152,14 +152,38 @@ class ColumnParserTest extends TestCase
      */
     public function testValidArguments()
     {
-        $this->assertEquals(['id'], $this->columnParser->validArguments(['id']));
-        $this->assertEquals(['id', 'id'], $this->columnParser->validArguments(['id', 'id']));
-        $this->assertEquals(['id:primary_key'], $this->columnParser->validArguments(['id:primary_key']));
-        $this->assertEquals(['id:primary_key:primary'], $this->columnParser->validArguments(['id:primary_key:primary']));
-        $this->assertEquals(['id:integer:primary'], $this->columnParser->validArguments(['id:integer:primary']));
-        $this->assertEquals(['id:integer:primary:ID_INDEX'], $this->columnParser->validArguments(['id:integer:primary:ID_INDEX']));
-        $this->assertEquals(['id', 'field:string:unique'], $this->columnParser->validArguments(['id', 'field:string:unique']));
-        $this->assertEquals(['field:fieldType:indexType:indexName'], $this->columnParser->validArguments(['field:fieldType:indexType:indexName']));
+        $this->assertEquals(
+            ['id'],
+            $this->columnParser->validArguments(['id'])
+        );
+        $this->assertEquals(
+            ['id', 'id'],
+            $this->columnParser->validArguments(['id', 'id'])
+        );
+        $this->assertEquals(
+            ['id:primary_key'],
+            $this->columnParser->validArguments(['id:primary_key'])
+        );
+        $this->assertEquals(
+            ['id:primary_key:primary'],
+            $this->columnParser->validArguments(['id:primary_key:primary'])
+        );
+        $this->assertEquals(
+            ['id:integer:primary'],
+            $this->columnParser->validArguments(['id:integer:primary'])
+        );
+        $this->assertEquals(
+            ['id:integer:primary:ID_INDEX'],
+            $this->columnParser->validArguments(['id:integer:primary:ID_INDEX'])
+        );
+        $this->assertEquals(
+            ['id', 'field:string:unique'],
+            $this->columnParser->validArguments(['id', 'field:string:unique'])
+        );
+        $this->assertEquals(
+            ['field:fieldType:indexType:indexName'],
+            $this->columnParser->validArguments(['field:fieldType:indexType:indexName'])
+        );
     }
 
     /**
