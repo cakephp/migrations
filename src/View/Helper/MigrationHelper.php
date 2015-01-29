@@ -93,29 +93,6 @@ class MigrationHelper extends Helper
     }
 
     /**
-     * Returns an array converted into a formatted single-line string
-     *
-     * @param array $list array of items to be stringified
-     * @param array $options options to use
-     * @return string
-     */
-    public function stringifyList(array $list, array $options = [])
-    {
-        if (!$list) {
-            return '';
-        }
-
-        foreach ($list as $k => &$v) {
-            $v = "'$v'";
-            if (!is_numeric($k)) {
-                $v = "'$k' => $v";
-            }
-        }
-
-        return implode(', ', $list);
-    }
-
-    /**
      * Returns an array of column data for a given table
      *
      * @param string $table Name of the table to retrieve columns for
