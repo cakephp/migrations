@@ -12,9 +12,31 @@
 require dirname(__DIR__) . '/vendor/cakephp/cakephp/src/basics.php';
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-define('DS', DIRECTORY_SEPARATOR);
+if (!defined('DS')) {
+    define('DS', DIRECTORY_SEPARATOR);
+}
 define('APP', sys_get_temp_dir());
 define('ROOT', dirname(__DIR__));
 Cake\Core\Configure::write('App', [
     'namespace' => 'App'
 ]);
+
+Cake\Cache\Cache::config([
+    '_cake_core_' => [
+        'engine' => 'File',
+        'prefix' => 'cake_core_',
+        'serialize' => true,
+        'path' => '/tmp',
+    ],
+    '_cake_model_' => [
+        'engine' => 'File',
+        'prefix' => 'cake_model_',
+        'serialize' => true,
+        'path' => '/tmp',
+    ]
+]);
+
+if (!getenv('db_dsn')) {
+    putenv('db_dsn=sqlite:///:memory:');
+}
+Cake\Datasource\ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
