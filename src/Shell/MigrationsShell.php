@@ -35,7 +35,11 @@ class MigrationsShell extends Shell
             ->addOption('plugin', ['short' => 'p'])
             ->addOption('target', ['short' => 't'])
             ->addOption('connection', ['short' => 'c'])
-            ->addOption('source', ['short' => 's']);
+            ->addOption('source', ['short' => 's'])
+            ->addOption('ansi')
+            ->addOption('no-ansi')
+            ->addOption('version', ['short' => 'V'])
+            ->addOption('no-interaction', ['short' => 'n']);
     }
 
     /**
@@ -46,7 +50,7 @@ class MigrationsShell extends Shell
     public function initialize()
     {
         if (!defined('PHINX_VERSION')) {
-            define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.5' : '@PHINX_VERSION@');
+            define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.1' : '@PHINX_VERSION@');
         }
         parent::initialize();
     }
