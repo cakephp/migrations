@@ -25,7 +25,8 @@ use Migrations\View\Helper\MigrationHelper;
 class MigrationHelperTest extends TestCase
 {
     public $fixtures = [
-        'core.users'
+        'core.users',
+        'plugin.migrations.special_tags',
     ];
 
     /**
@@ -45,6 +46,7 @@ class MigrationHelperTest extends TestCase
         Cache::clear(false, '_cake_model_');
         Cache::enable();
         $this->loadFixtures('Users');
+        $this->loadFixtures('SpecialTags');
     }
 
     /**
@@ -56,6 +58,15 @@ class MigrationHelperTest extends TestCase
     {
         parent::tearDown();
         unset($this->Helper, $this->View, $this->Collection, $this->Connection);
+    }
+
+    /**
+     * @covers Migrations\View\Helper\MigrationHelper::__construct
+     * @expectedException \InvalidArgumentException
+     */
+    public function testConstruct()
+    {
+        new MigrationHelper($this->View);
     }
 
     /**
@@ -89,10 +100,233 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::columnMethod
+     * @covers Migrations\View\Helper\MigrationHelper::columns
      */
     public function testColumns()
     {
-        $this->assertEquals('removeColumn', $this->Helper->columns('users'));
+        $this->assertEquals([
+            'id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'limit' => null,
+                    'null' => false,
+                    'default' => null,
+                    'precision' => null,
+                    'comment' => null,
+                    'signed' => true
+                ],
+            ],
+            'username' => [
+                'columnType' => 'string',
+                'options' => [
+                    'limit' => null,
+                    'null' => true,
+                    'default' => 'NULL',
+                    'precision' => null,
+                    'comment' => null,
+                ],
+            ],
+            'password' => [
+                'columnType' => 'string',
+                'options' => [
+                    'limit' => null,
+                    'null' => true,
+                    'default' => 'NULL',
+                    'precision' => null,
+                    'comment' => null,
+                ],
+            ],
+            'created' => [
+                'columnType' => 'timestamp',
+                'options' => [
+                    'limit' => null,
+                    'null' => true,
+                    'default' => 'NULL',
+                    'precision' => null,
+                    'comment' => null,
+                ],
+            ],
+            'updated' => [
+                'columnType' => 'timestamp',
+                'options' => [
+                    'limit' => null,
+                    'null' => true,
+                    'default' => 'NULL',
+                    'precision' => null,
+                    'comment' => null,
+                ],
+            ],
+        ], $this->Helper->columns('users'));
+    }
+
+    /**
+     * @covers Migrations\View\Helper\MigrationHelper::column
+     */
+    public function testColumn()
+    {
+        $tableSchema = $this->Collection->describe('users');
+        $this->assertEquals([
+            'columnType' => 'integer',
+            'options' => [
+                'limit' => null,
+                'null' => false,
+                'default' => null,
+                'precision' => null,
+                'comment' => null,
+                'signed' => true,
+            ],
+        ], $this->Helper->column($tableSchema, 'id'));
+
+        $this->assertEquals([
+            'columnType' => 'string',
+            'options' => [
+                'limit' => null,
+                'null' => true,
+                'default' => 'NULL',
+                'precision' => null,
+                'comment' => null,
+            ],
+        ], $this->Helper->column($tableSchema, 'username'));
+
+
+        $this->assertEquals([
+            'columnType' => 'string',
+            'options' => [
+                'limit' => null,
+                'null' => true,
+                'default' => 'NULL',
+                'precision' => null,
+                'comment' => null,
+            ],
+        ], $this->Helper->column($tableSchema, 'password'));
+
+
+        $this->assertEquals([
+            'columnType' => 'timestamp',
+            'options' => [
+                'limit' => null,
+                'null' => true,
+                'default' => 'NULL',
+                'precision' => null,
+                'comment' => null,
+            ],
+        ], $this->Helper->column($tableSchema, 'created'));
+
+        $this->assertEquals([
+            'columnType' => 'timestamp',
+            'options' => [
+                'limit' => null,
+                'null' => true,
+                'default' => 'NULL',
+                'precision' => null,
+                'comment' => null,
+            ],
+        ], $this->Helper->column($tableSchema, 'updated'));
+    }
+
+    /**
+     * @covers Migrations\View\Helper\MigrationHelper::value
+     */
+    public function testValue()
+    {
+        $this->assertEquals('null', $this->Helper->value(null));
+        $this->assertEquals('true', $this->Helper->value(true));
+        $this->assertEquals('false', $this->Helper->value(false));
+        $this->assertEquals(1, $this->Helper->value(1));
+        $this->assertEquals(-1, $this->Helper->value(-1));
+        $this->assertEquals('1', $this->Helper->value('1'));
+        $this->assertEquals("'one'", $this->Helper->value('one'));
+        $this->assertEquals("'o\\\"ne'", $this->Helper->value('o"ne'));
+    }
+
+    /**
+     * @covers Migrations\View\Helper\MigrationHelper::attributes
+     */
+    public function testAttributes()
+    {
+        $this->assertEquals([
+            'limit' => null,
+            'null' => false,
+            'default' => null,
+            'precision' => null,
+            'comment' => null,
+            'signed' => true,
+        ], $this->Helper->attributes('users', 'id'));
+
+        $this->assertEquals([
+            'limit' => null,
+            'null' => true,
+            'default' => 'NULL',
+            'precision' => null,
+            'comment' => null,
+        ], $this->Helper->attributes('users', 'username'));
+
+
+        $this->assertEquals([
+            'limit' => null,
+            'null' => true,
+            'default' => 'NULL',
+            'precision' => null,
+            'comment' => null,
+        ], $this->Helper->attributes('users', 'password'));
+
+
+        $this->assertEquals([
+            'limit' => null,
+            'null' => true,
+            'default' => 'NULL',
+            'precision' => null,
+            'comment' => null,
+        ], $this->Helper->attributes('users', 'created'));
+
+        $this->assertEquals([
+            'limit' => null,
+            'null' => true,
+            'default' => 'NULL',
+            'precision' => null,
+            'comment' => null,
+        ], $this->Helper->attributes('users', 'updated'));
+
+        $this->assertEquals([
+            'limit' => null,
+            'null' => false,
+            'default' => null,
+            'precision' => null,
+            'comment' => null,
+            'signed' => true,
+        ], $this->Helper->attributes('special_tags', 'article_id'));
+    }
+
+    /**
+     * @covers Migrations\View\Helper\MigrationHelper::stringifyList
+     */
+    public function testStringifyList()
+    {
+        $this->assertEquals("", $this->Helper->stringifyList([]));
+        $this->assertEquals("
+\t\t'key' => 'value',
+\t", $this->Helper->stringifyList([
+            'key' => 'value',
+        ]));
+        $this->assertEquals("
+\t\t'key' => 'value',
+\t\t'other_key' => 'other_value',
+\t", $this->Helper->stringifyList([
+            'key' => 'value',
+            'other_key'=> 'other_value',
+        ]));
+        $this->assertEquals("
+\t\t'key' => 'value',
+\t\t'other_key' => [
+\t\t\t'key' => 'value',
+\t\t\t'other_key' => 'other_value',
+\t\t],
+\t", $this->Helper->stringifyList([
+            'key' => 'value',
+            'other_key'=> [
+                'key' => 'value',
+                'other_key'=> 'other_value',
+            ],
+        ]));
     }
 }

@@ -214,7 +214,14 @@ class MigrationHelper extends Helper
         }
 
         foreach ($list as $k => &$v) {
-            $v = $this->value($v);
+            if (is_array($v)) {
+                $v = $this->stringifyList($v, [
+                    'indent' => $options['indent'] + 1
+                ]);
+                $v = sprintf('[%s]', $v);
+            } else {
+                $v = $this->value($v);
+            }
             if (!is_numeric($k)) {
                 $v = "'$k' => $v";
             }
@@ -229,6 +236,6 @@ class MigrationHelper extends Helper
             $end = "\n" . str_repeat("\t", $options['indent'] - 1);
         }
 
-        return $start . implode($join, $list) . $end;
+        return $start . implode($join, $list) . ',' . $end;
     }
 }
