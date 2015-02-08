@@ -47,6 +47,23 @@ class MigrationHelperTest extends TestCase
         Cache::enable();
         $this->loadFixtures('Users');
         $this->loadFixtures('SpecialTags');
+
+        $this->values = [
+            'null' => 'NULL',
+            'integerNull' => null,
+            'stringLimit' => null,
+            'integerLimit' => null,
+            'comment' => null,
+        ];
+
+        if (getenv('DB') != 'sqlite') {
+            $this->values = [
+                'null' => null,
+                'stringLimit' => 255,
+                'integerLimit' => 11,
+                'comment' => '',
+            ];
+        }
     }
 
     /**
@@ -108,32 +125,32 @@ class MigrationHelperTest extends TestCase
             'id' => [
                 'columnType' => 'integer',
                 'options' => [
-                    'limit' => null,
+                    'limit' => $this->values['integerLimit'],
                     'null' => false,
-                    'default' => null,
+                    'default' => $this->values['integerNull'],
                     'precision' => null,
-                    'comment' => null,
+                    'comment' => $this->values['comment'],
                     'signed' => true
                 ],
             ],
             'username' => [
                 'columnType' => 'string',
                 'options' => [
-                    'limit' => null,
+                    'limit' => $this->values['stringLimit'],
                     'null' => true,
-                    'default' => 'NULL',
+                    'default' => $this->values['null'],
                     'precision' => null,
-                    'comment' => null,
+                    'comment' => $this->values['comment'],
                 ],
             ],
             'password' => [
                 'columnType' => 'string',
                 'options' => [
-                    'limit' => null,
+                    'limit' => $this->values['stringLimit'],
                     'null' => true,
-                    'default' => 'NULL',
+                    'default' => $this->values['null'],
                     'precision' => null,
-                    'comment' => null,
+                    'comment' => $this->values['comment'],
                 ],
             ],
             'created' => [
@@ -141,9 +158,9 @@ class MigrationHelperTest extends TestCase
                 'options' => [
                     'limit' => null,
                     'null' => true,
-                    'default' => 'NULL',
+                    'default' => $this->values['null'],
                     'precision' => null,
-                    'comment' => null,
+                    'comment' => $this->values['comment'],
                 ],
             ],
             'updated' => [
@@ -151,9 +168,9 @@ class MigrationHelperTest extends TestCase
                 'options' => [
                     'limit' => null,
                     'null' => true,
-                    'default' => 'NULL',
+                    'default' => $this->values['null'],
                     'precision' => null,
-                    'comment' => null,
+                    'comment' => $this->values['comment'],
                 ],
             ],
         ], $this->Helper->columns('users'));
@@ -168,11 +185,11 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals([
             'columnType' => 'integer',
             'options' => [
-                'limit' => null,
+                'limit' => $this->values['integerLimit'],
                 'null' => false,
-                'default' => null,
+                'default' => $this->values['integerNull'],
                 'precision' => null,
-                'comment' => null,
+                'comment' => $this->values['comment'],
                 'signed' => true,
             ],
         ], $this->Helper->column($tableSchema, 'id'));
@@ -180,11 +197,11 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals([
             'columnType' => 'string',
             'options' => [
-                'limit' => null,
+                'limit' => $this->values['stringLimit'],
                 'null' => true,
-                'default' => 'NULL',
+                'default' => $this->values['null'],
                 'precision' => null,
-                'comment' => null,
+                'comment' => $this->values['comment'],
             ],
         ], $this->Helper->column($tableSchema, 'username'));
 
@@ -192,11 +209,11 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals([
             'columnType' => 'string',
             'options' => [
-                'limit' => null,
+                'limit' => $this->values['stringLimit'],
                 'null' => true,
-                'default' => 'NULL',
+                'default' => $this->values['null'],
                 'precision' => null,
-                'comment' => null,
+                'comment' => $this->values['comment'],
             ],
         ], $this->Helper->column($tableSchema, 'password'));
 
@@ -206,9 +223,9 @@ class MigrationHelperTest extends TestCase
             'options' => [
                 'limit' => null,
                 'null' => true,
-                'default' => 'NULL',
+                'default' => $this->values['null'],
                 'precision' => null,
-                'comment' => null,
+                'comment' => $this->values['comment'],
             ],
         ], $this->Helper->column($tableSchema, 'created'));
 
@@ -217,9 +234,9 @@ class MigrationHelperTest extends TestCase
             'options' => [
                 'limit' => null,
                 'null' => true,
-                'default' => 'NULL',
+                'default' => $this->values['null'],
                 'precision' => null,
-                'comment' => null,
+                'comment' => $this->values['comment'],
             ],
         ], $this->Helper->column($tableSchema, 'updated'));
     }
@@ -245,54 +262,54 @@ class MigrationHelperTest extends TestCase
     public function testAttributes()
     {
         $this->assertEquals([
-            'limit' => null,
+            'limit' => $this->values['integerLimit'],
             'null' => false,
-            'default' => null,
+            'default' => $this->values['integerNull'],
             'precision' => null,
-            'comment' => null,
+            'comment' => $this->values['comment'],
             'signed' => true,
         ], $this->Helper->attributes('users', 'id'));
 
         $this->assertEquals([
-            'limit' => null,
+            'limit' => $this->values['stringLimit'],
             'null' => true,
-            'default' => 'NULL',
+            'default' => $this->values['null'],
             'precision' => null,
-            'comment' => null,
+            'comment' => $this->values['comment'],
         ], $this->Helper->attributes('users', 'username'));
 
 
         $this->assertEquals([
-            'limit' => null,
+            'limit' => $this->values['stringLimit'],
             'null' => true,
-            'default' => 'NULL',
+            'default' => $this->values['null'],
             'precision' => null,
-            'comment' => null,
+            'comment' => $this->values['comment'],
         ], $this->Helper->attributes('users', 'password'));
 
 
         $this->assertEquals([
             'limit' => null,
             'null' => true,
-            'default' => 'NULL',
+            'default' => $this->values['null'],
             'precision' => null,
-            'comment' => null,
+            'comment' => $this->values['comment'],
         ], $this->Helper->attributes('users', 'created'));
 
         $this->assertEquals([
             'limit' => null,
             'null' => true,
-            'default' => 'NULL',
+            'default' => $this->values['null'],
             'precision' => null,
             'comment' => null,
         ], $this->Helper->attributes('users', 'updated'));
 
         $this->assertEquals([
-            'limit' => null,
+            'limit' => $this->values['integerLimit'],
             'null' => false,
-            'default' => null,
+            'default' => $this->values['integerNull'],
             'precision' => null,
-            'comment' => null,
+            'comment' => $this->values['comment'],
             'signed' => true,
         ], $this->Helper->attributes('special_tags', 'article_id'));
     }

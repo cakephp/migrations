@@ -39,4 +39,7 @@ Cake\Cache\Cache::config([
 if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite:///:memory:');
 }
+if (!getenv('DB')) {
+    putenv('DB=sqlite');
+}
 Cake\Datasource\ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
