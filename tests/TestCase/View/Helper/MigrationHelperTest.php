@@ -56,13 +56,23 @@ class MigrationHelperTest extends TestCase
             'comment' => null,
         ];
 
-        if (getenv('DB') != 'sqlite') {
+        if (getenv('DB') == 'mysql') {
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
                 'stringLimit' => 255,
                 'integerLimit' => 11,
                 'comment' => '',
+            ];
+        }
+
+        if (getenv('DB') == 'pgsql') {
+            $this->values = [
+                'null' => null,
+                'integerNull' => null,
+                'stringLimit' => 255,
+                'integerLimit' => 10,
+                'comment' => null,
             ];
         }
     }
