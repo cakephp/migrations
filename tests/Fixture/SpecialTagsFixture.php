@@ -46,7 +46,19 @@ class SpecialTagsFixture extends TestFixture
      * @var array
      */
     public $records = [
-        ['article_id' => 1, 'tag_id' => 3, 'highlighted' => false, 'highlighted_time' => null, 'author_id' => null],
-        ['article_id' => 2, 'tag_id' => 1, 'highlighted' => true, 'highlighted_time' => '2014-06-01 10:10:00', 'author_id' => null]
+        [
+            'article_id' => 1,
+            'tag_id' => 3,
+            'highlighted' => false,
+            'highlighted_time' => null,
+            'author_id' => null
+        ],
+        [
+            'article_id' => 2,
+            'tag_id' => 1,
+            'highlighted' => true,
+            'highlighted_time' => '2014-06-01 10:10:00',
+            'author_id' => null
+        ]
     ];
 }
