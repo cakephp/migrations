@@ -59,6 +59,7 @@ class MigrationHelperTest extends TestCase
         if (getenv('DB') != 'sqlite') {
             $this->values = [
                 'null' => null,
+                'integerNull' => null,
                 'stringLimit' => 255,
                 'integerLimit' => 11,
                 'comment' => '',
