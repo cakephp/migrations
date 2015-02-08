@@ -70,7 +70,7 @@ class MigrationHelperTest extends TestCase
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
-                'stringLimit' => 255,
+                'stringLimit' => null,
                 'integerLimit' => 10,
                 'comment' => null,
             ];
