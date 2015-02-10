@@ -14,6 +14,7 @@ namespace Migrations\Command;
 use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Create as CreateCommand;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class Create extends CreateCommand
 {
@@ -33,8 +34,10 @@ class Create extends CreateCommand
                 PHP_EOL,
                 PHP_EOL
             ));
-        $this->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin the file should be created for')
-            ->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use')
-            ->addOption('--source', '-s', InputArgument::OPTIONAL, 'The folder where migrations are in');
+        $this->addOption('plugin', 'p', InputArgument::OPTIONAL, 'The plugin the file should be created for')
+            ->addOption('connection', 'c', InputArgument::OPTIONAL, 'The datasource connection to use')
+            ->addOption('source', 's', InputArgument::OPTIONAL, 'The folder where migrations are in')
+            ->addOption('template', 't', InputOption::VALUE_REQUIRED, 'Use an alternative template')
+            ->addOption('class', 'l', InputOption::VALUE_REQUIRED, 'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template');
     }
 }

@@ -39,7 +39,8 @@ class MigrationsShell extends Shell
             ->addOption('ansi')
             ->addOption('no-ansi')
             ->addOption('version', ['short' => 'V'])
-            ->addOption('no-interaction', ['short' => 'n']);
+            ->addOption('no-interaction', ['short' => 'n'])
+            ->addOption('template', ['short' => 't']);
     }
 
     /**
