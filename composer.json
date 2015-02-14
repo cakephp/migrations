@@ -11,9 +11,6 @@
             "homepage": "https://github.com/cakephp/migrations/graphs/contributors"
         }
     ],
-    "extra": {
-        "installer-name": "Migrations"
-    },
     "support": {
         "issues": "https://github.com/cakephp/migrations/issues",
         "forum": "http://stackoverflow.com/tags/cakephp",
