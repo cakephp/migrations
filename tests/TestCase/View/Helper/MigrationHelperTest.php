@@ -332,24 +332,24 @@ class MigrationHelperTest extends TestCase
     {
         $this->assertEquals("", $this->Helper->stringifyList([]));
         $this->assertEquals("
-\t\t'key' => 'value',
-\t", $this->Helper->stringifyList([
+        'key' => 'value',
+    ", $this->Helper->stringifyList([
             'key' => 'value',
         ]));
         $this->assertEquals("
-\t\t'key' => 'value',
-\t\t'other_key' => 'other_value',
-\t", $this->Helper->stringifyList([
+        'key' => 'value',
+        'other_key' => 'other_value',
+    ", $this->Helper->stringifyList([
             'key' => 'value',
             'other_key'=> 'other_value',
         ]));
         $this->assertEquals("
-\t\t'key' => 'value',
-\t\t'other_key' => [
-\t\t\t'key' => 'value',
-\t\t\t'other_key' => 'other_value',
-\t\t],
-\t", $this->Helper->stringifyList([
+        'key' => 'value',
+        'other_key' => [
+            'key' => 'value',
+            'other_key' => 'other_value',
+        ],
+    ", $this->Helper->stringifyList([
             'key' => 'value',
             'other_key'=> [
                 'key' => 'value',
