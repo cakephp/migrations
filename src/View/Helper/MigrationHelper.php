@@ -134,8 +134,16 @@ class MigrationHelper extends Helper
      */
     public function value($value)
     {
-        if ($value === null) {
+        if ($value === null || $value === 'null') {
             return 'null';
+        }
+
+        if ($value === 'NULL') {
+            return 'NULL';
+        }
+
+        if (in_array($value, ['true', 'false'])) {
+            return $value;
         }
 
         if (is_bool($value)) {

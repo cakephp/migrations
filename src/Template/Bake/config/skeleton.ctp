@@ -12,6 +12,8 @@
  * @since         3.0.0
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
+
+$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
@@ -31,7 +33,7 @@ class <%= $name %> extends AbstractMigration
     public function change()
     {
 <% foreach ($tables as $table): %>
-        <%= "\$table = \$this->table('$table');"; %>
+        $table = $this->table('<%= $table%>');
 <% if ($tableMethod !== 'drop') : %>
 <% if ($columnMethod == 'removeColumn'): %>
 <% foreach ($columns['fields'] as $column => $config): %>
@@ -42,22 +44,28 @@ class <%= $name %> extends AbstractMigration
 <% endforeach; %>
 <% else : %>
 <% foreach ($columns['fields'] as $column => $config): %>
-        <%= "\$table->$columnMethod('" . $column . "', '" . $config['columnType'] . "', ["; %>
-<% foreach ($config['options'] as $optionName => $option): %>
-            <%= "'{$optionName}' => " .  $this->Migration->value($option) . ", "; %>
-<% endforeach; %>
-        <%= "]);"; %>
+        $table-><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
+                $options = [];
+                $columnOptions = $config['options'];
+                $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
+                foreach ($columnOptions as $optionName => $option) {
+                    $options[$optionName] = $this->Migration->value($option);
+                }
+                echo $this->Migration->stringifyList($options, ['indent' => 3]);
+            %>]);
 <% endforeach; %>
 <% foreach ($columns['indexes'] as $column => $config): %>
-        <%= "\$table->$indexMethod([" . $this->Migration->stringifyList($config['columns']) . "], ["; %>
-<% foreach ($config['options'] as $optionName => $option): %>
-            <%= "'{$optionName}' => " .  $this->Migration->value($option) . ", "; %>
-<% endforeach; %>
-        <%= "]);"; %>
+        $table-><%= $indexMethod %>(["<%= $this->Migration->stringifyList($config['columns']) %>"], [<%
+                $options = [];
+                foreach ($config['options'] as $optionName => $option) {
+                    $options[$optionName] = $this->Migration->value($option);
+                }
+                echo $this->Migration->stringifyList($options, ['indent' => 3]);
+            %>]);
 <% endforeach; %>
 <% endif; %>
 <% endif; %>
-        <%= "\$table->$tableMethod();"; %>
+        $table-><%= $tableMethod %>();
 <% endforeach; %>
     }
 }
