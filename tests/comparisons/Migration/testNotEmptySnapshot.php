@@ -7,11 +7,6 @@ class NotEmptySnapshot extends AbstractMigration
     {
         $table = $this->table('special_tags');
         $table
-            ->addColumn('id', 'integer', [
-                'limit' => null,
-                'null' => false,
-                'default' => null,
-            ])
             ->addColumn('article_id', 'integer', [
                 'limit' => 11,
                 'null' => false,
@@ -40,11 +35,6 @@ class NotEmptySnapshot extends AbstractMigration
             ->create();
         $table = $this->table('users');
         $table
-            ->addColumn('id', 'integer', [
-                'limit' => null,
-                'null' => false,
-                'default' => null,
-            ])
             ->addColumn('username', 'string', [
                 'limit' => 256,
                 'null' => true,

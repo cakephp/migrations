@@ -130,17 +130,6 @@ class MigrationHelperTest extends TestCase
     public function testColumns()
     {
         $this->assertEquals([
-            'id' => [
-                'columnType' => 'integer',
-                'options' => [
-                    'limit' => $this->values['integerLimit'],
-                    'null' => false,
-                    'default' => $this->values['integerNull'],
-                    'precision' => null,
-                    'comment' => $this->values['comment'],
-                    'signed' => true
-                ],
-            ],
             'username' => [
                 'columnType' => 'string',
                 'options' => [

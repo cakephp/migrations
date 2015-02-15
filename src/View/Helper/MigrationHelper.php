@@ -104,6 +104,9 @@ class MigrationHelper extends Helper
         $tableSchema = $collection->describe($table);
         $columns = [];
         foreach ($tableSchema->columns() as $column) {
+            if ($tableSchema->primaryKey() == [$column]) {
+                continue;
+            }
             $columns[$column] = $this->column($tableSchema, $column);
         }
 
