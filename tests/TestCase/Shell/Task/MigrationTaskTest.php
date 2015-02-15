@@ -87,32 +87,98 @@ class MigrationTaskTest extends TestCase
      */
     public function testDetectAction()
     {
-        $this->assertEquals(['create_table', 'groups'], $this->Task->detectAction('CreateGroups'));
-        $this->assertEquals(['create_table', 'users'], $this->Task->detectAction('CreateUsers'));
-        $this->assertEquals(['create_table', 'groups_users'], $this->Task->detectAction('CreateGroupsUsers'));
+        $this->assertEquals(
+            ['create_table', 'groups'],
+            $this->Task->detectAction('CreateGroups')
+        );
+        $this->assertEquals(
+            ['create_table', 'users'],
+            $this->Task->detectAction('CreateUsers')
+        );
+        $this->assertEquals(
+            ['create_table', 'groups_users'],
+            $this->Task->detectAction('CreateGroupsUsers')
+        );
 
-        $this->assertEquals(['drop_table', 'groups'], $this->Task->detectAction('DropGroups'));
-        $this->assertEquals(['drop_table', 'users'], $this->Task->detectAction('DropUsers'));
-        $this->assertEquals(['drop_table', 'groups_users'], $this->Task->detectAction('DropGroupsUsers'));
+        $this->assertEquals(
+            ['drop_table', 'groups'],
+            $this->Task->detectAction('DropGroups')
+        );
+        $this->assertEquals(
+            ['drop_table', 'users'],
+            $this->Task->detectAction('DropUsers')
+        );
+        $this->assertEquals(
+            ['drop_table', 'groups_users'],
+            $this->Task->detectAction('DropGroupsUsers')
+        );
 
-        $this->assertEquals(['add_field', 'groups'], $this->Task->detectAction('AddFieldToGroups'));
-        $this->assertEquals(['add_field', 'users'], $this->Task->detectAction('AddFieldToUsers'));
-        $this->assertEquals(['add_field', 'groups_users'], $this->Task->detectAction('AddFieldToGroupsUsers'));
-        $this->assertEquals(['add_field', 'groups'], $this->Task->detectAction('AddThingToGroups'));
-        $this->assertEquals(['add_field', 'users'], $this->Task->detectAction('AddAnotherFieldToUsers'));
-        $this->assertEquals(['add_field', 'groups_users'], $this->Task->detectAction('AddSomeFieldToGroupsUsers'));
+        $this->assertEquals(
+            ['add_field', 'groups'],
+            $this->Task->detectAction('AddFieldToGroups')
+        );
+        $this->assertEquals(
+            ['add_field', 'users'],
+            $this->Task->detectAction('AddFieldToUsers')
+        );
+        $this->assertEquals(
+            ['add_field', 'groups_users'],
+            $this->Task->detectAction('AddFieldToGroupsUsers')
+        );
+        $this->assertEquals(
+            ['add_field', 'groups'],
+            $this->Task->detectAction('AddThingToGroups')
+        );
+        $this->assertEquals(
+            ['add_field', 'users'],
+            $this->Task->detectAction('AddAnotherFieldToUsers')
+        );
+        $this->assertEquals(
+            ['add_field', 'groups_users'],
+            $this->Task->detectAction('AddSomeFieldToGroupsUsers')
+        );
 
-        $this->assertEquals(['drop_field', 'groups'], $this->Task->detectAction('RemoveFieldsFromGroups'));
-        $this->assertEquals(['drop_field', 'users'], $this->Task->detectAction('RemoveFieldsFromUsers'));
-        $this->assertEquals(['drop_field', 'groups_users'], $this->Task->detectAction('RemoveFieldsFromGroupsUsers'));
-        $this->assertEquals(['drop_field', 'groups'], $this->Task->detectAction('RemoveThingFromGroups'));
-        $this->assertEquals(['drop_field', 'users'], $this->Task->detectAction('RemoveAnotherFieldFromUsers'));
-        $this->assertEquals(['drop_field', 'groups_users'], $this->Task->detectAction('RemoveSomeFieldFromGroupsUsers'));
+        $this->assertEquals(
+            ['drop_field', 'groups'],
+            $this->Task->detectAction('RemoveFieldsFromGroups')
+        );
+        $this->assertEquals(
+            ['drop_field', 'users'],
+            $this->Task->detectAction('RemoveFieldsFromUsers')
+        );
+        $this->assertEquals(
+            ['drop_field', 'groups_users'],
+            $this->Task->detectAction('RemoveFieldsFromGroupsUsers')
+        );
+        $this->assertEquals(
+            ['drop_field', 'groups'],
+            $this->Task->detectAction('RemoveThingFromGroups')
+        );
+        $this->assertEquals(
+            ['drop_field', 'users'],
+            $this->Task->detectAction('RemoveAnotherFieldFromUsers')
+        );
+        $this->assertEquals(
+            ['drop_field', 'groups_users'],
+            $this->Task->detectAction('RemoveSomeFieldFromGroupsUsers')
+        );
 
-        $this->assertEquals(['alter_table', 'groups'], $this->Task->detectAction('AlterGroups'));
-        $this->assertEquals(['alter_table', 'users'], $this->Task->detectAction('AlterUsers'));
-        $this->assertEquals(['alter_table', 'groups_users'], $this->Task->detectAction('AlterGroupsUsers'));
+        $this->assertEquals(
+            ['alter_table', 'groups'],
+            $this->Task->detectAction('AlterGroups')
+        );
+        $this->assertEquals(
+            ['alter_table', 'users'],
+            $this->Task->detectAction('AlterUsers')
+        );
+        $this->assertEquals(
+            ['alter_table', 'groups_users'],
+            $this->Task->detectAction('AlterGroupsUsers')
+        );
 
-        $this->assertEquals(null, $this->Task->detectAction('ReaddColumnsToTable'));
+        $this->assertEquals(
+            null,
+            $this->Task->detectAction('ReaddColumnsToTable')
+        );
     }
 }
