@@ -11,7 +11,7 @@
  */
 namespace Migrations\Test\TestCase\Shell\Task;
 
-use Bake\Shell\Task\TemplateTask;
+use Bake\Shell\Task\BakeTemplateTask;
 use Migrations\Shell\Task\MigrationSnapshotTask;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
@@ -47,9 +47,9 @@ class MigrationSnapshotTaskTest extends TestCase
         );
         $this->Task->name = 'Migration';
         $this->Task->connection = 'test';
-        $this->Task->Template = new TemplateTask($inputOutput);
-        $this->Task->Template->initialize();
-        $this->Task->Template->interactive = false;
+        $this->Task->BakeTemplate = new BakeTemplateTask($inputOutput);
+        $this->Task->BakeTemplate->initialize();
+        $this->Task->BakeTemplate->interactive = false;
     }
 
     public function testNotEmptySnapshot()
