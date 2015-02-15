@@ -23,14 +23,7 @@ use Phinx\Migration\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
 {
-    /**
-     * Change Method.
-     *
-     * More information on this method is available here:
-     * http://docs.phinx.org/en/latest/migrations.html#the-change-method
-     * @return void
-     */
-    public function change()
+    public function up()
     {
     <%- foreach ($tables as $table): %>
         $table = $this->table('<%= $table%>');
@@ -38,13 +31,8 @@ class <%= $name %> extends AbstractMigration
         <%- foreach ($this->Migration->columns($table) as $column => $config): %>
             -><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
                 $options = [];
-                $columnOptions = $config['options'];
-                $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
-                foreach ($columnOptions as $optionName => $option) {
-                    $options[$optionName] = $this->Migration->value($option);
-                }
-
-                echo $this->Bake->stringifyList($options, ['indent' => 4]);
+                $columnOptions = array_intersect_key($config['options'], $wantedOptions);
+                echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
         <%- endforeach; %>
             -><%= $tableMethod %>();

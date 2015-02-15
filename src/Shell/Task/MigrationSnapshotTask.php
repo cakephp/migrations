@@ -75,7 +75,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'namespace' => $ns,
             'collection' => $collection,
             'tables' => $tables,
-            'action' => 'CreateTable',
+            'action' => 'create_table',
             'name' => $this->Template->viewVars['name'],
         ];
     }

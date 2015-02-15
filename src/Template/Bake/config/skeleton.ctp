@@ -45,22 +45,15 @@ class <%= $name %> extends AbstractMigration
 <% else : %>
 <% foreach ($columns['fields'] as $column => $config): %>
         $table-><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
-                $options = [];
                 $columnOptions = $config['options'];
                 $columnOptions = array_intersect_key($columnOptions, $wantedOptions);
-                foreach ($columnOptions as $optionName => $option) {
-                    $options[$optionName] = $this->Migration->value($option);
-                }
-                echo $this->Migration->stringifyList($options, ['indent' => 3]);
+                echo $this->Migration->stringifyList($columnOptions, ['indent' => 3]);
             %>]);
 <% endforeach; %>
 <% foreach ($columns['indexes'] as $column => $config): %>
         $table-><%= $indexMethod %>(["<%= $this->Migration->stringifyList($config['columns']) %>"], [<%
                 $options = [];
-                foreach ($config['options'] as $optionName => $option) {
-                    $options[$optionName] = $this->Migration->value($option);
-                }
-                echo $this->Migration->stringifyList($options, ['indent' => 3]);
+                echo $this->Migration->stringifyList($config['options'], ['indent' => 3]);
             %>]);
 <% endforeach; %>
 <% endif; %>

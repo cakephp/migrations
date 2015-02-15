@@ -25,7 +25,7 @@ use Migrations\View\Helper\MigrationHelper;
 class MigrationHelperTest extends TestCase
 {
     public $fixtures = [
-        'core.users',
+        'plugin.migrations.users',
         'plugin.migrations.special_tags',
     ];
 
@@ -147,7 +147,7 @@ class MigrationHelperTest extends TestCase
             'username' => [
                 'columnType' => 'string',
                 'options' => [
-                    'limit' => $this->values['stringLimit'],
+                    'limit' => 256,
                     'null' => true,
                     'default' => $this->values['null'],
                     'precision' => null,
@@ -157,7 +157,7 @@ class MigrationHelperTest extends TestCase
             'password' => [
                 'columnType' => 'string',
                 'options' => [
-                    'limit' => $this->values['stringLimit'],
+                    'limit' => 256,
                     'null' => true,
                     'default' => $this->values['null'],
                     'precision' => null,
@@ -208,7 +208,7 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals([
             'columnType' => 'string',
             'options' => [
-                'limit' => $this->values['stringLimit'],
+                'limit' => 256,
                 'null' => true,
                 'default' => $this->values['null'],
                 'precision' => null,
@@ -220,7 +220,7 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals([
             'columnType' => 'string',
             'options' => [
-                'limit' => $this->values['stringLimit'],
+                'limit' => 256,
                 'null' => true,
                 'default' => $this->values['null'],
                 'precision' => null,
@@ -258,11 +258,13 @@ class MigrationHelperTest extends TestCase
     public function testValue()
     {
         $this->assertEquals('null', $this->Helper->value(null));
+        $this->assertEquals('null', $this->Helper->value('null'));
         $this->assertEquals('true', $this->Helper->value(true));
         $this->assertEquals('false', $this->Helper->value(false));
         $this->assertEquals(1, $this->Helper->value(1));
         $this->assertEquals(-1, $this->Helper->value(-1));
-        $this->assertEquals('1', $this->Helper->value('1'));
+        $this->assertEquals(1, $this->Helper->value('1'));
+        $this->assertInternalType('int', $this->Helper->value('1'));
         $this->assertEquals("'one'", $this->Helper->value('one'));
         $this->assertEquals("'o\\\"ne'", $this->Helper->value('o"ne'));
     }
@@ -282,7 +284,7 @@ class MigrationHelperTest extends TestCase
         ], $this->Helper->attributes('users', 'id'));
 
         $this->assertEquals([
-            'limit' => $this->values['stringLimit'],
+            'limit' => 256,
             'null' => true,
             'default' => $this->values['null'],
             'precision' => null,
@@ -291,7 +293,7 @@ class MigrationHelperTest extends TestCase
 
 
         $this->assertEquals([
-            'limit' => $this->values['stringLimit'],
+            'limit' => 256,
             'null' => true,
             'default' => $this->values['null'],
             'precision' => null,
@@ -316,7 +318,7 @@ class MigrationHelperTest extends TestCase
         ], $this->Helper->attributes('users', 'updated'));
 
         $this->assertEquals([
-            'limit' => $this->values['integerLimit'],
+            'limit' => 11,
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,

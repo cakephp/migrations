@@ -29,11 +29,11 @@ class SpecialTagsFixture extends TestFixture
      */
     public $fields = [
         'id' => ['type' => 'integer'],
-        'article_id' => ['type' => 'integer', 'null' => false],
-        'tag_id' => ['type' => 'integer', 'null' => false],
+        'article_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
+        'author_id' => ['type' => 'integer', 'null' => true, 'length' => 11],
+        'tag_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
         'highlighted' => ['type' => 'boolean', 'null' => true],
-        'highlighted_time' => ['type' => 'timestamp', 'null' => true],
-        'author_id' => ['type' => 'integer', 'null' => true],
+        'highlighted_time' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
             'UNIQUE_TAG2' => ['type' => 'unique', 'columns' => ['article_id']]

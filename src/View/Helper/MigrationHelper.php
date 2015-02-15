@@ -134,15 +134,11 @@ class MigrationHelper extends Helper
      */
     public function value($value)
     {
-        if ($value === null || $value === 'null') {
+        if ($value === null || $value === 'null' || $value === 'NULL') {
             return 'null';
         }
 
-        if ($value === 'NULL') {
-            return 'NULL';
-        }
-
-        if (in_array($value, ['true', 'false'])) {
+        if ($value === 'true' || $value === 'false') {
             return $value;
         }
 
@@ -151,7 +147,7 @@ class MigrationHelper extends Helper
         }
 
         if (is_numeric($value) || ctype_digit($value)) {
-            return $value;
+            return (int)$value;
         }
 
         return sprintf("'%s'", addslashes($value));
