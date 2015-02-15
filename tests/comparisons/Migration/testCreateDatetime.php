@@ -14,17 +14,17 @@ class CreateUsers extends AbstractMigration
     {
         $table = $this->table('users');
         $table->addColumn('name', 'string', [
-            'null' => false,
             'default' => null,
             'limit' => 255,
+            'null' => false,
         ]);
         $table->addColumn('created', 'datetime', [
-            'null' => false,
             'default' => null,
+            'null' => false,
         ]);
         $table->addColumn('modified', 'datetime', [
-            'null' => false,
             'default' => null,
+            'null' => false,
         ]);
         $table->create();
     }

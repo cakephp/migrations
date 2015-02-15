@@ -200,6 +200,7 @@ class MigrationHelper extends Helper
             $attributes[$option] = $value;
         }
 
+        ksort($attributes);
         return $attributes;
     }
 
@@ -220,6 +221,7 @@ class MigrationHelper extends Helper
             return '';
         }
 
+        ksort($list);
         foreach ($list as $k => &$v) {
             if (is_array($v)) {
                 $v = $this->stringifyList($v, [

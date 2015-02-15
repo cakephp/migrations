@@ -8,52 +8,52 @@ class NotEmptySnapshot extends AbstractMigration
         $table = $this->table('special_tags');
         $table
             ->addColumn('article_id', 'integer', [
+                'default' => null,
                 'limit' => 11,
                 'null' => false,
-                'default' => null,
             ])
             ->addColumn('author_id', 'integer', [
+                'default' => null,
                 'limit' => 11,
                 'null' => true,
-                'default' => null,
             ])
             ->addColumn('tag_id', 'integer', [
+                'default' => null,
                 'limit' => 11,
                 'null' => false,
-                'default' => null,
             ])
             ->addColumn('highlighted', 'boolean', [
+                'default' => null,
                 'limit' => null,
                 'null' => true,
-                'default' => null,
             ])
             ->addColumn('highlighted_time', 'timestamp', [
+                'default' => null,
                 'limit' => null,
                 'null' => true,
-                'default' => null,
             ])
             ->create();
         $table = $this->table('users');
         $table
             ->addColumn('username', 'string', [
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
-                'default' => null,
             ])
             ->addColumn('password', 'string', [
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
-                'default' => null,
             ])
             ->addColumn('created', 'timestamp', [
+                'default' => null,
                 'limit' => null,
                 'null' => true,
-                'default' => null,
             ])
             ->addColumn('updated', 'timestamp', [
+                'default' => null,
                 'limit' => null,
                 'null' => true,
-                'default' => null,
             ])
             ->create();
     }
