@@ -51,7 +51,6 @@ class MigrationHelperTest extends TestCase
         $this->values = [
             'null' => 'NULL',
             'integerNull' => null,
-            'stringLimit' => null,
             'integerLimit' => null,
             'comment' => null,
         ];
@@ -60,7 +59,6 @@ class MigrationHelperTest extends TestCase
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
-                'stringLimit' => 255,
                 'integerLimit' => 11,
                 'comment' => '',
             ];
@@ -70,7 +68,6 @@ class MigrationHelperTest extends TestCase
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
-                'stringLimit' => null,
                 'integerLimit' => 10,
                 'comment' => null,
             ];
