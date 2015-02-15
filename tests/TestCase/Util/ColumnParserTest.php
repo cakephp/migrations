@@ -191,23 +191,19 @@ class ColumnParserTest extends TestCase
      */
     public function testGetType()
     {
-        $this->assertEquals('integer', $this->columnParser->getType(null, 'id'));
-        $this->assertEquals('integer', $this->columnParser->getType('primary_key', 'id'));
-        $this->assertEquals('integer', $this->columnParser->getType('integer', 'id'));
-        $this->assertEquals('integer', $this->columnParser->getType('other', 'id'));
-
-        $this->assertEquals('uuid', $this->columnParser->getType('uuid', 'id'));
-        $this->assertEquals('uuid', $this->columnParser->getType('uuid', 'created'));
-
-        $this->assertEquals('datetime', $this->columnParser->getType(null, 'created'));
-        $this->assertEquals('datetime', $this->columnParser->getType(null, 'modified'));
-        $this->assertEquals('datetime', $this->columnParser->getType(null, 'updated'));
-
-        $this->assertEquals('string', $this->columnParser->getType(null, 'some_field'));
-        $this->assertEquals('string', $this->columnParser->getType('string', 'some_field'));
-
-        $this->assertEquals('boolean', $this->columnParser->getType('boolean', 'field'));
-        $this->assertEquals('polygon', $this->columnParser->getType('polygon', 'field'));
+        $this->assertEquals('integer', $this->columnParser->getType('id', null));
+        $this->assertEquals('integer', $this->columnParser->getType('id', 'primary_key'));
+        $this->assertEquals('integer', $this->columnParser->getType('id', 'integer'));
+        $this->assertEquals('integer', $this->columnParser->getType('id', 'other'));
+        $this->assertEquals('uuid', $this->columnParser->getType('id', 'uuid'));
+        $this->assertEquals('uuid', $this->columnParser->getType('created', 'uuid'));
+        $this->assertEquals('datetime', $this->columnParser->getType('created', null));
+        $this->assertEquals('datetime', $this->columnParser->getType('modified', null));
+        $this->assertEquals('datetime', $this->columnParser->getType('updated', null));
+        $this->assertEquals('string', $this->columnParser->getType('some_field', null));
+        $this->assertEquals('string', $this->columnParser->getType('some_field', 'string'));
+        $this->assertEquals('boolean', $this->columnParser->getType('field', 'boolean'));
+        $this->assertEquals('polygon', $this->columnParser->getType('field', 'polygon'));
     }
 
     /**

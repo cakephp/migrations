@@ -329,7 +329,7 @@ class MigrationHelperTest extends TestCase
         'other_key' => 'other_value',
     ", $this->Helper->stringifyList([
             'key' => 'value',
-            'other_key'=> 'other_value',
+            'other_key' => 'other_value',
         ]));
         $this->assertEquals("
         'key' => 'value',
@@ -339,9 +339,9 @@ class MigrationHelperTest extends TestCase
         ],
     ", $this->Helper->stringifyList([
             'key' => 'value',
-            'other_key'=> [
+            'other_key' => [
                 'key' => 'value',
-                'other_key'=> 'other_value',
+                'other_key' => 'other_value',
             ],
         ]));
     }

@@ -15,8 +15,8 @@ namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
 use Cake\Utility\Inflector;
-use Migrations\Util\ColumnParser;
 use Migrations\Shell\Task\SimpleMigrationTask;
+use Migrations\Util\ColumnParser;
 
 /**
  * Task class for generating migration snapshot files.
@@ -81,6 +81,12 @@ class MigrationTask extends SimpleMigrationTask
         ];
     }
 
+    /**
+     * Detects the action and table from the name of a migration
+     *
+     * @param string $name Name of migration
+     * @return array
+     **/
     public function detectAction($name)
     {
         if (preg_match('/^(Create|Drop)(.*)/', $name, $matches)) {

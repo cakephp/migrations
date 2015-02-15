@@ -45,6 +45,9 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         return 'Migrations.config/snapshot';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function templateData()
     {
         $ns = Configure::read('App.namespace');

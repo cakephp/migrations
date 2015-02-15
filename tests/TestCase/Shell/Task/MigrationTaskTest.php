@@ -12,10 +12,10 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Bake\Shell\Task\BakeTemplateTask;
-use Migrations\Shell\Task\MigrationTask;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
+use Migrations\Shell\Task\MigrationTask;
 
 /**
  * MigrationTaskTest class

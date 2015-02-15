@@ -8,6 +8,12 @@ use ReflectionClass;
 
 class ColumnParser
 {
+    /**
+     * Parses a list of arguments into an array of fields
+     *
+     * @param array $arguments A list of arguments being parsed
+     * @return array
+     **/
     public function parseFields($arguments)
     {
         $fields = [];
@@ -21,7 +27,7 @@ class ColumnParser
                 $type = 'primary';
             }
 
-            $type = $this->getType($type, $field);
+            $type = $this->getType($field, $type);
             $length = $this->getLength($type);
             $fields[$field] = [
                 'columnType' => $type,
@@ -39,6 +45,12 @@ class ColumnParser
         return $fields;
     }
 
+    /**
+     * Parses a list of arguments into an array of indexes
+     *
+     * @param array $arguments A list of arguments being parsed
+     * @return array
+     **/
     public function parseIndexes($arguments)
     {
         $indexes = [];
@@ -83,21 +95,34 @@ class ColumnParser
         return $indexes;
     }
 
+    /**
+     * Returns a list of only valid arguments
+     *
+     * @param array $arguments A list of arguments
+     * @return array
+     **/
     public function validArguments($arguments)
     {
         $collection = new Collection($arguments);
-        return $collection->filter(function ($_, $field) {
-            $_;
+        return $collection->filter(function ($value, $field) {
+            $value;
             return preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field);
         })->toArray();
     }
 
-    public function getType($type, $field)
+    /**
+     * Retrieves a type that should be used for a specific field
+     *
+     * @param string $field Name of field
+     * @param string $type User-specified type
+     * @return string
+     **/
+    public function getType($field, $type)
     {
         $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
         $collection = new Collection($reflector->getConstants());
-        $validTypes = $collection->filter(function ($_, $constant) {
-            $_;
+        $validTypes = $collection->filter(function ($value, $constant) {
+            $value;
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
 
@@ -116,6 +141,12 @@ class ColumnParser
         return $type;
     }
 
+    /**
+     * Returns the default length to be used for a given fie
+     *
+     * @param string $type User-specified type
+     * @return int
+     **/
     public function getLength($type)
     {
         $length = null;
@@ -130,6 +161,15 @@ class ColumnParser
         return $length;
     }
 
+    /**
+     * Returns the default length to be used for a given fie
+     *
+     * @param string $field Name of field
+     * @param string $indexType Type of index
+     * @param string $indexName Name of index
+     * @param bool $indexUnique Whether this is a unique index or not
+     * @return string
+     **/
     public function getIndexName($field, $indexType, $indexName, $indexUnique)
     {
         if (empty($indexName)) {
