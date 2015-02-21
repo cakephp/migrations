@@ -10,7 +10,6 @@ sudo: false
 env:
   matrix:
     - DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test'
-    - DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
     - DB=sqlite db_dsn='sqlite:///:memory:'
   global:
     - DEFAULT=1
@@ -18,8 +17,8 @@ env:
 matrix:
   allow_failures:
     - php: hhvm
-
     - php: hhvm-nightly
+    - env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
 
   fast_finish: true
 
@@ -30,17 +29,26 @@ matrix:
     - php: 5.4
       env: COVERALLS=1 DEFAULT=0
 
-    - php: hhvm
-      env: HHVM=1 DB=sqlite db_class='Cake\Database\Driver\Sqlite' db_dsn='sqlite::memory:'
+    - php: 5.4
+      env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
+
+    - php: 5.5
+      env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
+
+    - php: 5.6
+      env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
 
     - php: hhvm
-      env: HHVM=1 DB=mysql db_class='Cake\Database\Driver\Mysql' db_dsn='mysql:host=0.0.0.0;dbname=cakephp_test' db_database='cakephp_test' db_login='travis' db_password=''
+      env: HHVM=1 DB=sqlite db_dsn='sqlite:///:memory:'
+
+    - php: hhvm
+      env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test'
 
     - php: hhvm-nightly
-      env: HHVM=1 DB=sqlite db_class='Cake\Database\Driver\Sqlite' db_dsn='sqlite::memory:'
+      env: HHVM=1 DB=sqlite db_dsn='sqlite:///:memory:'
 
     - php: hhvm-nightly
-      env: HHVM=1 DB=mysql db_class='Cake\Database\Driver\Mysql' db_dsn='mysql:host=0.0.0.0;dbname=cakephp_test' db_database='cakephp_test' db_login='travis' db_password=''
+      env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test'
 
 before_script:
   - composer self-update
@@ -61,7 +69,7 @@ before_script:
 
 script:
   - sh -c "if [ '$DEFAULT' = '1' ]; then phpunit --stderr; fi"
-  - sh -c "if [ '$PHPCS' = '1' ]; then vendor/bin/phpcs -p --extensions=php --standard=psr2 --ignore=tests/bootstrap.php ./src ./tests ; fi"
+  - sh -c "if [ '$PHPCS' = '1' ]; then vendor/bin/phpcs -p --extensions=php --standard=psr2 --ignore=tests/bootstrap.php,tests/comparisons/* ./src ./tests ; fi"
   - sh -c "if [ '$COVERALLS' = '1' ]; then phpunit --stderr --coverage-clover build/logs/clover.xml; fi"
   - sh -c "if [ '$COVERALLS' = '1' ]; then php vendor/bin/coveralls -c .coveralls.yml -v; fi"
 

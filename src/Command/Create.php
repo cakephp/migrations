@@ -38,6 +38,11 @@ class Create extends CreateCommand
             ->addOption('connection', 'c', InputArgument::OPTIONAL, 'The datasource connection to use')
             ->addOption('source', 's', InputArgument::OPTIONAL, 'The folder where migrations are in')
             ->addOption('template', 't', InputOption::VALUE_REQUIRED, 'Use an alternative template')
-            ->addOption('class', 'l', InputOption::VALUE_REQUIRED, 'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template');
+            ->addOption(
+                'class',
+                'l',
+                InputOption::VALUE_REQUIRED,
+                'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template'
+            );
     }
 }

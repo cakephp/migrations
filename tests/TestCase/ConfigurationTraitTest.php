@@ -14,11 +14,10 @@ namespace Migrations\Test;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
-use Migrations\Command\Create;
 use Migrations\ConfigurationTrait;
 
 /**
- * Tests the create command
+ * Tests the ConfigurationTrait
  */
 class ConfigurationTraitTest extends TestCase
 {
