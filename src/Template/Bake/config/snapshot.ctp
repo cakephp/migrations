@@ -26,8 +26,21 @@ class <%= $name %> extends AbstractMigration
     public function up()
     {
     <%- foreach ($tables as $table): %>
+        <%- $primaryKey = $this->Migration->primaryKey($table);
+        if ($primaryKey['name'] !== 'id' || $primaryKey['info']['columnType'] !== 'integer') {
+        %>
+        $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= $primaryKey['name'] %>']]);
+        <%- } else { %>
         $table = $this->table('<%= $table%>');
+        <%- } %>
         $table
+        <%- if ($primaryKey['name'] !== 'id' || $primaryKey['info']['columnType'] !== 'integer') { %>
+            -><%= $columnMethod %>('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
+                $options = [];
+                $columnOptions = array_intersect_key($primaryKey['info']['options'], $wantedOptions);
+                echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
+            %>])
+        <%- } %>
         <%- foreach ($this->Migration->columns($table) as $column => $config): %>
             -><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
                 $options = [];

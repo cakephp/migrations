@@ -33,7 +33,7 @@ class MigrationHelper extends Helper
      * @param \Cake\View\View $View The View this helper is being attached to.
      * @param array $config Configuration settings for the helper.
      */
-    public function __construct(View $View, array $config = array())
+    public function __construct(View $View, array $config = [])
     {
         parent::__construct($View, $config);
         $collection = $this->config('collection');
@@ -111,6 +111,22 @@ class MigrationHelper extends Helper
         }
 
         return $columns;
+    }
+
+    /**
+     * Returns the primary key data for a given table
+     *
+     * @param string $table Name of the table ot retrieve primary key for
+     * @return array
+     */
+    public function primaryKey($table) {
+        $collection = $this->config('collection');
+        $tableSchema = $collection->describe($table);
+        foreach ($tableSchema->columns() as $column) {
+            if ($tableSchema->primaryKey() == [$column]) {
+                return ['name' => $column, 'info' => $this->column($tableSchema, $column)];
+            }
+        }
     }
 
 
