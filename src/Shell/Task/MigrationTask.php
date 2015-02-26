@@ -36,7 +36,7 @@ class MigrationTask extends SimpleMigrationTask
      */
     public function templateData()
     {
-        $className = $this->BakeTemplate->viewVars['name'];
+        $className = $this->Template->viewVars['name'];
         $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
