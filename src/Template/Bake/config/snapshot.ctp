@@ -51,4 +51,11 @@ class <%= $name %> extends AbstractMigration
             -><%= $tableMethod %>();
     <%- endforeach; %>
     }
+
+    public function down()
+    {
+        <%- foreach ($tables as $table): %>
+            $this->dropTable('<%= $table%>');
+        <%- endforeach; %>
+    }
 }
