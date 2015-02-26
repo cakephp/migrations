@@ -92,9 +92,13 @@ bin/cake bake migration AddFieldToTable --connection connection
 bin/cake bake migration AddFieldToTable --require-table
 ```
 
-These commands will create a file under `config/Migrations` with the current database snapshot as the contents of the `change()` method. You may edit this as desired.
+These commands will create a file under `config/Migrations` with the current
+database snapshot as the contents of the `change()` method. You may edit this
+as desired.
 
-Please note that you will need to learn how to write your own migrations, you need to fill in the up() and down() or change() methods if you want automatically reversible migrations.
+Please note that you will need to learn how to write your own migrations, you
+need to fill in the up() and down() or change() methods if you want
+automatically reversible migrations.
 
 Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
@@ -122,7 +126,9 @@ $table->addColumn('id', 'char', ['limit' => 36])
 
 > When using this option, you can still modify the migration before running them if so desired.
 
-You can optionall generate entire migration files from the CLI without interacting with the database or an editor. This functionality only works when arguments are passed to the command `bin/cake bake generate` as follows:
+You can optionally generate entire migration files from the CLI without
+interacting with the database or an editor. This functionality only works when
+arguments are passed to the command `bin/cake bake generate` as follows:
 
 ```shell
 bin/cake bake generate create_users name:string created modified
@@ -138,7 +144,11 @@ bin/cake bake generate remove_taxonomic_stuff_from_posts category tags
 
 The above commands would:
 
-- Create a users table with the fields [`id`, `name`, `created`, `modified`]. A single primary key index would exist on `id` - as phinx autogenerates the field and it's index - and the `created` and `modified` fields would default to `datetime`, as per CakePHP conventions. Since the type is specified on `name`, it is string.
+- Create a users table with the fields [`id`, `name`, `created`, `modified`].
+  A single primary key index would exist on `id` - as phinx autogenerates the
+  field and it's index - and the `created` and `modified` fields would default
+  to `datetime`, as per CakePHP conventions. Since the type is specified on
+  `name`, it is string.
 - Add an index to the `name` column in the `users` table.
 - Drop the users table.
 - Add `category` and `tags` fields to the `posts` table.
@@ -146,15 +156,20 @@ The above commands would:
 
 Due to the conventions, not all schema changes can be performed via these shell commands.
 
-Migration Names can follow any of the following regices:
+Migration Names can follow any of the following patterns:
 
 - *create_table* `/^(Create)(.*)/`: Creates the specified table
 - *drop_table* `/^(Drop)(.*)/`: Drops the specified table. Ignores specified field arguments.
 - *add_field* `/^(Add).*(?:To)(.*)/`: Adds fields to the specified table
 - *remove_field* `/^(Remove).*(?:From)(.*)/`: Removes fields from the specified table
-- *alter_table* `/^(Alter)(.*)/` : Alters the specified table. The *alter_table* command can be used as an alias for `CreateTable` and `AddField`.
+- *alter_table* `/^(Alter)(.*)/` : Alters the specified table. The
+  *alter_table* command can be used as an alias for `CreateTable` and
+  `AddField`.
 
-Migration names are used as migration class names, and thus may collide with other migrations if the class names are not unique. In this case, it may be necessary to manually override the name at a later date, or simply change the name you are specifying.
+Migration names are used as migration class names, and thus may collide with
+other migrations if the class names are not unique. In this case, it may be
+necessary to manually override the name at a later date, or simply change the
+name you are specifying.
 
 Fields are verified via the following the following regular expression:
 
