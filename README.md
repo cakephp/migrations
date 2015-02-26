@@ -117,3 +117,70 @@ $table->addColumn('id', 'char', ['limit' => 36])
 ```
 
 > Phinx automatically creates an auto-increment `id` field for *every* table. This will hopefully be fixed in the future.
+
+#### Generating Migrations from the CLI
+
+> When using this option, you can still modify the migration before running them if so desired.
+
+You can optionall generate entire migration files from the CLI without interacting with the database or an editor. This functionality only works when arguments are passed to the command `bin/cake bake generate` as follows:
+
+```shell
+bin/cake bake generate create_users name:string created modified
+
+bin/cake bake generate alter_users name:string:index
+
+bin/cake bake generate drop_users
+
+bin/cake bake generate add_taxonomic_stuff_to_posts category:string tags:string
+
+bin/cake bake generate remove_taxonomic_stuff_from_posts category tags
+```
+
+The above commands would:
+
+- Create a users table with the fields [`id`, `name`, `created`, `modified`]. A single primary key index would exist on `id` - as phinx autogenerates the field and it's index - and the `created` and `modified` fields would default to `datetime`, as per CakePHP conventions. Since the type is specified on `name`, it is string.
+- Add an index to the `name` column in the `users` table.
+- Drop the users table.
+- Add `category` and `tags` fields to the `posts` table.
+- Remove `category` and `tags` fields from the `posts` table.
+
+Due to the conventions, not all schema changes can be performed via these shell commands.
+
+Migration Names can follow any of the following regices:
+
+- *create_table* `/^(Create)(.*)/`: Creates the specified table
+- *drop_table* `/^(Drop)(.*)/`: Drops the specified table. Ignores specified field arguments.
+- *add_field* `/^(Add).*(?:To)(.*)/`: Adds fields to the specified table
+- *remove_field* `/^(Remove).*(?:From)(.*)/`: Removes fields from the specified table
+- *alter_table* `/^(Alter)(.*)/` : Alters the specified table. The *alter_table* command can be used as an alias for `CreateTable` and `AddField`.
+
+Migration names are used as migration class names, and thus may collide with other migrations if the class names are not unique. In this case, it may be necessary to manually override the name at a later date, or simply change the name you are specifying.
+
+Fields are verified via the following the following regular expression:
+
+    /^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/
+
+They follow the format:
+
+    field:fieldType:indexType:indexName
+
+For instance, the following are all valid ways of specifying the primary key `id`:
+
+- `id:primary_key`
+- `id:primary_key:primary`
+- `id:integer:primary`
+- `id:integer:primary:ID_INDEX`
+
+Field types are those generically made available by phinx.
+
+There are some heuristics to choosing fieldtypes when left unspecified or set to an invalid value:
+
+- `id`: *integer*
+- `created`, `modified`, `updated`: *datetime*
+- Default *string*
+
+Lengths for certain columns are also defaulted:
+
+- *string*: `255`
+- *integer*: `11`
+- *biginteger*: `20`
