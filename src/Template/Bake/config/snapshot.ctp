@@ -26,20 +26,23 @@ class <%= $name %> extends AbstractMigration
     public function up()
     {
     <%- foreach ($tables as $table): %>
-        <%- $primaryKey = $this->Migration->primaryKey($table);
-        if ($primaryKey['name'] !== 'id' || $primaryKey['info']['columnType'] !== 'integer') {
+        <%- $primaryKeys = $this->Migration->primaryKeys($table);
+        $specialPk = count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer';
+        if ($specialPk) {
         %>
-        $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= $primaryKey['name'] %>']]);
+        $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);
         <%- } else { %>
         $table = $this->table('<%= $table%>');
         <%- } %>
         $table
-        <%- if ($primaryKey['name'] !== 'id' || $primaryKey['info']['columnType'] !== 'integer') { %>
+        <%- if ($specialPk) { %>
+            <%- foreach ($primaryKeys as $primaryKey) :%>
             -><%= $columnMethod %>('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
                 $options = [];
                 $columnOptions = array_intersect_key($primaryKey['info']['options'], $wantedOptions);
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
+            <%- endforeach; %>
         <%- } %>
         <%- foreach ($this->Migration->columns($table) as $column => $config): %>
             -><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
@@ -55,7 +58,7 @@ class <%= $name %> extends AbstractMigration
     public function down()
     {
         <%- foreach ($tables as $table): %>
-            $this->dropTable('<%= $table%>');
+        $this->dropTable('<%= $table%>');
         <%- endforeach; %>
     }
 }

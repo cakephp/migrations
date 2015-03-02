@@ -103,8 +103,9 @@ class MigrationHelper extends Helper
         $collection = $this->config('collection');
         $tableSchema = $collection->describe($table);
         $columns = [];
+        $tablePrimaryKeys = $tableSchema->primaryKey();
         foreach ($tableSchema->columns() as $column) {
-            if ($tableSchema->primaryKey() == [$column]) {
+            if (in_array($column, $tablePrimaryKeys)) {
                 continue;
             }
             $columns[$column] = $this->column($tableSchema, $column);
@@ -119,14 +120,17 @@ class MigrationHelper extends Helper
      * @param string $table Name of the table ot retrieve primary key for
      * @return array
      */
-    public function primaryKey($table) {
+    public function primaryKeys($table) {
         $collection = $this->config('collection');
         $tableSchema = $collection->describe($table);
+        $primaryKeys = [];
+        $tablePrimaryKeys = $tableSchema->primaryKey();
         foreach ($tableSchema->columns() as $column) {
-            if ($tableSchema->primaryKey() == [$column]) {
-                return ['name' => $column, 'info' => $this->column($tableSchema, $column)];
+            if (in_array($column, $tablePrimaryKeys)) {
+                $primaryKeys[] = ['name' => $column, 'info' => $this->column($tableSchema, $column)];
             }
         }
+        return $primaryKeys;
     }
 
 
