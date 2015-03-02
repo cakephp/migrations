@@ -27,8 +27,8 @@ class CompositePkFixture extends TestFixture
      * @var array
      */
     public $fields = [
-        'id' => ['type' => 'uuid'],
-        'name' => ['type' => 'string', 'length' => 50],
+        'id' => ['type' => 'uuid', 'default' => ''],
+        'name' => ['type' => 'string', 'length' => 50, 'default' => ''],
         '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id', 'name']]]
     ];
 }

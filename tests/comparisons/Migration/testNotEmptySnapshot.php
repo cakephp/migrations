@@ -8,12 +8,12 @@ class NotEmptySnapshot extends AbstractMigration
         $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
         $table
             ->addColumn('id', 'uuid', [
-                'default' => null,
+                'default' => '',
                 'limit' => null,
                 'null' => false,
             ])
             ->addColumn('name', 'string', [
-                'default' => null,
+                'default' => '',
                 'limit' => 50,
                 'null' => false,
             ])
@@ -21,7 +21,7 @@ class NotEmptySnapshot extends AbstractMigration
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
             ->addColumn('id', 'uuid', [
-                'default' => null,
+                'default' => '',
                 'limit' => null,
                 'null' => false,
             ])
