@@ -5,6 +5,32 @@ class NotEmptySnapshot extends AbstractMigration
 {
     public function up()
     {
+        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table
+            ->addColumn('id', 'uuid', [
+                'default' => '',
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('name', 'string', [
+                'default' => '',
+                'limit' => 50,
+                'null' => false,
+            ])
+            ->create();
+        $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
+        $table
+            ->addColumn('id', 'uuid', [
+                'default' => '',
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 256,
+                'null' => true,
+            ])
+            ->create();
         $table = $this->table('special_tags');
         $table
             ->addColumn('article_id', 'integer', [
@@ -56,5 +82,13 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+    }
+
+    public function down()
+    {
+        $this->dropTable('composite_pks');
+        $this->dropTable('special_pks');
+        $this->dropTable('special_tags');
+        $this->dropTable('users');
     }
 }

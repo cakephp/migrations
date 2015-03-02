@@ -27,6 +27,8 @@ class MigrationSnapshotTaskTest extends TestCase
     public $fixtures = [
         'plugin.migrations.users',
         'plugin.migrations.special_tags',
+        'plugin.migrations.special_pk',
+        'plugin.migrations.composite_pk',
     ];
 
     /**
