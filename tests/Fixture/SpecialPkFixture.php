@@ -19,7 +19,8 @@ use Cake\TestSuite\Fixture\TestFixture;
  * Class SpecialPkFixture
  *
  */
-class SpecialPkFixture extends TestFixture {
+class SpecialPkFixture extends TestFixture
+{
     /**
      * fields property
      *

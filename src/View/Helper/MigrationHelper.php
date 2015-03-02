@@ -120,7 +120,8 @@ class MigrationHelper extends Helper
      * @param string $table Name of the table ot retrieve primary key for
      * @return array
      */
-    public function primaryKeys($table) {
+    public function primaryKeys($table)
+    {
         $collection = $this->config('collection');
         $tableSchema = $collection->describe($table);
         $primaryKeys = [];
