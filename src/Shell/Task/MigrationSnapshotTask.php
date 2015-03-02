@@ -79,7 +79,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'collection' => $collection,
             'tables' => $tables,
             'action' => 'create_table',
-            'name' => $this->Template->viewVars['name'],
+            'name' => $this->BakeTemplate->viewVars['name'],
         ];
     }
 
