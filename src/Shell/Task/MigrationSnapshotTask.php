@@ -16,6 +16,7 @@ namespace Migrations\Shell\Task;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Filesystem\File;
+use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SimpleMigrationTask;
 
 /**
