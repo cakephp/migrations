@@ -14,7 +14,7 @@ class NotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('name', 'string', [
                 'default' => null,
-                'limit' => 256,
+                'limit' => 50,
                 'null' => false,
             ])
             ->create();
