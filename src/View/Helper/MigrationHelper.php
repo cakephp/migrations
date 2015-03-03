@@ -36,10 +36,6 @@ class MigrationHelper extends Helper
     public function __construct(View $View, array $config = [])
     {
         parent::__construct($View, $config);
-        $collection = $this->config('collection');
-        if (empty($collection) || !($collection instanceof Collection)) {
-            throw new InvalidArgumentException('Missing Collection object');
-        }
     }
 
     /**

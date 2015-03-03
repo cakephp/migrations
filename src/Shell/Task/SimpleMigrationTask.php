@@ -16,9 +16,6 @@ namespace Migrations\Shell\Task;
 use Bake\Shell\Task\SimpleBakeTask;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
-use Cake\Datasource\ConnectionManager;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
 use Cake\Utility\Inflector;
 use Phinx\Migration\Util;
 
@@ -69,27 +66,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public function bake($name)
     {
         $this->params['no-test'] = true;
-        $collection = $this->getCollection($this->connection);
-        EventManager::instance()->attach(function (Event $event) use ($collection) {
-            $event->subject->loadHelper('Migrations.Migration', [
-                'collection' => $collection
-            ]);
-        }, 'Bake.initialize');
-
-
         return parent::bake($name);
-    }
-
-    /**
-     * Get a collection from a database
-     *
-     * @param string $connection : database connection name
-     * @return obj schemaCollection
-     */
-    public function getCollection($connection)
-    {
-        $connection = ConnectionManager::get($connection);
-        return $connection->schemaCollection();
     }
 
     /**

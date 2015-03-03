@@ -14,6 +14,9 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Datasource\ConnectionManager;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Cake\Core\Plugin;
 use Cake\Filesystem\File;
 use Cake\Utility\Inflector;
@@ -37,6 +40,21 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      * @var string
      */
     public $skipTablesRegex = '_phinxlog';
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bake($name)
+    {
+        $collection = $this->getCollection($this->connection);
+        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
+            $event->subject->loadHelper('Migrations.Migration', [
+                'collection' => $collection
+            ]);
+        });
+
+        return parent::bake($name);
+    }
 
     /**
      * {@inheritDoc}
@@ -82,6 +100,18 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'action' => 'create_table',
             'name' => $this->BakeTemplate->viewVars['name'],
         ];
+    }
+
+    /**
+     * Get a collection from a database
+     *
+     * @param string $connection : database connection name
+     * @return obj schemaCollection
+     */
+    public function getCollection($connection)
+    {
+        $connection = ConnectionManager::get($connection);
+        return $connection->schemaCollection();
     }
 
     /**

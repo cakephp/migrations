@@ -14,6 +14,8 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SimpleMigrationTask;
 use Migrations\Util\ColumnParser;
@@ -23,6 +25,18 @@ use Migrations\Util\ColumnParser;
  */
 class MigrationTask extends SimpleMigrationTask
 {
+    /**
+     * {@inheritDoc}
+     */
+    public function bake($name)
+    {
+        EventManager::instance()->on('Bake.initialize', function (Event $event) {
+            $event->subject->loadHelper('Migrations.Migration');
+        });
+
+        return parent::bake($name);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -44,7 +58,6 @@ class MigrationTask extends SimpleMigrationTask
             $pluginPath = $this->plugin . '.';
         }
 
-        $collection = $this->getCollection($this->connection);
         $action = $this->detectAction($className);
 
         if ($action === null) {
@@ -52,7 +65,6 @@ class MigrationTask extends SimpleMigrationTask
                 'plugin' => $this->plugin,
                 'pluginPath' => $pluginPath,
                 'namespace' => $namespace,
-                'collection' => $collection,
                 'tables' => [],
                 'action' => null,
                 'name' => $className
@@ -70,7 +82,6 @@ class MigrationTask extends SimpleMigrationTask
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
             'namespace' => $namespace,
-            'collection' => $collection,
             'tables' => [$table],
             'action' => $action,
             'columns' => [

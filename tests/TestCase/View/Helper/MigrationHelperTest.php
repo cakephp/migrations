@@ -86,15 +86,6 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::__construct
-     * @expectedException \InvalidArgumentException
-     */
-    public function testConstruct()
-    {
-        new MigrationHelper($this->View);
-    }
-
-    /**
      * @covers Migrations\View\Helper\MigrationHelper::tableMethod
      */
     public function testTableMethod()
