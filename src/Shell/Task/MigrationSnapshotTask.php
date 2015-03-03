@@ -41,6 +41,21 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
+    public function bake($name)
+    {
+        $collection = $this->getCollection($this->connection);
+        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
+            $event->subject->loadHelper('Migrations.Migration', [
+                'collection' => $collection
+            ]);
+        });
+
+        return parent::bake($name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function template()
     {
         return 'Migrations.config/snapshot';
@@ -82,6 +97,18 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'action' => 'create_table',
             'name' => $this->BakeTemplate->viewVars['name'],
         ];
+    }
+
+    /**
+     * Get a collection from a database
+     *
+     * @param string $connection : database connection name
+     * @return obj schemaCollection
+     */
+    public function getCollection($connection)
+    {
+        $connection = ConnectionManager::get($connection);
+        return $connection->schemaCollection();
     }
 
     /**

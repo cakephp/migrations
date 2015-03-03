@@ -26,6 +26,18 @@ class MigrationTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
+    public function bake($name)
+    {
+        EventManager::instance()->on('Bake.initialize', function (Event $event) {
+            $event->subject->loadHelper('Migrations.Migration');
+        });
+
+        return parent::bake($name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function template()
     {
         return 'Migrations.config/skeleton';
@@ -44,7 +56,6 @@ class MigrationTask extends SimpleMigrationTask
             $pluginPath = $this->plugin . '.';
         }
 
-        $collection = $this->getCollection($this->connection);
         $action = $this->detectAction($className);
 
         if ($action === null) {
@@ -52,7 +63,6 @@ class MigrationTask extends SimpleMigrationTask
                 'plugin' => $this->plugin,
                 'pluginPath' => $pluginPath,
                 'namespace' => $namespace,
-                'collection' => $collection,
                 'tables' => [],
                 'action' => null,
                 'name' => $className
@@ -70,7 +80,6 @@ class MigrationTask extends SimpleMigrationTask
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
             'namespace' => $namespace,
-            'collection' => $collection,
             'tables' => [$table],
             'action' => $action,
             'columns' => [

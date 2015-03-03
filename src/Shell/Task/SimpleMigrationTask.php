@@ -69,27 +69,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public function bake($name)
     {
         $this->params['no-test'] = true;
-        $collection = $this->getCollection($this->connection);
-        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
-            $event->subject->loadHelper('Migrations.Migration', [
-                'collection' => $collection
-            ]);
-        });
-
-
         return parent::bake($name);
-    }
-
-    /**
-     * Get a collection from a database
-     *
-     * @param string $connection : database connection name
-     * @return obj schemaCollection
-     */
-    public function getCollection($connection)
-    {
-        $connection = ConnectionManager::get($connection);
-        return $connection->schemaCollection();
     }
 
     /**
