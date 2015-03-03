@@ -131,15 +131,15 @@ interacting with the database or an editor. This functionality only works when
 arguments are passed to the command `bin/cake bake generate` as follows:
 
 ```shell
-bin/cake bake generate create_users name:string created modified
+bin/cake bake migration create_users name:string created modified
 
-bin/cake bake generate alter_users name:string:index
+bin/cake bake migration alter_users name:string:index
 
-bin/cake bake generate drop_users
+bin/cake bake migration drop_users
 
-bin/cake bake generate add_taxonomic_stuff_to_posts category:string tags:string
+bin/cake bake migration add_taxonomic_stuff_to_posts category:string tags:string
 
-bin/cake bake generate remove_taxonomic_stuff_from_posts category tags
+bin/cake bake migration remove_taxonomic_stuff_from_posts category tags
 ```
 
 The above commands would:
