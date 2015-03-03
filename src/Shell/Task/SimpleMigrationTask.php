@@ -70,11 +70,11 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     {
         $this->params['no-test'] = true;
         $collection = $this->getCollection($this->connection);
-        EventManager::instance()->attach(function (Event $event) use ($collection) {
+        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
             $event->subject->loadHelper('Migrations.Migration', [
                 'collection' => $collection
             ]);
-        }, 'Bake.initialize');
+        });
 
 
         return parent::bake($name);
