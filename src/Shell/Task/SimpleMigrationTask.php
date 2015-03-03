@@ -16,9 +16,6 @@ namespace Migrations\Shell\Task;
 use Bake\Shell\Task\SimpleBakeTask;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
-use Cake\Datasource\ConnectionManager;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
 use Cake\Utility\Inflector;
 use Phinx\Migration\Util;
 

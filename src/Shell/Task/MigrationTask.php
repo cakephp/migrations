@@ -14,6 +14,8 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SimpleMigrationTask;
 use Migrations\Util\ColumnParser;

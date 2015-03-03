@@ -14,6 +14,9 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Datasource\ConnectionManager;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Cake\Core\Plugin;
 use Cake\Filesystem\File;
 use Cake\Utility\Inflector;
