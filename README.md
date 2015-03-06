@@ -77,7 +77,7 @@ You can also use the `bake` command to generate migrations.
 
 ```bash
 # The following will create an initial snapshot migration file:
-bin/cake bake migration Initial --snapshot
+bin/cake bake migration_snapshot Initial
 
 # Create an empty migration file
 bin/cake bake migration AddFieldToTable
