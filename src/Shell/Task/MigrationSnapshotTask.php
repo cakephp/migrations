@@ -14,11 +14,12 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Cake\Core\Plugin;
-use Cake\Filesystem\File;
+use Cake\Filesystem\Folder;
+use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SimpleMigrationTask;
 
@@ -40,6 +41,13 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      * @var string
      */
     public $skipTablesRegex = '_phinxlog';
+
+    /**
+     * List of Plugin Tables name
+     *
+     * @var string
+     */
+    public $pluginTables = [];
 
     /**
      * {@inheritDoc}
@@ -74,6 +82,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         if ($this->plugin) {
             $namespace = $this->_pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
+            $this->pluginTables = $this->getPluginTables($this->plugin);
         }
 
         $collection = $this->getCollection($this->connection);
@@ -124,37 +133,48 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     public function tableToAdd($tableName, $pluginName = null)
     {
         if ($this->params['require-table'] === true) {
-            return $this->tableExists(Inflector::camelize($tableName), $pluginName);
+
+            if (in_array($tableName, $this->pluginTables)) {
+                return true;
+            }
+
+            return false;
         }
 
-        return true;
+        $pluginName = strtolower(str_replace('/', '_', $pluginName)) . '_';
+        if (strpos($tableName, $pluginName) !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
-     * To check if a Table Model exists in the path of model
-     *
-     * @param string $tableName Table name in underscore case
-     * @param string $pluginName Plugin name if exists
-     * @return bool
-     */
-    public function tableExists($tableName, $pluginName = null)
-    {
-        $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
-        return $file->exists();
-    }
-
-    /**
-     * Path for Table folder
+     * Gets list Plugin Tables Names
      *
      * @param string $pluginName Plugin name if exists
-     * @return string : path to Table Folder. Default to App Table Path
+     * @return array
      */
-    public function getModelPath($pluginName = null)
+    public function getPluginTables($pluginName = null)
     {
-        if (!is_null($pluginName) && Plugin::loaded($pluginName)) {
-            return Plugin::classPath($pluginName) . 'Model' . DS . 'Table' . DS;
+        if (is_null($pluginName) && !Plugin::loaded($pluginName)) {
+            return false;
         }
-        return APP . 'Model' . DS . 'Table' . DS;
+
+        $path = Plugin::path($pluginName) . 'src' . DS . 'Model' . DS . 'Table' . DS;
+        if (!is_dir($path)) {
+            return false;
+        }
+
+        $tableDir = new Folder($path);
+        $tables = $tableDir->find('.*\.php');
+        foreach($tables as $num => $table) {
+            $table = $pluginName . '.' . str_replace('Table.php', '', $table);
+            $table = TableRegistry::get($table);
+            $tables[$num] = $table->table();
+        }
+
+        return $tables;
     }
 
     /**
