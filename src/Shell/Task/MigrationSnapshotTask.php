@@ -69,10 +69,10 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      */
     public function templateData()
     {
-        $ns = Configure::read('App.namespace');
+        $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
-            $ns = $this->plugin;
+            $namespace = $this->_pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
         }
 
@@ -94,7 +94,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         return [
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
-            'namespace' => $ns,
+            'namespace' => $namespace,
             'collection' => $collection,
             'tables' => $tables,
             'action' => 'create_table',

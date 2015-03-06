@@ -54,7 +54,7 @@ class MigrationTask extends SimpleMigrationTask
         $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
-            $namespace = $this->plugin;
+            $namespace = $this->_pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
         }
 
