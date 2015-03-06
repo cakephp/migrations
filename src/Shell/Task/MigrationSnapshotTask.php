@@ -19,12 +19,12 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Filesystem\Folder;
-use Cake\ORM\TableRegistry;
 use Cake\ORM\AssociationCollection;
 use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Association\HasOne;
+use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SimpleMigrationTask;
 
@@ -120,7 +120,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * Get a collection from a database
      *
-     * @param string $connection : database connection name
+     * @param string $connection Database connection name.
      * @return obj schemaCollection
      */
     public function getCollection($connection)
@@ -132,9 +132,9 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * To check if a Table Model is to be added in the migration file
      *
-     * @param string $tableName Table name in underscore case
-     * @param string $pluginName Plugin name if exists
-     * @return bool true if the model is to be added
+     * @param string $tableName Table name in underscore case.
+     * @param string $pluginName Plugin name if exists.
+     * @return bool true if the model is to be added.
      */
     public function tableToAdd($tableName, $pluginName = null)
     {
@@ -153,7 +153,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * Gets list Tables Names
      *
-     * @param string $pluginName Plugin name if exists
+     * @param string $pluginName Plugin name if exists.
      * @return array
      */
     public function getTableNames($pluginName = null)
@@ -173,12 +173,12 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * Find Table Class
      *
-     * @param string $pluginName
+     * @param string $pluginName Plugin name if exists.
      * @return array
      */
     public function findTables($pluginName = null)
     {
-        $path =  'Model' . DS . 'Table' . DS;
+        $path = 'Model' . DS . 'Table' . DS;
         if ($pluginName) {
             $path = Plugin::path($pluginName) . 'src' . DS . $path;
         } else {
@@ -197,8 +197,8 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * fetch TableName From Table Object
      *
-     * @param string $className Name of Table Class
-     * @param string $pluginName Plugin name if exists
+     * @param string $className Name of Table Class.
+     * @param string $pluginName Plugin name if exists.
      * @return string
      */
     public function fetchTableName($className, $pluginName = null)
