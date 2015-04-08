@@ -30,6 +30,9 @@ matrix:
       env: COVERALLS=1 DEFAULT=0
 
     - php: 5.4
+      env: PREFER_LOWEST=1
+
+    - php: 5.4
       env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
 
     - php: 5.5
@@ -52,7 +55,8 @@ matrix:
 
 before_script:
   - composer self-update
-  - composer install --prefer-source --no-interaction --dev
+  - sh -c "if [ '$PREFER_LOWEST' != '1' ]; then composer install --prefer-source --no-interaction; fi"
+  - sh -c "if [ '$PREFER_LOWEST' = '1' ]; then composer update --prefer-source --no-interaction --prefer-lowest --prefer-stable; fi"
 
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi"
 
