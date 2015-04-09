@@ -74,10 +74,7 @@ trait ConfigurationTrait
         $plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
         $plugin = str_replace(array('\\', '/', '.'), '_', $plugin);
 
-        $connection = 'default';
-        if ($this->input->getOption('connection')) {
-            $connection = $this->input->getOption('connection');
-        }
+        $connection = $this->getConnectionName($this->input);
 
         $config = ConnectionManager::config($connection);
         return $this->configuration = new Config([
@@ -169,7 +166,23 @@ trait ConfigurationTrait
     public function bootstrap(InputInterface $input, OutputInterface $output)
     {
         parent::bootstrap($input, $output);
-        $connection = $this->getManager()->getEnvironment('default')->getAdapter()->getConnection();
-        ConnectionManager::get('default')->driver()->connection($connection);
+        $connection = ConnectionManager::get($this->getConnectionName($input));
+        $pdo = $this->getManager()->getEnvironment('default')->getAdapter()->getConnection();
+        $connection->driver()->connection($pdo);
+    }
+
+    /**
+     * Returns the connection name that should be used for the migrations.
+     *
+     * @param Symfony\Component\Console\Input\Inputnterface $input the input object
+     * @return string
+     */
+    protected function getConnectionName(InputInterface $input)
+    {
+        $connection = 'default';
+        if ($input->getOption('connection')) {
+            $connection = $this->input->getOption('connection');
+        }
+        return $connection;
     }
 }
