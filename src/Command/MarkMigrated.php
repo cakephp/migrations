@@ -73,7 +73,9 @@ class MarkMigrated extends AbstractCommand
                 $output->writeln('<error>An error occurred : ' . $e->getMessage() . '</error>');
             }
         } else {
-            $output->writeln('<error>A migration file matching version number `' . $version . '` could not be found</error>');
+            $output->writeln(
+                '<error>A migration file matching version number `' . $version . '` could not be found</error>'
+            );
         }
     }
 

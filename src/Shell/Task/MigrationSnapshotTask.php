@@ -74,7 +74,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $createFile = parent::createFile($path, $contents);
 
         if ($createFile) {
-            $this->_markSnapshotApplied($path);
+            $this->markSnapshotApplied($path);
         }
 
         return $createFile;
@@ -87,7 +87,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      * @param string $path Path to the newly created snapshot
      * @return void
      */
-    protected function _markSnapshotApplied($path)
+    protected function markSnapshotApplied($path)
     {
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         list($version, ) = explode('_', $fileName, 2);
