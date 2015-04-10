@@ -13,6 +13,7 @@
  */
 namespace Migrations\Shell\Task;
 
+use Cake\Console\ShellDispatcher;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
@@ -60,6 +61,48 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         });
 
         return parent::bake($name);
+    }
+
+    /**
+     * After the file has been successfully created, we mark the newly
+     * created snapshot as applied
+     *
+     * {@inheritDoc}
+     */
+    public function createFile($path, $contents)
+    {
+        $createFile = parent::createFile($path, $contents);
+
+        if ($createFile) {
+            $this->_markSnapshotApplied($path);
+        }
+
+        return $createFile;
+    }
+
+    /**
+     * Will mark a snapshot created, the snapshot being identified by its
+     * full file path.
+     *
+     * @param string $path Path to the newly created snapshot
+     * @return void
+     */
+    protected function _markSnapshotApplied($path)
+    {
+        $fileName = pathinfo($path, PATHINFO_FILENAME);
+        list($version, ) = explode('_', $fileName, 2);
+
+        $argv = $_SERVER['argv'];
+        $_SERVER['argv'] = [
+            '',
+            'migrations',
+            'mark_migrated',
+            $version
+        ];
+
+        $this->_io->out('Marking the snapshot ' . $fileName . ' as migrated...');
+        $result = $this->dispatchShell('migrations', 'mark_migrated', $version);
+        $_SERVER['argv'] = $argv;
     }
 
     /**
