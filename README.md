@@ -12,7 +12,7 @@ following to your `composer.json` file:
 
 ```javascript
 "require": {
-	"cakephp/migrations": "dev-master"
+	"cakephp/migrations": "~1.0"
 }
 ```
 
