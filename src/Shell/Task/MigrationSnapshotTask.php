@@ -14,11 +14,17 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Cake\Core\Plugin;
-use Cake\Filesystem\File;
+use Cake\Filesystem\Folder;
+use Cake\ORM\AssociationCollection;
+use Cake\ORM\Association\BelongsTo;
+use Cake\ORM\Association\BelongsToMany;
+use Cake\ORM\Association\HasMany;
+use Cake\ORM\Association\HasOne;
+use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SimpleMigrationTask;
 
@@ -69,32 +75,41 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      */
     public function templateData()
     {
-        $ns = Configure::read('App.namespace');
+        $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
-            $ns = $this->plugin;
+            $namespace = $this->_pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
         }
 
         $collection = $this->getCollection($this->connection);
-
         $tables = $collection->listTables();
-        foreach ($tables as $num => $table) {
-            if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
-                unset($tables[$num]);
-                continue;
-            }
 
-            if (!$this->tableToAdd($table, $this->plugin)) {
-                unset($tables[$num]);
-                continue;
+        if ($this->params['require-table'] === true) {
+            $tableNamesInModel = $this->getTableNames($this->plugin);
+
+            foreach ($tableNamesInModel as $num => $table) {
+                if (!in_array($tables[$num], $tables)) {
+                    unset($tableNamesInModel[$num]);
+                }
+            }
+            $tables = $tableNamesInModel;
+        } else {
+            foreach ($tables as $num => $table) {
+                if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
+                    unset($tables[$num]);
+                    continue;
+                }
+                if (!$this->tableToAdd($table, $this->plugin)) {
+                    unset($tables[$num]);
+                    continue;
+                }
             }
         }
-
         return [
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
-            'namespace' => $ns,
+            'namespace' => $namespace,
             'collection' => $collection,
             'tables' => $tables,
             'action' => 'create_table',
@@ -105,7 +120,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * Get a collection from a database
      *
-     * @param string $connection : database connection name
+     * @param string $connection Database connection name.
      * @return obj schemaCollection
      */
     public function getCollection($connection)
@@ -117,44 +132,92 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * To check if a Table Model is to be added in the migration file
      *
-     * @param string $tableName Table name in underscore case
-     * @param string $pluginName Plugin name if exists
-     * @return bool true if the model is to be added
+     * @param string $tableName Table name in underscore case.
+     * @param string $pluginName Plugin name if exists.
+     * @return bool true if the model is to be added.
      */
     public function tableToAdd($tableName, $pluginName = null)
     {
-        if ($this->params['require-table'] === true) {
-            return $this->tableExists(Inflector::camelize($tableName), $pluginName);
+        if (is_null($pluginName)) {
+            return true;
         }
 
-        return true;
+        $pluginName = strtolower(str_replace('/', '_', $pluginName)) . '_';
+        if (strpos($tableName, $pluginName) !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
-     * To check if a Table Model exists in the path of model
+     * Gets list Tables Names
      *
-     * @param string $tableName Table name in underscore case
-     * @param string $pluginName Plugin name if exists
-     * @return bool
+     * @param string $pluginName Plugin name if exists.
+     * @return array
      */
-    public function tableExists($tableName, $pluginName = null)
+    public function getTableNames($pluginName = null)
     {
-        $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
-        return $file->exists();
+        if (!is_null($pluginName) && !Plugin::loaded($pluginName)) {
+            return false;
+        }
+        $list = [];
+        $tables = $this->findTables($pluginName);
+        foreach ($tables as $num => $table) {
+            $list = $list + $this->fetchTableName($table, $pluginName);
+        }
+
+        return $list;
     }
 
     /**
-     * Path for Table folder
+     * Find Table Class
      *
-     * @param string $pluginName Plugin name if exists
-     * @return string : path to Table Folder. Default to App Table Path
+     * @param string $pluginName Plugin name if exists.
+     * @return array
      */
-    public function getModelPath($pluginName = null)
+    public function findTables($pluginName = null)
     {
-        if (!is_null($pluginName) && Plugin::loaded($pluginName)) {
-            return Plugin::classPath($pluginName) . 'Model' . DS . 'Table' . DS;
+        $path = 'Model' . DS . 'Table' . DS;
+        if ($pluginName) {
+            $path = Plugin::path($pluginName) . 'src' . DS . $path;
+        } else {
+            $path = APP . $path;
         }
-        return APP . 'Model' . DS . 'Table' . DS;
+
+        if (!is_dir($path)) {
+            return false;
+        }
+
+        $tableDir = new Folder($path);
+        $tableDir = $tableDir->find('.*\.php');
+        return $tableDir;
+    }
+
+    /**
+     * fetch TableName From Table Object
+     *
+     * @param string $className Name of Table Class.
+     * @param string $pluginName Plugin name if exists.
+     * @return string
+     */
+    public function fetchTableName($className, $pluginName = null)
+    {
+        $tables = [];
+        $className = str_replace('Table.php', '', $className);
+        if (!is_null($pluginName)) {
+            $className = $pluginName . '.' . $className;
+        }
+
+        $table = TableRegistry::get($className);
+        foreach ($table->associations()->keys() as $key) {
+            if ($table->associations()->get($key)->type() === 'belongsToMany') {
+                $tables[] = $table->associations()->get($key)->_junctionTableName();
+            }
+        }
+        $tables[] = $table->table();
+
+        return $tables;
     }
 
     /**
