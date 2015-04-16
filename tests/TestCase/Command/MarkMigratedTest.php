@@ -81,7 +81,7 @@ class MarkMigratedTest extends TestCase
     }
 
     /**
-     * Test executing "mark_migration" with no file matching the version number
+     * Test executing "mark_migration"
      *
      * @return void
      */
