@@ -51,7 +51,9 @@ class <%= $name %> extends AbstractMigration
             %>]);
 <% endforeach; %>
 <% foreach ($columns['indexes'] as $column => $config): %>
-        $table-><%= $indexMethod %>(["<%= $this->Migration->stringifyList($config['columns']) %>"], [<%
+        $table-><%= $indexMethod %>([<%=
+                $this->Migration->stringifyList($config['columns'], ['indent' => 3])
+                %>], [<%
                 $options = [];
                 echo $this->Migration->stringifyList($config['options'], ['indent' => 3]);
             %>]);
