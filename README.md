@@ -48,6 +48,10 @@ bin/cake migrations status -p PluginName
 
 # You can also scope a command to a connection via the `--connection` or `-c` option
 bin/cake migrations status -c my_datasource
+
+# The following will mark targeted migration as marked without actually running it.
+# The expected argument is the migration version number
+bin/cake migrations mark_migrated 20150417223600
 ```
 
 ### Creating Migrations

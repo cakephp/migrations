@@ -1,5 +1,14 @@
 <?php
-
+/**
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ */
 namespace Migrations\Test\Command;
 
 use Cake\Datasource\ConnectionManager;
@@ -9,16 +18,39 @@ use Phinx\Migration\Manager\Environment;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Output\StreamOutput;
 use Phinx\Config\Config;
-use Phinx\Console\Command\Status;
 
+/**
+ * MarkMigratedTest class
+ */
 class MarkMigratedTest extends TestCase
 {
-    protected $Connection;
 
-    protected $config = [];
-
+    /**
+     * Instance of a Symfony Command object
+     *
+     * @var \Symfony\Component\Console\Command\Command
+     */
     protected $command;
 
+    /**
+     * Instance of a Phinx Config object
+     *
+     * @var \Phinx\Config\Config
+     */
+    protected $config = [];
+
+    /**
+     * Instance of a Cake Connection object
+     *
+     * @var \Cake\Database\Connection
+     */
+    protected $Connection;
+
+    /**
+     * setup method
+     *
+     * @return void
+     */
     public function setUp()
     {
         parent::setUp();
@@ -59,6 +91,11 @@ class MarkMigratedTest extends TestCase
         $this->command->setManager($Manager);
     }
 
+    /**
+     * tearDown method
+     *
+     * @return void
+     */
     public function tearDown()
     {
         parent::tearDown();
@@ -73,9 +110,16 @@ class MarkMigratedTest extends TestCase
     public function testExecuteNoFile()
     {
         $commandTester = new CommandTester($this->command);
-        $commandTester->execute(['command' => $this->command->getName(), 'version' => '2000000', '--connection' => 'test']);
+        $commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '2000000',
+            '--connection' => 'test'
+        ]);
 
-        $this->assertContains('A migration file matching version number `2000000` could not be found', $commandTester->getDisplay());
+        $this->assertContains(
+            'A migration file matching version number `2000000` could not be found',
+            $commandTester->getDisplay()
+        );
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetch('assoc');
         $this->assertFalse($result);
     }
@@ -88,7 +132,11 @@ class MarkMigratedTest extends TestCase
     public function testExecute()
     {
         $commandTester = new CommandTester($this->command);
-        $commandTester->execute(['command' => $this->command->getName(), 'version' => '20150416223600', '--connection' => 'test']);
+        $commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '20150416223600',
+            '--connection' => 'test'
+        ]);
 
         $this->assertContains('Migration successfully marked migrated !', $commandTester->getDisplay());
 

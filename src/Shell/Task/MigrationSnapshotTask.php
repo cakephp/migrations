@@ -13,7 +13,6 @@
  */
 namespace Migrations\Shell\Task;
 
-use Cake\Console\ShellDispatcher;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
