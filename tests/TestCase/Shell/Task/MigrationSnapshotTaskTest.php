@@ -16,6 +16,7 @@ use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Migrations\Shell\Task\MigrationSnapshotTask;
+use Phinx\Migration\Util;
 
 /**
  * MigrationSnapshotTaskTest class
@@ -44,7 +45,7 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $this->Task = $this->getMock(
             'Migrations\Shell\Task\MigrationSnapshotTask',
-            ['in', 'err', 'createFile', '_stop'],
+            ['in', 'err', 'dispatchShell', '_stop'],
             [$inputOutput]
         );
         $this->Task->name = 'Migration';
@@ -57,6 +58,13 @@ class MigrationSnapshotTaskTest extends TestCase
     public function testNotEmptySnapshot()
     {
         $this->Task->params['require-table'] = false;
+
+        $version = Util::getCurrentTimestamp();
+
+        $this->Task->expects($this->once())
+            ->method('dispatchShell')
+            ->with('migrations', 'mark_migrated', $version);
+
         $result = $this->Task->bake('NotEmptySnapshot');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
