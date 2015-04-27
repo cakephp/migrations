@@ -142,5 +142,18 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetch('assoc');
         $this->assertEquals('20150416223600', $result['version']);
+
+        $commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '20150416223600',
+            '--connection' => 'test'
+        ]);
+
+        $this->assertContains(
+            'The migration with version number `20150416223600` has already been marked as migrated.',
+            $commandTester->getDisplay()
+        );
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
+        $this->assertEquals(1, $result);
     }
 }

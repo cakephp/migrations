@@ -53,9 +53,21 @@ class MarkMigrated extends AbstractCommand
     {
         $this->setInput($input);
         $this->bootstrap($input, $output);
+        $adapter = $this->getManager()->getEnvironment('default')->getAdapter();
 
         $path = $this->getConfig()->getMigrationPath();
         $version = $input->getArgument('version');
+
+        $versions = array_flip($adapter->getVersions());
+        if (isset($versions[$version])) {
+            $output->writeln(
+                sprintf(
+                    '<info>The migration with version number `%s` has already been marked as migrated.</info>',
+                    $version
+                )
+            );
+            return;
+        }
 
         $migrationFile = glob($path . DS . $version . '*');
         if (!empty($migrationFile)) {
@@ -67,14 +79,14 @@ class MarkMigrated extends AbstractCommand
             $time = date('Y-m-d H:i:s', time());
 
             try {
-                $this->getManager()->getEnvironment('default')->getAdapter()->migrated($Migration, 'up', $time, $time);
+                $adapter->migrated($Migration, 'up', $time, $time);
                 $output->writeln('<info>Migration successfully marked migrated !</info>');
             } catch (Exception $e) {
-                $output->writeln('<error>An error occurred : ' . $e->getMessage() . '</error>');
+                $output->writeln(sprintf('<error>An error occurred : %s</error>', $e->getMessage()));
             }
         } else {
             $output->writeln(
-                '<error>A migration file matching version number `' . $version . '` could not be found</error>'
+                sprintf('<error>A migration file matching version number `%s` could not be found</error>', $version)
             );
         }
     }
