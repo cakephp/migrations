@@ -19,7 +19,6 @@ $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
 %>
 <?php
-use Cake\Utility\Inflector;
 use Phinx\Migration\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
