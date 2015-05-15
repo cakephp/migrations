@@ -150,8 +150,7 @@ class MigrationHelper extends Helper
         $indexes = [];
         if (!empty($tableIndexes)) {
             foreach ($tableIndexes as $name) {
-                $index = $tableSchema->index($name);
-                $indexes[$name] = $index;
+                $indexes[$name] = $tableSchema->index($name);
             }
         }
 
@@ -176,7 +175,6 @@ class MigrationHelper extends Helper
         if (!empty($tableConstraints)) {
             foreach ($tableConstraints as $name) {
                 $constraint = $tableSchema->constraint($name);
-//                debug($constraint);
                 if (isset($constraint['update'])) {
                     $constraint['update'] = strtoupper(Inflector::underscore($constraint['update']));
                     $constraint['delete'] = strtoupper(Inflector::underscore($constraint['delete']));
