@@ -19,6 +19,7 @@ $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
 %>
 <?php
+use Cake\Utility\Inflector;
 use Phinx\Migration\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
@@ -50,6 +51,33 @@ class <%= $name %> extends AbstractMigration
                 $columnOptions = array_intersect_key($config['options'], $wantedOptions);
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
+        <%- endforeach; %>
+        <%- foreach($this->Migration->indexes($table) as $index): %>
+            ->addIndex(
+                [<%
+                    echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
+                %>]
+            )
+        <%- endforeach; %>
+        <%- foreach ($this->Migration->constraints($table) as $constraint): %>
+            <%- if ($constraint['type'] === 'unique'): %>
+            ->addIndex(
+                [<%
+                    echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]);
+                %>],
+                ['unique' => true]
+            )
+            <%- else: %>
+            ->addForeignKey(
+                '<%= $constraint['columns'][0] %>',
+                '<%= $constraint['references'][0] %>',
+                '<%= $constraint['references'][1] %>',
+                [
+                    'update' => '<%= $constraint['update'] %>',
+                    'delete' => '<%= $constraint['delete'] %>'
+                ]
+            )
+            <%- endif; %>
         <%- endforeach; %>
             -><%= $tableMethod %>();
     <%- endforeach; %>
