@@ -31,7 +31,7 @@ class ProductsFixture extends TestFixture
         'id' => ['type' => 'integer'],
         'title' => ['type' => 'string', 'null' => true, 'length' => 255],
         'slug' => ['type' => 'string', 'null' => true, 'length' => 255],
-        'category_id' => ['type' => 'integer'],
+        'category_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [

@@ -29,7 +29,7 @@ class CategoriesFixture extends TestFixture
      */
     public $fields = [
         'id' => ['type' => 'integer'],
-        'parent_id' => ['type' => 'integer'],
+        'parent_id' => ['type' => 'integer', 'length' => 11],
         'title' => ['type' => 'string', 'null' => true, 'length' => 255],
         'slug' => ['type' => 'string', 'null' => true, 'length' => 255],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],

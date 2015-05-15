@@ -9,7 +9,7 @@ class NotEmptySnapshot extends AbstractMigration
         $table
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => null,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
@@ -73,7 +73,7 @@ class NotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => null,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
