@@ -51,13 +51,6 @@ class NotEmptySnapshot extends AbstractMigration
                 'limit' => 50,
                 'null' => false,
             ])
-            ->addIndex(
-                [
-                    'id',
-                    'name',
-                ],
-                ['unique' => true]
-            )
             ->create();
         $table = $this->table('products');
         $table
@@ -114,12 +107,6 @@ class NotEmptySnapshot extends AbstractMigration
                 'limit' => 256,
                 'null' => true,
             ])
-            ->addIndex(
-                [
-                    'id',
-                ],
-                ['unique' => true]
-            )
             ->create();
         $table = $this->table('special_tags');
         $table

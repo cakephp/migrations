@@ -12,6 +12,7 @@
 namespace Migrations\View\Helper;
 
 use Cake\Database\Schema\Collection;
+use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
@@ -206,6 +207,19 @@ class MigrationHelper extends Helper
         return $primaryKeys;
     }
 
+    /**
+     * Returns the primary key columns name for a given table
+     *
+     * @param string $table Name of the table ot retrieve primary key for
+     * @return array
+     */
+    public function primaryKeysColumnsList($table)
+    {
+        $primaryKeys = $this->primaryKeys($table);
+        $primaryKeysColumns = Hash::extract($primaryKeys, '{n}.name');
+        sort($primaryKeysColumns);
+        return $primaryKeysColumns;
+    }
 
     /**
      * Returns an array of column data for a single column
