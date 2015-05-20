@@ -12,6 +12,8 @@
 namespace Migrations\View\Helper;
 
 use Cake\Database\Schema\Collection;
+use Cake\Utility\Hash;
+use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
 use InvalidArgumentException;
@@ -23,6 +25,14 @@ use InvalidArgumentException;
  */
 class MigrationHelper extends Helper
 {
+
+    /**
+     * Schemas list for tables analyzed during migration baking
+     *
+     * @var array
+     */
+    protected $schemas = [];
+
     /**
      * Constructor
      *
@@ -72,7 +82,6 @@ class MigrationHelper extends Helper
         return 'addIndex';
     }
 
-
     /**
      * Returns the method to be used for the column manipulation
      *
@@ -89,6 +98,25 @@ class MigrationHelper extends Helper
     }
 
     /**
+     * Returns the Cake\Database\Schema\Table for $table
+     *
+     * @param string $table Name of the table to get the Schema for
+     * @return Cake\Database\Schema\Table
+     */
+    protected function schema($table)
+    {
+        if (isset($this->schemas[$table])) {
+            return $this->schemas[$table];
+        }
+
+        $collection = $this->config('collection');
+        $schema = $collection->describe($table);
+        $this->schemas[$table] = $schema;
+
+        return $schema;
+    }
+
+    /**
      * Returns an array of column data for a given table
      *
      * @param string $table Name of the table to retrieve columns for
@@ -96,8 +124,7 @@ class MigrationHelper extends Helper
      */
     public function columns($table)
     {
-        $collection = $this->config('collection');
-        $tableSchema = $collection->describe($table);
+        $tableSchema = $this->schema($table);
         $columns = [];
         $tablePrimaryKeys = $tableSchema->primaryKey();
         foreach ($tableSchema->columns() as $column) {
@@ -108,6 +135,56 @@ class MigrationHelper extends Helper
         }
 
         return $columns;
+    }
+
+    /**
+     * Returns an array of indexes for a given table
+     *
+     * @param string $table Name of the table to retrieve indexes for
+     * @return array
+     */
+    public function indexes($table)
+    {
+        $tableSchema = $this->schema($table);
+
+        $tableIndexes = $tableSchema->indexes();
+        $indexes = [];
+        if (!empty($tableIndexes)) {
+            foreach ($tableIndexes as $name) {
+                $indexes[$name] = $tableSchema->index($name);
+            }
+        }
+
+        return $indexes;
+    }
+
+    /**
+     * Returns an array of constraints for a given table
+     *
+     * @param string $table Name of the table to retrieve constraints for
+     * @return array
+     */
+    public function constraints($table)
+    {
+        $tableSchema = $this->schema($table);
+
+        $tableConstraints = $tableSchema->constraints();
+        $constraints = [];
+        if ($tableConstraints[0] === 'primary') {
+            unset($tableConstraints[0]);
+        }
+        if (!empty($tableConstraints)) {
+            foreach ($tableConstraints as $name) {
+                $constraint = $tableSchema->constraint($name);
+                if (isset($constraint['update'])) {
+                    $constraint['update'] = strtoupper(Inflector::underscore($constraint['update']));
+                    $constraint['delete'] = strtoupper(Inflector::underscore($constraint['delete']));
+                }
+                $constraints[$name] = $constraint;
+            }
+        }
+
+        return $constraints;
     }
 
     /**
@@ -130,6 +207,19 @@ class MigrationHelper extends Helper
         return $primaryKeys;
     }
 
+    /**
+     * Returns the primary key columns name for a given table
+     *
+     * @param string $table Name of the table ot retrieve primary key for
+     * @return array
+     */
+    public function primaryKeysColumnsList($table)
+    {
+        $primaryKeys = $this->primaryKeys($table);
+        $primaryKeysColumns = Hash::extract($primaryKeys, '{n}.name');
+        sort($primaryKeysColumns);
+        return $primaryKeysColumns;
+    }
 
     /**
      * Returns an array of column data for a single column

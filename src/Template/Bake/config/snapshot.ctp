@@ -26,7 +26,9 @@ class <%= $name %> extends AbstractMigration
     public function up()
     {
     <%- foreach ($tables as $table): %>
-        <%- $primaryKeys = $this->Migration->primaryKeys($table);
+        <%- $foreignKeys = [];
+        $primaryKeysColumns = $this->Migration->primaryKeysColumnsList($table);
+        $primaryKeys = $this->Migration->primaryKeys($table);
         $specialPk = count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer';
         if ($specialPk) {
         %>
@@ -51,6 +53,42 @@ class <%= $name %> extends AbstractMigration
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
         <%- endforeach; %>
+        <%- foreach ($this->Migration->constraints($table) as $constraint):
+            $constraintColumns = $constraint['columns'];
+            sort($constraintColumns);
+            if ($constraint['type'] !== 'unique'):
+                $foreignKeys[] = $constraint['columns'][0]; %>
+            ->addForeignKey(
+                '<%= $constraint['columns'][0] %>',
+                '<%= $constraint['references'][0] %>',
+                '<%= $constraint['references'][1] %>',
+                [
+                    'update' => '<%= $constraint['update'] %>',
+                    'delete' => '<%= $constraint['delete'] %>'
+                ]
+            )
+            <%- elseif ($constraintColumns !== $primaryKeysColumns): %>
+            ->addIndex(
+                [<%
+                    echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]);
+                %>],
+                ['unique' => true]
+            )
+            <%- endif; %>
+            <%- endforeach; %>
+        <%- foreach($this->Migration->indexes($table) as $index):
+            sort($foreignKeys);
+            $indexColumns = $index['columns'];
+            sort($indexColumns);
+            if ($foreignKeys !== $indexColumns):
+            %>
+            ->addIndex(
+                [<%
+                    echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
+                %>]
+            )
+        <%- endif;
+            endforeach; %>
             -><%= $tableMethod %>();
     <%- endforeach; %>
     }

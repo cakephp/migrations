@@ -30,6 +30,8 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.migrations.special_tags',
         'plugin.migrations.special_pk',
         'plugin.migrations.composite_pk',
+        'plugin.migrations.categories',
+        'plugin.migrations.products'
     ];
 
     /**
