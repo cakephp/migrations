@@ -17,7 +17,6 @@ env:
 matrix:
   allow_failures:
     - php: hhvm
-    - php: hhvm-nightly
     - env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
 
   fast_finish: true
@@ -45,12 +44,6 @@ matrix:
       env: HHVM=1 DB=sqlite db_dsn='sqlite:///:memory:'
 
     - php: hhvm
-      env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test'
-
-    - php: hhvm-nightly
-      env: HHVM=1 DB=sqlite db_dsn='sqlite:///:memory:'
-
-    - php: hhvm-nightly
       env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test'
 
 before_script:
