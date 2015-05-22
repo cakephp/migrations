@@ -24,7 +24,7 @@ class MigrationsShell extends Shell
 
     /**
      * Defines what options can be passed to the shell.
-     * This is required becuase CakePHP validates the passed options
+     * This is required because CakePHP validates the passed options
      * and would complain if something not configured here is present
      *
      * @return Cake\Console\ConsoleOptionParser
@@ -40,7 +40,8 @@ class MigrationsShell extends Shell
             ->addOption('no-ansi')
             ->addOption('version', ['short' => 'V'])
             ->addOption('no-interaction', ['short' => 'n'])
-            ->addOption('template', ['short' => 't']);
+            ->addOption('template', ['short' => 't'])
+            ->addOption('format', ['short' => 'f']);
     }
 
     /**
