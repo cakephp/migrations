@@ -99,8 +99,21 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             $version
         ];
 
+        $dispatchCommand = 'migrations mark_migrated ' . $version;
+        if (!empty($this->params['connection'])) {
+            $_SERVER['argv'][] = '-c';
+            $_SERVER['argv'][] = $this->params['connection'];
+            $dispatchCommand .= ' -c ' . $this->params['connection'];
+        }
+
+        if (!empty($this->params['plugin'])) {
+            $_SERVER['argv'][] = '-p';
+            $_SERVER['argv'][] = $this->params['plugin'];
+            $dispatchCommand .= ' -p ' . $this->params['plugin'];
+        }
+
         $this->_io->out('Marking the snapshot ' . $fileName . ' as migrated...');
-        $result = $this->dispatchShell('migrations', 'mark_migrated', $version);
+        $result = $this->dispatchShell($dispatchCommand);
         $_SERVER['argv'] = $argv;
     }
 
