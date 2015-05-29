@@ -23,7 +23,12 @@ use Symfony\Component\Console\Input\ArgvInput;
 class MigrationsShell extends Shell
 {
 
-    public $argv;
+    /**
+     * Array of arguments to run the shell with.
+     *
+     * @var array
+     */
+    public $argv = [];
 
     /**
      * Defines what options can be passed to the shell.
