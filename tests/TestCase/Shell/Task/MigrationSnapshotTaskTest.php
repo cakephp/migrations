@@ -67,7 +67,12 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $this->Task->expects($this->once())
             ->method('dispatchShell')
-            ->with('migrations mark_migrated ' . $version . ' -c test -p BogusPlugin');
+            ->with(
+                $this->logicalAnd(
+                    $this->stringContains('migrations mark_migrated'),
+                    $this->stringContains('-c test -p BogusPlugin')
+                )
+            );
 
         $result = $this->Task->bake('NotEmptySnapshot');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
