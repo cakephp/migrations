@@ -77,10 +77,7 @@ class MigrationsShell extends Shell
      */
     public function main()
     {
-        array_shift($_SERVER['argv']);
-        $_SERVER['argv']--;
         $app = new MigrationsDispatcher(PHINX_VERSION);
-
         $input = new ArgvInput($this->argv);
         $app->run($input);
     }
