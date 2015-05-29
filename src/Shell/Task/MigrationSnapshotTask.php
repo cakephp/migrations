@@ -91,17 +91,18 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         list($version, ) = explode('_', $fileName, 2);
 
-        $argv = $_SERVER['argv'];
-        $_SERVER['argv'] = [
-            '',
-            'migrations',
-            'mark_migrated',
-            $version
-        ];
+
+        $dispatchCommand = 'migrations mark_migrated ' . $version;
+        if (!empty($this->params['connection'])) {
+            $dispatchCommand .= ' -c ' . $this->params['connection'];
+        }
+
+        if (!empty($this->params['plugin'])) {
+            $dispatchCommand .= ' -p ' . $this->params['plugin'];
+        }
 
         $this->_io->out('Marking the snapshot ' . $fileName . ' as migrated...');
-        $result = $this->dispatchShell('migrations', 'mark_migrated', $version);
-        $_SERVER['argv'] = $argv;
+        $this->dispatchShell($dispatchCommand);
     }
 
     /**
