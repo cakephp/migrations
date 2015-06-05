@@ -171,7 +171,10 @@ trait ConfigurationTrait
         $connection = ConnectionManager::get($name);
 
         $env = $this->getManager()->getEnvironment('default');
-        $env->setAdapter(new CakeAdapter($env->getAdapter(), $connection));
+        $adapter = $env->getAdapter();
+        if (!$adapter instanceof CakeAdapter) {
+            $env->setAdapter(new CakeAdapter($adapter, $connection));
+        }
     }
 
     /**
