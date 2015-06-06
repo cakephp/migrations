@@ -24,21 +24,22 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Decorates an AdapterInterface in order to proxy some method to the actual
  * connection object.
  */
-class CakeAdapter implements AdapterInterface {
+class CakeAdapter implements AdapterInterface
+{
 
     /**
      * Decorated adapter
      *
      * @var \Phinx\Db\Adapter\AdapterInterface
      */
-    protected $_adapter;
+    protected $adapter;
 
     /**
      * Database connection
      *
      * @var \Cake\Database\Connection
      */
-    protected $_connection;
+    protected $connection;
 
     /**
      * Constructor
@@ -48,8 +49,8 @@ class CakeAdapter implements AdapterInterface {
      */
     public function __construct(AdapterInterface $adapter, Connection $connection)
     {
-        $this->_adapter = $adapter;
-        $this->_connection = $connection;
+        $this->adapter = $adapter;
+        $this->connection = $connection;
         $pdo = $adapter->getConnection();
         $connection->driver()->connection($pdo);
     }
@@ -61,7 +62,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getVersions()
     {
-        return $this->_adapter->getVersions();
+        return $this->adapter->getVersions();
     }
 
     /**
@@ -72,7 +73,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function setOptions(array $options)
     {
-        return $this->_adapter->setOptions($options);
+        return $this->adapter->setOptions($options);
     }
 
     /**
@@ -82,7 +83,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getOptions()
     {
-        return $this->_adapter->getOptions();
+        return $this->adapter->getOptions();
     }
 
     /**
@@ -93,7 +94,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasOption($name)
     {
-        return $this->_adapter->hasOption($name);
+        return $this->adapter->hasOption($name);
     }
 
     /**
@@ -104,7 +105,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getOption($name)
     {
-        return $this->_adapter->getOption($name);
+        return $this->adapter->getOption($name);
     }
 
     /**
@@ -115,7 +116,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function setOutput(OutputInterface $output)
     {
-        return $this->_adapter->setOutput($output);
+        return $this->adapter->setOutput($output);
     }
 
     /**
@@ -125,7 +126,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getOutput()
     {
-        return $this->_adapter->getOutput();
+        return $this->adapter->getOutput();
     }
 
     /**
@@ -139,7 +140,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime)
     {
-        return $this->_adapter->migrated($migration, $direction, $startTime, $endTime);
+        return $this->adapter->migrated($migration, $direction, $startTime, $endTime);
     }
 
     /**
@@ -150,7 +151,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasSchemaTable()
     {
-        return $this->_adapter->hasSchemaTable();
+        return $this->adapter->hasSchemaTable();
     }
 
     /**
@@ -160,7 +161,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function createSchemaTable()
     {
-        return $this->_adapter->createSchemaTable();
+        return $this->adapter->createSchemaTable();
     }
 
     /**
@@ -170,7 +171,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getAdapterType()
     {
-        return $this->_adapter->getAdapterType();
+        return $this->adapter->getAdapterType();
     }
 
     /**
@@ -181,7 +182,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function connect()
     {
-        return $this->_adapter->connect();
+        return $this->adapter->connect();
     }
 
     /**
@@ -191,7 +192,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function disconnect()
     {
-        return $this->_adapter->disconnect();
+        return $this->adapter->disconnect();
     }
 
     /**
@@ -201,7 +202,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasTransactions()
     {
-        return $this->_adapter->hasTransactions();
+        return $this->adapter->hasTransactions();
     }
 
     /**
@@ -211,7 +212,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function beginTransaction()
     {
-        $this->_connection->begin();
+        $this->connection->begin();
     }
 
     /**
@@ -221,7 +222,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function commitTransaction()
     {
-        $this->_connection->commit();
+        $this->connection->commit();
     }
 
     /**
@@ -231,7 +232,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function rollbackTransaction()
     {
-        $this->_connection->rollback();
+        $this->connection->rollback();
     }
 
     /**
@@ -242,7 +243,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function execute($sql)
     {
-        return $this->_adapter->execute($sql);
+        return $this->adapter->execute($sql);
     }
 
     /**
@@ -253,7 +254,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function query($sql)
     {
-        return $this->_adapter->query($sql);
+        return $this->adapter->query($sql);
     }
 
     /**
@@ -264,7 +265,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function fetchRow($sql)
     {
-        return $this->_adapter->fetchRow($sql);
+        return $this->adapter->fetchRow($sql);
     }
 
     /**
@@ -275,7 +276,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function fetchAll($sql)
     {
-        return $this->_adapter->fetchAll($sql);
+        return $this->adapter->fetchAll($sql);
     }
 
     /**
@@ -286,7 +287,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function quoteTableName($tableName)
     {
-        return $this->_adapter->quoteTableName($tableName);
+        return $this->adapter->quoteTableName($tableName);
     }
 
     /**
@@ -297,7 +298,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function quoteColumnName($columnName)
     {
-        return $this->_adapter->quoteColumnName($columnName);
+        return $this->adapter->quoteColumnName($columnName);
     }
 
     /**
@@ -308,7 +309,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasTable($tableName)
     {
-        return $this->_adapter->hasTable($tableName);
+        return $this->adapter->hasTable($tableName);
     }
 
     /**
@@ -319,7 +320,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function createTable(Table $table)
     {
-        return $this->_adapter->createTable($table);
+        return $this->adapter->createTable($table);
     }
 
     /**
@@ -331,7 +332,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function renameTable($tableName, $newName)
     {
-        return $this->_adapter->renameTable($tableName, $newName);
+        return $this->adapter->renameTable($tableName, $newName);
     }
 
     /**
@@ -342,7 +343,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function dropTable($tableName)
     {
-        return $this->_adapter->dropTable($tableName);
+        return $this->adapter->dropTable($tableName);
     }
 
     /**
@@ -353,7 +354,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getColumns($tableName)
     {
-        return $this->_adapter->getColumns($tableName);
+        return $this->adapter->getColumns($tableName);
     }
 
     /**
@@ -365,7 +366,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasColumn($tableName, $columnName)
     {
-        return $this->_adapter->hasColumn($tableName, $columnName);
+        return $this->adapter->hasColumn($tableName, $columnName);
     }
 
     /**
@@ -377,7 +378,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function addColumn(Table $table, Column $column)
     {
-        return $this->_adapter->addColumn($table, $column);
+        return $this->adapter->addColumn($table, $column);
     }
 
     /**
@@ -390,7 +391,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function renameColumn($tableName, $columnName, $newColumnName)
     {
-        return $this->_adapter->renameColumn($tableName, $columnName, $newColumnName);
+        return $this->adapter->renameColumn($tableName, $columnName, $newColumnName);
     }
 
     /**
@@ -403,7 +404,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function changeColumn($tableName, $columnName, Column $newColumn)
     {
-        return $this->_adapter->changeColumn($tableName, $columnName, $newColumn);
+        return $this->adapter->changeColumn($tableName, $columnName, $newColumn);
     }
 
     /**
@@ -415,7 +416,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function dropColumn($tableName, $columnName)
     {
-        return $this->_adapter->dropColumn($tableName, $columnName);
+        return $this->adapter->dropColumn($tableName, $columnName);
     }
 
     /**
@@ -427,7 +428,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasIndex($tableName, $columns)
     {
-        return $this->_adapter->hasIndex($tableName, $columns);
+        return $this->adapter->hasIndex($tableName, $columns);
     }
 
     /**
@@ -439,7 +440,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function addIndex(Table $table, Index $index)
     {
-        return $this->_adapter->addIndex($table, $index);
+        return $this->adapter->addIndex($table, $index);
     }
 
     /**
@@ -451,7 +452,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function dropIndex($tableName, $columns)
     {
-        return $this->_adapter->dropIndex($tableName, $columns);
+        return $this->adapter->dropIndex($tableName, $columns);
     }
 
     /**
@@ -463,7 +464,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function dropIndexByName($tableName, $indexName)
     {
-        return $this->_adapter->dropIndexByName($tableName, $indexName);
+        return $this->adapter->dropIndexByName($tableName, $indexName);
     }
 
     /**
@@ -476,7 +477,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasForeignKey($tableName, $columns, $constraint = null)
     {
-        return $this->_adapter->hasForeignKey($tableName, $columns, $constraint);
+        return $this->adapter->hasForeignKey($tableName, $columns, $constraint);
     }
 
     /**
@@ -488,7 +489,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function addForeignKey(Table $table, ForeignKey $foreignKey)
     {
-        return $this->_adapter->addForeignKey($table, $foreignKey);
+        return $this->adapter->addForeignKey($table, $foreignKey);
     }
 
     /**
@@ -501,7 +502,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function dropForeignKey($tableName, $columns, $constraint = null)
     {
-        return $this->_adapter->dropForeignKey($tableName, $columns, $constraint);
+        return $this->adapter->dropForeignKey($tableName, $columns, $constraint);
     }
 
     /**
@@ -511,7 +512,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getColumnTypes()
     {
-        return $this->_adapter->getColumnTypes();
+        return $this->adapter->getColumnTypes();
     }
 
     /**
@@ -522,7 +523,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function isValidColumnType(Column $column)
     {
-        return $this->_adapter->isValidColumnType($column);
+        return $this->adapter->isValidColumnType($column);
     }
 
     /**
@@ -534,7 +535,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function getSqlType($type, $limit = null)
     {
-        return $this->_adapter->getSqlType($type, $limit);
+        return $this->adapter->getSqlType($type, $limit);
     }
 
     /**
@@ -546,7 +547,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function createDatabase($name, $options = array())
     {
-        return $this->_adapter->createDatabase($name, $options);
+        return $this->adapter->createDatabase($name, $options);
     }
 
     /**
@@ -557,7 +558,7 @@ class CakeAdapter implements AdapterInterface {
      */
     public function hasDatabase($name)
     {
-        return $this->_adapter->hasDatabase($name);
+        return $this->adapter->hasDatabase($name);
     }
 
     /**
@@ -568,7 +569,6 @@ class CakeAdapter implements AdapterInterface {
      */
     public function dropDatabase($name)
     {
-        return $this->_adapter->dropDatabase($name);
+        return $this->adapter->dropDatabase($name);
     }
-
 }
