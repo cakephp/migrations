@@ -49,13 +49,13 @@ Cake\Cache\Cache::config([
         'engine' => 'File',
         'prefix' => 'cake_core_',
         'serialize' => true,
-        'path' => '/tmp',
+        'path' => TMP,
     ],
     '_cake_model_' => [
         'engine' => 'File',
         'prefix' => 'cake_model_',
         'serialize' => true,
-        'path' => '/tmp',
+        'path' => TMP,
     ]
 ]);
 

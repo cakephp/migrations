@@ -166,9 +166,15 @@ trait ConfigurationTrait
     public function bootstrap(InputInterface $input, OutputInterface $output)
     {
         parent::bootstrap($input, $output);
-        $connection = ConnectionManager::get($this->getConnectionName($input));
-        $pdo = $this->getManager()->getEnvironment('default')->getAdapter()->getConnection();
-        $connection->driver()->connection($pdo);
+        $name = $this->getConnectionName($input);
+        ConnectionManager::alias($name, 'default');
+        $connection = ConnectionManager::get($name);
+
+        $env = $this->getManager()->getEnvironment('default');
+        $adapter = $env->getAdapter();
+        if (!$adapter instanceof CakeAdapter) {
+            $env->setAdapter(new CakeAdapter($adapter, $connection));
+        }
     }
 
     /**

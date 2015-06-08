@@ -24,7 +24,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "*",
-        "cakephp/bake": "dev-master"
+        "cakephp/bake": "@stable"
     },
     "autoload": {
         "psr-4": {
