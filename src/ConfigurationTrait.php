@@ -46,11 +46,12 @@ trait ConfigurationTrait
      * Overrides the original method from phinx in order to return a tailored
      * Config object containing the connection details for the database.
      *
-     * @return Phinx\Config\Config
+     * @param bool $forceRefresh
+     * @return \Migrations\Phinx\Config\Config
      */
-    public function getConfig()
+    public function getConfig($forceRefresh = false)
     {
-        if ($this->configuration) {
+        if ($this->configuration && $forceRefresh === false) {
             return $this->configuration;
         }
 
@@ -72,7 +73,7 @@ trait ConfigurationTrait
         }
 
         $plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
-        $plugin = str_replace(array('\\', '/', '.'), '_', $plugin);
+        $plugin = str_replace(['\\', '/', '.'], '_', $plugin);
 
         $connection = $this->getConnectionName($this->input);
 
@@ -137,10 +138,23 @@ trait ConfigurationTrait
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->beforeExecute($input, $output);
+        parent::execute($input, $output);
+    }
+
+    /**
+     * Overrides the action execute method in order to vanish the idea of environments
+     * from phinx. CakePHP does not believe in the idea of having in-app environments
+     *
+     * @param Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+     * @return void
+     */
+    protected function beforeExecute(InputInterface $input, OutputInterface $output)
+    {
         $this->setInput($input);
         $this->addOption('--environment', '-e', InputArgument::OPTIONAL);
         $input->setOption('environment', 'default');
-        parent::execute($input, $output);
     }
 
     /**
@@ -171,6 +185,11 @@ trait ConfigurationTrait
         ConnectionManager::alias($name, 'default');
         $connection = ConnectionManager::get($name);
 
+        $manager = $this->getManager();
+
+        if (!$manager instanceof CakeManager) {
+            $this->setManager(new CakeManager($this->getConfig(), $output));
+        }
         $env = $this->getManager()->getEnvironment('default');
         $adapter = $env->getAdapter();
         if (!$adapter instanceof CakeAdapter) {
