@@ -14,7 +14,7 @@ namespace Migrations;
 use Phinx\Migration\Manager;
 
 /**
- * Overides Phinx Manager class in order to provide a interface
+ * Overrides Phinx Manager class in order to provide an interface
  * for running migrations within an app
  */
 class CakeManager extends Manager {
@@ -28,7 +28,7 @@ class CakeManager extends Manager {
      */
     public function printStatus($environment, $format = null)
     {
-        $migrations = array();
+        $migrations = [];
         if (count($this->getMigrations())) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersions();
@@ -47,6 +47,10 @@ class CakeManager extends Manager {
             foreach ($versions as $missing) {
                 $migrations[] = ['status' => 'up', 'id' => $missing, 'name' => false];
             }
+        }
+
+        if ($format === 'json') {
+            $migrations = json_encode($migrations);
         }
 
         return $migrations;

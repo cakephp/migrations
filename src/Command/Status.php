@@ -66,7 +66,7 @@ class Status extends StatusCommand
 
         switch ($format) {
             case 'json':
-                $output->writeln(json_encode($migrations));
+                $output->writeln($migrations);
                 break;
             default:
                 $this->display($migrations);
