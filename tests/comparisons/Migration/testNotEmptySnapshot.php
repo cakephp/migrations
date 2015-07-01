@@ -52,6 +52,34 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => false,
             ])
             ->create();
+        $table = $this->table('orders');
+        $table
+            ->addColumn('product_category', 'integer', [
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ],
+                'products',
+                [
+                    'category_id',
+                    'id',
+                ],
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->create();
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -171,6 +199,7 @@ class NotEmptySnapshot extends AbstractMigration
     {
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
+        $this->dropTable('orders');
         $this->dropTable('products');
         $this->dropTable('special_pks');
         $this->dropTable('special_tags');
