@@ -11,6 +11,8 @@
  */
 namespace Migrations;
 
+use Migrations\Command\Migrate;
+use Migrations\Command\Rollback;
 use Migrations\Command\Status;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
@@ -30,6 +32,13 @@ class Migrations {
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected $output;
+
+    /**
+     * The last error caught.
+     *
+     * @var string
+     */
+    protected $lastError;
 
     /**
      * Constructor
@@ -61,6 +70,68 @@ class Migrations {
         $params = ['default', $input->getOption('format')];
 
         return $this->run('printStatus', $params, $input);
+    }
+
+    /**
+     * Migrates available migrations
+     *
+     * @param array $options Options to pass to the command
+     * Available options are :
+     *
+     * - `target` The version number to migrate to. If not provided, will migrate
+     * everything it can
+     * - `connection` The datasource connection to use
+     * - `source` The folder where migrations are in
+     * - `plugin` The plugin containing the migrations
+     *
+     * @return bool Success
+     */
+    public function migrate($options = [])
+    {
+        $options = $this->prepareOptions($options);
+        $definition = (new Migrate())->getDefinition();
+        $input = new ArrayInput($options, $definition);
+
+        $params = ['default', $input->getOption('target')];
+
+        try {
+            $this->run('migrate', $params, $input);
+            return true;
+        } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
+            return false;
+        }
+    }
+
+    /**
+     * Rollbacks migrations
+     *
+     * @param array $options Options to pass to the command
+     * Available options are :
+     *
+     * - `target` The version number to migrate to. If not provided, will only migrate
+     * the last migrations registered in the phinx log
+     * - `connection` The datasource connection to use
+     * - `source` The folder where migrations are in
+     * - `plugin` The plugin containing the migrations
+     *
+     * @return bool Success
+     */
+    public function rollback($options = [])
+    {
+        $options = $this->prepareOptions($options);
+        $definition = (new Rollback())->getDefinition();
+        $input = new ArrayInput($options, $definition);
+
+        $params = ['default', $input->getOption('target')];
+
+        try {
+            $this->run('rollback', $params, $input);
+            return true;
+        } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
+            return false;
+        }
     }
 
     /**
@@ -100,5 +171,15 @@ class Migrations {
         }
 
         return $options;
+    }
+
+    /**
+     * Get the last error message caught while migrating
+     *
+     * @return string
+     */
+    public function getLastError()
+    {
+        return $this->lastError;
     }
 }
