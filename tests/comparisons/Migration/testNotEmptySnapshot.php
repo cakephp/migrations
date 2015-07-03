@@ -56,12 +56,12 @@ class NotEmptySnapshot extends AbstractMigration
         $table
             ->addColumn('product_category', 'integer', [
                 'default' => null,
-                'limit' => null,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => null,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addForeignKey(

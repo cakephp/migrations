@@ -34,8 +34,8 @@ class OrdersFixture extends TestFixture
      */
     public $fields = [
         'id' => ['type' => 'integer'],
-        'product_category' => ['type' => 'integer', 'null' => false],
-        'product_id' => ['type' => 'integer', 'null' => false],
+        'product_category' => ['type' => 'integer', 'null' => false, 'length' => 11],
+        'product_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
         '_indexes' => [
             'product_category' => [
                 'type' => 'index',
