@@ -1,7 +1,7 @@
 <?php
 use Phinx\Migration\AbstractMigration;
 
-class NotEmptySnapshot extends AbstractMigration
+class CompositeConstraintsSnapshot extends AbstractMigration
 {
     public function up()
     {
@@ -51,6 +51,34 @@ class NotEmptySnapshot extends AbstractMigration
                 'limit' => 50,
                 'null' => false,
             ])
+            ->create();
+        $table = $this->table('orders');
+        $table
+            ->addColumn('product_category', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ],
+                'products',
+                [
+                    'category_id',
+                    'id',
+                ],
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
             ->create();
         $table = $this->table('products');
         $table
@@ -171,6 +199,7 @@ class NotEmptySnapshot extends AbstractMigration
     {
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
+        $this->dropTable('orders');
         $this->dropTable('products');
         $this->dropTable('special_pks');
         $this->dropTable('special_tags');

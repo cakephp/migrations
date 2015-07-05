@@ -12,6 +12,7 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Bake\Shell\Task\BakeTemplateTask;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
@@ -34,6 +35,8 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.migrations.products',
         'plugin.migrations.orders'
     ];
+
+    public $autoFixtures = false;
 
     /**
      * setup method
@@ -60,6 +63,15 @@ class MigrationSnapshotTaskTest extends TestCase
 
     public function testNotEmptySnapshot()
     {
+        $this->loadFixtures(
+            'Users',
+            'SpecialTags',
+            'SpecialPk',
+            'CompositePk',
+            'Categories',
+            'Products'
+        );
+
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'BogusPlugin';
@@ -76,6 +88,24 @@ class MigrationSnapshotTaskTest extends TestCase
             );
 
         $result = $this->Task->bake('NotEmptySnapshot');
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    public function testCompositeConstraintsSnapshot()
+    {
+        $cakeVersion = intval(str_replace('.', '', Configure::version()));
+        $this->skipIf(
+            $cakeVersion < 308,
+            'Cannot run "testCompositeConstraintsSnapshot" because CakePHP Core feature is not implemented in this version'
+        );
+
+        $this->loadFixtures(
+            'Orders'
+        );
+
+        $this->Task->params['require-table'] = false;
+        $this->Task->params['connection'] = 'test';
+        $result = $this->Task->bake('CompositeConstraintsSnapshot');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 }
