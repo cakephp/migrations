@@ -41,11 +41,27 @@ class Migrations {
     protected $lastError;
 
     /**
-     * Constructor
+     * Default options to use
+     *
+     * @var array
      */
-    public function __construct()
+    protected $default = [];
+
+    /**
+     * Constructor
+     * @param array $default Default option to be used when calling a method.
+     * Available options are :
+     * - `connection` The datasource connection to use
+     * - `source` The folder where migrations are in
+     * - `plugin` The plugin containing the migrations
+     */
+    public function __construct(array $default = [])
     {
         $this->output = new NullOutput();
+
+        if (!empty($default)) {
+            $this->default = $default;
+        }
     }
 
     /**
@@ -161,6 +177,7 @@ class Migrations {
      */
     protected function prepareOptions($options = [])
     {
+        $options = array_merge($this->default, $options);
         if (empty($options)) {
             return $options;
         }
