@@ -31,8 +31,8 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.migrations.special_tags',
         'plugin.migrations.special_pk',
         'plugin.migrations.composite_pk',
-        'plugin.migrations.categories',
         'plugin.migrations.products',
+        'plugin.migrations.categories',
         'plugin.migrations.orders'
     ];
 
@@ -96,7 +96,8 @@ class MigrationSnapshotTaskTest extends TestCase
         $cakeVersion = intval(str_replace('.', '', Configure::version()));
         $this->skipIf(
             $cakeVersion < 308,
-            'Cannot run "testCompositeConstraintsSnapshot" because CakePHP Core feature is not implemented in this version'
+            'Cannot run "testCompositeConstraintsSnapshot" because CakePHP Core feature' .
+            'is not implemented in this version'
         );
 
         $this->loadFixtures(
