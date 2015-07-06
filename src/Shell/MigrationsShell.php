@@ -88,11 +88,11 @@ class MigrationsShell extends Shell
      *
      * {@inheritDoc}
      */
-    public function runCommand($argv, $autoMethod = false)
+    public function runCommand($argv, $autoMethod = false, $extra = [])
     {
         array_unshift($argv, 'migrations');
         $this->argv = $argv;
-        return parent::runCommand($argv, $autoMethod);
+        return parent::runCommand($argv, $autoMethod, $extra);
     }
 
     /**
