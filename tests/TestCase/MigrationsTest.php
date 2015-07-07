@@ -11,6 +11,7 @@
  */
 namespace Migrations\Test;
 
+use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
@@ -45,10 +46,21 @@ class MigrationsTest extends TestCase
     {
         parent::setUp();
         $this->migrations = new Migrations([
-            'connection' => 'test'
+            'connection' => 'test',
+            'source' => 'Tests'
         ]);
 
         $this->Connection = ConnectionManager::get('test');
+        $tables = (new Collection($this->Connection))->listTables();
+
+        foreach(['phinxlog', 'numbers'] as $tableName) {
+            if (in_array($tableName, $tables)) {
+                $ormTable = TableRegistry::get($tableName, ['connection' => $this->Connection]);
+                $this->Connection->execute(
+                    $this->Connection->driver()->schemaDialect()->dropTableSql($ormTable->schema())[0]
+                );
+            }
+        }
     }
 
     /**
@@ -92,12 +104,45 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMigrate()
+    public function testMigrateAndRollback()
     {
-        $result = $this->migrations->migrate();
-        $this->assertTrue($result);
+        // Migrate all
+        $migrate = $this->migrations->migrate();
+        $this->assertTrue($migrate);
 
-        $phinxLog = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
-        debug($phinxLog);
+        $status = $this->migrations->status();
+        $expectedStatus = [
+            [
+                'status' => 'up',
+                'id' => '20150416223600',
+                'name' => 'MarkMigratedTest'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $status);
+
+        $table = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
+        $columns = $table->schema()->columns();
+        $expected = ['id', 'number'];
+        $this->assertEquals($columns, $expected);
+
+        // Rollback last
+        $rollback = $this->migrations->rollback();
+        $this->assertTrue($rollback);
+        $expectedStatus[1]['status'] = 'down';
+        $status = $this->migrations->status();
+        $this->assertEquals($expectedStatus, $status);
+
+        // Migrate all again and rollback all
+        $this->migrations->migrate();
+        $rollback = $this->migrations->rollback(['target' => 0]);
+        $this->assertTrue($rollback);
+        $expectedStatus[0]['status'] = 'down';
+        $status = $this->migrations->status();
+        $this->assertEquals($expectedStatus, $status);
     }
 }
