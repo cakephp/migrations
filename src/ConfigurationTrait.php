@@ -92,6 +92,7 @@ trait ConfigurationTrait
                     'port' => isset($config['port']) ? $config['port'] : null,
                     'name' => $config['database'],
                     'charset' => isset($config['encoding']) ? $config['encoding'] : null,
+                    'unix_socket' => isset($config['unix_socket']) ? $config['unix_socket'] : null,
                 ]
             ]
         ]);
