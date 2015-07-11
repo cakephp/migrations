@@ -46,8 +46,7 @@ class MigrationsTest extends TestCase
     {
         parent::setUp();
         $this->migrations = new Migrations([
-            'connection' => 'test',
-            'source' => 'Tests'
+            'connection' => 'test'
         ]);
 
         $this->Connection = ConnectionManager::get('test');
@@ -100,7 +99,7 @@ class MigrationsTest extends TestCase
     }
 
     /**
-     * Tests the status method
+     * Tests the migrations and rollbacks
      *
      * @return void
      */
@@ -144,5 +143,62 @@ class MigrationsTest extends TestCase
         $expectedStatus[0]['status'] = 'down';
         $status = $this->migrations->status();
         $this->assertEquals($expectedStatus, $status);
+    }
+
+    /**
+     * Tests that migrate returns false in case of error
+     * and can return a error message
+     *
+     * @return void
+     */
+    public function testMigrateErrors()
+    {
+        $this->migrations->migrate();
+
+        $tables = (new Collection($this->Connection))->listTables();
+        if (in_array('phinxlog', $tables)) {
+            $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
+            $this->Connection->execute(
+                $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema())[0]
+            );
+        }
+
+        $migrate = $this->migrations->migrate();
+        $this->assertFalse($migrate);
+
+        $error = $this->migrations->getLastError();
+        $this->assertNotNull($error);
+    }
+
+    /**
+     * Tests that rollback returns false in case of error
+     * and can return a error message
+     *
+     * @return void
+     */
+    public function testRollbackErrors()
+    {
+        $this->migrations->migrate();
+        $this->migrations->rollback(['target' => 0]);
+
+        $this->Connection->newQuery()
+            ->insert(['version', 'start_time', 'end_time'])
+            ->values([
+                'version' => 20150416223600,
+                'start_time' => date('Y-d-m', time()),
+                'end_time' => date('Y-d-m', time())
+            ])
+            ->values([
+                'version' => 20150704160200,
+                'start_time' => date('Y-d-m', time()),
+                'end_time' => date('Y-d-m', time())
+            ])
+            ->into('phinxlog')
+            ->execute();
+
+        $rollback = $this->migrations->rollback();
+        $this->assertFalse($rollback);
+        $error = $this->migrations->getLastError();
+        $this->assertNotNull($error);
     }
 }
