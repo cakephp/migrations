@@ -11,9 +11,6 @@
  */
 namespace Migrations;
 
-use Migrations\Command\Migrate;
-use Migrations\Command\Rollback;
-use Migrations\Command\Status;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 
@@ -79,10 +76,7 @@ class Migrations {
      */
     public function status($options = [])
     {
-        $options = $this->prepareOptions($options);
-        $definition = (new Status())->getDefinition();
-        $input = new ArrayInput($options, $definition);
-
+        $input = $this->getInput('Status', $options);
         $params = ['default', $input->getOption('format')];
 
         return $this->run('printStatus', $params, $input);
@@ -104,10 +98,7 @@ class Migrations {
      */
     public function migrate($options = [])
     {
-        $options = $this->prepareOptions($options);
-        $definition = (new Migrate())->getDefinition();
-        $input = new ArrayInput($options, $definition);
-
+        $input = $this->getInput('Migrate', $options);
         $params = ['default', $input->getOption('target')];
 
         try {
@@ -135,10 +126,7 @@ class Migrations {
      */
     public function rollback($options = [])
     {
-        $options = $this->prepareOptions($options);
-        $definition = (new Rollback())->getDefinition();
-        $input = new ArrayInput($options, $definition);
-
+        $input = $this->getInput('Rollback', $options);
         $params = ['default', $input->getOption('target')];
 
         try {
@@ -167,6 +155,22 @@ class Migrations {
         $manager = new CakeManager($config, $this->output);
 
         return call_user_func_array([$manager, $method], $params);
+    }
+
+    /**
+     * Get the input needed for each commands to be run
+     *
+     * @param string $command Command name for which we need the InputInterface
+     * @param array $options Simple key-values array to pass to the InputInterface
+     * @return \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
+     * Manager to properly run
+     */
+    protected function getInput($command, $options)
+    {
+        $className = '\Migrations\Command\\' . $command;
+        $options = $this->prepareOptions($options);
+        $definition = (new $className())->getDefinition();
+        return new ArrayInput($options, $definition);
     }
 
     /**
