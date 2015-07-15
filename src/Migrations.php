@@ -11,6 +11,7 @@
  */
 namespace Migrations;
 
+use Phinx\Config\ConfigInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 
@@ -29,6 +30,13 @@ class Migrations {
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected $output;
+
+    /**
+     * CakeManager instance
+     *
+     * @var \Migrations\CakeManager
+     */
+    protected $manager;
 
     /**
      * The last error caught.
@@ -151,10 +159,27 @@ class Migrations {
     protected function run($method, $params, $input)
     {
         $this->setInput($input);
-        $config = $this->getConfig();
-        $manager = new CakeManager($config, $this->output);
+        $config = $this->getConfig(true);
+        $manager = $this->getManager($config);
 
         return call_user_func_array([$manager, $method], $params);
+    }
+
+    /**
+     * Returns an instance of CakeManager
+     *
+     * @param \Phinx\Config\ConfigInterface $config ConfigInterface the Manager needs to run
+     * @return \Migrations\CakeManager Instance of CakeManager
+     */
+    protected function getManager(ConfigInterface $config)
+    {
+        if ($this->manager instanceof CakeManager) {
+            $this->manager->setConfig($config);
+        } else {
+            $this->manager = new CakeManager($config, $this->output);
+        }
+
+        return $this->manager;
     }
 
     /**
