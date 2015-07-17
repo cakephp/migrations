@@ -55,4 +55,65 @@ class CakeManager extends Manager {
 
         return $migrations;
     }
+
+    /**
+     * Checks if the migration with version number $version as already been mark migrated
+     *
+     * @param int|string $version Version number of the migration to check
+     * @return bool
+     */
+    public function isMigrated($version)
+    {
+        $adapter = $this->getEnvironment('default')->getAdapter();
+        $versions = array_flip($adapter->getVersions());
+
+        return isset($versions[$version]);
+    }
+
+    /**
+     * Marks migration with version number $version migrated
+     *
+     * @param int|string $version Version number of the migration to check
+     * @param string $path Path where the migration file is located
+     * @return bool|string A string with the error message or true if success
+     */
+    public function markMigrated($version, $path)
+    {
+        $adapter = $this->getEnvironment('default')->getAdapter();
+
+        $migrationFile = glob($path . DS . $version . '*');
+
+        if (empty($migrationFile)) {
+            throw new \RuntimeException(sprintf('A migration file matching version number `%s` could not be found', $version));
+        }
+
+        $migrationFile = $migrationFile[0];
+        $className = $this->getMigrationClassName($migrationFile);
+        require_once $migrationFile;
+        $Migration = new $className($version);
+
+        $time = date('Y-m-d H:i:s', time());
+
+        $adapter->migrated($Migration, 'up', $time, $time);
+        return true;
+    }
+
+    /**
+     * Resolves a migration class name based on $path
+     *
+     * @param string $path Path to the migration file of which we want the class name
+     * @return string Migration class name
+     */
+    protected function getMigrationClassName($path)
+    {
+        $class = preg_replace('/^[0-9]+_/', '', basename($path));
+        $class = str_replace('_', ' ', $class);
+        $class = ucwords($class);
+        $class = str_replace(' ', '', $class);
+        if (strpos($class, '.') !== false) {
+            $class = substr($class, 0, strpos($class, '.'));
+        }
+
+        return $class;
+    }
 }
