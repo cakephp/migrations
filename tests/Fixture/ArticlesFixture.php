@@ -16,7 +16,7 @@ namespace Migrations\Test\Fixture;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
- * Class CategoriesFixture
+ * Class ArticlesFixture
  *
  */
 class ArticlesFixture extends TestFixture
@@ -35,7 +35,7 @@ class ArticlesFixture extends TestFixture
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'category_idx' => [
+            'category_article_idx' => [
                 'type' => 'foreign',
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],

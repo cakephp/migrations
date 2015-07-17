@@ -16,7 +16,7 @@ namespace Migrations\Test\Fixture;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
- * Class CategoriesFixture
+ * Class ProductsFixture
  *
  */
 class ProductsFixture extends TestFixture
