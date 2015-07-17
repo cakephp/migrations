@@ -110,6 +110,38 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 ]
             )
             ->create();
+        $table = $this->table('articles');
+        $table
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('category_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
+            ->addColumn('created', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('modified', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->create();
         $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
         $table
             ->addColumn('id', 'uuid', [
@@ -201,6 +233,7 @@ class CompositeConstraintsSnapshot extends AbstractMigration
         $this->dropTable('special_tags');
         $this->dropTable('special_pks');
         $this->dropTable('composite_pks');
+        $this->dropTable('articles');
         $this->dropTable('orders');
         $this->dropTable('products');
         $this->dropTable('categories');
