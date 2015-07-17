@@ -39,47 +39,6 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 ['unique' => true]
             )
             ->create();
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
-        $table
-            ->addColumn('id', 'uuid', [
-                'default' => '',
-                'limit' => null,
-                'null' => false,
-            ])
-            ->addColumn('name', 'string', [
-                'default' => '',
-                'limit' => 50,
-                'null' => false,
-            ])
-            ->create();
-        $table = $this->table('orders');
-        $table
-            ->addColumn('product_category', 'integer', [
-                'default' => null,
-                'limit' => 11,
-                'null' => false,
-            ])
-            ->addColumn('product_id', 'integer', [
-                'default' => null,
-                'limit' => 11,
-                'null' => false,
-            ])
-            ->addForeignKey(
-                [
-                    'product_category',
-                    'product_id',
-                ],
-                'products',
-                [
-                    'category_id',
-                    'id',
-                ],
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
-            )
-            ->create();
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -122,6 +81,47 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                     'delete' => 'CASCADE'
                 ]
             )
+            ->create();
+        $table = $this->table('orders');
+        $table
+            ->addColumn('product_category', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ],
+                'products',
+                [
+                    'category_id',
+                    'id',
+                ],
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->create();
+        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table
+            ->addColumn('id', 'uuid', [
+                'default' => '',
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('name', 'string', [
+                'default' => '',
+                'limit' => 50,
+                'null' => false,
+            ])
             ->create();
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
@@ -197,12 +197,12 @@ class CompositeConstraintsSnapshot extends AbstractMigration
 
     public function down()
     {
-        $this->dropTable('categories');
+        $this->dropTable('users');
+        $this->dropTable('special_tags');
+        $this->dropTable('special_pks');
         $this->dropTable('composite_pks');
         $this->dropTable('orders');
         $this->dropTable('products');
-        $this->dropTable('special_pks');
-        $this->dropTable('special_tags');
-        $this->dropTable('users');
+        $this->dropTable('categories');
     }
 }

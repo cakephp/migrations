@@ -106,7 +106,8 @@ class <%= $name %> extends AbstractMigration
 
     public function down()
     {
-        <%- foreach ($tables as $table): %>
+        <%- $tables = array_reverse($tables);
+            foreach ($tables as $table): %>
         $this->dropTable('<%= $table%>');
         <%- endforeach; %>
     }

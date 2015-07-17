@@ -39,19 +39,6 @@ class NotEmptySnapshot extends AbstractMigration
                 ['unique' => true]
             )
             ->create();
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
-        $table
-            ->addColumn('id', 'uuid', [
-                'default' => '',
-                'limit' => null,
-                'null' => false,
-            ])
-            ->addColumn('name', 'string', [
-                'default' => '',
-                'limit' => 50,
-                'null' => false,
-            ])
-            ->create();
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -94,6 +81,19 @@ class NotEmptySnapshot extends AbstractMigration
                     'delete' => 'CASCADE'
                 ]
             )
+            ->create();
+        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table
+            ->addColumn('id', 'uuid', [
+                'default' => '',
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('name', 'string', [
+                'default' => '',
+                'limit' => 50,
+                'null' => false,
+            ])
             ->create();
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
@@ -169,11 +169,11 @@ class NotEmptySnapshot extends AbstractMigration
 
     public function down()
     {
-        $this->dropTable('categories');
+        $this->dropTable('users');
+        $this->dropTable('special_tags');
+        $this->dropTable('special_pks');
         $this->dropTable('composite_pks');
         $this->dropTable('products');
-        $this->dropTable('special_pks');
-        $this->dropTable('special_tags');
-        $this->dropTable('users');
+        $this->dropTable('categories');
     }
 }
