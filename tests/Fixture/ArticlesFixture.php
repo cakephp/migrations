@@ -16,10 +16,10 @@ namespace Migrations\Test\Fixture;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
- * Class ProductsFixture
+ * Class ArticlesFixture
  *
  */
-class ProductsFixture extends TestFixture
+class ArticlesFixture extends TestFixture
 {
 
     /**
@@ -30,14 +30,12 @@ class ProductsFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'integer'],
         'title' => ['type' => 'string', 'null' => true, 'length' => 255],
-        'slug' => ['type' => 'string', 'null' => true, 'length' => 255],
         'category_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'UNIQUE_SLUG' => ['type' => 'unique', 'columns' => ['slug']],
-            'category_idx' => [
+            'category_article_idx' => [
                 'type' => 'foreign',
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],

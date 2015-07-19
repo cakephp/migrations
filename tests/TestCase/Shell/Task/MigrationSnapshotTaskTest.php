@@ -33,6 +33,7 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.migrations.composite_pk',
         'plugin.migrations.products',
         'plugin.migrations.categories',
+        'plugin.migrations.articles',
         'plugin.migrations.orders'
     ];
 
@@ -69,7 +70,8 @@ class MigrationSnapshotTaskTest extends TestCase
             'SpecialPk',
             'CompositePk',
             'Categories',
-            'Products'
+            'Products',
+            'Articles'
         );
 
         $this->Task->params['require-table'] = false;

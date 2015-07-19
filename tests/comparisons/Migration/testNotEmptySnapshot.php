@@ -39,19 +39,6 @@ class NotEmptySnapshot extends AbstractMigration
                 ['unique' => true]
             )
             ->create();
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
-        $table
-            ->addColumn('id', 'uuid', [
-                'default' => '',
-                'limit' => null,
-                'null' => false,
-            ])
-            ->addColumn('name', 'string', [
-                'default' => '',
-                'limit' => 50,
-                'null' => false,
-            ])
-            ->create();
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -94,6 +81,51 @@ class NotEmptySnapshot extends AbstractMigration
                     'delete' => 'CASCADE'
                 ]
             )
+            ->create();
+        $table = $this->table('articles');
+        $table
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('category_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
+            ->addColumn('created', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('modified', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->create();
+        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table
+            ->addColumn('id', 'uuid', [
+                'default' => '',
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('name', 'string', [
+                'default' => '',
+                'limit' => 50,
+                'null' => false,
+            ])
             ->create();
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
@@ -169,11 +201,12 @@ class NotEmptySnapshot extends AbstractMigration
 
     public function down()
     {
-        $this->dropTable('categories');
-        $this->dropTable('composite_pks');
-        $this->dropTable('products');
-        $this->dropTable('special_pks');
-        $this->dropTable('special_tags');
         $this->dropTable('users');
+        $this->dropTable('special_tags');
+        $this->dropTable('special_pks');
+        $this->dropTable('composite_pks');
+        $this->dropTable('articles');
+        $this->dropTable('products');
+        $this->dropTable('categories');
     }
 }

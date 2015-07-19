@@ -126,7 +126,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         }
 
         $collection = $this->getCollection($this->connection);
-        $tables = $collection->listTables();
+        $tables = $this->orderTables($collection->listTables());
 
         if ($this->params['require-table'] === true) {
             $tableNamesInModel = $this->getTableNames($this->plugin);
@@ -161,10 +161,75 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     }
 
     /**
+     * Order tables based on foreign key dependencies so tables that are foreign keys
+     * to other are created first
+     *
+     * @param array $tables Tables to order.
+     * @return array Tables ordered.
+     */
+    public function orderTables($tables)
+    {
+        if (empty($tables)) {
+            return $tables;
+        }
+
+        $orderedTables = [];
+        foreach ($tables as $table) {
+            $tableSchema = $this->getCollection($this->connection)->describe($table);
+            $tableConstraints = $tableSchema->constraints();
+            if (isset($tableConstraints[0]) && $tableConstraints[0] === 'primary') {
+                unset($tableConstraints[0]);
+            }
+
+            if (!empty($tableConstraints)) {
+                foreach ($tableConstraints as $tableConstraint) {
+                    $constraint = $tableSchema->constraint($tableConstraint);
+
+                    if ($constraint['type'] !== 'foreign') {
+                        continue;
+                    }
+
+                    $refTable = $constraint['references'][0];
+
+                    $refIndex = array_search($refTable, $orderedTables);
+                    $tableIndex = array_search($table, $orderedTables);
+
+                    if ($refIndex === false && $tableIndex === false) {
+                        array_unshift($orderedTables, $refTable, $table);
+                        continue;
+                    }
+
+                    if ($refIndex === false) {
+                        array_splice($orderedTables, $tableIndex, 0, $refTable);
+                        continue;
+                    }
+
+                    if ($tableIndex === false) {
+                        array_splice($orderedTables, $refIndex + 1, 0, $table);
+                        continue;
+                    }
+
+                    if ($refIndex > $tableIndex) {
+                        unset($orderedTables[$refIndex]);
+                        array_splice($orderedTables, $tableIndex, 0, $refTable);
+                        continue;
+                    }
+                }
+            }
+
+            if (!in_array($table, $orderedTables)) {
+                $orderedTables[] = $table;
+            }
+        }
+
+        return $orderedTables;
+    }
+
+    /**
      * Get a collection from a database
      *
      * @param string $connection Database connection name.
-     * @return obj schemaCollection
+     * @return \Cake\Database\Schema\Collection
      */
     public function getCollection($connection)
     {
