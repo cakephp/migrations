@@ -196,13 +196,23 @@ class MigrationSnapshotTask extends SimpleMigrationTask
 
                     if ($refIndex === false && $tableIndex === false) {
                         array_unshift($orderedTables, $refTable, $table);
-                    } elseif ($refIndex === false) {
+                        continue;
+                    }
+
+                    if ($refIndex === false) {
                         array_splice($orderedTables, $tableIndex, 0, $refTable);
-                    } elseif ($tableIndex === false) {
-                        array_splice($orderedTables, $refIndex+1, 0, $table);
-                    } elseif ($refIndex > $tableIndex) {
+                        continue;
+                    }
+
+                    if ($tableIndex === false) {
+                        array_splice($orderedTables, $refIndex + 1, 0, $table);
+                        continue;
+                    }
+
+                    if ($refIndex > $tableIndex) {
                         unset($orderedTables[$refIndex]);
                         array_splice($orderedTables, $tableIndex, 0, $refTable);
+                        continue;
                     }
                 }
             }
