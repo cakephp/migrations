@@ -36,9 +36,10 @@ class NotEmptySnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                ['unique' => true];
             )
             ->create();
+
         $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
         $table
             ->addColumn('id', 'uuid', [
@@ -52,6 +53,7 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => false,
             ])
             ->create();
+
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -83,18 +85,15 @@ class NotEmptySnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                ['unique' => true];
             )
-            ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
+            ->addIndex(
                 [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
+                    'category_id',
+                ],
             )
             ->create();
+
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
             ->addColumn('id', 'uuid', [
@@ -108,6 +107,7 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+
         $table = $this->table('special_tags');
         $table
             ->addColumn('article_id', 'integer', [
@@ -139,9 +139,10 @@ class NotEmptySnapshot extends AbstractMigration
                 [
                     'article_id',
                 ],
-                ['unique' => true]
+                ['unique' => true];
             )
             ->create();
+
         $table = $this->table('users');
         $table
             ->addColumn('username', 'string', [
@@ -165,10 +166,29 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+
+        $this->table('products')
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
     }
 
     public function down()
     {
+        $this->table('products')
+            ->dropForeignKey(
+                'category_id'
+            )
+            ->update();
+
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
         $this->dropTable('products');

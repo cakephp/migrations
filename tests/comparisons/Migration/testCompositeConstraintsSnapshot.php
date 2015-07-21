@@ -36,9 +36,10 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                ['unique' => true];
             )
             ->create();
+
         $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
         $table
             ->addColumn('id', 'uuid', [
@@ -52,6 +53,7 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 'null' => false,
             ])
             ->create();
+
         $table = $this->table('orders');
         $table
             ->addColumn('product_category', 'integer', [
@@ -64,22 +66,14 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 'limit' => 11,
                 'null' => false,
             ])
-            ->addForeignKey(
+            ->addIndex(
                 [
                     'product_category',
                     'product_id',
                 ],
-                'products',
-                [
-                    'category_id',
-                    'id',
-                ],
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
             )
             ->create();
+
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -111,18 +105,15 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                ['unique' => true];
             )
-            ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
+            ->addIndex(
                 [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
+                    'category_id',
+                ],
             )
             ->create();
+
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
             ->addColumn('id', 'uuid', [
@@ -136,6 +127,7 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+
         $table = $this->table('special_tags');
         $table
             ->addColumn('article_id', 'integer', [
@@ -167,9 +159,10 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 [
                     'article_id',
                 ],
-                ['unique' => true]
+                ['unique' => true];
             )
             ->create();
+
         $table = $this->table('users');
         $table
             ->addColumn('username', 'string', [
@@ -193,10 +186,56 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+
+        $this->table('orders')
+            ->addForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ],
+                'products',
+                [
+                    'category_id',
+                    'id',
+                ],
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
+        $this->table('products')
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
     }
 
     public function down()
     {
+        $this->table('orders')
+            ->dropForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ]
+            )
+            ->update();
+
+        $this->table('products')
+            ->dropForeignKey(
+                'category_id'
+            )
+            ->update();
+
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
         $this->dropTable('orders');
