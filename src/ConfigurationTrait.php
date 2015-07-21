@@ -76,15 +76,15 @@ trait ConfigurationTrait
 
         $connection = $this->getConnectionName($this->input);
 
-        $config = ConnectionManager::config($connection);
-        return $this->configuration = new Config([
+       	$config = ConnectionManager::config($connection);
+       	$configArray = [
             'paths' => [
-                'migrations' => $dir
+               	'migrations' => $dir
             ],
             'environments' => [
-                'default_migration_table' => $plugin . 'phinxlog',
+               	'default_migration_table' => $plugin . 'phinxlog',
                 'default_database' => 'default',
-                'default' => [
+               	'default' => [
                     'adapter' => $this->getAdapterName($config['driver']),
                     'host' => isset($config['host']) ? $config['host'] : null,
                     'user' => isset($config['username']) ? $config['username'] : null,
@@ -92,10 +92,20 @@ trait ConfigurationTrait
                     'port' => isset($config['port']) ? $config['port'] : null,
                     'name' => $config['database'],
                     'charset' => isset($config['encoding']) ? $config['encoding'] : null,
-                    'unix_socket' => isset($config['unix_socket']) ? $config['unix_socket'] : null,
-                ]
+               	]
             ]
-        ]);
+        ];
+
+	if (($config['datasource'] == 'Database/Mysql') {
+		$mysqlAttributesArray = [ 'ssl_ca', 'ssl_cert', 'ssl_key' ];
+
+		foreach ($mysqlAttributesArray as $value) {
+			if (isset($config[$value])) {
+				$configArray['environments']['default']['mysql_attr'.$value] = $config[$value];
+			}
+		}
+	}
+	return $this->configuration = new Config($configArray);
     }
 
     /**
