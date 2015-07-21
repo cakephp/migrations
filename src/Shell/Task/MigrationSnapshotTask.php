@@ -164,7 +164,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      * Get a collection from a database
      *
      * @param string $connection Database connection name.
-     * @return obj schemaCollection
+     * @return \Cake\Database\Schema\Collection
      */
     public function getCollection($connection)
     {

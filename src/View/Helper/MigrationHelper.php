@@ -357,6 +357,12 @@ class MigrationHelper extends Helper
         return $start . implode($join, $list) . ',' . $end;
     }
 
+    /**
+     * Returns a $this->table() statement only if it was not issued already
+     *
+     * @param string $table Table for which the statement is needed
+     * @return string
+     */
     public function tableStatement($table)
     {
         if (!isset($this->tableStatements[$table])) {
