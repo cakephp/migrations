@@ -96,15 +96,14 @@ trait ConfigurationTrait
             ]
         ];
 
-	if (($config['datasource'] == 'Database/Mysql')) {
-		$mysqlAttributesArray = [ 'ssl_ca', 'ssl_cert', 'ssl_key' ];
+	$mysqlAttributesArray = [ 'ssl_ca', 'ssl_cert', 'ssl_key' ];
 
-		foreach ($mysqlAttributesArray as $value) {
-			if (isset($config[$value])) {
-				$configArray['environments']['default']['mysql_attr'.$value] = $config[$value];
-			}
+	foreach ($mysqlAttributesArray as $value) {
+		if (isset($config[$value])) {
+			$configArray['environments']['default']['mysql_attr'.$value] = $config[$value];
 		}
 	}
+
 	return $this->configuration = new Config($configArray);
     }
 
