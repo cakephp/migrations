@@ -64,9 +64,10 @@ class <%= $name %> extends AbstractMigration
                     endif;
                     if ($constraint['columns'] !== $primaryKeysColumns): %>
             ->addIndex(
-                [<% echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]); %>],
+                [<% echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]); %>]<% echo ($constraint['type'] === 'unique') ? ',' : ''; %>
+
                 <%- if ($constraint['type'] === 'unique'): %>
-                ['unique' => true];
+                ['unique' => true]
                 <%- endif; %>
             )
                     <%- endif;

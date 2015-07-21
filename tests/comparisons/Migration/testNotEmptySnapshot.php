@@ -5,6 +5,35 @@ class NotEmptySnapshot extends AbstractMigration
 {
     public function up()
     {
+        $table = $this->table('articles');
+        $table
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('category_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
+            ->addColumn('created', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('modified', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addIndex(
+                [
+                    'category_id',
+                ]
+            )
+            ->create();
+
         $table = $this->table('categories');
         $table
             ->addColumn('parent_id', 'integer', [
@@ -36,7 +65,7 @@ class NotEmptySnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true];
+                ['unique' => true]
             )
             ->create();
 
@@ -85,12 +114,12 @@ class NotEmptySnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true];
+                ['unique' => true]
             )
             ->addIndex(
                 [
                     'category_id',
-                ],
+                ]
             )
             ->create();
 
@@ -139,7 +168,7 @@ class NotEmptySnapshot extends AbstractMigration
                 [
                     'article_id',
                 ],
-                ['unique' => true];
+                ['unique' => true]
             )
             ->create();
 
@@ -167,6 +196,18 @@ class NotEmptySnapshot extends AbstractMigration
             ])
             ->create();
 
+        $this->table('articles')
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
         $this->table('products')
             ->addForeignKey(
                 'category_id',
@@ -183,12 +224,19 @@ class NotEmptySnapshot extends AbstractMigration
 
     public function down()
     {
+        $this->table('articles')
+            ->dropForeignKey(
+                'category_id'
+            )
+            ->update();
+
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
             )
             ->update();
 
+        $this->dropTable('articles');
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
         $this->dropTable('products');
