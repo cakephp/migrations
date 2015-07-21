@@ -96,7 +96,7 @@ trait ConfigurationTrait
             ]
         ];
 
-	if (($config['datasource'] == 'Database/Mysql') {
+	if (($config['datasource'] == 'Database/Mysql')) {
 		$mysqlAttributesArray = [ 'ssl_ca', 'ssl_cert', 'ssl_key' ];
 
 		foreach ($mysqlAttributesArray as $value) {
