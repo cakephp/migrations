@@ -31,6 +31,7 @@ class ArticlesFixture extends TestFixture
         'id' => ['type' => 'integer'],
         'title' => ['type' => 'string', 'null' => true, 'length' => 255],
         'category_id' => ['type' => 'integer', 'length' => 11],
+        'product_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
@@ -39,6 +40,13 @@ class ArticlesFixture extends TestFixture
                 'type' => 'foreign',
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],
+                'update' => 'cascade',
+                'delete' => 'cascade'
+            ],
+            'product_idx' => [
+                'type' => 'foreign',
+                'columns' => ['product_id'],
+                'references' => ['products', 'id'],
                 'update' => 'cascade',
                 'delete' => 'cascade'
             ]

@@ -17,6 +17,11 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 'limit' => 11,
                 'null' => true,
             ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
@@ -30,6 +35,11 @@ class CompositeConstraintsSnapshot extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                ]
+            )
+            ->addIndex(
+                [
+                    'product_id',
                 ]
             )
             ->create();
@@ -226,6 +236,15 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                     'delete' => 'CASCADE'
                 ]
             )
+            ->addForeignKey(
+                'product_id',
+                'products',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
             ->update();
 
         $this->table('orders')
@@ -265,6 +284,9 @@ class CompositeConstraintsSnapshot extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
+            )
+            ->dropForeignKey(
+                'product_id'
             )
             ->update();
 

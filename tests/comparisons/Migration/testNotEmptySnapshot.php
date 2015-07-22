@@ -17,6 +17,11 @@ class NotEmptySnapshot extends AbstractMigration
                 'limit' => 11,
                 'null' => true,
             ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
@@ -30,6 +35,11 @@ class NotEmptySnapshot extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                ]
+            )
+            ->addIndex(
+                [
+                    'product_id',
                 ]
             )
             ->create();
@@ -206,6 +216,15 @@ class NotEmptySnapshot extends AbstractMigration
                     'delete' => 'CASCADE'
                 ]
             )
+            ->addForeignKey(
+                'product_id',
+                'products',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
             ->update();
 
         $this->table('products')
@@ -227,6 +246,9 @@ class NotEmptySnapshot extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
+            )
+            ->dropForeignKey(
+                'product_id'
             )
             ->update();
 

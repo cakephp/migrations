@@ -56,11 +56,12 @@ class <%= $name %> extends AbstractMigration
         <%- endforeach;
             $tableConstraints = $this->Migration->constraints($table);
             if (!empty($tableConstraints)):
+                sort($tableConstraints);
                 $constraints[$table] = $tableConstraints;
 
-                foreach ($constraints[$table] as $constraint):
+                foreach ($constraints[$table] as $name => $constraint):
                     if ($constraint['type'] !== 'unique'):
-                        $foreignKeys += $constraint['columns'];
+                        $foreignKeys[] = $constraint['columns'];
                     endif;
                     if ($constraint['columns'] !== $primaryKeysColumns): %>
             ->addIndex(
@@ -78,7 +79,7 @@ class <%= $name %> extends AbstractMigration
                 sort($foreignKeys);
                 $indexColumns = $index['columns'];
                 sort($indexColumns);
-                if ($foreignKeys !== $indexColumns):
+                if (in_array($foreignKeys, $indexColumns)):
                 %>
                 ->addIndex(
                     [<%
@@ -99,14 +100,17 @@ class <%= $name %> extends AbstractMigration
                     if (count($constraint['columns']) > 1):
                         $columnsList = '[' . $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]) . ']';
                     endif;
-                    $dropForeignKeys[$table] = $columnsList;
+                    $dropForeignKeys[$table][] = $columnsList;
 
                     if (is_array($constraint['references'][1])):
                         $columnsReference = '[' . $this->Migration->stringifyList($constraint['references'][1], ['indent' => 5]) . ']';
                     else:
                         $columnsReference = '\'' . $constraint['references'][1] . '\'';
-                    endif; %>
-        <%= $this->Migration->tableStatement($table); %>
+                    endif;
+                    $statement = $this->Migration->tableStatement($table);
+                    if (!empty($statement)): %>
+        <%= $statement %>
+                    <%- endif; %>
             ->addForeignKey(
                 <%= $columnsList %>,
                 '<%= $constraint['references'][0] %>',
@@ -127,11 +131,13 @@ class <%= $name %> extends AbstractMigration
 
     public function down()
     {
-        <%- foreach ($dropForeignKeys as $table => $columns): %>
+        <%- foreach ($dropForeignKeys as $table => $columnsList): %>
         $this->table('<%= $table %>')
+            <%- foreach ($columnsList as $columns): %>
             ->dropForeignKey(
                 <%= $columns %>
             )
+            <%- endforeach; %>
             ->update();
 
         <%- endforeach; %>
