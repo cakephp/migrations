@@ -14,6 +14,7 @@
 namespace Migrations\Test\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;
+use Cake\Utility\Text;
 
 /**
  * Class CompositePkFixture
@@ -27,7 +28,7 @@ class CompositePkFixture extends TestFixture
      * @var array
      */
     public $fields = [
-        'id' => ['type' => 'uuid', 'default' => '', 'null' => false ],
+        'id' => ['type' => 'uuid', 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7', 'null' => false ],
         'name' => ['type' => 'string', 'length' => 50, 'default' => '', 'null' => false],
         '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id', 'name']]]
     ];
