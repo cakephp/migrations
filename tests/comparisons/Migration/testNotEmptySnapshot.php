@@ -5,6 +5,45 @@ class NotEmptySnapshot extends AbstractMigration
 {
     public function up()
     {
+        $table = $this->table('articles');
+        $table
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('category_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+            ])
+            ->addColumn('created', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('modified', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addIndex(
+                [
+                    'category_id',
+                ]
+            )
+            ->addIndex(
+                [
+                    'product_id',
+                ]
+            )
+            ->create();
+
         $table = $this->table('categories');
         $table
             ->addColumn('parent_id', 'integer', [
@@ -39,6 +78,21 @@ class NotEmptySnapshot extends AbstractMigration
                 ['unique' => true]
             )
             ->create();
+
+        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table
+            ->addColumn('id', 'uuid', [
+                'default' => '',
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addColumn('name', 'string', [
+                'default' => '',
+                'limit' => 50,
+                'null' => false,
+            ])
+            ->create();
+
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -72,61 +126,13 @@ class NotEmptySnapshot extends AbstractMigration
                 ],
                 ['unique' => true]
             )
-            ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
+            ->addIndex(
                 [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'category_id',
                 ]
             )
             ->create();
-        $table = $this->table('articles');
-        $table
-            ->addColumn('title', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => true,
-            ])
-            ->addColumn('category_id', 'integer', [
-                'default' => null,
-                'limit' => 11,
-                'null' => true,
-            ])
-            ->addColumn('created', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addColumn('modified', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
-            )
-            ->create();
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
-        $table
-            ->addColumn('id', 'uuid', [
-                'default' => '',
-                'limit' => null,
-                'null' => false,
-            ])
-            ->addColumn('name', 'string', [
-                'default' => '',
-                'limit' => 50,
-                'null' => false,
-            ])
-            ->create();
+
         $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
         $table
             ->addColumn('id', 'uuid', [
@@ -140,6 +146,7 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+
         $table = $this->table('special_tags');
         $table
             ->addColumn('article_id', 'integer', [
@@ -174,6 +181,7 @@ class NotEmptySnapshot extends AbstractMigration
                 ['unique' => true]
             )
             ->create();
+
         $table = $this->table('users');
         $table
             ->addColumn('username', 'string', [
@@ -197,16 +205,65 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => true,
             ])
             ->create();
+
+        $this->table('articles')
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->addForeignKey(
+                'product_id',
+                'products',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
+        $this->table('products')
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
     }
 
     public function down()
     {
-        $this->dropTable('users');
-        $this->dropTable('special_tags');
-        $this->dropTable('special_pks');
-        $this->dropTable('composite_pks');
+        $this->table('articles')
+            ->dropForeignKey(
+                'category_id'
+            )
+            ->dropForeignKey(
+                'product_id'
+            )
+            ->update();
+
+        $this->table('products')
+            ->dropForeignKey(
+                'category_id'
+            )
+            ->update();
+
         $this->dropTable('articles');
-        $this->dropTable('products');
         $this->dropTable('categories');
+        $this->dropTable('composite_pks');
+        $this->dropTable('products');
+        $this->dropTable('special_pks');
+        $this->dropTable('special_tags');
+        $this->dropTable('users');
     }
 }

@@ -33,8 +33,8 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.migrations.composite_pk',
         'plugin.migrations.products',
         'plugin.migrations.categories',
-        'plugin.migrations.articles',
-        'plugin.migrations.orders'
+        'plugin.migrations.orders',
+        'plugin.migrations.articles'
     ];
 
     public $autoFixtures = false;
