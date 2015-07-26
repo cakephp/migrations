@@ -185,4 +185,19 @@ class MigrationsTest extends TestCase
         $error = $this->migrations->getLastError();
         $this->assertNotNull($error);
     }
+
+    /**
+     * Tests that marking migrated a non-existant migrations returns an error
+     * and can return a error message
+     *
+     * @return void
+     */
+    public function testMarkMigratedErrors()
+    {
+        $markMigrated = $this->migrations->markMigrated(20150704000000);
+        $this->assertFalse($markMigrated);
+
+        $error = $this->migrations->getLastError();
+        $this->assertEquals('A migration file matching version number `20150704000000` could not be found', $error);
+    }
 }
