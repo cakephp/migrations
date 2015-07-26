@@ -45,21 +45,28 @@ class MigrationsTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->migrations = new Migrations([
-            'connection' => 'test'
-        ]);
+        $params = [
+            'connection' => 'test',
+            'source' => 'TestsMigrations'
+        ];
+        $this->migrations = new Migrations($params);
+
+        $input = $this->migrations->getInput('Migrate', [], $params);
+        $this->migrations->setInput($input);
+        $this->migrations->getManager($this->migrations->getConfig());
 
         $this->Connection = ConnectionManager::get('test');
-        $tables = (new Collection($this->Connection))->listTables();
+        $connection = $this->migrations->getManager()->getEnvironment('default')->getAdapter()->getConnection();
+        $this->Connection->driver()->connection($connection);
 
-        foreach(['phinxlog', 'numbers'] as $tableName) {
-            if (in_array($tableName, $tables)) {
-                $ormTable = TableRegistry::get($tableName, ['connection' => $this->Connection]);
-                $this->Connection->execute(
-                    $this->Connection->driver()->schemaDialect()->dropTableSql($ormTable->schema())[0]
-                );
-            }
+        $tables = (new Collection($this->Connection))->listTables();
+        if (in_array('phinxlog', $tables)) {
+            $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
+            $this->Connection->execute(
+                $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema())[0]
+            );
         }
+
     }
 
     /**
@@ -85,13 +92,13 @@ class MigrationsTest extends TestCase
         $expected = [
             [
                 'status' => 'down',
-                'id' => '20150416223600',
-                'name' => 'MarkMigratedTest'
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
             ],
             [
                 'status' => 'down',
-                'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
             ]
         ];
 
@@ -113,20 +120,20 @@ class MigrationsTest extends TestCase
         $expectedStatus = [
             [
                 'status' => 'up',
-                'id' => '20150416223600',
-                'name' => 'MarkMigratedTest'
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
             ],
             [
                 'status' => 'up',
-                'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $status);
 
         $table = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
         $columns = $table->schema()->columns();
-        $expected = ['id', 'number'];
+        $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
 
         // Rollback last
@@ -153,15 +160,7 @@ class MigrationsTest extends TestCase
      */
     public function testMigrateErrors()
     {
-        $this->migrations->migrate();
-
-        $tables = (new Collection($this->Connection))->listTables();
-        if (in_array('phinxlog', $tables)) {
-            $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
-            $this->Connection->execute(
-                $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema())[0]
-            );
-        }
+        $this->migrations->markMigrated(20150704160200);
 
         $migrate = $this->migrations->migrate();
         $this->assertFalse($migrate);
@@ -178,23 +177,8 @@ class MigrationsTest extends TestCase
      */
     public function testRollbackErrors()
     {
-        $this->migrations->migrate();
-        $this->migrations->rollback(['target' => 0]);
-
-        $this->Connection->newQuery()
-            ->insert(['version', 'start_time', 'end_time'])
-            ->values([
-                'version' => 20150416223600,
-                'start_time' => date('Y-d-m', time()),
-                'end_time' => date('Y-d-m', time())
-            ])
-            ->values([
-                'version' => 20150704160200,
-                'start_time' => date('Y-d-m', time()),
-                'end_time' => date('Y-d-m', time())
-            ])
-            ->into('phinxlog')
-            ->execute();
+        $this->migrations->markMigrated(20150704160200);
+        $this->migrations->markMigrated(20150724233100);
 
         $rollback = $this->migrations->rollback();
         $this->assertFalse($rollback);
