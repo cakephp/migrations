@@ -84,7 +84,7 @@ class Migrations {
      */
     public function status($options = [])
     {
-        $input = $this->getInput('Status', $options);
+        $input = $this->getInput('Status', [], $options);
         $params = ['default', $input->getOption('format')];
 
         return $this->run('printStatus', $params, $input);
@@ -106,7 +106,7 @@ class Migrations {
      */
     public function migrate($options = [])
     {
-        $input = $this->getInput('Migrate', $options);
+        $input = $this->getInput('Migrate', [], $options);
         $params = ['default', $input->getOption('target')];
 
         try {
@@ -134,11 +134,45 @@ class Migrations {
      */
     public function rollback($options = [])
     {
-        $input = $this->getInput('Rollback', $options);
+        $input = $this->getInput('Rollback', [], $options);
         $params = ['default', $input->getOption('target')];
 
         try {
             $this->run('rollback', $params, $input);
+            return true;
+        } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
+            return false;
+        }
+    }
+
+    /**
+     * Marks a migration as migrated
+     *
+     * @param int $version The version number of the migration to mark as migrated
+     * @param array $options Options to pass to the command
+     * Available options are :
+     *
+     * - `connection` The datasource connection to use
+     * - `source` The folder where migrations are in
+     * - `plugin` The plugin containing the migrations
+     *
+     * @return bool Success
+     */
+    public function markMigrated($version, $options = [])
+    {
+        $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
+        $params = [$version];
+
+        $isMigrated = $this->run('isMigrated', $params, $input);
+        if ($isMigrated) {
+            return true;
+        }
+
+        $params[] = $this->getConfig()->getMigrationPath();
+
+        try {
+            $this->run('markMigrated', $params, $input);
             return true;
         } catch (\Exception $e) {
             $this->lastError = $e->getMessage();
@@ -171,12 +205,12 @@ class Migrations {
      * @param \Phinx\Config\ConfigInterface $config ConfigInterface the Manager needs to run
      * @return \Migrations\CakeManager Instance of CakeManager
      */
-    protected function getManager(ConfigInterface $config)
+    public function getManager(ConfigInterface $config = null)
     {
-        if ($this->manager instanceof CakeManager) {
-            $this->manager->setConfig($config);
-        } else {
+        if (!($this->manager instanceof CakeManager)) {
             $this->manager = new CakeManager($config, $this->output);
+        } elseif ($config !== null) {
+            $this->manager->setConfig($config);
         }
 
         return $this->manager;
@@ -186,14 +220,17 @@ class Migrations {
      * Get the input needed for each commands to be run
      *
      * @param string $command Command name for which we need the InputInterface
-     * @param array $options Simple key-values array to pass to the InputInterface
+     * @param array $arguments Simple key/values array representing the command arguments
+     * to pass to the InputInterface
+     * @param array $options Simple key/values array representing the command options
+     * to pass to the InputInterface
      * @return \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
      * Manager to properly run
      */
-    protected function getInput($command, $options)
+    public function getInput($command, $arguments, $options)
     {
         $className = '\Migrations\Command\\' . $command;
-        $options = $this->prepareOptions($options);
+        $options = $arguments + $this->prepareOptions($options);
         $definition = (new $className())->getDefinition();
         return new ArrayInput($options, $definition);
     }
