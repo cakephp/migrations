@@ -70,7 +70,7 @@ class MarkMigrated extends AbstractCommand
         try {
             $this->getManager()->markMigrated($version, $path);
             $output->writeln('<info>Migration successfully marked migrated !</info>');
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $output->writeln(sprintf('<error>An error occurred : %s</error>', $e->getMessage()));
         }
     }

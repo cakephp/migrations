@@ -17,7 +17,8 @@ use Phinx\Migration\Manager;
  * Overrides Phinx Manager class in order to provide an interface
  * for running migrations within an app
  */
-class CakeManager extends Manager {
+class CakeManager extends Manager
+{
 
     /**
      * Prints the specified environment's migration status.
@@ -41,7 +42,11 @@ class CakeManager extends Manager {
                     $status = 'down';
                 }
 
-                $migrations[] = ['status' => $status, 'id' => $migration->getVersion(), 'name' => $migration->getName()];
+                $migrations[] = [
+                    'status' => $status,
+                    'id' => $migration->getVersion(),
+                    'name' => $migration->getName()
+                ];
             }
 
             foreach ($versions as $missing) {
@@ -84,7 +89,9 @@ class CakeManager extends Manager {
         $migrationFile = glob($path . DS . $version . '*');
 
         if (empty($migrationFile)) {
-            throw new \RuntimeException(sprintf('A migration file matching version number `%s` could not be found', $version));
+            throw new \RuntimeException(
+                sprintf('A migration file matching version number `%s` could not be found', $version)
+            );
         }
 
         $migrationFile = $migrationFile[0];

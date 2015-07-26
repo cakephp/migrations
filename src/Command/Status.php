@@ -91,7 +91,9 @@ class Status extends StatusCommand
 
             foreach ($migrations as $migration) {
                 $status = $migration['status'] === 'up' ? '     <info>up</info> ' : '   <error>down</error> ';
-                $name = $migration['name'] !== false ? ' <comment>' . $migration['name'] . ' </comment>' : ' <error>** MISSING **</error>';
+                $name = $migration['name'] !== false ?
+                    ' <comment>' . $migration['name'] . ' </comment>' :
+                    ' <error>** MISSING **</error>';
 
                 $output->writeln(
                     $status
@@ -102,8 +104,9 @@ class Status extends StatusCommand
 
             $output->writeln('');
         } else {
+            $msg = 'There are no available migrations. Try creating one using the <info>create</info> command.';
             $output->writeln('');
-            $output->writeln('There are no available migrations. Try creating one using the <info>create</info> command.');
+            $output->writeln($msg);
             $output->writeln('');
         }
     }

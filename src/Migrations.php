@@ -19,7 +19,8 @@ use Symfony\Component\Console\Output\NullOutput;
  * The Migrations class is responsible for handling migrations command
  * within an none-shell application.
  */
-class Migrations {
+class Migrations
+{
 
     use ConfigurationTrait;
 
