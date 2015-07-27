@@ -193,9 +193,14 @@ class Migrations
      */
     protected function run($method, $params, $input)
     {
+        $migrationPath = $this->getConfig()->getMigrationPath();
+
         $this->setInput($input);
-        $config = $this->getConfig(true);
-        $manager = $this->getManager($config);
+        $newConfig = $this->getConfig(true);
+        $manager = $this->getManager($newConfig);
+        if ($newConfig->getMigrationPath() !== $migrationPath) {
+            $manager->resetMigrations();
+        }
 
         return call_user_func_array([$manager, $method], $params);
     }
@@ -203,12 +208,18 @@ class Migrations
     /**
      * Returns an instance of CakeManager
      *
-     * @param \Phinx\Config\ConfigInterface $config ConfigInterface the Manager needs to run
+     * @param \Phinx\Config\ConfigInterface|null $config ConfigInterface the Manager needs to run
      * @return \Migrations\CakeManager Instance of CakeManager
      */
-    public function getManager(ConfigInterface $config = null)
+    public function getManager($config = null)
     {
         if (!($this->manager instanceof CakeManager)) {
+            if (!($config instanceof ConfigInterface)) {
+                throw new \RuntimeException(
+                    'You need to pass a ConfigInterface object for your first getManager() call'
+                );
+            }
+
             $this->manager = new CakeManager($config, $this->output);
         } elseif ($config !== null) {
             $this->manager->setConfig($config);

@@ -88,7 +88,6 @@ class MigrationsTest extends TestCase
     public function testStatus()
     {
         $result = $this->migrations->status();
-
         $expected = [
             [
                 'status' => 'down',
@@ -101,7 +100,6 @@ class MigrationsTest extends TestCase
                 'name' => 'UpdateNumbersTable'
             ]
         ];
-
         $this->assertEquals($expected, $result);
     }
 
@@ -199,5 +197,42 @@ class MigrationsTest extends TestCase
 
         $error = $this->migrations->getLastError();
         $this->assertEquals('A migration file matching version number `20150704000000` could not be found', $error);
+    }
+
+    /**
+     * Tests that calling the migrations methods while passing
+     * parameters will override the default ones
+     *
+     * @return void
+     */
+    public function testOverrideOptions()
+    {
+        $result = $this->migrations->status(['source' => 'Migrations']);
+        $expected = [
+            [
+                'status' => 'down',
+                'id' => '20150416223600',
+                'name' => 'MarkMigratedTest'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $migrate = $this->migrations->migrate(['source' => 'Migrations']);
+        $this->assertTrue($migrate);
+        $result = $this->migrations->status(['source' => 'Migrations']);
+        $expected[0]['status'] = 'up';
+        $this->assertEquals($expected, $result);
+
+        $rollback = $this->migrations->rollback(['source' => 'Migrations']);
+        $this->assertTrue($rollback);
+        $result = $this->migrations->status(['source' => 'Migrations']);
+        $expected[0]['status'] = 'down';
+        $this->assertEquals($expected, $result);
+
+        $migrate = $this->migrations->markMigrated(20150416223600, ['source' => 'Migrations']);
+        $this->assertTrue($migrate);
+        $result = $this->migrations->status(['source' => 'Migrations']);
+        $expected[0]['status'] = 'up';
+        $this->assertEquals($expected, $result);
     }
 }

@@ -21,6 +21,16 @@ class CakeManager extends Manager
 {
 
     /**
+     * Reset the migrations stored in the object
+     *
+     * @return void
+     */
+    public function resetMigrations()
+    {
+        $this->migrations = null;
+    }
+
+    /**
      * Prints the specified environment's migration status.
      *
      * @param string $environment
