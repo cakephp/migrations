@@ -170,8 +170,12 @@ class MigrationHelper extends Helper
     {
         $tableSchema = $this->schema($table);
 
-        $tableConstraints = $tableSchema->constraints();
         $constraints = [];
+        $tableConstraints = $tableSchema->constraints();
+        if (empty($tableConstraints)) {
+            return $constraints;
+        }
+
         if ($tableConstraints[0] === 'primary') {
             unset($tableConstraints[0]);
         }

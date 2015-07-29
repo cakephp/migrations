@@ -36,7 +36,7 @@ class CategoriesFixture extends TestFixture
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'UNIQUE_SLUG' => ['type' => 'unique', 'columns' => ['slug']]
+            'categories_unique_slug' => ['type' => 'unique', 'columns' => ['slug']]
         ]
     ];
 }

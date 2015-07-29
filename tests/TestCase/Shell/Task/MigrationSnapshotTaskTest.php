@@ -78,8 +78,6 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'BogusPlugin';
 
-        $version = Util::getCurrentTimestamp();
-
         $this->Task->expects($this->once())
             ->method('dispatchShell')
             ->with(
