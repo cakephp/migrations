@@ -14,7 +14,6 @@
 namespace Migrations\Test\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;
-use Cake\Utility\Text;
 
 /**
  * Class CompositePkFixture
