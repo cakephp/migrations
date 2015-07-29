@@ -37,6 +37,7 @@ class ProductsFixture extends TestFixture
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
             'products_unique_slug' => ['type' => 'unique', 'columns' => ['slug']],
+            'products_category_unique' => ['type' => 'unique', 'columns' => ['category_id', 'id']],
             'category_idx' => [
                 'type' => 'foreign',
                 'columns' => ['category_id'],

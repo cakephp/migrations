@@ -149,6 +149,13 @@ class CompositeConstraintsSnapshot extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                    'id',
+                ],
+                ['unique' => true]
+            )
+            ->addIndex(
+                [
+                    'category_id',
                 ]
             )
             ->create();
