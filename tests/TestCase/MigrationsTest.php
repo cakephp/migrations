@@ -154,49 +154,36 @@ class MigrationsTest extends TestCase
      * Tests that migrate returns false in case of error
      * and can return a error message
      *
-     * @return void
+     * @expectedException Exception
      */
     public function testMigrateErrors()
     {
         $this->migrations->markMigrated(20150704160200);
-
-        $migrate = $this->migrations->migrate();
-        $this->assertFalse($migrate);
-
-        $error = $this->migrations->getLastError();
-        $this->assertNotNull($error);
+        $this->migrations->migrate();
     }
 
     /**
      * Tests that rollback returns false in case of error
      * and can return a error message
      *
-     * @return void
+     * @expectedException Exception
      */
     public function testRollbackErrors()
     {
         $this->migrations->markMigrated(20150704160200);
         $this->migrations->markMigrated(20150724233100);
-
-        $rollback = $this->migrations->rollback();
-        $this->assertFalse($rollback);
-        $error = $this->migrations->getLastError();
-        $this->assertNotNull($error);
+        $this->migrations->rollback();
     }
 
     /**
      * Tests that marking migrated a non-existant migrations returns an error
      * and can return a error message
      *
-     * @return void
+     * @expectedException Exception
      */
     public function testMarkMigratedErrors()
     {
-        $markMigrated = $this->migrations->markMigrated(20150704000000);
-        $this->assertFalse($markMigrated);
-
-        $error = $this->migrations->getLastError();
-        $this->assertEquals('A migration file matching version number `20150704000000` could not be found', $error);
+        $this->migrations->markMigrated(20150704000000);
     }
 
     /**

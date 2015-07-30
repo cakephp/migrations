@@ -40,13 +40,6 @@ class Migrations
     protected $manager;
 
     /**
-     * The last error caught.
-     *
-     * @var string
-     */
-    protected $lastError;
-
-    /**
      * Default options to use
      *
      * @var array
@@ -110,13 +103,8 @@ class Migrations
         $input = $this->getInput('Migrate', [], $options);
         $params = ['default', $input->getOption('target')];
 
-        try {
-            $this->run('migrate', $params, $input);
-            return true;
-        } catch (\Exception $e) {
-            $this->lastError = $e->getMessage();
-            return false;
-        }
+        $this->run('migrate', $params, $input);
+        return true;
     }
 
     /**
@@ -138,13 +126,8 @@ class Migrations
         $input = $this->getInput('Rollback', [], $options);
         $params = ['default', $input->getOption('target')];
 
-        try {
-            $this->run('rollback', $params, $input);
-            return true;
-        } catch (\Exception $e) {
-            $this->lastError = $e->getMessage();
-            return false;
-        }
+        $this->run('rollback', $params, $input);
+        return true;
     }
 
     /**
@@ -172,13 +155,8 @@ class Migrations
 
         $params[] = $this->getConfig()->getMigrationPath();
 
-        try {
-            $this->run('markMigrated', $params, $input);
-            return true;
-        } catch (\Exception $e) {
-            $this->lastError = $e->getMessage();
-            return false;
-        }
+        $this->run('markMigrated', $params, $input);
+        return true;
     }
 
     /**
@@ -266,15 +244,5 @@ class Migrations
         }
 
         return $options;
-    }
-
-    /**
-     * Get the last error message caught while migrating
-     *
-     * @return string
-     */
-    public function getLastError()
-    {
-        return $this->lastError;
     }
 }
