@@ -62,11 +62,11 @@ class MigrationsTest extends TestCase
         $tables = (new Collection($this->Connection))->listTables();
         if (in_array('phinxlog', $tables)) {
             $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
+            $query = $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema());
             $this->Connection->execute(
-                $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema())[0]
+                $query[0]
             );
         }
-
     }
 
     /**

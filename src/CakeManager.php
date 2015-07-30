@@ -34,7 +34,7 @@ class CakeManager extends Manager
      * Prints the specified environment's migration status.
      *
      * @param string $environment
-     * @param null $format
+     * @param null|string $format
      * @return array Array of migrations
      */
     public function printStatus($environment, $format = null)
@@ -90,7 +90,7 @@ class CakeManager extends Manager
      *
      * @param int|string $version Version number of the migration to check
      * @param string $path Path where the migration file is located
-     * @return bool|string A string with the error message or true if success
+     * @return bool True if success
      */
     public function markMigrated($version, $path)
     {
