@@ -45,21 +45,19 @@ class MarkMigrated extends AbstractCommand
     /**
      * Mark a migration migrated
      *
-     * @param Symfony\Component\Console\Input\Inputnterface $input the input object
-     * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->setInput($input);
         $this->bootstrap($input, $output);
-        $adapter = $this->getManager()->getEnvironment('default')->getAdapter();
 
         $path = $this->getConfig()->getMigrationPath();
         $version = $input->getArgument('version');
 
-        $versions = array_flip($adapter->getVersions());
-        if (isset($versions[$version])) {
+        if ($this->getManager()->isMigrated($version)) {
             $output->writeln(
                 sprintf(
                     '<info>The migration with version number `%s` has already been marked as migrated.</info>',
@@ -69,44 +67,11 @@ class MarkMigrated extends AbstractCommand
             return;
         }
 
-        $migrationFile = glob($path . DS . $version . '*');
-        if (!empty($migrationFile)) {
-            $migrationFile = $migrationFile[0];
-            $className = $this->getMigrationClassName($migrationFile);
-            require_once $migrationFile;
-            $Migration = new $className($version);
-
-            $time = date('Y-m-d H:i:s', time());
-
-            try {
-                $adapter->migrated($Migration, 'up', $time, $time);
-                $output->writeln('<info>Migration successfully marked migrated !</info>');
-            } catch (Exception $e) {
-                $output->writeln(sprintf('<error>An error occurred : %s</error>', $e->getMessage()));
-            }
-        } else {
-            $output->writeln(
-                sprintf('<error>A migration file matching version number `%s` could not be found</error>', $version)
-            );
+        try {
+            $this->getManager()->markMigrated($version, $path);
+            $output->writeln('<info>Migration successfully marked migrated !</info>');
+        } catch (\Exception $e) {
+            $output->writeln(sprintf('<error>An error occurred : %s</error>', $e->getMessage()));
         }
-    }
-
-    /**
-     * Resolves a migration class name based on $path
-     *
-     * @param string $path Path to the migration file of which we want the class name
-     * @return string Migration class name
-     */
-    protected function getMigrationClassName($path)
-    {
-        $class = preg_replace('/^[0-9]+_/', '', basename($path));
-        $class = str_replace('_', ' ', $class);
-        $class = ucwords($class);
-        $class = str_replace(' ', '', $class);
-        if (strpos($class, '.') !== false) {
-            $class = substr($class, 0, strpos($class, '.'));
-        }
-
-        return $class;
     }
 }

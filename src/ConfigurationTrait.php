@@ -31,14 +31,14 @@ trait ConfigurationTrait
     /**
      * The configuration object that phinx uses for connecting to the database
      *
-     * @var Phinx\Config\Config
+     * @var \Phinx\Config\Config
      */
     protected $configuration;
 
     /**
      * The console input instance
      *
-     * @var Symfony\Component\Console\Input\Input
+     * @var \Symfony\Component\Console\Input\Input
      */
     protected $input;
 
@@ -46,11 +46,12 @@ trait ConfigurationTrait
      * Overrides the original method from phinx in order to return a tailored
      * Config object containing the connection details for the database.
      *
-     * @return Phinx\Config\Config
+     * @param bool $forceRefresh
+     * @return \Phinx\Config\Config
      */
-    public function getConfig()
+    public function getConfig($forceRefresh = false)
     {
-        if ($this->configuration) {
+        if ($this->configuration && $forceRefresh === false) {
             return $this->configuration;
         }
 
@@ -72,7 +73,7 @@ trait ConfigurationTrait
         }
 
         $plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
-        $plugin = str_replace(array('\\', '/', '.'), '_', $plugin);
+        $plugin = str_replace(['\\', '/', '.'], '_', $plugin);
 
         $connection = $this->getConnectionName($this->input);
 
@@ -103,7 +104,7 @@ trait ConfigurationTrait
      * that was configured for the configuration.
      *
      * @param string $driver The driver name as configured for the CakePHP app.
-     * @return Phinx\Config\Config
+     * @return \Phinx\Config\Config
      * @throws \InvalidArgumentexception when it was not possible to infer the information
      * out of the provided database configuration
      */
@@ -131,23 +132,36 @@ trait ConfigurationTrait
      * Overrides the action execute method in order to vanish the idea of environments
      * from phinx. CakePHP does not believe in the idea of having in-app environments
      *
-     * @param Symfony\Component\Console\Input\InputInterface $input the input object
-     * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->beforeExecute($input, $output);
+        parent::execute($input, $output);
+    }
+
+    /**
+     * Overrides the action execute method in order to vanish the idea of environments
+     * from phinx. CakePHP does not believe in the idea of having in-app environments
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
+     * @return void
+     */
+    protected function beforeExecute(InputInterface $input, OutputInterface $output)
+    {
         $this->setInput($input);
         $this->addOption('--environment', '-e', InputArgument::OPTIONAL);
         $input->setOption('environment', 'default');
-        parent::execute($input, $output);
     }
 
     /**
      * Sets the input object that should be used for the command class. This object
      * is used to inspect the extra options that are needed for CakePHP apps.
      *
-     * @param Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @return void
      */
     public function setInput(InputInterface $input)
@@ -160,8 +174,8 @@ trait ConfigurationTrait
      * the CakePHP connection. This is needed in case the user decides to use tables
      * from the ORM and executes queries.
      *
-     * @param Symfony\Component\Console\Input\InputInterface $input the input object
-     * @param Symfony\Component\Console\Input\OutputInterface $output the output object
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return void
      */
     public function bootstrap(InputInterface $input, OutputInterface $output)
@@ -171,6 +185,11 @@ trait ConfigurationTrait
         ConnectionManager::alias($name, 'default');
         $connection = ConnectionManager::get($name);
 
+        $manager = $this->getManager();
+
+        if (!$manager instanceof CakeManager) {
+            $this->setManager(new CakeManager($this->getConfig(), $output));
+        }
         $env = $this->getManager()->getEnvironment('default');
         $adapter = $env->getAdapter();
         if (!$adapter instanceof CakeAdapter) {
@@ -181,14 +200,14 @@ trait ConfigurationTrait
     /**
      * Returns the connection name that should be used for the migrations.
      *
-     * @param Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @return string
      */
     protected function getConnectionName(InputInterface $input)
     {
         $connection = 'default';
         if ($input->getOption('connection')) {
-            $connection = $this->input->getOption('connection');
+            $connection = $input->getOption('connection');
         }
         return $connection;
     }
