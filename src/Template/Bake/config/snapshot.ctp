@@ -43,9 +43,6 @@ class <%= $name %> extends AbstractMigration
             -><%= $columnMethod %>('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
                 $options = [];
                 $columnOptions = array_intersect_key($primaryKey['info']['options'], $wantedOptions);
-                if(empty($columnOptions['comment'])){
-                    unset($columnOptions['comment']);
-                }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
             <%- endforeach;
