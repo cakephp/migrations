@@ -8,6 +8,7 @@ class NotEmptySnapshot extends AbstractMigration
         $table = $this->table('articles');
         $table
             ->addColumn('title', 'string', [
+                'comment' => 'Article title',
                 'default' => null,
                 'limit' => 255,
                 'null' => true,
