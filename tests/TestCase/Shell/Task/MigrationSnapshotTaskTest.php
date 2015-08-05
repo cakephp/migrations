@@ -88,7 +88,13 @@ class MigrationSnapshotTaskTest extends TestCase
             );
 
         $result = $this->Task->bake('NotEmptySnapshot');
-        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+
+        $dbenv = strtolower(getenv("DB"));
+        if ($dbenv === "sqlite") {
+            $this->assertSameAsFile(__FUNCTION__ . 'Sqlite.php', $result);
+        } else {
+            $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+        }
     }
 
     public function testCompositeConstraintsSnapshot()
@@ -106,6 +112,12 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $result = $this->Task->bake('CompositeConstraintsSnapshot');
-        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+
+        $dbenv = strtolower(getenv("DB"));
+        if ($dbenv === "sqlite") {
+            $this->assertSameAsFile(__FUNCTION__ . 'Sqlite.php', $result);
+        } else {
+            $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+        }
     }
 }

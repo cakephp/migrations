@@ -29,7 +29,7 @@ class ArticlesFixture extends TestFixture
      */
     public $fields = [
         'id' => ['type' => 'integer'],
-        'title' => ['type' => 'string', 'null' => true, 'length' => 255],
+        'title' => ['type' => 'string', 'null' => true, 'length' => 255, 'comment' => 'Article title'],
         'category_id' => ['type' => 'integer', 'length' => 11],
         'product_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
