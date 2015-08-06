@@ -40,6 +40,9 @@ matrix:
       env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
       
     - php: 7.0
+      env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test'
+      
+    - php: 7.0
       env: PHPCS=1 DEFAULT=0
 
     - php: hhvm
