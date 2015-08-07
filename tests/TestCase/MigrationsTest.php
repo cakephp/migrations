@@ -11,11 +11,13 @@
  */
 namespace Migrations\Test;
 
+use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use Migrations\Migrations;
+use Phinx\Migration\Util;
 
 /**
  * Tests the Migrations class
@@ -221,5 +223,59 @@ class MigrationsTest extends TestCase
         $result = $this->migrations->status(['source' => 'Migrations']);
         $expected[0]['status'] = 'up';
         $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Tests migrating the baked snapshots
+     *
+     * @dataProvider migrationsProvider
+     * @return void
+     */
+    public function testMigrateSnapshots($basePath)
+    {
+        $destination = ROOT . 'config' . DS . 'SnapshotTests' . DS;
+        $timestamp = Util::getCurrentTimestamp();
+
+        if (!file_exists($destination)) {
+            mkdir($destination);
+        }
+
+        copy(
+            $basePath . 'testCompositeConstraintsSnapshot.php',
+            $destination . $timestamp . '_testCompositeConstraintsSnapshot.php'
+        );
+
+        $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
+        $this->assertTrue($result);
+
+        $this->migrations->rollback(['source' => 'SnapshotTests']);
+
+        unlink($destination . $timestamp . '_testCompositeConstraintsSnapshot.php');
+
+        copy(
+            $basePath . 'testNotEmptySnapshot.php',
+            $destination . $timestamp . '_testNotEmptySnapshot.php'
+        );
+
+        $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
+        $this->assertTrue($result);
+
+        $this->migrations->rollback(['source' => 'SnapshotTests']);
+
+        unlink($destination . $timestamp . '_testNotEmptySnapshot.php');
+    }
+
+    /**
+     * provides the path to the baked migrations
+     *
+     * @return array
+     */
+    public function migrationsProvider()
+    {
+        return [
+            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS],
+            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS],
+            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS]
+        ];
     }
 }
