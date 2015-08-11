@@ -11,6 +11,7 @@
  */
 namespace Migrations;
 
+use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
@@ -171,12 +172,14 @@ class Migrations
      */
     protected function run($method, $params, $input)
     {
-        $migrationPath = $this->getConfig()->getMigrationPath();
+        if ($this->configuration instanceof Config) {
+            $migrationPath = $this->getConfig()->getMigrationPath();
+        }
 
         $this->setInput($input);
         $newConfig = $this->getConfig(true);
         $manager = $this->getManager($newConfig);
-        if ($newConfig->getMigrationPath() !== $migrationPath) {
+        if (isset($migrationPath) && $newConfig->getMigrationPath() !== $migrationPath) {
             $manager->resetMigrations();
         }
 

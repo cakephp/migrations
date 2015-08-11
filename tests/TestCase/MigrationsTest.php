@@ -51,15 +51,23 @@ class MigrationsTest extends TestCase
             'connection' => 'test',
             'source' => 'TestsMigrations'
         ];
-        $this->migrations = new Migrations($params);
 
-        $input = $this->migrations->getInput('Migrate', [], $params);
-        $this->migrations->setInput($input);
-        $this->migrations->getManager($this->migrations->getConfig());
-
+        // Get the PDO connection to have the same across the various objects needed to run the tests
+        $migrations = new Migrations();
+        $input = $migrations->getInput('Migrate', [], $params);
+        $migrations->setInput($input);
+        $migrations->getManager($migrations->getConfig());
         $this->Connection = ConnectionManager::get('test');
-        $connection = $this->migrations->getManager()->getEnvironment('default')->getAdapter()->getConnection();
+        $connection = $migrations->getManager()->getEnvironment('default')->getAdapter()->getConnection();
         $this->Connection->driver()->connection($connection);
+
+        // Get an instance of the Migrations object on which we will run the tests
+        $this->migrations = new Migrations($params);
+        $this->migrations
+            ->getManager($migrations->getConfig())
+            ->getEnvironment('default')
+            ->getAdapter()
+            ->setConnection($connection);
 
         $tables = (new Collection($this->Connection))->listTables();
         if (in_array('phinxlog', $tables)) {
@@ -196,6 +204,21 @@ class MigrationsTest extends TestCase
      */
     public function testOverrideOptions()
     {
+        $result = $this->migrations->status();
+        $expectedStatus = [
+            [
+                'status' => 'down',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $result);
+
         $result = $this->migrations->status(['source' => 'Migrations']);
         $expected = [
             [
