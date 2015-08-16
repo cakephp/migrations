@@ -39,8 +39,8 @@ class Status extends StatusCommand
     /**
      * Show the migration status.
      *
-     * @param InputInterface $input
-     * @param OutputInterface $output
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Input\OutputInterface $output the output object
      * @return void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
