@@ -16,7 +16,14 @@ use Phinx\Db\Table as BaseTable;
 class Table extends BaseTable
 {
 
-    protected $primaryKeys = [];
+    /**
+     * Primary key for this table.
+     * Can either be a string or an array in case of composite
+     * primary key.
+     *
+     * @var string|array
+     */
+    protected $primaryKey;
 
     /**
      * Add a primary key to a database table.
@@ -26,7 +33,7 @@ class Table extends BaseTable
      */
     public function addPrimaryKey($columns)
     {
-        $this->primaryKeys = $columns;
+        $this->primaryKey = $columns;
         return $this;
     }
 
@@ -52,8 +59,8 @@ class Table extends BaseTable
      */
     public function create()
     {
-        if ($this->options['id'] === false && !empty($this->primaryKeys)) {
-            $this->options['primary_key'] = $this->primaryKeys;
+        if ($this->options['id'] === false && !empty($this->primaryKey)) {
+            $this->options['primary_key'] = $this->primaryKey;
         }
         parent::create();
     }
