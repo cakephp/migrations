@@ -59,7 +59,7 @@ class Table extends BaseTable
      */
     public function create()
     {
-        if ($this->options['id'] === false && !empty($this->primaryKey)) {
+        if ((!isset($this->options['id']) || $this->options['id'] === false) && !empty($this->primaryKey)) {
             $this->options['primary_key'] = $this->primaryKey;
         }
         parent::create();

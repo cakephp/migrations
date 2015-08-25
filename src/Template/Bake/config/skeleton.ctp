@@ -19,7 +19,7 @@ $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
 %>
 <?php
-use Phinx\Migration\AbstractMigration;
+use Migrations\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
 {

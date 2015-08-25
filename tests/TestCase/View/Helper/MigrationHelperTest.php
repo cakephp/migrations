@@ -179,6 +179,7 @@ class MigrationHelperTest extends TestCase
                 'precision' => null,
                 'comment' => $this->values['comment'],
                 'signed' => true,
+                'autoIncrement' => true
             ],
         ], $this->Helper->column($tableSchema, 'id'));
 
@@ -258,6 +259,7 @@ class MigrationHelperTest extends TestCase
             'precision' => null,
             'comment' => $this->values['comment'],
             'signed' => true,
+            'autoIncrement' => true
         ], $this->Helper->attributes('users', 'id'));
 
         $this->assertEquals([
@@ -301,6 +303,7 @@ class MigrationHelperTest extends TestCase
             'precision' => null,
             'comment' => $this->values['comment'],
             'signed' => true,
+            'autoIncrement' => null
         ], $this->Helper->attributes('special_tags', 'article_id'));
     }
 
