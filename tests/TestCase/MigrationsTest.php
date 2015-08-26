@@ -108,6 +108,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expected, $result);
@@ -135,6 +140,11 @@ class MigrationsTest extends TestCase
                 'status' => 'up',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $status);
@@ -144,10 +154,19 @@ class MigrationsTest extends TestCase
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
 
+        $table = TableRegistry::get('Letters', ['connection' => $this->Connection]);
+        $columns = $table->schema()->columns();
+        $expected = ['id', 'letter'];
+        $this->assertEquals($expected, $columns);
+        $idColumn = $table->schema()->column('id');
+        $this->assertEquals(true, $idColumn['autoIncrement']);
+        $primaryKey = $table->schema()->primaryKey();
+        $this->assertEquals($primaryKey, ['id']);
+
         // Rollback last
         $rollback = $this->migrations->rollback();
         $this->assertTrue($rollback);
-        $expectedStatus[1]['status'] = 'down';
+        $expectedStatus[2]['status'] = 'down';
         $status = $this->migrations->status();
         $this->assertEquals($expectedStatus, $status);
 
@@ -155,7 +174,7 @@ class MigrationsTest extends TestCase
         $this->migrations->migrate();
         $rollback = $this->migrations->rollback(['target' => 0]);
         $this->assertTrue($rollback);
-        $expectedStatus[0]['status'] = 'down';
+        $expectedStatus[0]['status'] = $expectedStatus[1]['status'] = 'down';
         $status = $this->migrations->status();
         $this->assertEquals($expectedStatus, $status);
     }
@@ -215,6 +234,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $result);
