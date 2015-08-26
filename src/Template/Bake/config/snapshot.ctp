@@ -56,10 +56,10 @@ class <%= $name %> extends AbstractMigration
                 }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
-            <%- if (!$autoId): %>
+            <%- endforeach;
+            if (!$autoId): %>
             ->addPrimaryKey(['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>'])
             <%- endif;
-            endforeach;
             endif;
         foreach ($this->Migration->columns($table) as $column => $config): %>
             -><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%

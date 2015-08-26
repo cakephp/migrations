@@ -92,6 +92,18 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->assertCorrectSnapshot(__FUNCTION__, $result);
     }
 
+    public function testAutoIdDisabledSnapshot()
+    {
+        $this->Task->params['require-table'] = false;
+        $this->Task->params['disable-autoid'] = true;
+        $this->Task->params['connection'] = 'test';
+        $this->Task->params['plugin'] = 'BogusPlugin';
+
+        $result = $this->Task->bake('AutoIdDisabledSnapshot');
+
+        $this->assertCorrectSnapshot(__FUNCTION__, $result);
+    }
+
     public function testCompositeConstraintsSnapshot()
     {
         $this->skipIf(
