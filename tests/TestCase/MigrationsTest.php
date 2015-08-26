@@ -352,7 +352,7 @@ class MigrationsTest extends TestCase
      * @dataProvider migrationsProvider
      * @return void
      */
-    public function testMigrateSnapshots($basePath)
+    public function testMigrateSnapshots($basePath, $files)
     {
         $destination = ROOT . 'config' . DS . 'SnapshotTests' . DS;
         $timestamp = Util::getCurrentTimestamp();
@@ -361,29 +361,19 @@ class MigrationsTest extends TestCase
             mkdir($destination);
         }
 
-        copy(
-            $basePath . 'testCompositeConstraintsSnapshot.php',
-            $destination . $timestamp . '_testCompositeConstraintsSnapshot.php'
-        );
+        foreach ($files as $file) {
+            $copiedFileName = $timestamp . '_' . $file . '.php';
+            copy(
+                $basePath . $file . '.php',
+                $destination . $copiedFileName
+            );
 
-        $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
-        $this->assertTrue($result);
+            $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
+            $this->assertTrue($result);
 
-        $this->migrations->rollback(['source' => 'SnapshotTests']);
-
-        unlink($destination . $timestamp . '_testCompositeConstraintsSnapshot.php');
-
-        copy(
-            $basePath . 'testNotEmptySnapshot.php',
-            $destination . $timestamp . '_testNotEmptySnapshot.php'
-        );
-
-        $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
-        $this->assertTrue($result);
-
-        $this->migrations->rollback(['source' => 'SnapshotTests']);
-
-        unlink($destination . $timestamp . '_testNotEmptySnapshot.php');
+            $this->migrations->rollback(['source' => 'SnapshotTests']);
+            unlink($destination . $copiedFileName);
+        }
     }
 
     /**
@@ -394,9 +384,18 @@ class MigrationsTest extends TestCase
     public function migrationsProvider()
     {
         return [
-            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS],
-            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS],
-            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS]
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
+                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+            ],
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
+                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+            ],
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
+                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+            ]
         ];
     }
 }
