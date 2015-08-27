@@ -149,18 +149,20 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expectedStatus, $status);
 
-        $table = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
-        $columns = $table->schema()->columns();
+        $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
+        $columns = $numbersTable->schema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
+        $primaryKey = $numbersTable->schema()->primaryKey();
+        $this->assertEquals($primaryKey, ['id']);
 
-        $table = TableRegistry::get('Letters', ['connection' => $this->Connection]);
-        $columns = $table->schema()->columns();
+        $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
+        $columns = $lettersTable->schema()->columns();
         $expected = ['id', 'letter'];
         $this->assertEquals($expected, $columns);
-        $idColumn = $table->schema()->column('id');
+        $idColumn = $lettersTable->schema()->column('id');
         $this->assertEquals(true, $idColumn['autoIncrement']);
-        $primaryKey = $table->schema()->primaryKey();
+        $primaryKey = $lettersTable->schema()->primaryKey();
         $this->assertEquals($primaryKey, ['id']);
 
         // Rollback last

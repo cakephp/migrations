@@ -11,6 +11,8 @@
  */
 namespace Migrations;
 
+use Cake\Collection\Collection;
+use Phinx\Db\Adapter\SQLiteAdapter;
 use Phinx\Db\Table as BaseTable;
 
 class Table extends BaseTable
@@ -44,7 +46,7 @@ class Table extends BaseTable
      *
      * {@inheritdoc}
      */
-    public function addColumn($columnName, $type = null, $options = array())
+    public function addColumn($columnName, $type = null, $options = [])
     {
         if (isset($options['autoIncrement']) && $options['autoIncrement'] === true) {
             $options['identity'] = true;
@@ -61,7 +63,54 @@ class Table extends BaseTable
     {
         if ((!isset($this->options['id']) || $this->options['id'] === false) && !empty($this->primaryKey)) {
             $this->options['primary_key'] = $this->primaryKey;
+            $this->filterPrimaryKey();
         }
+
         parent::create();
+    }
+
+    /**
+     * This method is called in case a primary key was defined using the addPrimaryKey() method.
+     * It currently does something only if using SQLite.
+     * If a column is an auto-increment key in SQLite, it has to be a primary key and it has to defined
+     * when defining the column. Phinx takes care of that so we have to make sure columns defined as autoincrement were
+     * not added with the addPrimaryKey method, otherwise, SQL queries will be wrong.
+     *
+     * @return void
+     */
+    protected function filterPrimaryKey()
+    {
+        if (!($this->getAdapter() instanceof SQLiteAdapter) || empty($this->options['primary_key'])) {
+            return;
+        }
+
+        $primaryKey = $this->options['primary_key'];
+        if (!is_array($primaryKey)) {
+            $primaryKey = [$primaryKey];
+        }
+        $primaryKey = array_flip($primaryKey);
+
+        $columnsCollection = new Collection($this->columns);
+        $primaryKeyColumns = $columnsCollection->filter(function ($columnDef, $key) use ($primaryKey) {
+            return isset($primaryKey[$columnDef->getName()]);
+        })->toArray();
+
+        if (empty($primaryKeyColumns)) {
+            return;
+        }
+
+        foreach ($primaryKeyColumns as $primaryKeyColumn) {
+            if ($primaryKeyColumn->isIdentity()) {
+                unset($primaryKey[$primaryKeyColumn->getName()]);
+            }
+        }
+
+        $primaryKey = array_flip($primaryKey);
+
+        if (!empty($primaryKey)) {
+            $this->options['primary_key'] = $primaryKey;
+        } else {
+            unset($this->options['primary_key']);
+        }
     }
 }
