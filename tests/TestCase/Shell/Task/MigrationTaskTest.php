@@ -59,7 +59,7 @@ class MigrationTaskTest extends TestCase
     }
 
     /**
-     * Test the excute method.
+     * Test the execute method.
      *
      * @return void
      */
@@ -80,6 +80,26 @@ class MigrationTaskTest extends TestCase
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'Datetime.php', $result);
+
+        $this->Task->args = [
+            'create_users',
+            'id:integer:primary_key',
+            'name',
+            'created',
+            'modified'
+        ];
+        $result = $this->Task->bake('CreateUsers');
+        $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKey.php', $result);
+
+        $this->Task->args = [
+            'create_users',
+            'id:uuid:primary_key',
+            'name',
+            'created',
+            'modified'
+        ];
+        $result = $this->Task->bake('CreateUsers');
+        $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKeyUuid.php', $result);
     }
 
     /**

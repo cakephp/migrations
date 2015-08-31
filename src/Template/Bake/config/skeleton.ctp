@@ -23,6 +23,11 @@ use Migrations\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
 {
+    <%- if ($tableMethod === 'create' && !empty($columns['primaryKey'])): %>
+
+    public $autoId = false;
+
+    <%- endif; %>
     /**
      * Change Method.
      *
@@ -61,6 +66,11 @@ class <%= $name %> extends AbstractMigration
                 echo $this->Migration->stringifyList($config['options'], ['indent' => 3]);
             %>]);
 <% endforeach; %>
+<% if ($tableMethod === 'create' && !empty($columns['primaryKey'])): %>
+        $table->addPrimaryKey([<%=
+                $this->Migration->stringifyList($columns['primaryKey'], ['indent' => 3])
+                %>]);
+<% endif; %>
 <% endif; %>
 <% endif; %>
         $table-><%= $tableMethod %>();

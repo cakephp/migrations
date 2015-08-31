@@ -6,14 +6,18 @@ use Cake\Utility\Hash;
 use Phinx\Db\Adapter\AdapterInterface;
 use ReflectionClass;
 
+/**
+ * Utility class used to parse arguments passed to a ``bake migration`` class
+ */
 class ColumnParser
 {
+
     /**
      * Parses a list of arguments into an array of fields
      *
      * @param array $arguments A list of arguments being parsed
      * @return array
-     **/
+     */
     public function parseFields($arguments)
     {
         $fields = [];
@@ -23,7 +27,9 @@ class ColumnParser
             $field = $matches[1];
             $type = Hash::get($matches, 2);
 
+            $isPrimaryKey = false;
             if (in_array($type, ['primary', 'primary_key'])) {
+                $isPrimaryKey = true;
                 $type = 'primary';
             }
 
@@ -40,6 +46,10 @@ class ColumnParser
             if ($length !== null) {
                 $fields[$field]['options']['limit'] = $length;
             }
+
+            if ($isPrimaryKey === true && $type === 'integer') {
+                $fields[$field]['options']['autoIncrement'] = true;
+            }
         }
 
         return $fields;
@@ -50,7 +60,7 @@ class ColumnParser
      *
      * @param array $arguments A list of arguments being parsed
      * @return array
-     **/
+     */
     public function parseIndexes($arguments)
     {
         $indexes = [];
@@ -62,18 +72,12 @@ class ColumnParser
             $indexType = Hash::get($matches, 3);
             $indexName = Hash::get($matches, 4);
 
-            if (in_array($type, ['primary', 'primary_key'])) {
-                $indexType = 'primary';
-            }
-
-            if ($indexType === null) {
+            if (in_array($type, ['primary', 'primary_key']) || in_array($indexType, ['primary', 'primary_key']) || $indexType === null) {
                 continue;
             }
 
             $indexUnique = false;
-            if ($indexType == 'primary') {
-                $indexUnique = true;
-            } elseif ($indexType == 'unique') {
+            if ($indexType == 'unique') {
                 $indexUnique = true;
             }
 
@@ -96,11 +100,36 @@ class ColumnParser
     }
 
     /**
+     * Parses a list of arguments into an array of fields composing the primary key
+     * of the table
+     *
+     * @param array $arguments A list of arguments being parsed
+     * @return array
+     */
+    public function parsePrimaryKey($arguments)
+    {
+        $primaryKey = [];
+        $arguments = $this->validArguments($arguments);
+        foreach ($arguments as $field) {
+            preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches);
+            $field = $matches[1];
+            $type = Hash::get($matches, 2);
+            $indexType = Hash::get($matches, 3);
+
+            if (in_array($type, ['primary', 'primary_key']) || in_array($indexType, ['primary', 'primary_key'])) {
+                $primaryKey[] = $field;
+            }
+        }
+
+        return $primaryKey;
+    }
+
+    /**
      * Returns a list of only valid arguments
      *
      * @param array $arguments A list of arguments
      * @return array
-     **/
+     */
     public function validArguments($arguments)
     {
         $collection = new Collection($arguments);
@@ -116,7 +145,7 @@ class ColumnParser
      * @param string $field Name of field
      * @param string $type User-specified type
      * @return string
-     **/
+     */
     public function getType($field, $type)
     {
         $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
@@ -146,7 +175,7 @@ class ColumnParser
      *
      * @param string $type User-specified type
      * @return int
-     **/
+     */
     public function getLength($type)
     {
         $length = null;
@@ -169,7 +198,7 @@ class ColumnParser
      * @param string $indexName Name of index
      * @param bool $indexUnique Whether this is a unique index or not
      * @return string
-     **/
+     */
     public function getIndexName($field, $indexType, $indexName, $indexUnique)
     {
         if (empty($indexName)) {

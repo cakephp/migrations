@@ -47,6 +47,7 @@ class ColumnParserTest extends TestCase
                 ],
             ],
         ], $this->columnParser->parseFields(['id']));
+
         $this->assertEquals([
             'id' => [
                 'columnType' => 'integer',
@@ -54,16 +55,18 @@ class ColumnParserTest extends TestCase
                     'null' => false,
                     'default' => null,
                     'limit' => 11,
+                    'autoIncrement' => true
                 ],
             ],
         ], $this->columnParser->parseFields(['id:primary']));
+
         $this->assertEquals([
             'id' => [
                 'columnType' => 'integer',
                 'options' => [
                     'null' => false,
                     'default' => null,
-                    'limit' => 11,
+                    'limit' => 11
                 ],
             ],
             'name' => [
@@ -75,13 +78,14 @@ class ColumnParserTest extends TestCase
                 ],
             ],
         ], $this->columnParser->parseFields(['id', 'name']));
+
         $this->assertEquals([
             'id' => [
                 'columnType' => 'integer',
                 'options' => [
                     'null' => false,
                     'default' => null,
-                    'limit' => 11,
+                    'limit' => 11
                 ],
             ],
             'created' => [
@@ -113,22 +117,6 @@ class ColumnParserTest extends TestCase
      */
     public function testParseIndexes()
     {
-        $this->assertEquals(['PRIMARY' => [
-            'columns' => ['id'],
-            'options' => ['unique' => true, 'name' => 'PRIMARY']
-        ]], $this->columnParser->parseIndexes(['id:primary_key']));
-        $this->assertEquals(['PRIMARY' => [
-            'columns' => ['id'],
-            'options' => ['unique' => true, 'name' => 'PRIMARY']
-        ]], $this->columnParser->parseIndexes(['id:primary']));
-        $this->assertEquals(['PRIMARY' => [
-            'columns' => ['id'],
-            'options' => ['unique' => true, 'name' => 'PRIMARY']
-        ]], $this->columnParser->parseIndexes(['id:integer:primary']));
-        $this->assertEquals(['ID_INDEX' => [
-            'columns' => ['id'],
-            'options' => ['unique' => true, 'name' => 'ID_INDEX']
-        ]], $this->columnParser->parseIndexes(['id:integer:primary:ID_INDEX']));
         $this->assertEquals(['UNIQUE_ID' => [
             'columns' => ['id'],
             'options' => ['unique' => true, 'name' => 'UNIQUE_ID']
@@ -145,6 +133,17 @@ class ColumnParserTest extends TestCase
             'event_id:integer:unique:UNIQUE_EVENT',
             'market_id:integer:unique:UNIQUE_EVENT',
         ]));
+    }
+
+    /**
+     * @covers Migrations\Util\ColumnParser::parsePrimaryKey
+     */
+    public function testParsePrimaryKey()
+    {
+        $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:primary']));
+        $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:integer:primary']));
+        $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:integer:primary:ID_INDEX']));
+        $this->assertEquals(['id', 'name'], $this->columnParser->parsePrimaryKey(['id:integer:primary', 'name:primary_key']));
     }
 
     /**
