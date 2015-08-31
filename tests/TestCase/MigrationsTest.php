@@ -412,7 +412,13 @@ class MigrationsTest extends TestCase
         return [
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
-                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+                [
+                    'testCompositeConstraintsSnapshot',
+                    'testNotEmptySnapshot',
+                    'testAutoIdDisabledSnapshot',
+                    'testCreatePrimaryKey',
+                    'testCreatePrimaryKeyUuid'
+                ]
             ],
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
