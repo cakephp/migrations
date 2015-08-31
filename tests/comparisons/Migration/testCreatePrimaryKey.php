@@ -17,6 +17,7 @@ class CreateUsers extends AbstractMigration
     {
         $table = $this->table('users');
         $table->addColumn('id', 'integer', [
+            'autoIncrement' => true,
             'default' => null,
             'limit' => 11,
             'null' => false,

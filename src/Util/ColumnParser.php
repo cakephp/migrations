@@ -26,11 +26,16 @@ class ColumnParser
             preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
+            $indexType = Hash::get($matches, 3);
 
+            $typeIsPk = in_array($type, ['primary', 'primary_key']);
             $isPrimaryKey = false;
-            if (in_array($type, ['primary', 'primary_key'])) {
+            if ($typeIsPk || in_array($indexType, ['primary', 'primary_key'])) {
                 $isPrimaryKey = true;
-                $type = 'primary';
+
+                if ($typeIsPk) {
+                    $type = 'primary';
+                }
             }
 
             $type = $this->getType($field, $type);
