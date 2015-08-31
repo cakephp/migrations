@@ -35,7 +35,7 @@ class <%= $name %> extends AbstractMigration
         $foreignKeys = [];
         $primaryKeysColumns = $this->Migration->primaryKeysColumnsList($table);
         $primaryKeys = $this->Migration->primaryKeys($table);
-        $specialPk = count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer' && $autoId;
+        $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
         if ($specialPk):
         %>
         $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);

@@ -97,7 +97,7 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table = $this->table('composite_pks');
         $table
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
