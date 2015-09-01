@@ -35,7 +35,7 @@ class MigrationsShell extends Shell
      * This is required because CakePHP validates the passed options
      * and would complain if something not configured here is present
      *
-     * @return Cake\Console\ConsoleOptionParser
+     * @return \Cake\Console\ConsoleOptionParser
      */
     public function getOptionParser()
     {

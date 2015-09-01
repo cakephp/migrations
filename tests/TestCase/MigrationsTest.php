@@ -249,6 +249,104 @@ class MigrationsTest extends TestCase
     }
 
     /**
+     * Tests that calling the migrations methods while passing the ``date``
+     * parameter works as expected
+     *
+     * @return void
+     */
+    public function testMigrateDateOption()
+    {
+        // If we want to migrate to a date before the first first migration date,
+        // we should not migrate anything
+        $this->migrations->migrate(['date' => '20140705']);
+        $expectedStatus = [
+            [
+                'status' => 'down',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $this->migrations->status());
+
+        // If we want to migrate to a date between two migrations date,
+        // we should migrate only the migrations BEFORE the date
+        $this->migrations->migrate(['date' => '20150705']);
+        $expectedStatus = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $this->migrations->status());
+        $this->migrations->rollback();
+
+        // If we want to migrate to a date after the last migration date,
+        // we should migrate everything
+        $this->migrations->migrate(['date' => '20150730']);
+        $expectedStatus = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $this->migrations->status());
+
+        // If we want to rollback to a date between two migrations date,
+        // only migrations file having a date AFTER the date should be rollbacked
+        $this->migrations->rollback(['date' => '20150705']);
+        $expectedStatus = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $this->migrations->status());
+
+        // If we want to rollback to a date prior to the first migration date,
+        // everything should be rollbacked
+        $this->migrations->migrate();
+        $this->migrations->rollback([
+            'date' => '20150703'
+        ]);
+        $expectedStatus = [
+            [
+                'status' => 'down',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $this->migrations->status());
+    }
+
+    /**
      * Tests migrating the baked snapshots
      *
      * @dataProvider migrationsProvider
