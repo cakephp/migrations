@@ -103,7 +103,7 @@ class MigrationHelper extends Helper
      * Returns the Cake\Database\Schema\Table for $table
      *
      * @param string $table Name of the table to get the Schema for
-     * @return Cake\Database\Schema\Table
+     * @return \Cake\Database\Schema\Table
      */
     protected function schema($table)
     {
