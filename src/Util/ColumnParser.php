@@ -77,7 +77,9 @@ class ColumnParser
             $indexType = Hash::get($matches, 3);
             $indexName = Hash::get($matches, 4);
 
-            if (in_array($type, ['primary', 'primary_key']) || in_array($indexType, ['primary', 'primary_key']) || $indexType === null) {
+            if (in_array($type, ['primary', 'primary_key']) ||
+                in_array($indexType, ['primary', 'primary_key']) ||
+                $indexType === null) {
                 continue;
             }
 

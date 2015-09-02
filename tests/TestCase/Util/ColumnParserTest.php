@@ -143,7 +143,10 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:primary']));
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:integer:primary']));
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:integer:primary:ID_INDEX']));
-        $this->assertEquals(['id', 'name'], $this->columnParser->parsePrimaryKey(['id:integer:primary', 'name:primary_key']));
+        $this->assertEquals(
+            ['id', 'name'],
+            $this->columnParser->parsePrimaryKey(['id:integer:primary', 'name:primary_key'])
+        );
     }
 
     /**
