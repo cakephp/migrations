@@ -11,12 +11,10 @@
  */
 namespace Migrations\View\Helper;
 
-use Cake\Database\Schema\Collection;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
-use InvalidArgumentException;
 
 /**
  * Migration Helper class for output of field data in migration files.

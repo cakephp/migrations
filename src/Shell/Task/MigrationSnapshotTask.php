@@ -19,14 +19,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Filesystem\Folder;
-use Cake\ORM\AssociationCollection;
-use Cake\ORM\Association\BelongsTo;
-use Cake\ORM\Association\BelongsToMany;
-use Cake\ORM\Association\HasMany;
-use Cake\ORM\Association\HasOne;
 use Cake\ORM\TableRegistry;
-use Cake\Utility\Inflector;
-use Migrations\Shell\Task\SimpleMigrationTask;
 
 /**
  * Task class for generating migration snapshot files.

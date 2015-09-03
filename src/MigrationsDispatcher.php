@@ -13,8 +13,6 @@ namespace Migrations;
 
 use Migrations\Command;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Used to register all supported subcommand in order to make
