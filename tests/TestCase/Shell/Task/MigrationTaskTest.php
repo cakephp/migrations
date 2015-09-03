@@ -37,7 +37,7 @@ class MigrationTaskTest extends TestCase
 
         $this->Task = $this->getMock(
             'Migrations\Shell\Task\MigrationTask',
-            ['in', 'err', 'createFile', '_stop'],
+            ['in', 'err', 'createFile', '_stop', 'error'],
             [$inputOutput]
         );
         $this->Task->name = 'Migration';
@@ -100,6 +100,30 @@ class MigrationTaskTest extends TestCase
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKeyUuid.php', $result);
+    }
+
+    /**
+     * Test that adding a field or altering a table with a primary
+     * key will error out
+     *
+     * @return void
+     */
+    public function testAddPrimaryKeyToExistingTable()
+    {
+        $this->Task->expects($this->any())
+            ->method('error');
+
+        $this->Task->args = [
+            'add_pk_to_users',
+            'somefield:primary_key'
+        ];
+        $this->Task->bake('AddPkToUsers');
+
+        $this->Task->args = [
+            'alter_users',
+            'somefield:primary_key'
+        ];
+        $this->Task->bake('AlterUsers');
     }
 
     /**

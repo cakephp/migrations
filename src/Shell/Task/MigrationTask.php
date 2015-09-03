@@ -80,6 +80,10 @@ class MigrationTask extends SimpleMigrationTask
         $indexes = $columnParser->parseIndexes($arguments);
         $primaryKey = $columnParser->parsePrimaryKey($arguments);
 
+        if (in_array($action[0], ['alter_table', 'add_field']) && !empty($primaryKey)) {
+            $this->error('Adding a primary key to an already existing table is not supported.');
+        }
+
         list($action, $table) = $action;
         return [
             'plugin' => $this->plugin,
