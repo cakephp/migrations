@@ -76,8 +76,6 @@ class CakeManager extends Manager
      */
     public function migrateToDateTime($environment, \DateTime $dateTime)
     {
-
-        $env = $this->getEnvironment($environment);
         $versions = array_keys($this->getMigrations());
         $dateString = $dateTime->format('Ymdhis');
         $versionToMigrate = null;

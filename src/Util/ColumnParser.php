@@ -3,7 +3,6 @@ namespace Migrations\Util;
 
 use Cake\Collection\Collection;
 use Cake\Utility\Hash;
-use Phinx\Db\Adapter\AdapterInterface;
 use ReflectionClass;
 
 class ColumnParser
