@@ -14,10 +14,7 @@ namespace Migrations\Test\Command;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
-use Phinx\Migration\Manager\Environment;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Console\Output\StreamOutput;
-use Phinx\Config\Config;
 
 /**
  * MarkMigratedTest class
@@ -46,6 +43,11 @@ class MarkMigratedTest extends TestCase
      */
     protected $Connection;
 
+    /**
+     * Instance of a CommandTester object
+     *
+     * @var \Symfony\Component\Console\Tester\CommandTester
+     */
     protected $commandTester;
 
     /**
