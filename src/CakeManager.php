@@ -108,17 +108,24 @@ class CakeManager extends Manager
         $dateString = $dateTime->format('Ymdhis');
         sort($versions);
         $versions = array_reverse($versions);
-        $versionToRollback = null;
-        foreach ($versions as $version) {
-            if ($dateString > $version) {
-                $versionToRollback = $version;
-            }
+
+        if ($dateString > $versions[0]) {
+            $this->getOutput()->writeln('No migrations to rollback');
+            return;
         }
 
-        if ($versionToRollback === null) {
+        if ($dateString < end($versions)) {
             $this->getOutput()->writeln('Rolling back all migrations');
             return $this->rollback($environment, 0);
         }
+
+        foreach ($versions as $index => $version) {
+            if ($dateString > $version) {
+                break;
+            }
+        }
+
+        $versionToRollback = $versions[$index];
 
         $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
         return $this->rollback($environment, $versionToRollback);

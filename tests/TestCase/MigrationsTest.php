@@ -308,6 +308,25 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
 
+        // If we want to rollback to a date after the last migrations,
+        // nothing should be rollbacked
+        $this->migrations->rollback([
+            'date' => '20150730'
+        ]);
+        $expectedStatus = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ]
+        ];
+        $this->assertEquals($expectedStatus, $this->migrations->status());
+
         // If we want to rollback to a date between two migrations date,
         // only migrations file having a date AFTER the date should be rollbacked
         $this->migrations->rollback(['date' => '20150705']);
