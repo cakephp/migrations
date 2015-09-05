@@ -1,26 +1,35 @@
 <?php
 use Migrations\AbstractMigration;
 
-class CompositeConstraintsSnapshot extends AbstractMigration
+class AutoIdDisabledSnapshot extends AbstractMigration
 {
+
+    public $autoId = false;
+
     public function up()
     {
         $table = $this->table('articles');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -47,18 +56,25 @@ class CompositeConstraintsSnapshot extends AbstractMigration
 
         $table = $this->table('categories');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -80,7 +96,7 @@ class CompositeConstraintsSnapshot extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table = $this->table('composite_pks');
         $table
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
@@ -92,43 +108,31 @@ class CompositeConstraintsSnapshot extends AbstractMigration
                 'limit' => 50,
                 'null' => false,
             ])
-            ->create();
-
-        $table = $this->table('orders');
-        $table
-            ->addColumn('product_category', 'integer', [
-                'default' => null,
-                'limit' => 10,
-                'null' => false,
-            ])
-            ->addColumn('product_id', 'integer', [
-                'default' => null,
-                'limit' => 10,
-                'null' => false,
-            ])
-            ->addIndex(
-                [
-                    'product_category',
-                    'product_id',
-                ]
-            )
+            ->addPrimaryKey(['id', 'name'])
             ->create();
 
         $table = $this->table('products');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -161,15 +165,16 @@ class CompositeConstraintsSnapshot extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
+        $table = $this->table('special_pks');
         $table
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
                 'null' => false,
             ])
+            ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -177,19 +182,26 @@ class CompositeConstraintsSnapshot extends AbstractMigration
 
         $table = $this->table('special_tags');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('article_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('author_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('tag_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('highlighted', 'boolean', [
@@ -212,13 +224,20 @@ class CompositeConstraintsSnapshot extends AbstractMigration
 
         $table = $this->table('users');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -255,24 +274,6 @@ class CompositeConstraintsSnapshot extends AbstractMigration
             )
             ->update();
 
-        $this->table('orders')
-            ->addForeignKey(
-                [
-                    'product_category',
-                    'product_id',
-                ],
-                'products',
-                [
-                    'category_id',
-                    'id',
-                ],
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
-            )
-            ->update();
-
         $this->table('products')
             ->addForeignKey(
                 'category_id',
@@ -298,15 +299,6 @@ class CompositeConstraintsSnapshot extends AbstractMigration
             )
             ->update();
 
-        $this->table('orders')
-            ->dropForeignKey(
-                [
-                    'product_category',
-                    'product_id',
-                ]
-            )
-            ->update();
-
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
@@ -316,7 +308,6 @@ class CompositeConstraintsSnapshot extends AbstractMigration
         $this->dropTable('articles');
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
-        $this->dropTable('orders');
         $this->dropTable('products');
         $this->dropTable('special_pks');
         $this->dropTable('special_tags');

@@ -108,6 +108,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expected, $result);
@@ -135,19 +140,35 @@ class MigrationsTest extends TestCase
                 'status' => 'up',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $status);
 
-        $table = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
-        $columns = $table->schema()->columns();
+        $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
+        $columns = $numbersTable->schema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
+        $primaryKey = $numbersTable->schema()->primaryKey();
+        $this->assertEquals($primaryKey, ['id']);
+
+        $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
+        $columns = $lettersTable->schema()->columns();
+        $expected = ['id', 'letter'];
+        $this->assertEquals($expected, $columns);
+        $idColumn = $lettersTable->schema()->column('id');
+        $this->assertEquals(true, $idColumn['autoIncrement']);
+        $primaryKey = $lettersTable->schema()->primaryKey();
+        $this->assertEquals($primaryKey, ['id']);
 
         // Rollback last
         $rollback = $this->migrations->rollback();
         $this->assertTrue($rollback);
-        $expectedStatus[1]['status'] = 'down';
+        $expectedStatus[2]['status'] = 'down';
         $status = $this->migrations->status();
         $this->assertEquals($expectedStatus, $status);
 
@@ -155,7 +176,7 @@ class MigrationsTest extends TestCase
         $this->migrations->migrate();
         $rollback = $this->migrations->rollback(['target' => 0]);
         $this->assertTrue($rollback);
-        $expectedStatus[0]['status'] = 'down';
+        $expectedStatus[0]['status'] = $expectedStatus[1]['status'] = 'down';
         $status = $this->migrations->status();
         $this->assertEquals($expectedStatus, $status);
     }
@@ -215,6 +236,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $result);
@@ -269,6 +295,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
@@ -286,6 +317,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
@@ -304,6 +340,11 @@ class MigrationsTest extends TestCase
                 'status' => 'up',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
@@ -321,6 +362,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
@@ -341,6 +387,11 @@ class MigrationsTest extends TestCase
                 'status' => 'down',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
@@ -352,7 +403,7 @@ class MigrationsTest extends TestCase
      * @dataProvider migrationsProvider
      * @return void
      */
-    public function testMigrateSnapshots($basePath)
+    public function testMigrateSnapshots($basePath, $files)
     {
         $destination = ROOT . 'config' . DS . 'SnapshotTests' . DS;
         $timestamp = Util::getCurrentTimestamp();
@@ -361,29 +412,19 @@ class MigrationsTest extends TestCase
             mkdir($destination);
         }
 
-        copy(
-            $basePath . 'testCompositeConstraintsSnapshot.php',
-            $destination . $timestamp . '_testCompositeConstraintsSnapshot.php'
-        );
+        foreach ($files as $file) {
+            $copiedFileName = $timestamp . '_' . $file . '.php';
+            copy(
+                $basePath . $file . '.php',
+                $destination . $copiedFileName
+            );
 
-        $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
-        $this->assertTrue($result);
+            $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
+            $this->assertTrue($result);
 
-        $this->migrations->rollback(['source' => 'SnapshotTests']);
-
-        unlink($destination . $timestamp . '_testCompositeConstraintsSnapshot.php');
-
-        copy(
-            $basePath . 'testNotEmptySnapshot.php',
-            $destination . $timestamp . '_testNotEmptySnapshot.php'
-        );
-
-        $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
-        $this->assertTrue($result);
-
-        $this->migrations->rollback(['source' => 'SnapshotTests']);
-
-        unlink($destination . $timestamp . '_testNotEmptySnapshot.php');
+            $this->migrations->rollback(['source' => 'SnapshotTests']);
+            unlink($destination . $copiedFileName);
+        }
     }
 
     /**
@@ -394,9 +435,24 @@ class MigrationsTest extends TestCase
     public function migrationsProvider()
     {
         return [
-            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS],
-            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS],
-            [Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS]
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
+                [
+                    'testCompositeConstraintsSnapshot',
+                    'testNotEmptySnapshot',
+                    'testAutoIdDisabledSnapshot',
+                    'testCreatePrimaryKey',
+                    'testCreatePrimaryKeyUuid'
+                ]
+            ],
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
+                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+            ],
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
+                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+            ]
         ];
     }
 }

@@ -13,24 +13,29 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
-$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment']);
+$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
 $constraints = $foreignKeys = $dropForeignKeys = [];
 %>
 <?php
-use Phinx\Migration\AbstractMigration;
+use Migrations\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
 {
+    <%- if (!$autoId): %>
+
+    public $autoId = false;
+
+    <%- endif; %>
     public function up()
     {
     <%- foreach ($tables as $table):
         $foreignKeys = [];
         $primaryKeysColumns = $this->Migration->primaryKeysColumnsList($table);
         $primaryKeys = $this->Migration->primaryKeys($table);
-        $specialPk = count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer';
+        $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
         if ($specialPk):
         %>
         $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);
@@ -38,7 +43,7 @@ class <%= $name %> extends AbstractMigration
         $table = $this->table('<%= $table%>');
         <%- endif; %>
         $table
-        <%- if ($specialPk):
+        <%- if ($specialPk || !$autoId):
             foreach ($primaryKeys as $primaryKey) : %>
             -><%= $columnMethod %>('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
                 $options = [];
@@ -46,9 +51,15 @@ class <%= $name %> extends AbstractMigration
                 if (empty($columnOptions['comment'])) {
                     unset($columnOptions['comment']);
                 }
+                if (empty($columnOptions['autoIncrement'])) {
+                    unset($columnOptions['autoIncrement']);
+                }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
             <%- endforeach;
+            if (!$autoId): %>
+            ->addPrimaryKey(['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>'])
+            <%- endif;
             endif;
         foreach ($this->Migration->columns($table) as $column => $config): %>
             -><%= $columnMethod %>('<%= $column %>', '<%= $config['columnType'] %>', [<%
@@ -56,6 +67,9 @@ class <%= $name %> extends AbstractMigration
                 $columnOptions = array_intersect_key($config['options'], $wantedOptions);
                 if (empty($columnOptions['comment'])) {
                     unset($columnOptions['comment']);
+                }
+                if (empty($columnOptions['autoIncrement'])) {
+                    unset($columnOptions['autoIncrement']);
                 }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])

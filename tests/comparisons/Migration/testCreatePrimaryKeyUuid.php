@@ -3,6 +3,9 @@ use Migrations\AbstractMigration;
 
 class CreateUsers extends AbstractMigration
 {
+
+    public $autoId = false;
+
     /**
      * Change Method.
      *
@@ -13,6 +16,10 @@ class CreateUsers extends AbstractMigration
     public function change()
     {
         $table = $this->table('users');
+        $table->addColumn('id', 'uuid', [
+            'default' => null,
+            'null' => false,
+        ]);
         $table->addColumn('name', 'string', [
             'default' => null,
             'limit' => 255,
@@ -25,6 +32,9 @@ class CreateUsers extends AbstractMigration
         $table->addColumn('modified', 'datetime', [
             'default' => null,
             'null' => false,
+        ]);
+        $table->addPrimaryKey([
+            'id',
         ]);
         $table->create();
     }

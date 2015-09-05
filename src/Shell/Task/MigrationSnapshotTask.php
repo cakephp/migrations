@@ -142,6 +142,12 @@ class MigrationSnapshotTask extends SimpleMigrationTask
                 }
             }
         }
+
+        $autoId = true;
+        if (isset($this->params['disable-autoid'])) {
+            $autoId = !$this->params['disable-autoid'];
+        }
+
         return [
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
@@ -150,6 +156,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'tables' => $tables,
             'action' => 'create_table',
             'name' => $this->BakeTemplate->viewVars['name'],
+            'autoId' => $autoId
         ];
     }
 
@@ -271,6 +278,10 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'boolean' => true,
             'default' => false,
             'help' => 'If require-table is set to true, check also that the table class exists.'
+        ])->addOption('disable-autoid', [
+            'boolean' => true,
+            'default' => false,
+            'help' => 'Disable phinx behavior of automatically adding an id field.'
         ]);
 
         return $parser;

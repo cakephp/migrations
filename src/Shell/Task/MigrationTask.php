@@ -24,6 +24,7 @@ use Migrations\Util\ColumnParser;
  */
 class MigrationTask extends SimpleMigrationTask
 {
+
     /**
      * {@inheritDoc}
      */
@@ -75,6 +76,11 @@ class MigrationTask extends SimpleMigrationTask
         $columnParser = new ColumnParser;
         $fields = $columnParser->parseFields($arguments);
         $indexes = $columnParser->parseIndexes($arguments);
+        $primaryKey = $columnParser->parsePrimaryKey($arguments);
+
+        if (in_array($action[0], ['alter_table', 'add_field']) && !empty($primaryKey)) {
+            $this->error('Adding a primary key to an already existing table is not supported.');
+        }
 
         list($action, $table) = $action;
         return [
@@ -86,6 +92,7 @@ class MigrationTask extends SimpleMigrationTask
             'columns' => [
                 'fields' => $fields,
                 'indexes' => $indexes,
+                'primaryKey' => $primaryKey
             ],
             'name' => $className
         ];

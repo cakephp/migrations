@@ -284,7 +284,8 @@ class MigrationHelper extends Helper
             'precision', 'scale',
             'after', 'update',
             'comment', 'unsigned',
-            'signed', 'properties'
+            'signed', 'properties',
+            'autoIncrement'
         ];
 
         $attributes = [];

@@ -13,16 +13,21 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
-$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment']);
+$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
 %>
 <?php
-use Phinx\Migration\AbstractMigration;
+use Migrations\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
 {
+    <%- if ($tableMethod === 'create' && !empty($columns['primaryKey'])): %>
+
+    public $autoId = false;
+
+    <%- endif; %>
     /**
      * Change Method.
      *
@@ -61,6 +66,11 @@ class <%= $name %> extends AbstractMigration
                 echo $this->Migration->stringifyList($config['options'], ['indent' => 3]);
             %>]);
 <% endforeach; %>
+<% if ($tableMethod === 'create' && !empty($columns['primaryKey'])): %>
+        $table->addPrimaryKey([<%=
+                $this->Migration->stringifyList($columns['primaryKey'], ['indent' => 3])
+                %>]);
+<% endif; %>
 <% endif; %>
 <% endif; %>
         $table-><%= $tableMethod %>();
