@@ -14,10 +14,7 @@ namespace Migrations\Test\Command;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
-use Phinx\Migration\Manager\Environment;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Console\Output\StreamOutput;
-use Phinx\Config\Config;
 
 /**
  * MarkMigratedTest class
@@ -47,6 +44,13 @@ class MarkMigratedTest extends TestCase
     protected $Connection;
 
     /**
+     * Instance of a CommandTester object
+     *
+     * @var \Symfony\Component\Console\Tester\CommandTester
+     */
+    protected $commandTester;
+
+    /**
      * setup method
      *
      * @return void
@@ -56,39 +60,12 @@ class MarkMigratedTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
-        $connectionConfig = $this->Connection->config();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
-
-        $this->config = new Config([
-            'paths' => [
-                'migrations' => __FILE__,
-            ],
-            'environments' => [
-                'default_migration_table' => 'phinxlog',
-                'default_database' => 'cakephp_test',
-                'default' => [
-                    'adapter' => getenv('DB'),
-                    'host' => '127.0.0.1',
-                    'name' => !empty($connectionConfig['database']) ? $connectionConfig['database'] : '',
-                    'user' => !empty($connectionConfig['username']) ? $connectionConfig['username'] : '',
-                    'pass' => !empty($connectionConfig['password']) ? $connectionConfig['password'] : ''
-                ]
-            ]
-        ]);
+        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
         $application = new MigrationsDispatcher('testing');
-        $output = new StreamOutput(fopen('php://memory', 'a', false));
-
         $this->command = $application->find('mark_migrated');
-
-        $Environment = new Environment('default', $this->config['environments']['default']);
-
-        $Manager = $this->getMock('\Phinx\Migration\Manager', [], [$this->config, $output]);
-        $Manager->expects($this->any())
-            ->method('getEnvironment')
-            ->will($this->returnValue($Environment));
-
-        $this->command->setManager($Manager);
+        $this->commandTester = new CommandTester($this->command);
     }
 
     /**
@@ -99,7 +76,9 @@ class MarkMigratedTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
-        unset($this->Connection, $this->config, $this->command);
+        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
+        unset($this->Connection, $this->commandTester, $this->command);
     }
 
     /**
@@ -109,8 +88,7 @@ class MarkMigratedTest extends TestCase
      */
     public function testExecuteNoFile()
     {
-        $commandTester = new CommandTester($this->command);
-        $commandTester->execute([
+        $this->commandTester->execute([
             'command' => $this->command->getName(),
             'version' => '2000000',
             '--connection' => 'test'
@@ -118,7 +96,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertContains(
             'A migration file matching version number `2000000` could not be found',
-            $commandTester->getDisplay()
+            $this->commandTester->getDisplay()
         );
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetch('assoc');
         $this->assertFalse($result);
@@ -131,19 +109,18 @@ class MarkMigratedTest extends TestCase
      */
     public function testExecute()
     {
-        $commandTester = new CommandTester($this->command);
-        $commandTester->execute([
+        $this->commandTester->execute([
             'command' => $this->command->getName(),
             'version' => '20150416223600',
             '--connection' => 'test'
         ]);
 
-        $this->assertContains('Migration successfully marked migrated !', $commandTester->getDisplay());
+        $this->assertContains('Migration successfully marked migrated !', $this->commandTester->getDisplay());
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetch('assoc');
         $this->assertEquals('20150416223600', $result['version']);
 
-        $commandTester->execute([
+        $this->commandTester->execute([
             'command' => $this->command->getName(),
             'version' => '20150416223600',
             '--connection' => 'test'
@@ -151,7 +128,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertContains(
             'The migration with version number `20150416223600` has already been marked as migrated.',
-            $commandTester->getDisplay()
+            $this->commandTester->getDisplay()
         );
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
         $this->assertEquals(1, $result);

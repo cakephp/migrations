@@ -103,15 +103,15 @@ class Migrations
     public function migrate($options = [])
     {
         $input = $this->getInput('Migrate', [], $options);
-        $params = ['default'];
+        $method = 'migrate';
+        $params = ['default', $input->getOption('target')];
 
         if ($input->getOption('date')) {
-            $params[] = new \DateTime($input->getOption('date'));
-            $this->run('migrateToDateTime', $params, $input);
-        } else {
-            $params[] = $input->getOption('target');
-            $this->run('migrate', $params, $input);
+            $method = 'migrateToDateTime';
+            $params[1] = new \DateTime($input->getOption('date'));
         }
+
+        $this->run($method, $params, $input);
         return true;
     }
 
@@ -133,16 +133,15 @@ class Migrations
     public function rollback($options = [])
     {
         $input = $this->getInput('Rollback', [], $options);
-        $params = ['default'];
+        $method = 'rollback';
+        $params = ['default', $input->getOption('target')];
 
         if ($input->getOption('date')) {
-            $params[] = new \DateTime($input->getOption('date'));
-            $this->run('rollbackToDateTime', $params, $input);
-        } else {
-            $params[] = $input->getOption('target');
-            $this->run('rollback', $params, $input);
+            $method = 'rollbackToDateTime';
+            $params[1] = new \DateTime($input->getOption('date'));
         }
 
+        $this->run($method, $params, $input);
         return true;
     }
 
