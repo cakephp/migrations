@@ -14,7 +14,6 @@ namespace Migrations\Test;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
-use Migrations\ConfigurationTrait;
 
 /**
  * Tests the ConfigurationTrait
@@ -79,7 +78,10 @@ class ConfigurationTraitTest extends TestCase
                 'username' => 'root',
                 'password' => 'the_password',
                 'database' => 'the_database',
-                'encoding' => 'utf-8'
+                'encoding' => 'utf-8',
+                'ssl_ca' => '/certs/my_cert',
+                'ssl_key' => 'ssl_key_value',
+                'ssl_cert' => 'ssl_cert_value'
             ]
         ]);
 
@@ -104,6 +106,9 @@ class ConfigurationTraitTest extends TestCase
         $this->assertEquals('the_password', $environment['pass']);
         $this->assertEquals('the_database', $environment['name']);
         $this->assertEquals('utf-8', $environment['charset']);
+        $this->assertEquals('/certs/my_cert', $environment['mysql_attr_ssl_ca']);
+        $this->assertEquals('ssl_key_value', $environment['mysql_attr_ssl_key']);
+        $this->assertEquals('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
     }
 
     /**
