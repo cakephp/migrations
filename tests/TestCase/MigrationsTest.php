@@ -364,6 +364,11 @@ class MigrationsTest extends TestCase
                 'status' => 'up',
                 'id' => '20150724233100',
                 'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
             ]
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
