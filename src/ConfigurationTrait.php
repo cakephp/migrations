@@ -77,8 +77,9 @@ trait ConfigurationTrait
 
         $connection = $this->getConnectionName($this->input);
 
-        $config = ConnectionManager::config($connection);
-        return $this->configuration = new Config([
+        $connectionConfig = ConnectionManager::config($connection);
+        $adapterName = $this->getAdapterName($connectionConfig['driver']);
+        $config = [
             'paths' => [
                 'migrations' => $dir
             ],
@@ -86,17 +87,30 @@ trait ConfigurationTrait
                 'default_migration_table' => $plugin . 'phinxlog',
                 'default_database' => 'default',
                 'default' => [
-                    'adapter' => $this->getAdapterName($config['driver']),
-                    'host' => isset($config['host']) ? $config['host'] : null,
-                    'user' => isset($config['username']) ? $config['username'] : null,
-                    'pass' => isset($config['password']) ? $config['password'] : null,
-                    'port' => isset($config['port']) ? $config['port'] : null,
-                    'name' => $config['database'],
-                    'charset' => isset($config['encoding']) ? $config['encoding'] : null,
-                    'unix_socket' => isset($config['unix_socket']) ? $config['unix_socket'] : null,
+                    'adapter' => $adapterName,
+                    'host' => isset($connectionConfig['host']) ? $connectionConfig['host'] : null,
+                    'user' => isset($connectionConfig['username']) ? $connectionConfig['username'] : null,
+                    'pass' => isset($connectionConfig['password']) ? $connectionConfig['password'] : null,
+                    'port' => isset($connectionConfig['port']) ? $connectionConfig['port'] : null,
+                    'name' => $connectionConfig['database'],
+                    'charset' => isset($connectionConfig['encoding']) ? $connectionConfig['encoding'] : null,
+                    'unix_socket' => isset($connectionConfig['unix_socket']) ? $connectionConfig['unix_socket'] : null,
                 ]
             ]
-        ]);
+        ];
+
+        if ($adapterName === 'mysql') {
+            if (!empty($connectionConfig['ssl_key']) && !empty($connectionConfig['ssl_cert'])) {
+                $config['environments']['default']['mysql_attr_ssl_key'] = $connectionConfig['ssl_key'];
+                $config['environments']['default']['mysql_attr_ssl_cert'] = $connectionConfig['ssl_cert'];
+            }
+
+            if (!empty($connectionConfig['ssl_ca'])) {
+                $config['environments']['default']['mysql_attr_ssl_ca'] = $connectionConfig['ssl_ca'];
+            }
+        }
+
+        return $this->configuration = new Config($config);
     }
 
     /**

@@ -15,7 +15,6 @@ use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
-use Migrations\Shell\Task\MigrationTask;
 
 /**
  * MigrationTaskTest class

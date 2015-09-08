@@ -16,8 +16,6 @@ use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
-use Migrations\Shell\Task\MigrationSnapshotTask;
-use Phinx\Migration\Util;
 
 /**
  * MigrationSnapshotTaskTest class
