@@ -78,7 +78,7 @@ trait ConfigurationTrait
         $connection = $this->getConnectionName($this->input);
 
         $config = ConnectionManager::config($connection);
-        return $this->configuration = new Config([
+        $configArray = [
             'paths' => [
                 'migrations' => $dir
             ],
@@ -93,10 +93,19 @@ trait ConfigurationTrait
                     'port' => isset($config['port']) ? $config['port'] : null,
                     'name' => $config['database'],
                     'charset' => isset($config['encoding']) ? $config['encoding'] : null,
-                    'unix_socket' => isset($config['unix_socket']) ? $config['unix_socket'] : null,
                 ]
             ]
-        ]);
+        ];
+
+        $mysqlAttributesArray = [ 'ssl_ca', 'ssl_cert', 'ssl_key' ];
+
+        foreach ($mysqlAttributesArray as $value) {
+            if (isset($config[$value])) {
+                $configArray['environments']['default']['mysql_attr'.$value] = $config[$value];
+            }
+        }
+
+        return $this->configuration = new Config($configArray);
     }
 
     /**
