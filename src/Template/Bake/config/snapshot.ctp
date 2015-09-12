@@ -151,14 +151,15 @@ class <%= $name %> extends AbstractMigration
 
     public function down()
     {
-        <%- foreach ($dropForeignKeys as $table => $columnsList): %>
+        <%- foreach ($dropForeignKeys as $table => $columnsList):
+                $maxKey = count($columnsList) - 1;
+        %>
         $this->table('<%= $table %>')
-            <%- foreach ($columnsList as $columns): %>
+            <%- foreach ($columnsList as $key => $columns): %>
             ->dropForeignKey(
                 <%= $columns %>
-            )
+            )<%= ($key === $maxKey) ? ';' : '' %>
             <%- endforeach; %>
-            ->update();
 
         <%- endforeach; %>
         <%- foreach ($tables as $table): %>

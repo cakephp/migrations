@@ -430,16 +430,16 @@ class MigrationsTest extends TestCase
     public function testMigrateSnapshots($basePath, $files)
     {
         $destination = ROOT . 'config' . DS . 'SnapshotTests' . DS;
-        $timestamp = Util::getCurrentTimestamp();
 
         if (!file_exists($destination)) {
             mkdir($destination);
         }
 
         foreach ($files as $file) {
-            $copiedFileName = $timestamp . '_' . $file . '.php';
+            list($filename, $timestamp) = $file;
+            $copiedFileName = $timestamp . '_' . $filename . '.php';
             copy(
-                $basePath . $file . '.php',
+                $basePath . $filename . '.php',
                 $destination . $copiedFileName
             );
 
@@ -462,21 +462,30 @@ class MigrationsTest extends TestCase
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
                 [
-                    'testCompositeConstraintsSnapshot',
-                    'testNotEmptySnapshot',
-                    'testAutoIdDisabledSnapshot',
-                    'testCreatePrimaryKey',
-                    'testCreatePrimaryKeyUuid'
+                    ['test_composite_constraints_snapshot', 20150912015600],
+                    ['test_not_empty_snapshot', 20150912015601],
+                    ['test_auto_id_disabled_snapshot', 20150912015602],
+                    ['testCreatePrimaryKey', 20150912015603],
+                    ['testCreatePrimaryKeyUuid', 20150912015604]
                 ]
             ],
             [
-                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
-                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
-            ],
-            [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
-                ['testCompositeConstraintsSnapshot', 'testNotEmptySnapshot', 'testAutoIdDisabledSnapshot']
+                [
+                    ['test_composite_constraints_snapshot_pgsql', 20150912015605],
+                    ['test_not_empty_snapshot_pgsql', 20150912015606],
+                    ['test_auto_id_disabled_snapshot_pgsql', 20150912015607]
+                ]
             ]
+            ,
+            [
+                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
+                [
+                    ['test_composite_constraints_snapshot_sqlite', 20150912015608],
+                    ['test_not_empty_snapshot_sqlite', 20150912015609],
+                    ['test_auto_id_disabled_snapshot_sqlite', 20150912015610]
+                ]
+            ],
         ];
     }
 }

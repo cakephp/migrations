@@ -1,14 +1,13 @@
 <?php
 use Migrations\AbstractMigration;
 
-class NotEmptySnapshot extends AbstractMigration
+class TestNotEmptySnapshotSqlite extends AbstractMigration
 {
     public function up()
     {
         $table = $this->table('articles');
         $table
             ->addColumn('title', 'string', [
-                'comment' => 'Article title',
                 'default' => null,
                 'limit' => 255,
                 'null' => true,
@@ -257,14 +256,12 @@ class NotEmptySnapshot extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            )
-            ->update();
+            );
 
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->update();
+            );
 
         $this->dropTable('articles');
         $this->dropTable('categories');

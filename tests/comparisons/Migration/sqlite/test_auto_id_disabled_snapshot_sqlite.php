@@ -1,7 +1,7 @@
 <?php
 use Migrations\AbstractMigration;
 
-class AutoIdDisabledSnapshot extends AbstractMigration
+class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
 {
 
     public $autoId = false;
@@ -13,24 +13,23 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => null,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -60,22 +59,22 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => null,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -117,23 +116,23 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => null,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -175,7 +174,7 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -186,23 +185,23 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => null,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('article_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('author_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('tag_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('highlighted', 'boolean', [
@@ -228,17 +227,17 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => null,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -297,14 +296,12 @@ class AutoIdDisabledSnapshot extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            )
-            ->update();
+            );
 
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->update();
+            );
 
         $this->dropTable('articles');
         $this->dropTable('categories');
