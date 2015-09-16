@@ -81,7 +81,7 @@ class MarkMigrated extends AbstractCommand
         $path = $this->getConfig()->getMigrationPath();
         $version = $input->getArgument('version');
 
-        if ($version === 'all') {
+        if ($version === 'all' || $version === '*') {
             $this->markAllMigrated($path);
             return;
         }
