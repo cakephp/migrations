@@ -11,6 +11,7 @@
  */
 namespace Migrations;
 
+use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -193,6 +194,7 @@ class Migrations
         $this->setInput($input);
         $newConfig = $this->getConfig(true);
         $manager = $this->getManager($newConfig);
+
         if (isset($migrationPath) && $newConfig->getMigrationPath() !== $migrationPath) {
             $manager->resetMigrations();
         }
@@ -220,7 +222,31 @@ class Migrations
             $this->manager->setConfig($config);
         }
 
+        $this->setAdapter();
         return $this->manager;
+    }
+
+    /**
+     * Sets the adapter the manager is going to need to operate on the DB
+     * This will make sure the adapter instance is a \Migrations\CakeAdapter instance
+     *
+     * @return void
+     */
+    public function setAdapter()
+    {
+        if ($this->input !== null) {
+            $connectionName = 'default';
+            if ($this->input->getOption('connection')) {
+                $connectionName = $this->input->getOption('connection');
+            }
+            $connection = ConnectionManager::get($connectionName);
+
+            $env = $this->manager->getEnvironment('default');
+            $adapter = $env->getAdapter();
+            if (!$adapter instanceof CakeAdapter) {
+                $env->setAdapter(new CakeAdapter($adapter, $connection));
+            }
+        }
     }
 
     /**

@@ -116,6 +116,13 @@ class MigrationsTest extends TestCase
             ]
         ];
         $this->assertEquals($expected, $result);
+
+        $adapter = $this->migrations
+            ->getManager()
+            ->getEnvironment('default')
+            ->getAdapter();
+
+        $this->assertInstanceOf('\Migrations\CakeAdapter', $adapter);
     }
 
     /**
