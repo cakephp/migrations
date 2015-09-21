@@ -9,6 +9,8 @@ This is a Database Migrations system for CakePHP 3.0.
 
 The plugin consists of a wrapper for the [phinx](http://phinx.org) migrations library.
 
+Full documentation of the plugin can be found on the [CakePHP Cookbook](http://book.cakephp.org/3.0/en/migrations.html).
+
 ## Installation
 
 You can install this plugin into your CakePHP application using
