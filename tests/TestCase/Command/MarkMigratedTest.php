@@ -149,9 +149,18 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains('Migration `20150826191400` successfully marked migrated !', $this->commandTester->getDisplay());
-        $this->assertContains('Migration `20150724233100` successfully marked migrated !', $this->commandTester->getDisplay());
-        $this->assertContains('Migration `20150704160200` successfully marked migrated !', $this->commandTester->getDisplay());
+        $this->assertContains(
+            'Migration `20150826191400` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150724233100` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150704160200` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
@@ -165,9 +174,18 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains('Skipping migration `20150704160200` (already migrated).', $this->commandTester->getDisplay());
-        $this->assertContains('Skipping migration `20150724233100` (already migrated).', $this->commandTester->getDisplay());
-        $this->assertContains('Skipping migration `20150826191400` (already migrated).', $this->commandTester->getDisplay());
+        $this->assertContains(
+            'Skipping migration `20150704160200` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Skipping migration `20150724233100` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Skipping migration `20150826191400` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
 
         $config = $this->command->getConfig();
         $env = $this->command->getManager()->getEnvironment('default');
