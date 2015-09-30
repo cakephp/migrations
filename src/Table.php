@@ -80,7 +80,7 @@ class Table extends BaseTable
      */
     protected function filterPrimaryKey()
     {
-        if (!($this->getAdapter() instanceof SQLiteAdapter) || empty($this->options['primary_key'])) {
+        if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($this->options['primary_key'])) {
             return;
         }
 

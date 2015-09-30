@@ -19,7 +19,7 @@
     },
     "require": {
         "php": ">=5.4",
-        "robmorgan/phinx": ">=0.4.2 <1.0",
+        "robmorgan/phinx": "dev-master",
         "cakephp/cakephp": "~3.0"
     },
     "require-dev": {

@@ -1,7 +1,7 @@
 <?php
 use Migrations\AbstractMigration;
 
-class NotEmptySnapshot extends AbstractMigration
+class TestNotEmptySnapshot extends AbstractMigration
 {
     public function up()
     {
@@ -9,18 +9,18 @@ class NotEmptySnapshot extends AbstractMigration
         $table
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -49,16 +49,16 @@ class NotEmptySnapshot extends AbstractMigration
         $table
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -97,18 +97,18 @@ class NotEmptySnapshot extends AbstractMigration
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -149,7 +149,7 @@ class NotEmptySnapshot extends AbstractMigration
                 'null' => false,
             ])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -159,17 +159,17 @@ class NotEmptySnapshot extends AbstractMigration
         $table
             ->addColumn('article_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('author_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('tag_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('highlighted', 'boolean', [
@@ -193,12 +193,12 @@ class NotEmptySnapshot extends AbstractMigration
         $table = $this->table('users');
         $table
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -257,14 +257,12 @@ class NotEmptySnapshot extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            )
-            ->update();
+            );
 
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->update();
+            );
 
         $this->dropTable('articles');
         $this->dropTable('categories');

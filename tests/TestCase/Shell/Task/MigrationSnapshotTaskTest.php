@@ -16,6 +16,7 @@ use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
+use Cake\Utility\Inflector;
 
 /**
  * MigrationSnapshotTaskTest class
@@ -85,9 +86,10 @@ class MigrationSnapshotTaskTest extends TestCase
                 )
             );
 
-        $result = $this->Task->bake('NotEmptySnapshot');
+        $bakeName = $this->getBakeName('TestNotEmptySnapshot');
+        $result = $this->Task->bake($bakeName);
 
-        $this->assertCorrectSnapshot(__FUNCTION__, $result);
+        $this->assertCorrectSnapshot($bakeName, $result);
     }
 
     public function testAutoIdDisabledSnapshot()
@@ -97,9 +99,10 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'BogusPlugin';
 
-        $result = $this->Task->bake('AutoIdDisabledSnapshot');
+        $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
+        $result = $this->Task->bake($bakeName);
 
-        $this->assertCorrectSnapshot(__FUNCTION__, $result);
+        $this->assertCorrectSnapshot($bakeName, $result);
     }
 
     public function testCompositeConstraintsSnapshot()
@@ -116,18 +119,31 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
-        $result = $this->Task->bake('CompositeConstraintsSnapshot');
 
-        $this->assertCorrectSnapshot(__FUNCTION__, $result);
+        $bakeName = $this->getBakeName('TestCompositeConstraintsSnapshot');
+        $result = $this->Task->bake($bakeName);
+
+        $this->assertCorrectSnapshot($bakeName, $result);
     }
 
-    public function assertCorrectSnapshot($function, $result)
+    public function getBakeName($name)
     {
         $dbenv = getenv("DB");
-        if (file_exists($this->_compareBasePath . $dbenv . DS . $function . '.php')) {
-            $this->assertSameAsFile($dbenv . DS . $function . '.php', $result);
+        if ($dbenv !== 'mysql') {
+            $name .= ucfirst($dbenv);
+        }
+
+        return $name;
+    }
+
+    public function assertCorrectSnapshot($bakeName, $result)
+    {
+        $dbenv = getenv("DB");
+        $bakeName = Inflector::underscore($bakeName);
+        if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
+            $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);
         } else {
-            $this->assertSameAsFile($function . '.php', $result);
+            $this->assertSameAsFile($bakeName . '.php', $result);
         }
     }
 }

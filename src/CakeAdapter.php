@@ -56,6 +56,16 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
+     * Gets the database connection
+     *
+     * @return \PDO
+     */
+    public function getConnection()
+    {
+        return $this->adapter->getConnection();
+    }
+
+    /**
      * Get all migrated version numbers.
      *
      * @return array
@@ -127,6 +137,60 @@ class CakeAdapter implements AdapterInterface
     public function getOutput()
     {
         return $this->adapter->getOutput();
+    }
+
+    /**
+     * Sets the command start time
+     *
+     * @param int $time
+     * @return AdapterInterface
+     */
+    public function setCommandStartTime($time)
+    {
+        return $this->adapter->setCommandStartTime($time);
+    }
+
+    /**
+     * Gets the command start time
+     *
+     * @return int
+     */
+    public function getCommandStartTime()
+    {
+        return $this->adapter->getCommandStartTime();
+    }
+
+    /**
+     * Start timing a command.
+     *
+     * @return void
+     */
+    public function startCommandTimer()
+    {
+        $this->adapter->startCommandTimer();
+    }
+
+    /**
+     * Stop timing the current command and write the elapsed time to the
+     * output.
+     *
+     * @return void
+     */
+    public function endCommandTimer()
+    {
+        $this->adapter->endCommandTimer();
+    }
+
+    /**
+     * Write a Phinx command to the output.
+     *
+     * @param string $command Command Name
+     * @param array  $args    Command Args
+     * @return void
+     */
+    public function writeCommand($command, $args = array())
+    {
+        $this->adapter->writeCommand($command, $args);
     }
 
     /**
@@ -506,6 +570,9 @@ class CakeAdapter implements AdapterInterface
 
     /**
      * Drops the specified foreign key from a database table.
+     * If the adapter property is an instance of the \Phinx\Db\Adapter\SQLiteAdapter,
+     * a specific method will be called. The original one from Phinx contains a bug
+     * that can drop a table in certain conditions.
      *
      * @param string   $tableName
      * @param string[] $columns    Column(s)
@@ -557,7 +624,7 @@ class CakeAdapter implements AdapterInterface
      * @param array $options Options
      * @return void
      */
-    public function createDatabase($name, $options = array())
+    public function createDatabase($name, $options = [])
     {
         return $this->adapter->createDatabase($name, $options);
     }

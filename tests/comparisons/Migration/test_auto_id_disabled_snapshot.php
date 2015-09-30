@@ -1,13 +1,24 @@
 <?php
 use Migrations\AbstractMigration;
 
-class NotEmptySnapshot extends AbstractMigration
+class TestAutoIdDisabledSnapshot extends AbstractMigration
 {
+
+    public $autoId = false;
+
     public function up()
     {
         $table = $this->table('articles');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
+                'comment' => 'Article title',
                 'default' => null,
                 'limit' => 255,
                 'null' => true,
@@ -46,6 +57,13 @@ class NotEmptySnapshot extends AbstractMigration
 
         $table = $this->table('categories');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -79,7 +97,7 @@ class NotEmptySnapshot extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
+        $table = $this->table('composite_pks');
         $table
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
@@ -91,10 +109,18 @@ class NotEmptySnapshot extends AbstractMigration
                 'limit' => 50,
                 'null' => false,
             ])
+            ->addPrimaryKey(['id', 'name'])
             ->create();
 
         $table = $this->table('products');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -140,13 +166,14 @@ class NotEmptySnapshot extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
+        $table = $this->table('special_pks');
         $table
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
                 'null' => false,
             ])
+            ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 256,
@@ -156,6 +183,13 @@ class NotEmptySnapshot extends AbstractMigration
 
         $table = $this->table('special_tags');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('article_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -191,6 +225,13 @@ class NotEmptySnapshot extends AbstractMigration
 
         $table = $this->table('users');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('username', 'string', [
                 'default' => null,
                 'limit' => 256,
@@ -256,14 +297,12 @@ class NotEmptySnapshot extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            )
-            ->update();
+            );
 
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->update();
+            );
 
         $this->dropTable('articles');
         $this->dropTable('categories');
