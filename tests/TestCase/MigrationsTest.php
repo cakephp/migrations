@@ -208,8 +208,7 @@ class MigrationsTest extends TestCase
      */
     public function testRollbackErrors()
     {
-        $this->migrations->markMigrated(20150704160200);
-        $this->migrations->markMigrated(20150724233100);
+        $this->migrations->markMigrated('all');
         $this->migrations->rollback();
     }
 

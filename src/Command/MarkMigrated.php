@@ -23,13 +23,36 @@ class MarkMigrated extends AbstractCommand
     use ConfigurationTrait;
 
     /**
+     * The console output instance
+     *
+     * @var \Symfony\Component\Console\Output\OutputInterface
+     */
+    protected $output;
+
+    /**
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @return mixed
+     */
+    public function output(OutputInterface $output = null)
+    {
+        if ($output !== null) {
+            $this->output = $output;
+        }
+        return $this->output;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this->setName('mark_migrated')
             ->setDescription('Mark a migration as migrated')
-            ->addArgument('version', InputArgument::REQUIRED, 'What is the version of the migration?')
+            ->addArgument(
+                'version',
+                InputArgument::REQUIRED,
+                'What is the version of the migration? Use the special value `all` to mark all migrations as migrated.'
+            )
             ->setHelp(sprintf(
                 '%sMark a migration migrated based on its version number%s',
                 PHP_EOL,
@@ -42,6 +65,8 @@ class MarkMigrated extends AbstractCommand
 
     /**
      * Mark a migration migrated
+     * If the `version` argument has the value `all`, all migrations found will be marked as
+     * migrated
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
@@ -51,9 +76,15 @@ class MarkMigrated extends AbstractCommand
     {
         $this->setInput($input);
         $this->bootstrap($input, $output);
+        $this->output($output);
 
         $path = $this->getConfig()->getMigrationPath();
         $version = $input->getArgument('version');
+
+        if ($version === 'all' || $version === '*') {
+            $this->markAllMigrated($path);
+            return;
+        }
 
         if ($this->getManager()->isMigrated($version)) {
             $output->writeln(
@@ -71,5 +102,52 @@ class MarkMigrated extends AbstractCommand
         } catch (\Exception $e) {
             $output->writeln(sprintf('<error>An error occurred : %s</error>', $e->getMessage()));
         }
+    }
+
+    /**
+     * Mark all migrations found in $path as migrated
+     *
+     * It will start a transaction and rollback in case one of the operation raises an exception
+     *
+     * @param string $path Path where to look for migrations
+     * @return void
+     */
+    protected function markAllMigrated($path)
+    {
+        $manager = $this->getManager();
+        $adapter = $manager->getEnvironment('default')->getAdapter();
+        $migrations = $manager->getMigrations();
+        $output = $this->output();
+
+        if (empty($migrations)) {
+            $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
+            return;
+        }
+
+        $adapter->beginTransaction();
+        foreach ($migrations as $version => $migration) {
+            if ($manager->isMigrated($version)) {
+                $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
+            } else {
+                try {
+                    $this->getManager()->markMigrated($version, $path);
+                    $output->writeln(
+                        sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
+                    );
+                } catch (\Exception $e) {
+                    $adapter->rollbackTransaction();
+                    $output->writeln(
+                        sprintf(
+                            '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
+                            $version,
+                            $e->getMessage()
+                        )
+                    );
+                    $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
+                    return;
+                }
+            }
+        }
+        $adapter->commitTransaction();
     }
 }

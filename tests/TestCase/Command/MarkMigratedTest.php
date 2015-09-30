@@ -14,6 +14,7 @@ namespace Migrations\Test\Command;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
+use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -132,5 +133,93 @@ class MarkMigratedTest extends TestCase
         );
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
         $this->assertEquals(1, $result);
+    }
+
+    /**
+     * Test executing "mark_migration"
+     *
+     * @return void
+     */
+    public function testExecuteAll()
+    {
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => 'all',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'Migration `20150826191400` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150724233100` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150704160200` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $this->assertEquals('20150704160200', $result[0]['version']);
+        $this->assertEquals('20150724233100', $result[1]['version']);
+        $this->assertEquals('20150826191400', $result[2]['version']);
+
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => 'all',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'Skipping migration `20150704160200` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Skipping migration `20150724233100` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Skipping migration `20150826191400` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+
+        $config = $this->command->getConfig();
+        $env = $this->command->getManager()->getEnvironment('default');
+        $migrations = $this->command->getManager()->getMigrations();
+
+        $manager = $this->getMock(
+            '\Migrations\CakeManager',
+            ['getEnvironment', 'markMigrated'],
+            [$config, new StreamOutput(fopen('php://memory', 'a', false))]
+        );
+
+        $manager->expects($this->any())
+            ->method('getEnvironment')->will($this->returnValue($env));
+        $manager->expects($this->any())
+            ->method('getMigrations')->will($this->returnValue($migrations));
+        $manager
+            ->method('markMigrated')->will($this->throwException(new \Exception('Error during marking process')));
+
+        $this->Connection->execute('DELETE FROM phinxlog');
+
+        $application = new MigrationsDispatcher('testing');
+        $buggyCommand = $application->find('mark_migrated');
+        $buggyCommand->setManager($manager);
+        $buggyCommandTester = new CommandTester($buggyCommand);
+        $buggyCommandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => 'all',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'An error occurred while marking migration `20150704160200` as migrated : Error during marking process',
+            $buggyCommandTester->getDisplay()
+        );
     }
 }
