@@ -107,12 +107,6 @@ class MigrationSnapshotTaskTest extends TestCase
 
     public function testCompositeConstraintsSnapshot()
     {
-        $this->skipIf(
-            version_compare(Configure::version(), '3.0.8', '<'),
-            'Cannot run "testCompositeConstraintsSnapshot" because CakePHP Core feature' .
-            'is not implemented in this version'
-        );
-
         $this->loadFixtures(
             'Orders'
         );

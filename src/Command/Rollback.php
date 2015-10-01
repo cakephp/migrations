@@ -11,7 +11,7 @@
  */
 namespace Migrations\Command;
 
-use Cake\Event\EventManagerTrait;
+use Cake\Event\EventDispatcherTrait;
 use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Rollback as RollbackCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,7 +24,7 @@ class Rollback extends RollbackCommand
     use ConfigurationTrait {
         execute as parentExecute;
     }
-    use EventManagerTrait;
+    use EventDispatcherTrait;
 
     /**
      * {@inheritDoc}
