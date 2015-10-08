@@ -79,6 +79,7 @@ class MigrationsShell extends Shell
     {
         $app = new MigrationsDispatcher(PHINX_VERSION);
         $input = new ArgvInput($this->argv);
+        $app->setAutoExit(false);
         $app->run($input);
     }
 
