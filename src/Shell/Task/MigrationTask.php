@@ -112,7 +112,7 @@ class MigrationTask extends SimpleMigrationTask
         } elseif (preg_match('/^(Add).*?(?:To)(.*)/', $name, $matches)) {
             $action = 'add_field';
             $table = Inflector::tableize(Inflector::pluralize($matches[2]));
-        } elseif (preg_match('/^(Remove).*(?:From)(.*)/', $name, $matches)) {
+        } elseif (preg_match('/^(Remove).*?(?:From)(.*)/', $name, $matches)) {
             $action = 'drop_field';
             $table = Inflector::tableize(Inflector::pluralize($matches[2]));
         } elseif (preg_match('/^(Alter)(.*)/', $name, $matches)) {
