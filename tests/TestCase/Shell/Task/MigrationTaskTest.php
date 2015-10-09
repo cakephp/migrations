@@ -209,6 +209,10 @@ class MigrationTaskTest extends TestCase
             ['drop_field', 'groups_users'],
             $this->Task->detectAction('RemoveSomeFieldFromGroupsUsers')
         );
+        $this->assertEquals(
+            ['drop_field', 'fromages'],
+            $this->Task->detectAction('RemoveSomeFieldFromFromages')
+        );
 
         $this->assertEquals(
             ['alter_table', 'groups'],
