@@ -180,6 +180,10 @@ class MigrationTaskTest extends TestCase
             ['add_field', 'groups_users'],
             $this->Task->detectAction('AddSomeFieldToGroupsUsers')
         );
+        $this->assertEquals(
+            ['add_field', 'todos'],
+            $this->Task->detectAction('AddSomeFieldToTodos')
+        );
 
         $this->assertEquals(
             ['drop_field', 'groups'],
