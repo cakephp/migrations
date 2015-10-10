@@ -56,13 +56,23 @@ bin/cake migrations status -p PluginName
 # You can also scope a command to a connection via the `--connection` or `-c` option
 bin/cake migrations status -c my_datasource
 
-# The following will mark targeted migration as marked without actually running it.
-# The expected argument is the migration version number
-bin/cake migrations mark_migrated 20150417223600
+# The following will mark migrations as marked without actually running it.
+bin/cake migrations mark_migrated
 
-# Since Migrations 1.3.1, a new `all` special value for the version argumentwas added.
-# The following will mark all migrations found as migrated.
+# DEPRECATED: The use of the argument `all` will have the same effect as above
 bin/cake migrations mark_migrated all
+
+# Using the option `--target` it will try to mark every migration from beginning up to the given VERSION
+bin/cake migrations mark_migrated --target=VERSION
+
+# When using the `--target` option you can also use `--exclude` or `--only`:
+# `--exclude` will try to mark every migration from beginning until the given VERSION (excluding it from marking)
+# `--only` will try to mark only the given VERSION
+bin/cake migrations mark_migrated --target=VERSION --exclude
+bin/cake migrations mark_migrated --target=VERSION --only
+
+# DEPRECATED: Using the VERSION argument will try to mark only the given VERSION
+bin/cake migrations mark_migrated VERSION
 ```
 
 ### Creating Migrations
