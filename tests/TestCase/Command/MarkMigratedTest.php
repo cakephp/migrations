@@ -222,4 +222,93 @@ class MarkMigratedTest extends TestCase
             $buggyCommandTester->getDisplay()
         );
     }
+
+    public function testExecuteUpTo()
+    {
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '20150704160200',
+            '--up-to' => '',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'Migration `20150704160200` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $this->assertEquals('20150704160200', $result[0]['version']);
+
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '20150826191400',
+            '--up-to' => '',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'Skipping migration `20150704160200` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150724233100` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150826191400` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $this->assertEquals('20150704160200', $result[0]['version']);
+        $this->assertEquals('20150724233100', $result[1]['version']);
+        $this->assertEquals('20150826191400', $result[2]['version']);
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
+        $this->assertEquals(3, $result);
+    }
+
+    public function testExecuteSkipTo()
+    {
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '20150724233100',
+            '--skip-to' => '',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'Migration `20150704160200` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $this->assertEquals('20150704160200', $result[0]['version']);
+
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            'version' => '20150826191400',
+            '--skip-to' => '',
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
+        ]);
+
+        $this->assertContains(
+            'Skipping migration `20150704160200` (already migrated).',
+            $this->commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Migration `20150724233100` successfully marked migrated !',
+            $this->commandTester->getDisplay()
+        );
+
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $this->assertEquals('20150704160200', $result[0]['version']);
+        $this->assertEquals('20150724233100', $result[1]['version']);
+        $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
+        $this->assertEquals(2, $result);
+    }
 }

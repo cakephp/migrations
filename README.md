@@ -63,6 +63,12 @@ bin/cake migrations mark_migrated 20150417223600
 # Since Migrations 1.3.1, a new `all` special value for the version argumentwas added.
 # The following will mark all migrations found as migrated.
 bin/cake migrations mark_migrated all
+
+# The following option up-to will try to mark the migrations from beginning to the given version (including it)
+bin/cake migrations mark_migrated 20150417223600 --up-to
+
+# The following option skip-to will try to mark the migrations from beginning until the given version (excluding it)
+bin/cake migrations mark_migrated 20150417223600 --skip-to
 ```
 
 ### Creating Migrations
