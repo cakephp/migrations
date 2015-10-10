@@ -60,7 +60,9 @@ class MarkMigrated extends AbstractCommand
             ));
         $this->addOption('plugin', 'p', InputArgument::OPTIONAL, 'The plugin the file should be created for')
             ->addOption('connection', 'c', InputArgument::OPTIONAL, 'The datasource connection to use')
-            ->addOption('source', 's', InputArgument::OPTIONAL, 'The folder where migrations are in');
+            ->addOption('source', 's', InputArgument::OPTIONAL, 'The folder where migrations are in')
+            ->addOption('skip-to', 'u', InputArgument::OPTIONAL, 'If present it will mark all versions until the given one')
+            ->addOption('up-to', 't', InputArgument::OPTIONAL, 'If present it will mark all versions including the given one');
     }
 
     /**
@@ -81,8 +83,9 @@ class MarkMigrated extends AbstractCommand
         $path = $this->getConfig()->getMigrationPath();
         $version = $input->getArgument('version');
 
-        if ($version === 'all' || $version === '*') {
-            $this->markAllMigrated($path);
+        if ($this->isBatchMarking($input)) {
+            $versions = $this->versionsToMark($input);
+            $this->markVersionsAsMigrated($path, $versions);
             return;
         }
 
@@ -105,27 +108,27 @@ class MarkMigrated extends AbstractCommand
     }
 
     /**
-     * Mark all migrations found in $path as migrated
+     * Mark all migrations in $versions array found in $path as migrated
      *
      * It will start a transaction and rollback in case one of the operation raises an exception
      *
      * @param string $path Path where to look for migrations
+     * @param array $versions Versions which should be marked
      * @return void
      */
-    protected function markAllMigrated($path)
+    protected function markVersionsAsMigrated($path, $versions)
     {
         $manager = $this->getManager();
         $adapter = $manager->getEnvironment('default')->getAdapter();
-        $migrations = $manager->getMigrations();
         $output = $this->output();
 
-        if (empty($migrations)) {
+        if (empty($versions)) {
             $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
             return;
         }
 
         $adapter->beginTransaction();
-        foreach ($migrations as $version => $migration) {
+        foreach ($versions as $version) {
             if ($manager->isMigrated($version)) {
                 $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
             } else {
@@ -149,5 +152,75 @@ class MarkMigrated extends AbstractCommand
             }
         }
         $adapter->commitTransaction();
+    }
+
+    /**
+     * Decides based on $input if it will try to mark more than one migration
+     *
+     * @param InputInterface $input
+     * @return boolean
+     */
+    protected function isBatchMarking(InputInterface $input)
+    {
+        $version = $input->getArgument('version');
+
+        return $this->isAllVersion($version) ||
+            $this->isSkipTo($input) ||
+            $this->isUpTo($input);
+    }
+
+    /**
+     * Decides based on $input which versions it should mark as migrated
+     *
+     * @param InputInterface $input
+     * @return array of versions that should be marked as migrated
+     */
+    protected function versionsToMark(InputInterface $input)
+    {
+        $version = $input->getArgument('version');
+        $migrations = $this->getManager()->getMigrations();
+        $versions = array_keys($migrations);
+
+        if ($this->isAllVersion($version)) {
+            return $versions;
+        }
+
+        $lengthIncrease = $this->isSkipTo($input) ? 0 : 1;
+        $index = array_search($version, $versions) + $lengthIncrease;
+
+        return array_slice($versions, 0, $index);
+    }
+
+    /**
+     * Checks if the $version is for all migrations
+     *
+     * @param string $version
+     * @return boolean
+     */
+    protected function isAllVersion($version)
+    {
+        return $version == 'all' || $version == '*';
+    }
+
+    /**
+     * Checks if the $input has skip-to option
+     *
+     * @param InputInterface $input
+     * @return boolean
+     */
+    protected function isSkipTo(InputInterface $input)
+    {
+        return NULL !== $input->getOption('skip-to');
+    }
+
+    /**
+     * Checks if the $input has up-to option
+     *
+     * @param InputInterface $input
+     * @return boolean
+     */
+    protected function isUpTo(InputInterface $input)
+    {
+        return NULL !== $input->getOption('up-to');
     }
 }
