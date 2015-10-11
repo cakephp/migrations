@@ -100,7 +100,7 @@ class CakeAdapter implements AdapterInterface
      * Check if an option has been set.
      *
      * @param  string $name
-     * @return boolean
+     * @return bool
      */
     public function hasOption($name)
     {
@@ -211,7 +211,7 @@ class CakeAdapter implements AdapterInterface
      * Does the schema table exist?
      *
      * @deprecated use hasTable instead.
-     * @return boolean
+     * @return bool
      */
     public function hasSchemaTable()
     {
@@ -225,7 +225,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function createSchemaTable()
     {
-        return $this->adapter->createSchemaTable();
+        $this->adapter->createSchemaTable();
     }
 
     /**
@@ -246,7 +246,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function connect()
     {
-        return $this->adapter->connect();
+        $this->adapter->connect();
     }
 
     /**
@@ -256,13 +256,13 @@ class CakeAdapter implements AdapterInterface
      */
     public function disconnect()
     {
-        return $this->adapter->disconnect();
+        $this->adapter->disconnect();
     }
 
     /**
      * Does the adapter support transactions?
      *
-     * @return boolean
+     * @return bool
      */
     public function hasTransactions()
     {
@@ -381,7 +381,7 @@ class CakeAdapter implements AdapterInterface
      * Checks to see if a table exists.
      *
      * @param string $tableName Table Name
-     * @return boolean
+     * @return bool
      */
     public function hasTable($tableName)
     {
@@ -396,7 +396,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function createTable(Table $table)
     {
-        return $this->adapter->createTable($table);
+        $this->adapter->createTable($table);
     }
 
     /**
@@ -408,7 +408,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function renameTable($tableName, $newName)
     {
-        return $this->adapter->renameTable($tableName, $newName);
+        $this->adapter->renameTable($tableName, $newName);
     }
 
     /**
@@ -419,7 +419,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function dropTable($tableName)
     {
-        return $this->adapter->dropTable($tableName);
+        $this->adapter->dropTable($tableName);
     }
 
     /**
@@ -438,7 +438,7 @@ class CakeAdapter implements AdapterInterface
      *
      * @param string $tableName  Table Name
      * @param string $columnName Column Name
-     * @return boolean
+     * @return bool
      */
     public function hasColumn($tableName, $columnName)
     {
@@ -454,7 +454,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function addColumn(Table $table, Column $column)
     {
-        return $this->adapter->addColumn($table, $column);
+        $this->adapter->addColumn($table, $column);
     }
 
     /**
@@ -467,7 +467,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function renameColumn($tableName, $columnName, $newColumnName)
     {
-        return $this->adapter->renameColumn($tableName, $columnName, $newColumnName);
+        $this->adapter->renameColumn($tableName, $columnName, $newColumnName);
     }
 
     /**
@@ -492,7 +492,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function dropColumn($tableName, $columnName)
     {
-        return $this->adapter->dropColumn($tableName, $columnName);
+        $this->adapter->dropColumn($tableName, $columnName);
     }
 
     /**
@@ -500,7 +500,7 @@ class CakeAdapter implements AdapterInterface
      *
      * @param string $tableName Table Name
      * @param mixed  $columns   Column(s)
-     * @return boolean
+     * @return bool
      */
     public function hasIndex($tableName, $columns)
     {
@@ -516,7 +516,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function addIndex(Table $table, Index $index)
     {
-        return $this->adapter->addIndex($table, $index);
+        $this->adapter->addIndex($table, $index);
     }
 
     /**
@@ -528,7 +528,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function dropIndex($tableName, $columns)
     {
-        return $this->adapter->dropIndex($tableName, $columns);
+        $this->adapter->dropIndex($tableName, $columns);
     }
 
     /**
@@ -540,7 +540,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function dropIndexByName($tableName, $indexName)
     {
-        return $this->adapter->dropIndexByName($tableName, $indexName);
+        $this->adapter->dropIndexByName($tableName, $indexName);
     }
 
     /**
@@ -549,7 +549,7 @@ class CakeAdapter implements AdapterInterface
      * @param string   $tableName
      * @param string[] $columns    Column(s)
      * @param string   $constraint Constraint name
-     * @return boolean
+     * @return bool
      */
     public function hasForeignKey($tableName, $columns, $constraint = null)
     {
@@ -565,7 +565,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function addForeignKey(Table $table, ForeignKey $foreignKey)
     {
-        return $this->adapter->addForeignKey($table, $foreignKey);
+        $this->adapter->addForeignKey($table, $foreignKey);
     }
 
     /**
@@ -574,14 +574,14 @@ class CakeAdapter implements AdapterInterface
      * a specific method will be called. The original one from Phinx contains a bug
      * that can drop a table in certain conditions.
      *
-     * @param string   $tableName
-     * @param string[] $columns    Column(s)
-     * @param string   $constraint Constraint name
+     * @param string $tableName
+     * @param string[] $columns Column(s)
+     * @param string|null $constraint Constraint name
      * @return void
      */
     public function dropForeignKey($tableName, $columns, $constraint = null)
     {
-        return $this->adapter->dropForeignKey($tableName, $columns, $constraint);
+        $this->adapter->dropForeignKey($tableName, $columns, $constraint);
     }
 
     /**
@@ -598,7 +598,7 @@ class CakeAdapter implements AdapterInterface
      * Checks that the given column is of a supported type.
      *
      * @param  Column $column
-     * @return boolean
+     * @return bool
      */
     public function isValidColumnType(Column $column)
     {
@@ -609,7 +609,7 @@ class CakeAdapter implements AdapterInterface
      * Converts the Phinx logical type to the adapter's SQL type.
      *
      * @param string $type
-     * @param integer $limit
+     * @param int|null $limit
      * @return string
      */
     public function getSqlType($type, $limit = null)
@@ -626,14 +626,14 @@ class CakeAdapter implements AdapterInterface
      */
     public function createDatabase($name, $options = [])
     {
-        return $this->adapter->createDatabase($name, $options);
+        $this->adapter->createDatabase($name, $options);
     }
 
     /**
      * Checks to see if a database exists.
      *
      * @param string $name Database Name
-     * @return boolean
+     * @return bool
      */
     public function hasDatabase($name)
     {
@@ -648,6 +648,6 @@ class CakeAdapter implements AdapterInterface
      */
     public function dropDatabase($name)
     {
-        return $this->adapter->dropDatabase($name);
+        $this->adapter->dropDatabase($name);
     }
 }
