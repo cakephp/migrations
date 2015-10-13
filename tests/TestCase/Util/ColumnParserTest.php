@@ -186,6 +186,18 @@ class ColumnParserTest extends TestCase
             ['field:fieldType:indexType:indexName'],
             $this->columnParser->validArguments(['field:fieldType:indexType:indexName'])
         );
+        $this->assertEquals(
+            ['field:fieldType[128]:indexType:indexName'],
+            $this->columnParser->validArguments(['field:fieldType[128]:indexType:indexName'])
+        );
+        $this->assertEquals(
+            ['field:integer[9]:indexType:indexName'],
+            $this->columnParser->validArguments(['field:integer[9]:indexType:indexName'])
+        );
+        $this->assertEquals(
+            ['field:biginteger[18]:indexType:indexName'],
+            $this->columnParser->validArguments(['field:biginteger[18]:indexType:indexName'])
+        );
     }
 
     /**
@@ -206,6 +218,21 @@ class ColumnParserTest extends TestCase
         $this->assertEquals('string', $this->columnParser->getType('some_field', 'string'));
         $this->assertEquals('boolean', $this->columnParser->getType('field', 'boolean'));
         $this->assertEquals('polygon', $this->columnParser->getType('field', 'polygon'));
+    }
+
+    /**
+     * @covers Migrations\Util\ColumnParser::getTypeAndLength
+     */
+    public function testGetTypeAndLength()
+    {
+        $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('name', 'string'));
+        $this->assertEquals(['integer', 11], $this->columnParser->getTypeAndLength('counter', 'integer'));
+        $this->assertEquals(['string', 128], $this->columnParser->getTypeAndLength('name', 'string[128]'));
+        $this->assertEquals(['integer', 9], $this->columnParser->getTypeAndLength('counter', 'integer[9]'));
+        $this->assertEquals(['biginteger', 18], $this->columnParser->getTypeAndLength('bigcounter', 'biginteger[18]'));
+        $this->assertEquals(['integer', 11], $this->columnParser->getTypeAndLength('id', null));
+        $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('username', null));
+        $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('created', null));
     }
 
     /**

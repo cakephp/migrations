@@ -99,6 +99,14 @@ class MigrationTaskTest extends TestCase
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKeyUuid.php', $result);
+
+        $this->Task->args = [
+            'create_users',
+            'name:string[128]',
+            'counter:integer[8]'
+        ];
+        $result = $this->Task->bake('CreateUsers');
+        $this->assertSameAsFile(__FUNCTION__ . 'FieldLength.php', $result);
     }
 
     /**
