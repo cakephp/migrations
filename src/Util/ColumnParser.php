@@ -12,6 +12,20 @@ class ColumnParser
 {
 
     /**
+     * Regex used to parse the column definition passed through the shell
+     *
+     * @var string
+     */
+    protected $regexpParseColumn = '/^(\w*)(?::(\w*\[?\d*\]?))?(?::(\w*))?(?::(\w*))?/';
+
+    /**
+     * Regex used to parse the field type and length
+     *
+     * @var string
+     */
+    protected $regexpParseField = '/(\w+)\[(\d+)\]/';
+
+    /**
      * Parses a list of arguments into an array of fields
      *
      * @param array $arguments A list of arguments being parsed
@@ -22,7 +36,7 @@ class ColumnParser
         $fields = [];
         $arguments = $this->validArguments($arguments);
         foreach ($arguments as $field) {
-            preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches);
+            preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
@@ -37,8 +51,7 @@ class ColumnParser
                 }
             }
 
-            $type = $this->getType($field, $type);
-            $length = $this->getLength($type);
+            list($type, $length) = $this->getTypeAndLength($field, $type);
             $fields[$field] = [
                 'columnType' => $type,
                 'options' => [
@@ -70,7 +83,7 @@ class ColumnParser
         $indexes = [];
         $arguments = $this->validArguments($arguments);
         foreach ($arguments as $field) {
-            preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches);
+            preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
@@ -117,7 +130,7 @@ class ColumnParser
         $primaryKey = [];
         $arguments = $this->validArguments($arguments);
         foreach ($arguments as $field) {
-            preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field, $matches);
+            preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
@@ -141,8 +154,28 @@ class ColumnParser
         $collection = new Collection($arguments);
         return $collection->filter(function ($value, $field) {
             $value;
-            return preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/', $field);
+            return preg_match($this->regexpParseColumn, $field);
         })->toArray();
+    }
+
+    /**
+     * Get the type and length of a field based on the field and the type passed
+     *
+     * @param string $field Name of field
+     * @param string $type User-specified type
+     * @return array First value is the field type, second value is the field length. If no length
+     * can be extracted, null is returned for the second value
+     */
+    public function getTypeAndLength($field, $type)
+    {
+        if (preg_match($this->regexpParseField, $type, $matches)) {
+            return [$matches[1], $matches[2]];
+        }
+
+        $fieldType = $this->getType($field, $type);
+        $length = $this->getLength($fieldType);
+
+        return [$fieldType, $length];
     }
 
     /**
@@ -156,24 +189,26 @@ class ColumnParser
     {
         $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
         $collection = new Collection($reflector->getConstants());
+
         $validTypes = $collection->filter(function ($value, $constant) {
             $value;
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
 
+        $fieldType = $type;
         if ($type === null || !in_array($type, $validTypes)) {
             if ($type == 'primary') {
-                $type = 'integer';
+                $fieldType = 'integer';
             } elseif ($field == 'id') {
-                $type = 'integer';
+                $fieldType = 'integer';
             } elseif (in_array($field, ['created', 'modified', 'updated'])) {
-                $type = 'datetime';
+                $fieldType = 'datetime';
             } else {
-                $type = 'string';
+                $fieldType = 'string';
             }
         }
 
-        return $type;
+        return $fieldType;
     }
 
     /**

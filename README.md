@@ -211,12 +211,14 @@ name you are specifying.
 
 Fields are verified via the following the following regular expression:
 
-    /^(\w*)(?::(\w*))?(?::(\w*))?(?::(\w*))?/
+    /^(\w*)(?::(\w*\[?\d*\]?))?(?::(\w*))?(?::(\w*))?/
 
 They follow the format:
 
-    field:fieldType:indexType:indexName
+    field:fieldType[length]:indexType:indexName
 
+The length parameter for the ``fieldType`` is optionnal and should always be
+written between bracket.
 For instance, the following are all valid ways of specifying the primary key `id`:
 
 - `id:primary_key`
@@ -232,7 +234,11 @@ There are some heuristics to choosing fieldtypes when left unspecified or set to
 - `created`, `modified`, `updated`: *datetime*
 - Default *string*
 
-Lengths for certain columns are also defaulted:
+You can specify the wanted length for a field type by writing it between bracket:
+
+    username:string[128]
+
+If no length is specified, lengths for certain columns are defaulted:
 
 - *string*: `255`
 - *integer*: `11`
