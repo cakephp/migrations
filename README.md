@@ -14,16 +14,12 @@ Full documentation of the plugin can be found on the [CakePHP Cookbook](http://b
 ## Installation
 
 You can install this plugin into your CakePHP application using
-[composer](http://getcomposer.org). For existing applications you can add the
-following to your `composer.json` file:
+[composer](http://getcomposer.org). 
 
-```javascript
-"require": {
-	"cakephp/migrations": "~1.0"
-}
-```
-
-And run `php composer.phar update`
+Run the following command
+```sh
+composer require cakephp/migrations
+ ```
 
 ## Configuration
 
