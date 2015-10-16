@@ -217,7 +217,7 @@ They follow the format:
 
     field:fieldType[length]:indexType:indexName
 
-The length parameter for the ``fieldType`` is optionnal and should always be
+The length parameter for the ``fieldType`` is optional and should always be
 written between bracket.
 For instance, the following are all valid ways of specifying the primary key `id`:
 
