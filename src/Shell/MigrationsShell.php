@@ -49,7 +49,9 @@ class MigrationsShell extends Shell
             ->addOption('version', ['short' => 'V'])
             ->addOption('no-interaction', ['short' => 'n'])
             ->addOption('template', ['short' => 't'])
-            ->addOption('format', ['short' => 'f']);
+            ->addOption('format', ['short' => 'f'])
+            ->addOption('only', ['short' => 'o'])
+            ->addOption('exclude', ['short' => 'x']);
     }
 
     /**

@@ -81,8 +81,8 @@ class MigrationSnapshotTaskTest extends TestCase
             ->method('dispatchShell')
             ->with(
                 $this->logicalAnd(
-                    $this->stringContains('migrations mark_migrated'),
-                    $this->stringContains('-c test -p BogusPlugin')
+                    $this->stringContains('migrations mark_migrated -t'),
+                    $this->stringContains('-o -c test -p BogusPlugin')
                 )
             );
 

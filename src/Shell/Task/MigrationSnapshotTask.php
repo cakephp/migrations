@@ -85,7 +85,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         list($version, ) = explode('_', $fileName, 2);
 
 
-        $dispatchCommand = 'migrations mark_migrated ' . $version;
+        $dispatchCommand = 'migrations mark_migrated -t ' . $version . ' -o';
         if (!empty($this->params['connection'])) {
             $dispatchCommand .= ' -c ' . $this->params['connection'];
         }

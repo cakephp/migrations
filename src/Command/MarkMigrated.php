@@ -11,6 +11,7 @@
  */
 namespace Migrations\Command;
 
+use InvalidArgumentException;
 use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -52,32 +53,32 @@ class MarkMigrated extends AbstractCommand
             ->addArgument(
                 'version',
                 InputArgument::OPTIONAL,
-                'DEPRECATED: use `bin/cake migrations mark_migrated --target=VERSION` instead'
+                'DEPRECATED: use `bin/cake migrations mark_migrated --target=VERSION --only` instead'
             )
             ->setHelp(sprintf(
                 '%sMark migrations as migrated%s',
                 PHP_EOL,
                 PHP_EOL
-            ));
-        $this->addOption('plugin', 'p', InputArgument::OPTIONAL, 'The plugin the file should be created for')
-            ->addOption('connection', 'c', InputArgument::OPTIONAL, 'The datasource connection to use')
-            ->addOption('source', 's', InputArgument::OPTIONAL, 'The folder where migrations are in')
+            ))
+            ->addOption('plugin', 'p', InputOption::VALUE_REQUIRED, 'The plugin the file should be created for')
+            ->addOption('connection', 'c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
+            ->addOption('source', 's', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
             ->addOption(
                 'target',
                 't',
-                InputArgument::OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'It will mark migrations from beginning to the given version'
             )
             ->addOption(
                 'exclude',
                 'x',
-                InputArgument::OPTIONAL,
+                InputOption::VALUE_NONE,
                 'If present it will mark migrations from beginning until the given version, excluding it'
             )
             ->addOption(
                 'only',
                 'o',
-                InputArgument::OPTIONAL,
+                InputOption::VALUE_NONE,
                 'If present it will only mark the given migration version'
             );
     }
@@ -122,7 +123,7 @@ class MarkMigrated extends AbstractCommand
 
         try {
             $versions = $this->getVersionsToMark($input);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
             return;
         }
@@ -181,7 +182,7 @@ class MarkMigrated extends AbstractCommand
      * Decides which versions it should mark as migrated
      *
      * @return array Array of versions that should be marked as migrated
-     * @throws InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
+     * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
      * or version not found
      */
     protected function getVersionsToMark()
@@ -197,7 +198,7 @@ class MarkMigrated extends AbstractCommand
 
         if ($this->isOnly()) {
             if (!in_array($version, $versions)) {
-                throw new \InvalidArgumentException("Migration `$version` was not found !");
+                throw new InvalidArgumentException("Migration `$version` was not found !");
             }
 
             return [$version];
@@ -267,7 +268,7 @@ class MarkMigrated extends AbstractCommand
      */
     protected function hasExclude()
     {
-        return $this->input->getOption('exclude') !== null;
+        return $this->input->getOption('exclude');
     }
 
     /**
@@ -277,7 +278,7 @@ class MarkMigrated extends AbstractCommand
      */
     protected function hasOnly()
     {
-        return $this->input->getOption('only') !== null;
+        return $this->input->getOption('only');
     }
 
     /**

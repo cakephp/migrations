@@ -15,6 +15,7 @@ use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Status as StatusCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Status extends StatusCommand
@@ -29,11 +30,16 @@ class Status extends StatusCommand
     {
         $this->setName('status')
             ->setDescription('Show migration status')
-            ->addOption('--format', '-f', InputArgument::OPTIONAL, 'The output format: text or json. Defaults to text.')
+            ->addOption(
+                '--format',
+                '-f',
+                InputOption::VALUE_REQUIRED,
+                'The output format: text or json. Defaults to text.'
+            )
             ->setHelp('prints a list of all migrations, along with their current status')
-            ->addOption('--plugin', '-p', InputArgument::OPTIONAL, 'The plugin containing the migrations')
-            ->addOption('--connection', '-c', InputArgument::OPTIONAL, 'The datasource connection to use')
-            ->addOption('--source', '-s', InputArgument::OPTIONAL, 'The folder where migrations are in');
+            ->addOption('--plugin', '-p', InputOption::VALUE_REQUIRED, 'The plugin containing the migrations')
+            ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
+            ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in');
     }
 
     /**
