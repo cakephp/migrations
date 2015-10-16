@@ -293,7 +293,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150724233100',
-            '--exclude' => '',
+            '--exclude' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -309,7 +309,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150826191400',
-            '--exclude' => '',
+            '--exclude' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -332,7 +332,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150704160610',
-            '--exclude' => '',
+            '--exclude' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -348,7 +348,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150724233100',
-            '--only' => '',
+            '--only' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -364,7 +364,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150826191400',
-            '--only' => '',
+            '--only' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -383,7 +383,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150704160610',
-            '--only' => '',
+            '--only' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -422,7 +422,7 @@ class MarkMigratedTest extends TestCase
     {
         $this->commandTester->execute([
             'command' => $this->command->getName(),
-            '--exclude' => '',
+            '--exclude' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -436,7 +436,7 @@ class MarkMigratedTest extends TestCase
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
-            '--only' => '',
+            '--only' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
@@ -451,8 +451,8 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--target' => '20150724233100',
-            '--only' => '',
-            '--exclude' => '',
+            '--only' => true,
+            '--exclude' => true,
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ]);
