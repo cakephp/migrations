@@ -181,6 +181,10 @@ class MigrationTaskTest extends TestCase
             $this->Task->detectAction('AddThingToGroups')
         );
         $this->assertEquals(
+            ['add_field', 'groups'],
+            $this->Task->detectAction('AddTokenToGroups')
+        );
+        $this->assertEquals(
             ['add_field', 'users'],
             $this->Task->detectAction('AddAnotherFieldToUsers')
         );
@@ -220,6 +224,10 @@ class MigrationTaskTest extends TestCase
         $this->assertEquals(
             ['drop_field', 'fromages'],
             $this->Task->detectAction('RemoveSomeFieldFromFromages')
+        );
+        $this->assertEquals(
+            ['drop_field', 'fromages'],
+            $this->Task->detectAction('RemoveFromageFromFromages')
         );
 
         $this->assertEquals(
