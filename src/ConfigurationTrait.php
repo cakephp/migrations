@@ -99,6 +99,12 @@ trait ConfigurationTrait
             ]
         ];
 
+        if ($adapterName === 'pgsql') {
+            if (!empty($connectionConfig['schema'])) {
+                $config['environments']['default']['schema'] = $connectionConfig['schema'];
+            }
+        }
+
         if ($adapterName === 'mysql') {
             if (!empty($connectionConfig['ssl_key']) && !empty($connectionConfig['ssl_cert'])) {
                 $config['environments']['default']['mysql_attr_ssl_key'] = $connectionConfig['ssl_key'];
