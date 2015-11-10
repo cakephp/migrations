@@ -512,7 +512,7 @@ class CakeAdapter implements AdapterInterface
      *
      * @param string $tableName Table Name
      * @param string $indexName
-     * @return boolean
+     * @return bool
      */
     public function hasIndexByName($tableName, $indexName)
     {
