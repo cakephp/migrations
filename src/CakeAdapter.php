@@ -508,6 +508,18 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
+     * Checks to see if an index specified by name exists.
+     *
+     * @param string $tableName Table Name
+     * @param string $indexName
+     * @return boolean
+     */
+    public function hasIndexByName($tableName, $indexName)
+    {
+        return $this->adapter->hasIndexByName($tableName, $columns);
+    }
+
+    /**
      * Adds the specified index to a database table.
      *
      * @param Table $table Table
