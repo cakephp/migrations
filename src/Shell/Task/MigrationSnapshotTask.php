@@ -207,10 +207,10 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $list = [];
         $tables = $this->findTables($pluginName);
         foreach ($tables as $num => $table) {
-            $list = $list + $this->fetchTableName($table, $pluginName);
+            $list = array_merge($list, $this->fetchTableName($table, $pluginName));
         }
 
-        return $list;
+        return array_unique($list);
     }
 
     /**
