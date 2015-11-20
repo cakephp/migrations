@@ -36,8 +36,6 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.migrations.articles'
     ];
 
-    public $autoFixtures = false;
-
     /**
      * setup method
      *
@@ -63,16 +61,6 @@ class MigrationSnapshotTaskTest extends TestCase
 
     public function testNotEmptySnapshot()
     {
-        $this->loadFixtures(
-            'Users',
-            'SpecialTags',
-            'SpecialPk',
-            'CompositePk',
-            'Categories',
-            'Products',
-            'Articles'
-        );
-
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'BogusPlugin';
@@ -100,21 +88,6 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->params['plugin'] = 'BogusPlugin';
 
         $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
-        $result = $this->Task->bake($bakeName);
-
-        $this->assertCorrectSnapshot($bakeName, $result);
-    }
-
-    public function testCompositeConstraintsSnapshot()
-    {
-        $this->loadFixtures(
-            'Orders'
-        );
-
-        $this->Task->params['require-table'] = false;
-        $this->Task->params['connection'] = 'test';
-
-        $bakeName = $this->getBakeName('TestCompositeConstraintsSnapshot');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
