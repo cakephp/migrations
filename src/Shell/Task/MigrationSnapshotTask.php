@@ -31,7 +31,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      *
      * @var array
      */
-    public $skipTables = ['i18n', 'phinxlog'];
+    public $skipTables = ['phinxlog'];
 
     /**
      * Regex of Table name to skip
