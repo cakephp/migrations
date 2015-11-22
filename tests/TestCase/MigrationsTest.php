@@ -468,7 +468,6 @@ class MigrationsTest extends TestCase
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
                 [
-                    ['test_composite_constraints_snapshot', 20150912015600],
                     ['test_not_empty_snapshot', 20150912015601],
                     ['test_auto_id_disabled_snapshot', 20150912015602],
                     ['testCreatePrimaryKey', 20150912015603],
@@ -478,7 +477,6 @@ class MigrationsTest extends TestCase
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
                 [
-                    ['test_composite_constraints_snapshot_pgsql', 20150912015605],
                     ['test_not_empty_snapshot_pgsql', 20150912015606],
                     ['test_auto_id_disabled_snapshot_pgsql', 20150912015607]
                 ]
@@ -487,7 +485,6 @@ class MigrationsTest extends TestCase
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
                 [
-                    ['test_composite_constraints_snapshot_sqlite', 20150912015608],
                     ['test_not_empty_snapshot_sqlite', 20150912015609],
                     ['test_auto_id_disabled_snapshot_sqlite', 20150912015610]
                 ]

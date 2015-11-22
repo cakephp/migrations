@@ -111,6 +111,33 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             ->addPrimaryKey(['id', 'name'])
             ->create();
 
+        $table = $this->table('orders');
+        $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
+            ->addColumn('product_category', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addIndex(
+                [
+                    'product_category',
+                    'product_id',
+                ]
+            )
+            ->create();
+
         $table = $this->table('products');
         $table
             ->addColumn('id', 'integer', [
@@ -274,6 +301,24 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->update();
 
+        $this->table('orders')
+            ->addForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ],
+                'products',
+                [
+                    'category_id',
+                    'id',
+                ],
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
         $this->table('products')
             ->addForeignKey(
                 'category_id',
@@ -298,6 +343,14 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                 'product_id'
             );
 
+        $this->table('orders')
+            ->dropForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ]
+            );
+
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
@@ -306,6 +359,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
         $this->dropTable('articles');
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
+        $this->dropTable('orders');
         $this->dropTable('products');
         $this->dropTable('special_pks');
         $this->dropTable('special_tags');

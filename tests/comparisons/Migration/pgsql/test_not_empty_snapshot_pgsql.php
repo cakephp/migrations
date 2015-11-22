@@ -94,6 +94,26 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             ])
             ->create();
 
+        $table = $this->table('orders');
+        $table
+            ->addColumn('product_category', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => false,
+            ])
+            ->addColumn('product_id', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => false,
+            ])
+            ->addIndex(
+                [
+                    'product_category',
+                    'product_id',
+                ]
+            )
+            ->create();
+
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
@@ -235,6 +255,24 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->update();
 
+        $this->table('orders')
+            ->addForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ],
+                'products',
+                [
+                    'category_id',
+                    'id',
+                ],
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
+                ]
+            )
+            ->update();
+
         $this->table('products')
             ->addForeignKey(
                 'category_id',
@@ -259,6 +297,14 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'product_id'
             );
 
+        $this->table('orders')
+            ->dropForeignKey(
+                [
+                    'product_category',
+                    'product_id',
+                ]
+            );
+
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
@@ -267,6 +313,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->dropTable('articles');
         $this->dropTable('categories');
         $this->dropTable('composite_pks');
+        $this->dropTable('orders');
         $this->dropTable('products');
         $this->dropTable('special_pks');
         $this->dropTable('special_tags');
