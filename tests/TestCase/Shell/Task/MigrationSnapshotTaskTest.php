@@ -49,7 +49,7 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $this->Task = $this->getMock(
             'Migrations\Shell\Task\MigrationSnapshotTask',
-            ['in', 'err', 'dispatchShell', '_stop'],
+            ['in', 'err', 'dispatchShell', '_stop', 'findTables', 'fetchTableName'],
             [$inputOutput]
         );
         $this->Task->name = 'Migration';
@@ -57,6 +57,21 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->BakeTemplate = new BakeTemplateTask($inputOutput);
         $this->Task->BakeTemplate->initialize();
         $this->Task->BakeTemplate->interactive = false;
+    }
+
+    public function testGetTableNames()
+    {
+        $this->Task->expects($this->any())
+            ->method('findTables')
+            ->with('Blog')
+            ->will($this->returnValue(['ArticlesTable.php', 'TagsTable.php']));
+
+        $this->Task->method('fetchTableName')
+            ->will($this->onConsecutiveCalls(['articles_tags', 'articles'], ['articles_tags', 'tags']));
+
+        $results = $this->Task->getTableNames('Blog');
+        $expected = ['articles_tags', 'articles', 'tags'];
+        $this->assertEquals(array_values($expected), array_values($results));
     }
 
     public function testNotEmptySnapshot()
