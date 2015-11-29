@@ -344,15 +344,14 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
-     * Inserts data into the table
+     * Inserts data into a table.
      *
      * @param Table $table where to insert data
-     * @param array $columns column names
-     * @param $data
+     * @param array $row
      */
-    public function insert(Table $table, $columns, $data)
+    public function insert(Table $table, $row)
     {
-        return $this->adapter->insert($table, $columns, $data);
+        return $this->adapter->insert($table, $row);
     }
 
     /**
