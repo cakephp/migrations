@@ -348,6 +348,7 @@ class CakeAdapter implements AdapterInterface
      *
      * @param Table $table where to insert data
      * @param array $row
+     * @return void
      */
     public function insert(Table $table, $row)
     {
