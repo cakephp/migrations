@@ -60,7 +60,7 @@ class MigrationTask extends SimpleMigrationTask
 
         $action = $this->detectAction($className);
 
-        if ($action === null) {
+        if (empty($action)) {
             return [
                 'plugin' => $this->plugin,
                 'pluginPath' => $pluginPath,
@@ -119,7 +119,7 @@ class MigrationTask extends SimpleMigrationTask
             $action = 'alter_table';
             $table = Inflector::tableize(Inflector::pluralize($matches[2]));
         } else {
-            return null;
+            return [];
         }
 
         return [$action, $table];

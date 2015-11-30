@@ -56,11 +56,11 @@ class MigrationHelper extends Helper
      */
     public function tableMethod($action)
     {
-        if ($action == 'drop_table') {
+        if ($action === 'drop_table') {
             return 'drop';
         }
 
-        if ($action == 'create_table') {
+        if ($action === 'create_table') {
             return 'create';
         }
 
@@ -75,7 +75,7 @@ class MigrationHelper extends Helper
      */
     public function indexMethod($action)
     {
-        if ($action == 'drop_field') {
+        if ($action === 'drop_field') {
             return 'removeIndex';
         }
 
@@ -90,7 +90,7 @@ class MigrationHelper extends Helper
      */
     public function columnMethod($action)
     {
-        if ($action == 'drop_field') {
+        if ($action === 'drop_field') {
             return 'removeColumn';
         }
 

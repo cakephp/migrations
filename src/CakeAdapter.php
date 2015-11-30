@@ -352,7 +352,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function insert(Table $table, $row)
     {
-        return $this->adapter->insert($table, $row);
+        $this->adapter->insert($table, $row);
     }
 
     /**
@@ -516,7 +516,7 @@ class CakeAdapter implements AdapterInterface
      */
     public function hasIndexByName($tableName, $indexName)
     {
-        return $this->adapter->hasIndexByName($tableName, $columns);
+        return $this->adapter->hasIndexByName($tableName, $indexName);
     }
 
     /**
@@ -558,9 +558,9 @@ class CakeAdapter implements AdapterInterface
     /**
      * Checks to see if a foreign key exists.
      *
-     * @param string   $tableName
-     * @param string[] $columns    Column(s)
-     * @param string   $constraint Constraint name
+     * @param string $tableName
+     * @param string[] $columns Column(s)
+     * @param string|null $constraint Constraint name
      * @return bool
      */
     public function hasForeignKey($tableName, $columns, $constraint = null)

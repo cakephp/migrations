@@ -95,7 +95,7 @@ class CakeManager extends Manager
         $this->getOutput()->writeln(
             'Migrating to version ' . $versionToMigrate
         );
-        return $this->migrate($environment, $versionToMigrate);
+        $this->migrate($environment, $versionToMigrate);
     }
 
     /**
@@ -116,7 +116,8 @@ class CakeManager extends Manager
 
         if ($dateString < end($versions)) {
             $this->getOutput()->writeln('Rolling back all migrations');
-            return $this->rollback($environment, 0);
+            $this->rollback($environment, 0);
+            return;
         }
 
         foreach ($versions as $index => $version) {
@@ -128,7 +129,7 @@ class CakeManager extends Manager
         $versionToRollback = $versions[$index];
 
         $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
-        return $this->rollback($environment, $versionToRollback);
+        $this->rollback($environment, $versionToRollback);
     }
 
     /**

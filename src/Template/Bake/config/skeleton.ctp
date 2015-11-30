@@ -40,7 +40,7 @@ class <%= $name %> extends AbstractMigration
 <% foreach ($tables as $table): %>
         $table = $this->table('<%= $table%>');
 <% if ($tableMethod !== 'drop') : %>
-<% if ($columnMethod == 'removeColumn'): %>
+<% if ($columnMethod === 'removeColumn'): %>
 <% foreach ($columns['fields'] as $column => $config): %>
         <%= "\$table->$columnMethod('" . $column . "');"; %>
 <% endforeach; %>
