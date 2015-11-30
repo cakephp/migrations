@@ -17,7 +17,7 @@ use Bake\Shell\Task\SimpleBakeTask;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
 use Cake\Utility\Inflector;
-use Phinx\Migration\Util;
+use Phinx\Util\Util;
 
 /**
  * Task class for generating migration snapshot files.
