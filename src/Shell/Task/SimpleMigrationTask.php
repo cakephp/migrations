@@ -74,20 +74,22 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
      *
      * If the name is invalid, the task will exit
      *
-     * @param string $name Name for the generated migration
-     * @return string name of the migration file
+     * @param string|null $name Name for the generated migration
+     * @return string|null Name of the migration file or null if empty
      */
     protected function getMigrationName($name = null)
     {
         if (empty($name)) {
-            return $this->error('Choose a migration name to bake in CamelCase format');
+            $this->error('Choose a migration name to bake in CamelCase format');
+            return null;
         }
 
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
-            return $this->error('The className is not correct. The className can only contain "A-Z" and "0-9".');
+            $this->error('The className is not correct. The className can only contain "A-Z" and "0-9".');
+            return null;
         }
 
         return $name;

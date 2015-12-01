@@ -176,12 +176,12 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      * To check if a Table Model is to be added in the migration file
      *
      * @param string $tableName Table name in underscore case.
-     * @param string $pluginName Plugin name if exists.
-     * @return bool true if the model is to be added.
+     * @param string|null $pluginName Plugin name if exists.
+     * @return bool True if the model is to be added.
      */
     public function tableToAdd($tableName, $pluginName = null)
     {
-        if (is_null($pluginName)) {
+        if ($pluginName === null) {
             return true;
         }
 
@@ -196,13 +196,13 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * Gets list Tables Names
      *
-     * @param string $pluginName Plugin name if exists.
+     * @param string|null $pluginName Plugin name if exists.
      * @return array
      */
     public function getTableNames($pluginName = null)
     {
-        if (!is_null($pluginName) && !Plugin::loaded($pluginName)) {
-            return false;
+        if ($pluginName !== null && !Plugin::loaded($pluginName)) {
+            return [];
         }
         $list = [];
         $tables = $this->findTables($pluginName);
@@ -241,14 +241,14 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      * fetch TableName From Table Object
      *
      * @param string $className Name of Table Class.
-     * @param string $pluginName Plugin name if exists.
-     * @return string
+     * @param string|null $pluginName Plugin name if exists.
+     * @return array
      */
     public function fetchTableName($className, $pluginName = null)
     {
         $tables = [];
         $className = str_replace('Table.php', '', $className);
-        if (!is_null($pluginName)) {
+        if ($pluginName !== null) {
             $className = $pluginName . '.' . $className;
         }
 

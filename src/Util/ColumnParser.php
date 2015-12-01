@@ -96,7 +96,7 @@ class ColumnParser
             }
 
             $indexUnique = false;
-            if ($indexType == 'unique') {
+            if ($indexType === 'unique') {
                 $indexUnique = true;
             }
 
@@ -197,9 +197,9 @@ class ColumnParser
 
         $fieldType = $type;
         if ($type === null || !in_array($type, $validTypes)) {
-            if ($type == 'primary') {
+            if ($type === 'primary') {
                 $fieldType = 'integer';
-            } elseif ($field == 'id') {
+            } elseif ($field === 'id') {
                 $fieldType = 'integer';
             } elseif (in_array($field, ['created', 'modified', 'updated'])) {
                 $fieldType = 'datetime';
@@ -220,11 +220,11 @@ class ColumnParser
     public function getLength($type)
     {
         $length = null;
-        if ($type == 'string') {
+        if ($type === 'string') {
             $length = 255;
-        } elseif ($type == 'integer') {
+        } elseif ($type === 'integer') {
             $length = 11;
-        } elseif ($type == 'biginteger') {
+        } elseif ($type === 'biginteger') {
             $length = 20;
         }
 
@@ -244,7 +244,7 @@ class ColumnParser
     {
         if (empty($indexName)) {
             $indexName = strtoupper('BY_' . $field);
-            if ($indexType == 'primary') {
+            if ($indexType === 'primary') {
                 $indexName = 'PRIMARY';
             } elseif ($indexUnique) {
                 $indexName = strtoupper('UNIQUE_' . $field);

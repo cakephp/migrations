@@ -135,6 +135,7 @@ class MigrationTaskTest extends TestCase
 
     /**
      * @covers Migrations\Shell\Task\MigrationTask::detectAction
+     * @return void
      */
     public function testDetectAction()
     {
@@ -243,8 +244,8 @@ class MigrationTaskTest extends TestCase
             $this->Task->detectAction('AlterGroupsUsers')
         );
 
-        $this->assertEquals(
-            null,
+        $this->assertSame(
+            [],
             $this->Task->detectAction('ReaddColumnsToTable')
         );
     }
