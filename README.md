@@ -166,6 +166,13 @@ no way of adding a column to an existing table with a different collation than t
 the database.
 Only MySQL and SqlServer supports this configuration key for the time being.
 
+#### Updating columns name and using Table objects
+
+If you use a CakePHP ORM Table object to manipulate values from your database along with renaming or removing a
+column, make sure you create a new instance of your Table object after the ``update()`` call. The Table object registry
+is cleared after an ``update()`` call in order to refresh the schema that is reflected and stored in the Table object
+upon Table object instantiation.
+
 #### Generating Migrations from the CLI
 
 > When using this option, you can still modify the migration before running them if so desired.
