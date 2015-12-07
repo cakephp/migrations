@@ -169,6 +169,19 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     }
 
     /**
+     * To check if a Table Model is to be added in the migration file
+     *
+     * @param string $tableName Table name in underscore case.
+     * @param string|null $pluginName Plugin name if exists.
+     * @deprecated Will be removed in the next version
+     * @return bool True if the model is to be added.
+     */
+    public function tableToAdd($tableName, $pluginName = null)
+    {
+        return true;
+    }
+
+    /**
      * Gets list Tables Names
      *
      * @param string|null $pluginName Plugin name if exists.
