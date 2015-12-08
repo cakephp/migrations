@@ -103,7 +103,8 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'create']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --template -t --class -l\n";
+        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
+        $expected .= " --no-interaction -n --template -t --class -l\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -117,7 +118,8 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'mark_migrated']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --exclude -x --only -o\n";
+        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
+        $expected .= " --no-interaction -n --exclude -x --only -o\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -131,7 +133,8 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'migrate']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --target -t --date -d\n";
+        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
+        $expected .= " --no-interaction -n --target -t --date -d\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -145,7 +148,8 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'rollback']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --target -t --date -d\n";
+        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
+        $expected .= " --no-interaction -n --target -t --date -d\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -159,7 +163,8 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'status']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --format -f\n";
+        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
+        $expected .= " --no-interaction -n --format -f\n";
         $this->assertTextEquals($expected, $output);
     }
 }

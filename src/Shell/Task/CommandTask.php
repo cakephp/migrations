@@ -44,7 +44,10 @@ class CommandTask extends Shell
                 'short' => 's',
                 'help' => 'The name of the folder where migrations are stored',
                 'required' => false
-            ]);
+            ])
+            ->addOption('ansi')
+            ->addOption('no-ansi')
+            ->addOption('no-interaction', ['short' => 'n']);
 
         return $parser;
     }
