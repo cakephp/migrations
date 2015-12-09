@@ -136,10 +136,6 @@ class MigrationSnapshotTask extends SimpleMigrationTask
                     unset($tables[$num]);
                     continue;
                 }
-                if (!$this->tableToAdd($table, $this->plugin)) {
-                    unset($tables[$num]);
-                    continue;
-                }
             }
         }
 
@@ -177,20 +173,12 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      *
      * @param string $tableName Table name in underscore case.
      * @param string|null $pluginName Plugin name if exists.
+     * @deprecated Will be removed in the next version
      * @return bool True if the model is to be added.
      */
     public function tableToAdd($tableName, $pluginName = null)
     {
-        if ($pluginName === null) {
-            return true;
-        }
-
-        $pluginName = strtolower(str_replace('/', '_', $pluginName)) . '_';
-        if (strpos($tableName, $pluginName) !== false) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
