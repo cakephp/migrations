@@ -13,6 +13,7 @@ namespace Migrations\Test\TestCase\Shell\Task;
 
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOutput;
+use Cake\Core\Configure;
 use Cake\TestSuite\TestCase;
 
 /**
@@ -50,6 +51,8 @@ class CommandTaskTest extends TestCase
      */
     public function setUp()
     {
+        $this->skipIf(version_compare(Configure::version(), '3.1.6', '<'));
+
         parent::setUp();
 
         $this->out = new TestCompletionStringOutput();
