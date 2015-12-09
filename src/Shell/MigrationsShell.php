@@ -24,6 +24,17 @@ class MigrationsShell extends Shell
 {
 
     /**
+     * {@inheritDoc}
+     */
+    public $tasks = [
+        'Migrations.Create',
+        'Migrations.MarkMigrated',
+        'Migrations.Migrate',
+        'Migrations.Rollback',
+        'Migrations.Status'
+    ];
+
+    /**
      * Array of arguments to run the shell with.
      *
      * @var array
