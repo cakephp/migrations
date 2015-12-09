@@ -12,24 +12,9 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Cake\Console\ConsoleIo;
-use Cake\Console\ConsoleOutput;
 use Cake\Core\Configure;
 use Cake\TestSuite\TestCase;
-
-/**
- * Class TestCompletionStringOutput
- *
- */
-class TestCompletionStringOutput extends ConsoleOutput
-{
-
-    public $output = '';
-
-    protected function _write($message)
-    {
-        $this->output .= $message;
-    }
-}
+use Migrations\Test\TestCase\Shell\TestCompletionStringOutput;
 
 /**
  * Class CommandTaskTest
