@@ -54,6 +54,9 @@ class <%= $name %> extends AbstractMigration
                 if (empty($columnOptions['autoIncrement'])) {
                     unset($columnOptions['autoIncrement']);
                 }
+                if (empty($columnOptions['precision'])) {
+                    unset($columnOptions['precision']);
+                }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
             <%- endforeach;
