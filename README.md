@@ -11,6 +11,12 @@ The plugin consists of a wrapper for the [phinx](http://phinx.org) migrations li
 
 Full documentation of the plugin can be found on the [CakePHP Cookbook](http://book.cakephp.org/3.0/en/migrations.html).
 
+## Special notes
+
+This is the last release of the plugin compatible with the CakePHP 3.0.X release cycle.
+Be aware that, due to a defect in our main dependency, if you use the SQLite database provider and update indexes in an existing table, the table may be dropped during migrations. The bug has been fixed for later versions of the plugin.
+Also note that if you run the test suites of this version of the plugin, it will fail.
+
 ## Installation
 
 You can install this plugin into your CakePHP application using
