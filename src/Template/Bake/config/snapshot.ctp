@@ -13,7 +13,7 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
-$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement']);
+$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement', 'precision']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
@@ -54,6 +54,9 @@ class <%= $name %> extends AbstractMigration
                 if (empty($columnOptions['autoIncrement'])) {
                     unset($columnOptions['autoIncrement']);
                 }
+                if (empty($columnOptions['precision'])) {
+                    unset($columnOptions['precision']);
+                }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
             <%- endforeach;
@@ -70,6 +73,14 @@ class <%= $name %> extends AbstractMigration
                 }
                 if (empty($columnOptions['autoIncrement'])) {
                     unset($columnOptions['autoIncrement']);
+                }
+                if (empty($columnOptions['precision'])) {
+                    unset($columnOptions['precision']);
+                } else {
+                    // due to Phinx using different naming for the precision and scale to CakePHP
+                    $columnOptions['scale'] = $columnOptions['precision'];
+                    $columnOptions['precision'] = $columnOptions['limit'];
+                    unset($columnOptions['limit']);
                 }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])

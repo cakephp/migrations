@@ -261,7 +261,7 @@ class MigrationHelper extends Helper
         }
 
         if (is_numeric($value) || ctype_digit($value)) {
-            return (int)$value;
+            return (float)$value;
         }
 
         return sprintf("'%s'", addslashes($value));
