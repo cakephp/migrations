@@ -121,7 +121,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $collection = $this->getCollection($this->connection);
         $tables = $collection->listTables();
 
-        if ($this->params['require-table'] === true) {
+        if ($this->params['require-table'] === true || $this->plugin) {
             $tableNamesInModel = $this->getTableNames($this->plugin);
 
             foreach ($tableNamesInModel as $num => $table) {

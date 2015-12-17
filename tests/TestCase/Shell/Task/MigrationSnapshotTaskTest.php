@@ -14,6 +14,7 @@ namespace Migrations\Test\TestCase\Shell\Task;
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Inflector;
@@ -45,18 +46,25 @@ class MigrationSnapshotTaskTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
+        $this->Task = $this->getTaskMock();
+    }
+
+    public function getTaskMock($mockedMethods = [])
+    {
+        $mockedMethods = $mockedMethods ?: ['in', 'err', 'dispatchShell', '_stop', 'findTables', 'fetchTableName'];
         $inputOutput = $this->getMock('Cake\Console\ConsoleIo', [], [], '', false);
 
-        $this->Task = $this->getMock(
+        $task = $this->getMock(
             'Migrations\Shell\Task\MigrationSnapshotTask',
-            ['in', 'err', 'dispatchShell', '_stop', 'findTables', 'fetchTableName'],
+            $mockedMethods,
             [$inputOutput]
         );
-        $this->Task->name = 'Migration';
-        $this->Task->connection = 'test';
-        $this->Task->BakeTemplate = new BakeTemplateTask($inputOutput);
-        $this->Task->BakeTemplate->initialize();
-        $this->Task->BakeTemplate->interactive = false;
+        $task->name = 'Migration';
+        $task->connection = 'test';
+        $task->BakeTemplate = new BakeTemplateTask($inputOutput);
+        $task->BakeTemplate->initialize();
+        $task->BakeTemplate->interactive = false;
+        return $task;
     }
 
     public function testGetTableNames()
@@ -104,6 +112,20 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
         $result = $this->Task->bake($bakeName);
+
+        $this->assertCorrectSnapshot($bakeName, $result);
+    }
+
+    public function testPluginBlog()
+    {
+        $task = $this->getTaskMock(['in', 'err', 'dispatchShell', '_stop']);
+        $task->params['require-table'] = false;
+        $task->params['connection'] = 'test';
+        $task->params['plugin'] = 'Blog';
+        $task->plugin = 'Blog';
+
+        $bakeName = $this->getBakeName('TestPluginBlog');
+        $result = $task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
     }
