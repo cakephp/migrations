@@ -14,7 +14,7 @@ Full documentation of the plugin can be found on the [CakePHP Cookbook](http://b
 ## Installation
 
 You can install this plugin into your CakePHP application using
-[composer](http://getcomposer.org). 
+[composer](http://getcomposer.org).
 
 Run the following command
 ```sh
@@ -123,6 +123,11 @@ automatically reversible migrations.
 
 Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
+Be aware that when baking a snapshot for a plugin, your plugin must implements
+model Table classes matching the database tables you want to be in the snapshot :
+only those tables will be exported. This is the only way to filter your plugin's
+tables from you app tables if you are using the same database for both.
+
 #### Usage for custom primary key id in tables
 
 To create a table called `statuses` and use a CHAR (36) for the `id` field, this requires you to turn off the id.
@@ -146,7 +151,7 @@ $table->addColumn('id', 'char', ['limit' => 36])
 #### Collations
 
 If you need to create a table with a different collation than the database default one, you can define it
-with the ``table`` method, as an option : 
+with the ``table`` method, as an option :
 
 ```php
 $table = $this

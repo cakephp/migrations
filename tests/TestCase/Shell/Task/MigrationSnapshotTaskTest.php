@@ -14,7 +14,6 @@ namespace Migrations\Test\TestCase\Shell\Task;
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
-use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Inflector;
