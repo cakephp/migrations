@@ -123,7 +123,7 @@ automatically reversible migrations.
 
 Once again, please make sure you read [the official phinx documentation](http://docs.phinx.org/en/latest/migrations.html) to understand how migrations are created and executed in your database.
 
-Be aware that when baking a snapshot for a plugin, your plugin must implements
+Be aware that when baking a snapshot for a plugin, your plugin must implement
 model Table classes matching the database tables you want to be in the snapshot :
 only those tables will be exported. This is the only way to filter your plugin's
 tables from you app tables if you are using the same database for both.
