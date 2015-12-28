@@ -15,6 +15,7 @@ use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Command\Seed;
+use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,6 +29,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 trait ConfigurationTrait
 {
+
+    use UtilTrait;
 
     /**
      * The configuration object that phinx uses for connecting to the database
@@ -56,27 +59,9 @@ trait ConfigurationTrait
             return $this->configuration;
         }
 
-        $migrationsFolder = 'Migrations';
-        $seedsFolder = 'Seeds';
-
-        $source = $this->input->getOption('source');
-        if ($source) {
-            if ($this instanceof Seed || ($this instanceof Migrations && $this->getCommand() === 'seed')) {
-                $seedsFolder = $source;
-            } else {
-                $migrationsFolder = $source;
-            }
-        }
-
-        $migrationsPath = ROOT . DS . 'config' . DS . $migrationsFolder;
-        $seedsPath = ROOT . DS . 'config' . DS . $seedsFolder;
-        $plugin = null;
-
-        if ($this->input->getOption('plugin')) {
-            $plugin = $this->input->getOption('plugin');
-            $migrationsPath = Plugin::path($plugin) . 'config' . DS . $migrationsFolder;
-            $seedsPath = Plugin::path($plugin) . 'config' . DS . $seedsFolder;
-        }
+        $migrationsPath = $this->getPath($this->input);
+        $seedsPath = $this->getPath($this->input, 'Seeds');
+        $plugin = $this->getPlugin($this->input);
 
         if (!is_dir($migrationsPath)) {
             mkdir($migrationsPath, 0777, true);
