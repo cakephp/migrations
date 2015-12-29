@@ -12,7 +12,11 @@
 namespace Migrations\Shell;
 
 use Cake\Console\Shell;
+use Cake\Core\Plugin;
+use Cake\Datasource\ConnectionManager;
 use Migrations\MigrationsDispatcher;
+use Migrations\Shell\Task\SnapshotTrait;
+use Migrations\Util\UtilTrait;
 use Symfony\Component\Console\Input\ArgvInput;
 
 /**
@@ -22,6 +26,9 @@ use Symfony\Component\Console\Input\ArgvInput;
  */
 class MigrationsShell extends Shell
 {
+
+    use UtilTrait;
+    use SnapshotTrait;
 
     /**
      * {@inheritDoc}
@@ -94,7 +101,31 @@ class MigrationsShell extends Shell
         $app = new MigrationsDispatcher(PHINX_VERSION);
         $input = new ArgvInput($this->argv);
         $app->setAutoExit(false);
-        $app->run($input);
+        $exitCode = $app->run($input);
+
+        $path = $this->getMigrationsPath($input);
+
+        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) && $exitCode === 0) {
+            $connectionName = $input->getOption('connection') ?: 'default';
+            $connection = ConnectionManager::get($connectionName);
+            $collection = $connection->schemaCollection();
+
+            $options = [
+                'require-table' => true,
+                'plugin' => $this->getPlugin($input)
+            ];
+            $tables = $this->getTablesToBake($collection, $options);
+
+            $dump = [];
+            if (!empty($tables)) {
+                foreach ($tables as $table) {
+                    $schema = $collection->describe($table);
+                    $dump[$table] = $schema;
+                }
+            }
+
+            file_put_contents($path . DS . 'schema-dump', serialize($dump));
+        }
     }
 
     /**

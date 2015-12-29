@@ -42,7 +42,7 @@ trait SnapshotTrait
             $tableNamesInModel = $this->getTableNames($options['plugin']);
 
             foreach ($tableNamesInModel as $num => $table) {
-                if (!in_array($tables[$num], $tables)) {
+                if (!in_array($table, $tables)) {
                     unset($tableNamesInModel[$num]);
                 }
             }
