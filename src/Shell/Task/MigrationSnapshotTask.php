@@ -125,7 +125,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             $tableNamesInModel = $this->getTableNames($this->plugin);
 
             foreach ($tableNamesInModel as $num => $table) {
-                if (!in_array($tables[$num], $tables)) {
+                if (!in_array($table, $tables)) {
                     unset($tableNamesInModel[$num]);
                 }
             }
