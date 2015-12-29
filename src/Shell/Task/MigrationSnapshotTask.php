@@ -20,25 +20,15 @@ use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Filesystem\Folder;
 use Cake\ORM\TableRegistry;
+use Migrations\Util\UtilTrait;
 
 /**
  * Task class for generating migration snapshot files.
  */
 class MigrationSnapshotTask extends SimpleMigrationTask
 {
-    /**
-     * Tables to skip
-     *
-     * @var array
-     */
-    public $skipTables = ['phinxlog'];
-
-    /**
-     * Regex of Table name to skip
-     *
-     * @var string
-     */
-    public $skipTablesRegex = '_phinxlog';
+    use UtilTrait;
+    use SnapshotTrait;
 
     /**
      * {@inheritDoc}
@@ -119,25 +109,11 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         }
 
         $collection = $this->getCollection($this->connection);
-        $tables = $collection->listTables();
-
-        if ($this->params['require-table'] === true || $this->plugin) {
-            $tableNamesInModel = $this->getTableNames($this->plugin);
-
-            foreach ($tableNamesInModel as $num => $table) {
-                if (!in_array($table, $tables)) {
-                    unset($tableNamesInModel[$num]);
-                }
-            }
-            $tables = $tableNamesInModel;
-        } else {
-            foreach ($tables as $num => $table) {
-                if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
-                    unset($tables[$num]);
-                    continue;
-                }
-            }
-        }
+        $options = [
+            'require-table' => $this->params['require-table'],
+            'plugin' => $this->plugin
+        ];
+        $tables = $this->getTablesToBake($collection, $options);
 
         sort($tables, SORT_NATURAL);
 
@@ -181,85 +157,6 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     public function tableToAdd($tableName, $pluginName = null)
     {
         return true;
-    }
-
-    /**
-     * Gets list Tables Names
-     *
-     * @param string|null $pluginName Plugin name if exists.
-     * @return array
-     */
-    public function getTableNames($pluginName = null)
-    {
-        if ($pluginName !== null && !Plugin::loaded($pluginName)) {
-            return [];
-        }
-        $list = [];
-        $tables = $this->findTables($pluginName);
-        foreach ($tables as $num => $table) {
-            $list = array_merge($list, $this->fetchTableName($table, $pluginName));
-        }
-
-        return array_unique($list);
-    }
-
-    /**
-     * Find Table Class
-     *
-     * @param string $pluginName Plugin name if exists.
-     * @return array
-     */
-    public function findTables($pluginName = null)
-    {
-        $path = 'Model' . DS . 'Table' . DS;
-        if ($pluginName) {
-            $path = Plugin::path($pluginName) . 'src' . DS . $path;
-        } else {
-            $path = APP . $path;
-        }
-
-        if (!is_dir($path)) {
-            return false;
-        }
-
-        $tableDir = new Folder($path);
-        $tableDir = $tableDir->find('.*\.php');
-        return $tableDir;
-    }
-
-    /**
-     * fetch TableName From Table Object
-     *
-     * @param string $className Name of Table Class.
-     * @param string|null $pluginName Plugin name if exists.
-     * @return array
-     */
-    public function fetchTableName($className, $pluginName = null)
-    {
-        $tables = [];
-        $className = str_replace('Table.php', '', $className);
-        if ($pluginName !== null) {
-            $className = $pluginName . '.' . $className;
-        }
-
-        $table = TableRegistry::get($className);
-        foreach ($table->associations()->keys() as $key) {
-            if ($table->associations()->get($key)->type() === 'belongsToMany') {
-                $tables[] = $table->associations()->get($key)->_junctionTableName();
-            }
-        }
-        $tableName = $table->table();
-        $splitted = array_reverse(explode('.', $tableName, 2));
-        if (isset($splitted[1])) {
-            $config = ConnectionManager::config($this->connection);
-            $key = isset($config['schema']) ? 'schema' : 'database';
-            if ($config[$key] === $splitted[1]) {
-                $tableName = $splitted[0];
-            }
-        }
-        $tables[] = $tableName;
-
-        return $tables;
     }
 
     /**
