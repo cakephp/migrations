@@ -13,6 +13,10 @@ namespace Migrations\Test\TestCase\Shell;
 
 use Cake\Console\ConsoleOutput;
 
+/**
+ * Class TestCompletionStringOutput
+ * Used to store the output of test Console object in order to test the values
+ */
 class TestCompletionStringOutput extends ConsoleOutput
 {
 

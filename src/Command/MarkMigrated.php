@@ -155,24 +155,25 @@ class MarkMigrated extends AbstractCommand
         foreach ($versions as $version) {
             if ($manager->isMigrated($version)) {
                 $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
-            } else {
-                try {
-                    $this->getManager()->markMigrated($version, $path);
-                    $output->writeln(
-                        sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
-                    );
-                } catch (\Exception $e) {
-                    $adapter->rollbackTransaction();
-                    $output->writeln(
-                        sprintf(
-                            '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
-                            $version,
-                            $e->getMessage()
-                        )
-                    );
-                    $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
-                    return;
-                }
+                continue;
+            }
+
+            try {
+                $this->getManager()->markMigrated($version, $path);
+                $output->writeln(
+                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
+                );
+            } catch (\Exception $e) {
+                $adapter->rollbackTransaction();
+                $output->writeln(
+                    sprintf(
+                        '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
+                        $version,
+                        $e->getMessage()
+                    )
+                );
+                $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
+                return;
             }
         }
         $adapter->commitTransaction();

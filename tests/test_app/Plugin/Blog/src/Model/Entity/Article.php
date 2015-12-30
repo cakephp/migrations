@@ -1,5 +1,5 @@
 <?php
-namespace Pluginapp\Model\Entity;
+namespace Blog\Model\Entity;
 
 use Cake\ORM\Entity;
 
