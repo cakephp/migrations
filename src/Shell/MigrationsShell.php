@@ -117,7 +117,6 @@ class MigrationsShell extends Shell
      */
     protected function displayHelp($command)
     {
-        $command;
         $this->main();
     }
 

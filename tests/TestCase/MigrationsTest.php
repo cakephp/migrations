@@ -17,7 +17,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use Migrations\Migrations;
-use Phinx\Migration\Util;
 
 /**
  * Tests the Migrations class

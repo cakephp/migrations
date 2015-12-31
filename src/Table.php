@@ -13,7 +13,6 @@ namespace Migrations;
 
 use Cake\Collection\Collection;
 use Cake\ORM\TableRegistry;
-use Phinx\Db\Adapter\SQLiteAdapter;
 use Phinx\Db\Table as BaseTable;
 
 class Table extends BaseTable

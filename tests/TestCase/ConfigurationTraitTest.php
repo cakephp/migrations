@@ -36,7 +36,7 @@ class ConfigurationTraitTest extends TestCase
      * Returns the combination of the phinx driver name with
      * the associated cakephp driver instance that should be mapped to it
      *
-     * @return void
+     * @return array
      */
     public function driversProvider()
     {

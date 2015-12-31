@@ -14,7 +14,6 @@ namespace Migrations\Command;
 use Cake\Event\EventDispatcherTrait;
 use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Migrate as MigrateCommand;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;

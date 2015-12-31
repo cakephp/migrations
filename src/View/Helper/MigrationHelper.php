@@ -31,6 +31,12 @@ class MigrationHelper extends Helper
      */
     protected $schemas = [];
 
+    /**
+     * Stores the ``$this->table()`` statements issued while baking.
+     * It helps prevent duplicate calls in case of complex conditions
+     *
+     * @var array
+     */
     public $tableStatements = [];
 
     /**
