@@ -11,7 +11,6 @@
  */
 namespace Migrations;
 
-use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Command\Seed;

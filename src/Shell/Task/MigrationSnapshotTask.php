@@ -14,12 +14,9 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
-use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Cake\Filesystem\Folder;
-use Cake\ORM\TableRegistry;
 use Migrations\Util\UtilTrait;
 
 /**
@@ -73,7 +70,6 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     {
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         list($version, ) = explode('_', $fileName, 2);
-
 
         $dispatchCommand = 'migrations mark_migrated -t ' . $version . ' -o';
         if (!empty($this->params['connection'])) {
