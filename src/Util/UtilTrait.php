@@ -20,6 +20,19 @@ use Symfony\Component\Console\Input\InputInterface;
 trait UtilTrait
 {
 
+
+    /**
+     * Get the plugin name based on the current InputInterface
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input Input of the current command.
+     * @return string|null
+     */
+    protected function getPlugin(InputInterface $input)
+    {
+        $plugin = $input->getOption('plugin') ?: null;
+        return $plugin;
+    }
+
     /**
      * Get the migrations or seeds files path based on the current InputInterface
      *
@@ -27,7 +40,7 @@ trait UtilTrait
      * @param string $default Default folder to set if no source option is found in the $input param
      * @return string
      */
-    public function getPath(InputInterface $input, $default = 'Migrations')
+    protected function getPath(InputInterface $input, $default = 'Migrations')
     {
         $folder = $input->getOption('source') ?: $default;
 
@@ -39,17 +52,5 @@ trait UtilTrait
         }
 
         return $dir;
-    }
-
-    /**
-     * Get the plugin name based on the current InputInterface
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input of the current command.
-     * @return string|null
-     */
-    public function getPlugin(InputInterface $input)
-    {
-        $plugin = $input->getOption('plugin') ?: null;
-        return $plugin;
     }
 }

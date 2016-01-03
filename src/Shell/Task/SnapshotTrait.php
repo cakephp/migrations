@@ -33,7 +33,7 @@ trait SnapshotTrait
      */
     public $skipTablesRegex = '_phinxlog';
 
-    public function getTablesToBake(Collection $collection, $options = [])
+    protected function getTablesToBake(Collection $collection, $options = [])
     {
         $options = array_merge(['require-table' => false, 'plugin' => null], $options);
         $tables = $collection->listTables();
@@ -65,7 +65,7 @@ trait SnapshotTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return array
      */
-    public function getTableNames($pluginName = null)
+    protected function getTableNames($pluginName = null)
     {
         if ($pluginName !== null && !Plugin::loaded($pluginName)) {
             return [];
@@ -85,7 +85,7 @@ trait SnapshotTrait
      * @param string $pluginName Plugin name if exists.
      * @return array
      */
-    public function findTables($pluginName = null)
+    protected function findTables($pluginName = null)
     {
         $path = 'Model' . DS . 'Table' . DS;
         if ($pluginName) {
@@ -110,7 +110,7 @@ trait SnapshotTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return array
      */
-    public function fetchTableName($className, $pluginName = null)
+    protected function fetchTableName($className, $pluginName = null)
     {
         $tables = [];
         $className = str_replace('Table.php', '', $className);
