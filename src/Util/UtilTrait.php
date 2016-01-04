@@ -12,6 +12,7 @@
 namespace Migrations\Util;
 
 use Cake\Core\Plugin;
+use Cake\Utility\Inflector;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
@@ -31,6 +32,24 @@ trait UtilTrait
     {
         $plugin = $input->getOption('plugin') ?: null;
         return $plugin;
+    }
+    /**
+     * Get the phinx table name used to store migrations data
+     *
+     * @param string $plugin Plugin name
+     * @return string
+     */
+    protected function getPhinxTable($plugin = null)
+    {
+        $table = 'phinxlog';
+
+        if (empty($plugin)) {
+            return $table;
+        }
+
+        $plugin = Inflector::underscore($plugin) . '_';
+        $plugin = str_replace(['\\', '/', '.'], '_', $plugin);
+        return $plugin . $table;
     }
 
     /**

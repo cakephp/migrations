@@ -72,6 +72,7 @@ trait ConfigurationTrait
 
         $plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
         $plugin = str_replace(['\\', '/', '.'], '_', $plugin);
+        $phinxTable = $this->getPhinxTable($plugin);
 
         $connection = $this->getConnectionName($this->input);
 
@@ -83,7 +84,7 @@ trait ConfigurationTrait
                 'seeds' => $seedsPath,
             ],
             'environments' => [
-                'default_migration_table' => $plugin . 'phinxlog',
+                'default_migration_table' => $phinxTable,
                 'default_database' => 'default',
                 'default' => [
                     'adapter' => $adapterName,
