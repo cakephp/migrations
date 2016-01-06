@@ -55,21 +55,34 @@ trait ConfigurationTrait
             return $this->configuration;
         }
 
-        $folder = 'Migrations';
-        if ($this->input->getOption('source')) {
-            $folder = $this->input->getOption('source');
+        $migrationsFolder = 'Migrations';
+        $seedsFolder = 'Seeds';
+
+        $source = $this->input->getOption('source');
+        if ($source) {
+            if ($this->input->getFirstArgument() === 'seed') {
+                $seedsFolder = $source;
+            } else {
+                $migrationsFolder = $source;
+            }
         }
 
-        $dir = ROOT . DS . 'config' . DS . $folder;
+        $migrationsPath = ROOT . DS . 'config' . DS . $migrationsFolder;
+        $seedsPath = ROOT . DS . 'config' . DS . $seedsFolder;
         $plugin = null;
 
         if ($this->input->getOption('plugin')) {
             $plugin = $this->input->getOption('plugin');
-            $dir = Plugin::path($plugin) . 'config' . DS . $folder;
+            $migrationsPath = Plugin::path($plugin) . 'config' . DS . $migrationsFolder;
+            $seedsPath = Plugin::path($plugin) . 'config' . DS . $seedsFolder;
         }
 
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+        if (!is_dir($migrationsPath)) {
+            mkdir($migrationsPath, 0777, true);
+        }
+
+        if (!is_dir($seedsPath)) {
+            mkdir($seedsPath, 0777, true);
         }
 
         $plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
@@ -81,7 +94,8 @@ trait ConfigurationTrait
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
         $config = [
             'paths' => [
-                'migrations' => $dir
+                'migrations' => $migrationsPath,
+                'seeds' => $seedsPath,
             ],
             'environments' => [
                 'default_migration_table' => $plugin . 'phinxlog',

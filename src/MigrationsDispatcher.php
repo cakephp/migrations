@@ -36,5 +36,6 @@ class MigrationsDispatcher extends Application
         $this->add(new Command\Rollback());
         $this->add(new Command\Status());
         $this->add(new Command\MarkMigrated());
+        $this->add(new Command\Seed());
     }
 }
