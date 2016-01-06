@@ -29,7 +29,7 @@ class SeedTask extends SimpleBakeTask
      *
      * @var string
      */
-    public $pathFragment = 'Seed/';
+    public $pathFragment = 'config/Seeds/';
 
     /**
      * {@inheritDoc}
@@ -45,6 +45,18 @@ class SeedTask extends SimpleBakeTask
     public function fileName($name)
     {
         return Inflector::classify($this->args[0]) . 'Seed.php';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPath()
+    {
+        $path = ROOT . DS . $this->pathFragment;
+        if (isset($this->plugin)) {
+            $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
+        }
+        return str_replace('/', DS, $path);
     }
 
     /**
