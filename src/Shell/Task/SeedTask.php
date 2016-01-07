@@ -44,7 +44,7 @@ class SeedTask extends SimpleBakeTask
      */
     public function fileName($name)
     {
-        return Inflector::classify($this->args[0]) . 'Seed.php';
+        return Inflector::camelize($name) . 'Seed.php';
     }
 
     /**
