@@ -14,6 +14,7 @@ namespace Migrations;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
+use Migrations\Command\Seed;
 use Phinx\Config\Config;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -60,7 +61,7 @@ trait ConfigurationTrait
 
         $source = $this->input->getOption('source');
         if ($source) {
-            if ($this->input->getFirstArgument() === 'seed') {
+            if ($this instanceof Seed) {
                 $seedsFolder = $source;
             } else {
                 $migrationsFolder = $source;
