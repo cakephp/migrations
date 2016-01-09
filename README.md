@@ -264,8 +264,8 @@ If no length is specified, lengths for certain columns are defaulted:
 
 ### Seeding your database
 
-As of 1.5.5, you can use the ``migrations`` shell to seed your database. This leverage the [Phinx library seed feature](http://docs.phinx.org/en/latest/seeding.html).
-By default, seed files will be looked for in the ``config/Seeds`̀  directory of your application.
+As of 1.5.5, you can use the ``migrations`` shell to seed your database. This leverages the [Phinx library seed feature](http://docs.phinx.org/en/latest/seeding.html).
+By default, seed files will be looked for in the ``config/Seeds`` directory of your application.
 Please make sure you follow [Phinx instructions to build your seed files](http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class).
 
 As for migrations, a ``bake`` interface is provided for seed files:
