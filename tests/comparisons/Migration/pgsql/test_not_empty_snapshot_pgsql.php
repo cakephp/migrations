@@ -149,8 +149,8 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'category_id',
                     'id',
+                    'category_id',
                 ],
                 ['unique' => true]
             )
