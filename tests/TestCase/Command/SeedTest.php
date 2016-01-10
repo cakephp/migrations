@@ -155,7 +155,7 @@ class SeedTest extends TestCase
             ->execute()->fetchAll('assoc');
         $expected = [
             [
-                'id' => '1',
+                'id' => '2',
                 'number' => '5',
                 'radix' => '10'
             ]

@@ -31,6 +31,16 @@ class CakeManager extends Manager
     }
 
     /**
+     * Reset the seeds stored in the object
+     *
+     * @return void
+     */
+    public function resetSeeds()
+    {
+        $this->seeds = null;
+    }
+
+    /**
      * Prints the specified environment's migration status.
      *
      * @param string $environment

@@ -427,6 +427,143 @@ class MigrationsTest extends TestCase
     }
 
     /**
+     * Tests seeding the database
+     *
+     * @return void
+     */
+    public function testSeed()
+    {
+        $this->migrations->migrate();
+        $seed = $this->migrations->seed(['source' => 'Seeds']);
+        $this->assertTrue($seed);
+
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '10',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $seed = $this->migrations->seed(['source' => 'Seeds']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '10',
+                'radix' => '10'
+            ],
+            [
+                'id' => '2',
+                'number' => '10',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $seed = $this->migrations->seed(['source' => 'AltSeeds']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '10',
+                'radix' => '10'
+            ],
+            [
+                'id' => '2',
+                'number' => '10',
+                'radix' => '10'
+            ],
+            [
+                'id' => '3',
+                'number' => '2',
+                'radix' => '10'
+            ],
+            [
+                'id' => '4',
+                'number' => '5',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+        $this->migrations->rollback(['target' => 0]);
+    }
+
+    /**
+     * Tests seeding the database with seeder
+     *
+     * @return void
+     */
+    public function testSeedOneSeeder()
+    {
+        $this->migrations->migrate();
+
+        $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'AnotherNumbersSeed']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '2',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'NumbersAltSeed']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '2',
+                'radix' => '10'
+            ],
+            [
+                'id' => '2',
+                'number' => '5',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $this->migrations->rollback(['target' => 0]);
+    }
+
+    /**
+     * Tests that requesting a unexistant seed throws an exception
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage The seed class "DerpSeed" does not exist
+     * @return void
+     */
+    public function testSeedWrongSeed()
+    {
+        $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'DerpSeed']);
+    }
+
+    /**
      * Tests migrating the baked snapshots
      *
      * @dataProvider migrationsProvider
