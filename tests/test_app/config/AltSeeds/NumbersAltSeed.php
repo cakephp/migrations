@@ -18,7 +18,6 @@ class NumbersAltSeed extends AbstractSeed
     {
         $data = [
             [
-                'id' => '1',
                 'number' => '5',
                 'radix' => '10'
             ]

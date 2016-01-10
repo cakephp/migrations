@@ -61,7 +61,7 @@ trait ConfigurationTrait
 
         $source = $this->input->getOption('source');
         if ($source) {
-            if ($this instanceof Seed) {
+            if ($this instanceof Seed || ($this instanceof Migrations && $this->getCommand() === 'seed')) {
                 $seedsFolder = $source;
             } else {
                 $migrationsFolder = $source;

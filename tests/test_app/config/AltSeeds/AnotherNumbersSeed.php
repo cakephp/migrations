@@ -4,7 +4,7 @@ use Phinx\Seed\AbstractSeed;
 /**
  * NumbersSeed seed.
  */
-class NumbersSeed extends AbstractSeed
+class AnotherNumbersSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -18,7 +18,7 @@ class NumbersSeed extends AbstractSeed
     {
         $data = [
             [
-                'number' => '10',
+                'number' => '2',
                 'radix' => '10'
             ]
         ];

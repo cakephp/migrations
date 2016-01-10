@@ -49,6 +49,15 @@ class Migrations
     protected $default = [];
 
     /**
+     * Current command being run.
+     * Useful if some logic needs to be applied in the ConfigurationTrait depending
+     * on the command
+     *
+     * @var array
+     */
+    protected $command;
+
+    /**
      * Constructor
      * @param array $default Default option to be used when calling a method.
      * Available options are :
@@ -66,6 +75,28 @@ class Migrations
     }
 
     /**
+     * Sets the command
+     *
+     * @param string $command Command name to store.
+     * @return self
+     */
+    public function setCommand($command)
+    {
+        $this->command = $command;
+        return $this;
+    }
+
+    /**
+     * Gets the command
+     *
+     * @return string Command name
+     */
+    public function getCommand()
+    {
+        return $this->command;
+    }
+
+    /**
      * Returns the status of each migrations based on the options passed
      *
      * @param array $options Options to pass to the command
@@ -80,6 +111,7 @@ class Migrations
      */
     public function status($options = [])
     {
+        $this->setCommand('status');
         $input = $this->getInput('Status', [], $options);
         $params = ['default', $input->getOption('format')];
 
@@ -103,6 +135,7 @@ class Migrations
      */
     public function migrate($options = [])
     {
+        $this->setCommand('migrate');
         $input = $this->getInput('Migrate', [], $options);
         $method = 'migrate';
         $params = ['default', $input->getOption('target')];
@@ -133,6 +166,7 @@ class Migrations
      */
     public function rollback($options = [])
     {
+        $this->setCommand('rollback');
         $input = $this->getInput('Rollback', [], $options);
         $method = 'rollback';
         $params = ['default', $input->getOption('target')];
@@ -161,6 +195,7 @@ class Migrations
      */
     public function markMigrated($version, $options = [])
     {
+        $this->setCommand('mark_migrated');
         $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
         $params = [$version];
 
@@ -172,6 +207,29 @@ class Migrations
         $params[] = $this->getConfig()->getMigrationPath();
 
         $this->run('markMigrated', $params, $input);
+        return true;
+    }
+
+
+    /**
+     * Seed the database using a seed file
+     *
+     * @param array $options Options to pass to the command
+     * Available options are :
+     *
+     * - `connection` The datasource connection to use
+     * - `source` The folder where migrations are in
+     * - `plugin` The plugin containing the migrations
+     * - `seed` The seed file to use
+     *
+     * @return bool Success
+     */
+    public function seed($options = [])
+    {
+        $this->setCommand('seed');
+        $input = $this->getInput('Seed', [], $options);
+        $params = ['default', $input->getOption('seed')];
+        $this->run('Seed', $params, $input);
         return true;
     }
 
@@ -189,6 +247,7 @@ class Migrations
     {
         if ($this->configuration instanceof Config) {
             $migrationPath = $this->getConfig()->getMigrationPath();
+            $seedPath = $this->getConfig()->getSeedPath();
         }
 
         $this->setInput($input);
@@ -197,6 +256,9 @@ class Migrations
 
         if (isset($migrationPath) && $newConfig->getMigrationPath() !== $migrationPath) {
             $manager->resetMigrations();
+        }
+        if (isset($seedPath) && $newConfig->getSeedPath() !== $seedPath) {
+            $manager->resetSeeds();
         }
 
         return call_user_func_array([$manager, $method], $params);
