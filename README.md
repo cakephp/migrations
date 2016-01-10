@@ -261,3 +261,47 @@ If no length is specified, lengths for certain columns are defaulted:
 - *string*: `255`
 - *integer*: `11`
 - *biginteger*: `20`
+
+### Seeding your database
+
+As of 1.5.5, you can use the ``migrations`` shell to seed your database. This leverages the [Phinx library seed feature](http://docs.phinx.org/en/latest/seeding.html).
+By default, seed files will be looked for in the ``config/Seeds`` directory of your application.
+Please make sure you follow [Phinx instructions to build your seed files](http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class).
+
+As for migrations, a ``bake`` interface is provided for seed files:
+
+```bash
+# This will create a ArticlesSeed.php file in the directory config/Seeds of your application
+# By default, the table the seed will try to alter is the "tableized" version of the seed filename
+bin/cake bake seed Articles
+
+# You specify the name of the table the seed files will alter by using the ``--table`` option
+bin/cake bake seed Articles --table my_articles_table
+
+# You can specify a plugin to bake into
+bin/cake bake seed Articles --plugin PluginName
+
+# You can specify an alternative connection when generating a seeder.
+bin/cake bake seed Articles --connection connection
+```
+
+To seed your database, you can use the ``seed`` subcommand:
+
+```bash
+# Without parameters, the seed subcommand will run all available seeders in the target directory, in alphabetical order.
+bin/cake migrations seed
+
+# You can specify only one seeder to be run using the `--seed` option
+bin/cake migrations seed --seed ArticlesSeed
+
+# You can run seeders from an alternative directory
+bin/cake migrations seed --source AlternativeSeeds
+
+# You can run seeders from a plugin
+bin/cake migrations seed --plugin PluginName
+
+# You can run seeders from a specific connection
+bin/cake migrations seed --connection connection
+```
+
+Be aware that, as opposed to migrations, seeders are not tracked, which means that the same seeder can be applied multiple times.

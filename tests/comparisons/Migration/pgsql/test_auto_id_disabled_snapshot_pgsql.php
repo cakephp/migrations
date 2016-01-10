@@ -181,8 +181,8 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'category_id',
                     'id',
+                    'category_id',
                 ],
                 ['unique' => true]
             )

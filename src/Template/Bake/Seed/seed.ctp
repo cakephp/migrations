@@ -14,8 +14,6 @@
  */
 %>
 <?php
-namespace <%= $namespace %>\Seed;
-
 use Phinx\Seed\AbstractSeed;
 
 /**

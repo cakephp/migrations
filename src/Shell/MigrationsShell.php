@@ -55,6 +55,7 @@ class MigrationsShell extends Shell
             ->addOption('target', ['short' => 't'])
             ->addOption('connection', ['short' => 'c'])
             ->addOption('source', ['short' => 's'])
+            ->addOption('seed')
             ->addOption('ansi')
             ->addOption('no-ansi')
             ->addOption('version', ['short' => 'V'])
