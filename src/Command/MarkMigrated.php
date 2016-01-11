@@ -122,122 +122,13 @@ class MarkMigrated extends AbstractCommand
         }
 
         try {
-            $versions = $this->getVersionsToMark();
+            $versions = $this->getManager()->getVersionsToMark($input);
         } catch (InvalidArgumentException $e) {
             $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
             return;
         }
 
-        $this->markVersionsAsMigrated($path, $versions);
-    }
-
-    /**
-     * Mark all migrations in $versions array found in $path as migrated
-     *
-     * It will start a transaction and rollback in case one of the operation raises an exception
-     *
-     * @param string $path Path where to look for migrations
-     * @param array $versions Versions which should be marked
-     * @return void
-     */
-    protected function markVersionsAsMigrated($path, $versions)
-    {
-        $manager = $this->getManager();
-        $adapter = $manager->getEnvironment('default')->getAdapter();
-        $output = $this->output();
-
-        if (empty($versions)) {
-            $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
-            return;
-        }
-
-        $adapter->beginTransaction();
-        foreach ($versions as $version) {
-            if ($manager->isMigrated($version)) {
-                $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
-                continue;
-            }
-
-            try {
-                $this->getManager()->markMigrated($version, $path);
-                $output->writeln(
-                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
-                );
-            } catch (\Exception $e) {
-                $adapter->rollbackTransaction();
-                $output->writeln(
-                    sprintf(
-                        '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
-                        $version,
-                        $e->getMessage()
-                    )
-                );
-                $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
-                return;
-            }
-        }
-        $adapter->commitTransaction();
-    }
-
-    /**
-     * Decides which versions it should mark as migrated
-     *
-     * @return array Array of versions that should be marked as migrated
-     * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
-     * or version not found
-     */
-    protected function getVersionsToMark()
-    {
-        $migrations = $this->getManager()->getMigrations();
-        $versions = array_keys($migrations);
-
-        if ($this->isAllVersion()) {
-            return $versions;
-        }
-
-        $version = $this->getTarget();
-
-        if ($this->isOnly()) {
-            if (!in_array($version, $versions)) {
-                throw new InvalidArgumentException("Migration `$version` was not found !");
-            }
-
-            return [$version];
-        }
-
-        $lengthIncrease = $this->hasExclude() ? 0 : 1;
-        $index = array_search($version, $versions);
-
-        if ($index === false) {
-            throw new \InvalidArgumentException("Migration `$version` was not found !");
-        }
-
-        return array_slice($versions, 0, $index + $lengthIncrease);
-    }
-
-    /**
-     * Returns the target version from `--target` or from the deprecated version argument
-     *
-     * @return string Version found as target
-     */
-    protected function getTarget()
-    {
-        $target = $this->input->getOption('target');
-        return $target ? $target : $this->input->getArgument('version');
-    }
-
-    /**
-     * Checks if the $version is for all migrations
-     *
-     * @return bool Returns true if it should try to mark all versions
-     */
-    protected function isAllVersion()
-    {
-        if ($this->isUsingDeprecatedVersion()) {
-            return false;
-        }
-
-        return $this->isUsingDeprecatedAll() || $this->input->getOption('target') === null;
+        $this->getManager()->markVersionsAsMigrated($path, $versions, $output);
     }
 
     /**
@@ -249,17 +140,6 @@ class MarkMigrated extends AbstractCommand
     {
         $version = $this->input->getArgument('version');
         return $version === 'all' || $version === '*';
-    }
-
-    /**
-     * Checks if the input has the `--only` option or it is using the deprecated version argument
-     *
-     * @return bool Returns true when it is trying to mark only one migration
-     */
-    protected function isOnly()
-    {
-
-        return $this->hasOnly() || $this->isUsingDeprecatedVersion();
     }
 
     /**

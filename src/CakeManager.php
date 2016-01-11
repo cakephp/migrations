@@ -187,6 +187,91 @@ class CakeManager extends Manager
     }
 
     /**
+     * Decides which versions it should mark as migrated
+     *
+     * @return array Array of versions that should be marked as migrated
+     * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
+     * or version not found
+     */
+    public function getVersionsToMark($input)
+    {
+        $migrations = $this->getMigrations();
+        $versions = array_keys($migrations);
+
+        $versionArg = $input->getArgument('version');
+        $targetArg = $input->getOption('target');
+        $hasAllVersion = in_array($versionArg, ['all', '*']);
+        if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
+            return $versions;
+        }
+
+        $version = $targetArg ?: $versionArg;
+
+        if ($input->getOption('only') || !empty($versionArg)) {
+            if (!in_array($version, $versions)) {
+                throw new \InvalidArgumentException("Migration `$version` was not found !");
+            }
+
+            return [$version];
+        }
+
+        $lengthIncrease = $input->getOption('exclude') ? 0 : 1;
+        $index = array_search($version, $versions);
+
+        if ($index === false) {
+            throw new \InvalidArgumentException("Migration `$version` was not found !");
+        }
+
+        return array_slice($versions, 0, $index + $lengthIncrease);
+    }
+
+    /**
+     * Mark all migrations in $versions array found in $path as migrated
+     *
+     * It will start a transaction and rollback in case one of the operation raises an exception
+     *
+     * @param string $path Path where to look for migrations
+     * @param array $versions Versions which should be marked
+     * @return void
+     */
+    public function markVersionsAsMigrated($path, $versions, $output)
+    {
+        $adapter = $this->getEnvironment('default')->getAdapter();
+
+        if (empty($versions)) {
+            $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
+            return;
+        }
+
+        $adapter->beginTransaction();
+        foreach ($versions as $version) {
+            if ($this->isMigrated($version)) {
+                $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
+                continue;
+            }
+
+            try {
+                $this->markMigrated($version, $path);
+                $output->writeln(
+                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
+                );
+            } catch (\Exception $e) {
+                $adapter->rollbackTransaction();
+                $output->writeln(
+                    sprintf(
+                        '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
+                        $version,
+                        $e->getMessage()
+                    )
+                );
+                $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
+                return;
+            }
+        }
+        $adapter->commitTransaction();
+    }
+
+    /**
      * Resolves a migration class name based on $path
      *
      * @param string $path Path to the migration file of which we want the class name

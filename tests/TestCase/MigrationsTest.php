@@ -187,6 +187,15 @@ class MigrationsTest extends TestCase
         $this->assertEquals($expectedStatus, $status);
     }
 
+//    public function testMarkMigrated()
+//    {
+//        $status = $this->migrations->status();
+//        $markMigrated = $this->migrations->markMigrated();
+//        debug($markMigrated);
+//        $status = $this->migrations->status();
+//        debug($status);
+//    }
+
     /**
      * Tests that migrate returns false in case of error
      * and can return a error message
