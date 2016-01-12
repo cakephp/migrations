@@ -153,7 +153,6 @@ class ColumnParser
     {
         $collection = new Collection($arguments);
         return $collection->filter(function ($value, $field) {
-            $value;
             return preg_match($this->regexpParseColumn, $field);
         })->toArray();
     }
@@ -191,7 +190,6 @@ class ColumnParser
         $collection = new Collection($reflector->getConstants());
 
         $validTypes = $collection->filter(function ($value, $constant) {
-            $value;
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
 
