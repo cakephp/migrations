@@ -189,6 +189,8 @@ class CakeManager extends Manager
     /**
      * Decides which versions it should mark as migrated
      *
+     * @param \Symfony\Component\Console\Input\InputInterface $input Input interface from which argument and options
+     * will be extracted to determine which versions to be marked as migrated
      * @return array Array of versions that should be marked as migrated
      * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
      * or version not found
@@ -232,6 +234,8 @@ class CakeManager extends Manager
      *
      * @param string $path Path where to look for migrations
      * @param array $versions Versions which should be marked
+     * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
+     * the command output
      * @return void
      */
     public function markVersionsAsMigrated($path, $versions, $output)
