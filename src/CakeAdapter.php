@@ -12,6 +12,7 @@
 namespace Migrations;
 
 use Cake\Database\Connection;
+use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Table;
 use Phinx\Db\Table\Column;
@@ -52,6 +53,10 @@ class CakeAdapter implements AdapterInterface
         $this->adapter = $adapter;
         $this->connection = $connection;
         $pdo = $adapter->getConnection();
+
+        if ($pdo->getAttribute(PDO::ATTR_ERRMODE) !== PDO::ERRMODE_EXCEPTION) {
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
         $connection->driver()->connection($pdo);
     }
 
