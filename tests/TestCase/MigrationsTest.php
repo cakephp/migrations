@@ -187,48 +187,241 @@ class MigrationsTest extends TestCase
         $this->assertEquals($expectedStatus, $status);
     }
 
-//    public function testMarkMigrated()
-//    {
-//        $status = $this->migrations->status();
-//        $markMigrated = $this->migrations->markMigrated();
-//        debug($markMigrated);
-//        $status = $this->migrations->status();
-//        debug($status);
-//    }
-
     /**
-     * Tests that migrate returns false in case of error
-     * and can return a error message
+     * Tests calling Migrations::markMigrated without params marks everything
+     * as migrated
      *
-     * @expectedException Exception
+     * @return void
      */
-    public function testMigrateErrors()
+    public function testMarkMigratedAll()
     {
-        $this->migrations->markMigrated(20150704160200);
-        $this->migrations->migrate();
+        $markMigrated = $this->migrations->markMigrated();
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
+            ]
+        ];
+        $this->assertEquals($expected, $status);
     }
 
     /**
-     * Tests that rollback returns false in case of error
-     * and can return a error message
+     * Tests calling Migrations::markMigrated with the argument $version as the
+     * string 'all' marks everything
+     * as migrated
      *
-     * @expectedException Exception
+     * @return void
      */
-    public function testRollbackErrors()
+    public function testMarkMigratedAllAsVersion()
     {
-        $this->migrations->markMigrated('all');
-        $this->migrations->rollback();
+        $markMigrated = $this->migrations->markMigrated('all');
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
+            ]
+        ];
+        $this->assertEquals($expected, $status);
     }
 
     /**
-     * Tests that marking migrated a non-existant migrations returns an error
-     * and can return a error message
+     * Tests calling Migrations::markMigrated with the target option will mark
+     * only up to that one
      *
-     * @expectedException Exception
+     * @return void
      */
-    public function testMarkMigratedErrors()
+    public function testMarkMigratedTarget()
     {
-        $this->migrations->markMigrated(20150704000000);
+        $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150704160200']);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
+            ]
+        ];
+        $this->assertEquals($expected, $status);
+
+        $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150826191400']);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected[1]['status'] = $expected[2]['status'] = 'up';
+        $this->assertEquals($expected, $status);
+    }
+
+    /**
+     * Tests calling Migrations::markMigrated with the target option set to a
+     * non-existent target will throw an exception
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Migration `20150704160610` was not found !
+     * @return void
+     */
+    public function testMarkMigratedTargetError()
+    {
+        $this->migrations->markMigrated(null, ['target' => '20150704160610']);
+    }
+
+    /**
+     * Tests calling Migrations::markMigrated with the target option with the exclude
+     * option will mark only up to that one, excluding it
+     *
+     * @return void
+     */
+    public function testMarkMigratedTargetExclude()
+    {
+        $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150704160200', 'exclude' => true]);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected = [
+            [
+                'status' => 'down',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
+            ]
+        ];
+        $this->assertEquals($expected, $status);
+
+        $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150826191400', 'exclude' => true]);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected[0]['status'] = $expected[1]['status'] = 'up';
+        $this->assertEquals($expected, $status);
+    }
+
+    /**
+     * Tests calling Migrations::markMigrated with the target option with the only
+     * option will mark only that specific migrations
+     *
+     * @return void
+     */
+    public function testMarkMigratedTargetOnly()
+    {
+        $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true]);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected = [
+            [
+                'status' => 'down',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'up',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
+            ]
+        ];
+        $this->assertEquals($expected, $status);
+
+        $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150826191400', 'only' => true]);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected[2]['status'] = 'up';
+        $this->assertEquals($expected, $status);
+    }
+
+    /**
+     * Tests calling Migrations::markMigrated with the target option, the only option
+     * and the exclude option will throw an exception
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage You should use `exclude` OR `only` (not both) along with a `target` argument
+     * @return void
+     */
+    public function testMarkMigratedTargetExcludeOnly()
+    {
+        $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true, 'exclude' => true]);
+    }
+
+    /**
+     * Tests calling Migrations::markMigrated with the target option with the exclude
+     * option will mark only up to that one, excluding it
+     *
+     * @return void
+     */
+    public function testMarkMigratedVersion()
+    {
+        $markMigrated = $this->migrations->markMigrated(20150704160200);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected = [
+            [
+                'status' => 'up',
+                'id' => '20150704160200',
+                'name' => 'CreateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150724233100',
+                'name' => 'UpdateNumbersTable'
+            ],
+            [
+                'status' => 'down',
+                'id' => '20150826191400',
+                'name' => 'CreateLettersTable'
+            ]
+        ];
+        $this->assertEquals($expected, $status);
+
+        $markMigrated = $this->migrations->markMigrated(20150826191400);
+        $this->assertTrue($markMigrated);
+        $status = $this->migrations->status();
+        $expected[2]['status'] = 'up';
+        $this->assertEquals($expected, $status);
     }
 
     /**
@@ -589,10 +782,13 @@ class MigrationsTest extends TestCase
         foreach ($files as $file) {
             list($filename, $timestamp) = $file;
             $copiedFileName = $timestamp . '_' . $filename . '.php';
-            copy(
-                $basePath . $filename . '.php',
-                $destination . $copiedFileName
-            );
+
+            if (!file_exists($destination . $copiedFileName)) {
+                copy(
+                    $basePath . $filename . '.php',
+                    $destination . $copiedFileName
+                );
+            }
 
             $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
             $this->assertTrue($result);
@@ -600,6 +796,39 @@ class MigrationsTest extends TestCase
             $this->migrations->rollback(['source' => 'SnapshotTests']);
             unlink($destination . $copiedFileName);
         }
+    }
+
+    /**
+     * Tests that migrating in case of error throws an exception
+     *
+     * @expectedException \Exception
+     */
+    public function testMigrateErrors()
+    {
+        $this->migrations->markMigrated(20150704160200);
+        $this->migrations->migrate();
+    }
+
+    /**
+     * Tests that rolling back in case of error throws an exception
+     *
+     * @expectedException \Exception
+     */
+    public function testRollbackErrors()
+    {
+        $this->migrations->markMigrated('all');
+        $this->migrations->rollback();
+    }
+
+    /**
+     * Tests that marking migrated a non-existant migrations returns an error
+     * and can return a error message
+     *
+     * @expectedException \Exception
+     */
+    public function testMarkMigratedErrors()
+    {
+        $this->migrations->markMigrated(20150704000000);
     }
 
     /**
