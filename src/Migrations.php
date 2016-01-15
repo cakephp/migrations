@@ -210,7 +210,6 @@ class Migrations
         return true;
     }
 
-
     /**
      * Seed the database using a seed file
      *

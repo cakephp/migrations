@@ -101,7 +101,6 @@ class SeedTask extends SimpleBakeTask
         return parent::bake($name);
     }
 
-
     /**
      * Gets the option parser instance and configures it.
      *

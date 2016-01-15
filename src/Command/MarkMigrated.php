@@ -122,7 +122,7 @@ class MarkMigrated extends AbstractCommand
         }
 
         try {
-            $versions = $this->getVersionsToMark($input);
+            $versions = $this->getVersionsToMark();
         } catch (InvalidArgumentException $e) {
             $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
             return;
