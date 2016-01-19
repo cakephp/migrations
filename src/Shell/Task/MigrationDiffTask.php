@@ -22,7 +22,6 @@ use Migrations\Util\UtilTrait;
  */
 class MigrationDiffTask extends SimpleMigrationTask
 {
-
     use SnapshotTrait;
     use UtilTrait;
 

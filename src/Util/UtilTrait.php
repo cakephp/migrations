@@ -21,7 +21,6 @@ use Symfony\Component\Console\Input\InputInterface;
 trait UtilTrait
 {
 
-
     /**
      * Get the plugin name based on the current InputInterface
      *
@@ -59,7 +58,7 @@ trait UtilTrait
      * @param string $default Default folder to set if no source option is found in the $input param
      * @return string
      */
-    protected function getPath(InputInterface $input, $default = 'Migrations')
+    protected function getOperationsPath(InputInterface $input, $default = 'Migrations')
     {
         $folder = $input->getOption('source') ?: $default;
 

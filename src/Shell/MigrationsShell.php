@@ -103,7 +103,7 @@ class MigrationsShell extends Shell
         $app->setAutoExit(false);
         $exitCode = $app->run($input);
 
-        $path = $this->getMigrationsPath($input);
+        $path = $this->getOperationsPath($input);
 
         if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) && $exitCode === 0) {
             $connectionName = $input->getOption('connection') ?: 'default';

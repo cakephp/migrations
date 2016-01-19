@@ -58,8 +58,8 @@ trait ConfigurationTrait
             return $this->configuration;
         }
 
-        $migrationsPath = $this->getPath($this->input);
-        $seedsPath = $this->getPath($this->input, 'Seeds');
+        $migrationsPath = $this->getOperationsPath($this->input);
+        $seedsPath = $this->getOperationsPath($this->input, 'Seeds');
         $plugin = $this->getPlugin($this->input);
 
         if (!is_dir($migrationsPath)) {
@@ -70,8 +70,6 @@ trait ConfigurationTrait
             mkdir($seedsPath, 0777, true);
         }
 
-        $plugin = $plugin ? Inflector::underscore($plugin) . '_' : '';
-        $plugin = str_replace(['\\', '/', '.'], '_', $plugin);
         $phinxTable = $this->getPhinxTable($plugin);
 
         $connection = $this->getConnectionName($this->input);
