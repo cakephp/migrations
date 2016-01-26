@@ -32,10 +32,11 @@ class MigrationsDispatcher extends Application
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
         $this->add(new Command\Create());
+        $this->add(new Command\Dump());
+        $this->add(new Command\MarkMigrated());
         $this->add(new Command\Migrate());
         $this->add(new Command\Rollback());
-        $this->add(new Command\Status());
-        $this->add(new Command\MarkMigrated());
         $this->add(new Command\Seed());
+        $this->add(new Command\Status());
     }
 }

@@ -35,6 +35,7 @@ class MigrationsShell extends Shell
      */
     public $tasks = [
         'Migrations.Create',
+        'Migrations.Dump',
         'Migrations.MarkMigrated',
         'Migrations.Migrate',
         'Migrations.Rollback',
@@ -103,28 +104,17 @@ class MigrationsShell extends Shell
         $app->setAutoExit(false);
         $exitCode = $app->run($input);
 
-        $path = $this->getOperationsPath($input);
-
         if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) && $exitCode === 0) {
-            $connectionName = $input->getOption('connection') ?: 'default';
-            $connection = ConnectionManager::get($connectionName);
-            $collection = $connection->schemaCollection();
-
-            $options = [
-                'require-table' => true,
-                'plugin' => $this->getPlugin($input)
-            ];
-            $tables = $this->getTablesToBake($collection, $options);
-
-            $dump = [];
-            if (!empty($tables)) {
-                foreach ($tables as $table) {
-                    $schema = $collection->describe($table);
-                    $dump[$table] = $schema;
-                }
+            $dispatchCommand = 'migrations dump';
+            if (!empty($this->params['connection'])) {
+                $dispatchCommand .= ' -c ' . $this->params['connection'];
             }
 
-            file_put_contents($path . DS . 'schema-dump', serialize($dump));
+            if (!empty($this->params['plugin'])) {
+                $dispatchCommand .= ' -p ' . $this->params['plugin'];
+            }
+
+            $this->dispatchShell($dispatchCommand);
         }
     }
 

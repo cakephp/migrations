@@ -11,9 +11,11 @@
  */
 namespace Migrations\Test\Command;
 
+use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
+use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
@@ -23,10 +25,12 @@ use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * SeedTest class
+ * DumpTest class
  */
-class SeedTest extends TestCase
+class DumpTest extends TestCase
 {
+
+    use StringCompareTrait;
 
     /**
      * Instance of a Symfony Command object
@@ -68,8 +72,9 @@ class SeedTest extends TestCase
 
         $this->Connection = ConnectionManager::get('test');
         $application = new MigrationsDispatcher('testing');
-        $this->command = $application->find('seed');
+        $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
     }
 
     /**
@@ -84,55 +89,38 @@ class SeedTest extends TestCase
     }
 
     /**
-     * Test executing the "seed" command in a standard way
+     * Test executing "dump" with no tables in the database
      *
      * @return void
      */
-    public function testExecute()
+    public function testExecuteNoTables()
     {
         $params = [
             '--connection' => 'test',
+            '--source' => 'TestsMigrations'
         ];
         $commandTester = $this->getCommandTester($params);
-        $migrations = $this->getMigrations();
-        $migrations->migrate();
 
         $commandTester->execute([
             'command' => $this->command->getName(),
-            '--connection' => 'test'
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations'
         ]);
 
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('== NumbersSeed: seeded', $display);
-
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->order('id DESC')
-            ->limit(1)
-            ->execute()->fetchAll('assoc');
-        $expected = [
-            [
-                'id' => '1',
-                'number' => '10',
-                'radix' => '10'
-            ]
-        ];
-        $this->assertEquals($expected, $result);
-
-        $migrations->rollback(['target' => 0]);
+        $display = $commandTester->getDisplay();
+        $this->assertTextContains('No tables were found : the dump file was not created', $display);
     }
 
     /**
-     * Test executing the "seed" command with custom params
+     * Test executing "dump" with no tables in the database
      *
      * @return void
      */
-    public function testExecuteCustomParams()
+    public function testExecuteTables()
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'AltSeeds'
+            '--source' => 'TestsMigrations'
         ];
         $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -141,52 +129,22 @@ class SeedTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'AltSeeds'
+            '--source' => 'TestsMigrations'
         ]);
 
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('== NumbersAltSeed: seeded', $display);
+        $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump';
+        $this->assertTrue(file_exists($dumpFilePath));
 
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->order('id DESC')
-            ->limit(1)
-            ->execute()->fetchAll('assoc');
-        $expected = [
-            [
-                'id' => '2',
-                'number' => '5',
-                'radix' => '10'
-            ]
-        ];
-        $this->assertEquals($expected, $result);
-        $migrations->rollback(['target' => 0]);
-    }
+        $generatedDump = unserialize(file_get_contents($dumpFilePath));
 
-    /**
-     * Test executing the "seed" command with wrong custom params (no seed found)
-     *
-     * @return void
-     */
-    public function testExecuteWrongCustomParams()
-    {
-        $params = [
-            '--connection' => 'test',
-            '--source' => 'DerpSeeds'
-        ];
-        $commandTester = $this->getCommandTester($params);
-        $migrations = $this->getMigrations();
-        $migrations->migrate();
+        $this->assertCount(2, $generatedDump);
+        $this->assertArrayHasKey('letters', $generatedDump);
+        $this->assertArrayHasKey('numbers', $generatedDump);
+        $this->assertInstanceOf('Cake\Database\Schema\Table', $generatedDump['numbers']);
+        $this->assertInstanceOf('Cake\Database\Schema\Table', $generatedDump['letters']);
+        $this->assertEquals(['id', 'number', 'radix'], $generatedDump['numbers']->columns());
+        $this->assertEquals(['id', 'letter'], $generatedDump['letters']->columns());
 
-        $commandTester->execute([
-            'command' => $this->command->getName(),
-            '--connection' => 'test',
-            '--source' => 'DerpSeeds'
-        ]);
-
-        $display = $this->getDisplayFromOutput();
-        $this->assertEmpty($display);
         $migrations->rollback(['target' => 0]);
     }
 

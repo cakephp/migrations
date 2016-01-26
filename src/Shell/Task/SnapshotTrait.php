@@ -41,6 +41,10 @@ trait SnapshotTrait
         if ($options['require-table'] === true || $options['plugin']) {
             $tableNamesInModel = $this->getTableNames($options['plugin']);
 
+            if (empty($tableNamesInModel)) {
+                return [];
+            }
+
             foreach ($tableNamesInModel as $num => $table) {
                 if (!in_array($table, $tables)) {
                     unset($tableNamesInModel[$num]);
@@ -72,6 +76,11 @@ trait SnapshotTrait
         }
         $list = [];
         $tables = $this->findTables($pluginName);
+
+        if (empty($tables)) {
+            return [];
+        }
+
         foreach ($tables as $num => $table) {
             $list = array_merge($list, $this->fetchTableName($table, $pluginName));
         }

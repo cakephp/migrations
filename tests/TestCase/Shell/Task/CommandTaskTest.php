@@ -77,7 +77,7 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['subcommands', 'Migrations.migrations']);
         $output = $this->out->output;
-        $expected = "create mark_migrated migrate rollback status\n";
+        $expected = "create dump mark_migrated migrate rollback status\n";
         $this->assertTextEquals($expected, $output);
     }
 
