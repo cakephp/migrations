@@ -16,6 +16,7 @@ namespace Migrations\Shell\Task;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
+use Symfony\Component\Console\Input\ArrayInput;
 
 /**
  * Task class for generating migration diff files.
@@ -54,6 +55,35 @@ class MigrationDiffTask extends SimpleMigrationTask
     protected $phinxTable;
 
     /**
+     * List the tables the connection currently holds
+     *
+     * @var array
+     */
+    protected $tables = [];
+
+    /**
+     * Array of \Cake\Database\Schema\Table objects from the dump file which
+     * represents the state of the database after the last migrate / rollback command
+     *
+     * @var array
+     */
+    protected $dumpSchema;
+
+    /**
+     * Array of \Cake\Database\Schema\Table objects from the current state of the database
+     *
+     * @var array
+     */
+    protected $currentSchema;
+
+    /**
+     * List of the tables that are commonly found in the dump schema and the current schema
+     *
+     * @var array
+     */
+    protected $commonTables;
+
+    /**
      * {@inheritDoc}
      */
     public function bake($name)
@@ -68,6 +98,39 @@ class MigrationDiffTask extends SimpleMigrationTask
         if (empty($this->migrationsFiles) && empty($this->migratedItems)) {
             return $this->bakeSnapshot($name);
         }
+
+        $this->dumpSchema = $this->getDumpSchema();
+        $this->currentSchema = $this->getCurrentSchema();
+        $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
+
+        $diffParams = $this->calculateDiff();
+    }
+
+    protected function calculateDiff()
+    {
+        $indexes = $this->getIndexes();
+
+        return ['indexes' => $indexes];
+    }
+
+    protected function getIndexes()
+    {
+        $indexes = [];
+        foreach ($this->commonTables as $table => $currentSchema) {
+            $currentIndexes = $currentSchema->indexes();
+            $oldIndexes = $this->dumpSchema[$table]->indexes();
+
+            $indexes[$table] = ['add' => [], 'remove' => []];
+
+            $addedIndexes = array_diff($currentIndexes, $oldIndexes);
+            foreach ($addedIndexes as $indexName) {
+                $indexes[$table]['add'][$indexName] = $currentSchema->index($indexName);
+            }
+
+            $indexes[$table]['remove'] = array_diff($oldIndexes, $currentIndexes);
+        }
+
+        return $indexes;
     }
 
     /**
@@ -82,7 +145,8 @@ class MigrationDiffTask extends SimpleMigrationTask
         $this->phinxTable = $this->getPhinxTable($this->plugin);
 
         $connection = ConnectionManager::get($this->connection);
-        $tableExists = in_array($this->phinxTable, $connection->schemaCollection()->listTables());
+        $this->tables = $connection->schemaCollection()->listTables();
+        $tableExists = in_array($this->phinxTable, $this->tables);
 
         $migratedItems = [];
         if ($tableExists) {
@@ -146,6 +210,50 @@ class MigrationDiffTask extends SimpleMigrationTask
         }
 
         return $dispatch;
+    }
+
+    protected function getDumpSchema()
+    {
+        $inputArgs = [];
+
+        if (!empty($this->params['connection'])) {
+            $inputArgs['--connection'] = $this->params['connection'];
+        }
+        if (!empty($this->params['plugin'])) {
+            $inputArgs['--plugin'] = $this->params['plugin'];
+        }
+
+        $className = '\Migrations\Command\Dump';
+        $definition = (new $className())->getDefinition();
+
+        $input = new ArrayInput($inputArgs, $definition);
+        $path = $this->getOperationsPath($input) . DS . 'schema-dump';
+
+        if (!file_exists($path)) {
+            $this->error('Unable to retrieve the schema dump file. You can create a dump file using the `cake migrations dump` command');
+        }
+
+        return unserialize(file_get_contents($path));
+    }
+
+    protected function getCurrentSchema()
+    {
+        $schema = [];
+
+        if (empty($this->tables)) {
+            return $schema;
+        }
+
+        $collection = ConnectionManager::get($this->connection)->schemaCollection();
+        foreach ($this->tables as $table) {
+            if (strpos($table, 'phinx') === 0) {
+                continue;
+            }
+
+            $schema[$table] = $collection->describe($table);
+        }
+
+        return $schema;
     }
 
     /**
