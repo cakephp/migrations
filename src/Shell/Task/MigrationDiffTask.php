@@ -104,13 +104,99 @@ class MigrationDiffTask extends SimpleMigrationTask
         $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
 
         $diffParams = $this->calculateDiff();
+        debug($diffParams);
     }
 
     protected function calculateDiff()
     {
+        $tables = $this->getTables();
+        $columns = $this->getColumns();
         $indexes = $this->getIndexes();
+        $constraints = $this->getConstraints();
 
-        return ['indexes' => $indexes];
+        return [
+            'tables' => $tables,
+            'columns' => $columns,
+            'indexes' => $indexes,
+            'constraints' => $constraints
+        ];
+    }
+
+    protected function getTables()
+    {
+        return [
+            'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
+            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema)
+        ];
+    }
+
+    protected function getColumns()
+    {
+        $columns = [];
+        foreach ($this->commonTables as $table => $currentSchema) {
+            $currentColumns = $currentSchema->columns();
+            $oldColumns = $this->dumpSchema[$table]->columns();
+
+            $columns[$table] = ['add' => [], 'remove' => []];
+
+            // brand new columns
+            $addedColumns = array_diff($currentColumns, $oldColumns);
+            foreach ($addedColumns as $columnName) {
+                $columns[$table]['add'][$columnName] = $currentSchema->column($columnName);
+            }
+
+            // changes in columns meta-data
+            foreach ($currentColumns as $columnName) {
+                $column = $currentSchema->column($columnName);
+                $oldColumn = $this->dumpSchema[$table]->column($columnName);
+
+                if (in_array($columnName, $oldColumns) &&
+                    $column !== $oldColumn
+                ) {
+                    $columns[$table]['changed'][$columnName] = array_diff($column, $oldColumn);
+                }
+            }
+
+            // columns deletion
+            $columns[$table]['remove'] = array_diff($oldColumns, $currentColumns);
+        }
+
+        return $columns;
+    }
+
+    protected function getConstraints()
+    {
+        $constraints = [];
+        foreach ($this->commonTables as $table => $currentSchema) {
+            $currentConstraints = $currentSchema->constraints();
+            $oldConstraints = $this->dumpSchema[$table]->constraints();
+
+            $constraints[$table] = ['add' => [], 'remove' => []];
+
+            // brand new constraints
+            $addedConstraints = array_diff($currentConstraints, $oldConstraints);
+            foreach ($addedConstraints as $constraintName) {
+                $constraints[$table]['add'][$constraintName] = $currentSchema->constraint($constraintName);
+            }
+
+            // constraints having the same name between new and old schema
+            // if present in both, check if they are the same : if not, remove the old one and add the new one
+            foreach ($currentConstraints as $constraintName) {
+                $constraint = $currentSchema->constraint($constraintName);
+
+                if (in_array($constraintName, $oldConstraints) &&
+                    $constraint !== $this->dumpSchema[$table]->constraint($constraintName)
+                ) {
+                    $constraints[$table]['remove'][] = $constraintName;
+                    $constraints[$table]['add'][$constraintName] = $constraint;
+                }
+            }
+
+            // removed constraints
+            $constraints[$table]['remove'] += array_diff($oldConstraints, $currentConstraints);
+        }
+
+        return $constraints;
     }
 
     protected function getIndexes()
@@ -122,12 +208,27 @@ class MigrationDiffTask extends SimpleMigrationTask
 
             $indexes[$table] = ['add' => [], 'remove' => []];
 
+            // brand new indexes
             $addedIndexes = array_diff($currentIndexes, $oldIndexes);
             foreach ($addedIndexes as $indexName) {
                 $indexes[$table]['add'][$indexName] = $currentSchema->index($indexName);
             }
 
-            $indexes[$table]['remove'] = array_diff($oldIndexes, $currentIndexes);
+            // indexes having the same name between new and old schema
+            // if present in both, check if they are the same : if not, remove the old one and add the new one
+            foreach ($currentIndexes as $indexName) {
+                $index = $currentSchema->index($indexName);
+
+                if (in_array($indexName, $oldIndexes) &&
+                    $index !== $this->dumpSchema[$table]->index($indexName)
+                ) {
+                    $indexes[$table]['remove'][] = $indexName;
+                    $indexes[$table]['add'][$indexName] = $index;
+                }
+            }
+
+            // indexes deletion
+            $indexes[$table]['remove'] += array_diff($oldIndexes, $currentIndexes);
         }
 
         return $indexes;
