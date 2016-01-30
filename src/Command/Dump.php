@@ -89,7 +89,7 @@ class Dump extends AbstractCommand
             $dump[$table] = $schema;
         }
 
-        $filePath = $path . DS . 'schema-dump';
+        $filePath = $path . DS . 'schema-dump-' . $connectionName;
         $output->writeln(sprintf('<info>Writing dump file `%s`...</info>', $filePath));
         if (file_put_contents($filePath, serialize($dump))) {
             $output->writeln(sprintf('<info>Dump file `%s` was successfully written</info>', $filePath));
