@@ -43,6 +43,11 @@ class TestPluginBlog extends AbstractMigration
                     'product_id',
                 ]
             )
+            ->addIndex(
+                [
+                    'title',
+                ]
+            )
             ->create();
 
         $this->table('articles')
