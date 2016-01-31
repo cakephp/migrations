@@ -269,6 +269,28 @@ class MigrationHelper extends Helper
         ];
     }
 
+    public function getColumnOption($options)
+    {
+        $wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement', 'precision']);
+        $columnOptions = array_intersect_key($options, $wantedOptions);
+        if (empty($columnOptions['comment'])) {
+            unset($columnOptions['comment']);
+        }
+        if (empty($columnOptions['autoIncrement'])) {
+            unset($columnOptions['autoIncrement']);
+        }
+        if (empty($columnOptions['precision'])) {
+            unset($columnOptions['precision']);
+        } else {
+            // due to Phinx using different naming for the precision and scale to CakePHP
+            $columnOptions['scale'] = $columnOptions['precision'];
+            $columnOptions['precision'] = $columnOptions['limit'];
+            unset($columnOptions['limit']);
+        }
+
+        return $columnOptions;
+    }
+
     /**
      * Returns a string-like representation of a value
      *
@@ -392,10 +414,15 @@ class MigrationHelper extends Helper
      * Returns a $this->table() statement only if it was not issued already
      *
      * @param string $table Table for which the statement is needed
+     * @param bool $reset
      * @return string
      */
-    public function tableStatement($table)
+    public function tableStatement($table, $reset = false)
     {
+        if ($reset === true) {
+            unset($this->tableStatements[$table]);
+        }
+
         if (!isset($this->tableStatements[$table])) {
             $this->tableStatements[$table] = true;
             return '$this->table(\'' . $table . '\')';

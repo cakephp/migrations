@@ -14,7 +14,10 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
+use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Migrations\Util\UtilTrait;
 use Symfony\Component\Console\Input\ArrayInput;
 
@@ -83,6 +86,8 @@ class MigrationDiffTask extends SimpleMigrationTask
      */
     protected $commonTables;
 
+    protected $templateData = [];
+
     /**
      * {@inheritDoc}
      */
@@ -99,139 +104,14 @@ class MigrationDiffTask extends SimpleMigrationTask
             return $this->bakeSnapshot($name);
         }
 
-        $this->dumpSchema = $this->getDumpSchema();
-        $this->currentSchema = $this->getCurrentSchema();
-        $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
+        $collection = $this->getCollection($this->connection);
+        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
+            $event->subject->loadHelper('Migrations.Migration', [
+                'collection' => $collection
+            ]);
+        });
 
-        $diffParams = $this->calculateDiff();
-        debug($diffParams);
-    }
-
-    protected function calculateDiff()
-    {
-        $tables = $this->getTables();
-        $columns = $this->getColumns();
-        $indexes = $this->getIndexes();
-        $constraints = $this->getConstraints();
-
-        return [
-            'tables' => $tables,
-            'columns' => $columns,
-            'indexes' => $indexes,
-            'constraints' => $constraints
-        ];
-    }
-
-    protected function getTables()
-    {
-        return [
-            'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
-            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema)
-        ];
-    }
-
-    protected function getColumns()
-    {
-        $columns = [];
-        foreach ($this->commonTables as $table => $currentSchema) {
-            $currentColumns = $currentSchema->columns();
-            $oldColumns = $this->dumpSchema[$table]->columns();
-
-            $columns[$table] = ['add' => [], 'remove' => []];
-
-            // brand new columns
-            $addedColumns = array_diff($currentColumns, $oldColumns);
-            foreach ($addedColumns as $columnName) {
-                $columns[$table]['add'][$columnName] = $currentSchema->column($columnName);
-            }
-
-            // changes in columns meta-data
-            foreach ($currentColumns as $columnName) {
-                $column = $currentSchema->column($columnName);
-                $oldColumn = $this->dumpSchema[$table]->column($columnName);
-
-                if (in_array($columnName, $oldColumns) &&
-                    $column !== $oldColumn
-                ) {
-                    $columns[$table]['changed'][$columnName] = array_diff($column, $oldColumn);
-                }
-            }
-
-            // columns deletion
-            $columns[$table]['remove'] = array_diff($oldColumns, $currentColumns);
-        }
-
-        return $columns;
-    }
-
-    protected function getConstraints()
-    {
-        $constraints = [];
-        foreach ($this->commonTables as $table => $currentSchema) {
-            $currentConstraints = $currentSchema->constraints();
-            $oldConstraints = $this->dumpSchema[$table]->constraints();
-
-            $constraints[$table] = ['add' => [], 'remove' => []];
-
-            // brand new constraints
-            $addedConstraints = array_diff($currentConstraints, $oldConstraints);
-            foreach ($addedConstraints as $constraintName) {
-                $constraints[$table]['add'][$constraintName] = $currentSchema->constraint($constraintName);
-            }
-
-            // constraints having the same name between new and old schema
-            // if present in both, check if they are the same : if not, remove the old one and add the new one
-            foreach ($currentConstraints as $constraintName) {
-                $constraint = $currentSchema->constraint($constraintName);
-
-                if (in_array($constraintName, $oldConstraints) &&
-                    $constraint !== $this->dumpSchema[$table]->constraint($constraintName)
-                ) {
-                    $constraints[$table]['remove'][] = $constraintName;
-                    $constraints[$table]['add'][$constraintName] = $constraint;
-                }
-            }
-
-            // removed constraints
-            $constraints[$table]['remove'] += array_diff($oldConstraints, $currentConstraints);
-        }
-
-        return $constraints;
-    }
-
-    protected function getIndexes()
-    {
-        $indexes = [];
-        foreach ($this->commonTables as $table => $currentSchema) {
-            $currentIndexes = $currentSchema->indexes();
-            $oldIndexes = $this->dumpSchema[$table]->indexes();
-
-            $indexes[$table] = ['add' => [], 'remove' => []];
-
-            // brand new indexes
-            $addedIndexes = array_diff($currentIndexes, $oldIndexes);
-            foreach ($addedIndexes as $indexName) {
-                $indexes[$table]['add'][$indexName] = $currentSchema->index($indexName);
-            }
-
-            // indexes having the same name between new and old schema
-            // if present in both, check if they are the same : if not, remove the old one and add the new one
-            foreach ($currentIndexes as $indexName) {
-                $index = $currentSchema->index($indexName);
-
-                if (in_array($indexName, $oldIndexes) &&
-                    $index !== $this->dumpSchema[$table]->index($indexName)
-                ) {
-                    $indexes[$table]['remove'][] = $indexName;
-                    $indexes[$table]['add'][$indexName] = $index;
-                }
-            }
-
-            // indexes deletion
-            $indexes[$table]['remove'] += array_diff($oldIndexes, $currentIndexes);
-        }
-
-        return $indexes;
+        return parent::bake($name);
     }
 
     /**
@@ -260,6 +140,174 @@ class MigrationDiffTask extends SimpleMigrationTask
         }
 
         $this->migratedItems = $migratedItems;
+    }
+
+    /**
+     * Get a collection from a database
+     *
+     * @param string $connection Database connection name.
+     * @return \Cake\Database\Schema\Collection
+     */
+    public function getCollection($connection)
+    {
+        $connection = ConnectionManager::get($connection);
+        return $connection->schemaCollection();
+    }
+
+    public function templateData()
+    {
+        $this->dumpSchema = $this->getDumpSchema();
+        $this->currentSchema = $this->getCurrentSchema();
+        $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
+
+        $this->calculateDiff();
+
+        return [
+            'data' => $this->templateData,
+            'dumpSchema' => $this->dumpSchema,
+            'currentSchema' => $this->currentSchema,
+        ];
+    }
+
+    protected function calculateDiff()
+    {
+        $this->getConstraints();
+        $this->getIndexes();
+        $this->getColumns();
+        $this->getTables();
+    }
+
+    protected function getTables()
+    {
+        $this->templateData['__tables'] = [
+            'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
+            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema)
+        ];
+    }
+
+    protected function getColumns()
+    {
+        foreach ($this->commonTables as $table => $currentSchema) {
+            $currentColumns = $currentSchema->columns();
+            $oldColumns = $this->dumpSchema[$table]->columns();
+
+            // brand new columns
+            $addedColumns = array_diff($currentColumns, $oldColumns);
+            foreach ($addedColumns as $columnName) {
+                $this->templateData[$table]['columns']['add'][$columnName] = $currentSchema->column($columnName);
+            }
+
+            // changes in columns meta-data
+            foreach ($currentColumns as $columnName) {
+                $column = $currentSchema->column($columnName);
+                $oldColumn = $this->dumpSchema[$table]->column($columnName);
+
+                if (in_array($columnName, $oldColumns) &&
+                    $column !== $oldColumn
+                ) {
+                    $changedAttributes = array_diff($column, $oldColumn);
+
+                    if (!isset($changedAttributes['type'])) {
+                        $changedAttributes['type'] = $column['type'];
+                    }
+                    $this->templateData[$table]['columns']['changed'][$columnName] = $changedAttributes;
+                }
+            }
+
+            // columns deletion
+            if (!isset($this->templateData[$table]['columns']['remove'])) {
+                $this->templateData[$table]['columns']['remove'] = [];
+            }
+            $removedColumns = array_diff($oldColumns, $currentColumns);
+            if (!empty($removedColumns)) {
+                foreach ($removedColumns as $column) {
+                    $this->templateData[$table]['columns']['remove'][$column] = $this->dumpSchema[$table]->column($column);
+                }
+            }
+        }
+    }
+
+    protected function getConstraints()
+    {
+        foreach ($this->commonTables as $table => $currentSchema) {
+            $currentConstraints = $currentSchema->constraints();
+            $oldConstraints = $this->dumpSchema[$table]->constraints();
+
+            // brand new constraints
+            $addedConstraints = array_diff($currentConstraints, $oldConstraints);
+            foreach ($addedConstraints as $constraintName) {
+                $this->templateData[$table]['constraints']['add'][$constraintName] = $currentSchema->constraint($constraintName);
+            }
+
+            // constraints having the same name between new and old schema
+            // if present in both, check if they are the same : if not, remove the old one and add the new one
+            foreach ($currentConstraints as $constraintName) {
+                $constraint = $currentSchema->constraint($constraintName);
+
+                if (in_array($constraintName, $oldConstraints) &&
+                    $constraint !== $this->dumpSchema[$table]->constraint($constraintName)
+                ) {
+                    $this->templateData[$table]['constraints']['remove'][$constraintName] = $this->dumpSchema[$table]->constraint($constraintName);
+                    $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
+                }
+            }
+
+            // removed constraints
+            $removedConstraints = array_diff($oldConstraints, $currentConstraints);
+            foreach ($removedConstraints as $constraintName) {
+                $constraint = $this->dumpSchema[$table]->constraint($constraintName);
+                if ($constraint['type'] === Table::CONSTRAINT_FOREIGN) {
+                    $this->templateData[$table]['constraints']['remove'][$constraintName] = $constraint;
+                } else {
+                    $this->templateData[$table]['indexes']['remove'][$constraintName] = $constraint;
+                }
+            }
+
+        }
+    }
+
+    protected function getIndexes()
+    {
+        foreach ($this->commonTables as $table => $currentSchema) {
+            $currentIndexes = $currentSchema->indexes();
+            $oldIndexes = $this->dumpSchema[$table]->indexes();
+
+            // brand new indexes
+            $addedIndexes = array_diff($currentIndexes, $oldIndexes);
+            foreach ($addedIndexes as $indexName) {
+                $this->templateData[$table]['indexes']['add'][$indexName] = $currentSchema->index($indexName);
+            }
+
+            // indexes having the same name between new and old schema
+            // if present in both, check if they are the same : if not, remove the old one and add the new one
+            foreach ($currentIndexes as $indexName) {
+                $index = $currentSchema->index($indexName);
+
+                if (in_array($indexName, $oldIndexes) &&
+                    $index !== $this->dumpSchema[$table]->index($indexName)
+                ) {
+                    $this->templateData[$table]['indexes']['remove'][$indexName] = $this->dumpSchema[$table]->index($indexName);
+                    $this->templateData[$table]['indexes']['add'][$indexName] = $index;
+                }
+            }
+
+            // indexes deletion
+            if (!isset($this->templateData[$table]['indexes']['remove'])) {
+                $this->templateData[$table]['indexes']['remove'] = [];
+            }
+
+            $removedIndexes = array_diff($oldIndexes, $currentIndexes);
+            $parts = [];
+            if (!empty($removedIndexes)) {
+                foreach ($removedIndexes as $index) {
+                    $parts[$index] = $this->dumpSchema[$table]->index($index);
+                }
+            }
+            $this->templateData[$table]['indexes']['remove'] = array_merge(
+                $this->templateData[$table]['indexes']['remove'],
+                $parts
+            );
+        }
     }
 
     /**
@@ -317,8 +365,9 @@ class MigrationDiffTask extends SimpleMigrationTask
     {
         $inputArgs = [];
 
+        $connectionName = 'default';
         if (!empty($this->params['connection'])) {
-            $inputArgs['--connection'] = $this->params['connection'];
+            $connectionName = $inputArgs['--connection'] = $this->params['connection'];
         }
         if (!empty($this->params['plugin'])) {
             $inputArgs['--plugin'] = $this->params['plugin'];
@@ -328,7 +377,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         $definition = (new $className())->getDefinition();
 
         $input = new ArrayInput($inputArgs, $definition);
-        $path = $this->getOperationsPath($input) . DS . 'schema-dump';
+        $path = $this->getOperationsPath($input) . DS . 'schema-dump-' . $connectionName;
 
         if (!file_exists($path)) {
             $this->error('Unable to retrieve the schema dump file. You can create a dump file using the `cake migrations dump` command');
@@ -363,13 +412,5 @@ class MigrationDiffTask extends SimpleMigrationTask
     public function template()
     {
         return 'Migrations.config/diff';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function templateData()
-    {
-        return parent::templateData();
     }
 }
