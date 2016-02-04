@@ -13,6 +13,8 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Database\Schema\Table;
+
 $wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement', 'precision']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
@@ -91,7 +93,7 @@ class <%= $name %> extends AbstractMigration
                 $constraints[$table] = $tableConstraints;
 
                 foreach ($constraints[$table] as $name => $constraint):
-                    if ($constraint['type'] !== 'unique'):
+                    if ($constraint['type'] === Table::CONSTRAINT_FOREIGN):
                         $foreignKeys[] = $constraint['columns'];
                     endif;
                     if ($constraint['columns'] !== $primaryKeysColumns): %>
@@ -110,13 +112,13 @@ class <%= $name %> extends AbstractMigration
                 sort($foreignKeys);
                 $indexColumns = $index['columns'];
                 sort($indexColumns);
-                if (in_array($foreignKeys, $indexColumns)):
+                if (!in_array($indexColumns, $foreignKeys)):
                 %>
-                ->addIndex(
-                    [<%
-                        echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
-                    %>]
-                )
+            ->addIndex(
+                [<%
+                    echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
+                %>]
+            )
             <%- endif;
             endforeach; %>
             -><%= $tableMethod %>();

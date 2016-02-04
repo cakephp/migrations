@@ -43,6 +43,11 @@ class TestPluginBlogPgsql extends AbstractMigration
                     'product_id',
                 ]
             )
+            ->addIndex(
+                [
+                    'title',
+                ]
+            )
             ->create();
 
         $this->table('articles')

@@ -42,6 +42,11 @@ class TestPluginBlogSqlite extends AbstractMigration
                     'product_id',
                 ]
             )
+            ->addIndex(
+                [
+                    'title',
+                ]
+            )
             ->create();
 
         $this->table('articles')

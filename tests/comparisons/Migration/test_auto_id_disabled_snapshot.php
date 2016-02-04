@@ -53,6 +53,11 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
                     'product_id',
                 ]
             )
+            ->addIndex(
+                [
+                    'title',
+                ]
+            )
             ->create();
 
         $table = $this->table('categories');

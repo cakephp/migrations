@@ -34,6 +34,12 @@ class ArticlesFixture extends TestFixture
         'product_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
+        '_indexes' => [
+            'title_idx' => [
+                'type' => 'index',
+                'columns' => ['title']
+            ]
+        ],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
             'category_article_idx' => [
