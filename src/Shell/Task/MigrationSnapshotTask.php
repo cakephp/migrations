@@ -246,15 +246,16 @@ class MigrationSnapshotTask extends SimpleMigrationTask
                 $tables[] = $table->associations()->get($key)->_junctionTableName();
             }
         }
-        $t = $table->table();
-        $splitted = array_reverse(explode('.', $t));
+        $tableName = $table->table();
+        $splitted = array_reverse(explode('.', $tableName, 2));
         if (isset($splitted[1])) {
             $config = ConnectionManager::config($this->connection);
-            if ($config['database'] === $splitted[1]) {
-                $t = $splitted[0];
+            $key = isset($config['schema']) ? 'schema' : 'database';
+            if ($config[$key] === $splitted[1]) {
+                $tableName = $splitted[0];
             }
         }
-        $tables[] = $t;
+        $tables[] = $tableName;
 
         return $tables;
     }

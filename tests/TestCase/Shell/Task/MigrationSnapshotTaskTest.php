@@ -14,6 +14,7 @@ namespace Migrations\Test\TestCase\Shell\Task;
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Inflector;
@@ -82,13 +83,13 @@ class MigrationSnapshotTaskTest extends TestCase
     {
         $this->Task->expects($this->any())
             ->method('findTables')
-            ->with('Blog')
+            ->with('TestBlog')
             ->will($this->returnValue(['ArticlesTable.php', 'TagsTable.php']));
 
         $this->Task->method('fetchTableName')
             ->will($this->onConsecutiveCalls(['articles_tags', 'articles'], ['articles_tags', 'tags']));
 
-        $results = $this->Task->getTableNames('Blog');
+        $results = $this->Task->getTableNames('TestBlog');
         $expected = ['articles_tags', 'articles', 'tags'];
         $this->assertEquals(array_values($expected), array_values($results));
     }
@@ -149,13 +150,46 @@ class MigrationSnapshotTaskTest extends TestCase
         $task = $this->getTaskMock(['in', 'err', 'dispatchShell', '_stop']);
         $task->params['require-table'] = false;
         $task->params['connection'] = 'test';
-        $task->params['plugin'] = 'Blog';
-        $task->plugin = 'Blog';
+        $task->params['plugin'] = 'TestBlog';
+        $task->plugin = 'TestBlog';
 
         $bakeName = $this->getBakeName('TestPluginBlog');
         $result = $task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
+    }
+
+    /**
+     * Test that using MigrationSnapshotTask::fetchTableName in a Table object class
+     * where the table name is composed with the database name (e.g. mydb.mytable)
+     * will return :
+     * - only the table name if the current connection `database` parameter is the first part
+     * of the table name
+     * - the full string (e.g. mydb.mytable) if the current connection `database` parameter
+     * is not the first part of the table name
+     *
+     * @return void
+     */
+    public function testFetchTableNames()
+    {
+        $task = $this->getTaskMock(['in', 'err']);
+        $expected = ['alternative.special_tags'];
+        $this->assertEquals($expected, $task->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
+
+        ConnectionManager::config('alternative', [
+            'database' => 'alternative'
+        ]);
+        $task->connection = 'alternative';
+        $expected = ['special_tags'];
+        $this->assertEquals($expected, $task->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
+
+        ConnectionManager::drop('alternative');
+        ConnectionManager::config('alternative', [
+            'schema' => 'alternative'
+        ]);
+        $task->connection = 'alternative';
+        $expected = ['special_tags'];
+        $this->assertEquals($expected, $task->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
     }
 
     /**

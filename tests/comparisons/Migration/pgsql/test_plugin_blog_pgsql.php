@@ -50,6 +50,41 @@ class TestPluginBlogPgsql extends AbstractMigration
             )
             ->create();
 
+        $table = $this->table('categories');
+        $table
+            ->addColumn('parent_id', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+            ])
+            ->addColumn('title', 'string', [
+                'default' => 'NULL::character varying',
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('slug', 'string', [
+                'default' => 'NULL::character varying',
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('created', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('modified', 'timestamp', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addIndex(
+                [
+                    'slug',
+                ],
+                ['unique' => true]
+            )
+            ->create();
+
         $this->table('articles')
             ->addForeignKey(
                 'category_id',
@@ -84,5 +119,6 @@ class TestPluginBlogPgsql extends AbstractMigration
             );
 
         $this->dropTable('articles');
+        $this->dropTable('categories');
     }
 }
