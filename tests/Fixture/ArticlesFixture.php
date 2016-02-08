@@ -32,6 +32,7 @@ class ArticlesFixture extends TestFixture
         'title' => ['type' => 'string', 'null' => true, 'length' => 255, 'comment' => 'Article title'],
         'category_id' => ['type' => 'integer', 'length' => 11],
         'product_id' => ['type' => 'integer', 'length' => 11],
+        'counter' => ['type' => 'integer', 'length' => 11, 'unsigned' => true],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_indexes' => [

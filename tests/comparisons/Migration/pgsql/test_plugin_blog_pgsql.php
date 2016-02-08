@@ -23,6 +23,11 @@ class TestPluginBlogPgsql extends AbstractMigration
                 'limit' => 10,
                 'null' => true,
             ])
+            ->addColumn('counter', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
@@ -85,6 +90,20 @@ class TestPluginBlogPgsql extends AbstractMigration
             )
             ->create();
 
+        $table = $this->table('parts');
+        $table
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+            ])
+            ->create();
+
         $this->table('articles')
             ->addForeignKey(
                 'category_id',
@@ -120,5 +139,6 @@ class TestPluginBlogPgsql extends AbstractMigration
 
         $this->dropTable('articles');
         $this->dropTable('categories');
+        $this->dropTable('parts');
     }
 }

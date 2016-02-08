@@ -33,6 +33,12 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
                 'limit' => 11,
                 'null' => true,
             ])
+            ->addColumn('counter', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+                'signed' => false,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,

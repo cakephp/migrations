@@ -33,6 +33,11 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'limit' => 10,
                 'null' => true,
             ])
+            ->addColumn('counter', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,

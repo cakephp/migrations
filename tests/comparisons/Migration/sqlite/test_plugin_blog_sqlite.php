@@ -22,6 +22,12 @@ class TestPluginBlogSqlite extends AbstractMigration
                 'limit' => 11,
                 'null' => true,
             ])
+            ->addColumn('counter', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+                'signed' => false,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
@@ -84,6 +90,21 @@ class TestPluginBlogSqlite extends AbstractMigration
             )
             ->create();
 
+        $table = $this->table('parts');
+        $table
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+                'signed' => false,
+            ])
+            ->create();
+
         $this->table('articles')
             ->addForeignKey(
                 'category_id',
@@ -119,5 +140,6 @@ class TestPluginBlogSqlite extends AbstractMigration
 
         $this->dropTable('articles');
         $this->dropTable('categories');
+        $this->dropTable('parts');
     }
 }
