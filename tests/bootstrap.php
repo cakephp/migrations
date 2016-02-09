@@ -71,4 +71,6 @@ ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
 Plugin::load('Migrations', [
     'path' => dirname(dirname(__FILE__)) . DS,
 ]);
-Plugin::load('Blog');
+Plugin::load('TestBlog', [
+    'path' => ROOT . 'Plugin' . DS . 'TestBlog' . DS,
+]);
