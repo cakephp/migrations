@@ -3,10 +3,20 @@ use Migrations\AbstractMigration;
 
 class TestPluginBlog extends AbstractMigration
 {
+
+    public $autoId = false;
+
     public function up()
     {
         $table = $this->table('articles');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
                 'default' => null,
@@ -22,6 +32,12 @@ class TestPluginBlog extends AbstractMigration
                 'default' => null,
                 'limit' => 11,
                 'null' => true,
+            ])
+            ->addColumn('counter', 'integer', [
+                'default' => null,
+                'limit' => 11,
+                'null' => true,
+                'signed' => false,
             ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
@@ -52,6 +68,13 @@ class TestPluginBlog extends AbstractMigration
 
         $table = $this->table('categories');
         $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -83,6 +106,29 @@ class TestPluginBlog extends AbstractMigration
                 ],
                 ['unique' => true]
             )
+            ->create();
+
+        $table = $this->table('parts');
+        $table
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 10,
+                'null' => false,
+                'signed' => false,
+            ])
+            ->addPrimaryKey(['id'])
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+                'signed' => false,
+            ])
             ->create();
 
         $this->table('articles')
@@ -120,5 +166,6 @@ class TestPluginBlog extends AbstractMigration
 
         $this->dropTable('articles');
         $this->dropTable('categories');
+        $this->dropTable('parts');
     }
 }

@@ -14,6 +14,7 @@ namespace Migrations\Test\TestCase\Shell\Task;
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
@@ -147,6 +148,19 @@ class MigrationSnapshotTaskTest extends TestCase
      */
     public function testPluginBlog()
     {
+        $db = ConnectionManager::get('test');
+        $collection = $db->schemaCollection();
+        $table = new Table('parts', [
+            'id' => ['type' => 'integer', 'unsigned' => true],
+            'name' => ['type' => 'string', 'length' => 255],
+            'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true]
+        ]);
+        $table->addConstraint('primary', ['type' => 'primary', 'columns' => ['id']]);
+        $sql = $table->createSql($db);
+        foreach ($sql as $stmt) {
+            $db->execute($stmt);
+        }
+
         $task = $this->getTaskMock(['in', 'err', 'dispatchShell', '_stop']);
         $task->params['require-table'] = false;
         $task->params['connection'] = 'test';
@@ -157,6 +171,11 @@ class MigrationSnapshotTaskTest extends TestCase
         $result = $task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
+
+        $sql = $table->dropSql($db);
+        foreach ($sql as $stmt) {
+            $db->execute($stmt);
+        }
     }
 
     /**

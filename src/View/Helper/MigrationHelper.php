@@ -218,6 +218,31 @@ class MigrationHelper extends Helper
     }
 
     /**
+     * Returns whether the $tables list given as arguments contains primary keys
+     * unsigned.
+     *
+     * @param array $tables List of tables to check
+     * @return bool
+     */
+    public function hasUnsignedPrimaryKey($tables)
+    {
+        foreach ($tables as $table) {
+            $collection = $this->config('collection');
+            $tableSchema = $collection->describe($table);
+            $tablePrimaryKeys = $tableSchema->primaryKey();
+
+            foreach ($tablePrimaryKeys as $primaryKey) {
+                $column = $tableSchema->column($primaryKey);
+                if (isset($column['unsigned']) && $column['unsigned'] === true) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the primary key columns name for a given table
      *
      * @param string $table Name of the table ot retrieve primary key for

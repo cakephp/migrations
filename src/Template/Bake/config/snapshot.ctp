@@ -15,11 +15,16 @@
 
 use Cake\Database\Schema\Table;
 
-$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement', 'precision']);
+$wantedOptions = array_flip(['length', 'limit', 'default', 'signed', 'null', 'comment', 'autoIncrement', 'precision']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
 $constraints = $foreignKeys = $dropForeignKeys = [];
+$hasUnsignedPk = $this->Migration->hasUnsignedPrimaryKey($tables);
+
+if ($autoId && $hasUnsignedPk) {
+    $autoId = false;
+}
 %>
 <?php
 use Migrations\AbstractMigration;
@@ -59,6 +64,9 @@ class <%= $name %> extends AbstractMigration
                 if (empty($columnOptions['precision'])) {
                     unset($columnOptions['precision']);
                 }
+                if (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
+                    unset($columnOptions['signed']);
+                }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
             <%- endforeach;
@@ -75,6 +83,9 @@ class <%= $name %> extends AbstractMigration
                 }
                 if (empty($columnOptions['autoIncrement'])) {
                     unset($columnOptions['autoIncrement']);
+                }
+                if (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
+                    unset($columnOptions['signed']);
                 }
                 if (empty($columnOptions['precision'])) {
                     unset($columnOptions['precision']);
