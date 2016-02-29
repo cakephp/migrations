@@ -14,6 +14,7 @@ namespace Migrations\Test;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
+use Symfony\Component\Console\Input\ArrayInput;
 
 /**
  * Tests the ConfigurationTrait
@@ -109,6 +110,25 @@ class ConfigurationTraitTest extends TestCase
         $this->assertEquals('/certs/my_cert', $environment['mysql_attr_ssl_ca']);
         $this->assertEquals('ssl_key_value', $environment['mysql_attr_ssl_key']);
         $this->assertEquals('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
+    }
+
+    /**
+     * Tests that the when the Adapter is built, the Connection cache metadata
+     * feature is turned off to prevent "unknown column" errors when adding a column
+     * then adding data to that column
+     *
+     * @return void
+     */
+    public function testCacheMetadataDisabled()
+    {
+        $input = new ArrayInput([], $this->command->getDefinition());
+        $output = $this->getMock('Symfony\Component\Console\Output\OutputInterface');
+        $this->command->setInput($input);
+
+        $input->setOption('connection', 'test');
+        $this->command->bootstrap($input, $output);
+        $config = ConnectionManager::get('test')->config();
+        $this->assertFalse($config['cacheMetadata']);
     }
 
     /**

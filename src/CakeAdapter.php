@@ -57,6 +57,7 @@ class CakeAdapter implements AdapterInterface
         if ($pdo->getAttribute(PDO::ATTR_ERRMODE) !== PDO::ERRMODE_EXCEPTION) {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
+        $connection->cacheMetadata(false);
         $connection->driver()->connection($pdo);
     }
 
