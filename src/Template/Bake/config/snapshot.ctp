@@ -128,7 +128,11 @@ class <%= $name %> extends AbstractMigration
             ->addIndex(
                 [<%
                     echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
-                %>]
+                %>]<% echo ($index['type'] === 'fulltext') ? ',' : ''; %>
+
+                <%- if ($index['type'] === 'fulltext'): %>
+                ['type' => 'fulltext']
+                <%- endif; %>
             )
             <%- endif;
             endforeach; %>

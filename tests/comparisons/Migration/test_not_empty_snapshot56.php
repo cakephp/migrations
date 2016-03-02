@@ -1,7 +1,7 @@
 <?php
 use Migrations\AbstractMigration;
 
-class TestNotEmptySnapshotPgsql extends AbstractMigration
+class TestNotEmptySnapshot56 extends AbstractMigration
 {
     public function up()
     {
@@ -9,24 +9,25 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $table
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('counter', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
+                'signed' => false,
             ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
@@ -59,16 +60,16 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $table
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -108,12 +109,12 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $table
             ->addColumn('product_category', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addIndex(
@@ -127,18 +128,18 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $table = $this->table('products');
         $table
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -159,8 +160,8 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'id',
                     'category_id',
+                    'id',
                 ],
                 ['unique' => true]
             )
@@ -172,7 +173,8 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             ->addIndex(
                 [
                     'title',
-                ]
+                ],
+                ['type' => 'fulltext']
             )
             ->create();
 
@@ -184,7 +186,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'null' => false,
             ])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -194,17 +196,17 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $table
             ->addColumn('article_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('author_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('tag_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('highlighted', 'boolean', [
@@ -228,12 +230,12 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $table = $this->table('users');
         $table
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])

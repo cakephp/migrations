@@ -201,6 +201,11 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                     'category_id',
                 ]
             )
+            ->addIndex(
+                [
+                    'title',
+                ]
+            )
             ->create();
 
         $table = $this->table('special_pks');

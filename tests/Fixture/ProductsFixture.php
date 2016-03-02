@@ -13,7 +13,10 @@
  */
 namespace Migrations\Test\Fixture;
 
+use Cake\Database\Driver\Mysql;
+use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Fixture\TestFixture;
+use PDO;
 
 /**
  * Class ProductsFixture
@@ -34,6 +37,12 @@ class ProductsFixture extends TestFixture
         'category_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
+        '_indexes' => [
+            'title_idx_ft' => [
+                'type' => 'index',
+                'columns' => ['title']
+            ]
+        ],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
             'products_unique_slug' => ['type' => 'unique', 'columns' => ['slug']],
@@ -47,4 +56,22 @@ class ProductsFixture extends TestFixture
             ]
         ]
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function init()
+    {
+        $connection = ConnectionManager::get($this->connection());
+        $driver = $connection->driver();
+
+        if ($driver instanceof Mysql) {
+            $dbv = getenv('DBV');
+            if ($dbv === '56') {
+                $this->fields['_indexes']['title_idx_ft']['type'] = 'fulltext';
+            }
+        }
+
+        parent::init();
+    }
 }

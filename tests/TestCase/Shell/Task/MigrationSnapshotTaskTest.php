@@ -149,7 +149,6 @@ class MigrationSnapshotTaskTest extends TestCase
     public function testPluginBlog()
     {
         $db = ConnectionManager::get('test');
-        $collection = $db->schemaCollection();
         $table = new Table('parts', [
             'id' => ['type' => 'integer', 'unsigned' => true],
             'name' => ['type' => 'string', 'length' => 255],
@@ -222,6 +221,11 @@ class MigrationSnapshotTaskTest extends TestCase
         $dbenv = getenv("DB");
         if ($dbenv !== 'mysql') {
             $name .= ucfirst($dbenv);
+        } else {
+            $dbv = getenv('DBV');
+            if (!empty($dbv)) {
+                $name .= $dbv;
+            }
         }
 
         return $name;
