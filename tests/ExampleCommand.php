@@ -11,9 +11,9 @@
  */
 namespace Migrations\Test;
 
-use Migrations\Command\Create;
+use Migrations\Command\Status;
 
-class ExampleCommand extends Create
+class ExampleCommand extends Status
 {
 
 }
