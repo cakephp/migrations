@@ -82,6 +82,16 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
+     * Get all migration log entries, indexed by version number.
+     *
+     * @return array
+     */
+    public function getVersionLog()
+    {
+        return $this->adapter->getVersionLog();
+    }
+
+    /**
      * Set adapter configuration options.
      *
      * @param  array $options
