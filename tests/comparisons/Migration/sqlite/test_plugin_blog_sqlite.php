@@ -28,6 +28,11 @@ class TestPluginBlogSqlite extends AbstractMigration
                 'null' => true,
                 'signed' => false,
             ])
+            ->addColumn('active', 'boolean', [
+                'default' => false,
+                'limit' => null,
+                'null' => true,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,

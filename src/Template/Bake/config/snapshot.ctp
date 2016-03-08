@@ -95,6 +95,9 @@ class <%= $name %> extends AbstractMigration
                     $columnOptions['precision'] = $columnOptions['limit'];
                     unset($columnOptions['limit']);
                 }
+                if ($config['columnType'] === 'boolean' && isset($columnOptions['default']) && $this->Migration->value($columnOptions['default']) !== 'null') {
+                    $columnOptions['default'] = (bool)$columnOptions['default'];
+                }
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
         <%- endforeach;
