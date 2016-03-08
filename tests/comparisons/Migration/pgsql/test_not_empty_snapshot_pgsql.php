@@ -28,6 +28,11 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'limit' => 10,
                 'null' => true,
             ])
+            ->addColumn('active', 'boolean', [
+                'default' => false,
+                'limit' => null,
+                'null' => true,
+            ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
