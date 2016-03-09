@@ -288,6 +288,7 @@ class Migrations
 
             $this->manager = new CakeManager($config, $this->output);
         } elseif ($config !== null) {
+            $this->manager->setEnvironments([]);
             $this->manager->setConfig($config);
         }
 
