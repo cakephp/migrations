@@ -838,12 +838,14 @@ class MigrationsTest extends TestCase
      */
     public function migrationsProvider()
     {
-        return [
+        $return = [
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
                 [
                     ['test_not_empty_snapshot', 20150912015601],
                     ['test_auto_id_disabled_snapshot', 20150912015602],
+                    ['test_not_empty_snapshot56', 20150912015611],
+                    ['test_auto_id_disabled_snapshot56', 20150912015612],
                     ['testCreatePrimaryKey', 20150912015603],
                     ['testCreatePrimaryKeyUuid', 20150912015604]
                 ]
@@ -854,15 +856,22 @@ class MigrationsTest extends TestCase
                     ['test_not_empty_snapshot_pgsql', 20150912015606],
                     ['test_auto_id_disabled_snapshot_pgsql', 20150912015607]
                 ]
-            ]
-            ,
+            ],
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
                 [
                     ['test_not_empty_snapshot_sqlite', 20150912015609],
                     ['test_auto_id_disabled_snapshot_sqlite', 20150912015610]
                 ]
-            ],
+            ]
         ];
+
+        $db = getenv('DB');
+        $dbv = getenv('DBV');
+        if ($db === 'mysql' && empty($dbv)) {
+            unset($return[0][1]['test_not_empty_snapshot56'], $return[0][1]['test_auto_id_disabled_snapshot56']);
+        }
+
+        return $return;
     }
 }

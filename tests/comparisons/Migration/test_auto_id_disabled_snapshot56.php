@@ -1,7 +1,7 @@
 <?php
 use Migrations\AbstractMigration;
 
-class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
+class TestAutoIdDisabledSnapshot56 extends AbstractMigration
 {
 
     public $autoId = false;
@@ -13,35 +13,31 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('counter', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
-            ])
-            ->addColumn('active', 'boolean', [
-                'default' => false,
-                'limit' => null,
-                'null' => true,
+                'signed' => false,
             ])
             ->addColumn('created', 'timestamp', [
                 'default' => null,
@@ -75,22 +71,22 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -132,18 +128,18 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('product_category', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addIndex(
@@ -159,23 +155,23 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -196,8 +192,8 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'id',
                     'category_id',
+                    'id',
                 ],
                 ['unique' => true]
             )
@@ -209,7 +205,8 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addIndex(
                 [
                     'title',
-                ]
+                ],
+                ['type' => 'fulltext']
             )
             ->create();
 
@@ -222,7 +219,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -233,23 +230,23 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('article_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('author_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => true,
             ])
             ->addColumn('tag_id', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addColumn('highlighted', 'boolean', [
@@ -275,17 +272,17 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
-                'limit' => 10,
+                'limit' => 11,
                 'null' => false,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
