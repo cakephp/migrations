@@ -288,6 +288,19 @@ class Migrations
 
             $this->manager = new CakeManager($config, $this->output);
         } elseif ($config !== null) {
+            $defaultEnvironment = $config->getEnvironment('default');
+            try {
+                $environment = $this->manager->getEnvironment('default');
+                $oldConfig = $environment->getOptions();
+                unset($oldConfig['connection']);
+                if ($oldConfig == $defaultEnvironment) {
+                    $defaultEnvironment['connection'] = $environment
+                        ->getAdapter()
+                        ->getConnection();
+                }
+            } catch (\InvalidArgumentException $e) {
+            }
+            $config['environments'] = ['default' => $defaultEnvironment];
             $this->manager->setEnvironments([]);
             $this->manager->setConfig($config);
         }
