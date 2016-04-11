@@ -98,6 +98,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         if (!$this->checkSync()) {
             $this->error('Your migrations history is not in sync with your migrations files. ' .
                 'Make sure all your migrations have been migrated before baking a diff.');
+            return 1;
         }
 
         if (empty($this->migrationsFiles) && empty($this->migratedItems)) {
