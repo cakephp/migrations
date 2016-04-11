@@ -238,9 +238,9 @@ class SeedTest extends TestCase
         if (in_array('phinxlog', $tables)) {
             $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
             $query = $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema());
-            $this->Connection->execute(
-                $query[0]
-            );
+            foreach ($query as $stmt) {
+                $this->Connection->execute($stmt);
+            }
         }
 
         return $migrations;
