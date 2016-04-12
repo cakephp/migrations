@@ -222,7 +222,8 @@ class MigrationDiffTask extends SimpleMigrationTask
             $removedColumns = array_diff($oldColumns, $currentColumns);
             if (!empty($removedColumns)) {
                 foreach ($removedColumns as $column) {
-                    $this->templateData[$table]['columns']['remove'][$column] = $this->dumpSchema[$table]->column($column);
+                    $this->templateData[$table]['columns']['remove'][$column] =
+                        $this->dumpSchema[$table]->column($column);
                 }
             }
         }
@@ -237,7 +238,8 @@ class MigrationDiffTask extends SimpleMigrationTask
             // brand new constraints
             $addedConstraints = array_diff($currentConstraints, $oldConstraints);
             foreach ($addedConstraints as $constraintName) {
-                $this->templateData[$table]['constraints']['add'][$constraintName] = $currentSchema->constraint($constraintName);
+                $this->templateData[$table]['constraints']['add'][$constraintName] =
+                    $currentSchema->constraint($constraintName);
             }
 
             // constraints having the same name between new and old schema
@@ -248,8 +250,10 @@ class MigrationDiffTask extends SimpleMigrationTask
                 if (in_array($constraintName, $oldConstraints) &&
                     $constraint !== $this->dumpSchema[$table]->constraint($constraintName)
                 ) {
-                    $this->templateData[$table]['constraints']['remove'][$constraintName] = $this->dumpSchema[$table]->constraint($constraintName);
-                    $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
+                    $this->templateData[$table]['constraints']['remove'][$constraintName] =
+                        $this->dumpSchema[$table]->constraint($constraintName);
+                    $this->templateData[$table]['constraints']['add'][$constraintName] =
+                        $constraint;
                 }
             }
 
@@ -263,7 +267,6 @@ class MigrationDiffTask extends SimpleMigrationTask
                     $this->templateData[$table]['indexes']['remove'][$constraintName] = $constraint;
                 }
             }
-
         }
     }
 
@@ -287,7 +290,8 @@ class MigrationDiffTask extends SimpleMigrationTask
                 if (in_array($indexName, $oldIndexes) &&
                     $index !== $this->dumpSchema[$table]->index($indexName)
                 ) {
-                    $this->templateData[$table]['indexes']['remove'][$indexName] = $this->dumpSchema[$table]->index($indexName);
+                    $this->templateData[$table]['indexes']['remove'][$indexName] =
+                        $this->dumpSchema[$table]->index($indexName);
                     $this->templateData[$table]['indexes']['add'][$indexName] = $index;
                 }
             }
@@ -381,7 +385,9 @@ class MigrationDiffTask extends SimpleMigrationTask
         $path = $this->getOperationsPath($input) . DS . 'schema-dump-' . $connectionName;
 
         if (!file_exists($path)) {
-            $this->error('Unable to retrieve the schema dump file. You can create a dump file using the `cake migrations dump` command');
+            $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
+                'the `cake migrations dump` command';
+            $this->error($msg);
         }
 
         return unserialize(file_get_contents($path));

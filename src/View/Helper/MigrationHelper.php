@@ -271,7 +271,16 @@ class MigrationHelper extends Helper
 
     public function getColumnOption($options)
     {
-        $wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement', 'precision']);
+        $wantedOptions = array_flip([
+            'length',
+            'limit',
+            'default',
+            'unsigned',
+            'null',
+            'comment',
+            'autoIncrement',
+            'precision'
+        ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
             unset($columnOptions['comment']);
