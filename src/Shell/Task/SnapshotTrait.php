@@ -13,6 +13,7 @@ namespace Migrations\Shell\Task;
 
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
+use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\Folder;
 use Cake\ORM\TableRegistry;
 
@@ -133,7 +134,16 @@ trait SnapshotTrait
                 $tables[] = $table->associations()->get($key)->_junctionTableName();
             }
         }
-        $tables[] = $table->table();
+        $tableName = $table->table();
+        $splitted = array_reverse(explode('.', $tableName, 2));
+        if (isset($splitted[1])) {
+            $config = ConnectionManager::config($this->connection);
+            $key = isset($config['schema']) ? 'schema' : 'database';
+            if ($config[$key] === $splitted[1]) {
+                $tableName = $splitted[0];
+            }
+        }
+        $tables[] = $tableName;
 
         return $tables;
     }
