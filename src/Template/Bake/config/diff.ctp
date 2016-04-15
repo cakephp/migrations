@@ -62,6 +62,7 @@ class <%= $name %> extends AbstractMigration
         <%- foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
             $type = $columnAttributes['type'];
             unset($columnAttributes['type']);
+            $columnAttributes = $this->Migration->getColumnOption($columnAttributes);
             $columnAttributes = $this->Migration->stringifyList($columnAttributes, ['indent' => 4]);
             if (!empty($columnAttributes)): %>
             ->changeColumn('<%= $columnName %>', '<%= $type %>', [<%= $columnAttributes %>])
@@ -276,16 +277,16 @@ class <%= $name %> extends AbstractMigration
         <%- if (!empty($tables['remove'])):
         foreach ($tables['remove'] as $table => $schema):
             $foreignKeys = [];
-            $primaryKeysColumns = $this->Migration->primaryKeysColumnsList($table);
-            $primaryKeys = $this->Migration->primaryKeys($table);
+            $primaryKeysColumns = $this->Migration->primaryKeysColumnsList($schema);
+            $primaryKeys = $this->Migration->primaryKeys($schema);
             $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
             if ($specialPk): %>
 
-                $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);
-                <%- else: %>
+            $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);
+            <%- else: %>
 
-                $table = $this->table('<%= $table%>');
-                <%- endif; %>
+            $table = $this->table('<%= $table%>');
+            <%- endif; %>
             $table
             <%- if ($specialPk):
             foreach ($primaryKeys as $primaryKey) : %>
@@ -296,13 +297,13 @@ class <%= $name %> extends AbstractMigration
                 <%- endforeach; %>
             ->addPrimaryKey(['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>'])
             <%- endif;
-            foreach ($this->Migration->columns($table) as $column => $config): %>
+            foreach ($this->Migration->columns($schema) as $column => $config): %>
                 ->addColumn('<%= $column %>', '<%= $config['columnType'] %>', [<%
                 $columnOptions = $this->Migration->getColumnOption($config['options']);
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
             <%- endforeach;
-                $tableConstraints = $this->Migration->constraints($table);
+                $tableConstraints = $this->Migration->constraints($schema);
                 if (!empty($tableConstraints)):
                     sort($tableConstraints);
                     $constraints[$table] = $tableConstraints;
@@ -323,7 +324,7 @@ class <%= $name %> extends AbstractMigration
                     endforeach;
                 endif;
 
-                foreach($this->Migration->indexes($table) as $index):
+                foreach($this->Migration->indexes($schema) as $index):
                     sort($foreignKeys);
                     $indexColumns = $index['columns'];
                     sort($indexColumns);
@@ -462,6 +463,7 @@ class <%= $name %> extends AbstractMigration
             $columnAttributes = $oldTableDef->column($columnName);
             $type = $columnAttributes['type'];
             unset($columnAttributes['type']);
+            $columnAttributes = $this->Migration->getColumnOption($columnAttributes);
             $columnAttributes = $this->Migration->stringifyList($columnAttributes, ['indent' => 4]);
             if (!empty($columnAttributes)): %>
             ->changeColumn('<%= $columnName %>', '<%= $type %>', [<%= $columnAttributes %>])

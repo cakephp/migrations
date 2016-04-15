@@ -11,6 +11,7 @@
  */
 namespace Migrations\View\Helper;
 
+use Cake\Database\Schema\Table;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
@@ -115,6 +116,10 @@ class MigrationHelper extends Helper
             return $this->schemas[$table];
         }
 
+        if ($table instanceof Table) {
+            return $this->schemas[$table->name()] = $table;
+        }
+
         $collection = $this->config('collection');
         $schema = $collection->describe($table);
         $this->schemas[$table] = $schema;
@@ -130,7 +135,10 @@ class MigrationHelper extends Helper
      */
     public function columns($table)
     {
-        $tableSchema = $this->schema($table);
+        $tableSchema = $table;
+        if (!($table instanceof Table)) {
+            $tableSchema = $this->schema($table);
+        }
         $columns = [];
         $tablePrimaryKeys = $tableSchema->primaryKey();
         foreach ($tableSchema->columns() as $column) {
@@ -151,7 +159,10 @@ class MigrationHelper extends Helper
      */
     public function indexes($table)
     {
-        $tableSchema = $this->schema($table);
+        $tableSchema = $table;
+        if (!($table instanceof Table)) {
+            $tableSchema = $this->schema($table);
+        }
 
         $tableIndexes = $tableSchema->indexes();
         $indexes = [];
@@ -172,7 +183,10 @@ class MigrationHelper extends Helper
      */
     public function constraints($table)
     {
-        $tableSchema = $this->schema($table);
+        $tableSchema = $table;
+        if (!($table instanceof Table)) {
+            $tableSchema = $this->schema($table);
+        }
 
         $constraints = [];
         $tableConstraints = $tableSchema->constraints();
@@ -205,7 +219,10 @@ class MigrationHelper extends Helper
      */
     public function primaryKeys($table)
     {
-        $tableSchema = $this->schema($table);
+        $tableSchema = $table;
+        if (!($table instanceof Table)) {
+            $tableSchema = $this->schema($table);
+        }
         $primaryKeys = [];
         $tablePrimaryKeys = $tableSchema->primaryKey();
         foreach ($tableSchema->columns() as $column) {
@@ -265,7 +282,7 @@ class MigrationHelper extends Helper
     {
         return [
             'columnType' => $tableSchema->columnType($column),
-            'options' => $this->attributes($tableSchema->name(), $column),
+            'options' => $this->attributes($tableSchema, $column),
         ];
     }
 
@@ -275,7 +292,7 @@ class MigrationHelper extends Helper
             'length',
             'limit',
             'default',
-            'unsigned',
+            'signed',
             'null',
             'comment',
             'autoIncrement',
@@ -287,6 +304,9 @@ class MigrationHelper extends Helper
         }
         if (empty($columnOptions['autoIncrement'])) {
             unset($columnOptions['autoIncrement']);
+        }
+        if (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
+            unset($columnOptions['signed']);
         }
         if (empty($columnOptions['precision'])) {
             unset($columnOptions['precision']);
@@ -336,7 +356,10 @@ class MigrationHelper extends Helper
      */
     public function attributes($table, $column)
     {
-        $tableSchema = $this->schema($table);
+        $tableSchema = $table;
+        if (!($table instanceof Table)) {
+            $tableSchema = $this->schema($table);
+        }
         $validOptions = [
             'length', 'limit',
             'default', 'null',

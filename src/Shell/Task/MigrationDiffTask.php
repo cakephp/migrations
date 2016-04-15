@@ -275,6 +275,8 @@ class MigrationDiffTask extends SimpleMigrationTask
         foreach ($this->commonTables as $table => $currentSchema) {
             $currentIndexes = $currentSchema->indexes();
             $oldIndexes = $this->dumpSchema[$table]->indexes();
+            sort($currentIndexes);
+            sort($oldIndexes);
 
             // brand new indexes
             $addedIndexes = array_diff($currentIndexes, $oldIndexes);
@@ -330,7 +332,7 @@ class MigrationDiffTask extends SimpleMigrationTask
             $lastVersion = $this->migratedItems[0]['version'];
             $lastFile = end($this->migrationsFiles);
 
-            return (bool)strpos($lastFile, $lastVersion);
+            return (bool)strpos($lastFile, (string)$lastVersion);
         }
 
         return false;
@@ -383,6 +385,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
         $input = new ArrayInput($inputArgs, $definition);
         $path = $this->getOperationsPath($input) . DS . 'schema-dump-' . $connectionName;
+        debug($path);
 
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
