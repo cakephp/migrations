@@ -13,8 +13,8 @@
 * @license       http://www.opensource.org/licenses/mit-license.php MIT License
 */
 
-$tables = $data['__tables'];
-unset($data['__tables']);
+$tables = $data['fullTables'];
+unset($data['fullTables']);
 $constraints = [];
 %>
 <?php

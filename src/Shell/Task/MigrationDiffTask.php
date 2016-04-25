@@ -180,7 +180,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
     protected function getTables()
     {
-        $this->templateData['__tables'] = [
+        $this->templateData['fullTables'] = [
             'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
             'remove' => array_diff_key($this->dumpSchema, $this->currentSchema)
         ];
