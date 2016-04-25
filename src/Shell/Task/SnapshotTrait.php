@@ -17,6 +17,10 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\Folder;
 use Cake\ORM\TableRegistry;
 
+/**
+ * Trait needed for all "snapshot" type of bake operations.
+ * Snapshot type operations are : baking a snapshot and baking a diff.
+ */
 trait SnapshotTrait
 {
 
@@ -34,6 +38,15 @@ trait SnapshotTrait
      */
     public $skipTablesRegex = '_phinxlog';
 
+    /**
+     * Gets a list of table to baked based on the Collection instance passed and the options passed to
+     * the shell call.
+     *
+     * @param \Cake\Database\Schema\Collection $collection Instance of the collection of a specific database
+     * connection.
+     * @param array $options Array of options passed to a shell call.
+     * @return array
+     */
     protected function getTablesToBake(Collection $collection, $options = [])
     {
         $options = array_merge(['require-table' => false, 'plugin' => null], $options);

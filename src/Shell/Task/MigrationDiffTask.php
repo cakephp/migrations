@@ -86,6 +86,9 @@ class MigrationDiffTask extends SimpleMigrationTask
      */
     protected $commonTables;
 
+    /**
+     * {@inheritDoc}
+     */
     protected $templateData = [];
 
     /**
@@ -144,7 +147,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     }
 
     /**
-     * Get a collection from a database
+     * Get a collection from a database.
      *
      * @param string $connection Database connection name.
      * @return \Cake\Database\Schema\Collection
@@ -155,6 +158,11 @@ class MigrationDiffTask extends SimpleMigrationTask
         return $connection->schemaCollection();
     }
 
+    /**
+     * Process and prepare the data needed for the bake template to be generated.
+     *
+     * @return array
+     */
     public function templateData()
     {
         $this->dumpSchema = $this->getDumpSchema();
@@ -170,6 +178,12 @@ class MigrationDiffTask extends SimpleMigrationTask
         ];
     }
 
+    /**
+     * This methods runs the various methods needed to calculate a diff between the current
+     * state of the database and the schema dump file.
+     *
+     * @return void
+     */
     protected function calculateDiff()
     {
         $this->getConstraints();
@@ -178,6 +192,15 @@ class MigrationDiffTask extends SimpleMigrationTask
         $this->getTables();
     }
 
+    /**
+     * Calculate the diff between the current state of the database and the schema dump
+     * by returning an array containing the full \Cake\Database\Schema\Table definitions
+     * of tables to be created and removed in the diff file.
+     *
+     * The method directly sets the diff in a property of the class.
+     *
+     * @return void
+     */
     protected function getTables()
     {
         $this->templateData['fullTables'] = [
@@ -186,6 +209,16 @@ class MigrationDiffTask extends SimpleMigrationTask
         ];
     }
 
+    /**
+     * Calculate the diff between columns in existing tables.
+     * This will look for columns addition, columns removal and changes in columns metadata
+     * such as change of types or property such as length.
+     *
+     * Note that the method is not able to detect columns name change.
+     * The method directly sets the diff in a property of the class.
+     *
+     * @return void
+     */
     protected function getColumns()
     {
         foreach ($this->commonTables as $table => $currentSchema) {
@@ -229,6 +262,15 @@ class MigrationDiffTask extends SimpleMigrationTask
         }
     }
 
+    /**
+     * Calculate the diff between contraints in existing tables.
+     * This will look for contraints addition, contraints removal and changes in contraints metadata
+     * such as change of referenced columns if the old constraints and the new one have the same name.
+     *
+     * The method directly sets the diff in a property of the class.
+     *
+     * @return void
+     */
     protected function getConstraints()
     {
         foreach ($this->commonTables as $table => $currentSchema) {
@@ -270,6 +312,15 @@ class MigrationDiffTask extends SimpleMigrationTask
         }
     }
 
+    /**
+     * Calculate the diff between indexes in existing tables.
+     * This will look for indexes addition, indexes removal and changes in indexes metadata
+     * such as change of referenced columns if the old indexes and the new one have the same name.
+     *
+     * The method directly sets the diff in a property of the class.
+     *
+     * @return void
+     */
     protected function getIndexes()
     {
         foreach ($this->commonTables as $table => $currentSchema) {
@@ -368,6 +419,13 @@ class MigrationDiffTask extends SimpleMigrationTask
         return $dispatch;
     }
 
+    /**
+     * Fetch the correct schema dump based on the arguments and options passed to the shell call
+     * and returns it as an array
+     *
+     * @return array Full database schema : the key is the name of the table and the value is
+     * an instance of \Cake\Database\Schema\Table.
+     */
     protected function getDumpSchema()
     {
         $inputArgs = [];
@@ -396,6 +454,12 @@ class MigrationDiffTask extends SimpleMigrationTask
         return unserialize(file_get_contents($path));
     }
 
+    /**
+     * Reflects the current database schema.
+     *
+     * @return array Full database schema : the key is the name of the table and the value is
+     * an instance of \Cake\Database\Schema\Table.
+     */
     protected function getCurrentSchema()
     {
         $schema = [];
