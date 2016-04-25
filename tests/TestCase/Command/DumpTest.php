@@ -132,7 +132,7 @@ class DumpTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test';
+        $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
         $this->assertTrue(file_exists($dumpFilePath));
 
         $generatedDump = unserialize(file_get_contents($dumpFilePath));

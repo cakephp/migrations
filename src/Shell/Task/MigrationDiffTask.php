@@ -384,7 +384,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         $definition = (new $className())->getDefinition();
 
         $input = new ArrayInput($inputArgs, $definition);
-        $path = $this->getOperationsPath($input) . DS . 'schema-dump-' . $connectionName;
+        $path = $this->getOperationsPath($input) . DS . 'schema-dump-' . $connectionName . '.lock';
         debug($path);
 
         if (!file_exists($path)) {

@@ -152,11 +152,11 @@ class MigrationDiffTaskTest extends TestCase
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'. DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . env('DB') . '.php';
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB');
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiff' . DS;
         $destination = $destinationConfigDir . '20160415220805_TheDiff' . ucfirst(env('DB')) . '.php';
-        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB');
+        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
         $this->getMigrations()->migrate();
