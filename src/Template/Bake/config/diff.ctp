@@ -264,16 +264,18 @@ class <%= $name %> extends AbstractMigration
     public function down()
     {
         <%- $constraints = [];
+        if (!empty($dropForeignKeys)):
             foreach ($dropForeignKeys as $table => $columnsList):
-            $maxKey = count($columnsList) - 1;
+                $maxKey = count($columnsList) - 1;
         %>
         $this->table('<%= $table %>')
-            <%- foreach ($columnsList as $key => $columns): %>
+                <%- foreach ($columnsList as $key => $columns): %>
             ->dropForeignKey(
                 <%= $columns %>
             )<%= ($key === $maxKey) ? ';' : '' %>
+                <%- endforeach; %>
             <%- endforeach; %>
-        <%- endforeach; %>
+        <%- endif; %>
         <%- if (!empty($tables['remove'])):
         foreach ($tables['remove'] as $table => $schema):
             $foreignKeys = [];

@@ -43,48 +43,6 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     }
 
     /**
-     * After the file has been successfully created, we mark the newly
-     * created snapshot as applied
-     *
-     * {@inheritDoc}
-     */
-    public function createFile($path, $contents)
-    {
-        $createFile = parent::createFile($path, $contents);
-
-        if ($createFile) {
-            $this->markSnapshotApplied($path);
-        }
-
-        return $createFile;
-    }
-
-    /**
-     * Will mark a snapshot created, the snapshot being identified by its
-     * full file path.
-     *
-     * @param string $path Path to the newly created snapshot
-     * @return void
-     */
-    protected function markSnapshotApplied($path)
-    {
-        $fileName = pathinfo($path, PATHINFO_FILENAME);
-        list($version, ) = explode('_', $fileName, 2);
-
-        $dispatchCommand = 'migrations mark_migrated -t ' . $version . ' -o';
-        if (!empty($this->params['connection'])) {
-            $dispatchCommand .= ' -c ' . $this->params['connection'];
-        }
-
-        if (!empty($this->params['plugin'])) {
-            $dispatchCommand .= ' -p ' . $this->params['plugin'];
-        }
-
-        $this->_io->out('Marking the snapshot ' . $fileName . ' as migrated...');
-        $this->dispatchShell($dispatchCommand);
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function template()

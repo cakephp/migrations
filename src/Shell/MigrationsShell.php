@@ -12,11 +12,7 @@
 namespace Migrations\Shell;
 
 use Cake\Console\Shell;
-use Cake\Core\Plugin;
-use Cake\Datasource\ConnectionManager;
 use Migrations\MigrationsDispatcher;
-use Migrations\Shell\Task\SnapshotTrait;
-use Migrations\Util\UtilTrait;
 use Symfony\Component\Console\Input\ArgvInput;
 
 /**
@@ -26,9 +22,6 @@ use Symfony\Component\Console\Input\ArgvInput;
  */
 class MigrationsShell extends Shell
 {
-
-    use UtilTrait;
-    use SnapshotTrait;
 
     /**
      * {@inheritDoc}
