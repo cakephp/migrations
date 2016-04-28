@@ -52,6 +52,7 @@ trait SnapshotTrait
 
         if ($createFile) {
             $this->markSnapshotApplied($path);
+            $this->refreshDump();
         }
 
         return $createFile;
@@ -79,6 +80,27 @@ trait SnapshotTrait
         }
 
         $this->_io->out('Marking the migration ' . $fileName . ' as migrated...');
+        $this->dispatchShell($dispatchCommand);
+    }
+
+    /**
+     * After a file has been successfully created, we refresh the dump of the database
+     * to be able to generate a new diff afterward.
+     *
+     * @return void
+     */
+    protected function refreshDump()
+    {
+        $dispatchCommand = 'migrations dump';
+        if (!empty($this->params['connection'])) {
+            $dispatchCommand .= ' -c ' . $this->params['connection'];
+        }
+
+        if (!empty($this->params['plugin'])) {
+            $dispatchCommand .= ' -p ' . $this->params['plugin'];
+        }
+
+        $this->_io->out('Creating a dump of the new database state...');
         $this->dispatchShell($dispatchCommand);
     }
 

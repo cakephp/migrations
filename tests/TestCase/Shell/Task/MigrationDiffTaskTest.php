@@ -172,10 +172,17 @@ class MigrationDiffTaskTest extends TestCase
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
 
-        $this->Task = $this->getTaskMock(['getDumpSchema']);
+        $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
         $this->Task
             ->method('getDumpSchema')
             ->will($this->returnValue(unserialize(file_get_contents($destinationDumpPath))));
+
+        $this->Task->expects($this->at(1))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations mark_migrated'));
+        $this->Task->expects($this->at(2))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations dump'));
 
         $this->Task->params['connection'] = 'test_comparisons';
         $this->Task->pathFragment = 'config/MigrationsDiff/';

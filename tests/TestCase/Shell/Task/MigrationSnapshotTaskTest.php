@@ -112,7 +112,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'BogusPlugin';
 
-        $this->Task->expects($this->once())
+        $this->Task->expects($this->at(0))
             ->method('dispatchShell')
             ->with(
                 $this->logicalAnd(
@@ -120,6 +120,10 @@ class MigrationSnapshotTaskTest extends TestCase
                     $this->stringContains('-o -c test -p BogusPlugin')
                 )
             );
+
+        $this->Task->expects($this->at(1))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations dump'));
 
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
         $result = $this->Task->bake($bakeName);
