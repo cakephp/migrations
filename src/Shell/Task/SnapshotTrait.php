@@ -210,7 +210,7 @@ trait SnapshotTrait
         $table = TableRegistry::get($className);
         foreach ($table->associations()->keys() as $key) {
             if ($table->associations()->get($key)->type() === 'belongsToMany') {
-                $tables[] = $table->associations()->get($key)->_junctionTableName();
+                $tables[] = $table->associations()->get($key)->junction()->table();
             }
         }
         $tableName = $table->table();
