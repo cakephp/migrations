@@ -84,12 +84,11 @@ class <%= $name %> extends AbstractMigration
                 $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
                 if ($specialPk): %>
 
-        $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);
+        $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']])
                 <%- else: %>
 
-        $table = $this->table('<%= $table%>');
+        $this->table('<%= $table%>')
                     <%- endif; %>
-        $table
                 <%- if ($specialPk):
                 foreach ($primaryKeys as $primaryKey) : %>
             ->addColumn('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
@@ -181,9 +180,12 @@ class <%= $name %> extends AbstractMigration
         <%- endforeach; %>
         <%- endif; %>
         <%- foreach ($data as $tableName => $tableDiff): %>
-            <%- if (!empty($tableDiff['columns']['add'])): %>
+            <%- if (!empty($tableDiff['columns']['add'])):
+            $statement = $this->Migration->tableStatement($tableName, true);
+            if (!empty($statement)): %>
 
-        $this->table('<%= $tableName %>')
+        <%= $statement %>
+            <%- endif; %>
             <%- foreach ($tableDiff['columns']['add'] as $columnName => $columnAttributes):
                 $type = $columnAttributes['type'];
                 unset($columnAttributes['type']);
@@ -196,11 +198,12 @@ class <%= $name %> extends AbstractMigration
             ->addColumn('<%= $columnName %>', '<%= $type %>')
                 <%- endif; %>
                 <%- endforeach; %>
-            ->update();
             <%- endif; %>
-            <%- if (!empty($tableDiff['indexes']['add'])): %>
-
-        $this->table('<%= $tableName %>')
+            <%- if (!empty($tableDiff['indexes']['add'])):
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+        <%= $statement %>
+            <%- endif; %>
             <%- foreach ($tableDiff['indexes']['add'] as $indexName => $index): %>
             ->addIndex(
                 [<% echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]); %>],
@@ -212,8 +215,11 @@ class <%= $name %> extends AbstractMigration
                 echo $this->Migration->stringifyList($params, ['indent' => 5]);
                 %>]
             )
-            <%- endforeach; %>
+            <%- endforeach;
+            $statement = $this->Migration->tableStatement($tableName);
+            if (empty($statement)): %>
             ->update();
+            <%- endif; %>
             <%- endif; %>
             <%- if (!empty($tableDiff['constraints']['add'])): %>
             <%- foreach ($tableDiff['constraints']['add'] as $constraintName => $constraint):
@@ -255,11 +261,10 @@ class <%= $name %> extends AbstractMigration
 
         <%- if (!empty($tables['remove'])): %>
         <%- foreach ($tables['remove'] as $tableName => $table): %>
-            $this->dropTable('<%= $tableName %>');
+        $this->dropTable('<%= $tableName %>');
             <%- endforeach; %>
         <%- endif; %>
     }
-
 
     public function down()
     {
@@ -274,6 +279,9 @@ class <%= $name %> extends AbstractMigration
                 <%= $columns %>
             )<%= ($key === $maxKey) ? ';' : '' %>
                 <%- endforeach; %>
+                <%- if($key === $maxKey): %>
+
+                <%- endif; %>
             <%- endforeach; %>
         <%- endif; %>
         <%- if (!empty($tables['remove'])):
@@ -283,24 +291,21 @@ class <%= $name %> extends AbstractMigration
             $primaryKeys = $this->Migration->primaryKeys($schema);
             $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
             if ($specialPk): %>
-
-            $table = $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']]);
+        $this->table('<%= $table%>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']])
             <%- else: %>
-
-            $table = $this->table('<%= $table%>');
+        $this->table('<%= $table%>')
             <%- endif; %>
-            $table
             <%- if ($specialPk):
             foreach ($primaryKeys as $primaryKey) : %>
-                ->addColumn('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
+            ->addColumn('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
                 $columnOptions = $this->Migration->getColumnOption($primaryKey['info']['options']);
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
-                <%- endforeach; %>
+            <%- endforeach; %>
             ->addPrimaryKey(['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>'])
             <%- endif;
             foreach ($this->Migration->columns($schema) as $column => $config): %>
-                ->addColumn('<%= $column %>', '<%= $config['columnType'] %>', [<%
+            ->addColumn('<%= $column %>', '<%= $config['columnType'] %>', [<%
                 $columnOptions = $this->Migration->getColumnOption($config['options']);
                 echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
@@ -315,12 +320,12 @@ class <%= $name %> extends AbstractMigration
                             $foreignKeys[] = $constraint['columns'];
                         endif;
                         if ($constraint['columns'] !== $primaryKeysColumns): %>
-                            ->addIndex(
-                                [<% echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]); %>]<% echo ($constraint['type'] === 'unique') ? ',' : ''; %>
+            ->addIndex(
+                [<% echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]); %>]<% echo ($constraint['type'] === 'unique') ? ',' : ''; %>
 
                 <%- if ($constraint['type'] === 'unique'): %>
-                                ['unique' => true]
-                                <%- endif; %>
+                ['unique' => true]
+                <%- endif; %>
             )
                         <%- endif;
                     endforeach;
@@ -332,12 +337,12 @@ class <%= $name %> extends AbstractMigration
                     sort($indexColumns);
                     if (!in_array($indexColumns, $foreignKeys)):
                         %>
-                        ->addIndex(
-                        [<% echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]); %>]<% echo ($index['type'] === 'unique') ? ',' : ''; %>
+            ->addIndex(
+                [<% echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]); %>]<% echo ($index['type'] === 'unique') ? ',' : ''; %>
 
                 <%- if ($index['type'] === 'unique'): %>
-                        ['unique' => true]
-                        <%- endif; %>
+                ['unique' => true]
+                <%- endif; %>
             )
             <%- endif;
                 endforeach; %>
@@ -362,9 +367,9 @@ class <%= $name %> extends AbstractMigration
                 $statement = $this->Migration->tableStatement($table, true);
                 if (!empty($statement)): %>
 
-                    <%= $statement %>
+        <%= $statement %>
                     <%- endif; %>
-                ->addForeignKey(
+            ->addForeignKey(
                 <%= $columnsList %>,
                 '<%= $constraint['references'][0] %>',
                 <%= $columnsReference %>,
@@ -376,11 +381,10 @@ class <%= $name %> extends AbstractMigration
                 <%- endif; %>
             <%- endforeach; %>
         <%- if (isset($this->Migration->tableStatements[$table])): %>
-        ->update();
+            ->update();
         <%- endif; %>
         <%- endforeach; %>
         <%- endif; %>
-
         <%- if (!empty($tableDiff['constraints']['add'])): %>
             <%- foreach ($tableDiff['constraints']['add'] as $constraintName => $constraint):
             $constraintColumns = $constraint['columns'];
@@ -426,9 +430,57 @@ class <%= $name %> extends AbstractMigration
                 <%- endforeach %>
             ->update();
             <%- endif; %>
-            <%- if (!empty($tableDiff['indexes']['remove'])): %>
+        <%- if (!empty($tableDiff['columns']['remove'])):
+            $statement = $this->Migration->tableStatement($tableName, true);
+            if (!empty($statement)): %>
 
-        $this->table('<%= $tableName %>')
+        <%= $statement %>
+            <%- endif; %>
+        <%- foreach ($tableDiff['columns']['remove'] as $columnName => $columnDefinition):
+                $type = $columnDefinition['type'];
+                unset($columnDefinition['type']);
+                $columnOptions = $this->Migration->getColumnOption($columnDefinition);
+                $columnOptions = $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
+            %>
+            ->addColumn('<%= $columnName %>', '<%= $type %>', [<%= $columnOptions %>])
+        <%- endforeach; %>
+        <%- endif; %>
+        <%- if (!empty($tableDiff['columns']['changed'])):
+            $oldTableDef = $dumpSchema[$tableName];
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+
+        <%= $statement %>
+            <%- endif; %>
+            <%- foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
+            $columnAttributes = $oldTableDef->column($columnName);
+            $type = $columnAttributes['type'];
+            unset($columnAttributes['type']);
+            $columnAttributes = $this->Migration->getColumnOption($columnAttributes);
+            $columnAttributes = $this->Migration->stringifyList($columnAttributes, ['indent' => 4]);
+            if (!empty($columnAttributes)): %>
+            ->changeColumn('<%= $columnName %>', '<%= $type %>', [<%= $columnAttributes %>])
+            <%- else: %>
+            ->changeColumn('<%= $columnName %>', '<%= $type %>')
+            <%- endif; %>
+            <%- endforeach; %>
+        <%- endif; %>
+        <%- if (!empty($tableDiff['columns']['add'])):
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+
+        <%= $statement %>
+            <%- endif; %>
+            <%- foreach ($tableDiff['columns']['add'] as $columnName => $columnAttributes): %>
+            ->removeColumn('<%= $columnName %>')
+            <%- endforeach; %>
+        <%- endif; %>
+            <%- if (!empty($tableDiff['indexes']['remove'])):
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+
+        <%= $statement %>
+            <%- endif; %>
             <%- foreach ($tableDiff['indexes']['remove'] as $indexName => $indexDefinition): %>
             ->addIndex(
                 [<% echo $this->Migration->stringifyList($indexDefinition['columns'], ['indent' => 5]); %>],
@@ -440,50 +492,13 @@ class <%= $name %> extends AbstractMigration
                 echo $this->Migration->stringifyList($params, ['indent' => 5]);
                 %>]
             )
-            <%- endforeach; %>
-            ->update();
-        <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['remove'])): %>
-
-        $this->table('<%= $tableName %>')
-        <%- foreach ($tableDiff['columns']['remove'] as $columnName => $columnDefinition):
-                $type = $columnDefinition['type'];
-                unset($columnDefinition['type']);
-                $columnOptions = $this->Migration->getColumnOption($columnDefinition);
-                $columnOptions = $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
-            %>
-            ->addColumn('<%= $columnName %>', '<%= $type %>', [<%= $columnOptions %>])
-        <%- endforeach; %>
-            ->update();
-        <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['changed'])):
-            $oldTableDef = $dumpSchema[$tableName];
-            %>
-
-        $this->table('<%= $tableName %>')
-            <%- foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
-            $columnAttributes = $oldTableDef->column($columnName);
-            $type = $columnAttributes['type'];
-            unset($columnAttributes['type']);
-            $columnAttributes = $this->Migration->getColumnOption($columnAttributes);
-            $columnAttributes = $this->Migration->stringifyList($columnAttributes, ['indent' => 4]);
-            if (!empty($columnAttributes)): %>
-            ->changeColumn('<%= $columnName %>', '<%= $type %>', [<%= $columnAttributes %>])
-            <%- else: %>
-            ->changeColumn('<%= $columnName %>', '<%= $type %>')
-                <%- endif; %>
-            <%- endforeach; %>
-            ->update();
-        <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['add'])): %>
-
-        $this->table('<%= $tableName %>')
-            <%- foreach ($tableDiff['columns']['add'] as $columnName => $columnAttributes): %>
-            ->removeColumn('<%= $columnName %>')
-            <%- endforeach; %>
+            <%- endforeach;
+            $statement = $this->Migration->tableStatement($tableName);
+            endif; %>
+        <%- endforeach;
+            if (empty($statement)): %>
             ->update();
             <%- endif; %>
-        <%- endforeach; %>
 
         <%- if (!empty($tables['add'])): %>
             <%- foreach ($tables['add'] as $tableName => $table): %>
@@ -492,3 +507,4 @@ class <%= $name %> extends AbstractMigration
         <%- endif; %>
     }
 }
+

@@ -21,8 +21,7 @@ class TheDiff extends AbstractMigration
             ])
             ->update();
 
-        $table = $this->table('categories');
-        $table
+        $this->table('categories')
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -63,9 +62,6 @@ class TheDiff extends AbstractMigration
                 'length' => 11,
                 'null' => false,
             ])
-            ->update();
-
-        $this->table('articles')
             ->addIndex(
                 [
                     'slug',
@@ -104,9 +100,8 @@ class TheDiff extends AbstractMigration
             )
             ->update();
 
-            $this->dropTable('tags');
+        $this->dropTable('tags');
     }
-
 
     public function down()
     {
@@ -114,20 +109,19 @@ class TheDiff extends AbstractMigration
             ->dropForeignKey(
                 'user_id'
             );
+
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
             );
 
-            $table = $this->table('tags');
-            $table
-                ->addColumn('name', 'string', [
+        $this->table('tags')
+            ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 255,
                 'null' => false,
             ])
             ->create();
-
 
         $this->table('articles')
             ->removeIndexByName('UNIQUE_SLUG')
@@ -136,6 +130,22 @@ class TheDiff extends AbstractMigration
             ->update();
 
         $this->table('articles')
+            ->addColumn('content', 'text', [
+                'default' => null,
+                'length' => null,
+                'null' => false,
+            ])
+            ->changeColumn('title', 'string', [
+                'default' => null,
+                'length' => 255,
+                'null' => false,
+            ])
+            ->changeColumn('name', 'string', [
+                'default' => null,
+                'length' => 255,
+                'null' => false,
+            ])
+            ->removeColumn('category_id')
             ->addIndex(
                 [
                     'slug',
@@ -163,31 +173,7 @@ class TheDiff extends AbstractMigration
             )
             ->update();
 
-        $this->table('articles')
-            ->addColumn('content', 'text', [
-                'default' => null,
-                'length' => null,
-                'null' => false,
-            ])
-            ->update();
-
-        $this->table('articles')
-            ->changeColumn('title', 'string', [
-                'default' => null,
-                'length' => 255,
-                'null' => false,
-            ])
-            ->changeColumn('name', 'string', [
-                'default' => null,
-                'length' => 255,
-                'null' => false,
-            ])
-            ->update();
-
-        $this->table('articles')
-            ->removeColumn('category_id')
-            ->update();
-
         $this->dropTable('categories');
     }
 }
+
