@@ -19,7 +19,15 @@ class ColumnParser
     protected $regexpParseColumn = '/^(\w*)(?::(\w*\[?\d*\]?))?(?::(\w*))?(?::(\w*))?/';
 
     /**
-     * Regex used to parse the field type and length
+     * Regex used to parse the field defaults passed through the shell
+     *
+     * @var string
+     */
+    protected $regexpParseFieldDefaults = '/\[[^\]]*\]/';
+
+    /**
+     * Regex used to parse the field type and 
+     * length
      *
      * @var string
      */
@@ -36,10 +44,14 @@ class ColumnParser
         $fields = [];
         $arguments = $this->validArguments($arguments);
         foreach ($arguments as $field) {
+            $fieldOpts = $this->getDefaults($field);
+
             preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
+
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
+
 
             $typeIsPk = in_array($type, ['primary', 'primary_key']);
             $isPrimaryKey = false;
@@ -55,8 +67,8 @@ class ColumnParser
             $fields[$field] = [
                 'columnType' => $type,
                 'options' => [
-                    'null' => false,
-                    'default' => null,
+                    'null' => $fieldOpts['null'],
+                    'default' => $fieldOpts['default'],
                 ]
             ];
 
@@ -82,6 +94,7 @@ class ColumnParser
     {
         $indexes = [];
         $arguments = $this->validArguments($arguments);
+
         foreach ($arguments as $field) {
             preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
@@ -107,7 +120,7 @@ class ColumnParser
                     'columns' => [],
                     'options' => [
                         'unique' => $indexUnique,
-                        'name' => $indexName,
+                        'name' => $indexName
                     ],
                 ];
             }
@@ -176,6 +189,30 @@ class ColumnParser
 
         return [$fieldType, $length];
     }
+
+    /**
+     * Get the defaults of a field based on the field passed
+     *
+     * @param string $field Name of field
+     * @return array First value is the default value for the field, second value is the if field is null. If no length
+     * can be extracted, null is returned for default value and false for null
+     */
+    public function getDefaults($field)
+    {
+
+        if (preg_match($this->regexpParseFieldDefaults, $field, $matches)) {
+            $options = explode(':', trim($matches[0], '[]'));
+            if (isset($options[1])) {
+                if ($options[1] == 'null') $matches['null'] = true;
+            }
+            $matches['default'] = ($options[0] == 'null' ? null : $options[0]);
+            unset($matches[0]);
+        }
+        if(!isset($matches['default'])) $matches['default'] = null;
+        if(!isset($matches['null'])) $matches['null'] = false;
+        return $matches;
+    }
+
 
     /**
      * Retrieves a type that should be used for a specific field
