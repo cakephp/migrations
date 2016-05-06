@@ -89,10 +89,11 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsCreate()
     {
+        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'create']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
-        $expected .= " --no-interaction -n --template -t --class -l\n";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --class -l --connection";
+        $expected .= " -c --plugin -p --source -s --template -t\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -104,10 +105,11 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsMarkMigrated()
     {
+        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'mark_migrated']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
-        $expected .= " --no-interaction -n --exclude -x --only -o\n";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
+        $expected .= " --exclude -x --only -o --plugin -p --source -s\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -119,10 +121,11 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsMigrate()
     {
+        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'migrate']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
-        $expected .= " --no-interaction -n --target -t --date -d\n";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
+        $expected .= " --date -d --plugin -p --source -s --target -t\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -134,10 +137,11 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsRollback()
     {
+        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'rollback']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
-        $expected .= " --no-interaction -n --target -t --date -d\n";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
+        $expected .= " --date -d --plugin -p --source -s --target -t\n";
         $this->assertTextEquals($expected, $output);
     }
 
@@ -149,10 +153,11 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsStatus()
     {
+        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'status']);
         $output = $this->out->output;
-        $expected = "--help -h --verbose -v --quiet -q --plugin -p --connection -c --source -s --ansi --no-ansi";
-        $expected .= " --no-interaction -n --format -f\n";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
+        $expected .= " --format -f --plugin -p --source -s\n";
         $this->assertTextEquals($expected, $output);
     }
 }
