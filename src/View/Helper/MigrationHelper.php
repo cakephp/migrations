@@ -205,8 +205,7 @@ class MigrationHelper extends Helper
      */
     public function primaryKeys($table)
     {
-        $collection = $this->config('collection');
-        $tableSchema = $collection->describe($table);
+        $tableSchema = $this->schema($table);
         $primaryKeys = [];
         $tablePrimaryKeys = $tableSchema->primaryKey();
         foreach ($tableSchema->columns() as $column) {
@@ -227,8 +226,7 @@ class MigrationHelper extends Helper
     public function hasUnsignedPrimaryKey($tables)
     {
         foreach ($tables as $table) {
-            $collection = $this->config('collection');
-            $tableSchema = $collection->describe($table);
+            $tableSchema = $this->schema($table);
             $tablePrimaryKeys = $tableSchema->primaryKey();
 
             foreach ($tablePrimaryKeys as $primaryKey) {
@@ -307,8 +305,7 @@ class MigrationHelper extends Helper
      */
     public function attributes($table, $column)
     {
-        $collection = $this->config('collection');
-        $tableSchema = $collection->describe($table);
+        $tableSchema = $this->schema($table);
         $validOptions = [
             'length', 'limit',
             'default', 'null',
