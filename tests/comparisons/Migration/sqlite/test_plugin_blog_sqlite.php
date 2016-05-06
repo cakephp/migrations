@@ -46,16 +46,25 @@ class TestPluginBlogSqlite extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                ],
+                [
+                    'name' => 'category_id_fk',
                 ]
             )
             ->addIndex(
                 [
                     'product_id',
+                ],
+                [
+                    'name' => 'product_id_fk',
                 ]
             )
             ->addIndex(
                 [
                     'title',
+                ],
+                [
+                    'name' => 'title_idx',
                 ]
             )
             ->create();
@@ -91,7 +100,10 @@ class TestPluginBlogSqlite extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'sqlite_autoindex_categories_1',
+                    'unique' => true,
+                ]
             )
             ->create();
 

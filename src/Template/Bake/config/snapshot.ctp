@@ -103,7 +103,7 @@ class <%= $name %> extends AbstractMigration
         <%- endforeach;
             $tableConstraints = $this->Migration->constraints($table);
             if (!empty($tableConstraints)):
-                sort($tableConstraints);
+                asort($tableConstraints);
                 $constraints[$table] = $tableConstraints;
 
                 foreach ($constraints[$table] as $name => $constraint):
@@ -112,17 +112,22 @@ class <%= $name %> extends AbstractMigration
                     endif;
                     if ($constraint['columns'] !== $primaryKeysColumns): %>
             ->addIndex(
-                [<% echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]); %>]<% echo ($constraint['type'] === 'unique') ? ',' : ''; %>
-
-                <%- if ($constraint['type'] === 'unique'): %>
-                ['unique' => true]
-                <%- endif; %>
+                [<% echo $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]); %>],
+                [<%
+                    $indexOptions = [
+                        'name' => $name
+                    ];
+                    if ($constraint['type'] === 'unique') {
+                        $indexOptions['unique'] = true;
+                    }
+                    echo $this->Migration->stringifyList($indexOptions, ['indent' => 5]);
+                %>]
             )
                     <%- endif;
                 endforeach;
             endif;
 
-            foreach($this->Migration->indexes($table) as $index):
+            foreach($this->Migration->indexes($table) as $name => $index):
                 sort($foreignKeys);
                 $indexColumns = $index['columns'];
                 sort($indexColumns);
@@ -131,11 +136,16 @@ class <%= $name %> extends AbstractMigration
             ->addIndex(
                 [<%
                     echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
-                %>]<% echo ($index['type'] === 'fulltext') ? ',' : ''; %>
-
-                <%- if ($index['type'] === 'fulltext'): %>
-                ['type' => 'fulltext']
-                <%- endif; %>
+                %>],
+                [<%
+                    $indexOptions = [
+                        'name' => $name
+                    ];
+                    if ($constraint['type'] === 'fulltext') {
+                        $indexOptions['type'] = 'fulltext';
+                    }
+                    echo $this->Migration->stringifyList($indexOptions, ['indent' => 5]);
+                %>]
             )
             <%- endif;
             endforeach; %>
