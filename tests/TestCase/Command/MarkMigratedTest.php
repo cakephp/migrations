@@ -141,7 +141,7 @@ class MarkMigratedTest extends TestCase
 
         $manager = $this->getMock(
             '\Migrations\CakeManager',
-            ['getEnvironment', 'markMigrated'],
+            ['getEnvironment', 'markMigrated', 'getMigrations'],
             [$config, new StreamOutput(fopen('php://memory', 'a', false))]
         );
 
