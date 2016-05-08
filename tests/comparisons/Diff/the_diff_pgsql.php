@@ -94,8 +94,8 @@ class TheDiffPgsql extends AbstractMigration
                 'categories',
                 'id',
                 [
-                    'update' => 'restrict',
-                    'delete' => 'restrict'
+                    'update' => 'RESTRICT',
+                    'delete' => 'RESTRICT'
                 ]
             )
             ->update();
@@ -169,6 +169,18 @@ class TheDiffPgsql extends AbstractMigration
                 ],
                 [
                     'name' => 'by_name',
+                ]
+            )
+            ->update();
+
+        $this->table('articles')
+            ->addForeignKey(
+                'user_id',
+                'users',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE'
                 ]
             )
             ->update();

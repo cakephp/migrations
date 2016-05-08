@@ -40,6 +40,8 @@ class MigrationHelper extends Helper
      */
     public $tableStatements = [];
 
+    public $returnedData = [];
+
     /**
      * Constructor
      *

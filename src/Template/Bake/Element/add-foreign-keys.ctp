@@ -1,0 +1,34 @@
+<% foreach ($constraints as $constraint):
+    $constraintColumns = $constraint['columns'];
+    sort($constraintColumns);
+    if ($constraint['type'] !== 'unique'):
+    $columnsList = '\'' . $constraint['columns'][0] . '\'';
+    if (count($constraint['columns']) > 1):
+    $columnsList = '[' . $this->Migration->stringifyList($constraint['columns'], ['indent' => 5]) . ']';
+    endif;
+    $this->Migration->returnedData['dropForeignKeys'][$table][] = $columnsList;
+
+    if (is_array($constraint['references'][1])):
+    $columnsReference = '[' . $this->Migration->stringifyList($constraint['references'][1], ['indent' => 5]) . ']';
+    else:
+    $columnsReference = '\'' . $constraint['references'][1] . '\'';
+    endif;
+    $statement = $this->Migration->tableStatement($table, true);
+        if (!empty($statement)): %>
+
+        <%= $statement %>
+<% endif; %>
+            ->addForeignKey(
+                <%= $columnsList %>,
+                '<%= $constraint['references'][0] %>',
+                <%= $columnsReference %>,
+                [
+                    'update' => '<%= strtoupper($constraint['update']) %>',
+                    'delete' => '<%= strtoupper($constraint['delete']) %>'
+                ]
+            )
+<% endif; %>
+<% endforeach; %>
+<% if (isset($this->Migration->tableStatements[$table])): %>
+            ->update();
+<% endif; %>
