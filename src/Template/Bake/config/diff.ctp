@@ -16,12 +16,23 @@
 $tables = $data['fullTables'];
 unset($data['fullTables']);
 $constraints = [];
+
+$hasUnsignedPk = $this->Migration->hasUnsignedPrimaryKey($tables['add']);
+
+$autoId = true;
+if ($hasUnsignedPk) {
+    $autoId = false;
+}
 %>
 <?php
 use Migrations\AbstractMigration;
 
 class <%= $name %> extends AbstractMigration
 {
+    <%- if (!$autoId): %>
+
+    public $autoId = false;
+    <%- endif; %>
 
     public function up()
     {
@@ -76,7 +87,7 @@ class <%= $name %> extends AbstractMigration
         <%- endif; %>
         <%- endforeach; %>
         <%- if (!empty($tables['add'])): %>
-                <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['add'], 'useSchema' => true]) %>
+                <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['add'], 'autoId' => $autoId, 'useSchema' => true]) %>
         <%- endif; %>
         <%- foreach ($data as $tableName => $tableDiff): %>
             <%- if (!empty($tableDiff['columns']['add'])):
@@ -135,7 +146,7 @@ class <%= $name %> extends AbstractMigration
             <%- endforeach; %>
         <%- endif; %>
         <%- if (!empty($tables['remove'])): %>
-            <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['remove'], 'useSchema' => true]) %>
+            <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['remove'], 'autoId' => $autoId, 'useSchema' => true]) %>
         <%- endif; %>
         <%- foreach ($data as $tableName => $tableDiff): %>
             <%- if (!empty($tableDiff['indexes']['add'])): %>

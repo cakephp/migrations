@@ -5,8 +5,8 @@ class TestPluginBlogSqlite extends AbstractMigration
 {
     public function up()
     {
-        $table = $this->table('articles');
-        $table
+
+        $this->table('articles')
             ->addColumn('title', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -60,8 +60,7 @@ class TestPluginBlogSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('categories');
-        $table
+        $this->table('categories')
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -95,8 +94,7 @@ class TestPluginBlogSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('parts');
-        $table
+        $this->table('parts')
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -130,7 +128,6 @@ class TestPluginBlogSqlite extends AbstractMigration
                 ]
             )
             ->update();
-
     }
 
     public function down()

@@ -14,7 +14,7 @@ $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $pr
 
         $this->table('<%= $tableArgForArray %>')
 <% endif; %>
-<% if ($specialPk):
+<% if ($specialPk || !$autoId):
     foreach ($primaryKeys as $primaryKey) :
 %>
             ->addColumn('<%= $primaryKey['name'] %>', '<%= $primaryKey['info']['columnType'] %>', [<%
@@ -22,12 +22,17 @@ $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $pr
             echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
 <% endforeach; %>
+<% if (!$autoId): %>
             ->addPrimaryKey(['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>'])
+<% endif; %>
 <% endif;
 foreach ($this->Migration->columns($tableArgForMethods) as $column => $config):
 %>
             ->addColumn('<%= $column %>', '<%= $config['columnType'] %>', [<%
             $columnOptions = $this->Migration->getColumnOption($config['options']);
+            if ($config['columnType'] === 'boolean' && isset($columnOptions['default']) && $this->Migration->value($columnOptions['default']) !== 'null'):
+                $columnOptions['default'] = (bool)$columnOptions['default'];
+            endif;
             echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
 <% endforeach;
@@ -58,11 +63,13 @@ foreach($this->Migration->indexes($tableArgForMethods) as $index):
     if (!in_array($indexColumns, $foreignKeys)):
         %>
             ->addIndex(
-                [<% echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]); %>]<% echo ($index['type'] === 'unique') ? ',' : ''; %>
+                [<%
+                    echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]);
+                %>]<% echo ($index['type'] === 'fulltext') ? ',' : ''; %>
 
-<% if ($index['type'] === 'unique'): %>
-                ['unique' => true]
-<% endif; %>
+                <%- if ($index['type'] === 'fulltext'): %>
+                ['type' => 'fulltext']
+                <%- endif; %>
             )
 <% endif;
 endforeach; %>

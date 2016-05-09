@@ -245,7 +245,10 @@ class MigrationHelper extends Helper
     public function hasUnsignedPrimaryKey($tables)
     {
         foreach ($tables as $table) {
-            $tableSchema = $this->schema($table);
+            $tableSchema = $table;
+            if (!($table instanceof Table)) {
+                $tableSchema = $this->schema($table);
+            }
             $tablePrimaryKeys = $tableSchema->primaryKey();
 
             foreach ($tablePrimaryKeys as $primaryKey) {

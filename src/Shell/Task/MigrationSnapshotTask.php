@@ -71,6 +71,8 @@ class MigrationSnapshotTask extends SimpleMigrationTask
 
         sort($tables, SORT_NATURAL);
 
+        $tables = array_combine($tables, $tables);
+
         $autoId = true;
         if (isset($this->params['disable-autoid'])) {
             $autoId = !$this->params['disable-autoid'];

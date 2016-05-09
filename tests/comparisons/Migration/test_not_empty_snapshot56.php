@@ -5,8 +5,8 @@ class TestNotEmptySnapshot56 extends AbstractMigration
 {
     public function up()
     {
-        $table = $this->table('articles');
-        $table
+
+        $this->table('articles')
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
                 'default' => null,
@@ -61,8 +61,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('categories');
-        $table
+        $this->table('categories')
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -96,8 +95,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']]);
-        $table
+        $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']])
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
@@ -110,8 +108,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             ])
             ->create();
 
-        $table = $this->table('orders');
-        $table
+        $this->table('orders')
             ->addColumn('product_category', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -130,8 +127,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('products');
-        $table
+        $this->table('products')
             ->addColumn('title', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -183,8 +179,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('special_pks', ['id' => false, 'primary_key' => ['id']]);
-        $table
+        $this->table('special_pks', ['id' => false, 'primary_key' => ['id']])
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
@@ -197,8 +192,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             ])
             ->create();
 
-        $table = $this->table('special_tags');
-        $table
+        $this->table('special_tags')
             ->addColumn('article_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -232,8 +226,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('users');
-        $table
+        $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => null,
                 'limit' => 256,
@@ -306,7 +299,6 @@ class TestNotEmptySnapshot56 extends AbstractMigration
                 ]
             )
             ->update();
-
     }
 
     public function down()
