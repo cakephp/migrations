@@ -92,19 +92,8 @@ class <%= $name %> extends AbstractMigration
             if (!empty($statement)): %>
         <%= $statement %>
             <%- endif; %>
-            <%- foreach ($tableDiff['indexes']['add'] as $indexName => $index): %>
-            ->addIndex(
-                [<% echo $this->Migration->stringifyList($index['columns'], ['indent' => 5]); %>],
-                [<%
-                $params = ['name' => $indexName];
-                if ($index['type'] === 'unique'):
-                    $params['unique'] = true;
-                endif;
-                echo $this->Migration->stringifyList($params, ['indent' => 5]);
-                %>]
-            )
-            <%- endforeach;
-            endif;
+            <%- echo $this->element('Migrations.add-indexes', ['indexes' => $tableDiff['indexes']['add']]) %>
+            <%- endif;
             if (isset($this->Migration->tableStatements[$tableName])): %>
             ->update();
             <%- endif; %>
@@ -201,19 +190,8 @@ class <%= $name %> extends AbstractMigration
 
         <%= $statement %>
             <%- endif; %>
-            <%- foreach ($tableDiff['indexes']['remove'] as $indexName => $indexDefinition): %>
-            ->addIndex(
-                [<% echo $this->Migration->stringifyList($indexDefinition['columns'], ['indent' => 5]); %>],
-                [<%
-                $params = ['name' => $indexName];
-                if ($indexDefinition['type'] === 'unique'):
-                    $params['unique'] = true;
-                endif;
-                echo $this->Migration->stringifyList($params, ['indent' => 5]);
-                %>]
-            )
-            <%- endforeach;
-            endif;
+            <%- echo $this->element('Migrations.add-indexes', ['indexes' => $tableDiff['indexes']['remove']]) %>
+            <%- endif;
             if (isset($this->Migration->tableStatements[$tableName])): %>
             ->update();
             <%- endif; %>
