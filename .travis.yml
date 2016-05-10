@@ -18,14 +18,14 @@ env:
 matrix:
   allow_failures:
     - php: hhvm
-    - env: CODECOVERAGE=1 DEFAULT=0
+    - env: CODECOVERAGE=1 DEFAULT=0 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
     - env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test' db_dsn_compare='postgres://postgres@127.0.0.1/cakephp_comparisons'
 
   fast_finish: true
 
   include:
     - php: 7.0
-      env: CODECOVERAGE=1 DEFAULT=0
+      env: CODECOVERAGE=1 DEFAULT=0 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
 
     - php: 5.4
       env: PREFER_LOWEST=1
