@@ -12,8 +12,6 @@
 namespace Migrations;
 
 use Cake\Datasource\ConnectionManager;
-use Cake\Utility\Inflector;
-use Migrations\Command\Seed;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
 use Symfony\Component\Console\Input\InputArgument;
