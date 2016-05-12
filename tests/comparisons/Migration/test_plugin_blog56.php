@@ -8,8 +8,8 @@ class TestPluginBlog56 extends AbstractMigration
 
     public function up()
     {
-        $table = $this->table('articles');
-        $table
+
+        $this->table('articles')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -71,8 +71,7 @@ class TestPluginBlog56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('categories');
-        $table
+        $this->table('categories')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -113,8 +112,7 @@ class TestPluginBlog56 extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('parts');
-        $table
+        $this->table('parts')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -156,7 +154,6 @@ class TestPluginBlog56 extends AbstractMigration
                 ]
             )
             ->update();
-
     }
 
     public function down()

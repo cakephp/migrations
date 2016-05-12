@@ -8,8 +8,8 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
 
     public function up()
     {
-        $table = $this->table('articles');
-        $table
+
+        $this->table('articles')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -70,8 +70,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('categories');
-        $table
+        $this->table('categories')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -112,8 +111,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('composite_pks');
-        $table
+        $this->table('composite_pks')
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
@@ -127,8 +125,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             ->addPrimaryKey(['id', 'name'])
             ->create();
 
-        $table = $this->table('orders');
-        $table
+        $this->table('orders')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -154,8 +151,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('products');
-        $table
+        $this->table('products')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -213,8 +209,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('special_pks');
-        $table
+        $this->table('special_pks')
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
@@ -228,8 +223,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             ])
             ->create();
 
-        $table = $this->table('special_tags');
-        $table
+        $this->table('special_tags')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -270,8 +264,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->create();
 
-        $table = $this->table('users');
-        $table
+        $this->table('users')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -351,7 +344,6 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                 ]
             )
             ->update();
-
     }
 
     public function down()

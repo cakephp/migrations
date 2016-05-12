@@ -11,9 +11,11 @@
  */
 namespace Migrations\Test\Command;
 
+use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
+use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
@@ -23,10 +25,12 @@ use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * MarkMigratedTest class
+ * DumpTest class
  */
-class StatusTest extends TestCase
+class DumpTest extends TestCase
 {
+
+    use StringCompareTrait;
 
     /**
      * Instance of a Symfony Command object
@@ -50,13 +54,6 @@ class StatusTest extends TestCase
     protected $Connection;
 
     /**
-     * Instance of a CommandTester object
-     *
-     * @var \Symfony\Component\Console\Tester\CommandTester
-     */
-    protected $commandTester;
-
-    /**
      * Instance of a StreamOutput object.
      * It will store the output from the CommandTester
      *
@@ -74,12 +71,10 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
-        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
-
         $application = new MigrationsDispatcher('testing');
-        $this->command = $application->find('status');
+        $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
     }
 
     /**
@@ -90,116 +85,65 @@ class StatusTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
-        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->Connection, $this->command, $this->streamOutput);
     }
 
     /**
-     * Test executing the "status" command
+     * Test executing "dump" with no tables in the database
      *
      * @return void
      */
-    public function testExecute()
+    public function testExecuteNoTables()
     {
         $params = [
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ];
         $commandTester = $this->getCommandTester($params);
-        $commandTester->execute(['command' => $this->command->getName()] + $params);
 
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('down  20150704160200  CreateNumbersTable', $display);
-        $this->assertTextContains('down  20150724233100  UpdateNumbersTable', $display);
-        $this->assertTextContains('down  20150826191400  CreateLettersTable', $display);
-    }
-
-    /**
-     * Test executing the "status" command with the JSON option
-     *
-     * @return void
-     */
-    public function testExecuteJson()
-    {
-        $params = [
+        $commandTester->execute([
+            'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-            '--format' => 'json'
-        ];
-        $commandTester = $this->getCommandTester($params);
-        $commandTester->execute(['command' => $this->command->getName()] + $params);
-        $display = $this->getDisplayFromOutput();
+            '--source' => 'TestsMigrations'
+        ]);
 
-        $expected = '{"status":"down","id":"20150704160200","name":"CreateNumbersTable"},'
-            . '{"status":"down","id":"20150724233100","name":"UpdateNumbersTable"},'
-            . '{"status":"down","id":"20150826191400","name":"CreateLettersTable"}';
-
-        $this->assertTextContains($expected, $display);
+        $display = $commandTester->getDisplay();
+        $this->assertTextContains('No tables were found : the dump file was not created', $display);
     }
 
     /**
-     * Test executing the "status" command with the migrated migrations
+     * Test executing "dump" with no tables in the database
      *
      * @return void
      */
-    public function testExecuteWithMigrated()
+    public function testExecuteTables()
     {
         $params = [
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
         ];
-        $this->getCommandTester($params);
+        $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
         $migrations->migrate();
 
-        $params = [
+        $commandTester->execute([
+            'command' => $this->command->getName(),
             '--connection' => 'test',
             '--source' => 'TestsMigrations'
-        ];
-        $commandTester = $this->getCommandTester($params);
-        $commandTester->execute(['command' => $this->command->getName()] + $params);
+        ]);
 
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('up  20150704160200  CreateNumbersTable', $display);
-        $this->assertTextContains('up  20150724233100  UpdateNumbersTable', $display);
-        $this->assertTextContains('up  20150826191400  CreateLettersTable', $display);
+        $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
+        $this->assertTrue(file_exists($dumpFilePath));
 
-        $migrations->rollback(['target' => 0]);
-    }
+        $generatedDump = unserialize(file_get_contents($dumpFilePath));
 
-    /**
-     * Test executing the "status" command with inconsistency in the migrations files
-     *
-     * @return void
-     */
-    public function testExecuteWithInconsistency()
-    {
-        $params = [
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations'
-        ];
-        $this->getCommandTester($params);
-        $migrations = $this->getMigrations();
-        $migrations->migrate();
-
-        $origin = $migrations->getConfig()->getMigrationPath() . DS . '20150724233100_update_numbers_table.php';
-        $destination = $migrations->getConfig()->getMigrationPath() . DS . '_20150724233100_update_numbers_table.php';
-        rename($origin, $destination);
-
-        $params = [
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations'
-        ];
-        $commandTester = $this->getCommandTester($params);
-        $commandTester->execute(['command' => $this->command->getName()] + $params);
-
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('up  20150704160200  CreateNumbersTable', $display);
-        $this->assertTextContains('up  20150724233100  UpdateNumbersTable  ** MISSING **', $display);
-        $this->assertTextContains('up  20150826191400  CreateLettersTable', $display);
-
-        rename($destination, $origin);
+        $this->assertCount(2, $generatedDump);
+        $this->assertArrayHasKey('letters', $generatedDump);
+        $this->assertArrayHasKey('numbers', $generatedDump);
+        $this->assertInstanceOf('Cake\Database\Schema\Table', $generatedDump['numbers']);
+        $this->assertInstanceOf('Cake\Database\Schema\Table', $generatedDump['letters']);
+        $this->assertEquals(['id', 'number', 'radix'], $generatedDump['numbers']->columns());
+        $this->assertEquals(['id', 'letter'], $generatedDump['letters']->columns());
 
         $migrations->rollback(['target' => 0]);
     }
@@ -215,6 +159,10 @@ class StatusTest extends TestCase
      */
     protected function getCommandTester($params)
     {
+        if (!$this->Connection->driver()->isConnected()) {
+            $this->Connection->driver()->connect();
+        }
+
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $this->streamOutput);

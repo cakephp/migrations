@@ -201,6 +201,10 @@ class SeedTest extends TestCase
      */
     protected function getCommandTester($params)
     {
+        if (!$this->Connection->driver()->isConnected()) {
+            $this->Connection->driver()->connect();
+        }
+
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $this->streamOutput);
@@ -234,9 +238,9 @@ class SeedTest extends TestCase
         if (in_array('phinxlog', $tables)) {
             $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
             $query = $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema());
-            $this->Connection->execute(
-                $query[0]
-            );
+            foreach ($query as $stmt) {
+                $this->Connection->execute($stmt);
+            }
         }
 
         return $migrations;

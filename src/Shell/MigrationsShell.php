@@ -28,6 +28,7 @@ class MigrationsShell extends Shell
      */
     public $tasks = [
         'Migrations.Create',
+        'Migrations.Dump',
         'Migrations.MarkMigrated',
         'Migrations.Migrate',
         'Migrations.Rollback',
@@ -94,7 +95,20 @@ class MigrationsShell extends Shell
         $app = new MigrationsDispatcher(PHINX_VERSION);
         $input = new ArgvInput($this->argv);
         $app->setAutoExit(false);
-        $app->run($input);
+        $exitCode = $app->run($input);
+
+        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) && $exitCode === 0) {
+            $dispatchCommand = 'migrations dump';
+            if (!empty($this->params['connection'])) {
+                $dispatchCommand .= ' -c ' . $this->params['connection'];
+            }
+
+            if (!empty($this->params['plugin'])) {
+                $dispatchCommand .= ' -p ' . $this->params['plugin'];
+            }
+
+            $this->dispatchShell($dispatchCommand);
+        }
     }
 
     /**

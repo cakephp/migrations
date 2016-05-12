@@ -148,7 +148,7 @@ class ConfigurationTraitTest extends TestCase
             ->with('plugin')
             ->will($this->returnValue('MyPlugin'));
 
-        $input->expects($this->at(2))
+        $input->expects($this->at(4))
             ->method('getOption')
             ->with('plugin')
             ->will($this->returnValue('MyPlugin'));
@@ -185,12 +185,12 @@ class ConfigurationTraitTest extends TestCase
         $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
         $this->command->setInput($input);
 
-        $input->expects($this->at(2))
+        $input->expects($this->at(5))
             ->method('getOption')
             ->with('connection')
             ->will($this->returnValue('custom'));
 
-        $input->expects($this->at(3))
+        $input->expects($this->at(6))
             ->method('getOption')
             ->with('connection')
             ->will($this->returnValue('custom'));
