@@ -12,6 +12,7 @@
 namespace Migrations\Test;
 
 use Cake\Cache\Cache;
+use Cake\Core\Configure;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -47,8 +48,9 @@ class MigrationHelperTest extends TestCase
         $this->loadFixtures('Users');
         $this->loadFixtures('SpecialTags');
 
+        $nullDef = version_compare(PHP_VERSION, '5.5', '<') ? 'NULL' : null;
         $this->values = [
-            'null' => 'NULL',
+            'null' => $nullDef,
             'integerNull' => null,
             'integerLimit' => null,
             'comment' => null,
