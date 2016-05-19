@@ -100,7 +100,7 @@ class TheDiffPgsql extends AbstractMigration
             )
             ->update();
 
-            $this->dropTable('tags');
+        $this->dropTable('tags');
     }
 
     public function down()
