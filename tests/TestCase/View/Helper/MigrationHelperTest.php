@@ -12,7 +12,6 @@
 namespace Migrations\Test;
 
 use Cake\Cache\Cache;
-use Cake\Core\Configure;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
