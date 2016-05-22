@@ -11,18 +11,17 @@ class TheDiffSimplePgsql extends AbstractMigration
             ->addColumn('username', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('password', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => false,
+                'null' => true,
             ])
             ->create();
 
         $this->table('articles')
             ->addColumn('user_id', 'integer', [
-                'default' => null,
                 'length' => 10,
                 'null' => false,
             ])

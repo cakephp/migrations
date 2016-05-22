@@ -206,7 +206,12 @@ class MigrationDiffTaskTest extends TestCase
         $connection->newQuery()
             ->insert(['version', 'migration_name'])
             ->into('phinxlog')
-            ->values(['version' => 20160415220805, 'migration_name' => $versionParts[1]])
+            ->values([
+                'version' => 20160415220805,
+                'migration_name' => $versionParts[1],
+                'start_time' => '2016-05-22 16:51:46',
+                'end_time' => '2016-05-22 16:51:46',
+            ])
             ->execute();
         $this->getMigrations()->rollback(['target' => 0]);
         unlink($destinationDumpPath);
@@ -223,7 +228,8 @@ class MigrationDiffTaskTest extends TestCase
     {
         $this->skipIf(env('DB') === 'sqlite');
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'. DS . 'simple' . DS;
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
+            . DS . 'simple' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
@@ -243,7 +249,8 @@ class MigrationDiffTaskTest extends TestCase
             ->where(['version' => 20160415220805])
             ->execute();
 
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
+            . DS . 'simple' . DS;
 
         $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
         $this->Task
@@ -284,7 +291,8 @@ class MigrationDiffTaskTest extends TestCase
      * Gets a Migrations object in order to easily create and drop tables during the
      * tests
      *
-     * @return \Migrations\Migrations
+     * @param string $source Source folder where migrations are located
+     * @return Migrations
      */
     protected function getMigrations($source = 'MigrationsDiff')
     {
