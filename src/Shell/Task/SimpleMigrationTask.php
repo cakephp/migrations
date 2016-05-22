@@ -115,10 +115,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
 
         $parser->description(
             'Bake migration class.'
-        )->addArgument('name', [
-            'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
-            'required' => true
-        ])->addOption('plugin', [
+        )->addOption('plugin', [
             'short' => 'p',
             'help' => 'Plugin to bake into.'
         ])->addOption('force', [
