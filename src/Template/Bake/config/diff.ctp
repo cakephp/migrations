@@ -157,22 +157,20 @@ class <%= $name %> extends AbstractMigration
                 <%- endforeach %>
             ->update();
             <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['remove'])):
-            $statement = $this->Migration->tableStatement($tableName, true);
-            if (!empty($statement)): %>
+        <%- if (!empty($tableDiff['columns']['remove']) ||
+            !empty($tableDiff['columns']['changed']) ||
+            !empty($tableDiff['columns']['add']) ||
+            !empty($tableDiff['indexes']['remove'])
+        ): %>
 
-        <%= $statement %>
-            <%- endif; %>
+        <%= $this->Migration->tableStatement($tableName, true) %>
+        <%- endif; %>
+        <%- if (!empty($tableDiff['columns']['remove'])): %>
         <%- echo $this->element('Migrations.add-columns', ['columns' => $tableDiff['columns']['remove']]) %>
         <%- endif; %>
         <%- if (!empty($tableDiff['columns']['changed'])):
             $oldTableDef = $dumpSchema[$tableName];
-            $statement = $this->Migration->tableStatement($tableName);
-            if (!empty($statement)): %>
-
-        <%= $statement %>
-            <%- endif; %>
-            <%- foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
+            foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
             $columnAttributes = $oldTableDef->column($columnName);
             $type = $columnAttributes['type'];
             unset($columnAttributes['type']);
@@ -185,22 +183,12 @@ class <%= $name %> extends AbstractMigration
             <%- endif; %>
             <%- endforeach; %>
         <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['add'])):
-            $statement = $this->Migration->tableStatement($tableName);
-            if (!empty($statement)): %>
-
-        <%= $statement %>
-            <%- endif; %>
+        <%- if (!empty($tableDiff['columns']['add'])): %>
             <%- foreach ($tableDiff['columns']['add'] as $columnName => $columnAttributes): %>
             ->removeColumn('<%= $columnName %>')
             <%- endforeach; %>
         <%- endif; %>
-            <%- if (!empty($tableDiff['indexes']['remove'])):
-            $statement = $this->Migration->tableStatement($tableName);
-            if (!empty($statement)): %>
-
-        <%= $statement %>
-            <%- endif; %>
+            <%- if (!empty($tableDiff['indexes']['remove'])): %>
             <%- echo $this->element('Migrations.add-indexes', ['indexes' => $tableDiff['indexes']['remove']]) %>
             <%- endif;
             if (isset($this->Migration->tableStatements[$tableName])): %>
