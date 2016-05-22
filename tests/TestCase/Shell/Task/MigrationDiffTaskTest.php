@@ -204,7 +204,7 @@ class MigrationDiffTaskTest extends TestCase
         rename($destinationConfigDir . $file->name, $destination);
 
         $connection->newQuery()
-            ->insert(['version', 'migration_name'])
+            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
             ->into('phinxlog')
             ->values([
                 'version' => 20160415220805,
