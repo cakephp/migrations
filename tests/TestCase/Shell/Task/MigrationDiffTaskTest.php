@@ -17,7 +17,8 @@ use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
+use Cake\Filesystem\File;
+use Cake\Filesystem\Folder;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Inflector;
@@ -192,6 +193,85 @@ class MigrationDiffTaskTest extends TestCase
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
+
+        $dir = new Folder($destinationConfigDir);
+        $files = $dir->find('(.*)TheDiff(.*)');
+        $file = current($files);
+        $file = new File($dir->pwd() . DS . $file);
+        $file->open();
+        $versionParts = explode('_', $file->name());
+        $file->close();
+        rename($destinationConfigDir . $file->name, $destination);
+
+        $connection->newQuery()
+            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
+            ->into('phinxlog')
+            ->values([
+                'version' => 20160415220805,
+                'migration_name' => $versionParts[1],
+                'start_time' => '2016-05-22 16:51:46',
+                'end_time' => '2016-05-22 16:51:46',
+            ])
+            ->execute();
+        $this->getMigrations()->rollback(['target' => 0]);
+        unlink($destinationDumpPath);
+        unlink($destination);
+    }
+
+    /**
+     * Tests baking a simpler diff than above
+     * Introduced after finding a bug when baking a simple diff with less operations
+     *
+     * @return void
+     */
+    public function testBakingDiffSimple()
+    {
+        $this->skipIf(env('DB') === 'sqlite');
+
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
+            . DS . 'simple' . DS;
+        $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+
+        $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffSimple' . DS;
+        $destination = $destinationConfigDir . '20160415220805_TheDiffSimple' . ucfirst(env('DB')) . '.php';
+        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+        copy($diffMigrationsPath, $destination);
+
+        $this->getMigrations('MigrationsDiffSimple')->migrate();
+
+        unlink($destination);
+        copy($diffDumpPath, $destinationDumpPath);
+
+        $connection = ConnectionManager::get('test_comparisons');
+        $connection->newQuery()
+            ->delete('phinxlog')
+            ->where(['version' => 20160415220805])
+            ->execute();
+
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
+            . DS . 'simple' . DS;
+
+        $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
+        $this->Task
+            ->method('getDumpSchema')
+            ->will($this->returnValue(unserialize(file_get_contents($destinationDumpPath))));
+
+        $this->Task->expects($this->at(1))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations mark_migrated'));
+        $this->Task->expects($this->at(2))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations dump'));
+
+        $this->Task->params['connection'] = 'test_comparisons';
+        $this->Task->pathFragment = 'config/MigrationsDiffSimple/';
+        $this->Task->connection = 'test_comparisons';
+
+        $bakeName = $this->getBakeName('TheDiffSimple');
+        $result = $this->Task->bake($bakeName);
+
+        $this->assertCorrectSnapshot($bakeName, $result);
     }
 
     /**
@@ -211,13 +291,14 @@ class MigrationDiffTaskTest extends TestCase
      * Gets a Migrations object in order to easily create and drop tables during the
      * tests
      *
-     * @return \Migrations\Migrations
+     * @param string $source Source folder where migrations are located
+     * @return Migrations
      */
-    protected function getMigrations()
+    protected function getMigrations($source = 'MigrationsDiff')
     {
         $params = [
             'connection' => 'test_comparisons',
-            'source' => 'MigrationsDiff'
+            'source' => $source
         ];
         $migrations = new Migrations($params);
 
