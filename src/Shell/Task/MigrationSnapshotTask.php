@@ -126,7 +126,11 @@ class MigrationSnapshotTask extends SimpleMigrationTask
 
         $parser->description(
             'Bake migration snapshot class.'
-        )->addOption('require-table', [
+        )->addArgument('name', [
+            'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
+            'required' => true
+        ])
+        ->addOption('require-table', [
             'boolean' => true,
             'default' => false,
             'help' => 'If require-table is set to true, check also that the table class exists.'

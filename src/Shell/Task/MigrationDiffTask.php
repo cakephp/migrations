@@ -486,4 +486,20 @@ class MigrationDiffTask extends SimpleMigrationTask
     {
         return 'Migrations.config/diff';
     }
+
+    /**
+     * Gets the option parser instance and configures it.
+     *
+     * @return \Cake\Console\ConsoleOptionParser
+     */
+    public function getOptionParser()
+    {
+        $parser = parent::getOptionParser();
+
+        $parser->addArgument('name', [
+            'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
+            'required' => true
+        ]);
+        return $parser;
+    }
 }
