@@ -4,7 +4,7 @@ namespace TestApp\Model\Table;;
 use Cake\ORM\Table;
 
 /**
- * Articles Model
+ * Letters Model
  *
  */
 class LettersTable extends Table

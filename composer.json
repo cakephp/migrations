@@ -35,6 +35,7 @@
         "psr-4": {
             "Cake\\Test\\": "./vendor/cakephp/cakephp/tests",
             "Migrations\\Test\\": "tests",
+            "TestApp\\": "tests/test_app/App",
             "TestBlog\\": "tests/test_app/Plugin/TestBlog/src"
         }
     },
