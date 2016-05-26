@@ -38,7 +38,7 @@ define('TMP', sys_get_temp_dir() . DS);
 
 Configure::write('debug', true);
 Configure::write('App', [
-    'namespace' => 'App',
+    'namespace' => 'TestApp',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
         'templates' => [ROOT . 'App' . DS . 'Template' . DS]

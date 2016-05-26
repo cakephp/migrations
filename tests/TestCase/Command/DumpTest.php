@@ -112,7 +112,7 @@ class DumpTest extends TestCase
     }
 
     /**
-     * Test executing "dump" with no tables in the database
+     * Test executing "dump" with tables in the database
      *
      * @return void
      */

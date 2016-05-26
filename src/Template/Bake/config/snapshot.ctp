@@ -39,7 +39,8 @@ class <%= $name %> extends AbstractMigration
 
     public function down()
     {
-        <%- foreach ($this->Migration->returnedData['dropForeignKeys'] as $table => $columnsList):
+        <%- if (!empty($this->Migration->returnedData['dropForeignKeys'])):
+            foreach ($this->Migration->returnedData['dropForeignKeys'] as $table => $columnsList):
                 $maxKey = count($columnsList) - 1;
         %>
         $this->table('<%= $table %>')
@@ -49,7 +50,9 @@ class <%= $name %> extends AbstractMigration
             )<%= ($key === $maxKey) ? ';' : '' %>
             <%- endforeach; %>
 
-        <%- endforeach; %>
+        <%- endforeach;
+            endif;
+        %>
         <%- foreach ($tables as $table): %>
         $this->dropTable('<%= $table%>');
         <%- endforeach; %>

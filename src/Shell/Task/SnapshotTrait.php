@@ -11,11 +11,13 @@
  */
 namespace Migrations\Shell\Task;
 
+use Cake\Core\App;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\Folder;
 use Cake\ORM\TableRegistry;
+use ReflectionClass;
 
 /**
  * Trait needed for all "snapshot" type of bake operations.
@@ -118,6 +120,10 @@ trait SnapshotTrait
         $options = array_merge(['require-table' => false, 'plugin' => null], $options);
         $tables = $collection->listTables();
 
+        if (empty($tables)) {
+            return $tables;
+        }
+
         if ($options['require-table'] === true || $options['plugin']) {
             $tableNamesInModel = $this->getTableNames($options['plugin']);
 
@@ -205,6 +211,12 @@ trait SnapshotTrait
         $className = str_replace('Table.php', '', $className);
         if ($pluginName !== null) {
             $className = $pluginName . '.' . $className;
+        }
+
+        $namespacedClassName = App::className($className, 'Model/Table', 'Table');
+        $reflection = new ReflectionClass($namespacedClassName);
+        if (!$reflection->isInstantiable()) {
+            return $tables;
         }
 
         $table = TableRegistry::get($className);
