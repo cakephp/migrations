@@ -93,6 +93,11 @@ class MigrationsShell extends Shell
     public function main()
     {
         $app = new MigrationsDispatcher(PHINX_VERSION);
+        if (isset($this->params['requested']) && $this->params['requested'] === true) {
+            $app->setRequested(true);
+        }
+        $app->bindCommands();
+
         $input = new ArgvInput($this->argv);
         $app->setAutoExit(false);
         $exitCode = $app->run($input);

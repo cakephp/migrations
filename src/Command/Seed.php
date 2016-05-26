@@ -16,6 +16,7 @@ use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\SeedRun;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Seed extends SeedRun
@@ -25,6 +26,13 @@ class Seed extends SeedRun
         execute as parentExecute;
     }
     use EventDispatcherTrait;
+
+    protected $requested = false;
+
+    public function setRequested($requested)
+    {
+        $this->requested = (bool)$requested;
+    }
 
     /**
      * {@inheritdoc}
@@ -53,6 +61,9 @@ class Seed extends SeedRun
         $event = $this->dispatchEvent('Migration.beforeSeed');
         if ($event->isStopped()) {
             return $event->result;
+        }
+        if ($this->requested === true) {
+            $output = new NullOutput();
         }
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');

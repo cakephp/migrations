@@ -20,6 +20,7 @@ use Symfony\Component\Console\Application;
  */
 class MigrationsDispatcher extends Application
 {
+    protected $requested = false;
 
     /**
      * Class Constructor.
@@ -31,12 +32,24 @@ class MigrationsDispatcher extends Application
     public function __construct($version)
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
+    }
+
+    public function bindCommands()
+    {
         $this->add(new Command\Create());
         $this->add(new Command\Dump());
         $this->add(new Command\MarkMigrated());
         $this->add(new Command\Migrate());
         $this->add(new Command\Rollback());
-        $this->add(new Command\Seed());
+
+        $seedCommand = new Command\Seed();
+        $seedCommand->setRequested($this->requested);
+        $this->add($seedCommand);
         $this->add(new Command\Status());
+    }
+
+    public function setRequested($requested)
+    {
+        $this->requested = (bool)$requested;
     }
 }
