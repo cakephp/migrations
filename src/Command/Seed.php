@@ -27,8 +27,19 @@ class Seed extends SeedRun
     }
     use EventDispatcherTrait;
 
+    /**
+     * Whether this command was invoked through an application loaded and requested by another shell
+     * @var bool
+     */
     protected $requested = false;
 
+    /**
+     * Sets whether this command was invoked through an application loaded and requested by another shell
+     *
+     * @param bool $requested Requested status. If true, it means that this command was invoked through an application
+     * called from another shell
+     * @return void
+     */
     public function setRequested($requested)
     {
         $this->requested = (bool)$requested;

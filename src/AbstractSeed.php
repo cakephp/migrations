@@ -14,9 +14,22 @@ namespace Migrations;
 use Cake\Console\ShellDispatcher;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
 
-class AbstractSeed extends BaseAbstractSeed
+/**
+ * Class AbstractSeed
+ * Extends Phinx base AbstractSeed class in order to extend the features the seed class
+ * offers.
+ */
+abstract class AbstractSeed extends BaseAbstractSeed
 {
 
+    /**
+     * Gives the ability to a seeder to call another seeder.
+     * This is particularly useful if you need to run the seeders of your applications in a specific sequences,
+     * for instance to respect foreign key constraints.
+     *
+     * @param string $seeder Name of the seeder to call from the current seed
+     * @return void
+     */
     public function call($seeder)
     {
         $argv = [
