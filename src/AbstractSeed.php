@@ -11,8 +11,9 @@
  */
 namespace Migrations;
 
-use Cake\Console\ShellDispatcher;
+use Migrations\Command\Seed;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
+use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * Class AbstractSeed
@@ -21,6 +22,14 @@ use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
  */
 abstract class AbstractSeed extends BaseAbstractSeed
 {
+    /**
+     * Instance of MigrationsDispatcher
+     * It is a light-weight instance of the application (it only contains the Seed command)
+     * with custom settings
+     *
+     * @var MigrationsDispatcher
+     */
+    protected $app;
 
     /**
      * Gives the ability to a seeder to call another seeder.
@@ -32,14 +41,6 @@ abstract class AbstractSeed extends BaseAbstractSeed
      */
     public function call($seeder)
     {
-        $argv = [
-            'dummy',
-            'migrations',
-            'seed',
-            '--seed',
-            $seeder
-        ];
-
         $this->getOutput()->writeln('');
         $this->getOutput()->writeln(
             ' ===='
@@ -49,8 +50,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
 
         // Execute the seeder and log the time elapsed.
         $start = microtime(true);
-        $dispatcher = new ShellDispatcher($argv);
-        $dispatcher->dispatch(['requested' => true]);
+        $this->runCall($seeder);
         $end = microtime(true);
 
         $this->getOutput()->writeln(
@@ -60,5 +60,46 @@ abstract class AbstractSeed extends BaseAbstractSeed
             . ' ' . sprintf('%.4fs', $end - $start) . '</comment>'
         );
         $this->getOutput()->writeln('');
+    }
+
+    /**
+     * Calls another seeder from this seeder.
+     * It will start up a new shell light-weight application (only the and
+     *
+     * @param string $seeder Name of the seeder to call from the current seed
+     * @return void
+     */
+    protected function runCall($seeder)
+    {
+        $argv = [
+            'migrations',
+            'seed',
+            '--seed',
+            $seeder
+        ];
+        $input = new ArgvInput($argv);
+
+        $this->getApp()->run($input);
+    }
+
+    /**
+     * Get the specific MigrationsDispatcher instance needed to run a self::call() call
+     *
+     * @return MigrationsDispatcher
+     */
+    protected function getApp()
+    {
+        if ($this->app === null) {
+            $this->app = new MigrationsDispatcher(PHINX_VERSION);
+            $this->app->setAutoExit(false);
+            $this->app->setCatchExceptions(false);
+            $this->app->setRequested(true);
+
+            $seedCommand = new Seed();
+            $seedCommand->setRequested(true);
+            $this->app->add($seedCommand);
+        }
+
+        return $this->app;
     }
 }
