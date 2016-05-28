@@ -61,7 +61,7 @@ Cake\Cache\Cache::config([
 ]);
 
 if (!getenv('db_dsn')) {
-    putenv('db_dsn=sqlite:///:memory:');
+    putenv('db_dsn=sqlite://127.0.0.1/cakephp_test');
 }
 if (!getenv('DB')) {
     putenv('DB=sqlite');
