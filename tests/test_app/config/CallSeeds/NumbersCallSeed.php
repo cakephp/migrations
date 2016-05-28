@@ -4,7 +4,7 @@ use Migrations\AbstractSeed;
 /**
  * NumbersSeed seed.
  */
-class NumbersSeed extends AbstractSeed
+class NumbersCallSeed extends AbstractSeed
 {
     /**
      * Run Method.

@@ -68,6 +68,7 @@ class SeedTest extends TestCase
 
         $this->Connection = ConnectionManager::get('test');
         $application = new MigrationsDispatcher('testing');
+        $application->bindCommands();
         $this->command = $application->find('seed');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
     }
@@ -99,7 +100,8 @@ class SeedTest extends TestCase
 
         $commandTester->execute([
             'command' => $this->command->getName(),
-            '--connection' => 'test'
+            '--connection' => 'test',
+            '--seed' => 'NumbersSeed'
         ]);
 
         $display = $this->getDisplayFromOutput();
@@ -187,6 +189,34 @@ class SeedTest extends TestCase
 
         $display = $this->getDisplayFromOutput();
         $this->assertEmpty($display);
+        $migrations->rollback(['target' => 0]);
+    }
+
+    /**
+     * Test executing the "seed" command with seeders using the call method
+     *
+     * @return void
+     */
+    public function testExecuteSeedCallingOtherSeeders()
+    {
+        $params = [
+            '--connection' => 'test',
+            '--source' => 'CallSeeds'
+        ];
+        $commandTester = $this->getCommandTester($params);
+        $migrations = $this->getMigrations();
+        $migrations->migrate();
+
+        $commandTester->execute([
+            'command' => $this->command->getName(),
+            '--connection' => 'test',
+            '--source' => 'CallSeeds',
+            '--seed' => 'DatabaseSeed'
+        ]);
+
+        $display = $this->getDisplayFromOutput();
+        $this->assertTextContains('==== NumbersCallSeed: seeded', $display);
+        $this->assertTextContains('==== LettersSeed: seeded', $display);
         $migrations->rollback(['target' => 0]);
     }
 

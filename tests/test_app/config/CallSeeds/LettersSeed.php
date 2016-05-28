@@ -4,7 +4,7 @@ use Migrations\AbstractSeed;
 /**
  * NumbersSeed seed.
  */
-class NumbersSeed extends AbstractSeed
+class LettersSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -18,12 +18,14 @@ class NumbersSeed extends AbstractSeed
     {
         $data = [
             [
-                'number' => '10',
-                'radix' => '10'
+                'letter' => 'a'
+            ],
+            [
+                'letter' => 'b'
             ]
         ];
 
-        $table = $this->table('numbers');
+        $table = $this->table('letters');
         $table->insert($data)->save();
     }
 }

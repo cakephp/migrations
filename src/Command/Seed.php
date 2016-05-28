@@ -76,6 +76,10 @@ class Seed extends SeedRun
         if ($this->requested === true) {
             $output = new NullOutput();
         }
+
+        $this->setInput($input);
+        $this->bootstrap($input, $output);
+        $this->getManager()->setInput($input);
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
     }

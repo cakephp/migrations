@@ -75,3 +75,6 @@ Plugin::load('Migrations', [
 Plugin::load('TestBlog', [
     'path' => ROOT . 'Plugin' . DS . 'TestBlog' . DS,
 ]);
+if (!defined('PHINX_VERSION')) {
+    define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
+}

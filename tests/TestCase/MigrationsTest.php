@@ -754,6 +754,51 @@ class MigrationsTest extends TestCase
     }
 
     /**
+     * Tests seeding the database with seeder
+     *
+     * @return void
+     */
+    public function testSeedCallSeeder()
+    {
+        $this->migrations->migrate();
+
+        $seed = $this->migrations->seed(['source' => 'CallSeeds', 'seed' => 'DatabaseSeed']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '10',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('letters')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'letter' => 'a'
+            ],
+            [
+                'id' => '2',
+                'letter' => 'b'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $this->migrations->rollback(['target' => 0]);
+    }
+
+    /**
      * Tests that requesting a unexistant seed throws an exception
      *
      * @expectedException \InvalidArgumentException

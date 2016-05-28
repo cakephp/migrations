@@ -12,6 +12,7 @@
 namespace Migrations;
 
 use Phinx\Migration\Manager;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * Overrides Phinx Manager class in order to provide an interface
@@ -21,6 +22,13 @@ class CakeManager extends Manager
 {
 
     public $maxNameLength = 0;
+
+    /**
+     * Instance of InputInterface the Manager is dealing with for the current shell call
+     *
+     * @var \Symfony\Component\Console\Input\InputInterface
+     */
+    protected $input;
 
     /**
      * Reset the migrations stored in the object
@@ -317,5 +325,39 @@ class CakeManager extends Manager
         }
 
         return $class;
+    }
+
+    /**
+     * Sets the InputInterface the Manager is dealing with for the current shell call
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input Instance of InputInterface
+     * @return void
+     */
+    public function setInput(InputInterface $input)
+    {
+        $this->input = $input;
+    }
+
+    /**
+     * Overload the basic behavior to add an instance of the InputInterface the shell call is
+     * using in order to gives the ability to the AbstractSeed::call() method to propagate options
+     * to the other MigrationsDispatcher it is generating.
+     *
+     * {@inheritdoc}
+     */
+    public function getSeeds()
+    {
+        parent::getSeeds();
+        if (empty($this->seeds)) {
+            return $this->seeds;
+        }
+
+        foreach ($this->seeds as $class => $instance) {
+            if ($instance instanceof AbstractSeed) {
+                $instance->setInput($this->input);
+            }
+        }
+
+        return $this->seeds;
     }
 }

@@ -72,6 +72,7 @@ class DumpTest extends TestCase
 
         $this->Connection = ConnectionManager::get('test');
         $application = new MigrationsDispatcher('testing');
+        $application->bindCommands();
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;

@@ -4,7 +4,7 @@ use Migrations\AbstractSeed;
 /**
  * NumbersSeed seed.
  */
-class NumbersSeed extends AbstractSeed
+class DatabaseSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -16,14 +16,7 @@ class NumbersSeed extends AbstractSeed
      */
     public function run()
     {
-        $data = [
-            [
-                'number' => '10',
-                'radix' => '10'
-            ]
-        ];
-
-        $table = $this->table('numbers');
-        $table->insert($data)->save();
+        $this->call('NumbersCallSeed');
+        $this->call('LettersSeed');
     }
 }

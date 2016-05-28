@@ -14,6 +14,7 @@ namespace Migrations;
 use Migrations\Command\Seed;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * Class AbstractSeed
@@ -32,6 +33,13 @@ abstract class AbstractSeed extends BaseAbstractSeed
     protected $app;
 
     /**
+     * InputInterface this Seed class is being used with.
+     *
+     * @var \Symfony\Component\Console\Input\InputInterface
+     */
+    protected $input;
+
+    /**
      * Gives the ability to a seeder to call another seeder.
      * This is particularly useful if you need to run the seeders of your applications in a specific sequences,
      * for instance to respect foreign key constraints.
@@ -48,7 +56,6 @@ abstract class AbstractSeed extends BaseAbstractSeed
             . ' <comment>seeding</comment>'
         );
 
-        // Execute the seeder and log the time elapsed.
         $start = microtime(true);
         $this->runCall($seeder);
         $end = microtime(true);
@@ -77,8 +84,26 @@ abstract class AbstractSeed extends BaseAbstractSeed
             '--seed',
             $seeder
         ];
-        $input = new ArgvInput($argv);
 
+        $plugin = $this->input->getOption('plugin');
+        if ($plugin !== null) {
+            $argv[] = '--plugin';
+            $argv[] = $plugin;
+        }
+
+        $connection = $this->input->getOption('connection');
+        if ($connection !== null) {
+            $argv[] = '--connection';
+            $argv[] = $connection;
+        }
+
+        $source = $this->input->getOption('source');
+        if ($source !== null) {
+            $argv[] = '--source';
+            $argv[] = $source;
+        }
+
+        $input = new ArgvInput($argv);
         $this->getApp()->run($input);
     }
 
@@ -101,5 +126,16 @@ abstract class AbstractSeed extends BaseAbstractSeed
         }
 
         return $this->app;
+    }
+
+    /**
+     * Sets the InputInterface this Seed class is being used with.
+     *
+     * @param InputInterface $input
+     * @return void
+     */
+    public function setInput(InputInterface $input)
+    {
+        $this->input = $input;
     }
 }
