@@ -47,7 +47,6 @@ class TheDiffSimpleMysql extends AbstractMigration
                 ]
             )
             ->update();
-
     }
 
     public function down()
