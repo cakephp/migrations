@@ -271,6 +271,108 @@ class MigrationDiffTaskTest extends TestCase
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
+
+        $dir = new Folder($destinationConfigDir);
+        $files = $dir->find('(.*)TheDiff(.*)');
+        $file = current($files);
+        $file = new File($dir->pwd() . DS . $file);
+        $file->open();
+        $versionParts = explode('_', $file->name());
+        $file->close();
+        rename($destinationConfigDir . $file->name, $destination);
+
+        $connection->newQuery()
+            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
+            ->into('phinxlog')
+            ->values([
+                'version' => 20160415220805,
+                'migration_name' => $versionParts[1],
+                'start_time' => '2016-05-22 16:51:46',
+                'end_time' => '2016-05-22 16:51:46',
+            ])
+            ->execute();
+        $this->getMigrations('MigrationsDiffSimple')->rollback(['target' => 0]);
+        unlink($destinationDumpPath);
+        unlink($destination);
+    }
+
+    /**
+     * Tests baking a simpler diff than above
+     * Introduced after finding a bug when baking a simple diff with less operations
+     *
+     * @return void
+     */
+    public function testBakingDiffAddRemove()
+    {
+        $this->skipIf(env('DB') === 'sqlite');
+
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
+            . DS . 'addremove' . DS;
+        $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+
+        $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffAddRemove' . DS;
+        $destination = $destinationConfigDir . '20160415220805_TheDiffAddRemove' . ucfirst(env('DB')) . '.php';
+        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+        copy($diffMigrationsPath, $destination);
+
+        $this->getMigrations('MigrationsDiffAddRemove')->migrate();
+
+        unlink($destination);
+        copy($diffDumpPath, $destinationDumpPath);
+
+        $connection = ConnectionManager::get('test_comparisons');
+        $connection->newQuery()
+            ->delete('phinxlog')
+            ->where(['version' => 20160415220805])
+            ->execute();
+
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
+            . DS . 'addremove' . DS;
+
+        $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
+        $this->Task
+            ->method('getDumpSchema')
+            ->will($this->returnValue(unserialize(file_get_contents($destinationDumpPath))));
+
+        $this->Task->expects($this->at(1))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations mark_migrated'));
+        $this->Task->expects($this->at(2))
+            ->method('dispatchShell')
+            ->with($this->stringContains('migrations dump'));
+
+        $this->Task->params['connection'] = 'test_comparisons';
+        $this->Task->pathFragment = 'config/MigrationsDiffAddRemove/';
+        $this->Task->connection = 'test_comparisons';
+
+        $bakeName = $this->getBakeName('TheDiffAddRemove');
+        $result = $this->Task->bake($bakeName);
+
+        $this->assertCorrectSnapshot($bakeName, $result);
+
+        $dir = new Folder($destinationConfigDir);
+        $files = $dir->find('(.*)TheDiff(.*)');
+        $file = current($files);
+        $file = new File($dir->pwd() . DS . $file);
+        $file->open();
+        $versionParts = explode('_', $file->name());
+        $file->close();
+        rename($destinationConfigDir . $file->name, $destination);
+
+        $connection->newQuery()
+            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
+            ->into('phinxlog')
+            ->values([
+                'version' => 20160415220805,
+                'migration_name' => $versionParts[1],
+                'start_time' => '2016-05-22 16:51:46',
+                'end_time' => '2016-05-22 16:51:46',
+            ])
+            ->execute();
+        $this->getMigrations('MigrationsDiffAddRemove')->rollback(['target' => 0]);
+        unlink($destinationDumpPath);
+        unlink($destination);
     }
 
     /**
