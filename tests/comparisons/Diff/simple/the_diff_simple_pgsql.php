@@ -47,7 +47,6 @@ class TheDiffSimplePgsql extends AbstractMigration
                 ]
             )
             ->update();
-
     }
 
     public function down()
