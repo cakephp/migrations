@@ -791,6 +791,14 @@ class MigrationsTest extends TestCase
             [
                 'id' => '2',
                 'letter' => 'b'
+            ],
+            [
+                'id' => '3',
+                'letter' => 'c'
+            ],
+            [
+                'id' => '4',
+                'letter' => 'd'
             ]
         ];
         $this->assertEquals($expected, $result);
@@ -838,7 +846,7 @@ class MigrationsTest extends TestCase
             $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
             $this->assertTrue($result);
 
-            $this->migrations->rollback(['source' => 'SnapshotTests']);
+            $this->migrations->rollback(['target' => 0, 'source' => 'SnapshotTests']);
             unlink($destination . $copiedFileName);
         }
     }

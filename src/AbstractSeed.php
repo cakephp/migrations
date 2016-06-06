@@ -12,6 +12,7 @@
 namespace Migrations;
 
 use Migrations\Command\Seed;
+use Phinx\Migration\Manager;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,14 +24,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 abstract class AbstractSeed extends BaseAbstractSeed
 {
-    /**
-     * Instance of MigrationsDispatcher
-     * It is a light-weight instance of the application (it only contains the Seed command)
-     * with custom settings
-     *
-     * @var MigrationsDispatcher
-     */
-    protected $app;
 
     /**
      * InputInterface this Seed class is being used with.
@@ -78,14 +71,15 @@ abstract class AbstractSeed extends BaseAbstractSeed
      */
     protected function runCall($seeder)
     {
+        list($pluginName, $seeder) = pluginSplit($seeder);
+
         $argv = [
-            'migrations',
             'seed',
             '--seed',
             $seeder
         ];
 
-        $plugin = $this->input->getOption('plugin');
+        $plugin = $pluginName ?: $this->input->getOption('plugin');
         if ($plugin !== null) {
             $argv[] = '--plugin';
             $argv[] = $plugin;
@@ -103,29 +97,16 @@ abstract class AbstractSeed extends BaseAbstractSeed
             $argv[] = $source;
         }
 
-        $input = new ArgvInput($argv);
-        $this->getApp()->run($input);
-    }
+        $seedCommand = new Seed();
+        $input = new ArgvInput($argv, $seedCommand->getDefinition());
+        $seedCommand->setInput($input);
+        $config = $seedCommand->getConfig();
 
-    /**
-     * Get the specific MigrationsDispatcher instance needed to run a self::call() call
-     *
-     * @return MigrationsDispatcher
-     */
-    protected function getApp()
-    {
-        if ($this->app === null) {
-            $this->app = new MigrationsDispatcher(PHINX_VERSION);
-            $this->app->setAutoExit(false);
-            $this->app->setCatchExceptions(false);
-            $this->app->setRequested(true);
-
-            $seedCommand = new Seed();
-            $seedCommand->setRequested(true);
-            $this->app->add($seedCommand);
-        }
-
-        return $this->app;
+        require_once($config->getSeedPath() . DS . $seeder . '.php');
+        $seeder = new $seeder();
+        $seeder->setOutput($this->getOutput());
+        $seeder->setAdapter($this->getAdapter());
+        $seeder->run();
     }
 
     /**

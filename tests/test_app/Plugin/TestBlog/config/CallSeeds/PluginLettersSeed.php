@@ -4,7 +4,7 @@ use Migrations\AbstractSeed;
 /**
  * NumbersSeed seed.
  */
-class DatabaseSeed extends AbstractSeed
+class PluginLettersSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -16,8 +16,16 @@ class DatabaseSeed extends AbstractSeed
      */
     public function run()
     {
-        $this->call('NumbersCallSeed');
-        $this->call('LettersSeed');
-        $this->call('TestBlog.PluginLettersSeed');
+        $data = [
+            [
+                'letter' => 'c'
+            ],
+            [
+                'letter' => 'd'
+            ]
+        ];
+
+        $table = $this->table('letters');
+        $table->insert($data)->save();
     }
 }
