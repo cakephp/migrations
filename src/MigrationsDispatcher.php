@@ -21,12 +21,6 @@ use Symfony\Component\Console\Application;
 class MigrationsDispatcher extends Application
 {
     /**
-     * Whether this application was loaded and requested through another shell
-     * @var bool
-     */
-    protected $requested = false;
-
-    /**
      * Class Constructor.
      *
      * Initialize the Phinx console application.
@@ -36,35 +30,12 @@ class MigrationsDispatcher extends Application
     public function __construct($version)
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
-    }
-
-    /**
-     * Bind the commands to the shell application
-     *
-     * @return void
-     */
-    public function bindCommands()
-    {
         $this->add(new Command\Create());
         $this->add(new Command\Dump());
         $this->add(new Command\MarkMigrated());
         $this->add(new Command\Migrate());
         $this->add(new Command\Rollback());
-
-        $seedCommand = new Command\Seed();
-        $seedCommand->setRequested($this->requested);
-        $this->add($seedCommand);
+        $this->add(new Command\Seed());
         $this->add(new Command\Status());
-    }
-
-    /**
-     * Sets whether this application was loaded and requested through another shell
-     *
-     * @param bool $requested Requested status. If true, it means that this shell was invoked through another shell
-     * @return void
-     */
-    public function setRequested($requested)
-    {
-        $this->requested = (bool)$requested;
     }
 }

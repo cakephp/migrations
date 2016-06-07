@@ -65,7 +65,6 @@ class MarkMigratedTest extends TestCase
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
         $application = new MigrationsDispatcher('testing');
-        $application->bindCommands();
         $this->command = $application->find('mark_migrated');
         $this->commandTester = new CommandTester($this->command);
     }
@@ -155,7 +154,6 @@ class MarkMigratedTest extends TestCase
         $this->Connection->execute('DELETE FROM phinxlog');
 
         $application = new MigrationsDispatcher('testing');
-        $application->bindCommands();
         $buggyCommand = $application->find('mark_migrated');
         $buggyCommand->setManager($manager);
         $buggyCommandTester = new CommandTester($buggyCommand);

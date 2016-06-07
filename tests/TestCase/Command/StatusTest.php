@@ -78,7 +78,6 @@ class StatusTest extends TestCase
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
         $application = new MigrationsDispatcher('testing');
-        $application->bindCommands();
         $this->command = $application->find('status');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
     }

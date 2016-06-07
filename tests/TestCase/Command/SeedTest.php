@@ -68,7 +68,6 @@ class SeedTest extends TestCase
 
         $this->Connection = ConnectionManager::get('test');
         $application = new MigrationsDispatcher('testing');
-        $application->bindCommands();
         $this->command = $application->find('seed');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
     }
