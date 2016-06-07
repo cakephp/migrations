@@ -799,6 +799,14 @@ class MigrationsTest extends TestCase
             [
                 'id' => '4',
                 'letter' => 'd'
+            ],
+            [
+                'id' => '5',
+                'letter' => 'e'
+            ],
+            [
+                'id' => '6',
+                'letter' => 'f'
             ]
         ];
         $this->assertEquals($expected, $result);

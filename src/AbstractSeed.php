@@ -106,6 +106,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
         $seeder = new $seeder();
         $seeder->setOutput($this->getOutput());
         $seeder->setAdapter($this->getAdapter());
+        $seeder->setInput($this->input);
         $seeder->run();
     }
 
