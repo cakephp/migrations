@@ -60,13 +60,15 @@ class MigrationSnapshotTaskTest extends TestCase
     public function getTaskMock($mockedMethods = [])
     {
         $mockedMethods = $mockedMethods ?: ['in', 'err', 'dispatchShell', '_stop', 'findTables', 'fetchTableName'];
-        $inputOutput = $this->getMock('Cake\Console\ConsoleIo', [], [], '', false);
+        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $task = $this->getMock(
-            'Migrations\Shell\Task\MigrationSnapshotTask',
-            $mockedMethods,
-            [$inputOutput]
-        );
+        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationSnapshotTask')
+            ->setMethods($mockedMethods)
+            ->setConstructorArgs([$inputOutput])
+            ->getMock();
+
         $task->name = 'Migration';
         $task->connection = 'test';
         $task->BakeTemplate = new BakeTemplateTask($inputOutput);
@@ -83,10 +85,9 @@ class MigrationSnapshotTaskTest extends TestCase
      */
     public function testGetTableNames()
     {
-        $class = $this->getMock(
-            'Migrations\Test\TestCase\Shell\TestClassWithSnapshotTrait',
-            ['findTables', 'fetchTableName']
-        );
+        $class = $this->getMockBuilder('\Migrations\Test\TestCase\Shell\TestClassWithSnapshotTrait')
+            ->setMethods(['findTables', 'fetchTableName'])
+            ->getMock();
 
         $class->expects($this->any())
             ->method('findTables')

@@ -32,13 +32,15 @@ class SeedTaskTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Seeds' . DS;
-        $inputOutput = $this->getMock('Cake\Console\ConsoleIo', [], [], '', false);
+        $inputOutput = $this->getMockBuilder('Cake\Console\ConsoleIo')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $this->Task = $this->getMock(
-            'Migrations\Shell\Task\SeedTask',
-            ['in', 'err', 'createFile', '_stop', 'error'],
-            [$inputOutput]
-        );
+        $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\SeedTask')
+            ->setMethods(['in', 'err', 'createFile', '_stop', 'error'])
+            ->setConstructorArgs([$inputOutput])
+            ->getMock();
+
         $this->Task->name = 'Seeds';
         $this->Task->connection = 'test';
         $this->Task->BakeTemplate = new BakeTemplateTask($inputOutput);
