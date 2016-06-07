@@ -14,7 +14,7 @@
  */
 %>
 <?php
-use Phinx\Seed\AbstractSeed;
+use Migrations\AbstractSeed;
 
 /**
  * <%= $name %> seed.
