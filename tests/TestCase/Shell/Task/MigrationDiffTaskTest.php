@@ -56,11 +56,11 @@ class MigrationDiffTaskTest extends TestCase
         $this->out = new TestCompletionStringOutput();
         $io = new ConsoleIo($this->out);
 
-        $task = $this->getMock(
-            'Migrations\Shell\Task\MigrationDiffTask',
-            $mockedMethods,
-            [$io]
-        );
+        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationDiffTask')
+            ->setMethods($mockedMethods)
+            ->setConstructorArgs([$io])
+            ->getMock();
+        
         $task->name = 'Migration';
         $task->connection = 'test';
         $task->BakeTemplate = new BakeTemplateTask($io);

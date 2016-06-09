@@ -61,7 +61,7 @@ Cake\Cache\Cache::config([
 ]);
 
 if (!getenv('db_dsn')) {
-    putenv('db_dsn=sqlite:///:memory:');
+    putenv('db_dsn=sqlite://127.0.0.1/cakephp_test');
 }
 if (!getenv('DB')) {
     putenv('DB=sqlite');
@@ -75,3 +75,6 @@ Plugin::load('Migrations', [
 Plugin::load('TestBlog', [
     'path' => ROOT . 'Plugin' . DS . 'TestBlog' . DS,
 ]);
+if (!defined('PHINX_VERSION')) {
+    define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
+}

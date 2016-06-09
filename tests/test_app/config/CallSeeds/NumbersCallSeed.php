@@ -2,9 +2,9 @@
 use Migrations\AbstractSeed;
 
 /**
- * Articles seed.
+ * NumbersSeed seed.
  */
-class ArticlesSeed extends AbstractSeed
+class NumbersCallSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -13,14 +13,17 @@ class ArticlesSeed extends AbstractSeed
      *
      * More information on writing seeders is available here:
      * http://docs.phinx.org/en/latest/seeding.html
-     *
-     * @return void
      */
     public function run()
     {
-        $data = [];
+        $data = [
+            [
+                'number' => '10',
+                'radix' => '10'
+            ]
+        ];
 
-        $table = $this->table('articles');
+        $table = $this->table('numbers');
         $table->insert($data)->save();
     }
 }

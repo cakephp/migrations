@@ -754,6 +754,67 @@ class MigrationsTest extends TestCase
     }
 
     /**
+     * Tests seeding the database with seeder
+     *
+     * @return void
+     */
+    public function testSeedCallSeeder()
+    {
+        $this->migrations->migrate();
+
+        $seed = $this->migrations->seed(['source' => 'CallSeeds', 'seed' => 'DatabaseSeed']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '10',
+                'radix' => '10'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $result = $this->Connection->newQuery()
+            ->select(['*'])
+            ->from('letters')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'letter' => 'a'
+            ],
+            [
+                'id' => '2',
+                'letter' => 'b'
+            ],
+            [
+                'id' => '3',
+                'letter' => 'c'
+            ],
+            [
+                'id' => '4',
+                'letter' => 'd'
+            ],
+            [
+                'id' => '5',
+                'letter' => 'e'
+            ],
+            [
+                'id' => '6',
+                'letter' => 'f'
+            ]
+        ];
+        $this->assertEquals($expected, $result);
+
+        $this->migrations->rollback(['target' => 0]);
+    }
+
+    /**
      * Tests that requesting a unexistant seed throws an exception
      *
      * @expectedException \InvalidArgumentException
@@ -793,7 +854,7 @@ class MigrationsTest extends TestCase
             $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
             $this->assertTrue($result);
 
-            $this->migrations->rollback(['source' => 'SnapshotTests']);
+            $this->migrations->rollback(['target' => 0, 'source' => 'SnapshotTests']);
             unlink($destination . $copiedFileName);
         }
     }

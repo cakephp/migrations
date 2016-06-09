@@ -139,11 +139,10 @@ class MarkMigratedTest extends TestCase
         $env = $this->command->getManager()->getEnvironment('default');
         $migrations = $this->command->getManager()->getMigrations();
 
-        $manager = $this->getMock(
-            '\Migrations\CakeManager',
-            ['getEnvironment', 'markMigrated', 'getMigrations'],
-            [$config, new StreamOutput(fopen('php://memory', 'a', false))]
-        );
+        $manager = $this->getMockBuilder('\Migrations\CakeManager')
+            ->setMethods(['getEnvironment', 'markMigrated', 'getMigrations'])
+            ->setConstructorArgs([$config, new StreamOutput(fopen('php://memory', 'a', false))])
+            ->getMock();
 
         $manager->expects($this->any())
             ->method('getEnvironment')->will($this->returnValue($env));

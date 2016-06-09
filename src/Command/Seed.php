@@ -54,6 +54,10 @@ class Seed extends SeedRun
         if ($event->isStopped()) {
             return $event->result;
         }
+
+        $this->setInput($input);
+        $this->bootstrap($input, $output);
+        $this->getManager()->setInput($input);
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
     }

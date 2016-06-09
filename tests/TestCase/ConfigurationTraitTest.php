@@ -42,9 +42,9 @@ class ConfigurationTraitTest extends TestCase
     public function driversProvider()
     {
         return [
-            ['mysql', $this->getMock('Cake\Database\Driver\Mysql')],
-            ['pgsql', $this->getMock('Cake\Database\Driver\Postgres')],
-            ['sqlite', $this->getMock('Cake\Database\Driver\Sqlite')]
+            ['mysql', $this->getMockBuilder('\Cake\Database\Driver\Mysql')->getMock()],
+            ['pgsql', $this->getMockBuilder('\Cake\Database\Driver\Postgres')->getMock()],
+            ['sqlite', $this->getMockBuilder('\Cake\Database\Driver\Sqlite')->getMock()]
         ];
     }
 
@@ -86,7 +86,7 @@ class ConfigurationTraitTest extends TestCase
             ]
         ]);
 
-        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
         $this->command->setInput($input);
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
@@ -122,7 +122,7 @@ class ConfigurationTraitTest extends TestCase
     public function testCacheMetadataDisabled()
     {
         $input = new ArrayInput([], $this->command->getDefinition());
-        $output = $this->getMock('Symfony\Component\Console\Output\OutputInterface');
+        $output = $this->getMockBuilder('\Symfony\Component\Console\Output\OutputInterface')->getMock();
         $this->command->setInput($input);
 
         $input->setOption('connection', 'test');
@@ -140,7 +140,7 @@ class ConfigurationTraitTest extends TestCase
     {
         $tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
         Plugin::load('MyPlugin', ['path' => $tmpPath]);
-        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
         $this->command->setInput($input);
 
         $input->expects($this->at(1))
@@ -182,7 +182,7 @@ class ConfigurationTraitTest extends TestCase
             ]
         ]);
 
-        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
         $this->command->setInput($input);
 
         $input->expects($this->at(5))

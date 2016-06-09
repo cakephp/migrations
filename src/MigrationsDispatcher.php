@@ -20,7 +20,6 @@ use Symfony\Component\Console\Application;
  */
 class MigrationsDispatcher extends Application
 {
-
     /**
      * Class Constructor.
      *

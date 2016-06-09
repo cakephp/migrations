@@ -2,9 +2,9 @@
 use Migrations\AbstractSeed;
 
 /**
- * Articles seed.
+ * NumbersSeed seed.
  */
-class ArticlesSeed extends AbstractSeed
+class PluginSubLettersSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -13,14 +13,19 @@ class ArticlesSeed extends AbstractSeed
      *
      * More information on writing seeders is available here:
      * http://docs.phinx.org/en/latest/seeding.html
-     *
-     * @return void
      */
     public function run()
     {
-        $data = [];
+        $data = [
+            [
+                'letter' => 'e'
+            ],
+            [
+                'letter' => 'f'
+            ]
+        ];
 
-        $table = $this->table('articles');
+        $table = $this->table('letters');
         $table->insert($data)->save();
     }
 }
