@@ -64,7 +64,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
 
     /**
      * Calls another seeder from this seeder.
-     * It will start up a new shell light-weight application (only the and
+     * It will load the Seed class you are calling and run it.
      *
      * @param string $seeder Name of the seeder to call from the current seed
      * @return void
