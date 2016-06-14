@@ -9,7 +9,7 @@
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace TestApp\Model\Table;;
+namespace TestApp\Model\Table;
 
 use Cake\ORM\Table;
 
@@ -19,4 +19,14 @@ use Cake\ORM\Table;
  */
 class NumbersTable extends Table
 {
+    public function initialize(array $config)
+    {
+        $db = env('DB');
+        $schema = 'cakephp_test.';
+        if ($db === 'pgsql') {
+            $schema = '';
+        }
+
+        $this->table($schema . 'numbers');
+    }
 }

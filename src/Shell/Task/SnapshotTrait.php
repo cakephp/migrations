@@ -132,6 +132,16 @@ trait SnapshotTrait
             }
 
             foreach ($tableNamesInModel as $num => $table) {
+                if (strpos($table, '.') !== false) {
+                    $splitted = array_reverse(explode('.', $table, 2));
+
+                    $config = ConnectionManager::config($this->connection);
+                    $key = isset($config['schema']) ? 'schema' : 'database';
+                    if ($config[$key] === $splitted[1]) {
+                        $table = $splitted[0];
+                    }
+                }
+
                 if (!in_array($table, $tables)) {
                     unset($tableNamesInModel[$num]);
                 }
@@ -214,6 +224,11 @@ trait SnapshotTrait
         }
 
         $namespacedClassName = App::className($className, 'Model/Table', 'Table');
+
+        if (!class_exists($namespacedClassName)) {
+            return $tables;
+        }
+
         $reflection = new ReflectionClass($namespacedClassName);
         if (!$reflection->isInstantiable()) {
             return $tables;

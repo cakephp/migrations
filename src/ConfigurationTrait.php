@@ -37,6 +37,13 @@ trait ConfigurationTrait
     protected $configuration;
 
     /**
+     * Connection name to be used for this request
+     *
+     * @var string
+     */
+    protected $connection;
+
+    /**
      * The console input instance
      *
      * @var \Symfony\Component\Console\Input\Input
@@ -198,6 +205,7 @@ trait ConfigurationTrait
     {
         parent::bootstrap($input, $output);
         $name = $this->getConnectionName($input);
+        $this->connection = $name;
         ConnectionManager::alias($name, 'default');
         $connection = ConnectionManager::get($name);
 
