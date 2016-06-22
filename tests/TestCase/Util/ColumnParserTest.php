@@ -110,6 +110,25 @@ class ColumnParserTest extends TestCase
                 ],
             ],
         ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated']));
+
+        $this->assertEquals([
+            'id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11
+                ],
+            ],
+            'name' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'limit' => 255,
+                ],
+            ],
+        ], $this->columnParser->parseFields(['id', 'name:string?']));
     }
 
     /**
