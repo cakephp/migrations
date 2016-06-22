@@ -90,6 +90,7 @@ class ColumnParserTest extends TestCase
                 'options' => [
                     'null' => true,
                     'default' => null,
+                    'limit' => 11,
                 ],
             ],
         ], $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']));
