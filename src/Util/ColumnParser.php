@@ -16,14 +16,14 @@ class ColumnParser
      *
      * @var string
      */
-    protected $regexpParseColumn = '/^(\w*)(?::(\w*\[?\d*\]?))?(?::(\w*))?(?::(\w*))?/';
+    protected $regexpParseColumn = '/^(\w*)(?::(\w*\??\[?\d*\]?))?(?::(\w*))?(?::(\w*))?/';
 
     /**
      * Regex used to parse the field type and length
      *
      * @var string
      */
-    protected $regexpParseField = '/(\w+)\[(\d+)\]/';
+    protected $regexpParseField = '/(\w+\??)\[(\d+)\]/';
 
     /**
      * Parses a list of arguments into an array of fields
@@ -51,11 +51,14 @@ class ColumnParser
                 }
             }
 
+            $nullable = substr($type, -1) == '?';
+            $type = $nullable ? substr($type, 0, strlen($type)-1) : $type;
+
             list($type, $length) = $this->getTypeAndLength($field, $type);
             $fields[$field] = [
                 'columnType' => $type,
                 'options' => [
-                    'null' => false,
+                    'null' => $nullable,
                     'default' => null,
                 ]
             ];
