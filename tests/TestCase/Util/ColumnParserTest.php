@@ -111,7 +111,7 @@ class ColumnParserTest extends TestCase
             ],
         ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated']));
 
-        $this->assertEquals([
+        $expected = [
             'id' => [
                 'columnType' => 'integer',
                 'options' => [
@@ -144,7 +144,9 @@ class ColumnParserTest extends TestCase
                     'limit' => 11,
                 ],
             ],
-        ], $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']));
+        ];
+        $actual = $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']);
+        $this->assertEquals($expected, $actual);
     }
 
     /**
