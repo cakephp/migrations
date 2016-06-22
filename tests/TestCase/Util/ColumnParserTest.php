@@ -77,23 +77,7 @@ class ColumnParserTest extends TestCase
                     'limit' => 255,
                 ],
             ],
-            'description' => [
-                'columnType' => 'string',
-                'options' => [
-                    'null' => true,
-                    'default' => null,
-                    'limit' => 255,
-                ],
-            ],
-            'age' => [
-                'columnType' => 'integer',
-                'options' => [
-                    'null' => true,
-                    'default' => null,
-                    'limit' => 11,
-                ],
-            ],
-        ], $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']));
+        ], $this->columnParser->parseFields(['id', 'name']));
 
         $this->assertEquals([
             'id' => [
@@ -144,7 +128,23 @@ class ColumnParserTest extends TestCase
                     'limit' => 255,
                 ],
             ],
-        ], $this->columnParser->parseFields(['id', 'name']));
+            'description' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'limit' => 255,
+                ],
+            ],
+            'age' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ], $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']));
     }
 
     /**
