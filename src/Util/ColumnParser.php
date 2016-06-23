@@ -52,7 +52,7 @@ class ColumnParser
             }
 
             $nullable = substr($type, -1) === '?';
-            $type = $nullable ? substr($type, 0, strlen($type) - 1) : $type;
+            $type = $nullable ? substr($type, 0, -1) : $type;
 
             list($type, $length) = $this->getTypeAndLength($field, $type);
             $fields[$field] = [
