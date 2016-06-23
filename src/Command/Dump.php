@@ -78,7 +78,7 @@ class Dump extends AbstractCommand
         $collection = $connection->schemaCollection();
 
         $options = [
-            'require-table' => true,
+            'require-table' => false,
             'plugin' => $this->getPlugin($input)
         ];
         $tables = $this->getTablesToBake($collection, $options);
