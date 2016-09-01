@@ -20,7 +20,8 @@
     "require": {
         "php": ">=5.4",
         "robmorgan/phinx": "0.5.3",
-        "cakephp/cakephp": "~3.1"
+        "cakephp/cakephp": "~3.1",
+        "cakephp/plugin-installer": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
