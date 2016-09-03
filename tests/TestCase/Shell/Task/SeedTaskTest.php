@@ -23,7 +23,7 @@ class SeedTaskTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = ['plugin.migrations.users', 'plugin.migrations.events'];
+    public $fixtures = ['plugin.migrations.events'];
 
     /**
      * ConsoleIo mock
@@ -86,7 +86,7 @@ class SeedTaskTest extends TestCase
      */
     public function testWithData()
     {
-        $this->Task->args = ['users'];
+        $this->Task->args = ['events'];
         $this->Task->params['data'] = true;
 
         $path = __FUNCTION__ . '.php';
@@ -94,7 +94,7 @@ class SeedTaskTest extends TestCase
             $path = getenv('DB') . DS . $path;
         }
 
-        $result = $this->Task->bake('Users');
+        $result = $this->Task->bake('Events');
         $this->assertSameAsFile($path, $result);
     }
 
@@ -105,11 +105,11 @@ class SeedTaskTest extends TestCase
      */
     public function testWithDataAndFields()
     {
-        $this->Task->args = ['users'];
+        $this->Task->args = ['events'];
         $this->Task->params['data'] = true;
-        $this->Task->params['fields'] = 'username,password';
+        $this->Task->params['fields'] = 'title,description';
 
-        $result = $this->Task->bake('Users');
+        $result = $this->Task->bake('Events');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
@@ -120,7 +120,7 @@ class SeedTaskTest extends TestCase
      */
     public function testWithDataAndLimit()
     {
-        $this->Task->args = ['users'];
+        $this->Task->args = ['events'];
         $this->Task->params['data'] = true;
         $this->Task->params['limit'] = 2;
 
@@ -129,23 +129,7 @@ class SeedTaskTest extends TestCase
             $path = getenv('DB') . DS . $path;
         }
 
-        $result = $this->Task->bake('Users');
-        $this->assertSameAsFile($path, $result);
-    }
-
-    /**
-     * Test with table specified
-     *
-     * @return void
-     */
-    public function testWithQuotesInData()
-    {
-        $this->Task->args = ['events'];
-        $this->Task->params['data'] = true;
-        $this->Task->params['fields'] = 'title,description';
-
         $result = $this->Task->bake('Events');
-
-        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+        $this->assertSameAsFile($path, $result);
     }
 }

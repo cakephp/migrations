@@ -2,9 +2,9 @@
 use Migrations\AbstractSeed;
 
 /**
- * Users seed.
+ * Events seed.
  */
-class UsersSeed extends AbstractSeed
+class EventsSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -21,21 +21,19 @@ class UsersSeed extends AbstractSeed
         $data = [
             [
                 'id' => '1',
-                'username' => 'mariano',
-                'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
-                'created' => '2007-03-17 01:16:23',
-                'updated' => '2007-03-17 01:18:31',
+                'title' => 'Lorem ipsum dolor sit amet',
+                'description' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
+                'published' => 'Y',
             ],
             [
                 'id' => '2',
-                'username' => 'nate',
-                'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
-                'created' => '2008-03-17 01:18:23',
-                'updated' => '2008-03-17 01:20:31',
+                'title' => 'Second event',
+                'description' => 'Second event description.',
+                'published' => 'Y',
             ],
         ];
 
-        $table = $this->table('users');
+        $table = $this->table('events');
         $table->insert($data)->save();
     }
 }
