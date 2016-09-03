@@ -17,6 +17,7 @@ use Bake\Shell\Task\SimpleBakeTask;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 
 /**
@@ -84,10 +85,33 @@ class SeedTask extends SimpleBakeTask
             $table = $this->params['table'];
         }
 
+        $records = false;
+        if ($this->param('data')) {
+            $limit = (int)$this->param('limit');
+
+            $fields = $this->param('fields') ?: '*';
+            if ($fields != '*') {
+                $fields = explode(',', $fields);
+            }
+
+            $connection = ConnectionManager::get($this->connection);
+
+            $query = $connection->newQuery()
+                ->from($table)
+                ->select($fields);
+
+            if ($limit) {
+                $query->limit($limit);
+            }
+
+            $records = $connection->execute($query)->fetchAll('assoc');
+            $records = $this->prettifyArray($records);
+        }
+
         return [
             'className' => $this->BakeTemplate->viewVars['name'],
             'namespace' => $namespace,
-            'records' => false,
+            'records' => $records,
             'table' => $table,
         ];
     }
@@ -140,8 +164,90 @@ class SeedTask extends SimpleBakeTask
             'choices' => $bakeThemes
         ])->addArgument('name', [
             'help' => 'Name of the seed to bake. Can use Plugin.name to bake plugin models.'
+        ])->addOption('data', [
+            'short' => 'd',
+            'boolean' => true,
+            'help' => 'Include data from the table to the seed'
+        ])->addOption('fields', [
+            'short' => 'f',
+            'default' => '*',
+            'help' => 'If including data, comma separated list of fields to select (all fields by default)',
+        ])->addOption('limit', [
+            'short' => 'l',
+            'help' => 'If including data, max number of rows to select'
         ]);
 
         return $parser;
+    }
+
+    /**
+     * Prettify var_export of an array output
+     *
+     * @param array $array              Array to prettify
+     * @param int $tabCount             Initial tab count
+     * @param string $indentCharacter   Desired indent for the code.
+     * @return string
+     */
+    protected function prettifyArray($array, $tabCount = 3, $indentCharacter = "    ")
+    {
+        $content = var_export($array, true);
+
+        $lines = explode("\n", $content);
+
+        $inString = false;
+
+        foreach ($lines as $k => &$line) {
+            if ($k == 0) {
+                // First row
+                $line = '[';
+                continue;
+            } elseif ($k == count($lines) - 1) {
+                // Last row
+                $line = str_repeat($indentCharacter, --$tabCount) . ']';
+                continue;
+            }
+
+            $line = ltrim($line);
+
+            if (!$inString) {
+                if ($line == '),') {
+                    //Check for closing bracket
+                    $line = '],';
+                    $tabCount--;
+                } elseif (preg_match("/^\d+\s\=\>\s$/", $line)) {
+                    // Mark '0 =>' kind of lines to remove
+                    $line = false;
+                    continue;
+                }
+
+                //Insert tab count
+                $line = str_repeat($indentCharacter, $tabCount) . $line;
+            }
+
+            $length = strlen($line);
+            for ($j = 0; $j < $length; $j++) {
+                if ($line[$j] == '\\') {
+                    //skip character right after an escape \
+                    $j++;
+                } elseif ($line[$j] == '\'') {
+                    //check string open/end
+                    $inString = !$inString;
+                }
+            }
+
+            //check for opening bracket
+            if (!$inString && trim($line) == 'array (') {
+                $line = str_replace('array (', '[', $line);
+                $tabCount++;
+            }
+        }
+        unset($line);
+
+        // Remove marked lines
+        $lines = array_filter($lines, function ($line) {
+            return $line !== false;
+        });
+
+        return implode("\n", $lines);
     }
 }
