@@ -2,9 +2,9 @@
 use Migrations\AbstractSeed;
 
 /**
- * Articles seed.
+ * Users seed.
  */
-class ArticlesSeed extends AbstractSeed
+class UsersSeed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -20,20 +20,24 @@ class ArticlesSeed extends AbstractSeed
     {
         $data = [
             [
-                'title' => 'First Article',
-                'body' => 'First Article Body',
+                'username' => 'mariano',
+                'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             ],
             [
-                'title' => 'Second Article',
-                'body' => 'Second Article Body',
+                'username' => 'nate',
+                'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             ],
             [
-                'title' => 'Third Article',
-                'body' => 'Third Article Body',
+                'username' => 'larry',
+                'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
+            ],
+            [
+                'username' => 'garrett',
+                'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             ],
         ];
 
-        $table = $this->table('articles');
+        $table = $this->table('users');
         $table->insert($data)->save();
     }
 }

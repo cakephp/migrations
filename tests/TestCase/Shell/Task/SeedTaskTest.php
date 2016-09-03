@@ -23,7 +23,7 @@ class SeedTaskTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = ['core.articles', 'plugin.migrations.events'];
+    public $fixtures = ['plugin.migrations.users', 'plugin.migrations.events'];
 
     /**
      * ConsoleIo mock
@@ -86,7 +86,7 @@ class SeedTaskTest extends TestCase
      */
     public function testWithData()
     {
-        $this->Task->args = ['articles'];
+        $this->Task->args = ['users'];
         $this->Task->params['data'] = true;
 
         $path = __FUNCTION__ . '.php';
@@ -94,7 +94,7 @@ class SeedTaskTest extends TestCase
             $path = getenv('DB') . DS . $path;
         }
 
-        $result = $this->Task->bake('Articles');
+        $result = $this->Task->bake('Users');
         $this->assertSameAsFile($path, $result);
     }
 
@@ -105,22 +105,22 @@ class SeedTaskTest extends TestCase
      */
     public function testWithDataAndFields()
     {
-        $this->Task->args = ['articles'];
+        $this->Task->args = ['users'];
         $this->Task->params['data'] = true;
-        $this->Task->params['fields'] = 'title,body';
+        $this->Task->params['fields'] = 'username,password';
 
-        $result = $this->Task->bake('Articles');
+        $result = $this->Task->bake('Users');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
     /**
-     * Test with data, fields and limit specified
+     * Test with data and limit specified
      *
      * @return void
      */
-    public function testWithDataAndFieldsAndLimit()
+    public function testWithDataAndLimit()
     {
-        $this->Task->args = ['articles'];
+        $this->Task->args = ['users'];
         $this->Task->params['data'] = true;
         $this->Task->params['limit'] = 2;
 
@@ -129,7 +129,7 @@ class SeedTaskTest extends TestCase
             $path = getenv('DB') . DS . $path;
         }
 
-        $result = $this->Task->bake('Articles');
+        $result = $this->Task->bake('Users');
         $this->assertSameAsFile($path, $result);
     }
 
@@ -140,12 +140,11 @@ class SeedTaskTest extends TestCase
      */
     public function testWithQuotesInData()
     {
-        $this->Task->args = ['articles'];
+        $this->Task->args = ['events'];
         $this->Task->params['data'] = true;
-        $this->Task->params['table'] = 'events';
         $this->Task->params['fields'] = 'title,description';
 
-        $result = $this->Task->bake('Articles');
+        $result = $this->Task->bake('Events');
 
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }

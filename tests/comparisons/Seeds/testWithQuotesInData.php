@@ -2,9 +2,9 @@
 use Migrations\AbstractSeed;
 
 /**
- * Articles seed.
+ * Events seed.
  */
-class ArticlesSeed extends AbstractSeed
+class EventsSeed extends AbstractSeed
 {
     /**
      * Run Method.
