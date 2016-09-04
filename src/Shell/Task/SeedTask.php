@@ -90,7 +90,7 @@ class SeedTask extends SimpleBakeTask
             $limit = (int)$this->param('limit');
 
             $fields = $this->param('fields') ?: '*';
-            if ($fields != '*') {
+            if ($fields !== '*') {
                 $fields = explode(',', $fields);
             }
 
@@ -210,7 +210,7 @@ class SeedTask extends SimpleBakeTask
             $line = ltrim($line);
 
             if (!$inString) {
-                if ($line == '),') {
+                if ($line === '),') {
                     //Check for closing bracket
                     $line = '],';
                     $tabCount--;
@@ -226,17 +226,17 @@ class SeedTask extends SimpleBakeTask
 
             $length = strlen($line);
             for ($j = 0; $j < $length; $j++) {
-                if ($line[$j] == '\\') {
+                if ($line[$j] === '\\') {
                     //skip character right after an escape \
                     $j++;
-                } elseif ($line[$j] == '\'') {
+                } elseif ($line[$j] === '\'') {
                     //check string open/end
                     $inString = !$inString;
                 }
             }
 
             //check for opening bracket
-            if (!$inString && trim($line) == 'array (') {
+            if (!$inString && trim($line) === 'array (') {
                 $line = str_replace('array (', '[', $line);
                 $tabCount++;
             }

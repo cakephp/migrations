@@ -23,7 +23,7 @@ class SeedTaskTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = ['plugin.migrations.events'];
+    public $fixtures = ['plugin.migrations.events', 'plugin.migrations.texts'];
 
     /**
      * ConsoleIo mock
@@ -90,7 +90,7 @@ class SeedTaskTest extends TestCase
         $this->Task->params['data'] = true;
 
         $path = __FUNCTION__ . '.php';
-        if (getenv('DB') == 'pgsql') {
+        if (getenv('DB') === 'pgsql') {
             $path = getenv('DB') . DS . $path;
         }
 
@@ -125,11 +125,25 @@ class SeedTaskTest extends TestCase
         $this->Task->params['limit'] = 2;
 
         $path = __FUNCTION__ . '.php';
-        if (getenv('DB') == 'pgsql') {
+        if (getenv('DB') === 'pgsql') {
             $path = getenv('DB') . DS . $path;
         }
 
         $result = $this->Task->bake('Events');
         $this->assertSameAsFile($path, $result);
+    }
+
+    /**
+     * Test prettifyArray method. Texts fixture contains bunch of values trying to confuse prettifyArray
+     *
+     * @return void
+     */
+    public function testPrettifyArray()
+    {
+        $this->Task->args = ['texts'];
+        $this->Task->params['data'] = true;
+
+        $result = $this->Task->bake('Texts');
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 }
