@@ -197,11 +197,13 @@ class SeedTask extends SimpleBakeTask
         $inString = false;
 
         foreach ($lines as $k => &$line) {
-            if ($k == 0) {
+            if ($k === 0) {
                 // First row
                 $line = '[';
                 continue;
-            } elseif ($k == count($lines) - 1) {
+            }
+
+            if ($k === count($lines) - 1) {
                 // Last row
                 $line = str_repeat($indentCharacter, --$tabCount) . ']';
                 continue;
