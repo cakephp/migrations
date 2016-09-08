@@ -60,7 +60,7 @@ class MigrationDiffTaskTest extends TestCase
             ->setMethods($mockedMethods)
             ->setConstructorArgs([$io])
             ->getMock();
-        
+
         $task->name = 'Migration';
         $task->connection = 'test';
         $task->BakeTemplate = new BakeTemplateTask($io);
@@ -169,6 +169,9 @@ class MigrationDiffTaskTest extends TestCase
             ->delete('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
+
+        // Create a _phinxlog table to make sure it's not included in the dump
+        $connection->query("CREATE TABLE articles_phinxlog LIKE phinxlog;");
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
 
