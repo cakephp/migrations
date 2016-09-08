@@ -469,7 +469,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
         $collection = ConnectionManager::get($this->connection)->schemaCollection();
         foreach ($this->tables as $table) {
-            if (strpos($table, 'phinx') === 0) {
+            if (preg_match("/^.*phinxlog$/", $table) === 1) {
                 continue;
             }
 
