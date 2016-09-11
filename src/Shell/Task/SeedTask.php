@@ -165,11 +165,9 @@ class SeedTask extends SimpleBakeTask
         ])->addArgument('name', [
             'help' => 'Name of the seed to bake. Can use Plugin.name to bake plugin models.'
         ])->addOption('data', [
-            'short' => 'd',
             'boolean' => true,
             'help' => 'Include data from the table to the seed'
         ])->addOption('fields', [
-            'short' => 'f',
             'default' => '*',
             'help' => 'If including data, comma separated list of fields to select (all fields by default)',
         ])->addOption('limit', [
