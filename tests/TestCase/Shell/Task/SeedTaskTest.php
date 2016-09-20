@@ -23,6 +23,22 @@ class SeedTaskTest extends TestCase
 {
     use StringCompareTrait;
 
+    public $fixtures = ['plugin.migrations.events', 'plugin.migrations.texts'];
+
+    /**
+     * ConsoleIo mock
+     *
+     * @var \Cake\Console\ConsoleIo|\PHPUnit_Framework_MockObject_MockObject
+     */
+    public $io;
+
+    /**
+     * Test subject
+     *
+     * @var \Migrations\Shell\Task\SeedTask
+     */
+    public $Task;
+
     /**
      * setup method
      *
@@ -59,6 +75,75 @@ class SeedTaskTest extends TestCase
             'articles'
         ];
         $result = $this->Task->bake('Articles');
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+
+    /**
+     * Test with data, all fields, no limit
+     *
+     * @return void
+     */
+    public function testWithData()
+    {
+        $this->Task->args = ['events'];
+        $this->Task->params['data'] = true;
+
+        $path = __FUNCTION__ . '.php';
+        if (getenv('DB') === 'pgsql') {
+            $path = getenv('DB') . DS . $path;
+        }
+
+        $result = $this->Task->bake('Events');
+        $this->assertSameAsFile($path, $result);
+    }
+
+    /**
+     * Test with data and fields specified
+     *
+     * @return void
+     */
+    public function testWithDataAndFields()
+    {
+        $this->Task->args = ['events'];
+        $this->Task->params['data'] = true;
+        $this->Task->params['fields'] = 'title,description';
+
+        $result = $this->Task->bake('Events');
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    /**
+     * Test with data and limit specified
+     *
+     * @return void
+     */
+    public function testWithDataAndLimit()
+    {
+        $this->Task->args = ['events'];
+        $this->Task->params['data'] = true;
+        $this->Task->params['limit'] = 2;
+
+        $path = __FUNCTION__ . '.php';
+        if (getenv('DB') === 'pgsql') {
+            $path = getenv('DB') . DS . $path;
+        }
+
+        $result = $this->Task->bake('Events');
+        $this->assertSameAsFile($path, $result);
+    }
+
+    /**
+     * Test prettifyArray method. Texts fixture contains bunch of values trying to confuse prettifyArray
+     *
+     * @return void
+     */
+    public function testPrettifyArray()
+    {
+        $this->Task->args = ['texts'];
+        $this->Task->params['data'] = true;
+
+        $result = $this->Task->bake('Texts');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 }
