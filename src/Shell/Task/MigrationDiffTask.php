@@ -234,6 +234,7 @@ class MigrationDiffTask extends SimpleMigrationTask
             // changes in columns meta-data
             foreach ($currentColumns as $columnName) {
                 $column = $currentSchema->column($columnName);
+                unset($column['collate']);
                 $oldColumn = $this->dumpSchema[$table]->column($columnName);
 
                 if (in_array($columnName, $oldColumns) &&
