@@ -12,6 +12,7 @@
 namespace Migrations;
 
 use Cake\Database\Connection;
+use Cake\Database\Driver\Postgres;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Table;
@@ -58,6 +59,12 @@ class CakeAdapter implements AdapterInterface
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         $connection->cacheMetadata(false);
+
+        if ($connection->driver() instanceof Postgres) {
+            $config = $connection->config();
+            $schema = empty($config['schema']) ? 'public' : $config['schema'];
+            $pdo->exec('SET search_path TO ' . $schema);
+        }
         $connection->driver()->connection($pdo);
     }
 

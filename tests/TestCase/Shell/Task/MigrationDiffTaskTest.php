@@ -15,6 +15,7 @@ use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
@@ -171,7 +172,13 @@ class MigrationDiffTaskTest extends TestCase
             ->execute();
 
         // Create a _phinxlog table to make sure it's not included in the dump
-        $connection->query("CREATE TABLE articles_phinxlog LIKE phinxlog;");
+        $table = (new Table('articles_phinxlog'))->addColumn('title', [
+            'type' => 'string',
+            'length' => 255
+        ]);
+        foreach ($table->createSql($connection) as $stmt) {
+            $connection->query($stmt);
+        }
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
 
@@ -216,6 +223,11 @@ class MigrationDiffTaskTest extends TestCase
             ])
             ->execute();
         $this->getMigrations()->rollback(['target' => 0]);
+
+        foreach ($table->dropSql($connection) as $stmt) {
+            $connection->query($stmt);
+        }
+
         unlink($destinationDumpPath);
         unlink($destination);
     }
