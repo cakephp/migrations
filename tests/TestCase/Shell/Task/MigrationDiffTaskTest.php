@@ -171,7 +171,7 @@ class MigrationDiffTaskTest extends TestCase
             ->execute();
 
         // Create a _phinxlog table to make sure it's not included in the dump
-        $connection->query("CREATE TABLE articles_phinxlog LIKE phinxlog;");
+//        $connection->query("CREATE TABLE articles_phinxlog LIKE phinxlog;");
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
 
