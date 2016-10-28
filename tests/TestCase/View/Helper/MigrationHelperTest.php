@@ -245,6 +245,10 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals(1.5, $this->Helper->value('1.5'));
         $this->assertEquals(1, $this->Helper->value('1'));
         $this->assertInternalType('float', $this->Helper->value('1'));
+        $this->assertInternalType('string', $this->Helper->value('1', true));
+        $this->assertInternalType('string', $this->Helper->value('1.5', true));
+        $this->assertInternalType('string', $this->Helper->value(1, true));
+        $this->assertInternalType('string', $this->Helper->value(1.5, true));
         $this->assertEquals("'one'", $this->Helper->value('one'));
         $this->assertEquals("'o\\\"ne'", $this->Helper->value('o"ne'));
     }
