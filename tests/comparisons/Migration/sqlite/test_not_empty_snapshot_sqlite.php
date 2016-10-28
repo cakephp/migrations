@@ -22,6 +22,11 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 'limit' => 11,
                 'null' => true,
             ])
+            ->addColumn('note', 'string', [
+                'default' => '7.4',
+                'limit' => 255,
+                'null' => true,
+            ])
             ->addColumn('counter', 'integer', [
                 'default' => null,
                 'limit' => 11,
