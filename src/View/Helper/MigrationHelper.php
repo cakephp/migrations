@@ -331,7 +331,7 @@ class MigrationHelper extends Helper
      * @param string $value A value to represent as a string
      * @return mixed
      */
-    public function value($value)
+    public function value($value, $numbersAsString = false)
     {
         if ($value === null || $value === 'null' || $value === 'NULL') {
             return 'null';
@@ -345,7 +345,7 @@ class MigrationHelper extends Helper
             return $value ? 'true' : 'false';
         }
 
-        if (is_numeric($value) || ctype_digit($value)) {
+        if (!$numbersAsString && (is_numeric($value) || ctype_digit($value))) {
             return (float)$value;
         }
 
@@ -428,7 +428,7 @@ class MigrationHelper extends Helper
                 ]);
                 $v = sprintf('[%s]', $v);
             } else {
-                $v = $this->value($v);
+                $v = $this->value($v, $k === 'default');
             }
             if (!is_numeric($k)) {
                 $v = "'$k' => $v";
