@@ -22,6 +22,7 @@ class TheDiffSimpleMysql extends AbstractMigration
 
         $this->table('articles')
             ->addColumn('user_id', 'integer', [
+                'after' => 'name',
                 'default' => null,
                 'length' => 11,
                 'null' => false,

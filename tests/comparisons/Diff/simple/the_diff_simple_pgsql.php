@@ -22,6 +22,7 @@ class TheDiffSimplePgsql extends AbstractMigration
 
         $this->table('articles')
             ->addColumn('user_id', 'integer', [
+                'after' => 'name',
                 'default' => null,
                 'length' => 10,
                 'null' => false,

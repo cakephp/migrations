@@ -58,6 +58,7 @@ class TheDiff extends AbstractMigration
 
         $this->table('articles')
             ->addColumn('category_id', 'integer', [
+                'after' => 'user_id',
                 'default' => null,
                 'length' => 11,
                 'null' => false,
@@ -131,6 +132,7 @@ class TheDiff extends AbstractMigration
 
         $this->table('articles')
             ->addColumn('content', 'text', [
+                'after' => 'rating',
                 'default' => null,
                 'length' => null,
                 'null' => false,
