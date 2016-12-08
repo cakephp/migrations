@@ -33,8 +33,8 @@ $hasProcessedConstraint = false;
                 '<%= $constraint['references'][0] %>',
                 <%= $columnsReference %>,
                 [
-                    'update' => '<%= strtoupper($constraint['update']) %>',
-                    'delete' => '<%= strtoupper($constraint['delete']) %>'
+                    'update' => '<%= $this->Migration->formatConstraintAction($constraint['update']) %>',
+                    'delete' => '<%= $this->Migration->formatConstraintAction($constraint['delete']) %>'
                 ]
             )
 <% endif; %>

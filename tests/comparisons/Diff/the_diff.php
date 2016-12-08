@@ -94,8 +94,8 @@ class TheDiff extends AbstractMigration
                 'categories',
                 'id',
                 [
-                    'update' => 'RESTRICT',
-                    'delete' => 'RESTRICT'
+                    'update' => 'NO_ACTION',
+                    'delete' => 'NO_ACTION'
                 ]
             )
             ->update();
