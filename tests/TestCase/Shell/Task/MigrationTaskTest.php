@@ -153,6 +153,10 @@ class MigrationTaskTest extends TestCase
             ['create_table', 'groups_users'],
             $this->Task->detectAction('CreateGroupsUsers')
         );
+        $this->assertEquals(
+            ['create_table', 'articles_i18n'],
+            $this->Task->detectAction('CreateArticlesI18n')
+        );
 
         $this->assertEquals(
             ['drop_table', 'groups'],
@@ -165,6 +169,10 @@ class MigrationTaskTest extends TestCase
         $this->assertEquals(
             ['drop_table', 'groups_users'],
             $this->Task->detectAction('DropGroupsUsers')
+        );
+        $this->assertEquals(
+            ['drop_table', 'articles_i18n'],
+            $this->Task->detectAction('DropArticlesI18n')
         );
 
         $this->assertEquals(
@@ -199,6 +207,10 @@ class MigrationTaskTest extends TestCase
             ['add_field', 'todos'],
             $this->Task->detectAction('AddSomeFieldToTodos')
         );
+        $this->assertEquals(
+            ['add_field', 'articles_i18n'],
+            $this->Task->detectAction('AddSomeFieldToArticlesI18n')
+        );
 
         $this->assertEquals(
             ['drop_field', 'groups'],
@@ -232,6 +244,10 @@ class MigrationTaskTest extends TestCase
             ['drop_field', 'fromages'],
             $this->Task->detectAction('RemoveFromageFromFromages')
         );
+        $this->assertEquals(
+            ['drop_field', 'articles_i18n'],
+            $this->Task->detectAction('RemoveFromageFromArticlesI18n')
+        );
 
         $this->assertEquals(
             ['alter_table', 'groups'],
@@ -244,6 +260,10 @@ class MigrationTaskTest extends TestCase
         $this->assertEquals(
             ['alter_table', 'groups_users'],
             $this->Task->detectAction('AlterGroupsUsers')
+        );
+        $this->assertEquals(
+            ['alter_table', 'articles_i18n'],
+            $this->Task->detectAction('AlterArticlesI18n')
         );
 
         $this->assertSame(
