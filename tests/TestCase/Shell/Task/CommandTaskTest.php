@@ -123,7 +123,7 @@ class CommandTaskTest extends TestCase
         $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'migrate']);
         $output = $this->out->output;
-        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --no-lock --quiet -q --verbose -v --connection -c";
         $expected .= " --date -d --plugin -p --source -s --target -t\n";
         $this->assertTextEquals($expected, $output);
     }
@@ -139,7 +139,7 @@ class CommandTaskTest extends TestCase
         $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'rollback']);
         $output = $this->out->output;
-        $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
+        $expected = "--ansi --help -h --no-ansi --no-interaction -n --no-lock --quiet -q --verbose -v --connection -c";
         $expected .= " --date -d --plugin -p --source -s --target -t\n";
         $this->assertTextEquals($expected, $output);
     }

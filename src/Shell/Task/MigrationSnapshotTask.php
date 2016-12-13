@@ -138,6 +138,10 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'boolean' => true,
             'default' => false,
             'help' => 'Disable phinx behavior of automatically adding an id field.'
+        ])
+        ->addOption('no-lock', [
+            'help' => 'If present, no lock file will be generated after baking',
+            'boolean' => true
         ]);
 
         return $parser;

@@ -54,7 +54,10 @@ trait SnapshotTrait
 
         if ($createFile) {
             $this->markSnapshotApplied($path);
-            $this->refreshDump();
+
+            if (!isset($this->params['no-lock']) || !$this->params['no-lock']) {
+                $this->refreshDump();
+            }
         }
 
         return $createFile;

@@ -59,6 +59,7 @@ class MigrationsShell extends Shell
             ->addOption('seed')
             ->addOption('ansi')
             ->addOption('no-ansi')
+            ->addOption('no-lock', ['boolean' => true])
             ->addOption('version', ['short' => 'V'])
             ->addOption('no-interaction', ['short' => 'n'])
             ->addOption('template', ['short' => 't'])
@@ -97,7 +98,10 @@ class MigrationsShell extends Shell
         $app->setAutoExit(false);
         $exitCode = $app->run($input);
 
-        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) && $exitCode === 0) {
+        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
+            !$this->params['no-lock'] &&
+            $exitCode === 0
+        ) {
             $dispatchCommand = 'migrations dump';
             if (!empty($this->params['connection'])) {
                 $dispatchCommand .= ' -c ' . $this->params['connection'];
