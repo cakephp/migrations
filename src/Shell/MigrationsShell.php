@@ -14,6 +14,7 @@ namespace Migrations\Shell;
 use Cake\Console\Shell;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * A wrapper shell for phinx migrations, used to inject our own
@@ -93,10 +94,10 @@ class MigrationsShell extends Shell
      */
     public function main()
     {
-        $app = new MigrationsDispatcher(PHINX_VERSION);
+        $app = $this->getApp();
         $input = new ArgvInput($this->argv);
         $app->setAutoExit(false);
-        $exitCode = $app->run($input);
+        $exitCode = $app->run($input, $this->getOutput());
 
         if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
             !$this->params['no-lock'] &&
@@ -119,6 +120,26 @@ class MigrationsShell extends Shell
         }
 
         return $exitCode === 0;
+    }
+
+    /**
+     * Returns the MigrationsDispatcher the Shell will have to use
+     *
+     * @return \Migrations\MigrationsDispatcher
+     */
+    protected function getApp()
+    {
+        return new MigrationsDispatcher(PHINX_VERSION);
+    }
+
+    /**
+     * Returns the instance of OutputInterface the MigrationsDispatcher will have to use.
+     *
+     * @return \Symfony\Component\Console\Output\ConsoleOutput
+     */
+    protected function getOutput()
+    {
+        return new ConsoleOutput();
     }
 
     /**

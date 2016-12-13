@@ -2,6 +2,8 @@
 namespace Migrations\Test\TestCase\Shell;
 
 use Cake\TestSuite\TestCase;
+use Migrations\MigrationsDispatcher;
+use Symfony\Component\Console\Output\NullOutput;
 
 class MigrationShellTest extends TestCase
 {
@@ -21,12 +23,22 @@ class MigrationShellTest extends TestCase
 
         $mockedMethods = [
             'dispatchShell',
+            'getApp',
+            'getOutput'
         ];
 
         $this->shell = $this->getMockBuilder('\Migrations\Shell\MigrationsShell')
             ->setMethods($mockedMethods)
             ->setConstructorArgs([$inputOutput])
             ->getMock();
+
+        $this->shell->expects($this->any())
+            ->method('getOutput')
+            ->will($this->returnValue(new NullOutput()));
+
+        $this->shell->expects($this->any())
+            ->method('getApp')
+            ->will($this->returnValue(new MigrationsDispatcher(PHINX_VERSION)));
     }
 
     /**
