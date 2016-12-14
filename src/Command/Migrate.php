@@ -38,7 +38,13 @@ class Migrate extends MigrateCommand
             ->addOption('--date', '-d', InputOption::VALUE_REQUIRED, 'The date to migrate to')
             ->addOption('--plugin', '-p', InputOption::VALUE_REQUIRED, 'The plugin containing the migrations')
             ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
-            ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in');
+            ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
+            ->addOption(
+                '--no-lock',
+                null,
+                InputOption::VALUE_NONE,
+                'If present, no lock file will be generated after migrating'
+            );
     }
 
     /**

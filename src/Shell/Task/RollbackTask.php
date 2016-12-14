@@ -37,6 +37,10 @@ class RollbackTask extends CommandTask
                 'short' => 'd',
                 'help' => 'The date to migrate to',
                 'required' => false
+            ])
+            ->addOption('no-lock', [
+                'help' => 'If present, no lock file will be generated after rolling back',
+                'boolean' => true
             ]);
 
         return $parser;

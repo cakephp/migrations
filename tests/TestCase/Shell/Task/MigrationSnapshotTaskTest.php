@@ -12,7 +12,6 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Bake\Shell\Task\BakeTemplateTask;
-use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
@@ -40,6 +39,13 @@ class MigrationSnapshotTaskTest extends TestCase
     ];
 
     /**
+     * Mock of \Migrations\Shell\Task\MigrationSnapshotTask
+     *
+     * @var \Migrations\Shell\Task\MigrationSnapshotTask
+     */
+    public $Task;
+
+    /**
      * setup method
      *
      * @return void
@@ -52,6 +58,17 @@ class MigrationSnapshotTaskTest extends TestCase
     }
 
     /**
+     * tearDown method
+     *
+     * @return void
+     */
+    public function tearDown()
+    {
+        parent::tearDown();
+        unset($this->Task);
+    }
+
+    /**
      * Returns a MigrationSnapshotTask mock object properly configured
      *
      * @param array $mockedMethods List of methods to mock
@@ -59,7 +76,13 @@ class MigrationSnapshotTaskTest extends TestCase
      */
     public function getTaskMock($mockedMethods = [])
     {
-        $mockedMethods = $mockedMethods ?: ['in', 'err', 'dispatchShell', '_stop', 'findTables', 'fetchTableName'];
+        $mockedMethods = $mockedMethods ?: [
+            'dispatchShell',
+            'findTables',
+            'fetchTableName',
+            'refreshDump'
+        ];
+
         $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
             ->disableOriginalConstructor()
             ->getMock();
@@ -113,7 +136,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'BogusPlugin';
 
-        $this->Task->expects($this->at(0))
+        $this->Task->expects($this->once())
             ->method('dispatchShell')
             ->with(
                 $this->logicalAnd(
@@ -122,15 +145,42 @@ class MigrationSnapshotTaskTest extends TestCase
                 )
             );
 
-        $this->Task->expects($this->at(1))
-            ->method('dispatchShell')
-            ->with($this->stringContains('migrations dump'));
+        $this->Task->expects($this->once())
+            ->method('refreshDump');
 
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
         $result = $this->Task->bake($bakeName);
 
         $this->assertNotEmpty(glob($this->Task->getPath() . '*_TestNotEmptySnapshot*.php'));
         $this->assertCorrectSnapshot($bakeName, $result);
+    }
+
+    /**
+     * Test baking a snapshot
+     *
+     * @return void
+     */
+    public function testNotEmptySnapshotNoLock()
+    {
+        $this->Task->params['require-table'] = false;
+        $this->Task->params['connection'] = 'test';
+        $this->Task->params['plugin'] = 'BogusPlugin';
+        $this->Task->params['no-lock'] = true;
+
+        $this->Task->expects($this->once())
+            ->method('dispatchShell')
+            ->with(
+                $this->logicalAnd(
+                    $this->stringContains('migrations mark_migrated -t'),
+                    $this->stringContains('-o -c test -p BogusPlugin')
+                )
+            );
+
+        $this->Task->expects($this->never())
+            ->method('refreshDump');
+
+        $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
+        $result = $this->Task->bake($bakeName);
     }
 
     /**
