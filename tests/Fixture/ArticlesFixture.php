@@ -49,8 +49,8 @@ class ArticlesFixture extends TestFixture
                 'type' => 'foreign',
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],
-                'update' => 'cascade',
-                'delete' => 'cascade'
+                'update' => 'noAction',
+                'delete' => 'noAction'
             ],
             'product_idx' => [
                 'type' => 'foreign',

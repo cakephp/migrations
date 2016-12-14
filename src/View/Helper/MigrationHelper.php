@@ -203,14 +203,29 @@ class MigrationHelper extends Helper
             foreach ($tableConstraints as $name) {
                 $constraint = $tableSchema->constraint($name);
                 if (isset($constraint['update'])) {
-                    $constraint['update'] = strtoupper(Inflector::underscore($constraint['update']));
-                    $constraint['delete'] = strtoupper(Inflector::underscore($constraint['delete']));
+                    $constraint['update'] = $this->formatConstraintAction($constraint['update']);
+                    $constraint['delete'] = $this->formatConstraintAction($constraint['delete']);
                 }
                 $constraints[$name] = $constraint;
             }
         }
 
         return $constraints;
+    }
+
+    /**
+     * Format a constraint action if it is not already in the format expected by Phinx
+     *
+     * @param string $constraint Constraint action name
+     * @return string Constraint action name altered if needed.
+     */
+    public function formatConstraintAction($constraint)
+    {
+        if (defined('\Phinx\Db\Table\ForeignKey::' . $constraint)) {
+            return $constraint;
+        }
+
+        return strtoupper(Inflector::underscore($constraint));
     }
 
     /**

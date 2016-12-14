@@ -260,8 +260,8 @@ class TestNotEmptySnapshot56 extends AbstractMigration
                 'categories',
                 'id',
                 [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'update' => 'NO_ACTION',
+                    'delete' => 'NO_ACTION'
                 ]
             )
             ->addForeignKey(

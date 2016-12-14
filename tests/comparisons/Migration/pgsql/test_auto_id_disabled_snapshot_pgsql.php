@@ -305,8 +305,8 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'categories',
                 'id',
                 [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'update' => 'NO_ACTION',
+                    'delete' => 'NO_ACTION'
                 ]
             )
             ->addForeignKey(
