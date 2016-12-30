@@ -14,6 +14,7 @@ namespace Migrations\Test\Command;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -141,7 +142,7 @@ class MarkMigratedTest extends TestCase
 
         $manager = $this->getMockBuilder('\Migrations\CakeManager')
             ->setMethods(['getEnvironment', 'markMigrated', 'getMigrations'])
-            ->setConstructorArgs([$config, new StreamOutput(fopen('php://memory', 'a', false))])
+            ->setConstructorArgs([$config, new ArgvInput([]), new StreamOutput(fopen('php://memory', 'a', false))])
             ->getMock();
 
         $manager->expects($this->any())

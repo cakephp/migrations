@@ -61,6 +61,7 @@ class MigrationsShell extends Shell
             ->addOption('ansi')
             ->addOption('no-ansi')
             ->addOption('no-lock', ['boolean' => true])
+            ->addOption('force', ['boolean' => true])
             ->addOption('version', ['short' => 'V'])
             ->addOption('no-interaction', ['short' => 'n'])
             ->addOption('template', ['short' => 't'])

@@ -20,6 +20,7 @@ use Phinx\Db\Table\Column;
 use Phinx\Db\Table\ForeignKey;
 use Phinx\Db\Table\Index;
 use Phinx\Migration\MigrationInterface;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -684,5 +685,50 @@ class CakeAdapter implements AdapterInterface
     public function dropDatabase($name)
     {
         $this->adapter->dropDatabase($name);
+    }
+
+    /**
+     * Sets the console input.
+     *
+     * @param InputInterface $input Input
+     * @return AdapterInterface
+     */
+    public function setInput(InputInterface $input)
+    {
+        $this->adapter->setInput($input);
+        return $this;
+    }
+
+    /**
+     * Gets the console input.
+     *
+     * @return InputInterface
+     */
+    public function getInput()
+    {
+        return $this->adapter->getInput();
+    }
+
+    /**
+     * Toggle a migration breakpoint.
+     *
+     * @param MigrationInterface $migration
+     *
+     * @return AdapterInterface
+     */
+    public function toggleBreakpoint(MigrationInterface $migration)
+    {
+        $this->adapter->toggleBreakpoint($migration);
+        return $this;
+    }
+
+    /**
+     * Reset all migration breakpoints.
+     *
+     * @return int The number of breakpoints reset
+     */
+    public function resetAllBreakpoints()
+    {
+        return $this->adapter->resetAllBreakpoints();
     }
 }

@@ -68,6 +68,7 @@ class Migrations
     public function __construct(array $default = [])
     {
         $this->output = new NullOutput();
+        $this->stubInput = new ArrayInput([]);
 
         if (!empty($default)) {
             $this->default = $default;
@@ -235,8 +236,14 @@ class Migrations
     {
         $this->setCommand('seed');
         $input = $this->getInput('Seed', [], $options);
-        $params = ['default', $input->getOption('seed')];
-        $this->run('Seed', $params, $input);
+
+        $seed = $input->getOption('seed');
+        if (empty($seed)) {
+            $seed = null;
+        }
+
+        $params = ['default', $seed];
+        $this->run('seed', $params, $input);
         return true;
     }
 
@@ -287,7 +294,8 @@ class Migrations
                 );
             }
 
-            $this->manager = new CakeManager($config, $this->output);
+            $input = empty($this->input) ? $this->stubInput : $this->input;
+            $this->manager = new CakeManager($config, $input, $this->output);
         } elseif ($config !== null) {
             $defaultEnvironment = $config->getEnvironment('default');
             try {

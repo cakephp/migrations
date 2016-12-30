@@ -212,7 +212,7 @@ trait ConfigurationTrait
         $manager = $this->getManager();
 
         if (!$manager instanceof CakeManager) {
-            $this->setManager(new CakeManager($this->getConfig(), $output));
+            $this->setManager(new CakeManager($this->getConfig(), $input, $output));
         }
         $env = $this->getManager()->getEnvironment('default');
         $adapter = $env->getAdapter();
