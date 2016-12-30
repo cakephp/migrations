@@ -61,7 +61,7 @@ class Migrations
      * Stub input to feed the manager class since we might not have an input ready when we get the Manager using
      * the `getManager()` method
      *
-     * @var ArrayInput
+     * @var \Symfony\Component\Console\Input\ArrayInput
      */
     protected $stubInput;
 
@@ -302,7 +302,7 @@ class Migrations
                 );
             }
 
-            $input = $input = $this->input ?: $this->stubInput;
+            $input = $this->input ?: $this->stubInput;
             $this->manager = new CakeManager($config, $input, $this->output);
         } elseif ($config !== null) {
             $defaultEnvironment = $config->getEnvironment('default');
