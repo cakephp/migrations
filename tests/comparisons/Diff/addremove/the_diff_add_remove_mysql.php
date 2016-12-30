@@ -13,6 +13,7 @@ class TheDiffAddRemoveMysql extends AbstractMigration
 
         $this->table('articles')
             ->addColumn('the_text', 'text', [
+                'after' => 'title',
                 'default' => null,
                 'length' => null,
                 'null' => false,
@@ -25,6 +26,7 @@ class TheDiffAddRemoveMysql extends AbstractMigration
 
         $this->table('articles')
             ->addColumn('excerpt', 'text', [
+                'after' => 'title',
                 'default' => null,
                 'length' => null,
                 'null' => false,

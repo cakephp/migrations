@@ -228,7 +228,12 @@ class MigrationDiffTask extends SimpleMigrationTask
             // brand new columns
             $addedColumns = array_diff($currentColumns, $oldColumns);
             foreach ($addedColumns as $columnName) {
-                $this->templateData[$table]['columns']['add'][$columnName] = $currentSchema->column($columnName);
+                $column = $currentSchema->column($columnName);
+                $key = array_search($columnName, $currentColumns);
+                if ($key > 0) {
+                    $column['after'] = $currentColumns[$key - 1];
+                }
+                $this->templateData[$table]['columns']['add'][$columnName] = $column;
             }
 
             // changes in columns meta-data
@@ -256,9 +261,13 @@ class MigrationDiffTask extends SimpleMigrationTask
             }
             $removedColumns = array_diff($oldColumns, $currentColumns);
             if (!empty($removedColumns)) {
-                foreach ($removedColumns as $column) {
-                    $this->templateData[$table]['columns']['remove'][$column] =
-                        $this->dumpSchema[$table]->column($column);
+                foreach ($removedColumns as $columnName) {
+                    $column = $this->dumpSchema[$table]->column($columnName);
+                    $key = array_search($columnName, $oldColumns);
+                    if ($key > 0) {
+                        $column['after'] = $oldColumns[$key - 1];
+                    }
+                    $this->templateData[$table]['columns']['remove'][$columnName] = $column;
                 }
             }
         }

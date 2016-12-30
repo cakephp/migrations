@@ -316,7 +316,8 @@ class MigrationHelper extends Helper
             'null',
             'comment',
             'autoIncrement',
-            'precision'
+            'precision',
+            'after'
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
