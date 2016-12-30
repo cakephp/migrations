@@ -246,7 +246,7 @@ class Migrations
         $input = $this->getInput('Seed', [], $options);
 
         $seed = $input->getOption('seed');
-        if (empty($seed)) {
+        if (!$seed) {
             $seed = null;
         }
 
