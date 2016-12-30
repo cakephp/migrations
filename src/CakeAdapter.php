@@ -103,7 +103,7 @@ class CakeAdapter implements AdapterInterface
      * Set adapter configuration options.
      *
      * @param  array $options
-     * @return AdapterInterface
+     * @return $this
      */
     public function setOptions(array $options)
     {
@@ -146,7 +146,7 @@ class CakeAdapter implements AdapterInterface
      * Sets the console output.
      *
      * @param OutputInterface $output Output
-     * @return AdapterInterface
+     * @return $this
      */
     public function setOutput(OutputInterface $output)
     {
@@ -167,7 +167,7 @@ class CakeAdapter implements AdapterInterface
      * Sets the command start time
      *
      * @param int $time
-     * @return AdapterInterface
+     * @return $this
      */
     public function setCommandStartTime($time)
     {
@@ -224,7 +224,7 @@ class CakeAdapter implements AdapterInterface
      * @param string $direction Direction
      * @param int $startTime Start Time
      * @param int $endTime End Time
-     * @return AdapterInterface
+     * @return $this
      */
     public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime)
     {
@@ -691,7 +691,7 @@ class CakeAdapter implements AdapterInterface
      * Sets the console input.
      *
      * @param InputInterface $input Input
-     * @return AdapterInterface
+     * @return $this
      */
     public function setInput(InputInterface $input)
     {
@@ -714,7 +714,7 @@ class CakeAdapter implements AdapterInterface
      *
      * @param MigrationInterface $migration
      *
-     * @return AdapterInterface
+     * @return $this
      */
     public function toggleBreakpoint(MigrationInterface $migration)
     {
