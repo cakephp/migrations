@@ -58,6 +58,14 @@ class Migrations
     protected $command;
 
     /**
+     * Stub input to feed the manager class since we might not have an input ready when we get the Manager using
+     * the `getManager()` method
+     *
+     * @var ArrayInput
+     */
+    protected $stubInput;
+
+    /**
      * Constructor
      * @param array $default Default option to be used when calling a method.
      * Available options are :
@@ -294,7 +302,7 @@ class Migrations
                 );
             }
 
-            $input = empty($this->input) ? $this->stubInput : $this->input;
+            $input = $input = $this->input ?: $this->stubInput;
             $this->manager = new CakeManager($config, $input, $this->output);
         } elseif ($config !== null) {
             $defaultEnvironment = $config->getEnvironment('default');
