@@ -78,7 +78,7 @@ class Migrations
         $this->output = new NullOutput();
         $this->stubInput = new ArrayInput([]);
 
-        if (!empty($default)) {
+        if ($default) {
             $this->default = $default;
         }
     }
@@ -377,7 +377,7 @@ class Migrations
     protected function prepareOptions($options = [])
     {
         $options = array_merge($this->default, $options);
-        if (empty($options)) {
+        if (!$options) {
             return $options;
         }
 
