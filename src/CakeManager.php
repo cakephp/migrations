@@ -172,7 +172,7 @@ class CakeManager extends Manager
         $versionToRollback = $versions[$index];
 
         $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
-        $this->rollback($environment, $versionToRollback, $force = false);
+        $this->rollback($environment, $versionToRollback, $force);
     }
 
     /**
