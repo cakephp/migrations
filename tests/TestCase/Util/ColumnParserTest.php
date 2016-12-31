@@ -17,7 +17,7 @@ use Migrations\Util\ColumnParser;
 /**
  * Tests the ColumnParser
  *
- * @covers Migrations\Util\ColumnParser
+ * @covers \Migrations\Util\ColumnParser
  */
 class ColumnParserTest extends TestCase
 {
@@ -33,7 +33,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::parseFields
+     * @covers \Migrations\Util\ColumnParser::parseFields
      */
     public function testParseFields()
     {
@@ -147,10 +147,47 @@ class ColumnParserTest extends TestCase
         ];
         $actual = $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']);
         $this->assertEquals($expected, $actual);
+
+        $expected = [
+            'id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11
+                ],
+            ],
+            'name' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 125,
+                ],
+            ],
+            'description' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'limit' => 50,
+                ],
+            ],
+            'age' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['id', 'name:string[125]', 'description:string?[50]', 'age:integer?']);
+        $this->assertEquals($expected, $actual);
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::parseIndexes
+     * @covers \Migrations\Util\ColumnParser::parseIndexes
      */
     public function testParseIndexes()
     {
@@ -173,7 +210,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::parsePrimaryKey
+     * @covers \Migrations\Util\ColumnParser::parsePrimaryKey
      */
     public function testParsePrimaryKey()
     {
@@ -187,7 +224,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::validArguments
+     * @covers \Migrations\Util\ColumnParser::validArguments
      */
     public function testValidArguments()
     {
@@ -232,13 +269,17 @@ class ColumnParserTest extends TestCase
             $this->columnParser->validArguments(['field:integer[9]:indexType:indexName'])
         );
         $this->assertEquals(
+            ['field:string?[50]:indexType:indexName'],
+            $this->columnParser->validArguments(['field:string?[50]:indexType:indexName'])
+        );
+        $this->assertEquals(
             ['field:biginteger[18]:indexType:indexName'],
             $this->columnParser->validArguments(['field:biginteger[18]:indexType:indexName'])
         );
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::getType
+     * @covers \Migrations\Util\ColumnParser::getType
      */
     public function testGetType()
     {
@@ -258,7 +299,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::getTypeAndLength
+     * @covers \Migrations\Util\ColumnParser::getTypeAndLength
      */
     public function testGetTypeAndLength()
     {
@@ -273,7 +314,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::getLength
+     * @covers \Migrations\Util\ColumnParser::getLength
      */
     public function testGetLength()
     {
@@ -284,7 +325,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers Migrations\Util\ColumnParser::getIndexName
+     * @covers \Migrations\Util\ColumnParser::getIndexName
      */
     public function testGetIndexName()
     {
