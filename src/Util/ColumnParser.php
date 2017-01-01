@@ -202,7 +202,7 @@ class ColumnParser
                 $fieldType = 'integer';
             } elseif ($field === 'id') {
                 $fieldType = 'integer';
-            } elseif (in_array($field, ['created', 'modified', 'updated'])) {
+            } elseif (in_array($field, ['created', 'modified', 'updated']) || substr($field, -3) === '_at') {
                 $fieldType = 'datetime';
             } else {
                 $fieldType = 'string';
