@@ -109,7 +109,14 @@ class ColumnParserTest extends TestCase
                     'default' => null,
                 ],
             ],
-        ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated']));
+            'deleted_at' => [
+                'columnType' => 'datetime',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                ],
+            ],
+        ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated', 'deleted_at']));
 
         $expected = [
             'id' => [
@@ -182,7 +189,12 @@ class ColumnParserTest extends TestCase
                 ],
             ],
         ];
-        $actual = $this->columnParser->parseFields(['id', 'name:string[125]', 'description:string?[50]', 'age:integer?']);
+        $actual = $this->columnParser->parseFields([
+            'id',
+            'name:string[125]',
+            'description:string?[50]',
+            'age:integer?'
+        ]);
         $this->assertEquals($expected, $actual);
     }
 
@@ -292,6 +304,9 @@ class ColumnParserTest extends TestCase
         $this->assertEquals('datetime', $this->columnParser->getType('created', null));
         $this->assertEquals('datetime', $this->columnParser->getType('modified', null));
         $this->assertEquals('datetime', $this->columnParser->getType('updated', null));
+        $this->assertEquals('datetime', $this->columnParser->getType('created_at', null));
+        $this->assertEquals('datetime', $this->columnParser->getType('deleted_at', null));
+        $this->assertEquals('datetime', $this->columnParser->getType('changed_at', null));
         $this->assertEquals('string', $this->columnParser->getType('some_field', null));
         $this->assertEquals('string', $this->columnParser->getType('some_field', 'string'));
         $this->assertEquals('boolean', $this->columnParser->getType('field', 'boolean'));
@@ -311,6 +326,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['integer', 11], $this->columnParser->getTypeAndLength('id', null));
         $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('username', null));
         $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('created', null));
+        $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('changed_at', null));
     }
 
     /**
