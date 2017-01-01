@@ -20,6 +20,7 @@ use Phinx\Db\Table\Column;
 use Phinx\Db\Table\ForeignKey;
 use Phinx\Db\Table\Index;
 use Phinx\Migration\MigrationInterface;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -102,7 +103,7 @@ class CakeAdapter implements AdapterInterface
      * Set adapter configuration options.
      *
      * @param  array $options
-     * @return AdapterInterface
+     * @return $this
      */
     public function setOptions(array $options)
     {
@@ -145,7 +146,7 @@ class CakeAdapter implements AdapterInterface
      * Sets the console output.
      *
      * @param OutputInterface $output Output
-     * @return AdapterInterface
+     * @return $this
      */
     public function setOutput(OutputInterface $output)
     {
@@ -166,7 +167,7 @@ class CakeAdapter implements AdapterInterface
      * Sets the command start time
      *
      * @param int $time
-     * @return AdapterInterface
+     * @return $this
      */
     public function setCommandStartTime($time)
     {
@@ -223,7 +224,7 @@ class CakeAdapter implements AdapterInterface
      * @param string $direction Direction
      * @param int $startTime Start Time
      * @param int $endTime End Time
-     * @return AdapterInterface
+     * @return $this
      */
     public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime)
     {
@@ -684,5 +685,50 @@ class CakeAdapter implements AdapterInterface
     public function dropDatabase($name)
     {
         $this->adapter->dropDatabase($name);
+    }
+
+    /**
+     * Sets the console input.
+     *
+     * @param InputInterface $input Input
+     * @return $this
+     */
+    public function setInput(InputInterface $input)
+    {
+        $this->adapter->setInput($input);
+        return $this;
+    }
+
+    /**
+     * Gets the console input.
+     *
+     * @return InputInterface
+     */
+    public function getInput()
+    {
+        return $this->adapter->getInput();
+    }
+
+    /**
+     * Toggle a migration breakpoint.
+     *
+     * @param MigrationInterface $migration
+     *
+     * @return $this
+     */
+    public function toggleBreakpoint(MigrationInterface $migration)
+    {
+        $this->adapter->toggleBreakpoint($migration);
+        return $this;
+    }
+
+    /**
+     * Reset all migration breakpoints.
+     *
+     * @return int The number of breakpoints reset
+     */
+    public function resetAllBreakpoints()
+    {
+        return $this->adapter->resetAllBreakpoints();
     }
 }
