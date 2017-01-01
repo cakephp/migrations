@@ -15,9 +15,15 @@ class TheDiffPgsql extends AbstractMigration
 
         $this->table('articles')
             ->removeColumn('content')
-            ->changeColumn('title', 'text')
+            ->changeColumn('title', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
             ->changeColumn('name', 'string', [
-                'length' => 50,
+                'default' => null,
+                'limit' => 50,
+                'null' => false,
             ])
             ->update();
 

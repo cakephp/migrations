@@ -248,9 +248,24 @@ class MigrationDiffTask extends SimpleMigrationTask
                 ) {
                     $changedAttributes = array_diff($column, $oldColumn);
 
-                    if (!isset($changedAttributes['type'])) {
-                        $changedAttributes['type'] = $column['type'];
+                    foreach (['type', 'length', 'null', 'default'] as $attribute) {
+                        $phinxAttributeName = $attribute;
+                        if ($attribute == 'length') {
+                            $phinxAttributeName = 'limit';
+                        }
+                        if (!isset($changedAttributes[$phinxAttributeName])) {
+                            $changedAttributes[$phinxAttributeName] = $column[$attribute];
+                        }
                     }
+
+                    if (isset($changedAttributes['length'])) {
+                        if (!isset($changedAttributes['limit'])) {
+                            $changedAttributes['limit'] = $changedAttributes['length'];
+                        }
+
+                        unset($changedAttributes['length']);
+                    }
+
                     $this->templateData[$table]['columns']['changed'][$columnName] = $changedAttributes;
                 }
             }
