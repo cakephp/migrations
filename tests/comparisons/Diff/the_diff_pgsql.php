@@ -63,6 +63,13 @@ class TheDiffPgsql extends AbstractMigration
                 'length' => 10,
                 'null' => false,
             ])
+            ->addColumn('average_note', 'decimal', [
+                'after' => 'category_id',
+                'default' => null,
+                'null' => true,
+                'precision' => 5,
+                'scale' => 5,
+            ])
             ->addIndex(
                 [
                     'category_id',
@@ -148,6 +155,7 @@ class TheDiffPgsql extends AbstractMigration
                 'null' => false,
             ])
             ->removeColumn('category_id')
+            ->removeColumn('average_note')
             ->addIndex(
                 [
                     'slug',
