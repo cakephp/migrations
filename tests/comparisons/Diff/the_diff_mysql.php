@@ -69,6 +69,13 @@ class TheDiffMysql extends AbstractMigration
                 'length' => 11,
                 'null' => false,
             ])
+            ->addColumn('average_note', 'decimal', [
+                'after' => 'category_id',
+                'default' => null,
+                'null' => true,
+                'precision' => 5,
+                'scale' => 5,
+            ])
             ->addIndex(
                 [
                     'slug',
@@ -154,6 +161,7 @@ class TheDiffMysql extends AbstractMigration
                 'null' => false,
             ])
             ->removeColumn('category_id')
+            ->removeColumn('average_note')
             ->addIndex(
                 [
                     'slug',

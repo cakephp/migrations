@@ -306,6 +306,14 @@ class MigrationHelper extends Helper
         ];
     }
 
+    /**
+     * Compute the final array of options to display in a `addColumn` or `changeColumn` instruction.
+     * The method also takes care of translating properties names between CakePHP database layer and phinx database
+     * layer.
+     *
+     * @param array $options Array of options to compute the final list from.
+     * @return array
+     */
     public function getColumnOption($options)
     {
         $wantedOptions = array_flip([
@@ -334,8 +342,15 @@ class MigrationHelper extends Helper
         } else {
             // due to Phinx using different naming for the precision and scale to CakePHP
             $columnOptions['scale'] = $columnOptions['precision'];
-            $columnOptions['precision'] = $columnOptions['limit'];
-            unset($columnOptions['limit']);
+
+            if (isset($columnOptions['limit'])) {
+                $columnOptions['precision'] = $columnOptions['limit'];
+                unset($columnOptions['limit']);
+            }
+            if (isset($columnOptions['length'])) {
+                $columnOptions['precision'] = $columnOptions['length'];
+                unset($columnOptions['length']);
+            }
         }
 
         return $columnOptions;
