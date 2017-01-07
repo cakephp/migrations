@@ -61,8 +61,8 @@ class Seed extends SeedRun
         }
 
         $seed = $input->getOption('seed');
-        if (!empty($seed)) {
-            $input->setOption('seed', [$input->getOption('seed')]);
+        if (!empty($seed) && !is_array($seed)) {
+            $input->setOption('seed', [$seed]);
         }
 
         $this->setInput($input);
