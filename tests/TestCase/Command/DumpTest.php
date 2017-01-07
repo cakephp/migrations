@@ -107,8 +107,8 @@ class DumpTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $display = $commandTester->getDisplay();
-        $this->assertTextContains('No tables were found : the dump file was not created', $display);
+        $dumpPath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
+        $this->assertEquals(serialize([]), file_get_contents($dumpPath));
     }
 
     /**
