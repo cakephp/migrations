@@ -134,7 +134,8 @@ class Create extends CreateCommand
             ));
         }
 
-        // Verify that the template creation class (or the aliased class) exists and that it implements the required interface.
+        // Verify that the template creation class (or the aliased class) exists and
+        // that it implements the required interface.
         $aliasedClassName = null;
         if ($creationClassName) {
             // Supplied class does not exist, is it aliased?
