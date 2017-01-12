@@ -81,11 +81,16 @@ trait ConfigurationTrait
 
         $connectionConfig = ConnectionManager::config($connection);
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
+
         $config = [
             'paths' => [
                 'migrations' => $migrationsPath,
                 'seeds' => $seedsPath,
             ],
+            'templates' => [
+                'class' => 'Migrations\TemplateCreation'
+            ],
+            'migration_base_class' => 'Migrations\AbstractMigration',
             'environments' => [
                 'default_migration_table' => $phinxTable,
                 'default_database' => 'default',
