@@ -2,8 +2,15 @@
 namespace Migrations;
 
 use Cake\Core\Plugin;
+use Cake\Utility\Inflector;
 use Phinx\Migration\AbstractTemplateCreation;
+use Phinx\Util\Util;
 
+/**
+ * Class TemplateCreation
+ *
+ * Custom migration template class
+ */
 class TemplateCreation extends AbstractTemplateCreation
 {
 
@@ -23,8 +30,7 @@ class TemplateCreation extends AbstractTemplateCreation
     /**
      * Post Migration Creation.
      *
-     * Once the migration file has been created, this method will be called, allowing any additional
-     * processing, specific to the template to be performed.
+     * Will rename the file to follow the CakePHP conventions around migration filename (in CamelCase).
      *
      * @param string $migrationFilename The name of the newly created migration.
      * @param string $className The class name.
@@ -33,6 +39,15 @@ class TemplateCreation extends AbstractTemplateCreation
      */
     public function postMigrationCreation($migrationFilename, $className, $baseClassName)
     {
-        // TODO: Implement postMigrationCreation() method.
+        $path = dirname($migrationFilename) . DS;
+        $name = Inflector::camelize($className);
+        $newPath = $path . Util::getCurrentTimestamp() . '_' . $name . '.php';
+
+        $this->output->writeln('<info>renaming file in CamelCase to follow CakePHP convention...</info>');
+        if (rename($migrationFilename, $newPath)) {
+            $this->output->writeln(sprintf('<info>File successfully renamed to %s</info>', $newPath));
+        } else {
+            $this->output->writeln(sprintf('<info>An error occurred while renaming file to %s</info>', $newPath));
+        }
     }
 }
