@@ -109,7 +109,7 @@ class Create extends CreateCommand
         // Get the alternative template and static class options from the config, but only allow one of them.
         $defaultAltTemplate = $this->getConfig()->getTemplateFile();
         $defaultCreationClassName = $this->getConfig()->getTemplateClass();
-        if ($defaultAltTemplate && $defaultCreationClassName){
+        if ($defaultAltTemplate && $defaultCreationClassName) {
             throw new \InvalidArgumentException('Cannot define template:class and template:file at the same time');
         }
 
@@ -121,7 +121,7 @@ class Create extends CreateCommand
         }
 
         // If no commandline options then use the defaults.
-        if (!$altTemplate && !$creationClassName){
+        if (!$altTemplate && !$creationClassName) {
             $altTemplate = $defaultAltTemplate;
             $creationClassName = $defaultCreationClassName;
         }
@@ -135,7 +135,7 @@ class Create extends CreateCommand
         }
 
         // Verify that the template creation class (or the aliased class) exists and that it implements the required interface.
-        $aliasedClassName  = null;
+        $aliasedClassName = null;
         if ($creationClassName) {
             // Supplied class does not exist, is it aliased?
             if (!class_exists($creationClassName)) {
@@ -214,7 +214,11 @@ class Create extends CreateCommand
 
         // Do we need to do the post creation call to the creation class?
         if ($creationClassName) {
-            $creationClass->postMigrationCreation($filePath, $className, $this->getConfig()->getMigrationBaseClassName());
+            $creationClass->postMigrationCreation(
+                $filePath,
+                $className,
+                $this->getConfig()->getMigrationBaseClassName()
+            );
         }
     }
 }
