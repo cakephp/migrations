@@ -11,6 +11,7 @@
  */
 namespace Migrations;
 
+use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
@@ -88,7 +89,7 @@ trait ConfigurationTrait
                 'seeds' => $seedsPath,
             ],
             'templates' => [
-                'class' => 'Migrations\TemplateCreation'
+                'file' => Plugin::path('Migrations') . 'src' . DS . 'Template' . DS . 'Phinx' . DS . 'create.php.template'
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
             'environments' => [
