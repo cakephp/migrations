@@ -61,7 +61,7 @@ before_script:
   - sh -c "if [ '$PREFER_LOWEST' != '1' ]; then composer install --prefer-source --no-interaction; fi"
   - sh -c "if [ '$PREFER_LOWEST' = '1' ]; then composer update --prefer-source --no-interaction --prefer-lowest --prefer-stable; fi"
 
-  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test; CREATE DATABASE cakephp_comparisons;'; fi"
+  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test DEFAULT COLLATE=utf8mb4_general_ci; CREATE DATABASE cakephp_comparisons;'; fi"
 
   - sh -c "if [ '$DB' = 'pgsql' ]; then psql -c 'CREATE DATABASE cakephp_test;' -U postgres; fi"
   - sh -c "if [ '$DB' = 'pgsql' ]; then psql -c 'CREATE DATABASE cakephp_comparisons;' -U postgres; fi"
