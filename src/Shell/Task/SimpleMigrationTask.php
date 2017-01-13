@@ -65,6 +65,11 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
      */
     public function bake($name)
     {
+        $migrationWithSameName = glob($this->getPath() . '*_' . $name . '.php');
+        if (!empty($migrationWithSameName)) {
+            $this->abort(sprintf('A migration with the name `%s` already exists. Please use a different name.', $name));
+        }
+
         $this->params['no-test'] = true;
         return parent::bake($name);
     }
@@ -80,16 +85,14 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     protected function getMigrationName($name = null)
     {
         if (empty($name)) {
-            $this->error('Choose a migration name to bake in CamelCase format');
-            return null;
+            $this->abort('Choose a migration name to bake in CamelCase format');
         }
 
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
-            $this->error('The className is not correct. The className can only contain "A-Z" and "0-9".');
-            return null;
+            $this->abort('The className is not correct. The className can only contain "A-Z" and "0-9".');
         }
 
         return $name;
