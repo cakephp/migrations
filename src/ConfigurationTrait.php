@@ -83,13 +83,14 @@ trait ConfigurationTrait
         $connectionConfig = ConnectionManager::config($connection);
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
 
+        $templatePath = Plugin::path('Migrations') . 'src' . DS . 'Template';
         $config = [
             'paths' => [
                 'migrations' => $migrationsPath,
                 'seeds' => $seedsPath,
             ],
             'templates' => [
-                'file' => Plugin::path('Migrations') . 'src' . DS . 'Template' . DS . 'Phinx' . DS . 'create.php.template'
+                'file' => $templatePath . DS . 'Phinx' . DS . 'create.php.template'
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
             'environments' => [
