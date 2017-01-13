@@ -33,7 +33,7 @@ class ProductsFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'integer'],
         'title' => ['type' => 'string', 'null' => true, 'length' => 255],
-        'slug' => ['type' => 'string', 'null' => true, 'length' => 255],
+        'slug' => ['type' => 'string', 'null' => true, 'length' => 100],
         'category_id' => ['type' => 'integer', 'length' => 11],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],

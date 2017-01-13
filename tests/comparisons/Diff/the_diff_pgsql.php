@@ -22,7 +22,7 @@ class TheDiffPgsql extends AbstractMigration
             ])
             ->changeColumn('name', 'string', [
                 'default' => null,
-                'limit' => 50,
+                'limit' => 10,
                 'null' => false,
             ])
             ->update();
