@@ -112,6 +112,33 @@ class MigrationTaskTest extends TestCase
     }
 
     /**
+     * Tests that baking a migration with the name as another will throw an exception.
+     *
+     * @expectedException \Cake\Console\Exception\StopException
+     * @expectedExceptionMessage A migration with the name `CreateUsers` already exists. Please use a different name.
+     */
+    public function testCreateDuplicateName()
+    {
+        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
+            ->setMethods(['in', 'err', '_stop', 'error'])
+            ->setConstructorArgs([$inputOutput])
+            ->getMock();
+
+        $task->name = 'Migration';
+        $task->connection = 'test';
+        $task->BakeTemplate = new BakeTemplateTask($inputOutput);
+        $task->BakeTemplate->initialize();
+        $task->BakeTemplate->interactive = false;
+
+        $task->bake('CreateUsers');
+        $task->bake('CreateUsers');
+    }
+
+    /**
      * Test that adding a field or altering a table with a primary
      * key will error out
      *
