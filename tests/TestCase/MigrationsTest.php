@@ -188,6 +188,31 @@ class MigrationsTest extends TestCase
     }
 
     /**
+     * Tests the collation table behavior when using MySQL
+     *
+     * @return void
+     */
+    public function testCreateWithEncoding()
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+
+        $migrate = $this->migrations->migrate();
+        $this->assertTrue($migrate);
+
+        // Tests that if a collation is defined, it is used
+        $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
+        $options = $numbersTable->schema()->options();
+        $this->assertEquals('utf8_bin', $options['collation']);
+
+        // Tests that if a collation is not defined, it will use the database default one
+        $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
+        $options = $lettersTable->schema()->options();
+        $this->assertEquals('utf8mb4_general_ci', $options['collation']);
+
+        $this->migrations->rollback(['target' => 0]);
+    }
+
+    /**
      * Tests calling Migrations::markMigrated without params marks everything
      * as migrated
      *

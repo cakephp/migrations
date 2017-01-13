@@ -9,7 +9,7 @@ sudo: false
 
 env:
   matrix:
-    - DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
+    - DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test?encoding=utf8mb4' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
     - DB=sqlite
   global:
     - DEFAULT=1
@@ -17,14 +17,14 @@ env:
 matrix:
   allow_failures:
     - php: hhvm
-    - env: CODECOVERAGE=1 DEFAULT=0 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
+    - env: CODECOVERAGE=1 DEFAULT=0 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test?encoding=utf8mb4' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
     - env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test' db_dsn_compare='postgres://postgres@127.0.0.1/cakephp_comparisons'
 
   fast_finish: true
 
   include:
     - php: 7.0
-      env: CODECOVERAGE=1 DEFAULT=0 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
+      env: CODECOVERAGE=1 DEFAULT=0 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test?encoding=utf8mb4' db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
 
     - php: 5.5
       env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test' db_dsn_compare='postgres://postgres@127.0.0.1/cakephp_comparisons'
@@ -32,7 +32,7 @@ matrix:
     - php: 5.6
       dist: trusty
       sudo: required
-      env: DB=mysql db_dsn='mysql://root@0.0.0.0/cakephp_test' DBV=56 db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
+      env: DB=mysql db_dsn='mysql://root@0.0.0.0/cakephp_test?encoding=utf8mb4' DBV=56 db_dsn_compare='mysql://root@0.0.0.0/cakephp_comparisons'
       addons:
         apt:
           packages:
@@ -53,7 +53,7 @@ matrix:
       env: HHVM=1 DB=sqlite
 
     - php: hhvm
-      env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test' db_dsn_compare='mysql://travis@0.0.0.0/cakephp_comparisons'
+      env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test?encoding=utf8mb4' db_dsn_compare='mysql://travis@0.0.0.0/cakephp_comparisons'
 
 before_script:
   - sh -c "if [ '$HHVM' != '1' ]; then phpenv config-rm xdebug.ini; fi"
