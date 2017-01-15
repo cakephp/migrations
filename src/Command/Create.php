@@ -11,15 +11,21 @@
  */
 namespace Migrations\Command;
 
+use Cake\Utility\Inflector;
 use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\Create as CreateCommand;
+use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends CreateCommand
 {
 
-    use ConfigurationTrait;
+    use ConfigurationTrait {
+        execute as parentExecute;
+    }
 
     /**
      * {@inheritdoc}
@@ -33,8 +39,8 @@ class Create extends CreateCommand
                 '%sCreates a new database migration file%s',
                 PHP_EOL,
                 PHP_EOL
-            ));
-        $this->addOption('plugin', 'p', InputOption::VALUE_REQUIRED, 'The plugin the file should be created for')
+            ))
+            ->addOption('plugin', 'p', InputOption::VALUE_REQUIRED, 'The plugin the file should be created for')
             ->addOption('connection', 'c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
             ->addOption('source', 's', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
             ->addOption('template', 't', InputOption::VALUE_REQUIRED, 'Use an alternative template')
@@ -44,5 +50,41 @@ class Create extends CreateCommand
                 InputOption::VALUE_REQUIRED,
                 'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template'
             );
+    }
+
+    /**
+     * Overrides the action execute method in order to vanish the idea of environments
+     * from phinx. CakePHP does not believe in the idea of having in-app environments
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
+     * @return mixed
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->parentExecute($input, $output);
+
+        $output->writeln('<info>renaming file in CamelCase to follow CakePHP convention...</info>');
+
+        $migrationPath = $this->getConfig()->getMigrationPath() . DS;
+        $name = $input->getArgument('name');
+        list($phinxTimestamp, $phinxName) = explode('_', Util::mapClassNameToFileName($name), 2);
+        $migrationFilename = glob($migrationPath . '*' . $phinxName);
+
+        if (empty($migrationFilename)) {
+            $output->writeln(sprintf('<info>An error occurred while renaming file</info>'));
+        } else {
+            $migrationFilename = $migrationFilename[0];
+            $path = dirname($migrationFilename) . DS;
+            $name = Inflector::camelize($name);
+            $newPath = $path . Util::getCurrentTimestamp() . '_' . $name . '.php';
+
+            $output->writeln('<info>renaming file in CamelCase to follow CakePHP convention...</info>');
+            if (rename($migrationFilename, $newPath)) {
+                $output->writeln(sprintf('<info>File successfully renamed to %s</info>', $newPath));
+            } else {
+                $output->writeln(sprintf('<info>An error occurred while renaming file to %s</info>', $newPath));
+            }
+        }
     }
 }
