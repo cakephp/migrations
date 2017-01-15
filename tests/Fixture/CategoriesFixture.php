@@ -31,7 +31,7 @@ class CategoriesFixture extends TestFixture
         'id' => ['type' => 'integer'],
         'parent_id' => ['type' => 'integer', 'length' => 11],
         'title' => ['type' => 'string', 'null' => true, 'length' => 255],
-        'slug' => ['type' => 'string', 'null' => true, 'length' => 255],
+        'slug' => ['type' => 'string', 'null' => true, 'length' => 100],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [

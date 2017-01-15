@@ -70,13 +70,23 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
-     * Gets the database connection
+     * Gets the database PDO connection object.
      *
      * @return \PDO
      */
     public function getConnection()
     {
         return $this->adapter->getConnection();
+    }
+
+    /**
+     * Gets the CakePHP Connection object.
+     *
+     * @return \Cake\Database\Connection
+     */
+    public function getCakeConnection()
+    {
+        return $this->connection;
     }
 
     /**

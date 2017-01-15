@@ -58,12 +58,32 @@ class Table extends BaseTable
 
     /**
      * {@inheritdoc}
+     *
+     * If using MySQL and no collation information has been given to the table options, a request to the information
+     * schema will be made to get the default database collation and apply it to the database. This is to prevent
+     * phinx default mechanism to put the collation to a default of "utf8_general_ci".
      */
     public function create()
     {
         if ((!isset($this->options['id']) || $this->options['id'] === false) && !empty($this->primaryKey)) {
             $this->options['primary_key'] = $this->primaryKey;
             $this->filterPrimaryKey();
+        }
+
+        $options = $this->getOptions();
+        if ($this->getAdapter()->getAdapterType() === 'mysql' && empty($options['collation'])) {
+            $encodingRequest = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+                FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "%s"';
+
+            $cakeConnection = $this->getAdapter()->getCakeConnection();
+            $connectionConfig = $cakeConnection->config();
+            $encodingRequest = sprintf($encodingRequest, $connectionConfig['database']);
+
+            $defaultEncoding = $cakeConnection->execute($encodingRequest)->fetch('assoc');
+            if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
+                $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];
+                $this->setOptions($options);
+            }
         }
 
         parent::create();

@@ -78,7 +78,7 @@ class TestPluginBlogSqlite extends AbstractMigration
             ])
             ->addColumn('slug', 'string', [
                 'default' => null,
-                'limit' => 255,
+                'limit' => 100,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [

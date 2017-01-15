@@ -95,7 +95,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addColumn('slug', 'string', [
                 'default' => 'NULL::character varying',
-                'limit' => 255,
+                'limit' => 100,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -124,7 +124,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addColumn('name', 'string', [
                 'default' => '',
-                'limit' => 50,
+                'limit' => 10,
                 'null' => false,
             ])
             ->addPrimaryKey(['id', 'name'])
@@ -171,7 +171,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addColumn('slug', 'string', [
                 'default' => 'NULL::character varying',
-                'limit' => 255,
+                'limit' => 100,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [

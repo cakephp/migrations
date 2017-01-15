@@ -6,7 +6,7 @@ class CreateNumbersTable extends AbstractMigration
 
     public function up()
     {
-        $table = $this->table('numbers');
+        $table = $this->table('numbers', ['collation' => 'utf8_bin']);
         $table
             ->addColumn('number', 'integer', [
                 'default' => null,

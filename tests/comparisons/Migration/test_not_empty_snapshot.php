@@ -79,7 +79,7 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('slug', 'string', [
                 'default' => null,
-                'limit' => 255,
+                'limit' => 100,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -108,7 +108,7 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('name', 'string', [
                 'default' => '',
-                'limit' => 50,
+                'limit' => 10,
                 'null' => false,
             ])
             ->create();
@@ -140,7 +140,7 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('slug', 'string', [
                 'default' => null,
-                'limit' => 255,
+                'limit' => 100,
                 'null' => true,
             ])
             ->addColumn('category_id', 'integer', [
