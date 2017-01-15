@@ -67,7 +67,20 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     {
         $migrationWithSameName = glob($this->getPath() . '*_' . $name . '.php');
         if (!empty($migrationWithSameName)) {
-            $this->abort(sprintf('A migration with the name `%s` already exists. Please use a different name.', $name));
+            $force = $this->param('force');
+            if (!$force) {
+                $this->abort(sprintf('A migration with the name `%s` already exists. Please use a different name.', $name));
+            }
+
+            $this->info(sprintf('A migration with the name `%s` already exists, it will be deleted.', $name));
+            foreach ($migrationWithSameName as $migration) {
+                $this->info(sprintf('Deleting migration file `%s`...', $migration));
+                if (unlink($migration)) {
+                    $this->success(sprintf('Deleted `%s`', $migration));
+                } else {
+                    $this->err(sprintf('An error occurred while deleting `%s`', $migration));
+                }
+            }
         }
 
         $this->params['no-test'] = true;
@@ -118,22 +131,26 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
 
         $parser->description(
             'Bake migration class.'
-        )->addOption('plugin', [
-            'short' => 'p',
-            'help' => 'Plugin to bake into.'
-        ])->addOption('force', [
-            'short' => 'f',
-            'boolean' => true,
-            'help' => 'Force overwriting existing files without prompting.'
-        ])->addOption('connection', [
-            'short' => 'c',
-            'default' => 'default',
-            'help' => 'The datasource connection to get data from.'
-        ])->addOption('theme', [
-            'short' => 't',
-            'help' => 'The theme to use when baking code.',
-            'choices' => $bakeThemes
-        ]);
+            )
+            ->addOption('plugin', [
+                'short' => 'p',
+                'help' => 'Plugin to bake into.'
+            ])
+            ->addOption('force', [
+                'short' => 'f',
+                'boolean' => true,
+                'help' => 'Force overwriting existing file if a migration already exists with the same name.'
+            ])
+            ->addOption('connection', [
+                'short' => 'c',
+                'default' => 'default',
+                'help' => 'The datasource connection to get data from.'
+            ])
+            ->addOption('theme', [
+                'short' => 't',
+                'help' => 'The theme to use when baking code.',
+                'choices' => $bakeThemes
+            ]);
 
         return $parser;
     }

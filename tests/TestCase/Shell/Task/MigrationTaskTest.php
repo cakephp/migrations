@@ -139,6 +139,38 @@ class MigrationTaskTest extends TestCase
     }
 
     /**
+     * Tests that baking a migration with the name as another with the parameter "force", will delete the existing file.
+     */
+    public function testCreateDuplicateNameWithForce()
+    {
+        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
+            ->setMethods(['in', 'err', '_stop', 'error'])
+            ->setConstructorArgs([$inputOutput])
+            ->getMock();
+
+        $task->name = 'Migration';
+        $task->connection = 'test';
+        $task->params['force'] = true;
+        $task->BakeTemplate = new BakeTemplateTask($inputOutput);
+        $task->BakeTemplate->initialize();
+        $task->BakeTemplate->interactive = false;
+
+        $task->bake('CreateUsers');
+
+        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $filePath = current($file);
+        sleep(1);
+
+        $task->bake('CreateUsers');
+        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $this->assertNotEquals($filePath, current($file));
+    }
+
+    /**
      * Test that adding a field or altering a table with a primary
      * key will error out
      *
