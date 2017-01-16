@@ -11,7 +11,7 @@
  */
 namespace Migrations\Test\TestCase\Shell;
 
-use Migrations\Shell\Task\SnapshotTrait;
+use Migrations\TableFinderTrait;
 
 /**
  * Class TestClassWithSnapshotTrait
@@ -19,7 +19,7 @@ use Migrations\Shell\Task\SnapshotTrait;
  */
 class TestClassWithSnapshotTrait
 {
-    use SnapshotTrait {
+    use TableFinderTrait {
         fetchTableName as public publicFetchTableName;
         getTableNames as public publicGetTableNames;
     }

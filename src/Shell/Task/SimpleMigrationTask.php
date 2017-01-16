@@ -32,6 +32,13 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public $pathFragment = 'config/Migrations/';
 
     /**
+     * BakeTemplate instance.
+     *
+     * @var \Bake\Shell\Task\BakeTemplateTask
+     */
+    public $BakeTemplate;
+
+    /**
      * {@inheritDoc}
      */
     public function name()

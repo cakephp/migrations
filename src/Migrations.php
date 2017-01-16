@@ -15,6 +15,7 @@ use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 
 /**
@@ -93,6 +94,18 @@ class Migrations
     {
         $this->command = $command;
         return $this;
+    }
+
+    /**
+     * Sets the input object that should be used for the command class. This object
+     * is used to inspect the extra options that are needed for CakePHP apps.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @return void
+     */
+    public function setInput(InputInterface $input)
+    {
+        $this->input = $input;
     }
 
     /**

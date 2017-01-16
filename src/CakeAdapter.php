@@ -15,7 +15,7 @@ use Cake\Database\Connection;
 use Cake\Database\Driver\Postgres;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
-use Phinx\Db\Table;
+use Phinx\Db\Table as PhinxTable;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\ForeignKey;
 use Phinx\Db\Table\Index;
@@ -112,7 +112,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Set adapter configuration options.
      *
-     * @param  array $options
+     * @param array $options
      * @return $this
      */
     public function setOptions(array $options)
@@ -380,11 +380,11 @@ class CakeAdapter implements AdapterInterface
     /**
      * Inserts data into a table.
      *
-     * @param Table $table where to insert data
+     * @param \Phinx\Db\Table $table where to insert data
      * @param array $row
      * @return void
      */
-    public function insert(Table $table, $row)
+    public function insert(PhinxTable $table, $row)
     {
         $this->adapter->insert($table, $row);
     }
@@ -425,10 +425,10 @@ class CakeAdapter implements AdapterInterface
     /**
      * Creates the specified database table.
      *
-     * @param Table $table Table
+     * @param \Phinx\Db\Table $table Table
      * @return void
      */
-    public function createTable(Table $table)
+    public function createTable(PhinxTable $table)
     {
         $this->adapter->createTable($table);
     }
@@ -482,11 +482,11 @@ class CakeAdapter implements AdapterInterface
     /**
      * Adds the specified column to a database table.
      *
-     * @param Table  $table  Table
-     * @param Column $column Column
+     * @param \Phinx\Db\Table  $table  Table
+     * @param \Phinx\Db\Table\Column $column Column
      * @return void
      */
-    public function addColumn(Table $table, Column $column)
+    public function addColumn(PhinxTable $table, Column $column)
     {
         $this->adapter->addColumn($table, $column);
     }
@@ -509,8 +509,8 @@ class CakeAdapter implements AdapterInterface
      *
      * @param string $tableName  Table Name
      * @param string $columnName Column Name
-     * @param Column $newColumn  New Column
-     * @return Table
+     * @param \Phinx\Db\Table\Column $newColumn  New Column
+     * @return \Phinx\Db\Table
      */
     public function changeColumn($tableName, $columnName, Column $newColumn)
     {
@@ -556,11 +556,11 @@ class CakeAdapter implements AdapterInterface
     /**
      * Adds the specified index to a database table.
      *
-     * @param Table $table Table
+     * @param \Phinx\Db\Table $table Table
      * @param Index $index Index
      * @return void
      */
-    public function addIndex(Table $table, Index $index)
+    public function addIndex(PhinxTable $table, Index $index)
     {
         $this->adapter->addIndex($table, $index);
     }
@@ -605,11 +605,11 @@ class CakeAdapter implements AdapterInterface
     /**
      * Adds the specified foreign key to a database table.
      *
-     * @param Table      $table
-     * @param ForeignKey $foreignKey
+     * @param \Phinx\Db\Table $table
+     * @param \Phinx\Db\Table\ForeignKey $foreignKey
      * @return void
      */
-    public function addForeignKey(Table $table, ForeignKey $foreignKey)
+    public function addForeignKey(PhinxTable $table, ForeignKey $foreignKey)
     {
         $this->adapter->addForeignKey($table, $foreignKey);
     }

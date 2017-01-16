@@ -33,6 +33,13 @@ class SeedTask extends SimpleBakeTask
     public $pathFragment = 'config/Seeds/';
 
     /**
+     * BakeTemplate instance.
+     *
+     * @var \Bake\Shell\Task\BakeTemplateTask
+     */
+    public $BakeTemplate;
+
+    /**
      * {@inheritDoc}
      */
     public function name()
