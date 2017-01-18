@@ -16,8 +16,7 @@ class BakeTemplatePropertyReflection implements PropertyReflection
     public function __construct(
         ClassReflection $declaringClass,
         Type $type
-    )
-    {
+    ) {
         $this->declaringClass = $declaringClass;
         $this->type = $type;
     }
