@@ -5,6 +5,7 @@ use Bake\Shell\Task\SimpleBakeTask;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertiesClassReflectionExtension;
 use PHPStan\Reflection\PropertyReflection;
+use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypehintHelper;
 
 class ShellPropertiesClassReflectionExtension implements PropertiesClassReflectionExtension
@@ -29,7 +30,7 @@ class ShellPropertiesClassReflectionExtension implements PropertiesClassReflecti
     {
         return new BakeTemplatePropertyReflection(
             $classReflection,
-            TypehintHelper::getTypeObjectFromTypehint('Bake\Shell\Task\BakeTemplateTask', false)
+            new ObjectType('Bake\Shell\Task\BakeTemplateTask', false)
         );
     }
 

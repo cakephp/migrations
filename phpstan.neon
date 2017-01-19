@@ -2,5 +2,4 @@ services:
     -
         class: Migrations\PHPStan\ShellPropertiesClassReflectionExtension
         tags:
-            - phpstan.broker.methodsClassReflectionExtension
             - phpstan.broker.propertiesClassReflectionExtension
