@@ -33,14 +33,4 @@ class ShellPropertiesClassReflectionExtension implements PropertiesClassReflecti
             new ObjectType('Bake\Shell\Task\BakeTemplateTask', false)
         );
     }
-
-    /**
-     * @param ClassReflection $classReflection Class reflection
-     * @param string $methodName Method name
-     * @return bool
-     */
-    public function hasMethod(ClassReflection $classReflection, string $methodName): bool
-    {
-        return false;
-    }
 }
