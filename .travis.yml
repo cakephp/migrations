@@ -58,8 +58,8 @@ matrix:
 before_script:
   - sh -c "if [ '$HHVM' != '1' ]; then phpenv config-rm xdebug.ini; fi"
   - composer self-update
-  - sh -c "if [ '$PREFER_LOWEST' != '1' ]; then composer install --prefer-source --no-interaction; fi"
-  - sh -c "if [ '$PREFER_LOWEST' = '1' ]; then composer update --prefer-source --no-interaction --prefer-lowest --prefer-stable; fi"
+  - sh -c "if [ '$PREFER_LOWEST' != '1' ]; then composer install --prefer-dist --no-interaction; fi"
+  - sh -c "if [ '$PREFER_LOWEST' = '1' ]; then composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable; fi"
 
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test DEFAULT COLLATE=utf8mb4_general_ci; CREATE DATABASE cakephp_comparisons;'; fi"
 
@@ -71,7 +71,7 @@ before_script:
   - cp phpunit.xml.dist phpunit.xml
 
 script:
-  - sh -c "if [ '$DEFAULT' = '1' ]; then phpunit --stderr; fi"
+  - sh -c "if [ '$DEFAULT' = '1' ]; then vendor/bin/phpunit --stderr; fi"
   - sh -c "if [ '$PHPSTAN' = '1' ]; then composer require --dev phpstan/phpstan:^0.6 && vendor/bin/phpstan analyse -c phpstan.neon -l 1 src; fi"
   - sh -c "if [ '$CODECOVERAGE' = '1' ]; then phpdbg -qrr vendor/bin/phpunit --coverage-clover=clover.xml || true; fi"
   - sh -c "if [ '$CODECOVERAGE' = '1' ]; then wget -O codecov.sh https://codecov.io/bash; fi"
