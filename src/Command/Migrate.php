@@ -21,6 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Migrate extends MigrateCommand
 {
 
+    use CommandTrait;
     use ConfigurationTrait {
         execute as parentExecute;
     }

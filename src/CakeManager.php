@@ -152,7 +152,7 @@ class CakeManager extends Manager
         sort($versions);
         $versions = array_reverse($versions);
 
-        if ($dateString > $versions[0]) {
+        if (empty($versions) || $dateString > $versions[0]) {
             $this->getOutput()->writeln('No migrations to rollback');
             return;
         }
@@ -163,6 +163,7 @@ class CakeManager extends Manager
             return;
         }
 
+        $index = 0;
         foreach ($versions as $index => $version) {
             if ($dateString > $version) {
                 break;

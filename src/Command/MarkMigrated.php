@@ -22,6 +22,7 @@ use Symfony\Component\Console\Input\InputOption;
 class MarkMigrated extends AbstractCommand
 {
 
+    use CommandTrait;
     use ConfigurationTrait;
 
     /**

@@ -21,6 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Seed extends SeedRun
 {
 
+    use CommandTrait;
     use ConfigurationTrait {
         execute as parentExecute;
     }

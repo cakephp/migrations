@@ -20,6 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Status extends StatusCommand
 {
 
+    use CommandTrait;
     use ConfigurationTrait;
 
     /**

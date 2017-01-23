@@ -46,6 +46,9 @@ matrix:
     - php: 7.0
       env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test' db_dsn_compare='postgres://postgres@127.0.0.1/cakephp_comparisons'
 
+    - php: 7.0
+      env: PHPSTAN=1 DEFAULT=0
+
     - php: hhvm
       env: HHVM=1 DB=sqlite
 
@@ -69,7 +72,7 @@ before_script:
 
 script:
   - sh -c "if [ '$DEFAULT' = '1' ]; then phpunit --stderr; fi"
-  - sh -c "if [ '$PHPCS' = '1' ]; then vendor/bin/phpcs -p --extensions=php --standard=psr2 --ignore=tests/bootstrap.php,tests/comparisons/*,tests/test_app/* ./src ./tests ; fi"
+  - sh -c "if [ '$PHPSTAN' = '1' ]; then composer require --dev phpstan/phpstan:^0.6 && vendor/bin/phpstan analyse -c phpstan.neon -l 1 src; fi"
   - sh -c "if [ '$CODECOVERAGE' = '1' ]; then phpdbg -qrr vendor/bin/phpunit --coverage-clover=clover.xml || true; fi"
   - sh -c "if [ '$CODECOVERAGE' = '1' ]; then wget -O codecov.sh https://codecov.io/bash; fi"
   - sh -c "if [ '$CODECOVERAGE' = '1' ]; then bash codecov.sh; fi"
