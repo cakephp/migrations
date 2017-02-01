@@ -18,7 +18,7 @@
         "source": "https://github.com/cakephp/migrations"
     },
     "require": {
-        "php": ">=5.4",
+        "php": ">=5.5.9",
         "robmorgan/phinx": "0.6.6",
         "cakephp/cakephp": "~3.2"
     },
