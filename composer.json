@@ -23,7 +23,7 @@
         "cakephp/cakephp": "~3.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
+        "phpunit/phpunit": "~4.1",
         "cakephp/bake": "@stable"
     },
     "autoload": {
