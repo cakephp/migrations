@@ -68,7 +68,10 @@ if (!getenv('DB')) {
     putenv('DB=sqlite');
 }
 ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
-ConnectionManager::config('test_comparisons', ['url' => getenv('db_dsn_compare')]);
+
+if (getenv('db_dsn_compare') !== false) {
+    ConnectionManager::config('test_comparisons', ['url' => getenv('db_dsn_compare')]);
+}
 
 Plugin::load('Migrations', [
     'path' => dirname(dirname(__FILE__)) . DS,

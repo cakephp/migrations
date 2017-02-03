@@ -12,7 +12,6 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Cake\Console\ConsoleIo;
-use Cake\Core\Configure;
 use Cake\TestSuite\TestCase;
 use Migrations\Test\TestCase\Shell\TestCompletionStringOutput;
 
@@ -36,8 +35,6 @@ class CommandTaskTest extends TestCase
      */
     public function setUp()
     {
-        $this->skipIf(version_compare(Configure::version(), '3.1.6', '<'));
-
         parent::setUp();
 
         $this->out = new TestCompletionStringOutput();
@@ -88,12 +85,16 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsCreate()
     {
-        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'create']);
         $output = $this->out->output;
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --class -l --connection";
-        $expected .= " -c --plugin -p --source -s --template -t\n";
-        $this->assertTextEquals($expected, $output);
+        $expected .= " -c --plugin -p --source -s --template -t";
+        $outputExplode = explode(' ', trim($output));
+        sort($outputExplode);
+        $expectedExplode = explode(' ', $expected);
+        sort($expectedExplode);
+
+        $this->assertEquals($outputExplode, $expectedExplode);
     }
 
     /**
@@ -104,12 +105,16 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsMarkMigrated()
     {
-        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'mark_migrated']);
         $output = $this->out->output;
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
-        $expected .= " --exclude -x --only -o --plugin -p --source -s\n";
-        $this->assertTextEquals($expected, $output);
+        $expected .= " --exclude -x --only -o --plugin -p --source -s";
+        $outputExplode = explode(' ', trim($output));
+        sort($outputExplode);
+        $expectedExplode = explode(' ', $expected);
+        sort($expectedExplode);
+
+        $this->assertEquals($outputExplode, $expectedExplode);
     }
 
     /**
@@ -120,12 +125,16 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsMigrate()
     {
-        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'migrate']);
         $output = $this->out->output;
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --no-lock --quiet -q --verbose -v --connection -c";
-        $expected .= " --date -d --plugin -p --source -s --target -t\n";
-        $this->assertTextEquals($expected, $output);
+        $expected .= " --date -d --plugin -p --source -s --target -t";
+        $outputExplode = explode(' ', trim($output));
+        sort($outputExplode);
+        $expectedExplode = explode(' ', $expected);
+        sort($expectedExplode);
+
+        $this->assertEquals($outputExplode, $expectedExplode);
     }
 
     /**
@@ -136,12 +145,16 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsRollback()
     {
-        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'rollback']);
         $output = $this->out->output;
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --no-lock --quiet -q --verbose -v --connection -c";
-        $expected .= " --date -d --plugin -p --source -s --target -t\n";
-        $this->assertTextEquals($expected, $output);
+        $expected .= " --date -d --plugin -p --source -s --target -t";
+        $outputExplode = explode(' ', trim($output));
+        sort($outputExplode);
+        $expectedExplode = explode(' ', $expected);
+        sort($expectedExplode);
+
+        $this->assertEquals($outputExplode, $expectedExplode);
     }
 
     /**
@@ -152,11 +165,15 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsStatus()
     {
-        $this->skipIf(version_compare(phpversion(), '5.5.0', '<'));
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'status']);
         $output = $this->out->output;
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
-        $expected .= " --format -f --plugin -p --source -s\n";
-        $this->assertTextEquals($expected, $output);
+        $expected .= " --format -f --plugin -p --source -s";
+        $outputExplode = explode(' ', trim($output));
+        sort($outputExplode);
+        $expectedExplode = explode(' ', $expected);
+        sort($expectedExplode);
+
+        $this->assertEquals($outputExplode, $expectedExplode);
     }
 }
