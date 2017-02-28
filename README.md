@@ -26,7 +26,7 @@ You can load the plugin using the shell command:
 bin/cake plugin load Migrations
 ```
 
-Or you can manually add the loading statement in the **config/boostrap.php** file of your application:
+Or you can manually add the loading statement in the **config/bootstrap.php** file of your application:
 
 ```php
 Plugin::load('Migrations');
