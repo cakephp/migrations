@@ -1,6 +1,7 @@
 <?php
 namespace Migrations\Command;
 
+use Migrations\ConfigurationTrait;
 use Migrations\Util\SchemaTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,6 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CacheBuild extends Command
 {
+    use CommandTrait;
+    use ConfigurationTrait;
     use SchemaTrait;
 
     protected function configure()
