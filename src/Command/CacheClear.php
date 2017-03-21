@@ -2,7 +2,6 @@
 namespace Migrations\Command;
 
 use Cake\Cache\Cache;
-use Cake\Datasource\ConnectionManager;
 use Migrations\Util\SchemaTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,8 +11,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CacheClear extends Command
 {
+    use CommandTrait;
     use SchemaTrait;
-    
+
     protected function configure()
     {
         $this

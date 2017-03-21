@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CacheBuild extends Command
 {
+    use CommandTrait;
     use SchemaTrait;
 
     protected function configure()

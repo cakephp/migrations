@@ -24,26 +24,34 @@ trait SchemaTrait
     /**
      * Helper method to get the schema collection.
      *
-     * @return false|\Cake\Database\Schema\Collection
+     * @return null|\Cake\Database\Schema\Collection
      */
     protected function _getSchema(InputInterface $input, OutputInterface $output)
     {
-        $connection = $input->getOption('connection');
-        $source = ConnectionManager::get($connection);
-        if (!method_exists($source, 'schemaCollection')) {
+        $connectionName = $input->getOption('connection');
+        $connection = ConnectionManager::get($connectionName);
+
+        if (!method_exists($connection, 'schemaCollection')) {
             $msg = sprintf(
                 'The "%s" connection is not compatible with orm caching, ' .
                 'as it does not implement a "schemaCollection()" method.',
-                $connection
+                $connectionName
             );
             $output->writeln('<error>' . $msg . '</error>');
-            return false;
+
+            return null;
         }
-        $config = $source->config();
+
+        $config = $connection->config();
+
         if (empty($config['cacheMetadata'])) {
             $output->writeln('Metadata cache was disabled in config. Enable to cache or clear.');
-            $source->cacheMetadata(true);
+
+            return null;
         }
-        return $source->schemaCollection();
+
+        $connection->cacheMetadata(true);
+
+        return $connection->schemaCollection();
     }
 }
