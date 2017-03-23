@@ -68,6 +68,7 @@ class CacheBuildTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
+        $this->connection->execute('DROP TABLE IF EXISTS blog');
         unset($this->connection, $this->command, $this->streamOutput);
     }
 
