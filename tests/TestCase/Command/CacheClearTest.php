@@ -110,7 +110,6 @@ class CacheClearTest extends TestCase
         }
 
         $input = new ArrayInput($params, $this->command->getDefinition());
-        $this->command->setInput($input);
         $commandTester = new CommandTester($this->command);
 
         return $commandTester;

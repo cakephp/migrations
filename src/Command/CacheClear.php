@@ -11,7 +11,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CacheClear extends Command
 {
-    use CommandTrait;
     use SchemaTrait;
 
     protected function configure()
