@@ -91,8 +91,7 @@ class CacheClearTest extends TestCase
             '--connection' => 'test',
         ]);
 
-        $files = glob('/tmp/cake_model_test_blog');
-        $this->assertEmpty($files);
+        $this->assertFalse(Cache::read('test_blog', '_cake_model_'));
     }
 
     /**

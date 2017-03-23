@@ -92,12 +92,7 @@ class CacheBuildTest extends TestCase
             '--connection' => 'test',
         ]);
 
-        $file = Cache::read('test_blog', '_cake_model_');
-        $result = serialize($file);
-
-        $expected = file_get_contents($this->_compareBasePath . '/myapp_cake_model_default_blog');
-
-        $this->assertSame($expected, $result);
+        $this->assertNotFalse(Cache::read('test_blog', '_cake_model_'));
     }
 
     /**
