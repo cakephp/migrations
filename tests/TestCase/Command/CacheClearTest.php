@@ -66,6 +66,8 @@ class CacheClearTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
+        Cache::disable();
+        $this->connection->cacheMetadata(false);
         unset($this->connection, $this->command, $this->streamOutput);
     }
 
