@@ -1,10 +1,10 @@
 <?php
 namespace Migrations\Test\Command;
 
+use Cake\Cache\Cache;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
-use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -50,12 +50,12 @@ class CacheClearTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-
+        Cache::enable();
         $this->connection = ConnectionManager::get('test');
+        $this->connection->cacheMetadata(true);
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('orm-cache-clear');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Cache' . DS;
     }
 
     /**
@@ -78,18 +78,15 @@ class CacheClearTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'Create',
-            'name' => 'TestCreate'
         ];
         $commandTester = $this->getCommandTester($params);
 
         $commandTester->execute([
             'command' => $this->command->getName(),
-            'name' => 'TestCreate',
             '--connection' => 'test',
         ]);
 
-        $files = glob(ROOT . 'tmp' . DS . 'cache' . DS . 'models' . DS . '*');
+        $files = glob('/tmp/cake_model_test_blog');
         $this->assertEmpty($files);
     }
 
@@ -110,9 +107,6 @@ class CacheClearTest extends TestCase
 
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
-        $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->connection->driver()->connection());
-        $this->command->setManager($manager);
         $commandTester = new CommandTester($this->command);
 
         return $commandTester;

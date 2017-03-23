@@ -1,11 +1,10 @@
 <?php
 namespace Migrations\Test\Command;
 
+use Cake\Cache\Cache;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
-use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
-use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -13,8 +12,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class CacheBuildTest extends TestCase
 {
-
-    use StringCompareTrait;
 
     /**
      * Instance of a Symfony Command object
@@ -53,8 +50,10 @@ class CacheBuildTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-
+        Cache::enable();
         $this->connection = ConnectionManager::get('test');
+        $this->connection->cacheMetadata(true);
+        $this->connection->execute("CREATE TABLE blog (id int NOT NULL, title varchar(200) NOT NULL)");
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('orm-cache-build');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -87,14 +86,14 @@ class CacheBuildTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'Cache'
         ]);
 
-        $files = glob(ROOT . 'tmp' . DS . 'cache' . DS . 'models' . DS . '');
-        $this->assertNotEmpty($files);
+        $file = Cache::read('test_blog', '_cake_model_');
+        $result = serialize($file);
 
-        $file = current($files);
-        $this->assertSameAsFile('myapp_cake_model_default_articles', file_get_contents($file));
+        $expected = file_get_contents($this->_compareBasePath . '/myapp_cake_model_default_blog');
+
+        $this->assertSame($expected, $result);
     }
 
     /**
@@ -114,9 +113,6 @@ class CacheBuildTest extends TestCase
 
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
-        $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->connection->driver()->connection());
-        $this->command->setManager($manager);
         $commandTester = new CommandTester($this->command);
 
         return $commandTester;
