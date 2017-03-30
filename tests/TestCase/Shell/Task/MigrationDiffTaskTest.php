@@ -156,7 +156,7 @@ class MigrationDiffTaskTest extends TestCase
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiff' . DS;
-        $destination = $destinationConfigDir . '20160415220805_the_diff_' . ucfirst(env('DB')) . '.php';
+        $destination = $destinationConfigDir . '20160415220805_the_diff_' . env('DB') . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -204,7 +204,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->assertCorrectSnapshot($bakeName, $result);
 
         $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
+        $files = $dir->find('(.*)the_diff(.*)');
         $file = current($files);
         $file = new File($dir->pwd() . DS . $file);
         $file->open();
@@ -288,7 +288,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->assertCorrectSnapshot($bakeName, $result);
 
         $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
+        $files = $dir->find('(.*)the_diff(.*)');
         $file = current($files);
         $file = new File($dir->pwd() . DS . $file);
         $file->open();
@@ -327,7 +327,7 @@ class MigrationDiffTaskTest extends TestCase
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffAddRemove' . DS;
-        $destination = $destinationConfigDir . '20160415220805_the_diff_add_remove' . ucfirst(env('DB')) . '.php';
+        $destination = $destinationConfigDir . '20160415220805_the_diff_add_remove' . env('DB') . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -399,9 +399,7 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function getBakeName($name)
     {
-        $name .= ucfirst(getenv("DB"));
-
-        return $name;
+        return Inflector::underscore($name) . '_' . getenv("DB");
     }
 
     /**
