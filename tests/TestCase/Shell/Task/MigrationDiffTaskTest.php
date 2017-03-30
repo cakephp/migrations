@@ -198,7 +198,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->pathFragment = 'config/MigrationsDiff/';
         $this->Task->connection = 'test_comparisons';
 
-        $bakeName = $this->getBakeName('TheDiff');
+        $bakeName = $this->getBakeClassName('TheDiff');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
@@ -248,7 +248,7 @@ class MigrationDiffTaskTest extends TestCase
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffSimple' . DS;
-        $destination = $destinationConfigDir . '20160415220805_the_diff_simple' . ucfirst(env('DB')) . '.php';
+        $destination = $destinationConfigDir . '20160415220805_the_diff_simple_' . env('DB') . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -282,7 +282,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->pathFragment = 'config/MigrationsDiffSimple/';
         $this->Task->connection = 'test_comparisons';
 
-        $bakeName = $this->getBakeName('TheDiffSimple');
+        $bakeName = $this->getBakeClassName('TheDiffSimple');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
@@ -361,7 +361,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->pathFragment = 'config/MigrationsDiffAddRemove/';
         $this->Task->connection = 'test_comparisons';
 
-        $bakeName = $this->getBakeName('TheDiffAddRemove');
+        $bakeName = $this->getBakeClassName('TheDiffAddRemove');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
@@ -392,14 +392,14 @@ class MigrationDiffTaskTest extends TestCase
     }
 
     /**
-     * Get the baked filename based on the current db environment
+     * Get the baked class name based on the current db environment
      *
      * @param string $name Name of the baked file, unaware of the DB environment
-     * @return string Baked filename
+     * @return string Baked class name
      */
-    public function getBakeName($name)
+    public function getBakeClassName($name)
     {
-        return Inflector::underscore($name) . '_' . getenv("DB");
+        return $name . ucfirst(getenv("DB"));
     }
 
     /**
