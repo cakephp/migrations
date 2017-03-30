@@ -198,7 +198,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->pathFragment = 'config/MigrationsDiff/';
         $this->Task->connection = 'test_comparisons';
 
-        $bakeName = $this->getBakeClassName('TheDiff');
+        $bakeName = $this->getBakeName('TheDiff');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
@@ -282,7 +282,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->pathFragment = 'config/MigrationsDiffSimple/';
         $this->Task->connection = 'test_comparisons';
 
-        $bakeName = $this->getBakeClassName('TheDiffSimple');
+        $bakeName = $this->getBakeName('TheDiffSimple');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
@@ -361,7 +361,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->pathFragment = 'config/MigrationsDiffAddRemove/';
         $this->Task->connection = 'test_comparisons';
 
-        $bakeName = $this->getBakeClassName('TheDiffAddRemove');
+        $bakeName = $this->getBakeName('TheDiffAddRemove');
         $result = $this->Task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
@@ -397,9 +397,11 @@ class MigrationDiffTaskTest extends TestCase
      * @param string $name Name of the baked file, unaware of the DB environment
      * @return string Baked class name
      */
-    public function getBakeClassName($name)
+    public function getBakeName($name)
     {
-        return $name . ucfirst(getenv("DB"));
+        $name .= ucfirst(getenv("DB"));
+
+        return $name;
     }
 
     /**
