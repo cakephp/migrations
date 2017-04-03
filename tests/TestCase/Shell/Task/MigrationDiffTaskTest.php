@@ -156,7 +156,7 @@ class MigrationDiffTaskTest extends TestCase
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiff' . DS;
-        $destination = $destinationConfigDir . '20160415220805_TheDiff' . ucfirst(env('DB')) . '.php';
+        $destination = $destinationConfigDir . '20160415220805_the_diff_' . env('DB') . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -204,7 +204,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->assertCorrectSnapshot($bakeName, $result);
 
         $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
+        $files = $dir->find('(.*)the_diff(.*)');
         $file = current($files);
         $file = new File($dir->pwd() . DS . $file);
         $file->open();
@@ -248,7 +248,7 @@ class MigrationDiffTaskTest extends TestCase
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffSimple' . DS;
-        $destination = $destinationConfigDir . '20160415220805_TheDiffSimple' . ucfirst(env('DB')) . '.php';
+        $destination = $destinationConfigDir . '20160415220805_the_diff_simple_' . env('DB') . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -288,7 +288,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->assertCorrectSnapshot($bakeName, $result);
 
         $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
+        $files = $dir->find('(.*)the_diff(.*)');
         $file = current($files);
         $file = new File($dir->pwd() . DS . $file);
         $file->open();
@@ -327,7 +327,7 @@ class MigrationDiffTaskTest extends TestCase
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
         $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffAddRemove' . DS;
-        $destination = $destinationConfigDir . '20160415220805_TheDiffAddRemove' . ucfirst(env('DB')) . '.php';
+        $destination = $destinationConfigDir . '20160415220805_the_diff_add_remove' . env('DB') . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -367,11 +367,12 @@ class MigrationDiffTaskTest extends TestCase
         $this->assertCorrectSnapshot($bakeName, $result);
 
         $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
+        $files = $dir->find('(.*)the_diff(.*)');
         $file = current($files);
         $file = new File($dir->pwd() . DS . $file);
         $file->open();
-        $versionParts = explode('_', $file->name());
+        $fileName = $file->name();
+        $migrationName = substr($fileName, strpos($fileName, '_') + 1);
         $file->close();
         rename($destinationConfigDir . $file->name, $destination);
 
@@ -380,7 +381,7 @@ class MigrationDiffTaskTest extends TestCase
             ->into('phinxlog')
             ->values([
                 'version' => 20160415220805,
-                'migration_name' => $versionParts[1],
+                'migration_name' => $migrationName,
                 'start_time' => '2016-05-22 16:51:46',
                 'end_time' => '2016-05-22 16:51:46',
             ])
@@ -391,10 +392,10 @@ class MigrationDiffTaskTest extends TestCase
     }
 
     /**
-     * Get the baked filename based on the current db environment
+     * Get the baked class name based on the current db environment
      *
      * @param string $name Name of the baked file, unaware of the DB environment
-     * @return string Baked filename
+     * @return string Baked class name
      */
     public function getBakeName($name)
     {
