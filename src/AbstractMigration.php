@@ -33,12 +33,19 @@ class AbstractMigration extends BaseAbstractMigration
      *
      * @return \Migrations\Table
      */
-    public function table($tableName, $options = array())
+    public function table($tableName, $options = [])
     {
-        if ($this->autoId === false) {
-            $options['id'] = false;
+        $options += ['primary_key' => 'id'];
+        $table = new Table($tableName, ['id' => false] + $options, $this->getAdapter());
+
+        if ($this->autoId === true && (!array_key_exists('id', $options) || $options['id'])) {
+            $table->addColumn($options['primary_key'], 'integer', [
+                'null' => false,
+                'signed' => false,
+                'identity' => true,
+            ]);
         }
 
-        return new Table($tableName, $options, $this->getAdapter());
+        return $table;
     }
 }
