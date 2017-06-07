@@ -151,7 +151,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
         $result = $this->Task->bake($bakeName);
 
-        $this->assertNotEmpty(glob($this->Task->getPath() . '*_test_not_empty_snapshot*.php'));
+        $this->assertNotEmpty(glob($this->Task->getPath() . '*_TestNotEmptySnapshot*.php'));
         $this->assertCorrectSnapshot($bakeName, $result);
     }
 
@@ -198,7 +198,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
         $result = $this->Task->bake($bakeName);
 
-        $this->assertNotEmpty(glob($this->Task->getPath() . '*_test_auto_id_disabled_snapshot*.php'));
+        $this->assertNotEmpty(glob($this->Task->getPath() . '*_TestAutoIdDisabledSnapshot*.php'));
         $this->assertCorrectSnapshot($bakeName, $result);
     }
 

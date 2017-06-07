@@ -115,7 +115,7 @@ class MigrationTaskTest extends TestCase
      * Tests that baking a migration with the name as another will throw an exception.
      *
      * @expectedException \Cake\Console\Exception\StopException
-     * @expectedExceptionMessage A migration with the name `create_users` already exists. Please use a different name.
+     * @expectedExceptionMessage A migration with the name `CreateUsers` already exists. Please use a different name.
      */
     public function testCreateDuplicateName()
     {
@@ -134,8 +134,8 @@ class MigrationTaskTest extends TestCase
         $task->BakeTemplate->initialize();
         $task->BakeTemplate->interactive = false;
 
-        $task->bake('create_users');
-        $task->bake('create_users');
+        $task->bake('CreateUsers');
+        $task->bake('CreateUsers');
     }
 
     /**
@@ -161,13 +161,13 @@ class MigrationTaskTest extends TestCase
 
         $task->bake('CreateUsers');
 
-        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_create_users.php');
-        $filePath = end($file);
+        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $filePath = current($file);
         sleep(1);
 
         $task->bake('CreateUsers');
-        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_create_users.php');
-        $this->assertNotEquals($filePath, end($file));
+        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $this->assertNotEquals($filePath, current($file));
     }
 
     /**

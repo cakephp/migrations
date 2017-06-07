@@ -45,7 +45,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public function fileName($name)
     {
         $name = $this->getMigrationName($name);
-        return Util::getCurrentTimestamp() . '_' . Inflector::underscore($name) . '.php';
+        return Util::getCurrentTimestamp() . '_' . Inflector::camelize($name) . '.php';
     }
 
     /**
