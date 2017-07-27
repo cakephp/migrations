@@ -50,7 +50,8 @@ class Create extends CreateCommand
                 'l',
                 InputOption::VALUE_REQUIRED,
                 'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template'
-            );
+            )
+            ->addOption('path', null, InputOption::VALUE_REQUIRED, 'Specify the path in which to create this migration');
     }
 
     /**
