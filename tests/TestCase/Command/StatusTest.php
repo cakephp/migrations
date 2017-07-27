@@ -183,8 +183,10 @@ class StatusTest extends TestCase
         $migrations = $this->getMigrations();
         $migrations->migrate();
 
-        $origin = $migrations->getConfig()->getMigrationPath() . DS . '20150724233100_update_numbers_table.php';
-        $destination = $migrations->getConfig()->getMigrationPath() . DS . '_20150724233100_update_numbers_table.php';
+        $migrationPaths = $migrations->getConfig()->getMigrationPaths();
+        $migrationPath = array_pop($migrationPaths);
+        $origin = $migrationPath . DS . '20150724233100_update_numbers_table.php';
+        $destination = $migrationPath . DS . '_20150724233100_update_numbers_table.php';
         rename($origin, $destination);
 
         $params = [

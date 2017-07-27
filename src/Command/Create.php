@@ -67,7 +67,8 @@ class Create extends CreateCommand
 
         $output->writeln('<info>renaming file in CamelCase to follow CakePHP convention...</info>');
 
-        $migrationPath = $this->getConfig()->getMigrationPath() . DS;
+        $migrationPaths = $this->getConfig()->getMigrationPaths();
+        $migrationPath = array_pop($migrationPaths) . DS;
         $name = $input->getArgument('name');
         list($phinxTimestamp, $phinxName) = explode('_', Util::mapClassNameToFileName($name), 2);
         $migrationFilename = glob($migrationPath . '*' . $phinxName);
