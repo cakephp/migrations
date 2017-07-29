@@ -98,8 +98,28 @@ class Table extends BaseTable
      */
     public function update()
     {
+        if ($this->getAdapter()->getAdapterType() == 'sqlite') {
+            $this->foreignKeys = [];
+        }
+
         parent::update();
         TableRegistry::clear();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * We disable foreign key deletion for the SQLite adapter as SQLite does not support the feature natively and the
+     * process implemented by Phinx has serious side-effects (for instance it rename FK references in existing tables
+     * which breaks the database schema cohesion).
+     */
+    public function dropForeignKey($columns, $constraint = null)
+    {
+        if ($this->getAdapter()->getAdapterType() == 'sqlite') {
+            return $this;
+        }
+
+        return parent::dropForeignKey($columns, $constraint);
     }
 
     /**

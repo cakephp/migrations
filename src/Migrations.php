@@ -14,6 +14,7 @@ namespace Migrations;
 use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
+use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
@@ -288,10 +289,23 @@ class Migrations
             $seedPath = array_pop($seedPaths);
         }
 
+        if ($this->manager instanceof Manager) {
+            $pdo = $this->manager->getEnvironment('default')
+                ->getAdapter()
+                ->getConnection();
+        }
+
         $this->setInput($input);
         $newConfig = $this->getConfig(true);
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
+
+
+        if (isset($pdo)) {
+            $this->manager->getEnvironment('default')
+                ->getAdapter()
+                ->setConnection($pdo);
+        }
 
         $newMigrationPaths = $newConfig->getMigrationPaths();
         if (isset($migrationPath) && array_pop($newMigrationPaths) !== $migrationPath) {

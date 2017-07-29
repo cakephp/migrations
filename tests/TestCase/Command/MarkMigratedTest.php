@@ -62,6 +62,7 @@ class MarkMigratedTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
+        $this->pdo = $this->Connection->driver()->connection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
@@ -78,6 +79,7 @@ class MarkMigratedTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
+        $this->Connection->driver()->connection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->Connection, $this->commandTester, $this->command);
@@ -113,7 +115,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals('20150704160200', $result[0]['version']);
         $this->assertEquals('20150724233100', $result[1]['version']);
         $this->assertEquals('20150826191400', $result[2]['version']);
-        
+
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
@@ -157,7 +159,7 @@ class MarkMigratedTest extends TestCase
         $application = new MigrationsDispatcher('testing');
         $buggyCommand = $application->find('mark_migrated');
         $buggyCommand->setManager($manager);
-        $buggyCommandTester = new CommandTester($buggyCommand);
+        $buggyCommandTester = new \Migrations\Test\CommandTester($buggyCommand);
         $buggyCommandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',

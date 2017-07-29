@@ -74,6 +74,7 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
+        $this->pdo = $this->Connection->driver()->connection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
@@ -90,6 +91,7 @@ class StatusTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
+        $this->Connection->driver()->connection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->Connection, $this->command, $this->streamOutput);
@@ -220,9 +222,9 @@ class StatusTest extends TestCase
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->Connection->driver()->connection());
+        $manager->getEnvironment('default')->getAdapter()->setConnection($this->pdo);
         $this->command->setManager($manager);
-        $commandTester = new CommandTester($this->command);
+        $commandTester = new \Migrations\Test\CommandTester($this->command);
 
         return $commandTester;
     }
@@ -244,16 +246,7 @@ class StatusTest extends TestCase
             ->getManager($this->command->getConfig())
             ->getEnvironment('default')
             ->getAdapter()
-            ->setConnection($this->Connection->driver()->connection());
-
-        $tables = (new Collection($this->Connection))->listTables();
-        if (in_array('phinxlog', $tables)) {
-            $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
-            $query = $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema());
-            foreach ($query as $stmt) {
-                $this->Connection->execute($stmt);
-            }
-        }
+            ->setConnection($this->pdo);
 
         return $migrations;
     }

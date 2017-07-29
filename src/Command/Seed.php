@@ -21,10 +21,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Seed extends SeedRun
 {
 
-    use CommandTrait;
-    use ConfigurationTrait {
+    use CommandTrait {
         execute as parentExecute;
     }
+    use ConfigurationTrait;
     use EventDispatcherTrait;
 
     /**
