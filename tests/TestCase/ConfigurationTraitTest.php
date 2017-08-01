@@ -92,7 +92,8 @@ class ConfigurationTraitTest extends TestCase
         $this->assertInstanceOf('Phinx\Config\Config', $config);
 
         $expected = ROOT . DS . 'config' . DS . 'Migrations';
-        $this->assertEquals($expected, $config->getMigrationPath());
+        $migrationPaths = $config->getMigrationPaths();
+        $this->assertEquals($expected, array_pop($migrationPaths));
 
         $this->assertEquals(
             'phinxlog',
@@ -199,7 +200,8 @@ class ConfigurationTraitTest extends TestCase
         $this->assertInstanceOf('Phinx\Config\Config', $config);
 
         $expected = ROOT . DS . 'config' . DS . 'Migrations';
-        $this->assertEquals($expected, $config->getMigrationPath());
+        $migrationPaths = $config->getMigrationPaths();
+        $this->assertEquals($expected, array_pop($migrationPaths));
 
         $this->assertEquals(
             'phinxlog',

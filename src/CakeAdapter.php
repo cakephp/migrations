@@ -80,6 +80,17 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
+     * Gets the database PDO connection object.
+     *
+     * @param \PDO $connection Connection
+     * @return AdapterInterface
+     */
+    public function setConnection($connection)
+    {
+        return $this->adapter->setConnection($connection);
+    }
+
+    /**
      * Gets the CakePHP Connection object.
      *
      * @return \Cake\Database\Connection
@@ -457,6 +468,17 @@ class CakeAdapter implements AdapterInterface
     }
 
     /**
+     * Truncates the specified table
+     *
+     * @param string $tableName
+     * @return void
+     */
+    public function truncateTable($tableName)
+    {
+        $this->adapter->truncateTable($tableName);
+    }
+
+    /**
      * Returns table columns
      *
      * @param string $tableName Table Name
@@ -695,6 +717,18 @@ class CakeAdapter implements AdapterInterface
     public function dropDatabase($name)
     {
         $this->adapter->dropDatabase($name);
+    }
+
+    /**
+     * Cast a value to a boolean appropriate for the adapter.
+     *
+     * @param mixed $value The value to be cast
+     *
+     * @return mixed
+     */
+    public function castToBool($value)
+    {
+        return $this->adapter->castToBool($value);
     }
 
     /**

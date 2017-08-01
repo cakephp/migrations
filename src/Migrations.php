@@ -14,6 +14,7 @@ namespace Migrations;
 use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
+use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
@@ -230,8 +231,9 @@ class Migrations
         $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
         $this->setInput($input);
 
+        $migrationPaths = $this->getConfig()->getMigrationPaths();
         $params = [
-            $this->getConfig()->getMigrationPath(),
+            array_pop($migrationPaths),
             $this->getManager()->getVersionsToMark($input),
             $this->output
         ];
@@ -281,8 +283,16 @@ class Migrations
     protected function run($method, $params, $input)
     {
         if ($this->configuration instanceof Config) {
-            $migrationPath = $this->getConfig()->getMigrationPath();
-            $seedPath = $this->getConfig()->getSeedPath();
+            $migrationPaths = $this->getConfig()->getMigrationPaths();
+            $migrationPath = array_pop($migrationPaths);
+            $seedPaths = $this->getConfig()->getSeedPaths();
+            $seedPath = array_pop($seedPaths);
+        }
+
+        if ($this->manager instanceof Manager) {
+            $pdo = $this->manager->getEnvironment('default')
+                ->getAdapter()
+                ->getConnection();
         }
 
         $this->setInput($input);
@@ -290,10 +300,19 @@ class Migrations
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
 
-        if (isset($migrationPath) && $newConfig->getMigrationPath() !== $migrationPath) {
+
+        if (isset($pdo)) {
+            $this->manager->getEnvironment('default')
+                ->getAdapter()
+                ->setConnection($pdo);
+        }
+
+        $newMigrationPaths = $newConfig->getMigrationPaths();
+        if (isset($migrationPath) && array_pop($newMigrationPaths) !== $migrationPath) {
             $manager->resetMigrations();
         }
-        if (isset($seedPath) && $newConfig->getSeedPath() !== $seedPath) {
+        $newSeedPaths = $newConfig->getSeedPaths();
+        if (isset($seedPath) && array_pop($newSeedPaths) !== $seedPath) {
             $manager->resetSeeds();
         }
 
