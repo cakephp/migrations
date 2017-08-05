@@ -22,6 +22,8 @@ use Cake\Utility\Inflector;
 
 /**
  * Task class for generating seed files.
+ *
+ * @property \Bake\Shell\Task\BakeTemplateTask
  */
 class SeedTask extends SimpleBakeTask
 {
@@ -31,13 +33,6 @@ class SeedTask extends SimpleBakeTask
      * @var string
      */
     public $pathFragment = 'config/Seeds/';
-
-    /**
-     * BakeTemplate instance.
-     *
-     * @var \Bake\Shell\Task\BakeTemplateTask
-     */
-    public $BakeTemplate;
 
     /**
      * {@inheritDoc}

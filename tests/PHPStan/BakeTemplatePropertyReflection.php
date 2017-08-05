@@ -44,4 +44,14 @@ class BakeTemplatePropertyReflection implements PropertyReflection
     {
         return $this->type;
     }
+
+    public function isReadable(): bool
+    {
+        return true;
+    }
+
+    public function isWritable(): bool
+    {
+        return true;
+    }
 }
