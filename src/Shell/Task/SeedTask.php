@@ -23,7 +23,8 @@ use Cake\Utility\Inflector;
 /**
  * Task class for generating seed files.
  *
- * @property \Bake\Shell\Task\BakeTemplateTask
+ * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
+ * @property \Bake\Shell\Task\TestTask $Test
  */
 class SeedTask extends SimpleBakeTask
 {

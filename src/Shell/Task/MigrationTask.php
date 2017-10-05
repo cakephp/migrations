@@ -21,6 +21,9 @@ use Migrations\Util\ColumnParser;
 
 /**
  * Task class for generating migration snapshot files.
+ *
+ * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
+ * @property \Bake\Shell\Task\TestTask $Test
  */
 class MigrationTask extends SimpleMigrationTask
 {
