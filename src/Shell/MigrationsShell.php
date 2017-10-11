@@ -35,7 +35,6 @@ class MigrationsShell extends Shell
      */
     public $tasks = [
         'Migrations.Create',
-        'Migrations.Dump',
         'Migrations.MarkMigrated',
         'Migrations.Migrate',
         'Migrations.Rollback',
