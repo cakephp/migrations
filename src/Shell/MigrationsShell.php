@@ -22,6 +22,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
  * for the application can be reused.
  *
  * @property \Migrations\Shell\Task\CreateTask $Create
+ * @property \Migrations\Shell\Task\DumpTask $Dump
  * @property \Migrations\Shell\Task\MarkMigratedTask $MarkMigrated
  * @property \Migrations\Shell\Task\MigrateTask $Migrate
  * @property \Migrations\Shell\Task\RollbackTask $Rollback
