@@ -28,8 +28,7 @@ class CacheBuild extends Command
                 'name',
                 InputArgument::OPTIONAL,
                 'A specific table you want to clear/refresh cached data for.'
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -48,6 +47,7 @@ class CacheBuild extends Command
             $schema->describe($table, ['forceRefresh' => true]);
         }
         $output->writeln('<info>Cache build complete</info>');
+
         return true;
     }
 }

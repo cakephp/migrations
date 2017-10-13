@@ -233,7 +233,7 @@ class CakeAdapter implements AdapterInterface
      * @param array  $args    Command Args
      * @return void
      */
-    public function writeCommand($command, $args = array())
+    public function writeCommand($command, $args = [])
     {
         $this->adapter->writeCommand($command, $args);
     }
@@ -740,6 +740,7 @@ class CakeAdapter implements AdapterInterface
     public function setInput(InputInterface $input)
     {
         $this->adapter->setInput($input);
+
         return $this;
     }
 
@@ -763,6 +764,7 @@ class CakeAdapter implements AdapterInterface
     public function toggleBreakpoint(MigrationInterface $migration)
     {
         $this->adapter->toggleBreakpoint($migration);
+
         return $this;
     }
 

@@ -29,8 +29,7 @@ class CacheClear extends Command
                 'name',
                 InputArgument::OPTIONAL,
                 'A specific table you want to clear/refresh cached data for.'
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -56,6 +55,7 @@ class CacheClear extends Command
             Cache::delete($key, $configName);
         }
         $output->writeln('<info>Cache clear complete<info>');
+
         return true;
     }
 }

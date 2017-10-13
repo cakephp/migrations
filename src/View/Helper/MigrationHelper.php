@@ -247,6 +247,7 @@ class MigrationHelper extends Helper
                 $primaryKeys[] = ['name' => $column, 'info' => $this->column($tableSchema, $column)];
             }
         }
+
         return $primaryKeys;
     }
 
@@ -288,6 +289,7 @@ class MigrationHelper extends Helper
         $primaryKeys = $this->primaryKeys($table);
         $primaryKeysColumns = Hash::extract($primaryKeys, '{n}.name');
         sort($primaryKeysColumns);
+
         return $primaryKeysColumns;
     }
 
@@ -431,6 +433,7 @@ class MigrationHelper extends Helper
         }
 
         ksort($attributes);
+
         return $attributes;
     }
 
@@ -493,6 +496,7 @@ class MigrationHelper extends Helper
 
         if (!isset($this->tableStatements[$table])) {
             $this->tableStatements[$table] = true;
+
             return '$this->table(\'' . $table . '\')';
         }
 

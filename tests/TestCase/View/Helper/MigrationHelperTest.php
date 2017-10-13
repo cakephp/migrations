@@ -197,7 +197,6 @@ class MigrationHelperTest extends TestCase
             ],
         ], $this->Helper->column($tableSchema, 'username'));
 
-
         $this->assertEquals([
             'columnType' => 'string',
             'options' => [
@@ -208,7 +207,6 @@ class MigrationHelperTest extends TestCase
                 'comment' => $this->values['comment'],
             ],
         ], $this->Helper->column($tableSchema, 'password'));
-
 
         $this->assertEquals([
             'columnType' => 'timestamp',
@@ -279,7 +277,6 @@ class MigrationHelperTest extends TestCase
             'comment' => $this->values['comment'],
         ], $this->Helper->attributes('users', 'username'));
 
-
         $this->assertEquals([
             'limit' => 256,
             'null' => true,
@@ -287,7 +284,6 @@ class MigrationHelperTest extends TestCase
             'precision' => null,
             'comment' => $this->values['comment'],
         ], $this->Helper->attributes('users', 'password'));
-
 
         $this->assertEquals([
             'limit' => null,

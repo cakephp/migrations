@@ -97,6 +97,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $task->BakeTemplate = new BakeTemplateTask($inputOutput);
         $task->BakeTemplate->initialize();
         $task->BakeTemplate->interactive = false;
+
         return $task;
     }
 

@@ -35,4 +35,3 @@ class TheDiffAddRemovePgsql extends AbstractMigration
             ->update();
     }
 }
-

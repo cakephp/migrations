@@ -78,7 +78,6 @@ class SeedTaskTest extends TestCase
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
-
     /**
      * Test with data, all fields, no limit
      *

@@ -86,6 +86,7 @@ class MigrationTask extends SimpleMigrationTask
         }
 
         list($action, $table) = $action;
+
         return [
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,

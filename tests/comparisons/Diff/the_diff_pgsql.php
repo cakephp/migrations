@@ -204,4 +204,3 @@ class TheDiffPgsql extends AbstractMigration
         $this->dropTable('categories');
     }
 }
-

@@ -64,6 +64,7 @@ class Dump extends AbstractCommand
         if ($output !== null) {
             $this->output = $output;
         }
+
         return $this->output;
     }
 
@@ -103,6 +104,7 @@ class Dump extends AbstractCommand
         $output->writeln(sprintf('<info>Writing dump file `%s`...</info>', $filePath));
         if (file_put_contents($filePath, serialize($dump))) {
             $output->writeln(sprintf('<info>Dump file `%s` was successfully written</info>', $filePath));
+
             return true;
         }
 
@@ -110,6 +112,7 @@ class Dump extends AbstractCommand
             '<error>An error occurred while writing dump file `%s`</error>',
             $filePath
         ));
+
         return false;
     }
 }

@@ -41,6 +41,7 @@ class MarkMigrated extends AbstractCommand
         if ($output !== null) {
             $this->output = $output;
         }
+
         return $this->output;
     }
 
@@ -112,6 +113,7 @@ class MarkMigrated extends AbstractCommand
             $output->writeln(
                 "<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>"
             );
+
             return;
         }
 
@@ -127,6 +129,7 @@ class MarkMigrated extends AbstractCommand
             $versions = $this->getManager()->getVersionsToMark($input);
         } catch (InvalidArgumentException $e) {
             $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
+
             return;
         }
 
@@ -141,6 +144,7 @@ class MarkMigrated extends AbstractCommand
     protected function isUsingDeprecatedAll()
     {
         $version = $this->input->getArgument('version');
+
         return $version === 'all' || $version === '*';
     }
 
@@ -172,6 +176,7 @@ class MarkMigrated extends AbstractCommand
     protected function isUsingDeprecatedVersion()
     {
         $version = $this->input->getArgument('version');
+
         return $version && $version !== 'all' && $version !== '*';
     }
 

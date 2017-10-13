@@ -60,6 +60,7 @@ class SeedTask extends SimpleBakeTask
         if (isset($this->plugin)) {
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
+
         return str_replace('/', DS, $path);
     }
 
@@ -125,6 +126,7 @@ class SeedTask extends SimpleBakeTask
     public function bake($name)
     {
         $this->params['no-test'] = true;
+
         return parent::bake($name);
     }
 

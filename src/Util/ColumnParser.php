@@ -155,6 +155,7 @@ class ColumnParser
     public function validArguments($arguments)
     {
         $collection = new Collection($arguments);
+
         return $collection->filter(function ($value, $field) {
             return preg_match($this->regexpParseColumn, $field);
         })->toArray();

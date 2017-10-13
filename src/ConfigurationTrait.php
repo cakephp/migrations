@@ -170,6 +170,7 @@ trait ConfigurationTrait
         if ($input->getOption('connection')) {
             $connection = $input->getOption('connection');
         }
+
         return $connection;
     }
 }

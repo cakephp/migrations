@@ -67,6 +67,7 @@ class MigrationDiffTaskTest extends TestCase
         $task->BakeTemplate = new BakeTemplateTask($io);
         $task->BakeTemplate->initialize();
         $task->BakeTemplate->interactive = false;
+
         return $task;
     }
 

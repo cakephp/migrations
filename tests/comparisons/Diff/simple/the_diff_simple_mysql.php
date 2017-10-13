@@ -68,4 +68,3 @@ class TheDiffSimpleMysql extends AbstractMigration
         $this->dropTable('users');
     }
 }
-

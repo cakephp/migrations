@@ -104,6 +104,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         if (!$this->checkSync()) {
             $this->error('Your migrations history is not in sync with your migrations files. ' .
                 'Make sure all your migrations have been migrated before baking a diff.');
+
             return 1;
         }
 
@@ -158,6 +159,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     public function getCollection($connection)
     {
         $connection = ConnectionManager::get($connection);
+
         return $connection->schemaCollection();
     }
 
@@ -529,6 +531,7 @@ class MigrationDiffTask extends SimpleMigrationTask
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
             'required' => true
         ]);
+
         return $parser;
     }
 }

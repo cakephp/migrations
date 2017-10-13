@@ -26,7 +26,7 @@ class CommandTester
     private $command;
     private $input;
     private $output;
-    private $inputs = array();
+    private $inputs = [];
     private $statusCode;
 
     /**
@@ -53,7 +53,7 @@ class CommandTester
      *
      * @return int The command exit code
      */
-    public function execute(array $input, array $options = array())
+    public function execute(array $input, array $options = [])
     {
         // set the command name automatically if the application requires
         // this argument and no command name was passed
@@ -61,7 +61,7 @@ class CommandTester
             && (null !== $application = $this->command->getApplication())
             && $application->getDefinition()->hasArgument('command')
         ) {
-            $input = array_merge(array('command' => $this->command->getName()), $input);
+            $input = array_merge(['command' => $this->command->getName()], $input);
         }
 
         $this->input = new ArrayInput($input);
