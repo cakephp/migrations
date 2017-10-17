@@ -6,4 +6,5 @@
  <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
   <severity>0</severity>
  </rule>
+ <exclude-pattern>/tests/comparisons/*</exclude-pattern>
 </ruleset>
