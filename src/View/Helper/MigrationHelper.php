@@ -362,6 +362,7 @@ class MigrationHelper extends Helper
      * Returns a string-like representation of a value
      *
      * @param string $value A value to represent as a string
+     * @param bool $numbersAsString Set tu true to return as string.
      * @return mixed
      */
     public function value($value, $numbersAsString = false)
@@ -485,7 +486,7 @@ class MigrationHelper extends Helper
      * Returns a $this->table() statement only if it was not issued already
      *
      * @param string $table Table for which the statement is needed
-     * @param bool $reset
+     * @param bool $reset Reset previously set statement.
      * @return string
      */
     public function tableStatement($table, $reset = false)

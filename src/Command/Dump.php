@@ -56,7 +56,7 @@ class Dump extends AbstractCommand
     }
 
     /**
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param \Symfony\Component\Console\Output\OutputInterface $output The output object.
      * @return mixed
      */
     public function output(OutputInterface $output = null)

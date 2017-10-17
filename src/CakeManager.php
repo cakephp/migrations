@@ -53,9 +53,9 @@ class CakeManager extends Manager
     /**
      * Prints the specified environment's migration status.
      *
-     * @param string $environment
-     * @param null|string $format
-     * @return array Array of migrations
+     * @param string $environment Environment name.
+     * @param null|string $format Format (`json` or `array`).
+     * @return array|string Array of migrations or json string.
      */
     public function printStatus($environment, $format = null)
     {

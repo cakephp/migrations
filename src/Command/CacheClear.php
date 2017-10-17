@@ -13,6 +13,9 @@ class CacheClear extends Command
 {
     use SchemaTrait;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function configure()
     {
         $this
@@ -32,6 +35,9 @@ class CacheClear extends Command
             );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $schema = $this->_getSchema($input, $output);

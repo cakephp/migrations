@@ -424,6 +424,7 @@ class MigrationDiffTask extends SimpleMigrationTask
      * Fallback method called to bake a snapshot when the phinx log history is empty and
      * there are no migration files.
      *
+     * @param string $name Name.
      * @return int Value of the snapshot baking dispatch process
      */
     protected function bakeSnapshot($name)

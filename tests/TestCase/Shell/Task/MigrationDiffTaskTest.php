@@ -13,7 +13,6 @@ namespace Migrations\Test\TestCase\Shell\Task;
 
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Console\ConsoleIo;
-use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
@@ -82,8 +81,8 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
 
-        $expectedMessage = 'Your migrations history is not in sync with your migrations files. '
-            . 'Make sure all your migrations have been migrated before baking a diff.';
+        $expectedMessage = 'Your migrations history is not in sync with your migrations files. ' .
+            'Make sure all your migrations have been migrated before baking a diff.';
         $this->Task->expects($this->any())
             ->method('error')
             ->with($expectedMessage);
@@ -152,7 +151,7 @@ class MigrationDiffTaskTest extends TestCase
     {
         $this->skipIf(env('DB') === 'sqlite');
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'. DS;
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
@@ -243,8 +242,7 @@ class MigrationDiffTaskTest extends TestCase
     {
         $this->skipIf(env('DB') === 'sqlite');
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
-            . DS . 'simple' . DS;
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
@@ -264,8 +262,7 @@ class MigrationDiffTaskTest extends TestCase
             ->where(['version' => 20160415220805])
             ->execute();
 
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
-            . DS . 'simple' . DS;
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
 
         $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
         $this->Task
@@ -322,8 +319,7 @@ class MigrationDiffTaskTest extends TestCase
     {
         $this->skipIf(env('DB') === 'sqlite');
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
-            . DS . 'addremove' . DS;
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
@@ -343,8 +339,7 @@ class MigrationDiffTaskTest extends TestCase
             ->where(['version' => 20160415220805])
             ->execute();
 
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff'
-            . DS . 'addremove' . DS;
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
 
         $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
         $this->Task

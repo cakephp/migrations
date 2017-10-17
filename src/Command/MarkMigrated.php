@@ -16,8 +16,8 @@ use Migrations\ConfigurationTrait;
 use Phinx\Console\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class MarkMigrated extends AbstractCommand
 {
@@ -33,7 +33,7 @@ class MarkMigrated extends AbstractCommand
     protected $output;
 
     /**
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param \Symfony\Component\Console\Output\OutputInterface $output The output object.
      * @return mixed
      */
     public function output(OutputInterface $output = null)

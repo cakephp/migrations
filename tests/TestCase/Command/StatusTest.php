@@ -11,16 +11,13 @@
  */
 namespace Migrations\Test\Command;
 
-use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
-use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * MarkMigratedTest class
@@ -133,9 +130,9 @@ class StatusTest extends TestCase
         $commandTester->execute(['command' => $this->command->getName()] + $params);
         $display = $this->getDisplayFromOutput();
 
-        $expected = '{"status":"down","id":"20150704160200","name":"CreateNumbersTable"},'
-            . '{"status":"down","id":"20150724233100","name":"UpdateNumbersTable"},'
-            . '{"status":"down","id":"20150826191400","name":"CreateLettersTable"}';
+        $expected = '{"status":"down","id":"20150704160200","name":"CreateNumbersTable"},' .
+            '{"status":"down","id":"20150724233100","name":"UpdateNumbersTable"},' .
+            '{"status":"down","id":"20150826191400","name":"CreateLettersTable"}';
 
         $this->assertTextContains($expected, $display);
     }

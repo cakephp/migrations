@@ -280,7 +280,7 @@ class Migrations
      *
      * @param string $method Manager method to call
      * @param array $params Manager params to pass
-     * @param \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
+     * @param \Symfony\Component\Console\Input\InputInterface $input InputInterface needed for the
      * Manager to properly run
      *
      * @return mixed The result of the CakeManager::$method() call

@@ -12,6 +12,9 @@ class CacheBuild extends Command
 {
     use SchemaTrait;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function configure()
     {
         $this
@@ -31,6 +34,9 @@ class CacheBuild extends Command
             );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $name = $input->getArgument('name');
