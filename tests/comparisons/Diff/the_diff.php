@@ -204,3 +204,4 @@ class TheDiff extends AbstractMigration
         $this->dropTable('categories');
     }
 }
+

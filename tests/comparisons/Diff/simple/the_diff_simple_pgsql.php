@@ -68,3 +68,4 @@ class TheDiffSimplePgsql extends AbstractMigration
         $this->dropTable('users');
     }
 }
+
