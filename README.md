@@ -1,4 +1,4 @@
-# Database migrations plugin for CakePHP 3
+# Migrations plugin for CakePHP
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.txt)
 [![Build Status](https://img.shields.io/travis/cakephp/migrations/master.svg?style=flat-square)](https://travis-ci.org/cakephp/migrations)
