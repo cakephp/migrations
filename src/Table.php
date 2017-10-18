@@ -36,6 +36,7 @@ class Table extends BaseTable
     public function addPrimaryKey($columns)
     {
         $this->primaryKey = $columns;
+
         return $this;
     }
 

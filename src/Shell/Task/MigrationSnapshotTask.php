@@ -105,6 +105,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     public function getCollection($connection)
     {
         $connection = ConnectionManager::get($connection);
+
         return $connection->schemaCollection();
     }
 

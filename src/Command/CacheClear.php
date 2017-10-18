@@ -13,6 +13,9 @@ class CacheClear extends Command
 {
     use SchemaTrait;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function configure()
     {
         $this
@@ -29,10 +32,12 @@ class CacheClear extends Command
                 'name',
                 InputArgument::OPTIONAL,
                 'A specific table you want to clear/refresh cached data for.'
-            )
-        ;
+            );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $schema = $this->_getSchema($input, $output);
@@ -56,6 +61,7 @@ class CacheClear extends Command
             Cache::delete($key, $configName);
         }
         $output->writeln('<info>Cache clear complete<info>');
+
         return true;
     }
 }

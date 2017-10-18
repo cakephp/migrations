@@ -123,7 +123,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Set adapter configuration options.
      *
-     * @param array $options
+     * @param array $options Options array.
      * @return $this
      */
     public function setOptions(array $options)
@@ -144,7 +144,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Check if an option has been set.
      *
-     * @param  string $name
+     * @param string $name Option name.
      * @return bool
      */
     public function hasOption($name)
@@ -155,7 +155,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Get a single adapter option, or null if the option does not exist.
      *
-     * @param  string $name
+     * @param string $name Option name.
      * @return mixed
      */
     public function getOption($name)
@@ -187,7 +187,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Sets the command start time
      *
-     * @param int $time
+     * @param int $time Start time.
      * @return $this
      */
     public function setCommandStartTime($time)
@@ -233,7 +233,7 @@ class CakeAdapter implements AdapterInterface
      * @param array  $args    Command Args
      * @return void
      */
-    public function writeCommand($command, $args = array())
+    public function writeCommand($command, $args = [])
     {
         $this->adapter->writeCommand($command, $args);
     }
@@ -392,7 +392,7 @@ class CakeAdapter implements AdapterInterface
      * Inserts data into a table.
      *
      * @param \Phinx\Db\Table $table where to insert data
-     * @param array $row
+     * @param array $row Row array.
      * @return void
      */
     public function insert(PhinxTable $table, $row)
@@ -470,7 +470,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Truncates the specified table
      *
-     * @param string $tableName
+     * @param string $tableName Table name.
      * @return void
      */
     public function truncateTable($tableName)
@@ -566,8 +566,8 @@ class CakeAdapter implements AdapterInterface
     /**
      * Checks to see if an index specified by name exists.
      *
-     * @param string $tableName Table Name
-     * @param string $indexName
+     * @param string $tableName Table name.
+     * @param string $indexName Index name.
      * @return bool
      */
     public function hasIndexByName($tableName, $indexName)
@@ -590,7 +590,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Drops the specified index from a database table.
      *
-     * @param string $tableName
+     * @param string $tableName Table name.
      * @param mixed  $columns Column(s)
      * @return void
      */
@@ -602,8 +602,8 @@ class CakeAdapter implements AdapterInterface
     /**
      * Drops the index specified by name from a database table.
      *
-     * @param string $tableName
-     * @param string $indexName
+     * @param string $tableName Table name.
+     * @param string $indexName Index name.
      * @return void
      */
     public function dropIndexByName($tableName, $indexName)
@@ -614,7 +614,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Checks to see if a foreign key exists.
      *
-     * @param string $tableName
+     * @param string $tableName Table name.
      * @param string[] $columns Column(s)
      * @param string|null $constraint Constraint name
      * @return bool
@@ -627,8 +627,8 @@ class CakeAdapter implements AdapterInterface
     /**
      * Adds the specified foreign key to a database table.
      *
-     * @param \Phinx\Db\Table $table
-     * @param \Phinx\Db\Table\ForeignKey $foreignKey
+     * @param \Phinx\Db\Table $table Table object.
+     * @param \Phinx\Db\Table\ForeignKey $foreignKey Foreign key object.
      * @return void
      */
     public function addForeignKey(PhinxTable $table, ForeignKey $foreignKey)
@@ -642,7 +642,7 @@ class CakeAdapter implements AdapterInterface
      * a specific method will be called. The original one from Phinx contains a bug
      * that can drop a table in certain conditions.
      *
-     * @param string $tableName
+     * @param string $tableName Table name.
      * @param string[] $columns Column(s)
      * @param string|null $constraint Constraint name
      * @return void
@@ -665,7 +665,7 @@ class CakeAdapter implements AdapterInterface
     /**
      * Checks that the given column is of a supported type.
      *
-     * @param  Column $column
+     * @param \Phinx\Db\Table\Column $column Column object.
      * @return bool
      */
     public function isValidColumnType(Column $column)
@@ -676,8 +676,8 @@ class CakeAdapter implements AdapterInterface
     /**
      * Converts the Phinx logical type to the adapter's SQL type.
      *
-     * @param string $type
-     * @param int|null $limit
+     * @param string $type Type name.
+     * @param int|null $limit Limit.
      * @return string
      */
     public function getSqlType($type, $limit = null)
@@ -740,6 +740,7 @@ class CakeAdapter implements AdapterInterface
     public function setInput(InputInterface $input)
     {
         $this->adapter->setInput($input);
+
         return $this;
     }
 
@@ -756,13 +757,14 @@ class CakeAdapter implements AdapterInterface
     /**
      * Toggle a migration breakpoint.
      *
-     * @param MigrationInterface $migration
+     * @param MigrationInterface $migration Migration instance.
      *
      * @return $this
      */
     public function toggleBreakpoint(MigrationInterface $migration)
     {
         $this->adapter->toggleBreakpoint($migration);
+
         return $this;
     }
 

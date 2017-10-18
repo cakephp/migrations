@@ -160,6 +160,7 @@ class MigrationsShell extends Shell
     {
         array_unshift($argv, 'migrations');
         $this->argv = $argv;
+
         return parent::runCommand($argv, $autoMethod, $extra);
     }
 

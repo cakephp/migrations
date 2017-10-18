@@ -24,6 +24,8 @@ trait SchemaTrait
     /**
      * Helper method to get the schema collection.
      *
+     * @param \Symfony\Component\Console\Input\InputInterface $input Input object.
+     * @param \Symfony\Component\Console\Input\OutputInterface $output Output object.
      * @return null|\Cake\Database\Schema\Collection
      */
     protected function _getSchema(InputInterface $input, OutputInterface $output)

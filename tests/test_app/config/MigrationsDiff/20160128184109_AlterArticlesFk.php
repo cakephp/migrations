@@ -21,7 +21,6 @@ class AlterArticlesFk extends AbstractMigration
             ]);
         $table->update();
 
-
         $table->addForeignKey(
             'user_id',
             'users',

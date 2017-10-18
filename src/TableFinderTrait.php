@@ -135,6 +135,7 @@ trait TableFinderTrait
 
         $tableDir = new Folder($path);
         $tableDir = $tableDir->find('.*\.php');
+
         return $tableDir;
     }
 

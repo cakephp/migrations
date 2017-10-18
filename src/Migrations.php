@@ -94,6 +94,7 @@ class Migrations
     public function setCommand($command)
     {
         $this->command = $command;
+
         return $this;
     }
 
@@ -169,6 +170,7 @@ class Migrations
         }
 
         $this->run($method, $params, $input);
+
         return true;
     }
 
@@ -200,6 +202,7 @@ class Migrations
         }
 
         $this->run($method, $params, $input);
+
         return true;
     }
 
@@ -239,6 +242,7 @@ class Migrations
         ];
 
         $this->run('markVersionsAsMigrated', $params, $input);
+
         return true;
     }
 
@@ -267,6 +271,7 @@ class Migrations
 
         $params = ['default', $seed];
         $this->run('seed', $params, $input);
+
         return true;
     }
 
@@ -275,7 +280,7 @@ class Migrations
      *
      * @param string $method Manager method to call
      * @param array $params Manager params to pass
-     * @param \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
+     * @param \Symfony\Component\Console\Input\InputInterface $input InputInterface needed for the
      * Manager to properly run
      *
      * @return mixed The result of the CakeManager::$method() call
@@ -299,7 +304,6 @@ class Migrations
         $newConfig = $this->getConfig(true);
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
-
 
         if (isset($pdo)) {
             $this->manager->getEnvironment('default')
@@ -355,6 +359,7 @@ class Migrations
         }
 
         $this->setAdapter();
+
         return $this->manager;
     }
 
@@ -397,6 +402,7 @@ class Migrations
         $className = '\Migrations\Command\\' . $command;
         $options = $arguments + $this->prepareOptions($options);
         $definition = (new $className())->getDefinition();
+
         return new ArrayInput($options, $definition);
     }
 

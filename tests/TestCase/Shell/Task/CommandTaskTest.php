@@ -40,7 +40,6 @@ class CommandTaskTest extends TestCase
         $this->out = new TestCompletionStringOutput();
         $io = new ConsoleIo($this->out);
 
-
         $this->Shell = $this->getMockBuilder('\Cake\Shell\CompletionShell')
             ->setMethods(['in', '_stop', 'clear'])
             ->setConstructorArgs([$io])

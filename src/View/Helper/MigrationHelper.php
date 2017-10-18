@@ -247,6 +247,7 @@ class MigrationHelper extends Helper
                 $primaryKeys[] = ['name' => $column, 'info' => $this->column($tableSchema, $column)];
             }
         }
+
         return $primaryKeys;
     }
 
@@ -288,6 +289,7 @@ class MigrationHelper extends Helper
         $primaryKeys = $this->primaryKeys($table);
         $primaryKeysColumns = Hash::extract($primaryKeys, '{n}.name');
         sort($primaryKeysColumns);
+
         return $primaryKeysColumns;
     }
 
@@ -360,6 +362,7 @@ class MigrationHelper extends Helper
      * Returns a string-like representation of a value
      *
      * @param string $value A value to represent as a string
+     * @param bool $numbersAsString Set tu true to return as string.
      * @return mixed
      */
     public function value($value, $numbersAsString = false)
@@ -431,6 +434,7 @@ class MigrationHelper extends Helper
         }
 
         ksort($attributes);
+
         return $attributes;
     }
 
@@ -482,7 +486,7 @@ class MigrationHelper extends Helper
      * Returns a $this->table() statement only if it was not issued already
      *
      * @param string $table Table for which the statement is needed
-     * @param bool $reset
+     * @param bool $reset Reset previously set statement.
      * @return string
      */
     public function tableStatement($table, $reset = false)
@@ -493,6 +497,7 @@ class MigrationHelper extends Helper
 
         if (!isset($this->tableStatements[$table])) {
             $this->tableStatements[$table] = true;
+
             return '$this->table(\'' . $table . '\')';
         }
 

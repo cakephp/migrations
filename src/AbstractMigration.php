@@ -33,7 +33,7 @@ class AbstractMigration extends BaseAbstractMigration
      *
      * @return \Migrations\Table
      */
-    public function table($tableName, $options = array())
+    public function table($tableName, $options = [])
     {
         if ($this->autoId === false) {
             $options['id'] = false;

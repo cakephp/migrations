@@ -26,7 +26,8 @@
     "require-dev": {
         "phpunit/phpunit": "~4.1",
         "cakephp/cakephp": "~3.2",
-        "cakephp/bake": "@stable"
+        "cakephp/bake": "@stable",
+        "cakephp/cakephp-codesniffer": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -46,5 +47,15 @@
         "cakephp/bake": "Required if you want to generate migrations."
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs --colors -p ./src ./tests",
+        "cs-fix": "phpcbf --colors ./src ./tests",
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-clover=clover.xml"
+    }
 }

@@ -83,7 +83,7 @@ class Status extends StatusCommand
     /**
      * Will output the status of the migrations
      *
-     * @param array $migrations
+     * @param array $migrations Migrations array.
      * @return void
      */
     protected function display(array $migrations)
@@ -108,10 +108,10 @@ class Status extends StatusCommand
                 }
 
                 $output->writeln(
-                    $status
-                    . sprintf(' %14.0f ', $migration['id'])
-                    . $name
-                    . $missingComment
+                    $status .
+                    sprintf(' %14.0f ', $migration['id']) .
+                    $name .
+                    $missingComment
                 );
             }
 

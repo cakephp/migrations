@@ -45,6 +45,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public function fileName($name)
     {
         $name = $this->getMigrationName($name);
+
         return Util::getCurrentTimestamp() . '_' . Inflector::camelize($name) . '.php';
     }
 
@@ -57,6 +58,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
         if (isset($this->plugin)) {
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
+
         return str_replace('/', DS, $path);
     }
 
@@ -89,6 +91,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
         }
 
         $this->params['no-test'] = true;
+
         return parent::bake($name);
     }
 

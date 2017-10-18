@@ -274,6 +274,7 @@ class SeedTest extends TestCase
     {
         rewind($this->streamOutput->getStream());
         $display = stream_get_contents($this->streamOutput->getStream());
+
         return str_replace(PHP_EOL, "\n", $display);
     }
 }
