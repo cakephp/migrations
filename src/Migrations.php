@@ -320,7 +320,9 @@ class Migrations
             $manager->resetSeeds();
         }
 
-        return call_user_func_array([$manager, $method], $params);
+        $result = call_user_func_array([$manager, $method], $params);
+        $this->manager = null;
+        return $result;
     }
 
     /**
