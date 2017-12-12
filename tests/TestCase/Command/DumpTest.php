@@ -112,7 +112,7 @@ class DumpTest extends TestCase
         ]);
 
         $dumpPath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
-        $this->assertEquals(serialize([]), file_get_contents($dumpPath));
+        $this->assertStringEqualsFile($dumpPath, serialize([]));
     }
 
     /**
@@ -137,7 +137,7 @@ class DumpTest extends TestCase
         ]);
 
         $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
-        $this->assertTrue(file_exists($dumpFilePath));
+        $this->assertFileExists($dumpFilePath);
 
         $generatedDump = unserialize(file_get_contents($dumpFilePath));
 
