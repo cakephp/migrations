@@ -416,7 +416,7 @@ class MarkMigratedTest extends TestCase
         );
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
         $this->assertEquals('20150724233100', $result[0]['version']);
     }
 
