@@ -49,12 +49,39 @@ class Table extends BaseTable
      */
     public function addColumn($columnName, $type = null, $options = [])
     {
+        $options = $this->convertedAutoIncrement($options);
+
+        return parent::addColumn($columnName, $type, $options);
+    }
+
+    /**
+     * You can pass `autoIncrement` as an option and it will be converted
+     * to the correct option for phinx to create the column with an
+     * auto increment attribute
+     *
+     * {@inheritdoc}
+     */
+    public function changeColumn($columnName, $type = null, $options = [])
+    {
+        $options = $this->convertedAutoIncrement($options);
+
+        return parent::changeColumn($columnName, $type, $options);
+    }
+
+    /**
+     * Convert the `autoIncrement` option to the correct options for phinx.
+     *
+     * @param array $options Options
+     * @return array Converted options
+     */
+    protected function convertedAutoIncrement($options)
+    {
         if (isset($options['autoIncrement']) && $options['autoIncrement'] === true) {
             $options['identity'] = true;
             unset($options['autoIncrement']);
         }
 
-        return parent::addColumn($columnName, $type, $options);
+        return $options;
     }
 
     /**
