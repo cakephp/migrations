@@ -11,6 +11,6 @@ class CategoriesTable extends Table
 {
     public function initialize(array $config)
     {
-        $this->table('cakephp_test.categories');
+        $this->setTable('cakephp_test.categories');
     }
 }

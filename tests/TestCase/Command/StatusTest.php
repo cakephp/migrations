@@ -71,7 +71,7 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
-        $this->pdo = $this->Connection->driver()->connection();
+        $this->pdo = $this->Connection->getDriver()->getConnection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
@@ -88,7 +88,7 @@ class StatusTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
-        $this->Connection->driver()->connection($this->pdo);
+        $this->Connection->getDriver()->setConnection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->Connection, $this->command, $this->streamOutput);

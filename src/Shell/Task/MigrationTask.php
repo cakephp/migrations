@@ -34,7 +34,7 @@ class MigrationTask extends SimpleMigrationTask
     public function bake($name)
     {
         EventManager::instance()->on('Bake.initialize', function (Event $event) {
-            $event->subject->loadHelper('Migrations.Migration');
+            $event->getSubject()->loadHelper('Migrations.Migration');
         });
 
         return parent::bake($name);

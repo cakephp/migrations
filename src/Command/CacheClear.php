@@ -49,7 +49,7 @@ class CacheClear extends Command
         if (empty($name)) {
             $tables = $schema->listTables();
         }
-        $configName = $schema->cacheMetadata();
+        $configName = $schema->getCacheMetadata();
 
         foreach ($tables as $table) {
             $output->writeln(sprintf(

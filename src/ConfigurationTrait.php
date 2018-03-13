@@ -78,7 +78,7 @@ trait ConfigurationTrait
 
         $connection = $this->getConnectionName($this->input);
 
-        $connectionConfig = ConnectionManager::config($connection);
+        $connectionConfig = ConnectionManager::getConfig($connection);
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
 
         $templatePath = Plugin::path('Migrations') . 'src' . DS . 'Template' . DS;

@@ -27,6 +27,6 @@ class NumbersTable extends Table
             $schema = '';
         }
 
-        $this->table($schema . 'numbers');
+        $this->setTable($schema . 'numbers');
     }
 }

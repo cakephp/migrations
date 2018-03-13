@@ -65,7 +65,7 @@ trait TableFinderTrait
                 if (strpos($table, '.') !== false) {
                     $splitted = array_reverse(explode('.', $table, 2));
 
-                    $config = ConnectionManager::config($this->connection);
+                    $config = ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
                     if ($config[$key] === $splitted[1]) {
                         $table = $splitted[0];
@@ -168,13 +168,13 @@ trait TableFinderTrait
         $table = TableRegistry::get($className);
         foreach ($table->associations()->keys() as $key) {
             if ($table->associations()->get($key)->type() === 'belongsToMany') {
-                $tables[] = $table->associations()->get($key)->junction()->table();
+                $tables[] = $table->associations()->get($key)->junction()->getTable();
             }
         }
-        $tableName = $table->table();
+        $tableName = $table->getTable();
         $splitted = array_reverse(explode('.', $tableName, 2));
         if (isset($splitted[1])) {
-            $config = ConnectionManager::config($this->connection);
+            $config = ConnectionManager::getConfig($this->connection);
             $key = isset($config['schema']) ? 'schema' : 'database';
             if ($config[$key] === $splitted[1]) {
                 $tableName = $splitted[0];

@@ -33,10 +33,10 @@ trait SchemaTrait
         $connectionName = $input->getOption('connection');
         $connection = ConnectionManager::get($connectionName);
 
-        if (!method_exists($connection, 'schemaCollection')) {
+        if (!method_exists($connection, 'getSchemaCollection')) {
             $msg = sprintf(
                 'The "%s" connection is not compatible with orm caching, ' .
-                'as it does not implement a "schemaCollection()" method.',
+                'as it does not implement a "getSchemaCollection()" method.',
                 $connectionName
             );
             $output->writeln('<error>' . $msg . '</error>');
@@ -54,6 +54,6 @@ trait SchemaTrait
 
         $connection->cacheMetadata(true);
 
-        return $connection->schemaCollection();
+        return $connection->getSchemaCollection();
     }
 }

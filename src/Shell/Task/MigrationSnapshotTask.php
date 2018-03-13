@@ -40,7 +40,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     {
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
-            $event->subject->loadHelper('Migrations.Migration', [
+            $event->getSubject()->loadHelper('Migrations.Migration', [
                 'collection' => $collection
             ]);
         });
@@ -106,7 +106,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     {
         $connection = ConnectionManager::get($connection);
 
-        return $connection->schemaCollection();
+        return $connection->getSchemaCollection();
     }
 
     /**

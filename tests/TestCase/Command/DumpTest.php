@@ -71,7 +71,7 @@ class DumpTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
-        $this->pdo = $this->Connection->driver()->connection();
+        $this->pdo = $this->Connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -86,7 +86,7 @@ class DumpTest extends TestCase
     public function tearDown()
     {
         parent::tearDown();
-        $this->Connection->driver()->connection($this->pdo);
+        $this->Connection->getDriver()->setConnection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->Connection, $this->command, $this->streamOutput);
@@ -195,7 +195,7 @@ class DumpTest extends TestCase
         $tables = (new Collection($this->Connection))->listTables();
         if (in_array('phinxlog', $tables)) {
             $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
-            $query = $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema());
+            $query = $this->Connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
             foreach ($query as $stmt) {
                 $this->Connection->execute($stmt);
             }

@@ -63,7 +63,7 @@ class ProductsFixture extends TestFixture
     public function init()
     {
         $connection = ConnectionManager::get($this->connection());
-        $driver = $connection->driver();
+        $driver = $connection->getDriver();
 
         if ($driver instanceof Mysql) {
             $dbv = getenv('DBV');

@@ -110,14 +110,14 @@ class CreateTest extends TestCase
      */
     protected function getCommandTester($params)
     {
-        if (!$this->Connection->driver()->isConnected()) {
-            $this->Connection->driver()->connect();
+        if (!$this->Connection->getDriver()->isConnected()) {
+            $this->Connection->getDriver()->connect();
         }
 
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->Connection->driver()->connection());
+        $manager->getEnvironment('default')->getAdapter()->setConnection($this->Connection->getDriver()->getConnection());
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 

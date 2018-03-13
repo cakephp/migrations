@@ -30,7 +30,7 @@ class ConfigurationTraitTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->command = new ExampleCommand;
+        $this->command = new ExampleCommand();
     }
 
     /**
@@ -71,7 +71,7 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfig()
     {
-        ConnectionManager::config([
+        ConnectionManager::setConfig([
             'default' => [
                 'className' => 'Cake\Database\Connection',
                 'driver' => 'Cake\Database\Driver\Mysql',
@@ -171,7 +171,7 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfigWithConnectionName()
     {
-        ConnectionManager::config([
+        ConnectionManager::setConfig([
             'custom' => [
                 'className' => 'Cake\Database\Connection',
                 'driver' => 'Cake\Database\Driver\Mysql',
