@@ -62,7 +62,7 @@ class CakeAdapter implements AdapterInterface
         $connection->cacheMetadata(false);
 
         if ($connection->getDriver() instanceof Postgres) {
-            $config = $connection->getConfig();
+            $config = $connection->config();
             $schema = empty($config['schema']) ? 'public' : $config['schema'];
             $pdo->exec('SET search_path TO ' . $schema);
         }
