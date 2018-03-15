@@ -58,7 +58,7 @@ class MigrationsTest extends TestCase
         $migrations->getManager($migrations->getConfig());
         $this->Connection = ConnectionManager::get('test');
         $connection = $migrations->getManager()->getEnvironment('default')->getAdapter()->getConnection();
-        $this->Connection->driver()->connection($connection);
+        $this->Connection->getDriver()->setConnection($connection);
 
         // Get an instance of the Migrations object on which we will run the tests
         $this->migrations = new Migrations($params);
@@ -71,7 +71,7 @@ class MigrationsTest extends TestCase
         $tables = (new Collection($this->Connection))->listTables();
         if (in_array('phinxlog', $tables)) {
             $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
-            $query = $this->Connection->driver()->schemaDialect()->truncateTableSql($ormTable->schema());
+            $query = $this->Connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
             foreach ($query as $stmt) {
                 $this->Connection->execute($stmt);
             }
@@ -156,19 +156,19 @@ class MigrationsTest extends TestCase
         $this->assertEquals($expectedStatus, $status);
 
         $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
-        $columns = $numbersTable->schema()->columns();
+        $columns = $numbersTable->getSchema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
-        $primaryKey = $numbersTable->schema()->primaryKey();
+        $primaryKey = $numbersTable->getSchema()->primaryKey();
         $this->assertEquals($primaryKey, ['id']);
 
         $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
-        $columns = $lettersTable->schema()->columns();
+        $columns = $lettersTable->getSchema()->columns();
         $expected = ['id', 'letter'];
         $this->assertEquals($expected, $columns);
-        $idColumn = $lettersTable->schema()->column('id');
+        $idColumn = $lettersTable->getSchema()->getColumn('id');
         $this->assertEquals(true, $idColumn['autoIncrement']);
-        $primaryKey = $lettersTable->schema()->primaryKey();
+        $primaryKey = $lettersTable->getSchema()->primaryKey();
         $this->assertEquals($primaryKey, ['id']);
 
         // Rollback last
@@ -201,12 +201,12 @@ class MigrationsTest extends TestCase
 
         // Tests that if a collation is defined, it is used
         $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
-        $options = $numbersTable->schema()->options();
+        $options = $numbersTable->getSchema()->getOptions();
         $this->assertEquals('utf8_bin', $options['collation']);
 
         // Tests that if a collation is not defined, it will use the database default one
         $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
-        $options = $lettersTable->schema()->options();
+        $options = $lettersTable->getSchema()->getOptions();
         $this->assertEquals('utf8mb4_general_ci', $options['collation']);
 
         $this->migrations->rollback(['target' => 0]);

@@ -36,6 +36,7 @@ define('ROOT', $root . DS . 'tests' . DS . 'test_app' . DS);
 define('APP_DIR', 'App');
 define('APP', ROOT . 'App' . DS);
 define('TMP', sys_get_temp_dir() . DS);
+define('CACHE', sys_get_temp_dir() . DS . 'cache' . DS);
 
 Configure::write('debug', true);
 Configure::write('App', [
@@ -46,7 +47,7 @@ Configure::write('App', [
     ]
 ]);
 
-Cake\Cache\Cache::config([
+Cake\Cache\Cache::setConfig([
     '_cake_core_' => [
         'engine' => 'File',
         'prefix' => 'cake_core_',
@@ -67,10 +68,10 @@ if (!getenv('db_dsn')) {
 if (!getenv('DB')) {
     putenv('DB=sqlite');
 }
-ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
+ConnectionManager::setConfig('test', ['url' => getenv('db_dsn')]);
 
 if (getenv('db_dsn_compare') !== false) {
-    ConnectionManager::config('test_comparisons', ['url' => getenv('db_dsn_compare')]);
+    ConnectionManager::setConfig('test_comparisons', ['url' => getenv('db_dsn_compare')]);
 }
 
 Plugin::load('Migrations', [

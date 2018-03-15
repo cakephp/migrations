@@ -256,7 +256,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $expected = ['alternative.special_tags'];
         $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
 
-        ConnectionManager::config('alternative', [
+        ConnectionManager::setConfig('alternative', [
             'database' => 'alternative'
         ]);
         $class->connection = 'alternative';
@@ -264,7 +264,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
 
         ConnectionManager::drop('alternative');
-        ConnectionManager::config('alternative', [
+        ConnectionManager::setConfig('alternative', [
             'schema' => 'alternative'
         ]);
         $class->connection = 'alternative';

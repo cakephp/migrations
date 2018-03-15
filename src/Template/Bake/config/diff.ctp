@@ -162,7 +162,7 @@ class <%= $name %> extends AbstractMigration
         <%- if (!empty($tableDiff['columns']['changed'])):
             $oldTableDef = $dumpSchema[$tableName];
             foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
-            $columnAttributes = $oldTableDef->column($columnName);
+            $columnAttributes = $oldTableDef->getColumn($columnName);
             $type = $columnAttributes['type'];
             unset($columnAttributes['type']);
             $columnAttributes = $this->Migration->getColumnOption($columnAttributes);

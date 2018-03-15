@@ -105,8 +105,8 @@ class CacheClearTest extends TestCase
      */
     protected function getCommandTester($params)
     {
-        if (!$this->connection->driver()->isConnected()) {
-            $this->connection->driver()->connect();
+        if (!$this->connection->getDriver()->isConnected()) {
+            $this->connection->getDriver()->connect();
         }
 
         $input = new ArrayInput($params, $this->command->getDefinition());

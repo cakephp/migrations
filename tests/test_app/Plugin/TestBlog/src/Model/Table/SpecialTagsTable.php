@@ -11,6 +11,6 @@ class SpecialTagsTable extends Table
 {
     public function initialize(array $config)
     {
-        $this->table('alternative.special_tags');
+        $this->setTable('alternative.special_tags');
     }
 }

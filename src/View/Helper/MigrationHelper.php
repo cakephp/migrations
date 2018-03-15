@@ -122,7 +122,7 @@ class MigrationHelper extends Helper
             return $this->schemas[$table->name()] = $table;
         }
 
-        $collection = $this->config('collection');
+        $collection = $this->getConfig('collection');
         $schema = $collection->describe($table);
         $this->schemas[$table] = $schema;
 
@@ -170,7 +170,7 @@ class MigrationHelper extends Helper
         $indexes = [];
         if (!empty($tableIndexes)) {
             foreach ($tableIndexes as $name) {
-                $indexes[$name] = $tableSchema->index($name);
+                $indexes[$name] = $tableSchema->getIndex($name);
             }
         }
 
@@ -201,7 +201,7 @@ class MigrationHelper extends Helper
         }
         if (!empty($tableConstraints)) {
             foreach ($tableConstraints as $name) {
-                $constraint = $tableSchema->constraint($name);
+                $constraint = $tableSchema->getConstraint($name);
                 if (isset($constraint['update'])) {
                     $constraint['update'] = $this->formatConstraintAction($constraint['update']);
                     $constraint['delete'] = $this->formatConstraintAction($constraint['delete']);
@@ -268,7 +268,7 @@ class MigrationHelper extends Helper
             $tablePrimaryKeys = $tableSchema->primaryKey();
 
             foreach ($tablePrimaryKeys as $primaryKey) {
-                $column = $tableSchema->column($primaryKey);
+                $column = $tableSchema->getColumn($primaryKey);
                 if (isset($column['unsigned']) && $column['unsigned'] === true) {
                     return true;
                 }
@@ -303,7 +303,7 @@ class MigrationHelper extends Helper
     public function column($tableSchema, $column)
     {
         return [
-            'columnType' => $tableSchema->columnType($column),
+            'columnType' => $tableSchema->getColumnType($column),
             'options' => $this->attributes($tableSchema, $column),
         ];
     }
@@ -410,7 +410,7 @@ class MigrationHelper extends Helper
         ];
 
         $attributes = [];
-        $options = $tableSchema->column($column);
+        $options = $tableSchema->getColumn($column);
         foreach ($options as $_option => $value) {
             $option = $_option;
             switch ($_option) {
