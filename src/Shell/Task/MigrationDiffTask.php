@@ -327,8 +327,13 @@ class MigrationDiffTask extends SimpleMigrationTask
             // brand new constraints
             $addedConstraints = array_diff($currentConstraints, $oldConstraints);
             foreach ($addedConstraints as $constraintName) {
-                $this->templateData[$table]['constraints']['add'][$constraintName] =
-                    $currentSchema->constraint($constraintName);
+                $constraint = $currentSchema->constraint($constraintName);
+                if ($constraint['type'] === Table::CONSTRAINT_FOREIGN) {
+                    $this->templateData[$table]['constraints']['add'][$constraintName] =
+                        $constraint;
+                } else {
+                    $this->templateData[$table]['indexes']['add'][$constraintName] = $constraint;
+                }
             }
 
             // constraints having the same name between new and old schema
