@@ -274,7 +274,7 @@ class MigrationDiffTask extends SimpleMigrationTask
                         unset($changedAttributes['unsigned']);
                     } else {
                         // badish hack
-                        if (isset($column['unsigned']) && $column['unsigned'] == true) {
+                        if (isset($column['unsigned']) && $column['unsigned'] === true) {
                             $changedAttributes['signed'] = false;
                         }
                     }
@@ -329,8 +329,7 @@ class MigrationDiffTask extends SimpleMigrationTask
             foreach ($addedConstraints as $constraintName) {
                 $constraint = $currentSchema->constraint($constraintName);
                 if ($constraint['type'] === Table::CONSTRAINT_FOREIGN) {
-                    $this->templateData[$table]['constraints']['add'][$constraintName] =
-                        $constraint;
+                    $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
                 } else {
                     $this->templateData[$table]['indexes']['add'][$constraintName] = $constraint;
                 }
