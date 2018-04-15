@@ -137,7 +137,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
             }
         }
 
-        $parser->description(
+        $parser->setDescription(
             'Bake migration class.'
         )
         ->addOption('plugin', [
