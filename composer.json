@@ -20,13 +20,13 @@
     "require": {
         "php": ">=5.6.0",
         "robmorgan/phinx": "0.8.1",
-        "cakephp/orm": "dev-3.next as 3.6.0",
-        "cakephp/cache": "dev-3.next as 3.6.0"
+        "cakephp/orm": "^3.6.0",
+        "cakephp/cache": "^3.6.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7.14",
-        "cakephp/cakephp": "dev-3.next as 3.6.0",
-        "cakephp/bake": "dev-3.next",
+        "cakephp/cakephp": "^3.6.0",
+        "cakephp/bake": "^1.7.0",
         "cakephp/cakephp-codesniffer": "^3.0"
     },
     "autoload": {
