@@ -77,14 +77,14 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function testHistoryNotInSync()
     {
-        $this->Task = $this->getTaskMock(['error']);
+        $this->Task = $this->getTaskMock(['abort']);
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
 
         $expectedMessage = 'Your migrations history is not in sync with your migrations files. ' .
             'Make sure all your migrations have been migrated before baking a diff.';
         $this->Task->expects($this->any())
-            ->method('error')
+            ->method('abort')
             ->with($expectedMessage);
 
         $this->Task->bake('NotInSync');
@@ -98,7 +98,7 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function testEmptyHistoryNoMigrations()
     {
-        $this->Task = $this->getTaskMock(['error', 'dispatchShell']);
+        $this->Task = $this->getTaskMock(['abort', 'dispatchShell']);
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'Blog';
@@ -122,7 +122,7 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function testEmptyHistoryNoMigrationsError()
     {
-        $this->Task = $this->getTaskMock(['error', 'dispatchShell']);
+        $this->Task = $this->getTaskMock(['abort', 'dispatchShell']);
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'Blog';
@@ -136,7 +136,7 @@ class MigrationDiffTaskTest extends TestCase
             ->will($this->returnValue(1));
 
         $this->Task->expects($this->any())
-            ->method('error')
+            ->method('abort')
             ->with('Something went wrong during the snapshot baking. Please try again.');
 
         $this->Task->bake('EmptyHistoryNoMigrations');

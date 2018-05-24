@@ -37,7 +37,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', 'createFile', '_stop', 'error'])
+            ->setMethods(['in', 'err', 'createFile', '_stop', 'abort'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -124,7 +124,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'error'])
+            ->setMethods(['in', 'err', '_stop', 'abort'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -148,7 +148,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'error'])
+            ->setMethods(['in', 'err', '_stop', 'abort'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -179,7 +179,7 @@ class MigrationTaskTest extends TestCase
     public function testAddPrimaryKeyToExistingTable()
     {
         $this->Task->expects($this->any())
-            ->method('error');
+            ->method('abort');
 
         $this->Task->args = [
             'add_pk_to_users',
