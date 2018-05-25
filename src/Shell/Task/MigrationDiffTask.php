@@ -102,7 +102,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         $this->setup();
 
         if (!$this->checkSync()) {
-            $this->error('Your migrations history is not in sync with your migrations files. ' .
+            $this->abort('Your migrations history is not in sync with your migrations files. ' .
                 'Make sure all your migrations have been migrated before baking a diff.');
 
             return 1;
@@ -445,7 +445,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         ]);
 
         if ($dispatch === 1) {
-            $this->error('Something went wrong during the snapshot baking. Please try again.');
+            $this->abort('Something went wrong during the snapshot baking. Please try again.');
         }
 
         return $dispatch;
@@ -479,7 +479,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
                 'the `cake migrations dump` command';
-            $this->error($msg);
+            $this->abort($msg);
         }
 
         return unserialize(file_get_contents($path));
