@@ -37,7 +37,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', 'createFile', '_stop', 'abort'])
+            ->setMethods(['in', 'err', 'createFile', '_stop', 'abort', 'error'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -124,7 +124,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'abort'])
+            ->setMethods(['in', 'err', '_stop', 'error'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
