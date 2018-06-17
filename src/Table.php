@@ -134,15 +134,19 @@ class Table extends BaseTable
             return;
         }
 
-        return;
-
         $primaryKey = $this->options['primary_key'];
         if (!is_array($primaryKey)) {
             $primaryKey = [$primaryKey];
         }
         $primaryKey = array_flip($primaryKey);
 
-        $columnsCollection = new Collection($this->columns);
+        $columnsCollection = (new Collection($this->actions->getActions()))
+            ->filter(function ($action) {
+                return $action instanceof \Phinx\Db\Action\AddColumn;
+            })
+            ->map(function ($action) {
+                return $action->getColumn();
+            });
         $primaryKeyColumns = $columnsCollection->filter(function ($columnDef, $key) use ($primaryKey) {
             return isset($primaryKey[$columnDef->getName()]);
         })->toArray();
