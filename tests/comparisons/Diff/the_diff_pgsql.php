@@ -114,7 +114,7 @@ class TheDiffPgsql extends AbstractMigration
             )
             ->update();
 
-        $this->dropTable('tags');
+        $this->table('tags')->drop()->save();
     }
 
     public function down()
@@ -122,12 +122,12 @@ class TheDiffPgsql extends AbstractMigration
         $this->table('categories')
             ->dropForeignKey(
                 'user_id'
-            );
+            )->save();
 
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
-            );
+            )->save();
 
         $this->table('tags')
             ->addColumn('name', 'string', [
@@ -201,7 +201,7 @@ class TheDiffPgsql extends AbstractMigration
             )
             ->update();
 
-        $this->dropTable('categories');
+        $this->table('categories')->drop()->save();
     }
 }
 

@@ -7,6 +7,7 @@ use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
+use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -117,7 +118,11 @@ class CreateTest extends TestCase
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->Connection->getDriver()->getConnection());
+        $adapter = $manager->getEnvironment('default')->getAdapter();
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($this->Connection->getDriver()->getConnection());
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 

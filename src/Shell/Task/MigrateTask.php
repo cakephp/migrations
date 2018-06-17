@@ -38,6 +38,8 @@ class MigrateTask extends CommandTask
                 'help' => 'The date to migrate to',
                 'required' => false
             ])
+            ->addOption('dry-run', ['short' => 'x'])
+            ->addOption('fake', ['boolean' => true])
             ->addOption('no-lock', [
                 'help' => 'If present, no lock file will be generated after migrating',
                 'boolean' => true

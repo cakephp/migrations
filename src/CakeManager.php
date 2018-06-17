@@ -61,14 +61,14 @@ class CakeManager extends Manager
     {
         $migrations = [];
         $isJson = $format === 'json';
-        if (count($this->getMigrations())) {
+        if (count($this->getMigrations('default'))) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $this->maxNameLength = $versions ? max(array_map(function ($version) {
                 return strlen($version['migration_name']);
             }, $versions)) : 0;
 
-            foreach ($this->getMigrations() as $migration) {
+            foreach ($this->getMigrations('default') as $migration) {
                 if (array_key_exists($migration->getVersion(), $versions)) {
                     $status = 'up';
                     unset($versions[$migration->getVersion()]);
@@ -117,9 +117,9 @@ class CakeManager extends Manager
     /**
      * {@inheritdoc}
      */
-    public function migrateToDateTime($environment, \DateTime $dateTime)
+    public function migrateToDateTime($environment, \DateTime $dateTime, $fake = false)
     {
-        $versions = array_keys($this->getMigrations());
+        $versions = array_keys($this->getMigrations('default'));
         $dateString = $dateTime->format('Ymdhis');
         $versionToMigrate = null;
         foreach ($versions as $version) {
@@ -139,7 +139,7 @@ class CakeManager extends Manager
         $this->getOutput()->writeln(
             'Migrating to version ' . $versionToMigrate
         );
-        $this->migrate($environment, $versionToMigrate);
+        $this->migrate($environment, $versionToMigrate, $fake);
     }
 
     /**
@@ -215,7 +215,7 @@ class CakeManager extends Manager
         $migrationFile = $migrationFile[0];
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
-        $Migration = new $className($version);
+        $Migration = new $className('default', $version);
 
         $time = date('Y-m-d H:i:s', time());
 
@@ -235,7 +235,7 @@ class CakeManager extends Manager
      */
     public function getVersionsToMark($input)
     {
-        $migrations = $this->getMigrations();
+        $migrations = $this->getMigrations('default');
         $versions = array_keys($migrations);
 
         $versionArg = $input->getArgument('version');

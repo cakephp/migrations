@@ -3,7 +3,7 @@ use Migrations\AbstractMigration;
 
 class CreateArticlesAddRemove extends AbstractMigration
 {
-    public function up()
+    public function change()
     {
         $table = $this->table('articles');
         $table
@@ -17,10 +17,5 @@ class CreateArticlesAddRemove extends AbstractMigration
                 'null' => false,
             ])
             ->create();
-    }
-
-    public function down()
-    {
-        $this->dropTable('articles');
     }
 }

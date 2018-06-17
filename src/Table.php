@@ -99,10 +99,6 @@ class Table extends BaseTable
      */
     public function update()
     {
-        if ($this->getAdapter()->getAdapterType() == 'sqlite') {
-            $this->foreignKeys = [];
-        }
-
         parent::update();
         TableRegistry::clear();
     }
@@ -137,6 +133,8 @@ class Table extends BaseTable
         if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($this->options['primary_key'])) {
             return;
         }
+
+        return;
 
         $primaryKey = $this->options['primary_key'];
         if (!is_array($primaryKey)) {

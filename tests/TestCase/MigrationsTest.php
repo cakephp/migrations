@@ -17,6 +17,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use Migrations\Migrations;
+use Phinx\Db\Adapter\WrapperInterface;
 
 /**
  * Tests the Migrations class
@@ -62,11 +63,15 @@ class MigrationsTest extends TestCase
 
         // Get an instance of the Migrations object on which we will run the tests
         $this->migrations = new Migrations($params);
-        $this->migrations
-            ->getManager($migrations->getConfig())
-            ->getEnvironment('default')
-            ->getAdapter()
-            ->setConnection($connection);
+        $adapter = $this->migrations
+                        ->getManager($migrations->getConfig())
+                        ->getEnvironment('default')
+                        ->getAdapter();
+
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($connection);
 
         $tables = (new Collection($this->Connection))->listTables();
         if (in_array('phinxlog', $tables)) {
@@ -180,7 +185,7 @@ class MigrationsTest extends TestCase
 
         // Migrate all again and rollback all
         $this->migrations->migrate();
-        $rollback = $this->migrations->rollback(['target' => 0]);
+        $rollback = $this->migrations->rollback(['target' => 'all']);
         $this->assertTrue($rollback);
         $expectedStatus[0]['status'] = $expectedStatus[1]['status'] = 'down';
         $status = $this->migrations->status();
@@ -209,7 +214,7 @@ class MigrationsTest extends TestCase
         $options = $lettersTable->getSchema()->getOptions();
         $this->assertEquals('utf8mb4_general_ci', $options['collation']);
 
-        $this->migrations->rollback(['target' => 0]);
+        $this->migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -726,7 +731,7 @@ class MigrationsTest extends TestCase
             ]
         ];
         $this->assertEquals($expected, $result);
-        $this->migrations->rollback(['target' => 0]);
+        $this->migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -775,7 +780,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $this->migrations->rollback(['target' => 0]);
+        $this->migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -836,7 +841,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $this->migrations->rollback(['target' => 0]);
+        $this->migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -879,7 +884,7 @@ class MigrationsTest extends TestCase
             $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
             $this->assertTrue($result);
 
-            $this->migrations->rollback(['target' => 0, 'source' => 'SnapshotTests']);
+            $this->migrations->rollback(['target' => 'all', 'source' => 'SnapshotTests']);
             unlink($destination . $copiedFileName);
         }
     }

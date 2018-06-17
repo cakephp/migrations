@@ -18,6 +18,7 @@ use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
 use Migrations\MigrationsDispatcher;
+use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
@@ -66,6 +67,7 @@ class SeedTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
+        $this->Connection->connect();
         $this->pdo = $this->Connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('seed');
@@ -124,7 +126,7 @@ class SeedTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $migrations->rollback(['target' => 0]);
+        $migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -165,7 +167,7 @@ class SeedTest extends TestCase
             ]
         ];
         $this->assertEquals($expected, $result);
-        $migrations->rollback(['target' => 0]);
+        $migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -191,7 +193,7 @@ class SeedTest extends TestCase
 
         $display = $this->getDisplayFromOutput();
         $this->assertTextNotContains('seeded', $display);
-        $migrations->rollback(['target' => 0]);
+        $migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -219,7 +221,7 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('==== NumbersCallSeed: seeded', $display);
         $this->assertTextContains('==== LettersSeed: seeded', $display);
-        $migrations->rollback(['target' => 0]);
+        $migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -236,7 +238,13 @@ class SeedTest extends TestCase
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->pdo);
+        $adapter = $manager
+            ->getEnvironment('default')
+            ->getAdapter();
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($this->pdo);
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 
@@ -256,11 +264,15 @@ class SeedTest extends TestCase
             'source' => 'TestsMigrations'
         ];
         $migrations = new Migrations($params);
-        $migrations
+        $adapter = $migrations
             ->getManager($this->command->getConfig())
             ->getEnvironment('default')
-            ->getAdapter()
-            ->setConnection($this->pdo);
+            ->getAdapter();
+
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($this->pdo);
 
         return $migrations;
     }

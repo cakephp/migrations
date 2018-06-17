@@ -74,7 +74,7 @@ class MigrationsShell extends Shell
             ->addOption('template', ['short' => 't'])
             ->addOption('format', ['short' => 'f'])
             ->addOption('only', ['short' => 'o'])
-            ->addOption('exclude', ['short' => 'x']);
+            ->addOption('exclude', ['short' => 'e']);
     }
 
     /**

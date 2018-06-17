@@ -222,7 +222,7 @@ class MigrationDiffTaskTest extends TestCase
                 'end_time' => '2016-05-22 16:51:46',
             ])
             ->execute();
-        $this->getMigrations()->rollback(['target' => 0]);
+        $this->getMigrations()->rollback(['target' => 'all']);
 
         foreach ($table->dropSql($connection) as $stmt) {
             $connection->query($stmt);
@@ -304,7 +304,7 @@ class MigrationDiffTaskTest extends TestCase
                 'end_time' => '2016-05-22 16:51:46',
             ])
             ->execute();
-        $this->getMigrations('MigrationsDiffSimple')->rollback(['target' => 0]);
+        $this->getMigrations('MigrationsDiffSimple')->rollback(['target' => 'all']);
         unlink($destinationDumpPath);
         unlink($destination);
     }
@@ -381,7 +381,7 @@ class MigrationDiffTaskTest extends TestCase
                 'end_time' => '2016-05-22 16:51:46',
             ])
             ->execute();
-        $this->getMigrations('MigrationsDiffAddRemove')->rollback(['target' => 0]);
+        $this->getMigrations('MigrationsDiffAddRemove')->rollback(['target' => 'all']);
         unlink($destinationDumpPath);
         unlink($destination);
     }

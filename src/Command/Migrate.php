@@ -37,9 +37,11 @@ class Migrate extends MigrateCommand
             ->setHelp('runs all available migrations, optionally up to a specific version')
             ->addOption('--target', '-t', InputOption::VALUE_REQUIRED, 'The version number to migrate to')
             ->addOption('--date', '-d', InputOption::VALUE_REQUIRED, 'The date to migrate to')
+            ->addOption('--dry-run', '-x', InputOption::VALUE_NONE, 'Dump queries to standard output instead of executing it')
             ->addOption('--plugin', '-p', InputOption::VALUE_REQUIRED, 'The plugin containing the migrations')
             ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
             ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
+            ->addOption('--fake', null, InputOption::VALUE_NONE, "Mark any migrations selected as run, but don't actually execute them")
             ->addOption(
                 '--no-lock',
                 null,

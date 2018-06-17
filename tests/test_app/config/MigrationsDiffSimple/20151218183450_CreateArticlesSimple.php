@@ -3,7 +3,7 @@ use Migrations\AbstractMigration;
 
 class CreateArticlesSimple extends AbstractMigration
 {
-    public function up()
+    public function change()
     {
         $table = $this->table('articles');
         $table
@@ -24,8 +24,7 @@ class CreateArticlesSimple extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
-            ])
-            ->create();
+            ]);
 
         $table->addIndex([
             'rating',
@@ -33,11 +32,6 @@ class CreateArticlesSimple extends AbstractMigration
             'name' => 'rating_index',
             'unique' => false,
         ])
-        ->update();
-    }
-
-    public function down()
-    {
-        $this->dropTable('articles');
+        ->create();
     }
 }
