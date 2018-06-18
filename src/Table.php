@@ -66,12 +66,12 @@ class Table extends BaseTable
      */
     public function create()
     {
-        if ((!isset($this->options['id']) || $this->options['id'] === false) && !empty($this->primaryKey)) {
-            $this->options['primary_key'] = $this->primaryKey;
+        $options = $this->getTable()->getOptions();
+        if ((!isset($options['id']) || $options['id'] === false) && !empty($this->primaryKey)) {
+            $options['primary_key'] = $this->primaryKey;
             $this->filterPrimaryKey();
         }
 
-        $options = $this->getOptions();
         if ($this->getAdapter()->getAdapterType() === 'mysql' && empty($options['collation'])) {
             $encodingRequest = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
                 FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "%s"';
@@ -83,9 +83,10 @@ class Table extends BaseTable
             $defaultEncoding = $cakeConnection->execute($encodingRequest)->fetch('assoc');
             if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
                 $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];
-                $this->setOptions($options);
             }
         }
+
+        $this->getTable()->setOptions($options);
 
         parent::create();
     }
@@ -130,11 +131,12 @@ class Table extends BaseTable
      */
     protected function filterPrimaryKey()
     {
-        if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($this->options['primary_key'])) {
+        $options = $this->getTable()->getOptions();
+        if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($options['primary_key'])) {
             return;
         }
 
-        $primaryKey = $this->options['primary_key'];
+        $primaryKey = $options['primary_key'];
         if (!is_array($primaryKey)) {
             $primaryKey = [$primaryKey];
         }
@@ -164,9 +166,11 @@ class Table extends BaseTable
         $primaryKey = array_flip($primaryKey);
 
         if (!empty($primaryKey)) {
-            $this->options['primary_key'] = $primaryKey;
+            $options['primary_key'] = $primaryKey;
         } else {
-            unset($this->options['primary_key']);
+            unset($options['primary_key']);
         }
+
+        $this->getTable()->setOptions($options);
     }
 }
