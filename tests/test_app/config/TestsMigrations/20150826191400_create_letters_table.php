@@ -6,7 +6,7 @@ class CreateLettersTable extends AbstractMigration
 
     public $autoId = false;
 
-    public function up()
+    public function change()
     {
         $table = $this->table('letters');
         $table
@@ -21,10 +21,5 @@ class CreateLettersTable extends AbstractMigration
                 'limit' => 1
             ])
             ->create();
-    }
-
-    public function down()
-    {
-        $this->dropTable('letters');
     }
 }

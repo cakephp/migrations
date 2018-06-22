@@ -66,12 +66,12 @@ class Table extends BaseTable
      */
     public function create()
     {
-        if ((!isset($this->options['id']) || $this->options['id'] === false) && !empty($this->primaryKey)) {
-            $this->options['primary_key'] = $this->primaryKey;
+        $options = $this->getTable()->getOptions();
+        if ((!isset($options['id']) || $options['id'] === false) && !empty($this->primaryKey)) {
+            $options['primary_key'] = $this->primaryKey;
             $this->filterPrimaryKey();
         }
 
-        $options = $this->getOptions();
         if ($this->getAdapter()->getAdapterType() === 'mysql' && empty($options['collation'])) {
             $encodingRequest = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
                 FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "%s"';
@@ -83,9 +83,10 @@ class Table extends BaseTable
             $defaultEncoding = $cakeConnection->execute($encodingRequest)->fetch('assoc');
             if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
                 $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];
-                $this->setOptions($options);
             }
         }
+
+        $this->getTable()->setOptions($options);
 
         parent::create();
     }
@@ -99,10 +100,6 @@ class Table extends BaseTable
      */
     public function update()
     {
-        if ($this->getAdapter()->getAdapterType() == 'sqlite') {
-            $this->foreignKeys = [];
-        }
-
         parent::update();
         TableRegistry::clear();
     }
@@ -134,17 +131,24 @@ class Table extends BaseTable
      */
     protected function filterPrimaryKey()
     {
-        if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($this->options['primary_key'])) {
+        $options = $this->getTable()->getOptions();
+        if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($options['primary_key'])) {
             return;
         }
 
-        $primaryKey = $this->options['primary_key'];
+        $primaryKey = $options['primary_key'];
         if (!is_array($primaryKey)) {
             $primaryKey = [$primaryKey];
         }
         $primaryKey = array_flip($primaryKey);
 
-        $columnsCollection = new Collection($this->columns);
+        $columnsCollection = (new Collection($this->actions->getActions()))
+            ->filter(function ($action) {
+                return $action instanceof \Phinx\Db\Action\AddColumn;
+            })
+            ->map(function ($action) {
+                return $action->getColumn();
+            });
         $primaryKeyColumns = $columnsCollection->filter(function ($columnDef, $key) use ($primaryKey) {
             return isset($primaryKey[$columnDef->getName()]);
         })->toArray();
@@ -162,9 +166,11 @@ class Table extends BaseTable
         $primaryKey = array_flip($primaryKey);
 
         if (!empty($primaryKey)) {
-            $this->options['primary_key'] = $primaryKey;
+            $options['primary_key'] = $primaryKey;
         } else {
-            unset($this->options['primary_key']);
+            unset($options['primary_key']);
         }
+
+        $this->getTable()->setOptions($options);
     }
 }

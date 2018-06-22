@@ -16,6 +16,7 @@ use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
 use Migrations\MigrationsDispatcher;
+use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
@@ -71,6 +72,7 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
+        $this->Connection->connect();
         $this->pdo = $this->Connection->getDriver()->getConnection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
@@ -164,7 +166,7 @@ class StatusTest extends TestCase
         $this->assertTextContains('up  20150724233100  UpdateNumbersTable', $display);
         $this->assertTextContains('up  20150826191400  CreateLettersTable', $display);
 
-        $migrations->rollback(['target' => 0]);
+        $migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -202,7 +204,7 @@ class StatusTest extends TestCase
 
         rename($destination, $origin);
 
-        $migrations->rollback(['target' => 0]);
+        $migrations->rollback(['target' => 'all']);
     }
 
     /**
@@ -219,7 +221,13 @@ class StatusTest extends TestCase
         $input = new ArrayInput($params, $this->command->getDefinition());
         $this->command->setInput($input);
         $manager = new CakeManager($this->command->getConfig(), $input, $this->streamOutput);
-        $manager->getEnvironment('default')->getAdapter()->setConnection($this->pdo);
+        $adapter = $manager
+            ->getEnvironment('default')
+            ->getAdapter();
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($this->pdo);
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 
@@ -239,11 +247,15 @@ class StatusTest extends TestCase
             'source' => 'TestsMigrations'
         ];
         $migrations = new Migrations($params);
-        $migrations
+
+        $adapter = $migrations
             ->getManager($this->command->getConfig())
             ->getEnvironment('default')
-            ->getAdapter()
-            ->setConnection($this->pdo);
+            ->getAdapter();
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($this->pdo);
 
         return $migrations;
     }

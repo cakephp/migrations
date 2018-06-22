@@ -62,6 +62,7 @@ class MarkMigratedTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
+        $this->Connection->connect();
         $this->pdo = $this->Connection->getDriver()->getConnection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
@@ -140,7 +141,7 @@ class MarkMigratedTest extends TestCase
 
         $config = $this->command->getConfig();
         $env = $this->command->getManager()->getEnvironment('default');
-        $migrations = $this->command->getManager()->getMigrations();
+        $migrations = $this->command->getManager()->getMigrations('default');
 
         $manager = $this->getMockBuilder('\Migrations\CakeManager')
             ->setMethods(['getEnvironment', 'markMigrated', 'getMigrations'])

@@ -47,14 +47,14 @@ class <%= $name %> extends AbstractMigration
             <%- foreach ($columnsList as $key => $columns): %>
             ->dropForeignKey(
                 <%= $columns %>
-            )<%= ($key === $maxKey) ? ';' : '' %>
+            )<%= ($key === $maxKey) ? '->save();' : '' %>
             <%- endforeach; %>
 
         <%- endforeach;
             endif;
         %>
         <%- foreach ($tables as $table): %>
-        $this->dropTable('<%= $table%>');
+        $this->table('<%= $table%>')->drop()->save();
         <%- endforeach; %>
     }
 }

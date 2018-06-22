@@ -126,8 +126,9 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'migrate']);
         $output = $this->out->output;
-        $expected = "--ansi --help -h --no-ansi --no-interaction -n --no-lock --quiet -q --verbose -v --connection -c";
-        $expected .= " --date -d --plugin -p --source -s --target -t";
+        $expected = "--ansi --dry-run -x --fake --help -h --no-ansi --no-interaction";
+        $expected .= " -n --no-lock --quiet -q --verbose -v --connection -c --date -d";
+        $expected .= " --plugin -p --source -s --target -t";
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);
@@ -146,8 +147,8 @@ class CommandTaskTest extends TestCase
     {
         $this->Shell->runCommand(['options', 'Migrations.migrations', 'rollback']);
         $output = $this->out->output;
-        $expected = "--ansi --help -h --no-ansi --no-interaction -n --no-lock --quiet -q --verbose -v --connection -c";
-        $expected .= " --date -d --plugin -p --source -s --target -t";
+        $expected = "--ansi --dry-run -x --fake --help -h --no-ansi --no-interaction -n --no-lock";
+        $expected .= " --quiet -q --verbose -v --connection -c --date -d --plugin -p --source -s --target -t";
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);

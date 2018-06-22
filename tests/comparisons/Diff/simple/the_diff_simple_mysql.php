@@ -55,7 +55,7 @@ class TheDiffSimpleMysql extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'user_id'
-            );
+            )->save();
 
         $this->table('articles')
             ->removeIndexByName('user_id')
@@ -65,7 +65,7 @@ class TheDiffSimpleMysql extends AbstractMigration
             ->removeColumn('user_id')
             ->update();
 
-        $this->dropTable('users');
+        $this->table('users')->drop()->save();
     }
 }
 

@@ -110,7 +110,7 @@ class <%= $name %> extends AbstractMigration
         <%- if (!empty($tables['remove'])): %>
         <%- foreach ($tables['remove'] as $tableName => $table): %>
 
-        $this->dropTable('<%= $tableName %>');
+        $this->table('<%= $tableName %>')->drop()->save();
             <%- endforeach; %>
         <%- endif; %>
     }
@@ -131,7 +131,7 @@ class <%= $name %> extends AbstractMigration
                 <%- foreach ($columnsList as $key => $columns): %>
             ->dropForeignKey(
                 <%= $columns %>
-            )<%= ($key === $maxKey) ? ';' : '' %>
+            )<%= ($key === $maxKey) ? '->save();' : '' %>
                 <%- endforeach; %>
             <%- endforeach; %>
         <%- endif; %>
@@ -197,7 +197,7 @@ class <%= $name %> extends AbstractMigration
         <%- if (!empty($tables['add'])): %>
             <%- foreach ($tables['add'] as $tableName => $table): %>
 
-        $this->dropTable('<%= $tableName %>');
+        $this->table('<%= $tableName %>')->drop()->save();
             <%- endforeach; %>
         <%- endif; %>
     }

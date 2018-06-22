@@ -103,6 +103,7 @@ trait ConfigurationTrait
                     'name' => $connectionConfig['database'],
                     'charset' => isset($connectionConfig['encoding']) ? $connectionConfig['encoding'] : null,
                     'unix_socket' => isset($connectionConfig['unix_socket']) ? $connectionConfig['unix_socket'] : null,
+                    'suffix' => '',
                 ]
             ]
         ];

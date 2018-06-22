@@ -169,10 +169,10 @@ class TestPluginBlog56 extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            );
+            )->save();
 
-        $this->dropTable('articles');
-        $this->dropTable('categories');
-        $this->dropTable('parts');
+        $this->table('articles')->drop()->save();
+        $this->table('categories')->drop()->save();
+        $this->table('parts')->drop()->save();
     }
 }

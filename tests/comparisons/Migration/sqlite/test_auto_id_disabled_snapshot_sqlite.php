@@ -359,7 +359,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            );
+            )->save();
 
         $this->table('orders')
             ->dropForeignKey(
@@ -367,20 +367,20 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                     'product_category',
                     'product_id',
                 ]
-            );
+            )->save();
 
         $this->table('products')
             ->dropForeignKey(
                 'category_id'
-            );
+            )->save();
 
-        $this->dropTable('articles');
-        $this->dropTable('categories');
-        $this->dropTable('composite_pks');
-        $this->dropTable('orders');
-        $this->dropTable('products');
-        $this->dropTable('special_pks');
-        $this->dropTable('special_tags');
-        $this->dropTable('users');
+        $this->table('articles')->drop()->save();
+        $this->table('categories')->drop()->save();
+        $this->table('composite_pks')->drop()->save();
+        $this->table('orders')->drop()->save();
+        $this->table('products')->drop()->save();
+        $this->table('special_pks')->drop()->save();
+        $this->table('special_tags')->drop()->save();
+        $this->table('users')->drop()->save();
     }
 }

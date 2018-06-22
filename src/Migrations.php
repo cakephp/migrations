@@ -14,6 +14,7 @@ namespace Migrations;
 use Cake\Datasource\ConnectionManager;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
+use Phinx\Db\Adapter\WrapperInterface;
 use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -306,9 +307,11 @@ class Migrations
         $manager->setInput($input);
 
         if (isset($pdo)) {
-            $this->manager->getEnvironment('default')
-                ->getAdapter()
-                ->setConnection($pdo);
+            $adapter = $this->manager->getEnvironment('default')->getAdapter();
+            while ($adapter instanceof WrapperInterface) {
+                $adapter = $adapter->getAdapter();
+            }
+            $adapter->setConnection($pdo);
         }
 
         $newMigrationPaths = $newConfig->getMigrationPaths();

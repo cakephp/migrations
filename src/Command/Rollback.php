@@ -41,6 +41,8 @@ class Rollback extends RollbackCommand
             ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
             ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
             ->addOption('--force', '-f', InputOption::VALUE_NONE, 'Force rollback to ignore breakpoints')
+            ->addOption('--dry-run', '-x', InputOption::VALUE_NONE, 'Dump queries to standard output instead of executing it')
+            ->addOption('--fake', null, InputOption::VALUE_NONE, "Mark any rollbacks selected as run, but don't actually execute them")
             ->addOption(
                 '--no-lock',
                 null,
