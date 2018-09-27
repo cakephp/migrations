@@ -66,7 +66,7 @@ trait UtilTrait
 
         $dir = ROOT . DS . 'config' . DS . $folder;
 
-        if(defined('CONFIG')) {
+        if (defined('CONFIG')) {
             $dir = CONFIG . $folder;
         }
 
