@@ -65,6 +65,11 @@ trait UtilTrait
         $folder = $input->getOption('source') ?: $default;
 
         $dir = ROOT . DS . 'config' . DS . $folder;
+
+        if (defined('CONFIG')) {
+            $dir = CONFIG . $folder;
+        }
+
         $plugin = $this->getPlugin($input);
 
         if ($plugin !== null) {

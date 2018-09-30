@@ -37,7 +37,9 @@ define('APP_DIR', 'App');
 define('APP', ROOT . 'App' . DS);
 define('TMP', sys_get_temp_dir() . DS);
 define('CACHE', sys_get_temp_dir() . DS . 'cache' . DS);
-
+if (!defined('CONFIG')) {
+    define('CONFIG', ROOT . DS . 'config' . DS);
+}
 Configure::write('debug', true);
 Configure::write('App', [
     'namespace' => 'TestApp',
