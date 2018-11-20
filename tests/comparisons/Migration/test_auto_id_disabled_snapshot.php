@@ -270,6 +270,19 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
             )
             ->create();
 
+        $this->table('texts')
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('description', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->create();
+
         $this->table('users')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
@@ -382,6 +395,7 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
         $this->table('products')->drop()->save();
         $this->table('special_pks')->drop()->save();
         $this->table('special_tags')->drop()->save();
+        $this->table('texts')->drop()->save();
         $this->table('users')->drop()->save();
     }
 }
