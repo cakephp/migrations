@@ -130,7 +130,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
         $parser = new ConsoleOptionParser($name);
 
         $bakeThemes = [];
-        foreach (Plugin::loaded() as $plugin) {
+        foreach (Plugin::isLoaded() as $plugin) {
             $path = Plugin::classPath($plugin);
             if (is_dir($path . 'Template' . DS . 'Bake')) {
                 $bakeThemes[] = $plugin;
