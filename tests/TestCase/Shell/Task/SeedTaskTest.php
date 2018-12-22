@@ -24,8 +24,8 @@ class SeedTaskTest extends TestCase
     use StringCompareTrait;
 
     public $fixtures = [
-        'plugin.migrations.Events',
-        'plugin.migrations.Texts'
+        'plugin.Migrations.Events',
+        'plugin.Migrations.Texts'
     ];
 
     /**
