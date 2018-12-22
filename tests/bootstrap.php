@@ -77,12 +77,8 @@ if (getenv('db_dsn_compare') !== false) {
     ConnectionManager::setConfig('test_comparisons', ['url' => getenv('db_dsn_compare')]);
 }
 
-Plugin::load('Migrations', [
-    'path' => dirname(dirname(__FILE__)) . DS,
-]);
-Plugin::load('TestBlog', [
-    'path' => ROOT . 'Plugin' . DS . 'TestBlog' . DS,
-]);
+Plugin::getCollection()->add(new \Migrations\Plugin());
+Plugin::getCollection()->add(new \TestBlog\Plugin());
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
 }
