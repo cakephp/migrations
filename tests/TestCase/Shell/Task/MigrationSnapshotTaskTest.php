@@ -28,14 +28,14 @@ class MigrationSnapshotTaskTest extends TestCase
     use StringCompareTrait;
 
     public $fixtures = [
-        'plugin.migrations.users',
-        'plugin.migrations.special_tags',
-        'plugin.migrations.special_pk',
-        'plugin.migrations.composite_pk',
-        'plugin.migrations.products',
-        'plugin.migrations.categories',
-        'plugin.migrations.orders',
-        'plugin.migrations.articles'
+        'plugin.migrations.Users',
+        'plugin.migrations.SpecialTags',
+        'plugin.migrations.SpecialPk',
+        'plugin.migrations.CompositePk',
+        'plugin.migrations.Products',
+        'plugin.migrations.Categories',
+        'plugin.migrations.Orders',
+        'plugin.migrations.Articles'
     ];
 
     /**

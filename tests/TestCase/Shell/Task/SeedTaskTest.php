@@ -23,7 +23,10 @@ class SeedTaskTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = ['plugin.migrations.events', 'plugin.migrations.texts'];
+    public $fixtures = [
+        'plugin.migrations.Events',
+        'plugin.migrations.Texts'
+    ];
 
     /**
      * ConsoleIo mock
