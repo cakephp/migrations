@@ -16,7 +16,7 @@ namespace Migrations\Shell\Task;
 use Bake\Shell\Task\SimpleBakeTask;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
-use Cake\Core\Plugin;
+use Cake\Core\Plugin as CorePlugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 
@@ -141,8 +141,8 @@ class SeedTask extends SimpleBakeTask
         $parser = new ConsoleOptionParser($name);
 
         $bakeThemes = [];
-        foreach (Plugin::loaded() as $plugin) {
-            $path = Plugin::classPath($plugin);
+        foreach (CorePlugin::loaded() as $plugin) {
+            $path = CorePlugin::classPath($plugin);
             if (is_dir($path . 'Template' . DS . 'Bake')) {
                 $bakeThemes[] = $plugin;
             }

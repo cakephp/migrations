@@ -13,6 +13,7 @@
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
+use Cake\Routing\Router;
 
 $findRoot = function ($root) {
     do {
@@ -65,6 +66,9 @@ Cake\Cache\Cache::setConfig([
     ]
 ]);
 
+// Store initial state
+Router::reload();
+
 if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite://127.0.0.1/cakephp_test');
 }
@@ -79,6 +83,7 @@ if (getenv('db_dsn_compare') !== false) {
 
 Plugin::getCollection()->add(new \Migrations\Plugin());
 Plugin::getCollection()->add(new \TestBlog\Plugin());
+
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
 }
