@@ -97,7 +97,7 @@ trait TableFinderTrait
      */
     protected function getTableNames($pluginName = null)
     {
-        if ($pluginName !== null && !CorePlugin::isLoaded($pluginName)) {
+        if ($pluginName !== null && !CorePlugin::getCollection()->has($pluginName)) {
             return [];
         }
         $list = [];
