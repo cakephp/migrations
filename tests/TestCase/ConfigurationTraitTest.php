@@ -11,6 +11,7 @@
  */
 namespace Migrations\Test;
 
+use Cake\Core\BasePlugin;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -140,7 +141,10 @@ class ConfigurationTraitTest extends TestCase
     public function testGetConfigWithPlugin()
     {
         $tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
-        Plugin::load('MyPlugin', ['path' => $tmpPath]);
+        Plugin::getCollection()->add(new BasePlugin([
+            'name' => 'MyPlugin',
+            'path' => $tmpPath,
+        ]));
         $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
         $this->command->setInput($input);
 

@@ -12,7 +12,7 @@
 namespace Migrations;
 
 use Cake\Core\App;
-use Cake\Core\Plugin;
+use Cake\Core\Plugin as CorePlugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\Folder;
@@ -97,7 +97,7 @@ trait TableFinderTrait
      */
     protected function getTableNames($pluginName = null)
     {
-        if ($pluginName !== null && !Plugin::loaded($pluginName)) {
+        if ($pluginName !== null && !CorePlugin::getCollection()->has($pluginName)) {
             return [];
         }
         $list = [];
@@ -124,7 +124,7 @@ trait TableFinderTrait
     {
         $path = 'Model' . DS . 'Table' . DS;
         if ($pluginName) {
-            $path = Plugin::path($pluginName) . 'src' . DS . $path;
+            $path = CorePlugin::path($pluginName) . 'src' . DS . $path;
         } else {
             $path = APP . $path;
         }
