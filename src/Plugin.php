@@ -26,12 +26,9 @@ class Plugin extends BasePlugin
     protected $name = 'Migrations';
 
     /**
-     * Override to do nothing.
+     * Don't try to load routes.
      *
-     * @param \Cake\Routing\RouteBuilder $routes The route builder to update.
-     * @return void
+     * @var bool
      */
-    public function routes($routes)
-    {
-    }
+    protected $routesEnabled = false;
 }
