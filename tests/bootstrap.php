@@ -13,6 +13,7 @@
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
+use Cake\Routing\Router;
 
 $findRoot = function ($root) {
     do {
@@ -43,6 +44,7 @@ if (!defined('CONFIG')) {
 Configure::write('debug', true);
 Configure::write('App', [
     'namespace' => 'TestApp',
+    'encoding' => 'UTF-8',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
         'templates' => [ROOT . 'App' . DS . 'Template' . DS]
@@ -64,6 +66,9 @@ Cake\Cache\Cache::setConfig([
     ]
 ]);
 
+// Store initial state
+Router::reload();
+
 if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite://127.0.0.1/cakephp_test');
 }
@@ -76,12 +81,9 @@ if (getenv('db_dsn_compare') !== false) {
     ConnectionManager::setConfig('test_comparisons', ['url' => getenv('db_dsn_compare')]);
 }
 
-Plugin::load('Migrations', [
-    'path' => dirname(dirname(__FILE__)) . DS,
-]);
-Plugin::load('TestBlog', [
-    'path' => ROOT . 'Plugin' . DS . 'TestBlog' . DS,
-]);
+Plugin::getCollection()->add(new \Migrations\Plugin());
+Plugin::getCollection()->add(new \TestBlog\Plugin());
+
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
 }
