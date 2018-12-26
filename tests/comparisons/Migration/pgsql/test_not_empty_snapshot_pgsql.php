@@ -229,6 +229,19 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->create();
 
+        $this->table('texts', ['id' => false])
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('description', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->create();
+
         $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => 'NULL::character varying',
@@ -334,6 +347,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->table('products')->drop()->save();
         $this->table('special_pks')->drop()->save();
         $this->table('special_tags')->drop()->save();
+        $this->table('texts')->drop()->save();
         $this->table('users')->drop()->save();
     }
 }

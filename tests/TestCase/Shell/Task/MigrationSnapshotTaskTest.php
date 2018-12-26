@@ -35,7 +35,8 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.Migrations.Products',
         'plugin.Migrations.Categories',
         'plugin.Migrations.Orders',
-        'plugin.Migrations.Articles'
+        'plugin.Migrations.Articles',
+        'plugin.Migrations.Texts',
     ];
 
     /**

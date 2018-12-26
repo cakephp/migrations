@@ -5,11 +5,14 @@
 $foreignKeys = [];
 $primaryKeysColumns = $this->Migration->primaryKeysColumnsList($tableArgForMethods);
 $primaryKeys = $this->Migration->primaryKeys($tableArgForMethods);
-$specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
+$specialPk = $primaryKeys && (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $primaryKeys[0]['info']['columnType'] !== 'integer') && $autoId;
 %>
 <% if ($specialPk): %>
 
         $this->table('<%= $tableArgForArray %>', ['id' => false, 'primary_key' => ['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>']])
+<% elseif (!$primaryKeys && $autoId): %>
+
+        $this->table('<%= $tableArgForArray %>', ['id' => false])
 <% else: %>
 
         $this->table('<%= $tableArgForArray %>')
@@ -22,7 +25,7 @@ $specialPk = (count($primaryKeys) > 1 || $primaryKeys[0]['name'] !== 'id' || $pr
             echo $this->Migration->stringifyList($columnOptions, ['indent' => 4]);
             %>])
 <% endforeach; %>
-<% if (!$autoId): %>
+<% if (!$autoId && $primaryKeys): %>
             ->addPrimaryKey(['<%= implode("', '", \Cake\Utility\Hash::extract($primaryKeys, '{n}.name')) %>'])
 <% endif; %>
 <% endif;
