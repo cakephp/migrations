@@ -17,6 +17,7 @@ class TheDiffMysql extends AbstractMigration
             ->removeColumn('content')
             ->changeColumn('title', 'text', [
                 'default' => null,
+                'length' => null,
                 'limit' => null,
                 'null' => false,
             ])

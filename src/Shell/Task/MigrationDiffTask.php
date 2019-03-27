@@ -238,6 +238,10 @@ class MigrationDiffTask extends SimpleMigrationTask
                 if ($key > 0) {
                     $column['after'] = $currentColumns[$key - 1];
                 }
+                if (isset($column['unsigned'])) {
+                    $column['signed'] = !$column['unsigned'];
+                    unset($column['unsigned']);
+                }
                 $this->templateData[$table]['columns']['add'][$columnName] = $column;
             }
 
@@ -251,7 +255,7 @@ class MigrationDiffTask extends SimpleMigrationTask
                 if (in_array($columnName, $oldColumns) &&
                     $column !== $oldColumn
                 ) {
-                    $changedAttributes = array_diff($column, $oldColumn);
+                    $changedAttributes = array_diff_assoc($column, $oldColumn);
 
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
                         $phinxAttributeName = $attribute;
@@ -260,6 +264,16 @@ class MigrationDiffTask extends SimpleMigrationTask
                         }
                         if (!isset($changedAttributes[$phinxAttributeName])) {
                             $changedAttributes[$phinxAttributeName] = $column[$attribute];
+                        }
+                    }
+
+                    if (isset($changedAttributes['unsigned'])) {
+                        $changedAttributes['signed'] = !$changedAttributes['unsigned'];
+                        unset($changedAttributes['unsigned']);
+                    } else {
+                        // badish hack
+                        if (isset($column['unsigned']) && $column['unsigned'] === true) {
+                            $changedAttributes['signed'] = false;
                         }
                     }
 
@@ -313,6 +327,12 @@ class MigrationDiffTask extends SimpleMigrationTask
             foreach ($addedConstraints as $constraintName) {
                 $this->templateData[$table]['constraints']['add'][$constraintName] =
                     $currentSchema->getConstraint($constraintName);
+                $constraint = $currentSchema->getConstraint($constraintName);
+                if ($constraint['type'] === Table::CONSTRAINT_FOREIGN) {
+                    $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
+                } else {
+                    $this->templateData[$table]['indexes']['add'][$constraintName] = $constraint;
+                }
             }
 
             // constraints having the same name between new and old schema

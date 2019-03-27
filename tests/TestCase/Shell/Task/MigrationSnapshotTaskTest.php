@@ -13,7 +13,7 @@ namespace Migrations\Test\TestCase\Shell\Task;
 
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Plugin;
-use Cake\Database\Schema\Table;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
@@ -212,7 +212,7 @@ class MigrationSnapshotTaskTest extends TestCase
     public function testPluginBlog()
     {
         $db = ConnectionManager::get('test');
-        $table = new Table('parts', [
+        $table = new TableSchema('parts', [
             'id' => ['type' => 'integer', 'unsigned' => true],
             'name' => ['type' => 'string', 'length' => 255],
             'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true]

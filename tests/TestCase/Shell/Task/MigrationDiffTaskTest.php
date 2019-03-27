@@ -14,7 +14,7 @@ namespace Migrations\Test\TestCase\Shell\Task;
 use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Plugin;
-use Cake\Database\Schema\Table;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
@@ -172,7 +172,7 @@ class MigrationDiffTaskTest extends TestCase
             ->execute();
 
         // Create a _phinxlog table to make sure it's not included in the dump
-        $table = (new Table('articles_phinxlog'))->addColumn('title', [
+        $table = (new TableSchema('articles_phinxlog'))->addColumn('title', [
             'type' => 'string',
             'length' => 255
         ]);
