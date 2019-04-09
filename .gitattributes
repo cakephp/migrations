@@ -42,3 +42,4 @@ phpunit.xml.dist export-ignore
 .stickler.yml export-ignore
 phpcs.xml.dist export-ignore
 phpstan.neon export-ignore
+.github export-ignore
