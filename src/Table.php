@@ -61,7 +61,7 @@ class Table extends BaseTable
      *
      * {@inheritdoc}
      */
-    public function changeColumn($columnName, $type = null, $options = [])
+    public function changeColumn($columnName, $type, array $options = [])
     {
         $options = $this->convertedAutoIncrement($options);
 
