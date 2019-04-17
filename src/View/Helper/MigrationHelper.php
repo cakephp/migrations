@@ -406,7 +406,7 @@ class MigrationHelper extends Helper
             'after', 'update',
             'comment', 'unsigned',
             'signed', 'properties',
-            'autoIncrement'
+            'autoIncrement', 'unique'
         ];
 
         $attributes = [];
