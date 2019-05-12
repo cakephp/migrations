@@ -13,13 +13,13 @@
     ],
     "support": {
         "issues": "https://github.com/cakephp/migrations/issues",
-        "forum": "http://stackoverflow.com/tags/cakephp",
+        "forum": "https://stackoverflow.com/tags/cakephp",
         "irc": "irc://irc.freenode.org/cakephp",
         "source": "https://github.com/cakephp/migrations"
     },
     "require": {
         "php": ">=5.6.0",
-        "robmorgan/phinx": "~0.10.3",
+        "robmorgan/phinx": "^0.10.3",
         "cakephp/orm": "^3.6.0",
         "cakephp/cache": "^3.6.0"
     },
@@ -31,16 +31,16 @@
     },
     "autoload": {
         "psr-4": {
-            "Migrations\\": "src"
+            "Migrations\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests",
-            "Migrations\\PHPStan\\": "tests/PHPStan",
-            "Migrations\\Test\\": "tests",
-            "TestApp\\": "tests/test_app/App",
-            "TestBlog\\": "tests/test_app/Plugin/TestBlog/src"
+            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests/",
+            "Migrations\\PHPStan\\": "tests/PHPStan/",
+            "Migrations\\Test\\": "tests/",
+            "TestApp\\": "tests/test_app/App/",
+            "TestBlog\\": "tests/test_app/Plugin/TestBlog/src/"
         }
     },
     "suggest": {
