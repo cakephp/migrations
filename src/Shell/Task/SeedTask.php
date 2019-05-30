@@ -23,7 +23,6 @@ use Cake\Utility\Inflector;
 /**
  * Task class for generating seed files.
  *
- * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
  * @property \Bake\Shell\Task\TestTask $Test
  */
 class SeedTask extends SimpleBakeTask
@@ -35,10 +34,12 @@ class SeedTask extends SimpleBakeTask
      */
     public $pathFragment = 'config/Seeds/';
 
+    protected $_name;
+
     /**
      * {@inheritDoc}
      */
-    public function name()
+    public function name(): string
     {
         return 'seed';
     }
@@ -46,7 +47,7 @@ class SeedTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function fileName($name)
+    public function fileName($name): string
     {
         return Inflector::camelize($name) . 'Seed.php';
     }
@@ -54,7 +55,7 @@ class SeedTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function getPath()
+    public function getPath(): string
     {
         $path = ROOT . DS . $this->pathFragment;
         if (isset($this->plugin)) {
@@ -67,7 +68,7 @@ class SeedTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function template()
+    public function template(): string
     {
         return 'Migrations.Seed/seed';
     }
@@ -77,7 +78,7 @@ class SeedTask extends SimpleBakeTask
      *
      * @return array
      */
-    public function templateData()
+    public function templateData(): array
     {
         $namespace = Configure::read('App.namespace');
         if ($this->plugin) {
@@ -113,7 +114,7 @@ class SeedTask extends SimpleBakeTask
         }
 
         return [
-            'className' => $this->BakeTemplate->viewVars['name'],
+            'className' => $this->_name,
             'namespace' => $namespace,
             'records' => $records,
             'table' => $table,
@@ -123,9 +124,10 @@ class SeedTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function bake($name)
+    public function bake(string $name): string
     {
         $this->params['no-test'] = true;
+        $this->_name = $name;
 
         return parent::bake($name);
     }
@@ -135,7 +137,7 @@ class SeedTask extends SimpleBakeTask
      *
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $name = ($this->plugin ? $this->plugin . '.' : '') . $this->name;
         $parser = new ConsoleOptionParser($name);

@@ -1,4 +1,4 @@
-<%
+{#
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -12,14 +12,14 @@
  * @since         0.1.0
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-%>
+#}
 <?php
 use Migrations\AbstractSeed;
 
 /**
- * <%= $name %> seed.
+ * {{ name }} seed.
  */
-class <%= $name %>Seed extends AbstractSeed
+class {{ name }}Seed extends AbstractSeed
 {
     /**
      * Run Method.
@@ -33,13 +33,13 @@ class <%= $name %>Seed extends AbstractSeed
      */
     public function run()
     {
-<% if ($records): %>
-        $data = <%= $records %>;
-<% else: %>
+{% if records %}
+        $data = {{ records | raw }};
+{% else %}
         $data = [];
-<% endif; %>
+{% endif %}
 
-        $table = $this->table('<%= $table %>');
+        $table = $this->table('{{ table }}');
         $table->insert($data)->save();
     }
 }

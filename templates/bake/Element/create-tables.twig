@@ -1,0 +1,76 @@
+{% for table, schema in tables %}
+{%     set tableArgForMethods = useSchema ? schema : table %}
+{%     set tableArgForArray = useSchema ? table : schema %}
+{%     set foreignKeys = [] %}
+{%     set primaryKeysColumns = Migration.primaryKeysColumnsList(tableArgForMethods) %}
+{%     set primaryKeys = Migration.primaryKeys(tableArgForMethods) %}
+{%     set specialPk = primaryKeys and (primaryKeys|length > 1 or primaryKeys[0]['name'] != 'id' or primaryKeys[0]['info']['columnType'] != 'integer') and autoId %}
+{%     if specialPk %}
+
+        $this->table('{{ tableArgForArray }}', ['id' => false, 'primary_key' => ['{{ Migration.extract(primaryKeys)|join("', '")|raw }}']])
+{%     elseif not primaryKeys and autoId %}
+
+        $this->table('{{ tableArgForArray }}', ['id' => false])
+{%     else %}
+
+        $this->table('{{ tableArgForArray }}')
+{%     endif %}
+{%     if specialPk or not autoId %}
+{%         for primaryKey in primaryKeys %}
+{%             set columnOptions = Migration.getColumnOption(primaryKey['info']['options']) %}
+            ->addColumn('{{ primaryKey['name'] }}', '{{ primaryKey['info']['columnType'] }}', [{{ Migration.stringifyList(columnOptions, {'indent': 4}) | raw }}])
+{%         endfor %}
+{%         if not autoId and primaryKeys %}
+            ->addPrimaryKey(['{{ Migration.extract(primaryKeys)
+            |join("', '") }}'])
+{%         endif %}
+{%     endif %}
+{%     for column, config in Migration.columns(tableArgForMethods) %}
+{%         set columnOptions = Migration.getColumnOption(config['options']) %}
+{%         if config['columnType'] == 'boolean' and columnOptions['default'] is defined and (Migration.value(columnOptions['default'])) is not same as('null') %}
+{%             set default = columnOptions['default'] ? true : false %}
+{%             set columnOptions = columnOptions|merge({'default': default}) %}
+{%         endif %}
+            ->addColumn('{{ column }}', '{{ config['columnType'] }}', [{{
+            Migration.stringifyList(columnOptions, {'indent': 4}) | raw
+            }}])
+{%     endfor %}
+{%     set tableConstraints = Migration.constraints(tableArgForMethods) %}
+{%     if tableConstraints is not empty %}
+{%         set tableConstraints = tableConstraints|sort %}
+{%         if constraints is empty %}
+{%             set constraints = [] %}
+{%         endif %}
+{%         set constraints = constraints|merge({tableArgForArray: tableConstraints}) %}
+{%         for name, constraint in constraints[tableArgForArray] %}
+{%             if constraint['type'] == 'foreign' %}
+{%                 set foreignKeys = foreignKeys|merge(constraint['columns']) %}
+{%             endif %}
+{%             if constraint['columns'] != primaryKeysColumns %}
+            ->addIndex(
+                [{{ Migration.stringifyList(constraint['columns'], {'indent': 5}) | raw }}]{{  (constraint['type'] == 'unique') ? ',' : '' }}
+{%                 if constraint['type'] == 'unique' %}
+                ['unique' => true]
+{%                 endif %}
+            )
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     set indexes = Migration.indexes(tableArgForMethods) %}
+{%     for index in indexes %}
+{%         set foreignKeys = foreignKeys | sort %}
+{%         set indexColumns = index['columns'] | sort %}
+{%         if indexColumns not in foreignKeys %}
+            ->addIndex(
+                [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}]{{ (index['type'] == 'fulltext') ? ',' : '' }}
+{%             if index['type'] == 'fulltext' %}
+                ['type' => 'fulltext']
+{%             endif %}
+            )
+{%         endif %}
+{%     endfor %}
+            ->create();
+{% endfor %}
+{% if constraints is not empty %}
+{{     Migration.element('Migrations.add-foreign-keys-from-create', {'constraints': constraints}) | raw }}
+{% endif %}

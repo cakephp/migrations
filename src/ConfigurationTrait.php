@@ -81,7 +81,7 @@ trait ConfigurationTrait
         $connectionConfig = ConnectionManager::getConfig($connection);
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
 
-        $templatePath = __DIR__ . DS . 'Template' . DS;
+        $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
         $config = [
             'paths' => [
                 'migrations' => $migrationsPath,

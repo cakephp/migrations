@@ -57,7 +57,7 @@ class MarkMigratedTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -77,7 +77,7 @@ class MarkMigratedTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         $this->Connection->getDriver()->setConnection($this->pdo);
@@ -99,15 +99,15 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -123,15 +123,15 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150724233100` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150826191400` (already migrated).',
             $this->commandTester->getDisplay()
         );
@@ -167,7 +167,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'An error occurred while marking migration `20150704160200` as migrated : Error during marking process',
             $buggyCommandTester->getDisplay()
         );
@@ -187,19 +187,19 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead',
             $this->commandTester->getDisplay()
         );
@@ -216,19 +216,19 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150724233100` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150826191400` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead',
             $this->commandTester->getDisplay()
         );
@@ -243,7 +243,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -258,15 +258,15 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -285,7 +285,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160610` was not found !',
             $this->commandTester->getDisplay()
         );
@@ -301,7 +301,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -317,11 +317,11 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -340,7 +340,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160610` was not found !',
             $this->commandTester->getDisplay()
         );
@@ -356,7 +356,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -372,7 +372,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
@@ -391,7 +391,7 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150704160610` was not found !',
             $this->commandTester->getDisplay()
         );
@@ -406,11 +406,11 @@ class MarkMigratedTest extends TestCase
             '--source' => 'TestsMigrations'
         ]);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'DEPRECATED: VERSION as argument is deprecated. Use: ' .
             '`bin/cake migrations mark_migrated --target=VERSION --only`',
             $this->commandTester->getDisplay()
@@ -432,7 +432,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
         $this->assertEquals(0, $result);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
             $this->commandTester->getDisplay()
         );
@@ -446,7 +446,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
         $this->assertEquals(0, $result);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
             $this->commandTester->getDisplay()
         );
@@ -462,7 +462,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
         $this->assertEquals(0, $result);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
             $this->commandTester->getDisplay()
         );

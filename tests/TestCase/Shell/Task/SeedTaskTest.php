@@ -11,7 +11,6 @@
  */
 namespace Migrations\Test\TestCase\Shell\Task;
 
-use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
@@ -47,7 +46,7 @@ class SeedTaskTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Seeds' . DS;
@@ -62,9 +61,6 @@ class SeedTaskTest extends TestCase
 
         $this->Task->name = 'Seeds';
         $this->Task->connection = 'test';
-        $this->Task->BakeTemplate = new BakeTemplateTask($inputOutput);
-        $this->Task->BakeTemplate->initialize();
-        $this->Task->BakeTemplate->interactive = false;
     }
 
     /**

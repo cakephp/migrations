@@ -11,7 +11,6 @@
  */
 namespace Migrations\Test\TestCase\Shell\Task;
 
-use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\TableSchema;
@@ -38,7 +37,7 @@ class MigrationDiffTaskTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }
@@ -63,9 +62,6 @@ class MigrationDiffTaskTest extends TestCase
 
         $task->name = 'Migration';
         $task->connection = 'test';
-        $task->BakeTemplate = new BakeTemplateTask($io);
-        $task->BakeTemplate->initialize();
-        $task->BakeTemplate->interactive = false;
 
         return $task;
     }

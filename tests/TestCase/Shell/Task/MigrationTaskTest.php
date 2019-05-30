@@ -11,7 +11,7 @@
  */
 namespace Migrations\Test\TestCase\Shell\Task;
 
-use Bake\Shell\Task\BakeTemplateTask;
+use Cake\Console\Exception\StopException;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
@@ -28,7 +28,7 @@ class MigrationTaskTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
@@ -43,9 +43,6 @@ class MigrationTaskTest extends TestCase
 
         $this->Task->name = 'Migration';
         $this->Task->connection = 'test';
-        $this->Task->BakeTemplate = new BakeTemplateTask($inputOutput);
-        $this->Task->BakeTemplate->initialize();
-        $this->Task->BakeTemplate->interactive = false;
     }
 
     /**
@@ -113,12 +110,11 @@ class MigrationTaskTest extends TestCase
 
     /**
      * Tests that baking a migration with the name as another will throw an exception.
-     *
-     * @expectedException \Cake\Console\Exception\StopException
-     * @expectedExceptionMessage A migration with the name `CreateUsers` already exists. Please use a different name.
      */
     public function testCreateDuplicateName()
     {
+        $this->expectException(StopException::class);
+        $this->expectExceptionMessage('A migration with the name `CreateUsers` already exists. Please use a different name.');
         $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
             ->disableOriginalConstructor()
             ->getMock();
@@ -130,9 +126,6 @@ class MigrationTaskTest extends TestCase
 
         $task->name = 'Migration';
         $task->connection = 'test';
-        $task->BakeTemplate = new BakeTemplateTask($inputOutput);
-        $task->BakeTemplate->initialize();
-        $task->BakeTemplate->interactive = false;
 
         $task->bake('CreateUsers');
         $task->bake('CreateUsers');
@@ -155,9 +148,6 @@ class MigrationTaskTest extends TestCase
         $task->name = 'Migration';
         $task->connection = 'test';
         $task->params['force'] = true;
-        $task->BakeTemplate = new BakeTemplateTask($inputOutput);
-        $task->BakeTemplate->initialize();
-        $task->BakeTemplate->interactive = false;
 
         $task->bake('CreateUsers');
 

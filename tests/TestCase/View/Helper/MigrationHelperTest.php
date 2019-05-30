@@ -34,7 +34,7 @@ class MigrationHelperTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->Connection = ConnectionManager::get('test');
@@ -43,16 +43,13 @@ class MigrationHelperTest extends TestCase
         $this->Helper = new MigrationHelper($this->View, [
             'collection' => $this->Collection
         ]);
-        Cache::clear(false, '_cake_model_');
+        Cache::clear('_cake_model_');
         Cache::enable();
         $this->loadFixtures('Users');
         $this->loadFixtures('SpecialTags');
 
-        $nullDef = version_compare(PHP_VERSION, '5.5.9', '<=') || version_compare(Configure::version(), '3.3.0', '<') ?
-            'NULL' : null;
-
         $this->values = [
-            'null' => $nullDef,
+            'null' => null,
             'integerNull' => null,
             'integerLimit' => null,
             'comment' => null,
@@ -82,7 +79,7 @@ class MigrationHelperTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         unset($this->Helper, $this->View, $this->Collection, $this->Connection);
@@ -245,11 +242,11 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals(1.5, $this->Helper->value(1.5));
         $this->assertEquals(1.5, $this->Helper->value('1.5'));
         $this->assertEquals(1, $this->Helper->value('1'));
-        $this->assertInternalType('float', $this->Helper->value('1'));
-        $this->assertInternalType('string', $this->Helper->value('1', true));
-        $this->assertInternalType('string', $this->Helper->value('1.5', true));
-        $this->assertInternalType('string', $this->Helper->value(1, true));
-        $this->assertInternalType('string', $this->Helper->value(1.5, true));
+        $this->assertIsFloat($this->Helper->value('1'));
+        $this->assertIsString($this->Helper->value('1', true));
+        $this->assertIsString($this->Helper->value('1.5', true));
+        $this->assertIsString($this->Helper->value(1, true));
+        $this->assertIsString($this->Helper->value(1.5, true));
         $this->assertEquals("'one'", $this->Helper->value('one'));
         $this->assertEquals("'o\\\"ne'", $this->Helper->value('o"ne'));
     }

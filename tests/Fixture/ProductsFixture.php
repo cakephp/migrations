@@ -60,7 +60,7 @@ class ProductsFixture extends TestFixture
     /**
      * {@inheritdoc}
      */
-    public function init()
+    public function init(): void
     {
         $connection = ConnectionManager::get($this->connection());
         $driver = $connection->getDriver();

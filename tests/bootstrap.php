@@ -32,6 +32,9 @@ chdir($root);
 require_once 'vendor/cakephp/cakephp/src/basics.php';
 require_once 'vendor/autoload.php';
 
+if (!defined('DS')) {
+    define('DS', DIRECTORY_SEPARATOR);
+}
 define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS);
 define('ROOT', $root . DS . 'tests' . DS . 'test_app' . DS);
 define('APP_DIR', 'App');
@@ -56,14 +59,12 @@ Cake\Cache\Cache::setConfig([
         'engine' => 'File',
         'prefix' => 'cake_core_',
         'serialize' => true,
-        'path' => TMP,
     ],
     '_cake_model_' => [
         'engine' => 'File',
         'prefix' => 'cake_model_',
         'serialize' => true,
-        'path' => TMP,
-    ]
+    ],
 ]);
 
 // Store initial state
@@ -82,6 +83,7 @@ if (getenv('db_dsn_compare') !== false) {
 }
 
 Plugin::getCollection()->add(new \Migrations\Plugin());
+Plugin::getCollection()->add(new \Bake\Plugin());
 Plugin::getCollection()->add(new \TestBlog\Plugin());
 
 if (!defined('PHINX_VERSION')) {
