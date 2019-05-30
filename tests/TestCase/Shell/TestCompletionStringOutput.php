@@ -23,9 +23,11 @@ class TestCompletionStringOutput extends ConsoleOutput
     public $output = '';
 
     // @codingStandardsIgnoreStart
-    protected function _write($message)
+    protected function _write(string $message): int
     {
         // @codingStandardsIgnoreEnd
         $this->output .= $message;
+        
+        return 0;
     }
 }
