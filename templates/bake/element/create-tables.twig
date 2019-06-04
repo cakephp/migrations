@@ -22,7 +22,7 @@
 {%         endfor %}
 {%         if not autoId and primaryKeys %}
             ->addPrimaryKey(['{{ Migration.extract(primaryKeys)
-            |join("', '") }}'])
+            | join("', '") | raw }}'])
 {%         endif %}
 {%     endif %}
 {%     for column, config in Migration.columns(tableArgForMethods) %}
