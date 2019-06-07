@@ -1,7 +1,6 @@
 <?php
 namespace Migrations\Command;
 
-use Cake\Cache\Cache;
 use Migrations\Util\SchemaTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -49,16 +48,13 @@ class CacheClear extends Command
         if (empty($name)) {
             $tables = $schema->listTables();
         }
-        $configName = $schema->getCacheMetadata();
-
+        $cacher = $schema->getCacher();
         foreach ($tables as $table) {
             $output->writeln(sprintf(
-                'Clearing metadata cache from "%s" for %s',
-                $configName,
+                'Clearing metadata cache for %s',
                 $table
             ));
-            $key = $schema->cacheKey($table);
-            Cache::delete($key, $configName);
+            $cacher->delete($table);
         }
         $output->writeln('<info>Cache clear complete<info>');
 

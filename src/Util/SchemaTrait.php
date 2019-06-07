@@ -11,6 +11,7 @@
  */
 namespace Migrations\Util;
 
+use Cake\Database\Schema\CachedCollection;
 use Cake\Datasource\ConnectionManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,9 +27,9 @@ trait SchemaTrait
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input object.
      * @param \Symfony\Component\Console\Input\OutputInterface $output Output object.
-     * @return null|\Cake\Database\Schema\Collection
+     * @return null|\Cake\Database\Schema\CachedCollection
      */
-    protected function _getSchema(InputInterface $input, OutputInterface $output)
+    protected function _getSchema(InputInterface $input, OutputInterface $output): CachedCollection
     {
         $connectionName = $input->getOption('connection');
         $connection = ConnectionManager::get($connectionName);

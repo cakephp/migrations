@@ -1,3 +1,0 @@
-{% for table, tableConstraints in constraints %}
-{{     Migration.element('Migrations.add-foreign-keys', {'constraints': tableConstraints, 'table': table]}) | raw }}
-{% endfor %}

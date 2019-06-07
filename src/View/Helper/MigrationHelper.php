@@ -550,4 +550,61 @@ class MigrationHelper extends Helper
         return Hash::extract($list, $path);
     }
 
+    /**
+     * Get data to use in create tables element
+     *
+     * @param string $table
+     * @return array
+     */
+    public function getCreateTableData($table)
+    {
+        $constraints = $this->constraints($table);
+        $indexes = $this->indexes($table);
+        $foreignKeys = [];
+        foreach ($constraints as $constraint) {
+            if ($constraint['type'] == 'foreign') {
+                $foreignKeys[] = $constraint['columns'];
+            }
+        }
+        $indexes = array_filter($indexes, function($index) use ($foreignKeys) {
+            return !in_array($index['columns'], $foreignKeys);
+        });
+        $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
+
+        return $result;
+    }
+
+    /**
+     * Get data to use inside the create-tables element
+     *
+     * @param array $tables
+     * @return array
+     */
+    public function getCreateTablesElementData($tables)
+    {
+        $result = [
+            'constraints' => [],
+            'tables' => []
+        ];
+        foreach ($tables as $table) {
+            $tableName = $table;
+            if ($table instanceof TableSchema) {
+                $tableName = $table->name();
+            }
+            $data = $this->getCreateTableData($table);
+            $tableConstraintsNoUnique = array_filter(
+                $data['constraints'],
+                function($constraint) {
+                    return $constraint['type'] != 'unique';
+                }
+            );
+            if($tableConstraintsNoUnique) {
+                $result['constraints'][$tableName] =  $data['constraints'];
+            }
+            $result['tables'][$tableName] = $data;
+        }
+
+        return $result;
+    }
+
 }

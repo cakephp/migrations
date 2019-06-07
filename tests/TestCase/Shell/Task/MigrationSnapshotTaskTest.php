@@ -55,6 +55,9 @@ class MigrationSnapshotTaskTest extends TestCase
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
         $this->Task = $this->getTaskMock();
+        $this->loadPlugins([
+            'Migrations' => ['boostrap' => true],
+        ]);
     }
 
     /**
@@ -178,7 +181,7 @@ class MigrationSnapshotTaskTest extends TestCase
             ->method('refreshDump');
 
         $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
-        $result = $this->Task->bake($bakeName);
+        $this->Task->bake($bakeName);
     }
 
     /**

@@ -1,3 +1,4 @@
+{% set createData = Migration.getCreateTablesElementData(tables) %}
 {% for table, schema in tables %}
 {%     set tableArgForMethods = useSchema ? schema : table %}
 {%     set tableArgForArray = useSchema ? table : schema %}
@@ -35,17 +36,8 @@
             Migration.stringifyList(columnOptions, {'indent': 4}) | raw
             }}])
 {%     endfor %}
-{%     set tableConstraints = Migration.constraints(tableArgForMethods) %}
-{%     if tableConstraints is not empty %}
-{%         set tableConstraints = tableConstraints|sort %}
-{%         if constraints is empty %}
-{%             set constraints = [] %}
-{%         endif %}
-{%         set constraints = constraints|merge({tableArgForArray: tableConstraints}) %}
-{%         for name, constraint in constraints[tableArgForArray] %}
-{%             if constraint['type'] == 'foreign' %}
-{%                 set foreignKeys = foreignKeys|merge(constraint['columns']) %}
-{%             endif %}
+{%     if createData.tables[table].constraints is not empty %}
+{%         for name, constraint in createData.tables[table].constraints %}
 {%             if constraint['columns'] != primaryKeysColumns %}
             ->addIndex(
                 [{{ Migration.stringifyList(constraint['columns'], {'indent': 5}) | raw }}]{{  (constraint['type'] == 'unique') ? ',' : '' }}
@@ -56,21 +48,23 @@
 {%             endif %}
 {%         endfor %}
 {%     endif %}
-{%     set indexes = Migration.indexes(tableArgForMethods) %}
-{%     for index in indexes %}
-{%         set foreignKeys = foreignKeys | sort %}
+{%     for index in createData.tables[table].indexes %}
 {%         set indexColumns = index['columns'] | sort %}
-{%         if indexColumns not in foreignKeys %}
             ->addIndex(
                 [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}]{{ (index['type'] == 'fulltext') ? ',' : '' }}
 {%             if index['type'] == 'fulltext' %}
                 ['type' => 'fulltext']
 {%             endif %}
             )
-{%         endif %}
 {%     endfor %}
             ->create();
 {% endfor %}
-{% if constraints is not empty %}
-{{     Migration.element('Migrations.add-foreign-keys-from-create', {'constraints': constraints}) | raw }}
+{% if createData.constraints %}
+{% for table, tableConstraints in createData.constraints %}
+
+{% element 'Migrations.add-foreign-keys' {
+    constraints: tableConstraints,
+    table: table
+} %}
+{% endfor %}
 {% endif %}

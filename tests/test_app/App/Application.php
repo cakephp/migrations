@@ -21,5 +21,6 @@ class Application extends BaseApplication
     public function bootstrap(): void
     {
         $this->addPlugin('Migrations');
+        $this->addPlugin('Bake', ['boostrap' => true]);
     }
 }
