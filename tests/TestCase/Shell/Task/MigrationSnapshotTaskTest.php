@@ -181,7 +181,7 @@ class MigrationSnapshotTaskTest extends TestCase
             ->method('refreshDump');
 
         $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
-        $result = $this->Task->bake($bakeName);
+        $this->Task->bake($bakeName);
     }
 
     /**
