@@ -587,6 +587,10 @@ class MigrationHelper extends Helper
             'tables' => []
         ];
         foreach ($tables as $table) {
+            $tableName = $table;
+            if ($table instanceof TableSchema) {
+                $tableName = $table->name();
+            }
             $data = $this->getCreateTableData($table);
             $tableConstraintsNoUnique = array_filter(
                 $data['constraints'],
@@ -595,9 +599,9 @@ class MigrationHelper extends Helper
                 }
             );
             if($tableConstraintsNoUnique) {
-                $result['constraints'][$table] =  $data['constraints'];
+                $result['constraints'][$tableName] =  $data['constraints'];
             }
-            $result['tables'][$table] = $data;
+            $result['tables'][$tableName] = $data;
         }
 
         return $result;
