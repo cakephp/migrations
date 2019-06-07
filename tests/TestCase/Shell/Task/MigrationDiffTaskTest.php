@@ -40,6 +40,9 @@ class MigrationDiffTaskTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        $this->loadPlugins([
+            'Migrations' => ['boostrap' => true],
+        ]);
     }
 
     /**
