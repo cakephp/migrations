@@ -9,19 +9,15 @@
 {%             set columnsList = '[' ~ Migration.stringifyList(constraint['columns'], {'indent': 5}) ~ ']' %}
 {%         endif %}
 {%         set record = Migration.storeReturnedData(table, columnsList) %}
-
 {%         if constraint['references'][1] is iterable %}
 {%             set columnsReference = '[' ~ Migration.stringifyList(constraint['references'][1], {'indent': 5}) ~ ']' %}
 {%         else %}
 {%             set columnsReference = '\'' ~ constraint['references'][1] ~ '\'' %}
 {%         endif %}
-
 {%         if statement is not defined %}
 {%             set statement = Migration.tableStatement(table) %}
 {%         endif %}
-
 {%         if statement is not empty %}
-
         {{ statement | raw }}
 {%             set statement = null %}
 {%         endif %}

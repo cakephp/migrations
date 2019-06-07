@@ -32,7 +32,11 @@ class {{ name }} extends AbstractMigration
 {% endif %}
     public function up()
     {
-{{ Migration.element('Migrations.create-tables', {'tables': tables, 'autoId': autoId, 'useSchema': false}) | raw }}
+{% element 'Migrations.create-tables' {
+    tables: tables,
+    autoId: autoId,
+    useSchema: false
+} %}
     }
 
     public function down()
@@ -44,7 +48,7 @@ class {{ name }} extends AbstractMigration
         $this->table('{{ table }}')
 {%          for key, columns in columnsList %}
             ->dropForeignKey(
-                {{ columns }}
+                {{ columns|raw }}
             ){{ (key == maxKey) ? '->save();' : '' }}
 {%          endfor %}
 
