@@ -27,7 +27,7 @@ version_list = [
 ]
 
 # Languages available.
-languages = ['en', 'es', 'fr', 'ja', 'pt', 'ru']
+languages = ['en', 'fr', 'ja', 'pt', 'ru']
 
 # The GitHub branch name for this version of the docs
 # for edit links to point at.
