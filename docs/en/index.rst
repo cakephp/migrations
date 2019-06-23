@@ -585,7 +585,7 @@ The Status command prints a list of all migrations, along with their current
 status. You can use this command to determine which migrations have been run:
 
 .. code-block:: bash
-j
+
     bin/cake migrations status
 
 You can also output the results as a JSON formatted string using the
