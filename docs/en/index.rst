@@ -23,7 +23,7 @@ located):
 
     php composer.phar require cakephp/migrations "@stable"
 
-    // Or if composer is installed globally
+    # Or if composer is installed globally
     composer require cakephp/migrations "@stable"
 
 To use the plugin you'll need to load it in your application's
@@ -920,9 +920,11 @@ The above will create a ``CHAR(36)`` ``id`` column that is also the primary key.
 
     When specifying a custom primary key on the command line, you must note
     it as the primary key in the id field, otherwise you may get an error
-    regarding duplicate id fields, i.e.::
+    regarding duplicate id fields, i.e.:
 
-        $ bin/cake bake migration CreateProducts id:uuid:primary name:string description:text created modified
+    .. code-block:: bash
+
+        bin/cake bake migration CreateProducts id:uuid:primary name:string description:text created modified
 
 Additionally, since Migrations 1.3, a new way to deal with primary key was
 introduced. To do so, your migration class should extend the new
