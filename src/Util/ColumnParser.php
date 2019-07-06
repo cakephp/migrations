@@ -64,7 +64,7 @@ class ColumnParser
             ];
 
             if ($length !== null) {
-                if(is_array($length)) {
+                if (is_array($length)) {
                     list($fields[$field]['options']['precision'], $fields[$field]['options']['scale']) = $length;
                 } else {
                     $fields[$field]['options']['limit'] = $length;
@@ -176,9 +176,10 @@ class ColumnParser
     public function getTypeAndLength($field, $type)
     {
         if (preg_match($this->regexpParseField, $type, $matches)) {
-            if(strpos($matches[2], ',') !== false) {
+            if (strpos($matches[2], ',') !== false) {
                 $matches[2] = explode(',', $matches[2]);
             }
+
             return [$matches[1], $matches[2]];
         }
 
@@ -238,7 +239,7 @@ class ColumnParser
         } elseif ($type === 'biginteger') {
             $length = 20;
         } elseif ($type === 'decimal') {
-            $length = [10,6];
+            $length = [10, 6];
         }
 
         return $length;

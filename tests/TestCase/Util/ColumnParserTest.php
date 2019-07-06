@@ -356,7 +356,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('username', null));
         $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('created', null));
         $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('changed_at', null));
-        $this->assertEquals(['decimal', [10,6]], $this->columnParser->getTypeAndLength('latitude', 'decimal[10,6]'));
+        $this->assertEquals(['decimal', [10, 6]], $this->columnParser->getTypeAndLength('latitude', 'decimal[10,6]'));
     }
 
     /**
@@ -367,7 +367,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(255, $this->columnParser->getLength('string'));
         $this->assertEquals(11, $this->columnParser->getLength('integer'));
         $this->assertEquals(20, $this->columnParser->getLength('biginteger'));
-        $this->assertEquals([10,6], $this->columnParser->getLength('decimal'));
+        $this->assertEquals([10, 6], $this->columnParser->getLength('decimal'));
         $this->assertNull($this->columnParser->getLength('text'));
     }
 
