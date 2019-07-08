@@ -51,7 +51,7 @@ class ColumnParser
                 }
             }
 
-            $nullable = (bool)preg_match('/\w+\?(\[[0-9]+\])?/', $type);
+            $nullable = (bool)preg_match('/(\w+\??)\[([0-9]+)(\,[0-9]+)?\]/', $type);
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
             list($type, $length) = $this->getTypeAndLength($field, $type);
