@@ -50,8 +50,7 @@ class ColumnParser
                     $type = 'primary';
                 }
             }
-
-            $nullable = (bool)preg_match('/(\w+\??)\[([0-9]+)(\,[0-9]+)?\]/', $type);
+            $nullable = (bool)preg_match('/(\w+\?)(?:(\[(([1-9][0-9]|[1-9]){1,2})(?:(\,([1-9][0-9]|[1-9]))*)\]))*/', $type);
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
             list($type, $length) = $this->getTypeAndLength($field, $type);
@@ -204,7 +203,6 @@ class ColumnParser
         $validTypes = $collection->filter(function ($value, $constant) {
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
-
         $fieldType = $type;
         if ($type === null || !in_array($type, $validTypes)) {
             if ($type === 'primary') {
