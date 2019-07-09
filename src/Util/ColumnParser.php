@@ -50,7 +50,7 @@ class ColumnParser
                     $type = 'primary';
                 }
             }
-            $nullable = (bool)preg_match('/(\w+\?)(?:(\[(([1-9][0-9]|[1-9]){1,2})(?:(\,([1-9][0-9]|[1-9]))*)\]))*/', $type);
+            $nullable = (bool)strpos($type, '?');
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
             list($type, $length) = $this->getTypeAndLength($field, $type);
