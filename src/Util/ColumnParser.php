@@ -16,7 +16,19 @@ class ColumnParser
      *
      * @var string
      */
-    protected $regexpParseColumn = '/^(\w+)(?::(\w+\??(?:\[(?:[0-9]|[1-9][0-9]+)(?:,(?:[0-9]|[1-9][0-9]+))?\])?))?(?::(\w+))?(?::(\w+))?$/';
+    protected $regexpParseColumn = '/
+        ^
+        (\w+)
+        (?::(\w+\??
+            (?:\[
+                (?:[0-9]|[1-9][0-9]+)
+                (?:,(?:[0-9]|[1-9][0-9]+))?
+            \])?
+        ))?
+        (?::(\w+))?
+        (?::(\w+))?
+        $
+        /x';
 
     /**
      * Regex used to parse the field type and length
