@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\Test\Command;
 
 use Cake\Cache\Cache;
-use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
@@ -12,7 +13,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class CacheClearTest extends TestCase
 {
-
     /**
      * Instance of a Symfony Command object
      *
@@ -51,6 +51,8 @@ class CacheClearTest extends TestCase
     {
         parent::setUp();
         Cache::enable();
+        Cache::clear('_cake_model_');
+
         $this->connection = ConnectionManager::get('test');
         $this->connection->cacheMetadata(true);
         $this->connection->execute('DROP TABLE IF EXISTS blog');
