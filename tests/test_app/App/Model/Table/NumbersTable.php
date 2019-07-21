@@ -19,7 +19,7 @@ use Cake\ORM\Table;
  */
 class NumbersTable extends Table
 {
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
         $db = env('DB');
         $schema = 'cakephp_test.';

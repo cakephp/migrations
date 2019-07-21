@@ -44,7 +44,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $params = [
@@ -88,7 +88,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         unset($this->Connection, $this->migrations);
@@ -321,12 +321,12 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option set to a
      * non-existent target will throw an exception
      *
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Migration `20150704160610` was not found !
      * @return void
      */
     public function testMarkMigratedTargetError()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Migration `20150704160610` was not found !');
         $this->migrations->markMigrated(null, ['target' => '20150704160610']);
     }
 
@@ -408,12 +408,12 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option, the only option
      * and the exclude option will throw an exception
      *
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage You should use `exclude` OR `only` (not both) along with a `target` argument
      * @return void
      */
     public function testMarkMigratedTargetExcludeOnly()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('You should use `exclude` OR `only` (not both) along with a `target` argument');
         $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true, 'exclude' => true]);
     }
 
@@ -847,12 +847,12 @@ class MigrationsTest extends TestCase
     /**
      * Tests that requesting a unexistant seed throws an exception
      *
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage The seed class "DerpSeed" does not exist
      * @return void
      */
     public function testSeedWrongSeed()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The seed class "DerpSeed" does not exist');
         $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'DerpSeed']);
     }
 
@@ -891,22 +891,20 @@ class MigrationsTest extends TestCase
 
     /**
      * Tests that migrating in case of error throws an exception
-     *
-     * @expectedException \Exception
      */
     public function testMigrateErrors()
     {
+        $this->expectException(\Exception::class);
         $this->migrations->markMigrated(20150704160200);
         $this->migrations->migrate();
     }
 
     /**
      * Tests that rolling back in case of error throws an exception
-     *
-     * @expectedException \Exception
      */
     public function testRollbackErrors()
     {
+        $this->expectException(\Exception::class);
         $this->migrations->markMigrated('all');
         $this->migrations->rollback();
     }
@@ -914,11 +912,10 @@ class MigrationsTest extends TestCase
     /**
      * Tests that marking migrated a non-existant migrations returns an error
      * and can return a error message
-     *
-     * @expectedException \Exception
      */
     public function testMarkMigratedErrors()
     {
+        $this->expectException(\Exception::class);
         $this->migrations->markMigrated(20150704000000);
     }
 

@@ -13,6 +13,7 @@
  */
 namespace Migrations\Shell\Task;
 
+use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
@@ -23,7 +24,6 @@ use Migrations\Util\UtilTrait;
 /**
  * Task class for generating migration snapshot files.
  *
- * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
  * @property \Bake\Shell\Task\TestTask $Test
  */
 class MigrationSnapshotTask extends SimpleMigrationTask
@@ -33,10 +33,12 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     use TableFinderTrait;
     use UtilTrait;
 
+    protected $_name;
+
     /**
      * {@inheritDoc}
      */
-    public function bake($name)
+    public function bake(string $name): string
     {
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
@@ -44,6 +46,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
                 'collection' => $collection
             ]);
         });
+        $this->_name = $name;
 
         return parent::bake($name);
     }
@@ -51,7 +54,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function template()
+    public function template(): string
     {
         return 'Migrations.config/snapshot';
     }
@@ -59,7 +62,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function templateData()
+    public function templateData(): array
     {
         $namespace = Configure::read('App.namespace');
         $pluginPath = '';
@@ -91,7 +94,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'collection' => $collection,
             'tables' => $tables,
             'action' => 'create_table',
-            'name' => $this->BakeTemplate->viewVars['name'],
+            'name' => $this->_name,
             'autoId' => $autoId
         ];
     }
@@ -127,7 +130,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      *
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $parser = parent::getOptionParser();
 

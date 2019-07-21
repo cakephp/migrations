@@ -34,7 +34,7 @@ trait SnapshotTrait
      * @param string $contents Content to put in the file.
      * @return bool Success
      */
-    public function createFile($path, $contents)
+    public function createFile(string $path, string $contents): bool
     {
         $createFile = parent::createFile($path, $contents);
 

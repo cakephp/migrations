@@ -13,6 +13,7 @@ namespace Migrations\Test\Command;
 
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\StringCompareTrait;
@@ -67,7 +68,7 @@ class DumpTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -78,6 +79,9 @@ class DumpTest extends TestCase
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
+        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
+        $this->Connection->execute('DROP TABLE IF EXISTS letters');
     }
 
     /**
@@ -85,12 +89,13 @@ class DumpTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         $this->Connection->getDriver()->setConnection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
+        $this->Connection->execute('DROP TABLE IF EXISTS letters');
         unset($this->Connection, $this->command, $this->streamOutput);
     }
 
@@ -146,8 +151,8 @@ class DumpTest extends TestCase
         $this->assertCount(2, $generatedDump);
         $this->assertArrayHasKey('letters', $generatedDump);
         $this->assertArrayHasKey('numbers', $generatedDump);
-        $this->assertInstanceOf('Cake\Database\Schema\Table', $generatedDump['numbers']);
-        $this->assertInstanceOf('Cake\Database\Schema\Table', $generatedDump['letters']);
+        $this->assertInstanceOf(TableSchema::class, $generatedDump['numbers']);
+        $this->assertInstanceOf(TableSchema::class, $generatedDump['letters']);
         $this->assertEquals(['id', 'number', 'radix'], $generatedDump['numbers']->columns());
         $this->assertEquals(['id', 'letter'], $generatedDump['letters']->columns());
 

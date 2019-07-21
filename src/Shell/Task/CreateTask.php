@@ -13,6 +13,7 @@
  */
 namespace Migrations\Shell\Task;
 
+use Cake\Console\ConsoleOptionParser;
 use Phinx\Console\Command\Create;
 
 /**
@@ -26,7 +27,7 @@ class CreateTask extends CommandTask
     /**
      * {@inheritDoc}
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $parser = parent::getOptionParser();
         $parser

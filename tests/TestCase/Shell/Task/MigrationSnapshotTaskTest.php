@@ -11,7 +11,6 @@
  */
 namespace Migrations\Test\TestCase\Shell\Task;
 
-use Bake\Shell\Task\BakeTemplateTask;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -51,11 +50,14 @@ class MigrationSnapshotTaskTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
         $this->Task = $this->getTaskMock();
+        $this->loadPlugins([
+            'Migrations' => ['boostrap' => true],
+        ]);
     }
 
     /**
@@ -63,7 +65,7 @@ class MigrationSnapshotTaskTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         unset($this->Task);
@@ -95,9 +97,6 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $task->name = 'Migration';
         $task->connection = 'test';
-        $task->BakeTemplate = new BakeTemplateTask($inputOutput);
-        $task->BakeTemplate->initialize();
-        $task->BakeTemplate->interactive = false;
 
         return $task;
     }
@@ -182,7 +181,7 @@ class MigrationSnapshotTaskTest extends TestCase
             ->method('refreshDump');
 
         $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
-        $result = $this->Task->bake($bakeName);
+        $this->Task->bake($bakeName);
     }
 
     /**
@@ -254,6 +253,7 @@ class MigrationSnapshotTaskTest extends TestCase
     public function testFetchTableNames()
     {
         $class = new TestClassWithSnapshotTrait();
+        $class->connection = 'alternative';
         $expected = ['alternative.special_tags'];
         $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
 

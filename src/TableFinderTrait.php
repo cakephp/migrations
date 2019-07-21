@@ -13,7 +13,7 @@ namespace Migrations;
 
 use Cake\Core\App;
 use Cake\Core\Plugin as CorePlugin;
-use Cake\Database\Schema\Collection;
+use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\Folder;
 use Cake\ORM\TableRegistry;
@@ -45,7 +45,7 @@ trait TableFinderTrait
      * @param array $options Array of options passed to a shell call.
      * @return array
      */
-    protected function getTablesToBake(Collection $collection, $options = [])
+    protected function getTablesToBake(CollectionInterface $collection, $options = [])
     {
         $options = array_merge(['require-table' => false, 'plugin' => null], $options);
         $tables = $collection->listTables();

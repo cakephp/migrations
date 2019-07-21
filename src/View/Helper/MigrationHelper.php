@@ -11,7 +11,7 @@
  */
 namespace Migrations\View\Helper;
 
-use Cake\Database\Schema\Table;
+use Cake\Database\Schema\TableSchema;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
@@ -41,6 +41,16 @@ class MigrationHelper extends Helper
     public $tableStatements = [];
 
     public $returnedData = [];
+
+    public function storeReturnedData($table, $columnsList)
+    {
+        $this->returnedData['dropForeignKeys'][$table][] = $columnsList;
+    }
+
+    public function getReturnedData()
+    {
+        return $this->returnedData;
+    }
 
     /**
      * Constructor
@@ -107,10 +117,10 @@ class MigrationHelper extends Helper
     }
 
     /**
-     * Returns the Cake\Database\Schema\Table for $table
+     * Returns the Cake\Database\Schema\TableSchema for $table
      *
      * @param string $table Name of the table to get the Schema for
-     * @return \Cake\Database\Schema\Table
+     * @return \Cake\Database\Schema\TableSchema
      */
     protected function schema($table)
     {
@@ -118,7 +128,7 @@ class MigrationHelper extends Helper
             return $this->schemas[$table];
         }
 
-        if ($table instanceof Table) {
+        if ($table instanceof TableSchema) {
             return $this->schemas[$table->name()] = $table;
         }
 
@@ -138,7 +148,7 @@ class MigrationHelper extends Helper
     public function columns($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof Table)) {
+        if (!($table instanceof TableSchema)) {
             $tableSchema = $this->schema($table);
         }
         $columns = [];
@@ -162,7 +172,7 @@ class MigrationHelper extends Helper
     public function indexes($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof Table)) {
+        if (!($table instanceof TableSchema)) {
             $tableSchema = $this->schema($table);
         }
 
@@ -186,7 +196,7 @@ class MigrationHelper extends Helper
     public function constraints($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof Table)) {
+        if (!($table instanceof TableSchema)) {
             $tableSchema = $this->schema($table);
         }
 
@@ -237,7 +247,7 @@ class MigrationHelper extends Helper
     public function primaryKeys($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof Table)) {
+        if (!($table instanceof TableSchema)) {
             $tableSchema = $this->schema($table);
         }
         $primaryKeys = [];
@@ -262,7 +272,7 @@ class MigrationHelper extends Helper
     {
         foreach ($tables as $table) {
             $tableSchema = $table;
-            if (!($table instanceof Table)) {
+            if (!($table instanceof TableSchema)) {
                 $tableSchema = $this->schema($table);
             }
             $tablePrimaryKeys = $tableSchema->primaryKey();
@@ -296,7 +306,7 @@ class MigrationHelper extends Helper
     /**
      * Returns an array of column data for a single column
      *
-     * @param \Cake\Database\Schema\Table $tableSchema Name of the table to retrieve columns for
+     * @param \Cake\Database\Schema\TableSchema $tableSchema Name of the table to retrieve columns for
      * @param string $column A column to retrieve data for
      * @return array
      */
@@ -396,7 +406,7 @@ class MigrationHelper extends Helper
     public function attributes($table, $column)
     {
         $tableSchema = $table;
-        if (!($table instanceof Table)) {
+        if (!($table instanceof TableSchema)) {
             $tableSchema = $this->schema($table);
         }
         $validOptions = [
@@ -445,12 +455,26 @@ class MigrationHelper extends Helper
      * @param array $options options to use
      * @return string
      */
-    public function stringifyList(array $list, array $options = [])
+    public function stringifyList(array $list, array $options = [], array $wantedOptions = [])
     {
+        if (!empty($wantedOptions)) {
+            $list = array_intersect_key($list, $wantedOptions);
+            if (empty($list['comment'])) {
+                unset($list['comment']);
+            }
+        }
+
         $options += [
             'indent' => 2
         ];
 
+        if (!empty($options['remove'])) {
+            foreach ($options['remove'] as $option) {
+                unset($list[$option]);
+            }
+            unset($options['remove']);
+        }
+        
         if (!$list) {
             return '';
         }
@@ -503,4 +527,84 @@ class MigrationHelper extends Helper
 
         return '';
     }
+
+    public function getTableStatement($table) {
+        if (array_key_exists($table, $this->tableStatements)) {
+            return $this->tableStatements[$table];
+        }
+
+        return null;
+    }
+
+    public function removeTableStatement($table) {
+        unset($this->tableStatements[$table]);
+    }
+
+    public function element($name, $data)
+    {
+        return $this->getView()->element($name, $data);
+    }
+
+    public function extract($list, $path = '{n}.name')
+    {
+        return Hash::extract($list, $path);
+    }
+
+    /**
+     * Get data to use in create tables element
+     *
+     * @param string $table
+     * @return array
+     */
+    public function getCreateTableData($table)
+    {
+        $constraints = $this->constraints($table);
+        $indexes = $this->indexes($table);
+        $foreignKeys = [];
+        foreach ($constraints as $constraint) {
+            if ($constraint['type'] == 'foreign') {
+                $foreignKeys[] = $constraint['columns'];
+            }
+        }
+        $indexes = array_filter($indexes, function($index) use ($foreignKeys) {
+            return !in_array($index['columns'], $foreignKeys);
+        });
+        $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
+
+        return $result;
+    }
+
+    /**
+     * Get data to use inside the create-tables element
+     *
+     * @param array $tables
+     * @return array
+     */
+    public function getCreateTablesElementData($tables)
+    {
+        $result = [
+            'constraints' => [],
+            'tables' => []
+        ];
+        foreach ($tables as $table) {
+            $tableName = $table;
+            if ($table instanceof TableSchema) {
+                $tableName = $table->name();
+            }
+            $data = $this->getCreateTableData($table);
+            $tableConstraintsNoUnique = array_filter(
+                $data['constraints'],
+                function($constraint) {
+                    return $constraint['type'] != 'unique';
+                }
+            );
+            if($tableConstraintsNoUnique) {
+                $result['constraints'][$tableName] =  $data['constraints'];
+            }
+            $result['tables'][$tableName] = $data;
+        }
+
+        return $result;
+    }
+
 }

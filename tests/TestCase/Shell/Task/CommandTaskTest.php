@@ -12,6 +12,7 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Cake\Console\ConsoleIo;
+use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use Migrations\Test\TestCase\Shell\TestCompletionStringOutput;
 
@@ -20,35 +21,17 @@ use Migrations\Test\TestCase\Shell\TestCompletionStringOutput;
  */
 class CommandTaskTest extends TestCase
 {
-
-    /**
-     * Instance of ConsoleOutput
-     *
-     * @var \Cake\Console\ConsoleOutput
-     */
-    public $out;
+    use ConsoleIntegrationTestTrait;
 
     /**
      * setUp method
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
-
-        $this->out = new TestCompletionStringOutput();
-        $io = new ConsoleIo($this->out);
-
-        $this->Shell = $this->getMockBuilder('\Cake\Shell\CompletionShell')
-            ->setMethods(['in', '_stop', 'clear'])
-            ->setConstructorArgs([$io])
-            ->getMock();
-
-        $this->Shell->Command = $this->getMockBuilder('\Cake\Shell\Task\CommandTask')
-            ->setMethods(['in', '_stop', 'clear'])
-            ->setConstructorArgs([$io])
-            ->getMock();
+        $this->useCommandRunner();
     }
 
     /**
@@ -56,7 +39,7 @@ class CommandTaskTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         unset($this->Shell);
@@ -70,10 +53,12 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsSubcommands()
     {
-        $this->Shell->runCommand(['subcommands', 'Migrations.migrations']);
-        $output = $this->out->output;
-        $expected = "create dump mark_migrated migrate rollback status\n";
-        $this->assertTextEquals($expected, $output);
+        $this->exec('completion subcommands migrations.migrations');
+        $expected = [
+            'main create dump mark_migrated migrate rollback status'
+        ];
+        $actual = $this->_out->messages();
+        $this->assertEquals($expected, $actual);
     }
 
     /**
@@ -84,8 +69,9 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsCreate()
     {
-        $this->Shell->runCommand(['options', 'Migrations.migrations', 'create']);
-        $output = $this->out->output;
+        $this->exec('completion options migrations.migrations create');
+        $this->assertCount(1, $this->_out->messages());
+        $output = $this->_out->messages()[0];
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --class -l --connection";
         $expected .= " -c --plugin -p --source -s --template -t";
         $outputExplode = explode(' ', trim($output));
@@ -104,8 +90,9 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsMarkMigrated()
     {
-        $this->Shell->runCommand(['options', 'Migrations.migrations', 'mark_migrated']);
-        $output = $this->out->output;
+        $this->exec('completion options migrations.migrations mark_migrated');
+        $this->assertCount(1, $this->_out->messages());
+        $output = $this->_out->messages()[0];
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
         $expected .= " --exclude -x --only -o --plugin -p --source -s";
         $outputExplode = explode(' ', trim($output));
@@ -124,8 +111,9 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsMigrate()
     {
-        $this->Shell->runCommand(['options', 'Migrations.migrations', 'migrate']);
-        $output = $this->out->output;
+        $this->exec('completion options migrations.migrations migrate');
+        $this->assertCount(1, $this->_out->messages());
+        $output = $this->_out->messages()[0];
         $expected = "--ansi --dry-run -x --fake --help -h --no-ansi --no-interaction";
         $expected .= " -n --no-lock --quiet -q --verbose -v --connection -c --date -d";
         $expected .= " --plugin -p --source -s --target -t";
@@ -145,8 +133,9 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsRollback()
     {
-        $this->Shell->runCommand(['options', 'Migrations.migrations', 'rollback']);
-        $output = $this->out->output;
+        $this->exec('completion options migrations.migrations rollback');
+        $this->assertCount(1, $this->_out->messages());
+        $output = $this->_out->messages()[0];
         $expected = "--ansi --dry-run -x --fake --help -h --no-ansi --no-interaction -n --no-lock";
         $expected .= " --quiet -q --verbose -v --connection -c --date -d --plugin -p --source -s --target -t";
         $outputExplode = explode(' ', trim($output));
@@ -165,8 +154,9 @@ class CommandTaskTest extends TestCase
      */
     public function testMigrationsOptionsStatus()
     {
-        $this->Shell->runCommand(['options', 'Migrations.migrations', 'status']);
-        $output = $this->out->output;
+        $this->exec('completion options migrations.migrations status');
+        $this->assertCount(1, $this->_out->messages());
+        $output = $this->_out->messages()[0];
         $expected = "--ansi --help -h --no-ansi --no-interaction -n --quiet -q --verbose -v --connection -c";
         $expected .= " --format -f --plugin -p --source -s";
         $outputExplode = explode(' ', trim($output));

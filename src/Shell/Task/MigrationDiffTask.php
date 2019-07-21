@@ -14,7 +14,8 @@
 namespace Migrations\Shell\Task;
 
 use Cake\Core\Configure;
-use Cake\Database\Schema\Table;
+use Cake\Console\ConsoleOptionParser;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
@@ -24,7 +25,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 /**
  * Task class for generating migration diff files.
  *
- * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
  * @property \Bake\Shell\Task\TestTask $Test
  */
 class MigrationDiffTask extends SimpleMigrationTask
@@ -68,7 +68,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     protected $tables = [];
 
     /**
-     * Array of \Cake\Database\Schema\Table objects from the dump file which
+     * Array of \Cake\Database\Schema\TableSchema objects from the dump file which
      * represents the state of the database after the last migrate / rollback command
      *
      * @var array
@@ -76,7 +76,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     protected $dumpSchema;
 
     /**
-     * Array of \Cake\Database\Schema\Table objects from the current state of the database
+     * Array of \Cake\Database\Schema\TableSchema objects from the current state of the database
      *
      * @var array
      */
@@ -97,7 +97,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function bake($name)
+    public function bake(string $name): string
     {
         $this->setup();
 
@@ -168,7 +168,7 @@ class MigrationDiffTask extends SimpleMigrationTask
      *
      * @return array
      */
-    public function templateData()
+    public function templateData(): array
     {
         $this->dumpSchema = $this->getDumpSchema();
         $this->currentSchema = $this->getCurrentSchema();
@@ -199,7 +199,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
     /**
      * Calculate the diff between the current state of the database and the schema dump
-     * by returning an array containing the full \Cake\Database\Schema\Table definitions
+     * by returning an array containing the full \Cake\Database\Schema\TableSchema definitions
      * of tables to be created and removed in the diff file.
      *
      * The method directly sets the diff in a property of the class.
@@ -328,7 +328,7 @@ class MigrationDiffTask extends SimpleMigrationTask
                 $this->templateData[$table]['constraints']['add'][$constraintName] =
                     $currentSchema->getConstraint($constraintName);
                 $constraint = $currentSchema->getConstraint($constraintName);
-                if ($constraint['type'] === Table::CONSTRAINT_FOREIGN) {
+                if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
                 } else {
                     $this->templateData[$table]['indexes']['add'][$constraintName] = $constraint;
@@ -354,7 +354,7 @@ class MigrationDiffTask extends SimpleMigrationTask
             $removedConstraints = array_diff($oldConstraints, $currentConstraints);
             foreach ($removedConstraints as $constraintName) {
                 $constraint = $this->dumpSchema[$table]->getConstraint($constraintName);
-                if ($constraint['type'] === Table::CONSTRAINT_FOREIGN) {
+                if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] = $constraint;
                 } else {
                     $this->templateData[$table]['indexes']['remove'][$constraintName] = $constraint;
@@ -534,7 +534,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function template()
+    public function template(): string
     {
         return 'Migrations.config/diff';
     }
@@ -544,7 +544,7 @@ class MigrationDiffTask extends SimpleMigrationTask
      *
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $parser = parent::getOptionParser();
 

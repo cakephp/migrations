@@ -47,7 +47,7 @@ class CacheClearTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         Cache::enable();
@@ -65,7 +65,7 @@ class CacheClearTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         Cache::disable();
@@ -91,7 +91,7 @@ class CacheClearTest extends TestCase
             '--connection' => 'test',
         ]);
 
-        $this->assertFalse(Cache::read('test_blog', '_cake_model_'));
+        $this->assertNull(Cache::read('test_blog', '_cake_model_'));
     }
 
     /**

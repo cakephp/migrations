@@ -13,6 +13,8 @@
  */
 namespace Migrations\Shell\Task;
 
+use Cake\Console\ConsoleOptionParser;
+
 /**
  * This task class is needed in order to provide a correct autocompletion feature
  * when using the CakePHP migrations shell plugin. It has no effect on the
@@ -24,7 +26,7 @@ class MigrateTask extends CommandTask
     /**
      * {@inheritDoc}
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $parser = parent::getOptionParser();
         $parser

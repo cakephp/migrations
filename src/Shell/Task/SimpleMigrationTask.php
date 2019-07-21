@@ -34,7 +34,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function name()
+    public function name(): string
     {
         return 'migration';
     }
@@ -42,7 +42,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function fileName($name)
+    public function fileName($name): string
     {
         $name = $this->getMigrationName($name);
 
@@ -52,7 +52,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function getPath()
+    public function getPath(): string
     {
         $path = ROOT . DS . $this->pathFragment;
         if (isset($this->plugin)) {
@@ -65,7 +65,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function bake($name)
+    public function bake(string $name): string
     {
         $migrationWithSameName = glob($this->getPath() . '*_' . $name . '.php');
         if (!empty($migrationWithSameName)) {
@@ -124,7 +124,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
      *
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $name = ($this->plugin ? $this->plugin . '.' : '') . $this->name;
         $parser = new ConsoleOptionParser($name);

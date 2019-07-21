@@ -11,6 +11,7 @@
  */
 namespace Migrations\Shell;
 
+use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Shell;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -57,7 +58,7 @@ class MigrationsShell extends Shell
      *
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         return parent::getOptionParser()
             ->addOption('plugin', ['short' => 'p'])
@@ -83,7 +84,7 @@ class MigrationsShell extends Shell
      *
      * @return void
      */
-    public function initialize()
+    public function initialize(): void
     {
         if (!defined('PHINX_VERSION')) {
             define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');

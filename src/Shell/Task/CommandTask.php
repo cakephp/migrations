@@ -13,6 +13,7 @@
  */
 namespace Migrations\Shell\Task;
 
+use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Shell;
 
 /**
@@ -26,7 +27,7 @@ class CommandTask extends Shell
     /**
      * {@inheritDoc}
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $parser = parent::getOptionParser();
         $parser

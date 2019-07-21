@@ -18,16 +18,16 @@
         "source": "https://github.com/cakephp/migrations"
     },
     "require": {
-        "php": ">=5.6.0",
-        "robmorgan/phinx": "^0.10.3",
-        "cakephp/orm": "^3.6.0",
-        "cakephp/cache": "^3.6.0"
+        "php": ">=7.2.0",
+        "robmorgan/phinx": "cake4-dev",
+        "cakephp/orm": "4.x-dev",
+        "cakephp/cache": "4.x-dev"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7.14|^6.0",
-        "cakephp/cakephp": "^3.6.0",
-        "cakephp/bake": "^1.7.0",
-        "cakephp/cakephp-codesniffer": "^3.0"
+        "phpunit/phpunit": "^8.0",
+        "cakephp/cakephp": "4.x-dev as 4.0.0",
+        "cakephp/bake": "4.x-dev",
+        "cakephp/cakephp-codesniffer": "dev-next"
     },
     "autoload": {
         "psr-4": {
@@ -51,11 +51,15 @@
     "scripts": {
         "check": [
             "@cs-check",
-            "@test"
+            "@test",
+            "@stan"
         ],
-        "cs-check": "phpcs --colors -p ./src ./tests",
-        "cs-fix": "phpcbf --colors ./src ./tests",
+        "cs-check": "phpcs -p --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
+        "cs-fix": "phpcbf --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
+        "stan": "phpstan analyse src/ && psalm --show-info=false",
+        "psalm": "psalm --show-info=false",
         "test": "phpunit",
+        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:^0.11 vimeo/psalm:^3.0 && mv composer.backup composer.json",
         "test-coverage": "phpunit --coverage-clover=clover.xml"
     }
 }
