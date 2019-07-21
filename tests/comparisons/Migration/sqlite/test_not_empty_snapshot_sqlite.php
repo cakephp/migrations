@@ -50,12 +50,12 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
+                    'product_id',
                 ]
             )
             ->addIndex(
                 [
-                    'product_id',
+                    'category_id',
                 ]
             )
             ->addIndex(
@@ -131,6 +131,20 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
             )
             ->create();
 
+        $this->table('parts')
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+                'signed' => false,
+            ])
+            ->create();
+
         $this->table('products')
             ->addColumn('title', 'string', [
                 'default' => null,
@@ -159,14 +173,14 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'slug',
+                    'category_id',
+                    'id',
                 ],
                 ['unique' => true]
             )
             ->addIndex(
                 [
-                    'category_id',
-                    'id',
+                    'slug',
                 ],
                 ['unique' => true]
             )
@@ -267,21 +281,21 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
 
         $this->table('articles')
             ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
-                [
-                    'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
-                ]
-            )
-            ->addForeignKey(
                 'product_id',
                 'products',
                 'id',
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE'
+                ]
+            )
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'NO_ACTION',
+                    'delete' => 'NO_ACTION'
                 ]
             )
             ->update();
@@ -321,10 +335,10 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
     {
         $this->table('articles')
             ->dropForeignKey(
-                'category_id'
+                'product_id'
             )
             ->dropForeignKey(
-                'product_id'
+                'category_id'
             )->save();
 
         $this->table('orders')
@@ -344,6 +358,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
         $this->table('orders')->drop()->save();
+        $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();
         $this->table('special_pks')->drop()->save();
         $this->table('special_tags')->drop()->save();

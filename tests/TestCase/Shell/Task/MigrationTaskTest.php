@@ -39,12 +39,23 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', 'createFile', 'error'])
+            ->setMethods(['in', 'createFile'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
         $this->Task->name = 'Migration';
         $this->Task->connection = 'test';
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        $createUsers = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        if ($createUsers) {
+            foreach ($createUsers as $file) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -122,7 +133,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'error'])
+            ->setMethods(['in', 'err', 'error'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -143,7 +154,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'abort'])
+            ->setMethods(['in', 'err'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 

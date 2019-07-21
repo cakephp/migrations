@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -12,7 +14,6 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Cake\Core\Plugin;
-use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
@@ -33,10 +34,16 @@ class MigrationSnapshotTaskTest extends TestCase
         'plugin.Migrations.CompositePk',
         'plugin.Migrations.Products',
         'plugin.Migrations.Categories',
+        'plugin.Migrations.Parts',
         'plugin.Migrations.Orders',
         'plugin.Migrations.Articles',
         'plugin.Migrations.Texts',
     ];
+
+    /**
+     * @var string[]
+     */
+    protected $generatedFiles = [];
 
     /**
      * Mock of \Migrations\Shell\Task\MigrationSnapshotTask
@@ -58,6 +65,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->loadPlugins([
             'Migrations' => ['boostrap' => true],
         ]);
+        $this->generatedFiles = [];
     }
 
     /**
@@ -69,6 +77,12 @@ class MigrationSnapshotTaskTest extends TestCase
     {
         parent::tearDown();
         unset($this->Task);
+
+        foreach ($this->generatedFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -83,7 +97,7 @@ class MigrationSnapshotTaskTest extends TestCase
             'dispatchShell',
             'findTables',
             'fetchTableName',
-            'refreshDump'
+            'refreshDump',
         ];
 
         $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
@@ -152,7 +166,8 @@ class MigrationSnapshotTaskTest extends TestCase
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
         $result = $this->Task->bake($bakeName);
 
-        $this->assertNotEmpty(glob($this->Task->getPath() . '*_TestNotEmptySnapshot*.php'));
+        $this->generatedFiles = glob($this->Task->getPath() . '*_TestNotEmptySnapshot*.php');
+        $this->assertNotEmpty($this->generatedFiles);
         $this->assertCorrectSnapshot($bakeName, $result);
     }
 
@@ -182,6 +197,8 @@ class MigrationSnapshotTaskTest extends TestCase
 
         $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
         $this->Task->bake($bakeName);
+
+        $this->generatedFiles = glob($this->Task->getPath() . '*_TestNotEmptySnapshotNoLock*.php');
     }
 
     /**
@@ -199,7 +216,8 @@ class MigrationSnapshotTaskTest extends TestCase
         $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
         $result = $this->Task->bake($bakeName);
 
-        $this->assertNotEmpty(glob($this->Task->getPath() . '*_TestAutoIdDisabledSnapshot*.php'));
+        $this->generatedFiles = glob($this->Task->getPath() . '*_TestAutoIdDisabledSnapshot*.php');
+        $this->assertNotEmpty($this->generatedFiles);
         $this->assertCorrectSnapshot($bakeName, $result);
     }
 
@@ -210,19 +228,7 @@ class MigrationSnapshotTaskTest extends TestCase
      */
     public function testPluginBlog()
     {
-        $db = ConnectionManager::get('test');
-        $table = new TableSchema('parts', [
-            'id' => ['type' => 'integer', 'unsigned' => true],
-            'name' => ['type' => 'string', 'length' => 255],
-            'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true]
-        ]);
-        $table->addConstraint('primary', ['type' => 'primary', 'columns' => ['id']]);
-        $sql = $table->createSql($db);
-        foreach ($sql as $stmt) {
-            $db->execute($stmt);
-        }
-
-        $task = $this->getTaskMock(['in', 'err', 'dispatchShell', '_stop']);
+        $task = $this->getTaskMock(['in', 'err', 'dispatchShell', 'createFile']);
         $task->params['require-table'] = false;
         $task->params['connection'] = 'test';
         $task->params['plugin'] = 'TestBlog';
@@ -232,11 +238,6 @@ class MigrationSnapshotTaskTest extends TestCase
         $result = $task->bake($bakeName);
 
         $this->assertCorrectSnapshot($bakeName, $result);
-
-        $sql = $table->dropSql($db);
-        foreach ($sql as $stmt) {
-            $db->execute($stmt);
-        }
     }
 
     /**
@@ -258,7 +259,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
 
         ConnectionManager::setConfig('alternative', [
-            'database' => 'alternative'
+            'database' => 'alternative',
         ]);
         $class->connection = 'alternative';
         $expected = ['special_tags'];
@@ -266,7 +267,7 @@ class MigrationSnapshotTaskTest extends TestCase
 
         ConnectionManager::drop('alternative');
         ConnectionManager::setConfig('alternative', [
-            'schema' => 'alternative'
+            'schema' => 'alternative',
         ]);
         $class->connection = 'alternative';
         $expected = ['special_tags'];

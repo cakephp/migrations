@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -50,8 +52,8 @@ Configure::write('App', [
     'encoding' => 'UTF-8',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
-        'templates' => [ROOT . 'App' . DS . 'Template' . DS]
-    ]
+        'templates' => [ROOT . 'App' . DS . 'Template' . DS],
+    ],
 ]);
 
 Cake\Cache\Cache::setConfig([
@@ -87,5 +89,5 @@ Plugin::getCollection()->add(new \Bake\Plugin());
 Plugin::getCollection()->add(new \TestBlog\Plugin());
 
 if (!defined('PHINX_VERSION')) {
-    define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
+    define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? '0.4.3' : '@PHINX_VERSION@');
 }

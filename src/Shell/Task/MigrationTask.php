@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -37,6 +39,7 @@ class MigrationTask extends SimpleMigrationTask
             $event->getSubject()->loadHelper('Migrations.Migration');
         });
         $this->_name = $name;
+
         return parent::bake($name);
     }
 
@@ -70,13 +73,13 @@ class MigrationTask extends SimpleMigrationTask
                 'namespace' => $namespace,
                 'tables' => [],
                 'action' => null,
-                'name' => $className
+                'name' => $className,
             ];
         }
 
         $arguments = $this->args;
         unset($arguments[0]);
-        $columnParser = new ColumnParser;
+        $columnParser = new ColumnParser();
         $fields = $columnParser->parseFields($arguments);
         $indexes = $columnParser->parseIndexes($arguments);
         $primaryKey = $columnParser->parsePrimaryKey($arguments);
@@ -85,7 +88,7 @@ class MigrationTask extends SimpleMigrationTask
             $this->abort('Adding a primary key to an already existing table is not supported.');
         }
 
-        list($action, $table) = $action;
+        [$action, $table] = $action;
 
         return [
             'plugin' => $this->plugin,
@@ -96,9 +99,9 @@ class MigrationTask extends SimpleMigrationTask
             'columns' => [
                 'fields' => $fields,
                 'indexes' => $indexes,
-                'primaryKey' => $primaryKey
+                'primaryKey' => $primaryKey,
             ],
-            'name' => $className
+            'name' => $className,
         ];
     }
 
