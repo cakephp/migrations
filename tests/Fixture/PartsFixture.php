@@ -32,7 +32,7 @@ class PartsFixture extends TestFixture
      * @var array
      */
     public $fields = [
-        'id' => ['type' => 'integer', 'unsigned' => true],
+        'id' => ['type' => 'integer'],
         'name' => ['type' => 'string', 'length' => 255],
         'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true],
         '_constraints' => [

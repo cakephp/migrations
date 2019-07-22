@@ -38,7 +38,7 @@
 
         <!-- SQLite
         <env name="DB" value="sqlite"/>
-        <env name="db_dsn" value="sqlite:///:memory:"/>
+        <env name="db_dsn" value="sqlite://127.0.0.1/cakephp_test"/>
         -->
         <!-- Postgres
         <env name="DB" value="postgres"/>

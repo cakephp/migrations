@@ -36,6 +36,11 @@ class MigrationDiffTaskTest extends TestCase
     public $out;
 
     /**
+     * @var string[]
+     */
+    protected $generatedFiles = [];
+
+    /**
      * setup method
      *
      * @return void
@@ -46,6 +51,17 @@ class MigrationDiffTaskTest extends TestCase
         $this->loadPlugins([
             'Migrations' => ['boostrap' => true],
         ]);
+        $this->generatedFiles = [];
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        foreach ($this->generatedFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -159,6 +175,11 @@ class MigrationDiffTaskTest extends TestCase
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
+        $this->generatedFiles = [
+            $destination,
+            $destinationDumpPath,
+        ];
+
         $this->getMigrations()->migrate();
 
         unlink($destination);
@@ -226,9 +247,6 @@ class MigrationDiffTaskTest extends TestCase
         foreach ($table->dropSql($connection) as $stmt) {
             $connection->query($stmt);
         }
-
-        unlink($destinationDumpPath);
-        unlink($destination);
     }
 
     /**
@@ -249,6 +267,11 @@ class MigrationDiffTaskTest extends TestCase
         $destination = $destinationConfigDir . '20160415220805_TheDiffSimple' . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
+
+        $this->generatedFiles = [
+            $destination,
+            $destinationDumpPath,
+        ];
 
         $this->getMigrations('MigrationsDiffSimple')->migrate();
 
@@ -304,8 +327,6 @@ class MigrationDiffTaskTest extends TestCase
             ])
             ->execute();
         $this->getMigrations('MigrationsDiffSimple')->rollback(['target' => 'all']);
-        unlink($destinationDumpPath);
-        unlink($destination);
     }
 
     /**
@@ -326,6 +347,11 @@ class MigrationDiffTaskTest extends TestCase
         $destination = $destinationConfigDir . '20160415220805_TheDiffAddRemove' . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
+
+        $this->generatedFiles = [
+            $destination,
+            $destinationDumpPath,
+        ];
 
         $this->getMigrations('MigrationsDiffAddRemove')->migrate();
 
@@ -381,8 +407,6 @@ class MigrationDiffTaskTest extends TestCase
             ])
             ->execute();
         $this->getMigrations('MigrationsDiffAddRemove')->rollback(['target' => 'all']);
-        unlink($destinationDumpPath);
-        unlink($destination);
     }
 
     /**
