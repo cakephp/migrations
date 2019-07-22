@@ -16,14 +16,26 @@ class ColumnParser
      *
      * @var string
      */
-    protected $regexpParseColumn = '/^(\w*)(?::(\w*\??\[?\d*\]?))?(?::(\w*))?(?::(\w*))?/';
+    protected $regexpParseColumn = '/
+        ^
+        (\w+)
+        (?::(\w+\??
+            (?:\[
+                (?:[0-9]|[1-9][0-9]+)
+                (?:,(?:[0-9]|[1-9][0-9]+))?
+            \])?
+        ))?
+        (?::(\w+))?
+        (?::(\w+))?
+        $
+        /x';
 
     /**
      * Regex used to parse the field type and length
      *
      * @var string
      */
-    protected $regexpParseField = '/(\w+\??)\[(\d+)\]/';
+    protected $regexpParseField = '/(\w+\??)\[([0-9,]+)\]/';
 
     /**
      * Parses a list of arguments into an array of fields
@@ -50,8 +62,7 @@ class ColumnParser
                     $type = 'primary';
                 }
             }
-
-            $nullable = (bool)preg_match('/\w+\?(\[\d+\])?/', $type);
+            $nullable = (bool)strpos($type, '?');
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
             list($type, $length) = $this->getTypeAndLength($field, $type);
@@ -64,7 +75,11 @@ class ColumnParser
             ];
 
             if ($length !== null) {
-                $fields[$field]['options']['limit'] = $length;
+                if (is_array($length)) {
+                    list($fields[$field]['options']['precision'], $fields[$field]['options']['scale']) = $length;
+                } else {
+                    $fields[$field]['options']['limit'] = $length;
+                }
             }
 
             if ($isPrimaryKey === true && $type === 'integer') {
@@ -172,6 +187,10 @@ class ColumnParser
     public function getTypeAndLength($field, $type)
     {
         if (preg_match($this->regexpParseField, $type, $matches)) {
+            if (strpos($matches[2], ',') !== false) {
+                $matches[2] = explode(',', $matches[2]);
+            }
+
             return [$matches[1], $matches[2]];
         }
 
@@ -196,7 +215,6 @@ class ColumnParser
         $validTypes = $collection->filter(function ($value, $constant) {
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
-
         $fieldType = $type;
         if ($type === null || !in_array($type, $validTypes)) {
             if ($type === 'primary') {
@@ -205,6 +223,8 @@ class ColumnParser
                 $fieldType = 'integer';
             } elseif (in_array($field, ['created', 'modified', 'updated']) || substr($field, -3) === '_at') {
                 $fieldType = 'datetime';
+            } elseif (in_array($field, ['latitude', 'longitude'])) {
+                $fieldType = 'decimal';
             } else {
                 $fieldType = 'string';
             }
@@ -228,6 +248,8 @@ class ColumnParser
             $length = 11;
         } elseif ($type === 'biginteger') {
             $length = 20;
+        } elseif ($type === 'decimal') {
+            $length = [10, 6];
         }
 
         return $length;

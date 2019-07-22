@@ -13,7 +13,7 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
-$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement']);
+$wantedOptions = array_flip(['length', 'limit', 'default', 'unsigned', 'null', 'comment', 'autoIncrement', 'precision', 'scale']);
 $tableMethod = $this->Migration->tableMethod($action);
 $columnMethod = $this->Migration->columnMethod($action);
 $indexMethod = $this->Migration->indexMethod($action);
