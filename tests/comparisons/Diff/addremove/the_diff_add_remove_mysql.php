@@ -35,4 +35,3 @@ class TheDiffAddRemoveMysql extends AbstractMigration
             ->update();
     }
 }
-

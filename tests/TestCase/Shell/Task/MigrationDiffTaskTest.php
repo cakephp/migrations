@@ -52,6 +52,7 @@ class MigrationDiffTaskTest extends TestCase
             'Migrations' => ['boostrap' => true],
         ]);
         $this->generatedFiles = [];
+        $this->cleanupDatabase();
     }
 
     public function tearDown(): void
@@ -64,6 +65,13 @@ class MigrationDiffTaskTest extends TestCase
         }
     }
 
+    protected function cleanupDatabase()
+    {
+        $connection = ConnectionManager::get('test');
+        $connection->execute('DROP TABLE IF EXISTS articles');
+        $connection->execute('DROP TABLE IF EXISTS categories');
+    }
+
     /**
      * Returns a MigrationSnapshotTask mock object properly configured
      *
@@ -72,7 +80,7 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function getTaskMock($mockedMethods = [])
     {
-        $mockedMethods = $mockedMethods ?: ['in', 'dispatchShell', '_stop'];
+        $mockedMethods = $mockedMethods ?: ['in', 'dispatchShell'];
 
         $this->out = new TestCompletionStringOutput();
         $io = new ConsoleIo($this->out, $this->out);

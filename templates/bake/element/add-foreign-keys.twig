@@ -18,6 +18,7 @@
 {%             set statement = Migration.tableStatement(table) %}
 {%         endif %}
 {%         if statement is not empty %}
+
         {{ statement | raw }}
 {%             set statement = null %}
 {%         endif %}
@@ -34,4 +35,4 @@
 {% endfor %}
 {% if Migration.getTableStatement(table) != null and hasProcessedConstraint %}
             ->update();
-{% endif %}
+{% endif -%}
