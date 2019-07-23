@@ -35,9 +35,6 @@ matrix:
       env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test' db_dsn_compare='postgres://postgres@127.0.0.1/cakephp_comparisons'
 
     - php: 7.2
-      env: DB=pgsql db_dsn='postgres://postgres@127.0.0.1/cakephp_test' db_dsn_compare='postgres://postgres@127.0.0.1/cakephp_comparisons'
-
-    - php: 7.2
       env: PREFER_LOWEST=1
 
     - php: 7.3
