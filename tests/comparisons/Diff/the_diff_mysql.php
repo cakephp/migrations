@@ -51,7 +51,6 @@ class TheDiffMysql extends AbstractMigration
             )
             ->create();
 
-
         $this->table('categories')
             ->addForeignKey(
                 'user_id',

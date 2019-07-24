@@ -94,23 +94,24 @@ not empty %}
 {%            endif -%}
 {%            if Migration.getTableStatement(tableName) != null %}
             ->update();
-{%            endif %}
-{%        endif %}
-{%    endfor %}
-{%    for tableName, tableDiff in data  %}
-{%        if tableDiff['constraints']['add'] is not empty %}
+{%            endif -%}
+{%        endif -%}
+{%    endfor -%}
+{%    for tableName, tableDiff in data -%}
+{%        if tableDiff['constraints']['add'] is not empty -%}
+
 {{ Migration.element(
                 'Migrations.add-foreign-keys',
                 {'constraints': tableDiff['constraints']['add'], 'table': tableName}
             ) | raw -}}
-{%        endif %}
-{%    endfor %}
-{%        if tables['remove'] is not empty %}
-{%            for tableName, table in tables['remove']  %}
+{%        endif -%}
+{%    endfor -%}
+{%    if tables['remove'] is not empty %}
+{%       for tableName, table in tables['remove'] %}
 
         $this->table('{{ tableName }}')->drop()->save();
-{%            endfor %}
-{%        endif %}
+{%        endfor %}
+{%     endif %}
     }
 
     public function down()
