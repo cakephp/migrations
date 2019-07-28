@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -24,14 +26,12 @@ use Migrations\MigrationsDispatcher;
 use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
-use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * DumpTest class
  */
 class DumpTest extends TestCase
 {
-
     use StringCompareTrait;
 
     /**
@@ -64,6 +64,11 @@ class DumpTest extends TestCase
     protected $streamOutput;
 
     /**
+     * @var string
+     */
+    protected $dumpfile = '';
+
+    /**
      * setup method
      *
      * @return void
@@ -79,9 +84,13 @@ class DumpTest extends TestCase
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
+
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
+        $this->Connection->execute('DROP TABLE IF EXISTS parts');
+
+        $this->dumpfile = ROOT . 'config/TestsMigrations/schema-dump-test.lock';
     }
 
     /**
@@ -96,6 +105,7 @@ class DumpTest extends TestCase
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
+        $this->Connection->execute('DROP TABLE IF EXISTS parts');
         unset($this->Connection, $this->command, $this->streamOutput);
     }
 
@@ -108,18 +118,16 @@ class DumpTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
 
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
-
-        $dumpPath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
-        $this->assertEquals(serialize([]), file_get_contents($dumpPath));
+        $this->assertEquals(serialize([]), file_get_contents($this->dumpfile));
     }
 
     /**
@@ -131,7 +139,7 @@ class DumpTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -140,13 +148,11 @@ class DumpTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
-        $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
-        $this->assertTrue(file_exists($dumpFilePath));
-
-        $generatedDump = unserialize(file_get_contents($dumpFilePath));
+        $this->assertFileExists($this->dumpfile);
+        $generatedDump = unserialize(file_get_contents($this->dumpfile));
 
         $this->assertCount(2, $generatedDump);
         $this->assertArrayHasKey('letters', $generatedDump);
@@ -198,7 +204,7 @@ class DumpTest extends TestCase
     {
         $params = [
             'connection' => 'test',
-            'source' => 'TestsMigrations'
+            'source' => 'TestsMigrations',
         ];
         $migrations = new Migrations($params);
         $adapter = $migrations

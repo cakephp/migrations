@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -37,12 +39,23 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', 'createFile', '_stop', 'abort', 'error'])
+            ->setMethods(['in', 'createFile'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
         $this->Task->name = 'Migration';
         $this->Task->connection = 'test';
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        $createUsers = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        if ($createUsers) {
+            foreach ($createUsers as $file) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -65,7 +78,7 @@ class MigrationTaskTest extends TestCase
     {
         $this->Task->args = [
             'create_users',
-            'name'
+            'name',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
@@ -74,7 +87,7 @@ class MigrationTaskTest extends TestCase
             'create_users',
             'name',
             'created',
-            'modified'
+            'modified',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'Datetime.php', $result);
@@ -84,7 +97,7 @@ class MigrationTaskTest extends TestCase
             'id:integer:primary_key',
             'name',
             'created',
-            'modified'
+            'modified',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKey.php', $result);
@@ -94,7 +107,7 @@ class MigrationTaskTest extends TestCase
             'id:uuid:primary_key',
             'name',
             'created',
-            'modified'
+            'modified',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKeyUuid.php', $result);
@@ -102,7 +115,7 @@ class MigrationTaskTest extends TestCase
         $this->Task->args = [
             'create_users',
             'name:string[128]',
-            'counter:integer[8]'
+            'counter:integer[8]',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'FieldLength.php', $result);
@@ -120,7 +133,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'error'])
+            ->setMethods(['in', 'err', 'error'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -141,7 +154,7 @@ class MigrationTaskTest extends TestCase
             ->getMock();
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', '_stop', 'abort'])
+            ->setMethods(['in', 'err'])
             ->setConstructorArgs([$inputOutput])
             ->getMock();
 
@@ -168,19 +181,29 @@ class MigrationTaskTest extends TestCase
      */
     public function testAddPrimaryKeyToExistingTable()
     {
-        $this->Task->expects($this->any())
-            ->method('abort');
-
         $this->Task->args = [
             'add_pk_to_users',
-            'somefield:primary_key'
+            'somefield:primary_key',
         ];
+        $this->expectException(StopException::class);
+        $this->expectExceptionMessage('Adding a primary key to an already existing table is not supported.');
         $this->Task->bake('AddPkToUsers');
+    }
 
+    /**
+     * Test that adding a field or altering a table with a primary
+     * key will error out
+     *
+     * @return void
+     */
+    public function testAddPrimaryKeyToExistingUsersTable()
+    {
         $this->Task->args = [
             'alter_users',
-            'somefield:primary_key'
+            'somefield:primary_key',
         ];
+        $this->expectException(StopException::class);
+        $this->expectExceptionMessage('Adding a primary key to an already existing table is not supported.');
         $this->Task->bake('AlterUsers');
     }
 

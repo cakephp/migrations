@@ -14,6 +14,7 @@ error.log
 /tests/test_app/config/Migrations/*
 /tests/test_app/config/TestsMigrations/schema-dump-test.lock
 /tests/test_app/Plugin/TestBlog/config/Migrations/*
+.phpunit.result.cache
 
 # IDE and editor specific files #
 #################################

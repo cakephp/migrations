@@ -3,20 +3,10 @@ use Migrations\AbstractMigration;
 
 class TestPluginBlog extends AbstractMigration
 {
-
-    public $autoId = false;
-
     public function up()
     {
 
         $this->table('articles')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => 11,
-                'null' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
                 'default' => null,
@@ -77,13 +67,6 @@ class TestPluginBlog extends AbstractMigration
             ->create();
 
         $this->table('categories')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => 11,
-                'null' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
@@ -118,14 +101,6 @@ class TestPluginBlog extends AbstractMigration
             ->create();
 
         $this->table('parts')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => 10,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 255,

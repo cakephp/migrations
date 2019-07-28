@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -12,6 +14,7 @@
 namespace Migrations\Test\TestCase\Shell\Task;
 
 use Cake\Console\ConsoleIo;
+use Cake\Console\Exception\StopException;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -33,6 +36,11 @@ class MigrationDiffTaskTest extends TestCase
     public $out;
 
     /**
+     * @var string[]
+     */
+    protected $generatedFiles = [];
+
+    /**
      * setup method
      *
      * @return void
@@ -43,6 +51,25 @@ class MigrationDiffTaskTest extends TestCase
         $this->loadPlugins([
             'Migrations' => ['boostrap' => true],
         ]);
+        $this->generatedFiles = [];
+        $this->cleanupDatabase();
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        foreach ($this->generatedFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+    }
+
+    protected function cleanupDatabase()
+    {
+        $connection = ConnectionManager::get('test');
+        $connection->execute('DROP TABLE IF EXISTS articles');
+        $connection->execute('DROP TABLE IF EXISTS categories');
     }
 
     /**
@@ -53,10 +80,10 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function getTaskMock($mockedMethods = [])
     {
-        $mockedMethods = $mockedMethods ?: ['in', 'err', 'dispatchShell', '_stop'];
+        $mockedMethods = $mockedMethods ?: ['in', 'dispatchShell'];
 
         $this->out = new TestCompletionStringOutput();
-        $io = new ConsoleIo($this->out);
+        $io = new ConsoleIo($this->out, $this->out);
 
         $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationDiffTask')
             ->setMethods($mockedMethods)
@@ -76,16 +103,15 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function testHistoryNotInSync()
     {
-        $this->Task = $this->getTaskMock(['abort']);
+        $this->Task = $this->getTaskMock();
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
 
         $expectedMessage = 'Your migrations history is not in sync with your migrations files. ' .
             'Make sure all your migrations have been migrated before baking a diff.';
-        $this->Task->expects($this->any())
-            ->method('abort')
-            ->with($expectedMessage);
 
+        $this->expectException(StopException::class);
+        $this->expectExceptionMessage($expectedMessage);
         $this->Task->bake('NotInSync');
     }
 
@@ -97,7 +123,7 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function testEmptyHistoryNoMigrations()
     {
-        $this->Task = $this->getTaskMock(['abort', 'dispatchShell']);
+        $this->Task = $this->getTaskMock(['dispatchShell']);
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'Blog';
@@ -106,7 +132,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->expects($this->once())
             ->method('dispatchShell')
             ->with([
-                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog'
+                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog',
             ]);
 
         $this->Task->bake('EmptyHistoryNoMigrations');
@@ -121,7 +147,7 @@ class MigrationDiffTaskTest extends TestCase
      */
     public function testEmptyHistoryNoMigrationsError()
     {
-        $this->Task = $this->getTaskMock(['abort', 'dispatchShell']);
+        $this->Task = $this->getTaskMock();
         $this->Task->params['require-table'] = false;
         $this->Task->params['connection'] = 'test';
         $this->Task->params['plugin'] = 'Blog';
@@ -130,14 +156,12 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->expects($this->once())
             ->method('dispatchShell')
             ->with([
-                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog'
+                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog',
             ])
             ->will($this->returnValue(1));
 
-        $this->Task->expects($this->any())
-            ->method('abort')
-            ->with('Something went wrong during the snapshot baking. Please try again.');
-
+        $this->expectException(StopException::class);
+        $this->expectExceptionMessage('Something went wrong during the snapshot baking. Please try again.');
         $this->Task->bake('EmptyHistoryNoMigrations');
     }
 
@@ -159,6 +183,11 @@ class MigrationDiffTaskTest extends TestCase
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
+        $this->generatedFiles = [
+            $destination,
+            $destinationDumpPath,
+        ];
+
         $this->getMigrations()->migrate();
 
         unlink($destination);
@@ -173,7 +202,7 @@ class MigrationDiffTaskTest extends TestCase
         // Create a _phinxlog table to make sure it's not included in the dump
         $table = (new TableSchema('articles_phinxlog'))->addColumn('title', [
             'type' => 'string',
-            'length' => 255
+            'length' => 255,
         ]);
         foreach ($table->createSql($connection) as $stmt) {
             $connection->query($stmt);
@@ -226,9 +255,6 @@ class MigrationDiffTaskTest extends TestCase
         foreach ($table->dropSql($connection) as $stmt) {
             $connection->query($stmt);
         }
-
-        unlink($destinationDumpPath);
-        unlink($destination);
     }
 
     /**
@@ -249,6 +275,11 @@ class MigrationDiffTaskTest extends TestCase
         $destination = $destinationConfigDir . '20160415220805_TheDiffSimple' . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
+
+        $this->generatedFiles = [
+            $destination,
+            $destinationDumpPath,
+        ];
 
         $this->getMigrations('MigrationsDiffSimple')->migrate();
 
@@ -304,8 +335,6 @@ class MigrationDiffTaskTest extends TestCase
             ])
             ->execute();
         $this->getMigrations('MigrationsDiffSimple')->rollback(['target' => 'all']);
-        unlink($destinationDumpPath);
-        unlink($destination);
     }
 
     /**
@@ -326,6 +355,11 @@ class MigrationDiffTaskTest extends TestCase
         $destination = $destinationConfigDir . '20160415220805_TheDiffAddRemove' . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
+
+        $this->generatedFiles = [
+            $destination,
+            $destinationDumpPath,
+        ];
 
         $this->getMigrations('MigrationsDiffAddRemove')->migrate();
 
@@ -381,8 +415,6 @@ class MigrationDiffTaskTest extends TestCase
             ])
             ->execute();
         $this->getMigrations('MigrationsDiffAddRemove')->rollback(['target' => 'all']);
-        unlink($destinationDumpPath);
-        unlink($destination);
     }
 
     /**
@@ -409,7 +441,7 @@ class MigrationDiffTaskTest extends TestCase
     {
         $params = [
             'connection' => 'test_comparisons',
-            'source' => $source
+            'source' => $source,
         ];
         $migrations = new Migrations($params);
 

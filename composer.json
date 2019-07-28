@@ -19,7 +19,7 @@
     },
     "require": {
         "php": ">=7.2.0",
-        "robmorgan/phinx": "cake4-dev",
+        "robmorgan/phinx": "0.11.x-dev",
         "cakephp/orm": "4.x-dev",
         "cakephp/cache": "4.x-dev"
     },

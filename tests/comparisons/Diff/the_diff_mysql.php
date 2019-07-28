@@ -205,4 +205,3 @@ class TheDiffMysql extends AbstractMigration
         $this->table('categories')->drop()->save();
     }
 }
-

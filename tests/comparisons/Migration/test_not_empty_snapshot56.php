@@ -132,6 +132,20 @@ class TestNotEmptySnapshot56 extends AbstractMigration
             )
             ->create();
 
+        $this->table('parts')
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+                'signed' => false,
+            ])
+            ->create();
+
         $this->table('products')
             ->addColumn('title', 'string', [
                 'default' => null,
@@ -346,6 +360,7 @@ class TestNotEmptySnapshot56 extends AbstractMigration
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
         $this->table('orders')->drop()->save();
+        $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();
         $this->table('special_pks')->drop()->save();
         $this->table('special_tags')->drop()->save();

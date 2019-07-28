@@ -6,5 +6,5 @@
             ->addColumn('{{ columnName }}', '{{ type }}', [{{ columnAttributes | raw }}])
 {%     else %}
             ->addColumn('{{ columnName }}', '{{ type }}')
-{%     endif %}
-{% endfor %}
+{%     endif -%}
+{% endfor -%}
