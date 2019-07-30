@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -20,7 +22,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 trait UtilTrait
 {
-
     /**
      * Get the plugin name based on the current InputInterface
      *
@@ -33,6 +34,7 @@ trait UtilTrait
 
         return $plugin;
     }
+
     /**
      * Get the phinx table name used to store migrations data
      *

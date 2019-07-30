@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -21,7 +23,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MarkMigrated extends AbstractCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait;
 
@@ -36,7 +37,7 @@ class MarkMigrated extends AbstractCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output The output object.
      * @return mixed
      */
-    public function output(OutputInterface $output = null)
+    public function output(?OutputInterface $output = null)
     {
         if ($output !== null) {
             $this->output = $output;

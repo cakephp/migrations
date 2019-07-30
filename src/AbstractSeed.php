@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -12,7 +14,6 @@
 namespace Migrations;
 
 use Migrations\Command\Seed;
-use Phinx\Migration\Manager;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +25,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 abstract class AbstractSeed extends BaseAbstractSeed
 {
-
     /**
      * InputInterface this Seed class is being used with.
      *
@@ -71,12 +71,12 @@ abstract class AbstractSeed extends BaseAbstractSeed
      */
     protected function runCall($seeder)
     {
-        list($pluginName, $seeder) = pluginSplit($seeder);
+        [$pluginName, $seeder] = pluginSplit($seeder);
 
         $argv = [
             'seed',
             '--seed',
-            $seeder
+            $seeder,
         ];
 
         $plugin = $pluginName ?: $this->input->getOption('plugin');
@@ -103,7 +103,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
         $config = $seedCommand->getConfig();
 
         $seedPaths = $config->getSeedPaths();
-        require_once(array_pop($seedPaths) . DS . $seeder . '.php');
+        require_once array_pop($seedPaths) . DS . $seeder . '.php';
         $seeder = new $seeder();
         $seeder->setOutput($this->getOutput());
         $seeder->setAdapter($this->getAdapter());
@@ -114,7 +114,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
     /**
      * Sets the InputInterface this Seed class is being used with.
      *
-     * @param InputInterface $input Input object.
+     * @param \Symfony\Component\Console\Input\InputInterface $input Input object.
      * @return void
      */
     public function setInput(InputInterface $input)

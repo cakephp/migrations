@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -109,7 +111,7 @@ class SeedTask extends SimpleBakeTask
                 $query->limit($limit);
             }
 
-            $records = $connection->execute($query)->fetchAll('assoc');
+            $records = $connection->execute($query->sql())->fetchAll('assoc');
             $records = $this->prettifyArray($records);
         }
 
@@ -154,32 +156,32 @@ class SeedTask extends SimpleBakeTask
             'Bake seed class.'
         )->addOption('plugin', [
             'short' => 'p',
-            'help' => 'Plugin to bake into.'
+            'help' => 'Plugin to bake into.',
         ])->addOption('force', [
             'short' => 'f',
             'boolean' => true,
-            'help' => 'Force overwriting existing files without prompting.'
+            'help' => 'Force overwriting existing files without prompting.',
         ])->addOption('connection', [
             'short' => 'c',
             'default' => 'default',
-            'help' => 'The datasource connection to get data from.'
+            'help' => 'The datasource connection to get data from.',
         ])->addOption('table', [
-            'help' => 'The database table to use.'
+            'help' => 'The database table to use.',
         ])->addOption('theme', [
             'short' => 't',
             'help' => 'The theme to use when baking code.',
-            'choices' => $bakeThemes
+            'choices' => $bakeThemes,
         ])->addArgument('name', [
-            'help' => 'Name of the seed to bake. Can use Plugin.name to bake plugin models.'
+            'help' => 'Name of the seed to bake. Can use Plugin.name to bake plugin models.',
         ])->addOption('data', [
             'boolean' => true,
-            'help' => 'Include data from the table to the seed'
+            'help' => 'Include data from the table to the seed',
         ])->addOption('fields', [
             'default' => '*',
             'help' => 'If including data, comma separated list of fields to select (all fields by default)',
         ])->addOption('limit', [
             'short' => 'l',
-            'help' => 'If including data, max number of rows to select'
+            'help' => 'If including data, max number of rows to select',
         ]);
 
         return $parser;

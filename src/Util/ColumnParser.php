@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\Util;
 
 use Cake\Collection\Collection;
@@ -10,7 +12,6 @@ use ReflectionClass;
  */
 class ColumnParser
 {
-
     /**
      * Regex used to parse the column definition passed through the shell
      *
@@ -38,7 +39,7 @@ class ColumnParser
         foreach ($arguments as $field) {
             preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
-            $type = Hash::get($matches, 2);
+            $type = Hash::get($matches, 2, '');
             $indexType = Hash::get($matches, 3);
 
             $typeIsPk = in_array($type, ['primary', 'primary_key']);
@@ -54,13 +55,13 @@ class ColumnParser
             $nullable = (bool)preg_match('/\w+\?(\[\d+\])?/', $type);
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
-            list($type, $length) = $this->getTypeAndLength($field, $type);
+            [$type, $length] = $this->getTypeAndLength($field, $type);
             $fields[$field] = [
                 'columnType' => $type,
                 'options' => [
                     'null' => $nullable,
                     'default' => null,
-                ]
+                ],
             ];
 
             if ($length !== null) {
@@ -157,7 +158,7 @@ class ColumnParser
         $collection = new Collection($arguments);
 
         return $collection->filter(function ($value, $field) {
-            return preg_match($this->regexpParseColumn, $field);
+            return preg_match($this->regexpParseColumn, (string)$field);
         })->toArray();
     }
 
@@ -171,7 +172,7 @@ class ColumnParser
      */
     public function getTypeAndLength($field, $type)
     {
-        if (preg_match($this->regexpParseField, $type, $matches)) {
+        if ($type && preg_match($this->regexpParseField, $type, $matches)) {
             return [$matches[1], $matches[2]];
         }
 

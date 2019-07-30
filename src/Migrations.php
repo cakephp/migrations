@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -26,7 +28,6 @@ use Symfony\Component\Console\Output\NullOutput;
  */
 class Migrations
 {
-
     use ConfigurationTrait;
 
     /**
@@ -239,7 +240,7 @@ class Migrations
         $params = [
             array_pop($migrationPaths),
             $this->getManager()->getVersionsToMark($input),
-            $this->output
+            $this->output,
         ];
 
         $this->run('markVersionsAsMigrated', $params, $input);

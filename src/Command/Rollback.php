@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -20,7 +22,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Rollback extends RollbackCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait {
         execute as parentExecute;

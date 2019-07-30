@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -15,7 +17,6 @@ use Phinx\Migration\AbstractMigration as BaseAbstractMigration;
 
 class AbstractMigration extends BaseAbstractMigration
 {
-
     /**
      * Whether the tables created in this migration
      * should auto-create an `id` field or not

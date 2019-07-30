@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -20,7 +22,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 trait CommandTrait
 {
-
     /**
      * Overrides the action execute method in order to vanish the idea of environments
      * from phinx. CakePHP does not believe in the idea of having in-app environments

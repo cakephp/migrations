@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -22,7 +24,6 @@ use Cake\Console\ConsoleOptionParser;
  */
 class StatusTask extends CommandTask
 {
-
     /**
      * {@inheritDoc}
      */
@@ -32,7 +33,7 @@ class StatusTask extends CommandTask
         $parser->addOption('format', [
             'short' => 'f',
             'help' => 'The output format: text or json. Defaults to text.',
-            'required' => false
+            'required' => false,
         ]);
 
         return $parser;

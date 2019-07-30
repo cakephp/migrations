@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -22,7 +24,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends CreateCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait {
         execute as parentExecute;
@@ -76,7 +77,7 @@ class Create extends CreateCommand
         $migrationPaths = $this->getConfig()->getMigrationPaths();
         $migrationPath = array_pop($migrationPaths) . DS;
         $name = $input->getArgument('name');
-        list($phinxTimestamp, $phinxName) = explode('_', Util::mapClassNameToFileName($name), 2);
+        [$phinxTimestamp, $phinxName] = explode('_', Util::mapClassNameToFileName($name), 2);
         $migrationFilename = glob($migrationPath . '*' . $phinxName);
 
         if (empty($migrationFilename)) {

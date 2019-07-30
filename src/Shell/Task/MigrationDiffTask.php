@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -13,7 +15,6 @@
  */
 namespace Migrations\Shell\Task;
 
-use Cake\Core\Configure;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -115,7 +116,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
             $event->getSubject()->loadHelper('Migrations.Migration', [
-                'collection' => $collection
+                'collection' => $collection,
             ]);
         });
 
@@ -210,7 +211,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     {
         $this->templateData['fullTables'] = [
             'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
-            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema)
+            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema),
         ];
     }
 
@@ -445,7 +446,7 @@ class MigrationDiffTask extends SimpleMigrationTask
      * there are no migration files.
      *
      * @param string $name Name.
-     * @return int Value of the snapshot baking dispatch process
+     * @return string Value of the snapshot baking dispatch process
      */
     protected function bakeSnapshot($name)
     {
@@ -461,14 +462,14 @@ class MigrationDiffTask extends SimpleMigrationTask
         }
 
         $dispatch = $this->dispatchShell([
-            'command' => $dispatchCommand
+            'command' => $dispatchCommand,
         ]);
 
         if ($dispatch === 1) {
             $this->abort('Something went wrong during the snapshot baking. Please try again.');
         }
 
-        return $dispatch;
+        return (string)$dispatch;
     }
 
     /**
@@ -550,7 +551,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
         $parser->addArgument('name', [
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
-            'required' => true
+            'required' => true,
         ]);
 
         return $parser;

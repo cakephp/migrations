@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -31,7 +33,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
  */
 class MigrationsShell extends Shell
 {
-
     /**
      * {@inheritDoc}
      */
@@ -41,7 +42,7 @@ class MigrationsShell extends Shell
         'Migrations.MarkMigrated',
         'Migrations.Migrate',
         'Migrations.Rollback',
-        'Migrations.Status'
+        'Migrations.Status',
     ];
 
     /**
@@ -87,7 +88,7 @@ class MigrationsShell extends Shell
     public function initialize(): void
     {
         if (!defined('PHINX_VERSION')) {
-            define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
+            define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? '0.4.3' : '@PHINX_VERSION@');
         }
         parent::initialize();
     }

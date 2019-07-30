@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -17,7 +19,6 @@ use Phinx\Db\Table as BaseTable;
 
 class Table extends BaseTable
 {
-
     /**
      * Primary key for this table.
      * Can either be a string or an array in case of composite
@@ -31,7 +32,7 @@ class Table extends BaseTable
      * Add a primary key to a database table.
      *
      * @param string|array $columns Table Column(s)
-     * @return Table
+     * @return \Migrations\Table
      */
     public function addPrimaryKey($columns)
     {

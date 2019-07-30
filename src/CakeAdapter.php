@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -16,13 +18,6 @@ use Cake\Database\Driver\Postgres;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\AdapterWrapper;
-use Phinx\Db\Table as PhinxTable;
-use Phinx\Db\Table\Column;
-use Phinx\Db\Table\ForeignKey;
-use Phinx\Db\Table\Index;
-use Phinx\Migration\MigrationInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Decorates an AdapterInterface in order to proxy some method to the actual
@@ -30,7 +25,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CakeAdapter extends AdapterWrapper
 {
-
     /**
      * Database connection
      *
@@ -44,7 +38,7 @@ class CakeAdapter extends AdapterWrapper
      * @param \Phinx\Db\Adapter\AdapterInterface $adapter The original adapter to decorate.
      * @param \Cake\Database\Connection|null $connection The connection to actually use.
      */
-    public function __construct(AdapterInterface $adapter, Connection $connection = null)
+    public function __construct(AdapterInterface $adapter, ?Connection $connection = null)
     {
         if ($connection === null) {
             throw new \InvalidArgumentException("The cake connection cannot be null");
