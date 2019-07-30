@@ -21,7 +21,6 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class UsersFixture extends TestFixture
 {
-
     /**
      * fields property
      *
@@ -33,7 +32,7 @@ class UsersFixture extends TestFixture
         'password' => ['type' => 'string', 'null' => true, 'length' => 256],
         'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         'updated' => ['type' => 'timestamp', 'null' => true, 'default' => null],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]]
+        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
     ];
 
     /**
@@ -46,25 +45,25 @@ class UsersFixture extends TestFixture
             'username' => 'mariano',
             'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             'created' => '2007-03-17 01:16:23',
-            'updated' => '2007-03-17 01:18:31'
+            'updated' => '2007-03-17 01:18:31',
         ],
         [
             'username' => 'nate',
             'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             'created' => '2008-03-17 01:18:23',
-            'updated' => '2008-03-17 01:20:31'
+            'updated' => '2008-03-17 01:20:31',
         ],
         [
             'username' => 'larry',
             'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             'created' => '2010-05-10 01:20:23',
-            'updated' => '2010-05-10 01:22:31'
+            'updated' => '2010-05-10 01:22:31',
         ],
         [
             'username' => 'garrett',
             'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
             'created' => '2012-06-10 01:22:23',
-            'updated' => '2012-06-12 01:24:31'
+            'updated' => '2012-06-12 01:24:31',
         ],
     ];
 }

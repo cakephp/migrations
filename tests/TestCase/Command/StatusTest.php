@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -25,7 +27,6 @@ use Symfony\Component\Console\Output\StreamOutput;
  */
 class StatusTest extends TestCase
 {
-
     /**
      * Instance of a Symfony Command object
      *
@@ -105,7 +106,7 @@ class StatusTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -126,7 +127,7 @@ class StatusTest extends TestCase
         $params = [
             '--connection' => 'test',
             '--source' => 'TestsMigrations',
-            '--format' => 'json'
+            '--format' => 'json',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -148,7 +149,7 @@ class StatusTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -156,7 +157,7 @@ class StatusTest extends TestCase
 
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -178,7 +179,7 @@ class StatusTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -192,7 +193,7 @@ class StatusTest extends TestCase
 
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -244,7 +245,7 @@ class StatusTest extends TestCase
     {
         $params = [
             'connection' => 'test',
-            'source' => 'TestsMigrations'
+            'source' => 'TestsMigrations',
         ];
         $migrations = new Migrations($params);
 

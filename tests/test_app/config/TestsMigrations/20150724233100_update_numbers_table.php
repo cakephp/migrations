@@ -1,9 +1,9 @@
 <?php
+
 use Migrations\AbstractMigration;
 
 class UpdateNumbersTable extends AbstractMigration
 {
-
     public function up()
     {
         $table = $this->table('numbers');

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -11,10 +13,8 @@
  */
 namespace Migrations\Test\TestCase\Shell\Task;
 
-use Cake\Console\ConsoleIo;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
-use Migrations\Test\TestCase\Shell\TestCompletionStringOutput;
 
 /**
  * Class CommandTaskTest
@@ -55,7 +55,7 @@ class CommandTaskTest extends TestCase
     {
         $this->exec('completion subcommands migrations.migrations');
         $expected = [
-            'main create dump mark_migrated migrate rollback status'
+            'main create dump mark_migrated migrate rollback status',
         ];
         $actual = $this->_out->messages();
         $this->assertEquals($expected, $actual);

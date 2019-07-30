@@ -1,4 +1,5 @@
 <?php
+
 use Migrations\AbstractSeed;
 
 /**
@@ -18,11 +19,11 @@ class PluginSubLettersSeed extends AbstractSeed
     {
         $data = [
             [
-                'letter' => 'e'
+                'letter' => 'e',
             ],
             [
-                'letter' => 'f'
-            ]
+                'letter' => 'f',
+            ],
         ];
 
         $table = $this->table('letters');

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\PHPStan;
 
 use PHPStan\Reflection\ClassReflection;
@@ -7,10 +9,14 @@ use PHPStan\Type\Type;
 
 class BakeTemplatePropertyReflection implements PropertyReflection
 {
-    /** @var \PHPStan\Reflection\ClassReflection */
+    /**
+     * @var \PHPStan\Reflection\ClassReflection
+     */
     private $declaringClass;
 
-    /** @var \PHPStan\Type\Type */
+    /**
+     * @var \PHPStan\Type\Type
+     */
     private $type;
 
     public function __construct(
@@ -20,6 +26,7 @@ class BakeTemplatePropertyReflection implements PropertyReflection
         $this->declaringClass = $declaringClass;
         $this->type = $type;
     }
+
     public function getDeclaringClass(): ClassReflection
     {
         return $this->declaringClass;

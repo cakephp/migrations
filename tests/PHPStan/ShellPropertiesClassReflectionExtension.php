@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\PHPStan;
 
 use Bake\Shell\Task\SimpleBakeTask;
@@ -6,11 +8,9 @@ use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertiesClassReflectionExtension;
 use PHPStan\Reflection\PropertyReflection;
 use PHPStan\Type\ObjectType;
-use PHPStan\Type\TypehintHelper;
 
 class ShellPropertiesClassReflectionExtension implements PropertiesClassReflectionExtension
 {
-
     /**
      * @param ClassReflection $classReflection Class reflection
      * @param string $propertyName Method name

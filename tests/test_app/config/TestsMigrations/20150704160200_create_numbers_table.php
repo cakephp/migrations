@@ -1,9 +1,9 @@
 <?php
+
 use Migrations\AbstractMigration;
 
 class CreateNumbersTable extends AbstractMigration
 {
-
     public function change()
     {
         $table = $this->table('numbers', ['collation' => 'utf8_bin']);

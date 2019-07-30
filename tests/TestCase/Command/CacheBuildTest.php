@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\Test\Command;
 
 use Cake\Cache\Cache;
@@ -12,7 +14,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class CacheBuildTest extends TestCase
 {
-
     /**
      * Instance of a Symfony Command object
      *
