@@ -56,10 +56,9 @@
         ],
         "cs-check": "phpcs -p --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
         "cs-fix": "phpcbf --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
-        "stan": "phpstan analyse src/ && psalm --show-info=false",
-        "psalm": "psalm --show-info=false",
+        "stan": "phpstan analyse src/",
         "test": "phpunit",
-        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:^0.11 vimeo/psalm:^3.0 && mv composer.backup composer.json",
+        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:^0.11 && mv composer.backup composer.json",
         "test-coverage": "phpunit --coverage-clover=clover.xml"
     }
 }

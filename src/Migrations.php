@@ -307,7 +307,7 @@ class Migrations
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
 
-        if (isset($pdo)) {
+        if ($pdo) {
             $adapter = $this->manager->getEnvironment('default')->getAdapter();
             while ($adapter instanceof WrapperInterface) {
                 $adapter = $adapter->getAdapter();
