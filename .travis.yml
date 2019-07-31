@@ -72,7 +72,7 @@ script:
   - if [[ $CODECOVERAGE == 1 ]]; then vendor/bin/phpunit --coverage-clover=clover.xml; fi
 
   - if [[ $CHECKS == 1 ]]; then composer cs-check; fi
-  - if [[ $CHECKS == 1 ]]; then composer phpstan; fi
+  - if [[ $CHECKS == 1 ]]; then composer stan; fi
 
 after_success:
   - if [[ $CODECOVERAGE == 1 ]]; then bash <(curl -s https://codecov.io/bash); fi
