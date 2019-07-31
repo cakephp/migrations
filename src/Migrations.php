@@ -296,6 +296,7 @@ class Migrations
             $seedPath = array_pop($seedPaths);
         }
 
+        $pdo = null;
         if ($this->manager instanceof Manager) {
             $pdo = $this->manager->getEnvironment('default')
                 ->getAdapter()
