@@ -6,5 +6,8 @@
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
         <severity>0</severity>
     </rule>
-    <exclude-pattern>/tests/comparisons/*</exclude-pattern>
+    <rule ref="Squiz.Classes.ClassFileName.NoMatch">
+        <exclude-pattern>tests/comparisons/*</exclude-pattern>
+        <exclude-pattern>test_app/config/*</exclude-pattern>
+    </rule>
 </ruleset>
