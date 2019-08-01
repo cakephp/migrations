@@ -43,12 +43,24 @@ class MigrationHelper extends Helper
 
     public $returnedData = [];
 
-    public function storeReturnedData($table, $columnsList)
+    /**
+     * Store a table's column listing.
+     *
+     * @param string $table The table name
+     * @param string $columnsList The column list to store.
+     * @return void
+     */
+    public function storeReturnedData(string $table, string $columnsList): void
     {
         $this->returnedData['dropForeignKeys'][$table][] = $columnsList;
     }
 
-    public function getReturnedData()
+    /**
+     * Get all stored data.
+     *
+     * @return array An array of stored data.
+     */
+    public function getReturnedData(): array
     {
         return $this->returnedData;
     }
@@ -454,6 +466,7 @@ class MigrationHelper extends Helper
      *
      * @param array $list array of items to be stringified
      * @param array $options options to use
+     * @param array $wantedOptions The options you want to include in the output. If undefined all keys are included.
      * @return string
      */
     public function stringifyList(array $list, array $options = [], array $wantedOptions = [])
@@ -529,7 +542,13 @@ class MigrationHelper extends Helper
         return '';
     }
 
-    public function getTableStatement($table)
+    /**
+     * Get the stored table statement.
+     *
+     * @param string $table The table name.
+     * @return bool|string|null
+     */
+    public function getTableStatement(string $table)
     {
         if (array_key_exists($table, $this->tableStatements)) {
             return $this->tableStatements[$table];
@@ -538,17 +557,37 @@ class MigrationHelper extends Helper
         return null;
     }
 
-    public function removeTableStatement($table)
+    /**
+     * Remove a stored table statement
+     *
+     * @param string $table The table to remove
+     * @return void
+     */
+    public function removeTableStatement(string $table): void
     {
         unset($this->tableStatements[$table]);
     }
 
-    public function element($name, $data)
+    /**
+     * Render an element.
+     *
+     * @param string $name The name of the element to render.
+     * @param array $data Additional data for the element.
+     * @return ?string
+     */
+    public function element(string $name, array $data): ?string
     {
         return $this->getView()->element($name, $data);
     }
 
-    public function extract($list, $path = '{n}.name')
+    /**
+     * Wrapper around Hash::extract()
+     *
+     * @param array|\ArrayAccess $list The data to extract from.
+     * @param string $path The path to extract.
+     * @return mixed
+     */
+    public function extract($list, string $path = '{n}.name')
     {
         return Hash::extract($list, $path);
     }
@@ -556,10 +595,10 @@ class MigrationHelper extends Helper
     /**
      * Get data to use in create tables element
      *
-     * @param string $table
+     * @param string $table The table to get data for.
      * @return array
      */
-    public function getCreateTableData($table)
+    public function getCreateTableData(string $table): array
     {
         $constraints = $this->constraints($table);
         $indexes = $this->indexes($table);
@@ -580,7 +619,7 @@ class MigrationHelper extends Helper
     /**
      * Get data to use inside the create-tables element
      *
-     * @param array $tables
+     * @param array $tables The tables to create element data for.
      * @return array
      */
     public function getCreateTablesElementData($tables)
@@ -602,7 +641,7 @@ class MigrationHelper extends Helper
                 }
             );
             if ($tableConstraintsNoUnique) {
-                $result['constraints'][$tableName] =  $data['constraints'];
+                $result['constraints'][$tableName] = $data['constraints'];
             }
             $result['tables'][$tableName] = $data;
         }

@@ -21,7 +21,10 @@ class CacheBuild extends Command
     {
         $this
             ->setName('orm-cache-build')
-            ->setDescription('Build all metadata caches for the connection. If a table name is provided, only that table will be cached.')
+            ->setDescription(
+                'Build all metadata caches for the connection. ' .
+                'If a table name is provided, only that table will be cached.'
+            )
             ->addOption(
                 'connection',
                 null,
