@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
 {
-
     public $autoId = false;
 
     public function up()
@@ -340,7 +341,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->addForeignKey(
@@ -349,7 +350,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->update();
@@ -367,7 +368,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                 ],
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -379,7 +380,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();

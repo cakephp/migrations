@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TheDiffAddRemoveMysql extends AbstractMigration
 {
-
     public function up()
     {
 

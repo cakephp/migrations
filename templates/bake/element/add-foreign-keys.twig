@@ -28,7 +28,7 @@
                 {{ columnsReference | raw }},
                 [
                     'update' => '{{ Migration.formatConstraintAction(constraint['update']) | raw }}',
-                    'delete' => '{{ Migration.formatConstraintAction(constraint['delete']) | raw }}'
+                    'delete' => '{{ Migration.formatConstraintAction(constraint['delete']) | raw }}',
                 ]
             )
 {%     endif %}

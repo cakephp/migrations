@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestNotEmptySnapshotSqlite extends AbstractMigration
@@ -286,7 +288,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->addForeignKey(
@@ -295,7 +297,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->update();
@@ -313,7 +315,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 ],
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -325,7 +327,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
