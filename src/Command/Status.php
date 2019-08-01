@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -19,7 +21,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Status extends StatusCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait;
 
@@ -57,13 +58,13 @@ class Status extends StatusCommand
         $environment = $input->getOption('environment');
         $format = $input->getOption('format');
 
-        if (null === $environment) {
+        if ($environment === null) {
             $environment = $this->getManager()->getConfig()->getDefaultEnvironment();
             $output->writeln('<comment>warning</comment> no environment specified, defaulting to: ' . $environment);
         } else {
             $output->writeln('<info>using environment</info> ' . $environment);
         }
-        if (null !== $format) {
+        if ($format !== null) {
             $output->writeln('<info>using format</info> ' . $format);
         }
 

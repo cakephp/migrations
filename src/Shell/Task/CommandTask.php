@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -23,7 +25,6 @@ use Cake\Console\Shell;
  */
 class CommandTask extends Shell
 {
-
     /**
      * {@inheritDoc}
      */
@@ -34,17 +35,17 @@ class CommandTask extends Shell
             ->addOption('plugin', [
                 'short' => 'p',
                 'help' => 'The plugin the command should be applied to',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('connection', [
                 'short' => 'c',
                 'help' => 'The datasource connection to use',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('source', [
                 'short' => 's',
                 'help' => 'The name of the folder where migrations are stored',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('ansi')
             ->addOption('no-ansi')

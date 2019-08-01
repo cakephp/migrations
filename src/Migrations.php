@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -26,7 +28,6 @@ use Symfony\Component\Console\Output\NullOutput;
  */
 class Migrations
 {
-
     use ConfigurationTrait;
 
     /**
@@ -239,7 +240,7 @@ class Migrations
         $params = [
             array_pop($migrationPaths),
             $this->getManager()->getVersionsToMark($input),
-            $this->output
+            $this->output,
         ];
 
         $this->run('markVersionsAsMigrated', $params, $input);
@@ -295,6 +296,7 @@ class Migrations
             $seedPath = array_pop($seedPaths);
         }
 
+        $pdo = null;
         if ($this->manager instanceof Manager) {
             $pdo = $this->manager->getEnvironment('default')
                 ->getAdapter()
@@ -306,7 +308,7 @@ class Migrations
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
 
-        if (isset($pdo)) {
+        if ($pdo) {
             $adapter = $this->manager->getEnvironment('default')->getAdapter();
             while ($adapter instanceof WrapperInterface) {
                 $adapter = $adapter->getAdapter();

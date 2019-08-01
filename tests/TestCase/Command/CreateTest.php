@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\Test\Command;
 
 use Cake\Core\Plugin;
@@ -10,11 +12,9 @@ use Migrations\MigrationsDispatcher;
 use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
-use Symfony\Component\Console\Tester\CommandTester;
 
 class CreateTest extends TestCase
 {
-
     use StringCompareTrait;
 
     /**
@@ -47,6 +47,11 @@ class CreateTest extends TestCase
     protected $streamOutput;
 
     /**
+     * @var string[]
+     */
+    protected $generatedFiles = [];
+
+    /**
      * setup method
      *
      * @return void
@@ -60,6 +65,7 @@ class CreateTest extends TestCase
         $this->command = $application->find('create');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Create' . DS;
+        $this->generatedFiles = [];
     }
 
     /**
@@ -71,6 +77,12 @@ class CreateTest extends TestCase
     {
         parent::tearDown();
         unset($this->Connection, $this->command, $this->streamOutput);
+
+        foreach ($this->generatedFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -83,7 +95,7 @@ class CreateTest extends TestCase
         $params = [
             '--connection' => 'test',
             '--source' => 'Create',
-            'name' => 'TestCreate'
+            'name' => 'TestCreate',
         ];
         $commandTester = $this->getCommandTester($params);
 
@@ -94,6 +106,7 @@ class CreateTest extends TestCase
         ]);
 
         $files = glob(ROOT . 'config' . DS . 'Create' . DS . '*_TestCreate*.php');
+        $this->generatedFiles = $files;
         $this->assertNotEmpty($files);
 
         $file = current($files);

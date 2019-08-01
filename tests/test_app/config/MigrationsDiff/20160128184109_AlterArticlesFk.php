@@ -1,4 +1,5 @@
 <?php
+
 use Migrations\AbstractMigration;
 
 class AlterArticlesFk extends AbstractMigration
@@ -27,7 +28,7 @@ class AlterArticlesFk extends AbstractMigration
             'id',
             [
                 'update' => 'CASCADE',
-                'delete' => 'CASCADE'
+                'delete' => 'CASCADE',
             ]
         );
 

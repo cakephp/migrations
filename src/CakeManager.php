@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -20,7 +22,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class CakeManager extends Manager
 {
-
     public $maxNameLength = 0;
 
     /**
@@ -80,7 +81,7 @@ class CakeManager extends Manager
                 $migrationParams = [
                     'status' => $status,
                     'id' => $migration->getVersion(),
-                    'name' => $migration->getName()
+                    'name' => $migration->getName(),
                 ];
 
                 $migrations[$version] = $migrationParams;
@@ -91,12 +92,12 @@ class CakeManager extends Manager
                 $migrationParams = [
                     'status' => 'up',
                     'id' => $version,
-                    'name' => $missing['migration_name']
+                    'name' => $missing['migration_name'],
                 ];
 
                 if (!$isJson) {
                     $migrationParams = array_merge($migrationParams, [
-                        'missing' => true
+                        'missing' => true,
                     ]);
                 }
 

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -21,7 +23,6 @@ use ReflectionClass;
 
 trait TableFinderTrait
 {
-
     /**
      * Tables to skip
      *
@@ -79,7 +80,7 @@ trait TableFinderTrait
             $tables = $tableNamesInModel;
         } else {
             foreach ($tables as $num => $table) {
-                if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
+                if (in_array($table, $this->skipTables) || (strpos($table, $this->skipTablesRegex) !== false)) {
                     unset($tables[$num]);
                     continue;
                 }

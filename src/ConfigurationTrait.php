@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -11,7 +13,6 @@
  */
 namespace Migrations;
 
-use Cake\Core\Plugin as CorePlugin;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
@@ -25,7 +26,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 trait ConfigurationTrait
 {
-
     use UtilTrait;
 
     /**
@@ -88,7 +88,7 @@ trait ConfigurationTrait
                 'seeds' => $seedsPath,
             ],
             'templates' => [
-                'file' => $templatePath . 'Phinx' . DS . 'create.php.template'
+                'file' => $templatePath . 'Phinx' . DS . 'create.php.template',
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
             'environments' => [
@@ -96,16 +96,16 @@ trait ConfigurationTrait
                 'default_database' => 'default',
                 'default' => [
                     'adapter' => $adapterName,
-                    'host' => isset($connectionConfig['host']) ? $connectionConfig['host'] : null,
-                    'user' => isset($connectionConfig['username']) ? $connectionConfig['username'] : null,
-                    'pass' => isset($connectionConfig['password']) ? $connectionConfig['password'] : null,
-                    'port' => isset($connectionConfig['port']) ? $connectionConfig['port'] : null,
+                    'host' => $connectionConfig['host'] ?? null,
+                    'user' => $connectionConfig['username'] ?? null,
+                    'pass' => $connectionConfig['password'] ?? null,
+                    'port' => $connectionConfig['port'] ?? null,
                     'name' => $connectionConfig['database'],
-                    'charset' => isset($connectionConfig['encoding']) ? $connectionConfig['encoding'] : null,
-                    'unix_socket' => isset($connectionConfig['unix_socket']) ? $connectionConfig['unix_socket'] : null,
+                    'charset' => $connectionConfig['encoding'] ?? null,
+                    'unix_socket' => $connectionConfig['unix_socket'] ?? null,
                     'suffix' => '',
-                ]
-            ]
+                ],
+            ],
         ];
 
         if ($adapterName === 'pgsql') {

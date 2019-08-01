@@ -9,7 +9,6 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class EventsFixture extends TestFixture
 {
-
     /**
      * Fields
      *
@@ -41,7 +40,7 @@ class EventsFixture extends TestFixture
             'id' => 2,
             'title' => 'Second event',
             'description' => 'Second event description.',
-            'published' => 'Y'
+            'published' => 'Y',
         ],
         [
             'id' => 3,
@@ -51,7 +50,7 @@ Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvina
 nullam, vivamus ut a sed, mollitia lectus. 
 Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus 
 duis vestibulum nunc mattis convallis.',
-            'published' => 'Y'
+            'published' => 'Y',
         ],
     ];
 }

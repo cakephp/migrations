@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -22,7 +24,6 @@ use Symfony\Component\Console\Input\ArrayInput;
  */
 class ConfigurationTraitTest extends TestCase
 {
-
     /**
      * Setup method
      *
@@ -45,7 +46,7 @@ class ConfigurationTraitTest extends TestCase
         return [
             ['mysql', $this->getMockBuilder('\Cake\Database\Driver\Mysql')->getMock()],
             ['pgsql', $this->getMockBuilder('\Cake\Database\Driver\Postgres')->getMock()],
-            ['sqlite', $this->getMockBuilder('\Cake\Database\Driver\Sqlite')->getMock()]
+            ['sqlite', $this->getMockBuilder('\Cake\Database\Driver\Sqlite')->getMock()],
         ];
     }
 
@@ -83,8 +84,8 @@ class ConfigurationTraitTest extends TestCase
                 'encoding' => 'utf-8',
                 'ssl_ca' => '/certs/my_cert',
                 'ssl_key' => 'ssl_key_value',
-                'ssl_cert' => 'ssl_cert_value'
-            ]
+                'ssl_cert' => 'ssl_cert_value',
+            ],
         ]);
 
         $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
@@ -183,8 +184,8 @@ class ConfigurationTraitTest extends TestCase
                 'username' => 'rooty',
                 'password' => 'the_password2',
                 'database' => 'the_database2',
-                'encoding' => 'utf-8'
-            ]
+                'encoding' => 'utf-8',
+            ],
         ]);
 
         $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();

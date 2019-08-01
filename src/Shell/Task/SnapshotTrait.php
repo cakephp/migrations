@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -11,21 +13,12 @@
  */
 namespace Migrations\Shell\Task;
 
-use Cake\Core\App;
-use Cake\Core\Plugin;
-use Cake\Database\Schema\Collection;
-use Cake\Datasource\ConnectionManager;
-use Cake\Filesystem\Folder;
-use Cake\ORM\TableRegistry;
-use ReflectionClass;
-
 /**
  * Trait needed for all "snapshot" type of bake operations.
  * Snapshot type operations are : baking a snapshot and baking a diff.
  */
 trait SnapshotTrait
 {
-
     /**
      * After a file has been successfully created, we mark the newly
      * created migration as applied
@@ -59,7 +52,7 @@ trait SnapshotTrait
     protected function markSnapshotApplied($path)
     {
         $fileName = pathinfo($path, PATHINFO_FILENAME);
-        list($version, ) = explode('_', $fileName, 2);
+        [$version, ] = explode('_', $fileName, 2);
 
         $dispatchCommand = 'migrations mark_migrated -t ' . $version . ' -o';
         if (!empty($this->params['connection'])) {

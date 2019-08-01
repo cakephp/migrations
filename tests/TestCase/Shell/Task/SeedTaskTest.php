@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -24,7 +26,7 @@ class SeedTaskTest extends TestCase
 
     public $fixtures = [
         'plugin.Migrations.Events',
-        'plugin.Migrations.Texts'
+        'plugin.Migrations.Texts',
     ];
 
     /**
@@ -71,7 +73,7 @@ class SeedTaskTest extends TestCase
     public function testBasicBaking()
     {
         $this->Task->args = [
-            'articles'
+            'articles',
         ];
         $result = $this->Task->bake('Articles');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -14,8 +16,6 @@ namespace Migrations\Test;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Complete override of the Symfony class needed to have a charged instance of the output object used in the tests.
@@ -75,7 +75,7 @@ class CommandTester
 
         // This is where the magic does its magic : we use the output object of the command.
         $this->output = $this->command->getManager()->getOutput();
-        $this->output->setDecorated(isset($options['decorated']) ? $options['decorated'] : false);
+        $this->output->setDecorated($options['decorated'] ?? false);
         if (isset($options['verbosity'])) {
             $this->output->setVerbosity($options['verbosity']);
         }

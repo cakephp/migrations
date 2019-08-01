@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -19,7 +21,6 @@ use Cake\Console\ConsoleOutput;
  */
 class TestCompletionStringOutput extends ConsoleOutput
 {
-
     public $output = '';
 
     // @codingStandardsIgnoreStart
@@ -27,7 +28,7 @@ class TestCompletionStringOutput extends ConsoleOutput
     {
         // @codingStandardsIgnoreEnd
         $this->output .= $message;
-        
+
         return 0;
     }
 }

@@ -29,6 +29,6 @@ class SpecialPkFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'uuid', 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7'],
         'name' => ['type' => 'string', 'null' => true, 'length' => 256],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]]
+        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
     ];
 }

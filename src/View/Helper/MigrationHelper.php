@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
@@ -24,7 +26,6 @@ use Cake\View\View;
  */
 class MigrationHelper extends Helper
 {
-
     /**
      * Schemas list for tables analyzed during migration baking
      *
@@ -337,7 +338,7 @@ class MigrationHelper extends Helper
             'comment',
             'autoIncrement',
             'precision',
-            'after'
+            'after',
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -393,7 +394,7 @@ class MigrationHelper extends Helper
             return (float)$value;
         }
 
-        return sprintf("'%s'", addslashes($value));
+        return sprintf("'%s'", addslashes((string)$value));
     }
 
     /**
@@ -416,7 +417,7 @@ class MigrationHelper extends Helper
             'after', 'update',
             'comment', 'unsigned',
             'signed', 'properties',
-            'autoIncrement', 'unique'
+            'autoIncrement', 'unique',
         ];
 
         $attributes = [];
@@ -465,7 +466,7 @@ class MigrationHelper extends Helper
         }
 
         $options += [
-            'indent' => 2
+            'indent' => 2,
         ];
 
         if (!empty($options['remove'])) {
@@ -474,7 +475,7 @@ class MigrationHelper extends Helper
             }
             unset($options['remove']);
         }
-        
+
         if (!$list) {
             return '';
         }
@@ -483,7 +484,7 @@ class MigrationHelper extends Helper
         foreach ($list as $k => &$v) {
             if (is_array($v)) {
                 $v = $this->stringifyList($v, [
-                    'indent' => $options['indent'] + 1
+                    'indent' => $options['indent'] + 1,
                 ]);
                 $v = sprintf('[%s]', $v);
             } else {
@@ -528,7 +529,8 @@ class MigrationHelper extends Helper
         return '';
     }
 
-    public function getTableStatement($table) {
+    public function getTableStatement($table)
+    {
         if (array_key_exists($table, $this->tableStatements)) {
             return $this->tableStatements[$table];
         }
@@ -536,7 +538,8 @@ class MigrationHelper extends Helper
         return null;
     }
 
-    public function removeTableStatement($table) {
+    public function removeTableStatement($table)
+    {
         unset($this->tableStatements[$table]);
     }
 
@@ -566,7 +569,7 @@ class MigrationHelper extends Helper
                 $foreignKeys[] = $constraint['columns'];
             }
         }
-        $indexes = array_filter($indexes, function($index) use ($foreignKeys) {
+        $indexes = array_filter($indexes, function ($index) use ($foreignKeys) {
             return !in_array($index['columns'], $foreignKeys);
         });
         $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
@@ -584,7 +587,7 @@ class MigrationHelper extends Helper
     {
         $result = [
             'constraints' => [],
-            'tables' => []
+            'tables' => [],
         ];
         foreach ($tables as $table) {
             $tableName = $table;
@@ -594,11 +597,11 @@ class MigrationHelper extends Helper
             $data = $this->getCreateTableData($table);
             $tableConstraintsNoUnique = array_filter(
                 $data['constraints'],
-                function($constraint) {
+                function ($constraint) {
                     return $constraint['type'] != 'unique';
                 }
             );
-            if($tableConstraintsNoUnique) {
+            if ($tableConstraintsNoUnique) {
                 $result['constraints'][$tableName] =  $data['constraints'];
             }
             $result['tables'][$tableName] = $data;
@@ -606,5 +609,4 @@ class MigrationHelper extends Helper
 
         return $result;
     }
-
 }
