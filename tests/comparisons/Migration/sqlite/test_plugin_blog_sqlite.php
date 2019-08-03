@@ -7,7 +7,6 @@ class TestPluginBlogSqlite extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'default' => null,

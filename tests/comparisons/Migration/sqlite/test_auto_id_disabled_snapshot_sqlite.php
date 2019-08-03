@@ -9,7 +9,6 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
 
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
