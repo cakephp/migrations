@@ -9,7 +9,6 @@ class TestAutoIdDisabledSnapshot56 extends AbstractMigration
 
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,

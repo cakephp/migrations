@@ -7,7 +7,6 @@ class TheDiffAddRemovePgsql extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('articles')
             ->removeColumn('excerpt')
             ->update();
@@ -24,7 +23,6 @@ class TheDiffAddRemovePgsql extends AbstractMigration
 
     public function down()
     {
-
         $this->table('articles')
             ->addColumn('excerpt', 'text', [
                 'after' => 'title',

@@ -7,7 +7,6 @@ class TheDiffSimplePgsql extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => null,
