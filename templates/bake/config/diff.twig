@@ -34,9 +34,9 @@ class {{ name }} extends AbstractMigration
 {% endif %}
     public function up()
     {
-{%    for tableName, tableDiff in data -%}
+{%    for tableName, tableDiff in data %}
 {%        set hasRemoveFK = tableDiff['constraints']['remove'] is not empty or tableDiff['indexes']['remove'] is
-not empty -%}
+not empty %}
 {%        if hasRemoveFK %}
         $this->table('{{ tableName }}')
 {%        endif %}

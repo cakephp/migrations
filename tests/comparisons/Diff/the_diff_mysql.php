@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TheDiffMysql extends AbstractMigration
 {
-
     public function up()
     {
         $this->table('articles')
@@ -27,7 +28,6 @@ class TheDiffMysql extends AbstractMigration
                 'null' => false,
             ])
             ->update();
-
         $this->table('categories')
             ->addColumn('name', 'string', [
                 'default' => null,
@@ -58,7 +58,7 @@ class TheDiffMysql extends AbstractMigration
                 'id',
                 [
                     'update' => 'RESTRICT',
-                    'delete' => 'RESTRICT'
+                    'delete' => 'RESTRICT',
                 ]
             )
             ->update();
@@ -110,7 +110,7 @@ class TheDiffMysql extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->update();
@@ -129,7 +129,6 @@ class TheDiffMysql extends AbstractMigration
             ->dropForeignKey(
                 'category_id'
             )->save();
-
         $this->table('tags')
             ->addColumn('name', 'string', [
                 'default' => null,
@@ -197,7 +196,7 @@ class TheDiffMysql extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
