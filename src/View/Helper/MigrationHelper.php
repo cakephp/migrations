@@ -132,7 +132,8 @@ class MigrationHelper extends Helper
     /**
      * Returns the Cake\Database\Schema\TableSchema for $table
      *
-     * @param string $table Name of the table to get the Schema for
+     * @param string|\Cake\Database\Schema\TableSchema $table Name of the table to retrieve constraints for
+     *  or a table schema object.
      * @return \Cake\Database\Schema\TableSchema
      */
     protected function schema($table)
@@ -155,7 +156,8 @@ class MigrationHelper extends Helper
     /**
      * Returns an array of column data for a given table
      *
-     * @param string $table Name of the table to retrieve columns for
+     * @param string|\Cake\Database\Schema\TableSchema $table Name of the table to retrieve constraints for
+     *  or a table schema object.
      * @return array
      */
     public function columns($table)
@@ -179,7 +181,8 @@ class MigrationHelper extends Helper
     /**
      * Returns an array of indexes for a given table
      *
-     * @param string $table Name of the table to retrieve indexes for
+     * @param string|\Cake\Database\Schema\TableSchema $table Name of the table to retrieve constraints for
+     *  or a table schema object.
      * @return array
      */
     public function indexes($table)
@@ -203,7 +206,8 @@ class MigrationHelper extends Helper
     /**
      * Returns an array of constraints for a given table
      *
-     * @param string $table Name of the table to retrieve constraints for
+     * @param string|\Cake\Database\Schema\TableSchema $table Name of the table to retrieve constraints for
+     *  or a table schema object.
      * @return array
      */
     public function constraints($table)
@@ -595,10 +599,11 @@ class MigrationHelper extends Helper
     /**
      * Get data to use in create tables element
      *
-     * @param string $table The table to get data for.
+     * @param string|\Cake\Database\Schema\TableSchema $table Name of the table to retrieve constraints for
+     *  or a table schema object.
      * @return array
      */
-    public function getCreateTableData(string $table): array
+    public function getCreateTableData($table): array
     {
         $constraints = $this->constraints($table);
         $indexes = $this->indexes($table);
