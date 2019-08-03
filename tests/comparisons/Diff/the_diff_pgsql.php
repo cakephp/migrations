@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TheDiffPgsql extends AbstractMigration
 {
-
     public function up()
     {
         $this->table('articles')
@@ -57,7 +58,7 @@ class TheDiffPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'RESTRICT',
-                    'delete' => 'RESTRICT'
+                    'delete' => 'RESTRICT',
                 ]
             )
             ->update();
@@ -109,7 +110,7 @@ class TheDiffPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->update();
@@ -196,7 +197,7 @@ class TheDiffPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -204,4 +205,3 @@ class TheDiffPgsql extends AbstractMigration
         $this->table('categories')->drop()->save();
     }
 }
-

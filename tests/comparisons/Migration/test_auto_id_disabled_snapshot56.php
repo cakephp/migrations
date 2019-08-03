@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestAutoIdDisabledSnapshot56 extends AbstractMigration
 {
-
     public $autoId = false;
 
     public function up()
@@ -342,7 +343,7 @@ class TestAutoIdDisabledSnapshot56 extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->addForeignKey(
@@ -351,7 +352,7 @@ class TestAutoIdDisabledSnapshot56 extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -369,7 +370,7 @@ class TestAutoIdDisabledSnapshot56 extends AbstractMigration
                 ],
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -381,7 +382,7 @@ class TestAutoIdDisabledSnapshot56 extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
