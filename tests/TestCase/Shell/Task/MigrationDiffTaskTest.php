@@ -18,8 +18,6 @@ use Cake\Console\Exception\StopException;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
-use Cake\Filesystem\File;
-use Cake\Filesystem\Folder;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Inflector;
