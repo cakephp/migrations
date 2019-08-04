@@ -59,7 +59,7 @@ class Seed extends SeedRun
     {
         $event = $this->dispatchEvent('Migration.beforeSeed');
         if ($event->isStopped()) {
-            return $event->result;
+            return $event->getResult();
         }
 
         $seed = $input->getOption('seed');

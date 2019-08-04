@@ -74,7 +74,7 @@ class Rollback extends RollbackCommand
     {
         $event = $this->dispatchEvent('Migration.beforeRollback');
         if ($event->isStopped()) {
-            return $event->result;
+            return $event->getResult();
         }
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterRollback');

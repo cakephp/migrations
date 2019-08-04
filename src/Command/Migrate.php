@@ -78,7 +78,7 @@ class Migrate extends MigrateCommand
     {
         $event = $this->dispatchEvent('Migration.beforeMigrate');
         if ($event->isStopped()) {
-            return $event->result;
+            return $event->getResult();
         }
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterMigrate');
