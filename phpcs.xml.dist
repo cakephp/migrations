@@ -10,4 +10,7 @@
         <exclude-pattern>tests/comparisons/*</exclude-pattern>
         <exclude-pattern>test_app/config/*</exclude-pattern>
     </rule>
+    <rule ref="CakePHP.WhiteSpace.FunctionOpeningBraceSpace.SpacingAfter">
+        <exclude-pattern>tests/comparisons/*</exclude-pattern>
+    </rule>
 </ruleset>
