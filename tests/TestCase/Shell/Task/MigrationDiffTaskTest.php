@@ -229,16 +229,11 @@ class MigrationDiffTaskTest extends TestCase
         $bakeName = $this->getBakeName('TheDiff');
         $result = $this->Task->bake($bakeName);
 
+        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
         $this->assertCorrectSnapshot($bakeName, $result);
 
-        $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
-        $file = current($files);
-        $file = new File($dir->pwd() . DS . $file);
-        $file->open();
-        $versionParts = explode('_', $file->name());
-        $file->close();
-        rename($destinationConfigDir . $file->name, $destination);
+        rename($destinationConfigDir . $generatedMigration, $destination);
+        $versionParts = explode('_', $generatedMigration);
 
         $connection->newQuery()
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
@@ -313,16 +308,12 @@ class MigrationDiffTaskTest extends TestCase
         $bakeName = $this->getBakeName('TheDiffSimple');
         $result = $this->Task->bake($bakeName);
 
+        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
+
         $this->assertCorrectSnapshot($bakeName, $result);
 
-        $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
-        $file = current($files);
-        $file = new File($dir->pwd() . DS . $file);
-        $file->open();
-        $versionParts = explode('_', $file->name());
-        $file->close();
-        rename($destinationConfigDir . $file->name, $destination);
+        rename($destinationConfigDir . $generatedMigration, $destination);
+        $versionParts = explode('_', $generatedMigration);
 
         $connection->newQuery()
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
@@ -393,16 +384,11 @@ class MigrationDiffTaskTest extends TestCase
         $bakeName = $this->getBakeName('TheDiffAddRemove');
         $result = $this->Task->bake($bakeName);
 
+        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
         $this->assertCorrectSnapshot($bakeName, $result);
 
-        $dir = new Folder($destinationConfigDir);
-        $files = $dir->find('(.*)TheDiff(.*)');
-        $file = current($files);
-        $file = new File($dir->pwd() . DS . $file);
-        $file->open();
-        $versionParts = explode('_', $file->name());
-        $file->close();
-        rename($destinationConfigDir . $file->name, $destination);
+        rename($destinationConfigDir . $generatedMigration, $destination);
+        $versionParts = explode('_', $generatedMigration);
 
         $connection->newQuery()
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
@@ -464,5 +450,23 @@ class MigrationDiffTaskTest extends TestCase
         } else {
             $this->assertSameAsFile($bakeName . '.php', $result);
         }
+    }
+
+    /**
+     * Get the generated migration version number
+     *
+     * @param string $configDir The config directory to look in.
+     * @param string $needle The filename pattern to find.
+     * @return string[]
+     */
+    public function getGeneratedMigrationName($configDir, $needle)
+    {
+        $files = glob($configDir . $needle);
+        $this->assertNotEmpty($files, "Could not find any files matching `{$needle}` in `{$configDir}`");
+
+        // Record the generated file so we can cleanup if the test fails.
+        $this->generatedFiles[] = $files[0];
+
+        return basename($files[0]);
     }
 }
