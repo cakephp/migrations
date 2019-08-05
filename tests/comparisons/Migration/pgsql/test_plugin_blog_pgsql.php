@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestPluginBlogPgsql extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
@@ -119,7 +120,7 @@ class TestPluginBlogPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->addForeignKey(
@@ -128,7 +129,7 @@ class TestPluginBlogPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();

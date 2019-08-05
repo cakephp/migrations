@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestPluginBlogSqlite extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'default' => null,
@@ -120,7 +121,7 @@ class TestPluginBlogSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->addForeignKey(
@@ -129,7 +130,7 @@ class TestPluginBlogSqlite extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->update();

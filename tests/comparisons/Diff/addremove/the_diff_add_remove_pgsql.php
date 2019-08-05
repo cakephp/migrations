@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TheDiffAddRemovePgsql extends AbstractMigration
 {
-
     public function up()
     {
 
@@ -35,4 +36,3 @@ class TheDiffAddRemovePgsql extends AbstractMigration
             ->update();
     }
 }
-

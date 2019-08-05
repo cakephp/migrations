@@ -21,7 +21,10 @@ class CacheClear extends Command
     {
         $this
             ->setName('orm-cache-clear')
-            ->setDescription('Clear all metadata caches for the connection. If a table name is provided, only that table will be removed.')
+            ->setDescription(
+                'Clear all metadata caches for the connection. ' .
+                'If a table name is provided, only that table will be removed.'
+            )
             ->addOption(
                 'connection',
                 null,

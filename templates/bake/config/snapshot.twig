@@ -21,12 +21,13 @@
 {%     set autoId = false %}
 {% endif %}
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class {{ name }} extends AbstractMigration
 {
 {% if not autoId  %}
-
     public $autoId = false;
 
 {% endif %}

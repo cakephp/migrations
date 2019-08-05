@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestNotEmptySnapshotPgsql extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
@@ -272,7 +273,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->addForeignKey(
@@ -281,7 +282,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -299,7 +300,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 ],
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -311,7 +312,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();

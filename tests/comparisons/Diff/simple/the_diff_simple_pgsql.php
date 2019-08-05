@@ -1,12 +1,12 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TheDiffSimplePgsql extends AbstractMigration
 {
-
     public function up()
     {
-
         $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => null,
@@ -44,7 +44,7 @@ class TheDiffSimplePgsql extends AbstractMigration
                 'id',
                 [
                     'update' => 'RESTRICT',
-                    'delete' => 'RESTRICT'
+                    'delete' => 'RESTRICT',
                 ]
             )
             ->update();
@@ -68,4 +68,3 @@ class TheDiffSimplePgsql extends AbstractMigration
         $this->table('users')->drop->save();
     }
 }
-

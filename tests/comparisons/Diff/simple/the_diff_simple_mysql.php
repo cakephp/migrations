@@ -1,12 +1,12 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TheDiffSimpleMysql extends AbstractMigration
 {
-
     public function up()
     {
-
         $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => null,
@@ -44,7 +44,7 @@ class TheDiffSimpleMysql extends AbstractMigration
                 'id',
                 [
                     'update' => 'RESTRICT',
-                    'delete' => 'RESTRICT'
+                    'delete' => 'RESTRICT',
                 ]
             )
             ->update();

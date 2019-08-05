@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
+
 use Migrations\AbstractMigration;
 
 class TestPluginBlog56 extends AbstractMigration
 {
     public function up()
     {
-
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
@@ -121,7 +122,7 @@ class TestPluginBlog56 extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION'
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->addForeignKey(
@@ -130,7 +131,7 @@ class TestPluginBlog56 extends AbstractMigration
                 'id',
                 [
                     'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();

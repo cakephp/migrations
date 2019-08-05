@@ -27,10 +27,10 @@ trait SchemaTrait
      * Helper method to get the schema collection.
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input object.
-     * @param \Symfony\Component\Console\Input\OutputInterface $output Output object.
+     * @param \Symfony\Component\Console\Output\OutputInterface $output Output object.
      * @return null|\Cake\Database\Schema\CachedCollection
      */
-    protected function _getSchema(InputInterface $input, OutputInterface $output): CachedCollection
+    protected function _getSchema(InputInterface $input, OutputInterface $output): ?CachedCollection
     {
         $connectionName = $input->getOption('connection');
         $connection = ConnectionManager::get($connectionName);
