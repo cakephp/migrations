@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\TestCase\Shell\Task;
+namespace Migrations\Test\TestCase\Command;
 
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -19,7 +19,7 @@ use Cake\TestSuite\TestCase;
 /**
  * Class CommandTaskTest
  */
-class CommandTaskTest extends TestCase
+class CompletionTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 

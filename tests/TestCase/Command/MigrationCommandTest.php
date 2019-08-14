@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Migrations\Test\TestCase\Shell;
+namespace Migrations\Test\TestCase\Command;
 
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Output\NullOutput;
 
-class MigrationShellTest extends TestCase
+class MigrationCommandTest extends TestCase
 {
     /**
      * setup method
