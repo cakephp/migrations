@@ -36,16 +36,25 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 class MigrationsCommand extends Command
 {
     /**
+     * Phinx command name.
+     *
+     * @var string
+     */
+    protected static $commandName = '';
+
+    /**
      * {@inheritDoc}
      */
-    public $tasks = [
-        'Migrations.Create',
-        'Migrations.Dump',
-        'Migrations.MarkMigrated',
-        'Migrations.Migrate',
-        'Migrations.Rollback',
-        'Migrations.Status',
-    ];
+    public static function defaultName(): string
+    {
+        if (parent::defaultName() === 'migrations') {
+            return 'migrations';
+        }
+        $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
+        $name = $command->getName();
+
+        return 'migrations ' . $name;
+    }
 
     /**
      * Array of arguments to run the shell with.
@@ -63,23 +72,25 @@ class MigrationsCommand extends Command
      */
     public function getOptionParser(): ConsoleOptionParser
     {
-        return parent::getOptionParser()
-            ->addOption('plugin', ['short' => 'p'])
-            ->addOption('target', ['short' => 't'])
-            ->addOption('connection', ['short' => 'c'])
-            ->addOption('source', ['short' => 's'])
-            ->addOption('seed')
-            ->addOption('ansi')
-            ->addOption('no-ansi')
-            ->addOption('no-lock', ['boolean' => true])
-            ->addOption('force', ['boolean' => true])
-            ->addOption('version', ['short' => 'V'])
-            ->addOption('no-interaction', ['short' => 'n'])
-            ->addOption('template', ['short' => 't'])
-            ->addOption('format', ['short' => 'f'])
-            ->addOption('only', ['short' => 'o'])
-            ->addOption('dry-run', ['short' => 'x'])
-            ->addOption('exclude', ['short' => 'e']);
+        if (parent::defaultName() === 'migrations') {
+            return parent::getOptionParser();
+        }
+        $parser = parent::getOptionParser();
+        $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
+        $parser->setDescription($command->getDescription());
+        $definition = $command->getDefinition();
+        foreach ($definition->getOptions() as $key => $option) {
+            if (!empty($option->getShortcut())) {
+                $parser->addOption($option->getName(), [
+                    'short' => $option->getShortcut(),
+                    'help' => $option->getDescription(),
+                    ]);
+                continue;
+            }
+            $parser->addOption($option->getName());
+        }
+
+        return $parser;
     }
 
     /**
@@ -167,7 +178,10 @@ class MigrationsCommand extends Command
      */
     public function run(array $argv, ConsoleIo $io): ?int
     {
-        array_unshift($argv, 'migrations');
+        $name = static::defaultName();
+        $name = explode(' ', $name);
+
+        array_unshift($argv, ...$name);
         $this->argv = $argv;
 
         return parent::run($argv, $io);
