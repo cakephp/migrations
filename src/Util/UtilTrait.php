@@ -33,6 +33,7 @@ trait UtilTrait
 
         return $plugin;
     }
+
     /**
      * Get the phinx table name used to store migrations data
      *

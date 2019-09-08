@@ -20,6 +20,7 @@ class BakeTemplatePropertyReflection implements PropertyReflection
         $this->declaringClass = $declaringClass;
         $this->type = $type;
     }
+
     public function getDeclaringClass(): ClassReflection
     {
         return $this->declaringClass;
