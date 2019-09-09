@@ -118,7 +118,25 @@ class ColumnParserTest extends TestCase
                     'default' => null,
                 ],
             ],
-        ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated', 'deleted_at']));
+            'latitude' => [
+                'columnType' => 'decimal',
+                'options' => [
+                    'default' => false,
+                    'null' => false,
+                    'precision' => 10,
+                    'scale' => 6,
+                ]
+            ],
+            'longitude' => [
+                'columnType' => 'decimal',
+                'options' => [
+                    'default' => false,
+                    'null' => false,
+                    'precision' => 10,
+                    'scale' => 6,
+                ]
+            ],
+        ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated', 'deleted_at', 'latitude', 'longitude']));
 
         $expected = [
             'id' => [
@@ -153,8 +171,17 @@ class ColumnParserTest extends TestCase
                     'limit' => 11,
                 ],
             ],
+            'amount' => [
+                'columnType' => 'decimal',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'precision' => 6,
+                    'scale' => 3,
+                ],
+            ],
         ];
-        $actual = $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?']);
+        $actual = $this->columnParser->parseFields(['id', 'name:string', 'description:string?', 'age:integer?', 'amount:decimal?[6,3]']);
         $this->assertEquals($expected, $actual);
 
         $expected = [
@@ -313,6 +340,8 @@ class ColumnParserTest extends TestCase
         $this->assertEquals('string', $this->columnParser->getType('some_field', 'string'));
         $this->assertEquals('boolean', $this->columnParser->getType('field', 'boolean'));
         $this->assertEquals('polygon', $this->columnParser->getType('field', 'polygon'));
+        $this->assertEquals('decimal', $this->columnParser->getType('latitude', null));
+        $this->assertEquals('decimal', $this->columnParser->getType('longitude', null));
     }
 
     /**
@@ -329,6 +358,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('username', null));
         $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('created', null));
         $this->assertEquals(['datetime', null], $this->columnParser->getTypeAndLength('changed_at', null));
+        $this->assertEquals(['decimal', [10, 6]], $this->columnParser->getTypeAndLength('latitude', 'decimal[10,6]'));
     }
 
     /**
@@ -339,6 +369,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(255, $this->columnParser->getLength('string'));
         $this->assertEquals(11, $this->columnParser->getLength('integer'));
         $this->assertEquals(20, $this->columnParser->getLength('biginteger'));
+        $this->assertEquals([10, 6], $this->columnParser->getLength('decimal'));
         $this->assertNull($this->columnParser->getLength('text'));
     }
 
