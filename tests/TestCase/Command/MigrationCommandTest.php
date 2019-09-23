@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
+use Cake\Console\ConsoleIo;
+use Cake\TestSuite\Stub\ConsoleOutput;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Output\NullOutput;
@@ -17,29 +19,6 @@ class MigrationCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-
-        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockedMethods = [
-            'dispatchShell',
-            'getApp',
-            'getOutput',
-        ];
-
-        $this->shell = $this->getMockBuilder('\Migrations\Shell\MigrationsShell')
-            ->setMethods($mockedMethods)
-            ->setConstructorArgs([$inputOutput])
-            ->getMock();
-
-        $this->shell->expects($this->any())
-            ->method('getOutput')
-            ->will($this->returnValue(new NullOutput()));
-
-        $this->shell->expects($this->any())
-            ->method('getApp')
-            ->will($this->returnValue(new MigrationsDispatcher(PHINX_VERSION)));
     }
 
     /**
@@ -50,7 +29,7 @@ class MigrationCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        unset($this->shell);
+        unset($this->command);
     }
 
     /**
@@ -61,15 +40,16 @@ class MigrationCommandTest extends TestCase
     public function testMigrateWithLock()
     {
         $argv = [
-            'migrate',
             '-c',
             'test',
         ];
 
-        $this->shell->expects($this->once())
-            ->method('dispatchShell');
+        $this->command = $this->getMockCommand('MigrationsMigrateCommand');
 
-        $this->shell->runCommand($argv);
+        $this->command->expects($this->once())
+            ->method('executeCommand');
+
+        $this->command->run($argv, $this->getMockIo());
     }
 
     /**
@@ -80,16 +60,17 @@ class MigrationCommandTest extends TestCase
     public function testMigrateWithNoLock()
     {
         $argv = [
-            'migrate',
             '-c',
             'test',
             '--no-lock',
         ];
 
-        $this->shell->expects($this->never())
-            ->method('dispatchShell');
+        $this->command = $this->getMockCommand('MigrationsMigrateCommand');
 
-        $this->shell->runCommand($argv);
+        $this->command->expects($this->never())
+            ->method('executeCommand');
+
+        $this->command->run($argv, $this->getMockIo());
     }
 
     /**
@@ -100,15 +81,16 @@ class MigrationCommandTest extends TestCase
     public function testRollbackWithLock()
     {
         $argv = [
-            'rollback',
             '-c',
             'test',
         ];
 
-        $this->shell->expects($this->once())
-            ->method('dispatchShell');
+        $this->command = $this->getMockCommand('MigrationsRollbackCommand');
 
-        $this->shell->runCommand($argv);
+        $this->command->expects($this->once())
+            ->method('executeCommand');
+
+        $this->command->run($argv, $this->getMockIo());
     }
 
     /**
@@ -119,15 +101,50 @@ class MigrationCommandTest extends TestCase
     public function testRollbackWithNoLock()
     {
         $argv = [
-            'rollback',
             '-c',
             'test',
             '--no-lock',
         ];
 
-        $this->shell->expects($this->never())
-            ->method('dispatchShell');
+        $this->command = $this->getMockCommand('MigrationsRollbackCommand');
 
-        $this->shell->runCommand($argv);
+        $this->command->expects($this->never())
+            ->method('executeCommand');
+
+        $this->command->run($argv, $this->getMockIo());
+    }
+
+    protected function getMockIo()
+    {
+        $output = new ConsoleOutput();
+        $io = $this->getMockBuilder(ConsoleIo::class)
+            ->setConstructorArgs([$output, $output, null, null])
+            ->setMethods(['in'])
+            ->getMock();
+
+        return $io;
+    }
+
+    protected function getMockCommand($command)
+    {
+        $mockedMethods = [
+            'executeCommand',
+            'getApp',
+            'getOutput',
+        ];
+
+        $mock = $this->getMockBuilder('\Migrations\Command\\' . $command)
+        ->setMethods($mockedMethods)
+        ->getMock();
+
+        $mock->expects($this->any())
+            ->method('getOutput')
+            ->will($this->returnValue(new NullOutput()));
+
+        $mock->expects($this->any())
+            ->method('getApp')
+            ->will($this->returnValue(new MigrationsDispatcher(PHINX_VERSION)));
+
+        return $mock;
     }
 }
