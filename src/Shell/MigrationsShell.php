@@ -111,8 +111,7 @@ class MigrationsShell extends Shell
         $app->setAutoExit(false);
         $exitCode = $app->run($input, $this->getOutput());
 
-        if(in_array('-h', $this->argv) || in_array('--help', $this->argv)){
-
+        if (in_array('-h', $this->argv) || in_array('--help', $this->argv)) {
             return $exitCode === 0;
         }
 
