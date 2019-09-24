@@ -80,14 +80,18 @@ class MigrationsCommand extends Command
         $parser->setDescription($command->getDescription());
         $definition = $command->getDefinition();
         foreach ($definition->getOptions() as $key => $option) {
+            $isBoolean = !$option->isValueRequired() &&
+                         !$option->isValueOptional() &&
+                         !$option->isArray();
             if (!empty($option->getShortcut())) {
                 $parser->addOption($option->getName(), [
                     'short' => $option->getShortcut(),
                     'help' => $option->getDescription(),
+                    'boolean' => $isBoolean
                     ]);
                 continue;
             }
-            $parser->addOption($option->getName());
+            $parser->addOption($option->getName(), ['boolean' => $isBoolean]);
         }
 
         return $parser;
