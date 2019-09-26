@@ -125,7 +125,7 @@ class ColumnParserTest extends TestCase
                     'null' => false,
                     'precision' => 10,
                     'scale' => 6,
-                ]
+                ],
             ],
             'longitude' => [
                 'columnType' => 'decimal',
@@ -134,7 +134,7 @@ class ColumnParserTest extends TestCase
                     'null' => false,
                     'precision' => 10,
                     'scale' => 6,
-                ]
+                ],
             ],
         ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated', 'deleted_at', 'latitude', 'longitude']));
 

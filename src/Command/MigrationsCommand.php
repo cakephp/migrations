@@ -101,7 +101,7 @@ class MigrationsCommand extends Command
     public function initialize(): void
     {
         $composerConfig = ROOT . DS . 'vendor' . DS . 'robmorgan' . DS . 'phinx' . DS . 'composer.json';
-        $version = file_exists($composerConfig)? json_decode(file_get_contents($composerConfig))->version : '0';
+        $version = file_exists($composerConfig) ? json_decode(file_get_contents($composerConfig))->version : '0';
 
         if (!defined('PHINX_VERSION')) {
             define('PHINX_VERSION', $version);
