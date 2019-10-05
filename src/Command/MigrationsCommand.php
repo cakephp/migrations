@@ -129,7 +129,7 @@ class MigrationsCommand extends Command
         $exitCode = $app->run($input, $this->getOutput());
 
         if (in_array('-h', $this->argv) || in_array('--help', $this->argv)) {
-            return $exitCode === 0;
+            return $exitCode;
         }
 
         if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
