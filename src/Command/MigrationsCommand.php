@@ -128,6 +128,10 @@ class MigrationsCommand extends Command
         $app->setAutoExit(false);
         $exitCode = $app->run($input, $this->getOutput());
 
+        if (in_array('-h', $this->argv) || in_array('--help', $this->argv)) {
+            return $exitCode === 0;
+        }
+
         if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
             !in_array('--no-lock', $this->argv) &&
             $exitCode === 0
