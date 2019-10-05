@@ -185,7 +185,7 @@ class MigrationsShell extends Shell
      * {@inheritDoc}
      */
     // @codingStandardsIgnoreStart
-    protected function _displayHelp($command)
+    protected function _displayHelp(?string $command = null)
     {
         // @codingStandardsIgnoreEnd
         return $this->displayHelp($command);
