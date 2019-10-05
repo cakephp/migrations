@@ -11,16 +11,18 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell;
+namespace Migrations\Command;
 
+use Cake\Console\Arguments;
+use Cake\Console\Command;
+use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Console\Shell;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
- * A wrapper shell for phinx migrations, used to inject our own
+ * A wrapper command for phinx migrations, used to inject our own
  * console actions so that database configuration already defined
  * for the application can be reused.
  *
@@ -31,19 +33,28 @@ use Symfony\Component\Console\Output\ConsoleOutput;
  * @property \Migrations\Shell\Task\RollbackTask $Rollback
  * @property \Migrations\Shell\Task\StatusTask $Status
  */
-class MigrationsShell extends Shell
+class MigrationsCommand extends Command
 {
+    /**
+     * Phinx command name.
+     *
+     * @var string
+     */
+    protected static $commandName = '';
+
     /**
      * {@inheritDoc}
      */
-    public $tasks = [
-        'Migrations.Create',
-        'Migrations.Dump',
-        'Migrations.MarkMigrated',
-        'Migrations.Migrate',
-        'Migrations.Rollback',
-        'Migrations.Status',
-    ];
+    public static function defaultName(): string
+    {
+        if (parent::defaultName() === 'migrations') {
+            return 'migrations';
+        }
+        $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
+        $name = $command->getName();
+
+        return 'migrations ' . $name;
+    }
 
     /**
      * Array of arguments to run the shell with.
@@ -61,23 +72,25 @@ class MigrationsShell extends Shell
      */
     public function getOptionParser(): ConsoleOptionParser
     {
-        return parent::getOptionParser()
-            ->addOption('plugin', ['short' => 'p'])
-            ->addOption('target', ['short' => 't'])
-            ->addOption('connection', ['short' => 'c'])
-            ->addOption('source', ['short' => 's'])
-            ->addOption('seed')
-            ->addOption('ansi')
-            ->addOption('no-ansi')
-            ->addOption('no-lock', ['boolean' => true])
-            ->addOption('force', ['boolean' => true])
-            ->addOption('version', ['short' => 'V'])
-            ->addOption('no-interaction', ['short' => 'n'])
-            ->addOption('template', ['short' => 't'])
-            ->addOption('format', ['short' => 'f'])
-            ->addOption('only', ['short' => 'o'])
-            ->addOption('dry-run', ['short' => 'x'])
-            ->addOption('exclude', ['short' => 'e']);
+        if (parent::defaultName() === 'migrations') {
+            return parent::getOptionParser();
+        }
+        $parser = parent::getOptionParser();
+        $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
+        $parser->setDescription($command->getDescription());
+        $definition = $command->getDefinition();
+        foreach ($definition->getOptions() as $key => $option) {
+            if (!empty($option->getShortcut())) {
+                $parser->addOption($option->getName(), [
+                    'short' => $option->getShortcut(),
+                    'help' => $option->getDescription(),
+                    ]);
+                continue;
+            }
+            $parser->addOption($option->getName());
+        }
+
+        return $parser;
     }
 
     /**
@@ -88,7 +101,7 @@ class MigrationsShell extends Shell
     public function initialize(): void
     {
         $composerConfig = ROOT . DS . 'vendor' . DS . 'robmorgan' . DS . 'phinx' . DS . 'composer.json';
-        $version = file_exists($composerConfig)? json_decode(file_get_contents($composerConfig))->version : '0';
+        $version = file_exists($composerConfig) ? json_decode(file_get_contents($composerConfig))->version : '0';
 
         if (!defined('PHINX_VERSION')) {
             define('PHINX_VERSION', $version);
@@ -104,9 +117,11 @@ class MigrationsShell extends Shell
      * The input parameter of the ``MigrationDispatcher::run()`` method is manually built
      * in case a MigrationsShell is dispatched using ``Shell::dispatch()``.
      *
-     * @return bool Success of the call.
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io
+     * @return null|int The exit code or null for success
      */
-    public function main()
+    public function execute(Arguments $args, ConsoleIo $io): ?int
     {
         $app = $this->getApp();
         $input = new ArgvInput($this->argv);
@@ -114,26 +129,28 @@ class MigrationsShell extends Shell
         $exitCode = $app->run($input, $this->getOutput());
 
         if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
-            !$this->params['no-lock'] &&
+            !in_array('--no-lock', $this->argv) &&
             $exitCode === 0
         ) {
-            $dispatchCommand = 'migrations dump';
-            if (!empty($this->params['connection'])) {
-                $dispatchCommand .= ' -c ' . $this->params['connection'];
+            $newArgs = ['dump'];
+            if (!empty($args->getOption('connection'))) {
+                $newArgs[] = '-c';
+                $newArgs[] = $args->getOption('connection');
             }
 
-            if (!empty($this->params['plugin'])) {
-                $dispatchCommand .= ' -p ' . $this->params['plugin'];
+            if (!empty($args->getOption('plugin'))) {
+                $newArgs[] = '-p';
+                $newArgs[] = $args->getOption('plugin');
             }
 
-            $dumpExitCode = $this->dispatchShell($dispatchCommand);
+            $dumpExitCode = $this->executeCommand(MigrationsCommand::class, $newArgs, $io);
         }
 
         if (isset($dumpExitCode) && $exitCode === 0 && $dumpExitCode !== 0) {
             $exitCode = 1;
         }
 
-        return $exitCode === 0;
+        return $exitCode;
     }
 
     /**
@@ -162,32 +179,27 @@ class MigrationsShell extends Shell
      *
      * {@inheritDoc}
      */
-    public function runCommand($argv, $autoMethod = false, $extra = [])
+    public function run(array $argv, ConsoleIo $io): ?int
     {
-        array_unshift($argv, 'migrations');
+        $name = static::defaultName();
+        $name = explode(' ', $name);
+
+        array_unshift($argv, ...$name);
         $this->argv = $argv;
 
-        return parent::runCommand($argv, $autoMethod, $extra);
+        return parent::run($argv, $io);
     }
 
     /**
-     * Display the help in the correct format
+     * Output help content
      *
-     * @param string $command The command to get help for.
-     * @return int|bool|null Exit code or number of bytes written to stdout
+     * @param \Cake\Console\ConsoleOptionParser $parser The option parser.
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io
+     * @return void
      */
-    protected function displayHelp($command)
+    protected function displayHelp(ConsoleOptionParser $parser, Arguments $args, ConsoleIo $io): void
     {
-        return $this->main();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    // @codingStandardsIgnoreStart
-    protected function _displayHelp(?string $command = null)
-    {
-        // @codingStandardsIgnoreEnd
-        return $this->displayHelp($command);
+        $this->execute($args, $io);
     }
 }

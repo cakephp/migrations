@@ -21,6 +21,17 @@ use Symfony\Component\Console\Application;
  */
 class MigrationsDispatcher extends Application
 {
+    public static $phinxCommands = [
+        'Create' => Command\Create::class,
+        'Dump' => Command\Dump::class,
+        'MarkMigrated' => Command\MarkMigrated::class,
+        'Migrate' => Command\Migrate::class,
+        'Rollback' => Command\Rollback::class,
+        'Seed' => Command\Seed::class,
+        'Status' => Command\Status::class,
+        'CacheBuild' => Command\CacheBuild::class,
+        'CacheClear' => Command\CacheClear::class,
+    ];
     /**
      * Class Constructor.
      *
@@ -31,15 +42,9 @@ class MigrationsDispatcher extends Application
     public function __construct($version)
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
-        $this->add(new Command\Create());
-        $this->add(new Command\Dump());
-        $this->add(new Command\MarkMigrated());
-        $this->add(new Command\Migrate());
-        $this->add(new Command\Rollback());
-        $this->add(new Command\Seed());
-        $this->add(new Command\Status());
-        $this->add(new Command\CacheBuild());
-        $this->add(new Command\CacheClear());
+        foreach (static::$phinxCommands as $key => $value) {
+            $this->add(new $value());
+        }
         $this->setCatchExceptions(false);
     }
 }

@@ -77,7 +77,7 @@ class ColumnParser
 
             if ($length !== null) {
                 if (is_array($length)) {
-                    list($fields[$field]['options']['precision'], $fields[$field]['options']['scale']) = $length;
+                    [$fields[$field]['options']['precision'], $fields[$field]['options']['scale']] = $length;
                 } else {
                     $fields[$field]['options']['limit'] = $length;
                 }
