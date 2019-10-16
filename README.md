@@ -5,9 +5,9 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/cakephp/migrations/master.svg?style=flat-square)](https://codecov.io/github/cakephp/migrations?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/cakephp/migrations.svg?style=flat-square)](https://packagist.org/packages/cakephp/migrations)
 
-This is a Database Migrations system for CakePHP 3.
+This is a Database Migrations system for CakePHP.
 
-The plugin consists of a CakePHP shell wrapper for the [phinx](http://phinx.org) migrations library.
+The plugin consists of a CakePHP shell wrapper for the [phinx](https://book.cakephp.org/4.0/en/phinx.html) migrations library.
 
 ## Installation
 
@@ -33,10 +33,6 @@ public function bootstrap()
     parent::bootstrap();
     $this->addPlugin('Migrations');
 }
-```
-Prior to 3.6.0
-```php
-Plugin::load('Migrations');
 ```
 
 Additionally, you will need to configure the ``default`` database configuration in your **config/app.php** file.
