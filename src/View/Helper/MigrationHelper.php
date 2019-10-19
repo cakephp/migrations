@@ -103,7 +103,7 @@ class MigrationHelper extends Helper
             return 'removeColumn';
         }
 
-        if($action === 'alter_field'){
+        if ($action === 'alter_field') {
             return 'changeColumn';
         }
 
