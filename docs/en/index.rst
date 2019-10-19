@@ -193,6 +193,7 @@ Migration names can follow any of the following patterns:
   specified table
 * (``/^(Alter)(.*)/``) Alters the specified table. An alias
   for CreateTable and AddField.
+* (``/^(Alter).*(?:From)(.*)/``) Alters fields from the specified table.
 
 You can also use the ``underscore_form`` as the name for your migrations i.e.
 ``create_products``.
@@ -404,6 +405,31 @@ If no length is specified, lengths for certain type of columns are defaulted:
 * string: 255
 * integer: 11
 * biginteger: 20
+
+Alter a column from a table
+-----------------------------------
+
+In the same way, you can generate a migration to alter a column by using the
+command line, if the migration name is of the form "AlterXXXFromYYY":
+
+.. code-block:: bash
+
+    bin/cake bake migration AlterPriceFromProducts name:float
+
+will generate::
+
+    <?php
+    use Migrations\AbstractMigration;
+
+    class AlterPriceFromProducts extends AbstractMigration
+    {
+        public function change()
+        {
+            $table = $this->table('products');
+            $table->changeColumn('name', 'float');
+            $table->update();
+        }
+    }
 
 Removing a column from a table
 ------------------------------
