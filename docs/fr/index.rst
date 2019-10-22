@@ -192,7 +192,7 @@ Les noms des migrations peuvent suivre l'une des structures suivantes:
 * (``/^(Add).*(?:To)(.*)/``) Ajoute les champs à la table spécifiée.
 * (``/^(Remove).*(?:From)(.*)/``) Supprime les champs de la table spécifiée.
 * (``/^(Alter)(.*)/``) Modifie la table spécifiée. Un alias pour CreateTable et AddField.
-* (``/^(Alter).*(?:From)(.*)/``) Modifie les champs de la table spécifiée.
+* (``/^(Alter).*(?:On)(.*)/``) Modifie les champs de la table spécifiée.
 
 Vous pouvez aussi utiliser ``la_forme_avec_underscores`` comme nom pour vos
 migrations par exemple ``create_products``.
@@ -406,11 +406,11 @@ Modifier une colonne d'une table
 -----------------------------------
 
 De la même manière, vous pouvez générer une migration pour modifier une colonne à l'aide de la commande
-ligne de commande, si le nom de la migration est de la forme "AlterXXXFromYYY":
+ligne de commande, si le nom de la migration est de la forme "AlterXXXOnYYY":
 
 .. code-block:: bash
 
-    bin/cake bake migration AlterPriceFromProducts name:float
+    bin/cake bake migration AlterPriceOnProducts name:float
 
 créé le fichier::
 

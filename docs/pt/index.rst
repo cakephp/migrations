@@ -182,7 +182,7 @@ seguir:
   tabela específica
 * (``/^(Alter)(.*)/``) Altera a tabela especificada. Um apelido para
   um CreateTable seguido de um AlterTable
-* (``/^(Alter).*(?:From)(.*)/``) Alterar os campos da tabela especificada.
+* (``/^(Alter).*(?:On)(.*)/``) Alterar os campos da tabela especificada
 
 Você também pode usar  ``underscore_form`` como nome das suas **migrations**.
 Ex.: ``create_products``.
@@ -378,11 +378,11 @@ Alterar uma coluna de uma tabela
 -----------------------------------
 
 Da mesma maneira, você pode gerar uma migração para alterar uma coluna usando a
-linha de comando, se o nome da migração estiver no formato "X""AlterXXXFromYYY":
+linha de comando, se o nome da migração estiver no formato "X""AlterXXXOnYYY":
 
 .. code-block:: bash
 
-    bin/cake bake migration AlterPriceFromProducts name:float
+    bin/cake bake migration AlterPriceOnProducts name:float
 
 Cria o arquivo::
 

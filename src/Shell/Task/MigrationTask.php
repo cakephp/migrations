@@ -122,7 +122,7 @@ class MigrationTask extends SimpleMigrationTask
         } elseif (preg_match('/^(Alter)(.*)/', $name, $matches)) {
             $action = 'alter_table';
             $table = Inflector::underscore($matches[2]);
-        } elseif (preg_match('/^(Alter).+?(?:From)(.*)/', $name, $matches)) {
+        } elseif (preg_match('/^(Alter).+?(?:On)(.*)/', $name, $matches)) {
             $action = 'alter_field';
             $table = Inflector::underscore($matches[2]);
         } else {

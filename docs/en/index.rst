@@ -193,7 +193,7 @@ Migration names can follow any of the following patterns:
   specified table
 * (``/^(Alter)(.*)/``) Alters the specified table. An alias
   for CreateTable and AddField.
-* (``/^(Alter).*(?:From)(.*)/``) Alters fields from the specified table.
+* (``/^(Alter).*(?:On)(.*)/``) Alters fields from the specified table.
 
 You can also use the ``underscore_form`` as the name for your migrations i.e.
 ``create_products``.
@@ -410,11 +410,11 @@ Alter a column from a table
 -----------------------------------
 
 In the same way, you can generate a migration to alter a column by using the
-command line, if the migration name is of the form "AlterXXXFromYYY":
+command line, if the migration name is of the form "AlterXXXOnYYY":
 
 .. code-block:: bash
 
-    bin/cake bake migration AlterPriceFromProducts name:float
+    bin/cake bake migration AlterPriceOnProducts name:float
 
 will generate::
 
