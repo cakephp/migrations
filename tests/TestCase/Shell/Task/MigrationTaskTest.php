@@ -329,5 +329,26 @@ class MigrationTaskTest extends TestCase
             [],
             $this->Task->detectAction('ReaddColumnsToTable')
         );
+
+        $this->assertEquals(
+            ['alter_field', 'groups'],
+            $this->Task->detectAction('AlterFieldOnGroups')
+        );
+        $this->assertEquals(
+            ['alter_field', 'users'],
+            $this->Task->detectAction('AlterFieldOnUsers')
+        );
+        $this->assertEquals(
+            ['alter_field', 'groups_users'],
+            $this->Task->detectAction('AlterFieldOnGroupsUsers')
+        );
+        $this->assertEquals(
+            ['alter_field', 'todos'],
+            $this->Task->detectAction('AlterFieldOnTodos')
+        );
+        $this->assertEquals(
+            ['alter_field', 'articles_i18n'],
+            $this->Task->detectAction('AlterFieldOnArticlesI18n')
+        );
     }
 }
