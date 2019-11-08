@@ -10,10 +10,10 @@ from cakephpsphinx.config.all import *
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '2.x'
+release = '3.x'
 
 # The search index version.
-search_version = 'migrations-2'
+search_version = 'migrations-3'
 
 # The marketing display name for the book.
 version_name = ''
@@ -23,7 +23,8 @@ project = 'CakePHP Migrations'
 
 # Other versions that display in the version picker menu.
 version_list = [
-    {'name': '2.x', 'number': '/migrations/2.x', 'title': '2.x', 'current': True},
+    {'name': '2.x', 'number': '/migrations/2', 'title': '2.x'},
+    {'name': '3.x', 'number': '/migrations/3', 'title': '3.x', 'current': True},
 ]
 
 # Languages available.
@@ -31,10 +32,10 @@ languages = ['en', 'fr', 'ja', 'pt', 'ru']
 
 # The GitHub branch name for this version of the docs
 # for edit links to point at.
-branch = 'master'
+branch = '4.x'
 
 # Current version being built
-version = '2.x'
+version = '3.x'
 
 # Language in use for this directory.
 language = 'en'
@@ -46,3 +47,5 @@ repository = 'cakephp/migrations'
 source_path = 'docs/'
 
 hide_page_contents = ('search', '404', 'contents')
+
+is_prerelease = True
