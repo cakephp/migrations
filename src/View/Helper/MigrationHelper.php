@@ -103,6 +103,10 @@ class MigrationHelper extends Helper
             return 'removeColumn';
         }
 
+        if ($action === 'alter_field') {
+            return 'changeColumn';
+        }
+
         return 'addColumn';
     }
 
