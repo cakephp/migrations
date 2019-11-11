@@ -30,7 +30,7 @@ class ShellPropertiesClassReflectionExtension implements PropertiesClassReflecti
     {
         return new BakeTemplatePropertyReflection(
             $classReflection,
-            new ObjectType('Bake\Shell\Task\BakeTemplateTask', false)
+            new ObjectType('Bake\Shell\Task\BakeTemplateTask', null)
         );
     }
 }
