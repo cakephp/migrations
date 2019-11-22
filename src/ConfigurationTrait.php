@@ -87,7 +87,7 @@ trait ConfigurationTrait
                 'seeds' => $seedsPath,
             ],
             'templates' => [
-                'file' => $templatePath . 'Phinx' . DS . 'create.php.template'
+                'file' => $templatePath . 'Phinx' . DS . 'create.php.template',
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
             'environments' => [
@@ -103,8 +103,8 @@ trait ConfigurationTrait
                     'charset' => isset($connectionConfig['encoding']) ? $connectionConfig['encoding'] : null,
                     'unix_socket' => isset($connectionConfig['unix_socket']) ? $connectionConfig['unix_socket'] : null,
                     'suffix' => '',
-                ]
-            ]
+                ],
+            ],
         ];
 
         if ($adapterName === 'pgsql') {

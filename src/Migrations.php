@@ -239,7 +239,7 @@ class Migrations
         $params = [
             array_pop($migrationPaths),
             $this->getManager()->getVersionsToMark($input),
-            $this->output
+            $this->output,
         ];
 
         $this->run('markVersionsAsMigrated', $params, $input);

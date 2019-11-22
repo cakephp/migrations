@@ -40,7 +40,7 @@ class MigrationsShell extends Shell
         'Migrations.MarkMigrated',
         'Migrations.Migrate',
         'Migrations.Rollback',
-        'Migrations.Status'
+        'Migrations.Status',
     ];
 
     /**

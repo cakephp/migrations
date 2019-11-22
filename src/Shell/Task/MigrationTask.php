@@ -70,7 +70,7 @@ class MigrationTask extends SimpleMigrationTask
                 'namespace' => $namespace,
                 'tables' => [],
                 'action' => null,
-                'name' => $className
+                'name' => $className,
             ];
         }
 
@@ -96,9 +96,9 @@ class MigrationTask extends SimpleMigrationTask
             'columns' => [
                 'fields' => $fields,
                 'indexes' => $indexes,
-                'primaryKey' => $primaryKey
+                'primaryKey' => $primaryKey,
             ],
-            'name' => $className
+            'name' => $className,
         ];
     }
 

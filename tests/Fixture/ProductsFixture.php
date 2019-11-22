@@ -40,8 +40,8 @@ class ProductsFixture extends TestFixture
         '_indexes' => [
             'title_idx_ft' => [
                 'type' => 'index',
-                'columns' => ['title']
-            ]
+                'columns' => ['title'],
+            ],
         ],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
@@ -52,9 +52,9 @@ class ProductsFixture extends TestFixture
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],
                 'update' => 'cascade',
-                'delete' => 'cascade'
-            ]
-        ]
+                'delete' => 'cascade',
+            ],
+        ],
     ];
 
     /**

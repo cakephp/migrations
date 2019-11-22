@@ -31,18 +31,18 @@ class MigrateTask extends CommandTask
             ->addOption('target', [
                 'short' => 't',
                 'help' => 'The version number to migrate to',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('date', [
                 'short' => 'd',
                 'help' => 'The date to migrate to',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('dry-run', ['short' => 'x'])
             ->addOption('fake', ['boolean' => true])
             ->addOption('no-lock', [
                 'help' => 'If present, no lock file will be generated after migrating',
-                'boolean' => true
+                'boolean' => true,
             ]);
 
         return $parser;

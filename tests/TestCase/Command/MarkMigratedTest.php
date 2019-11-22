@@ -96,7 +96,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -120,7 +120,7 @@ class MarkMigratedTest extends TestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -164,7 +164,7 @@ class MarkMigratedTest extends TestCase
         $buggyCommandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -184,7 +184,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             'version' => 'all',
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -213,7 +213,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             'version' => 'all',
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -240,7 +240,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             '--target' => '20150704160200',
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -255,7 +255,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             '--target' => '20150826191400',
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -282,7 +282,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             '--target' => '20150704160610',
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -298,7 +298,7 @@ class MarkMigratedTest extends TestCase
             '--target' => '20150724233100',
             '--exclude' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -314,7 +314,7 @@ class MarkMigratedTest extends TestCase
             '--target' => '20150826191400',
             '--exclude' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -337,7 +337,7 @@ class MarkMigratedTest extends TestCase
             '--target' => '20150704160610',
             '--exclude' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -353,7 +353,7 @@ class MarkMigratedTest extends TestCase
             '--target' => '20150724233100',
             '--only' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -369,7 +369,7 @@ class MarkMigratedTest extends TestCase
             '--target' => '20150826191400',
             '--only' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -388,7 +388,7 @@ class MarkMigratedTest extends TestCase
             '--target' => '20150704160610',
             '--only' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -403,7 +403,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             'version' => '20150724233100',
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $this->assertContains(
@@ -427,7 +427,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             '--exclude' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
@@ -441,7 +441,7 @@ class MarkMigratedTest extends TestCase
             'command' => $this->command->getName(),
             '--only' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();
@@ -457,7 +457,7 @@ class MarkMigratedTest extends TestCase
             '--only' => true,
             '--exclude' => true,
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $result = $this->Connection->newQuery()->select(['*'])->from('phinxlog')->execute()->count();

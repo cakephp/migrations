@@ -115,7 +115,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
             $event->getSubject()->loadHelper('Migrations.Migration', [
-                'collection' => $collection
+                'collection' => $collection,
             ]);
         });
 
@@ -210,7 +210,7 @@ class MigrationDiffTask extends SimpleMigrationTask
     {
         $this->templateData['fullTables'] = [
             'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
-            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema)
+            'remove' => array_diff_key($this->dumpSchema, $this->currentSchema),
         ];
     }
 
@@ -464,7 +464,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         }
 
         $dispatch = $this->dispatchShell([
-            'command' => $dispatchCommand
+            'command' => $dispatchCommand,
         ]);
 
         if ($dispatch === 1) {
@@ -553,7 +553,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
         $parser->addArgument('name', [
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
-            'required' => true
+            'required' => true,
         ]);
 
         return $parser;

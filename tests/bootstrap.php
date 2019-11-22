@@ -47,8 +47,8 @@ Configure::write('App', [
     'encoding' => 'UTF-8',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
-        'templates' => [ROOT . 'App' . DS . 'Template' . DS]
-    ]
+        'templates' => [ROOT . 'App' . DS . 'Template' . DS],
+    ],
 ]);
 
 Cake\Cache\Cache::setConfig([
@@ -63,7 +63,7 @@ Cake\Cache\Cache::setConfig([
         'prefix' => 'cake_model_',
         'serialize' => true,
         'path' => TMP,
-    ]
+    ],
 ]);
 
 // Store initial state

@@ -40,8 +40,8 @@ class ArticlesFixture extends TestFixture
         '_indexes' => [
             'title_idx' => [
                 'type' => 'index',
-                'columns' => ['title']
-            ]
+                'columns' => ['title'],
+            ],
         ],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
@@ -50,15 +50,15 @@ class ArticlesFixture extends TestFixture
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],
                 'update' => 'noAction',
-                'delete' => 'noAction'
+                'delete' => 'noAction',
             ],
             'product_idx' => [
                 'type' => 'foreign',
                 'columns' => ['product_id'],
                 'references' => ['products', 'id'],
                 'update' => 'cascade',
-                'delete' => 'cascade'
-            ]
-        ]
+                'delete' => 'cascade',
+            ],
+        ],
     ];
 }
