@@ -28,7 +28,6 @@ use Migrations\Util\UtilTrait;
  */
 class MigrationSnapshotTask extends SimpleMigrationTask
 {
-
     use SnapshotTrait;
     use TableFinderTrait;
     use UtilTrait;

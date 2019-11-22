@@ -14,7 +14,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class CreateTest extends TestCase
 {
-
     use StringCompareTrait;
 
     /**

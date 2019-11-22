@@ -21,7 +21,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MarkMigrated extends AbstractCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait;
 

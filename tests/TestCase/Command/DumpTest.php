@@ -30,7 +30,6 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class DumpTest extends TestCase
 {
-
     use StringCompareTrait;
 
     /**

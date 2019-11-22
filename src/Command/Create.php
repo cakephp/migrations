@@ -22,7 +22,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends CreateCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait {
         execute as parentExecute;

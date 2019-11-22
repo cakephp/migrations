@@ -29,7 +29,7 @@ class ColumnParserTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->columnParser = new ColumnParser;
+        $this->columnParser = new ColumnParser();
     }
 
     /**

@@ -76,7 +76,7 @@ class MigrationTask extends SimpleMigrationTask
 
         $arguments = $this->args;
         unset($arguments[0]);
-        $columnParser = new ColumnParser;
+        $columnParser = new ColumnParser();
         $fields = $columnParser->parseFields($arguments);
         $indexes = $columnParser->parseIndexes($arguments);
         $primaryKey = $columnParser->parsePrimaryKey($arguments);

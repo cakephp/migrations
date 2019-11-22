@@ -25,7 +25,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 trait ConfigurationTrait
 {
-
     use UtilTrait;
 
     /**

@@ -26,7 +26,6 @@ use Symfony\Component\Console\Output\NullOutput;
  */
 class Migrations
 {
-
     use ConfigurationTrait;
 
     /**
@@ -224,7 +223,8 @@ class Migrations
     {
         $this->setCommand('mark_migrated');
 
-        if (isset($options['target']) &&
+        if (
+            isset($options['target']) &&
             isset($options['exclude']) &&
             isset($options['only'])
         ) {

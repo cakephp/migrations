@@ -57,7 +57,8 @@ class CommandTester
     {
         // set the command name automatically if the application requires
         // this argument and no command name was passed
-        if (!isset($input['command'])
+        if (
+            !isset($input['command'])
             && (null !== $application = $this->command->getApplication())
             && $application->getDefinition()->hasArgument('command')
         ) {

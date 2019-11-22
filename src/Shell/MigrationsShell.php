@@ -86,7 +86,7 @@ class MigrationsShell extends Shell
     public function initialize()
     {
         $composerConfig = ROOT . DS . 'vendor' . DS . 'robmorgan' . DS . 'phinx' . DS . 'composer.json';
-        $version = file_exists($composerConfig)? json_decode(file_get_contents($composerConfig))->version : '0';
+        $version = file_exists($composerConfig) ? json_decode(file_get_contents($composerConfig))->version : '0';
 
         if (!defined('PHINX_VERSION')) {
             define('PHINX_VERSION', $version);
@@ -115,7 +115,8 @@ class MigrationsShell extends Shell
             return $exitCode === 0;
         }
 
-        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
+        if (
+            isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
             !$this->params['no-lock'] &&
             $exitCode === 0
         ) {

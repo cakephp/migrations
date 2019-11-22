@@ -26,7 +26,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Dump extends AbstractCommand
 {
-
     use CommandTrait;
     use ConfigurationTrait;
     use TableFinderTrait;

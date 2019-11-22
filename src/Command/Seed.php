@@ -20,7 +20,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Seed extends SeedRun
 {
-
     use CommandTrait {
         execute as parentExecute;
     }
