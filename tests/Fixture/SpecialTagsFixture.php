@@ -36,8 +36,8 @@ class SpecialTagsFixture extends TestFixture
         'highlighted_time' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'UNIQUE_TAG2' => ['type' => 'unique', 'columns' => ['article_id']]
-        ]
+            'UNIQUE_TAG2' => ['type' => 'unique', 'columns' => ['article_id']],
+        ],
     ];
 
     /**
@@ -51,14 +51,14 @@ class SpecialTagsFixture extends TestFixture
             'tag_id' => 3,
             'highlighted' => false,
             'highlighted_time' => null,
-            'author_id' => null
+            'author_id' => null,
         ],
         [
             'article_id' => 2,
             'tag_id' => 1,
             'highlighted' => true,
             'highlighted_time' => '2014-06-01 10:10:00',
-            'author_id' => null
-        ]
+            'author_id' => null,
+        ],
     ];
 }

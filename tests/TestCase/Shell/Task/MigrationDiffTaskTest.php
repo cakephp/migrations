@@ -107,7 +107,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->expects($this->once())
             ->method('dispatchShell')
             ->with([
-                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog'
+                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog',
             ]);
 
         $this->Task->bake('EmptyHistoryNoMigrations');
@@ -131,7 +131,7 @@ class MigrationDiffTaskTest extends TestCase
         $this->Task->expects($this->once())
             ->method('dispatchShell')
             ->with([
-                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog'
+                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog',
             ])
             ->will($this->returnValue(1));
 
@@ -174,7 +174,7 @@ class MigrationDiffTaskTest extends TestCase
         // Create a _phinxlog table to make sure it's not included in the dump
         $table = (new TableSchema('articles_phinxlog'))->addColumn('title', [
             'type' => 'string',
-            'length' => 255
+            'length' => 255,
         ]);
         foreach ($table->createSql($connection) as $stmt) {
             $connection->query($stmt);
@@ -410,7 +410,7 @@ class MigrationDiffTaskTest extends TestCase
     {
         $params = [
             'connection' => 'test_comparisons',
-            'source' => $source
+            'source' => $source,
         ];
         $migrations = new Migrations($params);
 

@@ -76,7 +76,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
         $argv = [
             'seed',
             '--seed',
-            $seeder
+            $seeder,
         ];
 
         $plugin = $pluginName ?: $this->input->getOption('plugin');

@@ -331,7 +331,7 @@ class MigrationHelper extends Helper
             'comment',
             'autoIncrement',
             'precision',
-            'after'
+            'after',
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -410,7 +410,7 @@ class MigrationHelper extends Helper
             'after', 'update',
             'comment', 'unsigned',
             'signed', 'properties',
-            'autoIncrement', 'unique'
+            'autoIncrement', 'unique',
         ];
 
         $attributes = [];
@@ -452,7 +452,7 @@ class MigrationHelper extends Helper
     public function stringifyList(array $list, array $options = [])
     {
         $options += [
-            'indent' => 2
+            'indent' => 2,
         ];
 
         if (!$list) {
@@ -463,7 +463,7 @@ class MigrationHelper extends Helper
         foreach ($list as $k => &$v) {
             if (is_array($v)) {
                 $v = $this->stringifyList($v, [
-                    'indent' => $options['indent'] + 1
+                    'indent' => $options['indent'] + 1,
                 ]);
                 $v = sprintf('[%s]', $v);
             } else {

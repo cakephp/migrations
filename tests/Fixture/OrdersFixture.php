@@ -39,12 +39,12 @@ class OrdersFixture extends TestFixture
         '_indexes' => [
             'product_category' => [
                 'type' => 'index',
-                'columns' => ['product_category', 'product_id']
-            ]
+                'columns' => ['product_category', 'product_id'],
+            ],
         ],
         '_constraints' => [
             'primary' => [
-                'type' => 'primary', 'columns' => ['id']
+                'type' => 'primary', 'columns' => ['id'],
             ],
             'product_id_fk' => [
                 'type' => 'foreign',
@@ -52,7 +52,7 @@ class OrdersFixture extends TestFixture
                 'references' => ['products', ['category_id', 'id']],
                 'update' => 'cascade',
                 'delete' => 'cascade',
-            ]
-        ]
+            ],
+        ],
     ];
 }

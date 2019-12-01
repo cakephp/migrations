@@ -3,7 +3,6 @@ use Migrations\AbstractMigration;
 
 class CreateLettersTable extends AbstractMigration
 {
-
     public $autoId = false;
 
     public function change()
@@ -18,7 +17,7 @@ class CreateLettersTable extends AbstractMigration
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('letter', 'string', [
-                'limit' => 1
+                'limit' => 1,
             ])
             ->create();
     }

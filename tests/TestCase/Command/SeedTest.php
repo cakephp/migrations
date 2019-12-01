@@ -105,7 +105,7 @@ class SeedTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--seed' => 'NumbersSeed'
+            '--seed' => 'NumbersSeed',
         ]);
 
         $display = $this->getDisplayFromOutput();
@@ -121,8 +121,8 @@ class SeedTest extends TestCase
             [
                 'id' => '1',
                 'number' => '10',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -138,7 +138,7 @@ class SeedTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'AltSeeds'
+            '--source' => 'AltSeeds',
         ];
         $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -147,7 +147,7 @@ class SeedTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'AltSeeds'
+            '--source' => 'AltSeeds',
         ]);
 
         $display = $this->getDisplayFromOutput();
@@ -163,8 +163,8 @@ class SeedTest extends TestCase
             [
                 'id' => '2',
                 'number' => '5',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
         $migrations->rollback(['target' => 'all']);
@@ -179,7 +179,7 @@ class SeedTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'DerpSeeds'
+            '--source' => 'DerpSeeds',
         ];
         $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -188,7 +188,7 @@ class SeedTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'DerpSeeds'
+            '--source' => 'DerpSeeds',
         ]);
 
         $display = $this->getDisplayFromOutput();
@@ -205,7 +205,7 @@ class SeedTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'CallSeeds'
+            '--source' => 'CallSeeds',
         ];
         $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -215,7 +215,7 @@ class SeedTest extends TestCase
             'command' => $this->command->getName(),
             '--connection' => 'test',
             '--source' => 'CallSeeds',
-            '--seed' => 'DatabaseSeed'
+            '--seed' => 'DatabaseSeed',
         ]);
 
         $display = $this->getDisplayFromOutput();
@@ -261,7 +261,7 @@ class SeedTest extends TestCase
     {
         $params = [
             'connection' => 'test',
-            'source' => 'TestsMigrations'
+            'source' => 'TestsMigrations',
         ];
         $migrations = new Migrations($params);
         $adapter = $migrations

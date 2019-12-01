@@ -40,7 +40,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
             $event->getSubject()->loadHelper('Migrations.Migration', [
-                'collection' => $collection
+                'collection' => $collection,
             ]);
         });
 
@@ -70,7 +70,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $collection = $this->getCollection($this->connection);
         $options = [
             'require-table' => $this->params['require-table'],
-            'plugin' => $this->plugin
+            'plugin' => $this->plugin,
         ];
         $tables = $this->getTablesToBake($collection, $options);
 
@@ -91,7 +91,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'tables' => $tables,
             'action' => 'create_table',
             'name' => $this->BakeTemplate->viewVars['name'],
-            'autoId' => $autoId
+            'autoId' => $autoId,
         ];
     }
 
@@ -134,20 +134,20 @@ class MigrationSnapshotTask extends SimpleMigrationTask
             'Bake migration snapshot class.'
         )->addArgument('name', [
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
-            'required' => true
+            'required' => true,
         ])
         ->addOption('require-table', [
             'boolean' => true,
             'default' => false,
-            'help' => 'If require-table is set to true, check also that the table class exists.'
+            'help' => 'If require-table is set to true, check also that the table class exists.',
         ])->addOption('disable-autoid', [
             'boolean' => true,
             'default' => false,
-            'help' => 'Disable phinx behavior of automatically adding an id field.'
+            'help' => 'Disable phinx behavior of automatically adding an id field.',
         ])
         ->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after baking',
-            'boolean' => true
+            'boolean' => true,
         ]);
 
         return $parser;

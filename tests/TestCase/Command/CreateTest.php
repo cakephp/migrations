@@ -82,7 +82,7 @@ class CreateTest extends TestCase
         $params = [
             '--connection' => 'test',
             '--source' => 'Create',
-            'name' => 'TestCreate'
+            'name' => 'TestCreate',
         ];
         $commandTester = $this->getCommandTester($params);
 

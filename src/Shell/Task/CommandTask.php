@@ -33,17 +33,17 @@ class CommandTask extends Shell
             ->addOption('plugin', [
                 'short' => 'p',
                 'help' => 'The plugin the command should be applied to',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('connection', [
                 'short' => 'c',
                 'help' => 'The datasource connection to use',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('source', [
                 'short' => 's',
                 'help' => 'The name of the folder where migrations are stored',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('ansi')
             ->addOption('no-ansi')

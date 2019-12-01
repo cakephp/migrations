@@ -55,7 +55,7 @@ class ColumnParserTest extends TestCase
                     'null' => false,
                     'default' => null,
                     'limit' => 11,
-                    'autoIncrement' => true
+                    'autoIncrement' => true,
                 ],
             ],
         ], $this->columnParser->parseFields(['id:primary']));
@@ -66,7 +66,7 @@ class ColumnParserTest extends TestCase
                 'options' => [
                     'null' => false,
                     'default' => null,
-                    'limit' => 11
+                    'limit' => 11,
                 ],
             ],
             'name' => [
@@ -85,7 +85,7 @@ class ColumnParserTest extends TestCase
                 'options' => [
                     'null' => false,
                     'default' => null,
-                    'limit' => 11
+                    'limit' => 11,
                 ],
             ],
             'created' => [
@@ -123,7 +123,7 @@ class ColumnParserTest extends TestCase
                     'null' => false,
                     'precision' => 10,
                     'scale' => 6,
-                ]
+                ],
             ],
             'longitude' => [
                 'columnType' => 'decimal',
@@ -132,7 +132,7 @@ class ColumnParserTest extends TestCase
                     'null' => false,
                     'precision' => 10,
                     'scale' => 6,
-                ]
+                ],
             ],
         ], $this->columnParser->parseFields(['id', 'created', 'modified', 'updated', 'deleted_at', 'latitude', 'longitude']));
 
@@ -142,7 +142,7 @@ class ColumnParserTest extends TestCase
                 'options' => [
                     'null' => false,
                     'default' => null,
-                    'limit' => 11
+                    'limit' => 11,
                 ],
             ],
             'name' => [
@@ -188,7 +188,7 @@ class ColumnParserTest extends TestCase
                 'options' => [
                     'null' => false,
                     'default' => null,
-                    'limit' => 11
+                    'limit' => 11,
                 ],
             ],
             'name' => [
@@ -220,7 +220,7 @@ class ColumnParserTest extends TestCase
             'id',
             'name:string[125]',
             'description:string?[50]',
-            'age:integer?'
+            'age:integer?',
         ]);
         $this->assertEquals($expected, $actual);
     }
@@ -232,15 +232,15 @@ class ColumnParserTest extends TestCase
     {
         $this->assertEquals(['UNIQUE_ID' => [
             'columns' => ['id'],
-            'options' => ['unique' => true, 'name' => 'UNIQUE_ID']
+            'options' => ['unique' => true, 'name' => 'UNIQUE_ID'],
         ]], $this->columnParser->parseIndexes(['id:integer:unique']));
         $this->assertEquals(['UNIQUE_USER' => [
             'columns' => ['email'],
-            'options' => ['unique' => true, 'name' => 'UNIQUE_USER']
+            'options' => ['unique' => true, 'name' => 'UNIQUE_USER'],
         ]], $this->columnParser->parseIndexes(['email:string:unique:UNIQUE_USER']));
         $this->assertEquals(['UNIQUE_EVENT' => [
             'columns' => ['event_id', 'market_id'],
-            'options' => ['unique' => true, 'name' => 'UNIQUE_EVENT']
+            'options' => ['unique' => true, 'name' => 'UNIQUE_EVENT'],
         ]], $this->columnParser->parseIndexes([
             'some_field',
             'event_id:integer:unique:UNIQUE_EVENT',

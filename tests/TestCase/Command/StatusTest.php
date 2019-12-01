@@ -105,7 +105,7 @@ class StatusTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -126,7 +126,7 @@ class StatusTest extends TestCase
         $params = [
             '--connection' => 'test',
             '--source' => 'TestsMigrations',
-            '--format' => 'json'
+            '--format' => 'json',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -148,7 +148,7 @@ class StatusTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -156,7 +156,7 @@ class StatusTest extends TestCase
 
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -178,7 +178,7 @@ class StatusTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -192,7 +192,7 @@ class StatusTest extends TestCase
 
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $commandTester->execute(['command' => $this->command->getName()] + $params);
@@ -244,7 +244,7 @@ class StatusTest extends TestCase
     {
         $params = [
             'connection' => 'test',
-            'source' => 'TestsMigrations'
+            'source' => 'TestsMigrations',
         ];
         $migrations = new Migrations($params);
 

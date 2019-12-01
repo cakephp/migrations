@@ -71,7 +71,7 @@ class ColumnParser
                 'options' => [
                     'null' => $nullable,
                     'default' => null,
-                ]
+                ],
             ];
 
             if ($length !== null) {

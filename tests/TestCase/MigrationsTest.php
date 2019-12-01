@@ -49,7 +49,7 @@ class MigrationsTest extends TestCase
         parent::setUp();
         $params = [
             'connection' => 'test',
-            'source' => 'TestsMigrations'
+            'source' => 'TestsMigrations',
         ];
 
         // Get the PDO connection to have the same across the various objects needed to run the tests
@@ -106,18 +106,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'down',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -145,18 +145,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $status);
 
@@ -232,18 +232,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $status);
     }
@@ -264,18 +264,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $status);
     }
@@ -295,18 +295,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $status);
 
@@ -345,18 +345,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'down',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $status);
 
@@ -382,18 +382,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'down',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $status);
 
@@ -432,18 +432,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expected, $status);
 
@@ -467,18 +467,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'down',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $result);
 
@@ -487,8 +487,8 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'down',
                 'id' => '20150416223600',
-                'name' => 'MarkMigratedTest'
-            ]
+                'name' => 'MarkMigratedTest',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -526,18 +526,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'down',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
 
@@ -548,18 +548,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
         $this->migrations->rollback();
@@ -571,42 +571,42 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
 
         // If we want to rollback to a date after the last migrations,
         // nothing should be rollbacked
         $this->migrations->rollback([
-            'date' => '20150730'
+            'date' => '20150730',
         ]);
         $expectedStatus = [
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'up',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
 
@@ -617,18 +617,18 @@ class MigrationsTest extends TestCase
             [
                 'status' => 'up',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
 
@@ -636,24 +636,24 @@ class MigrationsTest extends TestCase
         // everything should be rollbacked
         $this->migrations->migrate();
         $this->migrations->rollback([
-            'date' => '20150703'
+            'date' => '20150703',
         ]);
         $expectedStatus = [
             [
                 'status' => 'down',
                 'id' => '20150704160200',
-                'name' => 'CreateNumbersTable'
+                'name' => 'CreateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150724233100',
-                'name' => 'UpdateNumbersTable'
+                'name' => 'UpdateNumbersTable',
             ],
             [
                 'status' => 'down',
                 'id' => '20150826191400',
-                'name' => 'CreateLettersTable'
-            ]
+                'name' => 'CreateLettersTable',
+            ],
         ];
         $this->assertEquals($expectedStatus, $this->migrations->status());
     }
@@ -677,8 +677,8 @@ class MigrationsTest extends TestCase
             [
                 'id' => '1',
                 'number' => '10',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -692,13 +692,13 @@ class MigrationsTest extends TestCase
             [
                 'id' => '1',
                 'number' => '10',
-                'radix' => '10'
+                'radix' => '10',
             ],
             [
                 'id' => '2',
                 'number' => '10',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -712,23 +712,23 @@ class MigrationsTest extends TestCase
             [
                 'id' => '1',
                 'number' => '10',
-                'radix' => '10'
+                'radix' => '10',
             ],
             [
                 'id' => '2',
                 'number' => '10',
-                'radix' => '10'
+                'radix' => '10',
             ],
             [
                 'id' => '3',
                 'number' => '2',
-                'radix' => '10'
+                'radix' => '10',
             ],
             [
                 'id' => '4',
                 'number' => '5',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
         $this->migrations->rollback(['target' => 'all']);
@@ -754,8 +754,8 @@ class MigrationsTest extends TestCase
             [
                 'id' => '1',
                 'number' => '2',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -770,13 +770,13 @@ class MigrationsTest extends TestCase
             [
                 'id' => '1',
                 'number' => '2',
-                'radix' => '10'
+                'radix' => '10',
             ],
             [
                 'id' => '2',
                 'number' => '5',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -803,8 +803,8 @@ class MigrationsTest extends TestCase
             [
                 'id' => '1',
                 'number' => '10',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -816,28 +816,28 @@ class MigrationsTest extends TestCase
         $expected = [
             [
                 'id' => '1',
-                'letter' => 'a'
+                'letter' => 'a',
             ],
             [
                 'id' => '2',
-                'letter' => 'b'
+                'letter' => 'b',
             ],
             [
                 'id' => '3',
-                'letter' => 'c'
+                'letter' => 'c',
             ],
             [
                 'id' => '4',
-                'letter' => 'd'
+                'letter' => 'd',
             ],
             [
                 'id' => '5',
-                'letter' => 'e'
+                'letter' => 'e',
             ],
             [
                 'id' => '6',
-                'letter' => 'f'
-            ]
+                'letter' => 'f',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -938,23 +938,23 @@ class MigrationsTest extends TestCase
                     ['test_not_empty_snapshot56', 20150912015611],
                     ['test_auto_id_disabled_snapshot56', 20150912015612],
                     ['testCreatePrimaryKey', 20150912015603],
-                    ['testCreatePrimaryKeyUuid', 20150912015604]
-                ]
+                    ['testCreatePrimaryKeyUuid', 20150912015604],
+                ],
             ],
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
                 [
                     ['test_not_empty_snapshot_pgsql', 20150912015606],
-                    ['test_auto_id_disabled_snapshot_pgsql', 20150912015607]
-                ]
+                    ['test_auto_id_disabled_snapshot_pgsql', 20150912015607],
+                ],
             ],
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
                 [
                     ['test_not_empty_snapshot_sqlite', 20150912015609],
-                    ['test_auto_id_disabled_snapshot_sqlite', 20150912015610]
-                ]
-            ]
+                    ['test_auto_id_disabled_snapshot_sqlite', 20150912015610],
+                ],
+            ],
         ];
 
         $db = getenv('DB');

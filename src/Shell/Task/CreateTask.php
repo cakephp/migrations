@@ -31,17 +31,17 @@ class CreateTask extends CommandTask
         $parser = parent::getOptionParser();
         $parser
             ->addArgument('name', [
-                'help' => 'What is the name of the migration?'
+                'help' => 'What is the name of the migration?',
             ])
             ->addOption('template', [
                 'short' => 't',
                 'help' => 'Use an alternative template',
-                'required' => false
+                'required' => false,
             ])
             ->addOption('class', [
                 'short' => 'l',
                 'help' => 'Use a class implementing "' . Create::CREATION_INTERFACE . '" to generate the template',
-                'required' => false
+                'required' => false,
             ]);
 
         return $parser;

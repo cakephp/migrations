@@ -24,7 +24,7 @@ class MigrationShellTest extends TestCase
         $mockedMethods = [
             'dispatchShell',
             'getApp',
-            'getOutput'
+            'getOutput',
         ];
 
         $this->shell = $this->getMockBuilder('\Migrations\Shell\MigrationsShell')
@@ -62,7 +62,7 @@ class MigrationShellTest extends TestCase
         $argv = [
             'migrate',
             '-c',
-            'test'
+            'test',
         ];
 
         $this->shell->expects($this->once())
@@ -82,7 +82,7 @@ class MigrationShellTest extends TestCase
             'migrate',
             '-c',
             'test',
-            '--no-lock'
+            '--no-lock',
         ];
 
         $this->shell->expects($this->never())
@@ -101,7 +101,7 @@ class MigrationShellTest extends TestCase
         $argv = [
             'rollback',
             '-c',
-            'test'
+            'test',
         ];
 
         $this->shell->expects($this->once())
@@ -121,7 +121,7 @@ class MigrationShellTest extends TestCase
             'rollback',
             '-c',
             'test',
-            '--no-lock'
+            '--no-lock',
         ];
 
         $this->shell->expects($this->never())

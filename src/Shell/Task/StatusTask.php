@@ -30,7 +30,7 @@ class StatusTask extends CommandTask
         $parser->addOption('format', [
             'short' => 'f',
             'help' => 'The output format: text or json. Defaults to text.',
-            'required' => false
+            'required' => false,
         ]);
 
         return $parser;

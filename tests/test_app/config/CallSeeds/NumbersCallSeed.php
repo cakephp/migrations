@@ -19,8 +19,8 @@ class NumbersCallSeed extends AbstractSeed
         $data = [
             [
                 'number' => '10',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
 
         $table = $this->table('numbers');

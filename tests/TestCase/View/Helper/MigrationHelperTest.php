@@ -26,7 +26,7 @@ class MigrationHelperTest extends TestCase
 {
     public $fixtures = [
         'plugin.Migrations.Users',
-        'plugin.Migrations.SpecialTags'
+        'plugin.Migrations.SpecialTags',
     ];
 
     /**
@@ -41,7 +41,7 @@ class MigrationHelperTest extends TestCase
         $this->Collection = new Collection($this->Connection);
         $this->View = new View();
         $this->Helper = new MigrationHelper($this->View, [
-            'collection' => $this->Collection
+            'collection' => $this->Collection,
         ]);
         Cache::clear(false, '_cake_model_');
         Cache::enable();
@@ -182,7 +182,7 @@ class MigrationHelperTest extends TestCase
                 'precision' => null,
                 'comment' => $this->values['comment'],
                 'signed' => true,
-                'autoIncrement' => true
+                'autoIncrement' => true,
             ],
         ], $this->Helper->column($tableSchema, 'id'));
 
@@ -266,7 +266,7 @@ class MigrationHelperTest extends TestCase
             'precision' => null,
             'comment' => $this->values['comment'],
             'signed' => true,
-            'autoIncrement' => true
+            'autoIncrement' => true,
         ], $this->Helper->attributes('users', 'id'));
 
         $this->assertEquals([
@@ -308,7 +308,7 @@ class MigrationHelperTest extends TestCase
             'precision' => null,
             'comment' => $this->values['comment'],
             'signed' => true,
-            'autoIncrement' => null
+            'autoIncrement' => null,
         ], $this->Helper->attributes('special_tags', 'article_id'));
     }
 

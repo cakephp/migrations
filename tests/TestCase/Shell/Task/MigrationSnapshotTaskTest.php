@@ -81,7 +81,7 @@ class MigrationSnapshotTaskTest extends TestCase
             'dispatchShell',
             'findTables',
             'fetchTableName',
-            'refreshDump'
+            'refreshDump',
         ];
 
         $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
@@ -215,7 +215,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $table = new TableSchema('parts', [
             'id' => ['type' => 'integer', 'unsigned' => true],
             'name' => ['type' => 'string', 'length' => 255],
-            'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true]
+            'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true],
         ]);
         $table->addConstraint('primary', ['type' => 'primary', 'columns' => ['id']]);
         $sql = $table->createSql($db);
@@ -258,7 +258,7 @@ class MigrationSnapshotTaskTest extends TestCase
         $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
 
         ConnectionManager::setConfig('alternative', [
-            'database' => 'alternative'
+            'database' => 'alternative',
         ]);
         $class->connection = 'alternative';
         $expected = ['special_tags'];
@@ -266,7 +266,7 @@ class MigrationSnapshotTaskTest extends TestCase
 
         ConnectionManager::drop('alternative');
         ConnectionManager::setConfig('alternative', [
-            'schema' => 'alternative'
+            'schema' => 'alternative',
         ]);
         $class->connection = 'alternative';
         $expected = ['special_tags'];

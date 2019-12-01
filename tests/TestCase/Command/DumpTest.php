@@ -102,14 +102,14 @@ class DumpTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
 
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $dumpPath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
@@ -125,7 +125,7 @@ class DumpTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
         $migrations = $this->getMigrations();
@@ -134,7 +134,7 @@ class DumpTest extends TestCase
         $commandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',
-            '--source' => 'TestsMigrations'
+            '--source' => 'TestsMigrations',
         ]);
 
         $dumpFilePath = ROOT . 'config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock';
@@ -192,7 +192,7 @@ class DumpTest extends TestCase
     {
         $params = [
             'connection' => 'test',
-            'source' => 'TestsMigrations'
+            'source' => 'TestsMigrations',
         ];
         $migrations = new Migrations($params);
         $adapter = $migrations

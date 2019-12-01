@@ -29,6 +29,6 @@ class CompositePkFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'uuid', 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7', 'null' => false ],
         'name' => ['type' => 'string', 'length' => 10, 'default' => '', 'null' => false],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id', 'name']]]
+        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id', 'name']]],
     ];
 }

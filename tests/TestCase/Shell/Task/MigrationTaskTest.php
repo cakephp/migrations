@@ -68,7 +68,7 @@ class MigrationTaskTest extends TestCase
     {
         $this->Task->args = [
             'create_users',
-            'name'
+            'name',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
@@ -77,7 +77,7 @@ class MigrationTaskTest extends TestCase
             'create_users',
             'name',
             'created',
-            'modified'
+            'modified',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'Datetime.php', $result);
@@ -87,7 +87,7 @@ class MigrationTaskTest extends TestCase
             'id:integer:primary_key',
             'name',
             'created',
-            'modified'
+            'modified',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKey.php', $result);
@@ -97,7 +97,7 @@ class MigrationTaskTest extends TestCase
             'id:uuid:primary_key',
             'name',
             'created',
-            'modified'
+            'modified',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKeyUuid.php', $result);
@@ -105,7 +105,7 @@ class MigrationTaskTest extends TestCase
         $this->Task->args = [
             'create_users',
             'name:string[128]',
-            'counter:integer[8]'
+            'counter:integer[8]',
         ];
         $result = $this->Task->bake('CreateUsers');
         $this->assertSameAsFile(__FUNCTION__ . 'FieldLength.php', $result);
@@ -183,13 +183,13 @@ class MigrationTaskTest extends TestCase
 
         $this->Task->args = [
             'add_pk_to_users',
-            'somefield:primary_key'
+            'somefield:primary_key',
         ];
         $this->Task->bake('AddPkToUsers');
 
         $this->Task->args = [
             'alter_users',
-            'somefield:primary_key'
+            'somefield:primary_key',
         ];
         $this->Task->bake('AlterUsers');
     }

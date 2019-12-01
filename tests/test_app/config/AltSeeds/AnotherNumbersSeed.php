@@ -19,8 +19,8 @@ class AnotherNumbersSeed extends AbstractSeed
         $data = [
             [
                 'number' => '2',
-                'radix' => '10'
-            ]
+                'radix' => '10',
+            ],
         ];
 
         $table = $this->table('numbers');

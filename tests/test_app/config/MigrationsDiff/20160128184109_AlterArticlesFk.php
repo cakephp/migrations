@@ -27,7 +27,7 @@ class AlterArticlesFk extends AbstractMigration
             'id',
             [
                 'update' => 'CASCADE',
-                'delete' => 'CASCADE'
+                'delete' => 'CASCADE',
             ]
         );
 
