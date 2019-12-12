@@ -97,7 +97,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return void
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -113,7 +113,7 @@ class MarkMigrated extends AbstractCommand
                 "<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>"
             );
 
-            return;
+            return BaseCommand::CODE_ERROR;
         }
 
         if ($this->isUsingDeprecatedAll()) {
@@ -129,10 +129,12 @@ class MarkMigrated extends AbstractCommand
         } catch (InvalidArgumentException $e) {
             $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
 
-            return;
+            return BaseCommand::CODE_ERROR;
         }
 
         $this->getManager()->markVersionsAsMigrated($path, $versions, $output);
+
+        return BaseCommand::CODE_SUCCESS;
     }
 
     /**
