@@ -85,5 +85,5 @@ Plugin::getCollection()->add(new \Migrations\Plugin());
 Plugin::getCollection()->add(new \TestBlog\Plugin());
 
 if (!defined('PHINX_VERSION')) {
-    define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
+    define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? 'UNKNOWN' : '@PHINX_VERSION@');
 }

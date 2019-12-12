@@ -13,5 +13,5 @@
  */
 define('ROOT', '');
 define('APP', 'app');
-define('PHINX_VERSION', '0.8.1');
+define('PHINX_VERSION', 'UNKNOWN');
 define('CONFIG', ROOT . DS . 'config' . DS);
