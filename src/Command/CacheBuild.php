@@ -2,13 +2,12 @@
 namespace Migrations\Command;
 
 use Migrations\Util\SchemaTrait;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CacheBuild extends Command
+class CacheBuild extends BaseCommand
 {
     use SchemaTrait;
 
@@ -42,7 +41,7 @@ class CacheBuild extends Command
         $name = $input->getArgument('name');
         $schema = $this->_getSchema($input, $output);
         if (!$schema) {
-            return false;
+            return static::CODE_ERROR;
         }
         $tables = [$name];
         if (empty($name)) {
@@ -54,6 +53,6 @@ class CacheBuild extends Command
         }
         $output->writeln('<info>Cache build complete</info>');
 
-        return true;
+        return static::CODE_SUCCESS;
     }
 }

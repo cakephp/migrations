@@ -57,7 +57,7 @@ class Seed extends SeedRun
     {
         $event = $this->dispatchEvent('Migration.beforeSeed');
         if ($event->isStopped()) {
-            return $event->result;
+            return $event->result ? BaseCommand::CODE_SUCCESS : BaseCommand::CODE_ERROR;
         }
 
         $seed = $input->getOption('seed');
@@ -70,5 +70,7 @@ class Seed extends SeedRun
         $this->getManager()->setInput($input);
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
+
+        return BaseCommand::CODE_SUCCESS;
     }
 }
