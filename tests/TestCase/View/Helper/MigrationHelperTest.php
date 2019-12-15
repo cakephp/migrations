@@ -113,7 +113,7 @@ class MigrationHelperTest extends TestCase
     {
         $this->assertEquals('removeColumn', $this->Helper->columnMethod('drop_field'));
         $this->assertEquals('addColumn', $this->Helper->columnMethod('add_field'));
-        $this->assertEquals('addColumn', $this->Helper->columnMethod('alter_field'));
+        $this->assertEquals('changeColumn', $this->Helper->columnMethod('alter_field'));
     }
 
     /**

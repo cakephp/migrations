@@ -1,6 +1,6 @@
 {
     "name": "cakephp/migrations",
-    "description": "Database Migration plugin for CakePHP 3.0 based on Phinx",
+    "description": "Database Migration plugin for CakePHP based on Phinx",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "migrations"],
     "homepage": "https://github.com/cakephp/migrations",
@@ -19,7 +19,7 @@
     },
     "require": {
         "php": ">=7.2.0",
-        "robmorgan/phinx": "0.11.x-dev",
+        "robmorgan/phinx": "0.next-dev",
         "cakephp/orm": "4.x-dev",
         "cakephp/cache": "4.x-dev"
     },
@@ -54,11 +54,11 @@
             "@test",
             "@stan"
         ],
-        "cs-check": "phpcs -p src/ tests/",
-        "cs-fix": "phpcbf --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
+        "cs-check": "phpcs --colors  -p src/ tests/",
+        "cs-fix": "phpcbf --colors -p src/ tests/",
         "stan": "phpstan analyse src/",
-        "test": "phpunit",
         "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:^0.11 && mv composer.backup composer.json",
+        "test": "phpunit",
         "test-coverage": "phpunit --coverage-clover=clover.xml"
     }
 }

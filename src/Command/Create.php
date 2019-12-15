@@ -66,7 +66,7 @@ class Create extends CreateCommand
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return mixed
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -95,5 +95,7 @@ class Create extends CreateCommand
                 $output->writeln(sprintf('<info>An error occurred while renaming file to %s</info>', $newPath));
             }
         }
+
+        return BaseCommand::CODE_SUCCESS;
     }
 }

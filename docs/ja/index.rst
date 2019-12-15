@@ -184,6 +184,7 @@ Migrations
 * (``/^(Add).*(?:To)(.*)/``) 指定したテーブルにカラム追加します。
 * (``/^(Remove).*(?:From)(.*)/``) 指定のテーブルのカラムを削除します。
 * (``/^(Alter)(.*)/``) 指定したテーブルを変更します。 CreateTable と AddField の別名。
+* (``/^(Alter).*(?:On)(.*)/``) 指定されたテーブルのフィールドを変更します。
 
 マイグレーションの名前に ``アンダースコアー_形式`` を使用できます。例: create_products
 
@@ -379,6 +380,30 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
 * string: 255
 * integer: 11
 * biginteger: 20
+
+テーブルから列を変更する
+-----------------------------------
+
+同様に、移行名が「AlterXXXOnYYY」の形式の場合、コマンドラインを使用して、列を変更する移行を生成できます。
+
+.. code-block:: bash
+
+    bin/cake bake migration AlterPriceOnProducts name:float
+
+生成されます::
+
+    <?php
+    use Migrations\AbstractMigration;
+
+    class AlterPriceFromProducts extends AbstractMigration
+    {
+        public function change()
+        {
+            $table = $this->table('products');
+            $table->changeColumn('name', 'float');
+            $table->update();
+        }
+    }
 
 テーブルからカラムを削除
 ------------------------

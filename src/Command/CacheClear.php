@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Migrations\Util\SchemaTrait;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CacheClear extends Command
+class CacheClear extends BaseCommand
 {
     use SchemaTrait;
 
@@ -47,7 +46,7 @@ class CacheClear extends Command
         $schema = $this->_getSchema($input, $output);
         $name = $input->getArgument('name');
         if (!$schema) {
-            return false;
+            return static::CODE_ERROR;
         }
         $tables = [$name];
         if (empty($name)) {
@@ -63,6 +62,6 @@ class CacheClear extends Command
         }
         $output->writeln('<info>Cache clear complete<info>');
 
-        return true;
+        return static::CODE_SUCCESS;
     }
 }

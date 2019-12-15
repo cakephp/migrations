@@ -225,7 +225,8 @@ class Migrations
     {
         $this->setCommand('mark_migrated');
 
-        if (isset($options['target']) &&
+        if (
+            isset($options['target']) &&
             isset($options['exclude']) &&
             isset($options['only'])
         ) {
@@ -308,7 +309,7 @@ class Migrations
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
 
-        if ($pdo) {
+        if ($pdo !== null) {
             $adapter = $this->manager->getEnvironment('default')->getAdapter();
             while ($adapter instanceof WrapperInterface) {
                 $adapter = $adapter->getAdapter();

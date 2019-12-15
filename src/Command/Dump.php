@@ -74,7 +74,7 @@ class Dump extends AbstractCommand
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return bool Success of the call.
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -106,7 +106,7 @@ class Dump extends AbstractCommand
         if (file_put_contents($filePath, serialize($dump))) {
             $output->writeln(sprintf('<info>Dump file `%s` was successfully written</info>', $filePath));
 
-            return true;
+            return BaseCommand::CODE_SUCCESS;
         }
 
         $output->writeln(sprintf(
@@ -114,6 +114,6 @@ class Dump extends AbstractCommand
             $filePath
         ));
 
-        return false;
+        return BaseCommand::CODE_ERROR;
     }
 }

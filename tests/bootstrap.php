@@ -66,6 +66,7 @@ Cake\Cache\Cache::setConfig([
         'engine' => 'File',
         'prefix' => 'cake_model_',
         'serialize' => true,
+        'path' => TMP,
     ],
 ]);
 
@@ -89,5 +90,5 @@ Plugin::getCollection()->add(new \Bake\Plugin());
 Plugin::getCollection()->add(new \TestBlog\Plugin());
 
 if (!defined('PHINX_VERSION')) {
-    define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? '0.4.3' : '@PHINX_VERSION@');
+    define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? 'UNKNOWN' : '@PHINX_VERSION@');
 }
