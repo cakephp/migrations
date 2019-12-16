@@ -165,7 +165,7 @@ class MigrationsTest extends TestCase
         $columns = $numbersTable->getSchema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
-        $primaryKey = $numbersTable->getSchema()->primaryKey();
+        $primaryKey = $numbersTable->getSchema()->getPrimaryKey();
         $this->assertEquals($primaryKey, ['id']);
 
         $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
@@ -174,7 +174,7 @@ class MigrationsTest extends TestCase
         $this->assertEquals($expected, $columns);
         $idColumn = $lettersTable->getSchema()->getColumn('id');
         $this->assertEquals(true, $idColumn['autoIncrement']);
-        $primaryKey = $lettersTable->getSchema()->primaryKey();
+        $primaryKey = $lettersTable->getSchema()->getPrimaryKey();
         $this->assertEquals($primaryKey, ['id']);
 
         // Rollback last
