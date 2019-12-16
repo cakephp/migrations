@@ -171,7 +171,7 @@ class MigrationHelper extends Helper
             $tableSchema = $this->schema($table);
         }
         $columns = [];
-        $tablePrimaryKeys = $tableSchema->primaryKey();
+        $tablePrimaryKeys = $tableSchema->getPrimaryKey();
         foreach ($tableSchema->columns() as $column) {
             if (in_array($column, $tablePrimaryKeys)) {
                 continue;
@@ -272,7 +272,7 @@ class MigrationHelper extends Helper
             $tableSchema = $this->schema($table);
         }
         $primaryKeys = [];
-        $tablePrimaryKeys = $tableSchema->primaryKey();
+        $tablePrimaryKeys = $tableSchema->getPrimaryKey();
         foreach ($tableSchema->columns() as $column) {
             if (in_array($column, $tablePrimaryKeys)) {
                 $primaryKeys[] = ['name' => $column, 'info' => $this->column($tableSchema, $column)];
@@ -296,7 +296,7 @@ class MigrationHelper extends Helper
             if (!($table instanceof TableSchema)) {
                 $tableSchema = $this->schema($table);
             }
-            $tablePrimaryKeys = $tableSchema->primaryKey();
+            $tablePrimaryKeys = $tableSchema->getPrimaryKey();
 
             foreach ($tablePrimaryKeys as $primaryKey) {
                 $column = $tableSchema->getColumn($primaryKey);
