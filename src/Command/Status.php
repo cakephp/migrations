@@ -48,7 +48,7 @@ class Status extends StatusCommand
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return void
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -79,6 +79,8 @@ class Status extends StatusCommand
                 $this->display($migrations);
                 break;
         }
+
+        return BaseCommand::CODE_SUCCESS;
     }
 
     /**

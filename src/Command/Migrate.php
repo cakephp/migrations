@@ -72,15 +72,17 @@ class Migrate extends MigrateCommand
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return mixed
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $event = $this->dispatchEvent('Migration.beforeMigrate');
         if ($event->isStopped()) {
-            return $event->getResult();
+            return $event->getResult() ? BaseCommand::CODE_SUCCESS : BaseCommand::CODE_ERROR;
         }
         $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterMigrate');
+
+        return BaseCommand::CODE_SUCCESS;
     }
 }

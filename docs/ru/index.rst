@@ -177,6 +177,7 @@
 * (``/^(Remove).*(?:From)(.*)/``) Удаляет поля из указанной таблицы.
 * (``/^(Alter)(.*)/``) Изменяет указанную таблицу. Псевдоним для
   CreateTable и AddField.
+* (``/^(Alter).*(?:On)(.*)/``) Изменяет поля указанной таблицы.
 
 Вы также можете использовать ``underscore_form`` как имя для своих миграций, например
 ``create_products``.
@@ -368,6 +369,31 @@
 * string: 255
 * integer: 11
 * biginteger: 20
+
+Изменить столбец из таблицы
+-----------------------------------
+
+Таким же образом вы можете сгенерировать миграцию для изменения столбца с помощью
+командной строки, если имя миграции имеет вид "AlterXXXOnYYY":
+
+.. code-block:: bash
+
+    bin/cake bake migration AlterPriceOnProducts name:float
+
+создаст файл::
+
+    <?php
+    use Migrations\AbstractMigration;
+
+    class AlterPriceFromProducts extends AbstractMigration
+    {
+        public function change()
+        {
+            $table = $this->table('products');
+            $table->changeColumn('name', 'float');
+            $table->update();
+        }
+    }
 
 Удаление столбца из таблицы
 ---------------------------

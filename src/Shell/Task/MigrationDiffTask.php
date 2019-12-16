@@ -253,7 +253,8 @@ class MigrationDiffTask extends SimpleMigrationTask
                 unset($column['collate']);
                 unset($oldColumn['collate']);
 
-                if (in_array($columnName, $oldColumns) &&
+                if (
+                    in_array($columnName, $oldColumns) &&
                     $column !== $oldColumn
                 ) {
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
@@ -341,7 +342,8 @@ class MigrationDiffTask extends SimpleMigrationTask
             foreach ($currentConstraints as $constraintName) {
                 $constraint = $currentSchema->getConstraint($constraintName);
 
-                if (in_array($constraintName, $oldConstraints) &&
+                if (
+                    in_array($constraintName, $oldConstraints) &&
                     $constraint !== $this->dumpSchema[$table]->getConstraint($constraintName)
                 ) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] =
@@ -392,7 +394,8 @@ class MigrationDiffTask extends SimpleMigrationTask
             foreach ($currentIndexes as $indexName) {
                 $index = $currentSchema->getIndex($indexName);
 
-                if (in_array($indexName, $oldIndexes) &&
+                if (
+                    in_array($indexName, $oldIndexes) &&
                     $index !== $this->dumpSchema[$table]->getIndex($indexName)
                 ) {
                     $this->templateData[$table]['indexes']['remove'][$indexName] =

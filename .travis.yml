@@ -4,8 +4,6 @@ php:
   - 7.2
   - 7.3
 
-sudo: false
-
 services:
   - mysql
   - postgresql
@@ -71,8 +69,8 @@ script:
 
   - if [[ $CODECOVERAGE == 1 ]]; then vendor/bin/phpunit --coverage-clover=clover.xml; fi
 
-  - if [[ $CHECKS == 1 ]]; then composer cs-check; fi
   - if [[ $CHECKS == 1 ]]; then composer stan; fi
+  - if [[ $CHECKS == 1 ]]; then composer cs-check; fi
 
 after_success:
   - if [[ $CODECOVERAGE == 1 ]]; then bash <(curl -s https://codecov.io/bash); fi
