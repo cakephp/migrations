@@ -228,19 +228,7 @@ class MigrationSnapshotTaskTest extends TestCase
      */
     public function testPluginBlog()
     {
-        $db = ConnectionManager::get('test');
-        $table = new TableSchema('parts', [
-            'id' => ['type' => 'integer', 'unsigned' => true],
-            'name' => ['type' => 'string', 'length' => 255],
-            'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true]
-        ]);
-        $table->addConstraint('primary', ['type' => 'primary', 'columns' => ['id']]);
-        $sql = $table->createSql($db);
-        foreach ($sql as $stmt) {
-            $db->execute($stmt);
-        }
-
-        $task = $this->getTaskMock(['in', 'err', 'dispatchShell', '_stop']);
+        $task = $this->getTaskMock(['in', 'err', 'dispatchShell', 'createFile']);
         $task->params['require-table'] = false;
         $task->params['connection'] = 'test';
         $task->params['plugin'] = 'TestBlog';
