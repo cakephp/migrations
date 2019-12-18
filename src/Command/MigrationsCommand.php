@@ -133,7 +133,7 @@ class MigrationsCommand extends Command
             !in_array('--no-lock', $this->argv) &&
             $exitCode === 0
         ) {
-            $newArgs = ['dump'];
+            $newArgs = [];
             if (!empty($args->getOption('connection'))) {
                 $newArgs[] = '-c';
                 $newArgs[] = $args->getOption('connection');
@@ -144,7 +144,11 @@ class MigrationsCommand extends Command
                 $newArgs[] = $args->getOption('plugin');
             }
 
-            $dumpExitCode = $this->executeCommand(MigrationsCommand::class, $newArgs, $io);
+            $io->out('');
+            $io->out('Dumps the current schema of the database to be used while baking a diff');
+            $io->out('');
+
+            $dumpExitCode = $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
         }
 
         if (isset($dumpExitCode) && $exitCode === 0 && $dumpExitCode !== 0) {
