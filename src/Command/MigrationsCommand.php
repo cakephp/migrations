@@ -129,7 +129,8 @@ class MigrationsCommand extends Command
             return $exitCode;
         }
 
-        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
+        if (
+            isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
             !in_array('--no-lock', $this->argv) &&
             $exitCode === 0
         ) {
