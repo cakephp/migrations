@@ -13,21 +13,22 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell\Task;
+namespace Migrations\Command;
 
-use Bake\Shell\Task\SimpleBakeTask;
+use Bake\Command\SimpleBakeCommand;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
-use Cake\Core\Plugin as CorePlugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 
 /**
  * Task class for generating seed files.
  *
- * @property \Bake\Shell\Task\TestTask $Test
+ * @property \Bake\Command\TestCommand $Test
  */
-class SeedTask extends SimpleBakeTask
+class BakeSeedCommand extends SimpleBakeCommand
 {
     /**
      * path to Migration directory
@@ -37,6 +38,14 @@ class SeedTask extends SimpleBakeTask
     public $pathFragment = 'config/Seeds/';
 
     protected $_name;
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function defaultName(): string
+    {
+        return 'bake seed';
+    }
 
     /**
      * {@inheritDoc}
@@ -57,7 +66,7 @@ class SeedTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function getPath(): string
+    public function getPath(Arguments $args): string
     {
         $path = ROOT . DS . $this->pathFragment;
         if (isset($this->plugin)) {
@@ -78,25 +87,26 @@ class SeedTask extends SimpleBakeTask
     /**
      * Get template data.
      *
+     * @param \Cake\Console\Arguments $arguments The arguments for the command
      * @return array
      */
-    public function templateData(): array
+    public function templateData(Arguments $arguments): array
     {
         $namespace = Configure::read('App.namespace');
         if ($this->plugin) {
             $namespace = $this->_pluginNamespace($this->plugin);
         }
 
-        $table = Inflector::tableize($this->args[0]);
-        if (!empty($this->params['table'])) {
-            $table = $this->params['table'];
+        $table = Inflector::tableize($arguments->getArgumentAt(0));
+        if ($arguments->hasOption('table')) {
+            $table = $arguments->getOption('table');
         }
 
         $records = false;
-        if ($this->param('data')) {
-            $limit = (int)$this->param('limit');
+        if ($arguments->getOption('data')) {
+            $limit = (int)$arguments->getOption('limit');
 
-            $fields = $this->param('fields') ?: '*';
+            $fields = $arguments->getOption('fields') ?: '*';
             if ($fields !== '*') {
                 $fields = explode(',', $fields);
             }
@@ -126,53 +136,31 @@ class SeedTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function bake(string $name): string
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
-        $this->params['no-test'] = true;
+        $newArgs = new Arguments(
+            $args->getArguments(),
+            ['no-test' => true] + $args->getOptions(),
+            ['name']
+        );
         $this->_name = $name;
-
-        return parent::bake($name);
+        parent::bake($name, $newArgs, $io);
     }
 
     /**
      * Gets the option parser instance and configures it.
      *
+     * @param \Cake\Console\ConsoleOptionParser $parser Option parser to update.
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser(): ConsoleOptionParser
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
-        $name = ($this->plugin ? $this->plugin . '.' : '') . $this->name;
-        $parser = new ConsoleOptionParser($name);
-
-        $bakeThemes = [];
-        foreach (CorePlugin::loaded() as $plugin) {
-            $path = CorePlugin::classPath($plugin);
-            if (is_dir($path . 'Template' . DS . 'Bake')) {
-                $bakeThemes[] = $plugin;
-            }
-        }
+        $parser = parent::buildOptionParser($parser);
 
         $parser->setDescription(
             'Bake seed class.'
-        )->addOption('plugin', [
-            'short' => 'p',
-            'help' => 'Plugin to bake into.',
-        ])->addOption('force', [
-            'short' => 'f',
-            'boolean' => true,
-            'help' => 'Force overwriting existing files without prompting.',
-        ])->addOption('connection', [
-            'short' => 'c',
-            'default' => 'default',
-            'help' => 'The datasource connection to get data from.',
-        ])->addOption('table', [
+        )->addOption('table', [
             'help' => 'The database table to use.',
-        ])->addOption('theme', [
-            'short' => 't',
-            'help' => 'The theme to use when baking code.',
-            'choices' => $bakeThemes,
-        ])->addArgument('name', [
-            'help' => 'Name of the seed to bake. Can use Plugin.name to bake plugin models.',
         ])->addOption('data', [
             'boolean' => true,
             'help' => 'Include data from the table to the seed',

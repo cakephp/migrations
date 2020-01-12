@@ -11,16 +11,17 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\TestCase\Shell\Task;
+namespace Migrations\Test\Command;
 
+use Cake\Console\BaseCommand;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
-use Cake\TestSuite\TestCase;
+use Migrations\Test\TestCase\TestCase;
 
 /**
  * MigrationTaskTest class
  */
-class SeedTaskTest extends TestCase
+class BakeSeedCommandTest extends TestCase
 {
     use StringCompareTrait;
 
@@ -52,17 +53,7 @@ class SeedTaskTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Seeds' . DS;
-        $inputOutput = $this->getMockBuilder('Cake\Console\ConsoleIo')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\SeedTask')
-            ->setMethods(['in', 'err', 'createFile', '_stop', 'error'])
-            ->setConstructorArgs([$inputOutput])
-            ->getMock();
-
-        $this->Task->name = 'Seeds';
-        $this->Task->connection = 'test';
+        $this->useCommandRunner();
     }
 
     /**
@@ -72,10 +63,11 @@ class SeedTaskTest extends TestCase
      */
     public function testBasicBaking()
     {
-        $this->Task->args = [
-            'articles',
-        ];
-        $result = $this->Task->bake('Articles');
+        $this->generatedFile = ROOT . 'config/Seeds/ArticlesSeed.php';
+        $this->exec('bake seed Articles --connection test');
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
@@ -86,15 +78,16 @@ class SeedTaskTest extends TestCase
      */
     public function testWithData()
     {
-        $this->Task->args = ['events'];
-        $this->Task->params['data'] = true;
+        $this->generatedFile = ROOT . 'config/Seeds/EventsSeed.php';
+        $this->exec('bake seed Events --connection test --data');
 
         $path = __FUNCTION__ . '.php';
         if (getenv('DB') === 'pgsql') {
             $path = getenv('DB') . DS . $path;
         }
 
-        $result = $this->Task->bake('Events');
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile($path, $result);
     }
 
@@ -105,11 +98,11 @@ class SeedTaskTest extends TestCase
      */
     public function testWithDataAndFields()
     {
-        $this->Task->args = ['events'];
-        $this->Task->params['data'] = true;
-        $this->Task->params['fields'] = 'title,description';
+        $this->generatedFile = ROOT . 'config/Seeds/EventsSeed.php';
+        $this->exec('bake seed Events --connection test --data --fields title,description');
 
-        $result = $this->Task->bake('Events');
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
@@ -120,16 +113,16 @@ class SeedTaskTest extends TestCase
      */
     public function testWithDataAndLimit()
     {
-        $this->Task->args = ['events'];
-        $this->Task->params['data'] = true;
-        $this->Task->params['limit'] = 2;
+        $this->generatedFile = ROOT . 'config/Seeds/EventsSeed.php';
+        $this->exec('bake seed Events --connection test --data --limit 2');
 
         $path = __FUNCTION__ . '.php';
         if (getenv('DB') === 'pgsql') {
             $path = getenv('DB') . DS . $path;
         }
 
-        $result = $this->Task->bake('Events');
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile($path, $result);
     }
 
@@ -140,10 +133,11 @@ class SeedTaskTest extends TestCase
      */
     public function testPrettifyArray()
     {
-        $this->Task->args = ['texts'];
-        $this->Task->params['data'] = true;
+        $this->generatedFile = ROOT . 'config/Seeds/TextsSeed.php';
+        $this->exec('bake seed Texts --connection test --data');
 
-        $result = $this->Task->bake('Texts');
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 }

@@ -85,11 +85,11 @@ class DumpTest extends TestCase
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
 
+        $this->fixtureManager->shutDown();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
         $this->Connection->execute('DROP TABLE IF EXISTS parts');
-
         $this->dumpfile = ROOT . 'config/TestsMigrations/schema-dump-test.lock';
     }
 
@@ -100,6 +100,7 @@ class DumpTest extends TestCase
      */
     public function tearDown(): void
     {
+        $this->fixtureManager->shutDown();
         parent::tearDown();
         $this->Connection->getDriver()->setConnection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
