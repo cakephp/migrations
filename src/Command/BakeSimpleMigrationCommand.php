@@ -13,19 +13,27 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell\Task;
+namespace Migrations\Command;
 
-use Bake\Shell\Task\SimpleBakeTask;
+use Bake\Command\SimpleBakeCommand;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Core\Plugin as CorePlugin;
 use Cake\Utility\Inflector;
 use Phinx\Util\Util;
 
 /**
  * Task class for generating migration snapshot files.
  */
-abstract class SimpleMigrationTask extends SimpleBakeTask
+abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
 {
+    /**
+     * Console IO
+     *
+     * @var \Cake\Console\ConsoleIo
+     */
+    protected $io;
+
     /**
      * path to Migration directory
      *
@@ -54,7 +62,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function getPath(): string
+    public function getPath(Arguments $args): string
     {
         $path = ROOT . DS . $this->pathFragment;
         if (isset($this->plugin)) {
@@ -67,13 +75,14 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function bake(string $name): string
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
-        $migrationWithSameName = glob($this->getPath() . '*_' . $name . '.php');
+        $this->io = $io;
+        $migrationWithSameName = glob($this->getPath($args) . '*_' . $name . '.php');
         if (!empty($migrationWithSameName)) {
-            $force = $this->param('force');
+            $force = $args->getOption('force');
             if (!$force) {
-                $this->abort(
+                $io->abort(
                     sprintf(
                         'A migration with the name `%s` already exists. Please use a different name.',
                         $name
@@ -81,20 +90,23 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
                 );
             }
 
-            $this->info(sprintf('A migration with the name `%s` already exists, it will be deleted.', $name));
+            $io->info(sprintf('A migration with the name `%s` already exists, it will be deleted.', $name));
             foreach ($migrationWithSameName as $migration) {
-                $this->info(sprintf('Deleting migration file `%s`...', $migration));
+                $io->info(sprintf('Deleting migration file `%s`...', $migration));
                 if (unlink($migration)) {
-                    $this->success(sprintf('Deleted `%s`', $migration));
+                    $io->success(sprintf('Deleted `%s`', $migration));
                 } else {
-                    $this->err(sprintf('An error occurred while deleting `%s`', $migration));
+                    $io->err(sprintf('An error occurred while deleting `%s`', $migration));
                 }
             }
         }
 
-        $this->params['no-test'] = true;
-
-        return parent::bake($name);
+        $newArgs = new Arguments(
+            $args->getArguments(),
+            ['no-test' => true] + $args->getOptions(),
+            ['name']
+        );
+        parent::bake($name, $newArgs, $io);
     }
 
     /**
@@ -108,14 +120,14 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     protected function getMigrationName($name = null)
     {
         if (empty($name)) {
-            $this->abort('Choose a migration name to bake in CamelCase format');
+            $this->io->abort('Choose a migration name to bake in CamelCase format');
         }
 
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
-            $this->abort('The className is not correct. The className can only contain "A-Z" and "0-9".');
+            $this->io->abort('The className is not correct. The className can only contain "A-Z" and "0-9".');
         }
 
         return $name;
@@ -124,42 +136,19 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     /**
      * Gets the option parser instance and configures it.
      *
+     * @param \Cake\Console\ConsoleOptionParser $parser Option parser to update.
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser(): ConsoleOptionParser
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
-        $name = ($this->plugin ? $this->plugin . '.' : '') . $this->name;
-        $parser = new ConsoleOptionParser($name);
-
-        $bakeThemes = [];
-        foreach (CorePlugin::loaded() as $plugin) {
-            $path = CorePlugin::classPath($plugin);
-            if (is_dir($path . 'Template' . DS . 'Bake')) {
-                $bakeThemes[] = $plugin;
-            }
-        }
+        $parser = parent::buildOptionParser($parser);
 
         $parser->setDescription(
             'Bake migration class.'
-        )
-        ->addOption('plugin', [
-            'short' => 'p',
-            'help' => 'Plugin to bake into.',
-        ])
-        ->addOption('force', [
+        )->addOption('force', [
             'short' => 'f',
             'boolean' => true,
             'help' => 'Force overwriting existing file if a migration already exists with the same name.',
-        ])
-        ->addOption('connection', [
-            'short' => 'c',
-            'default' => 'default',
-            'help' => 'The datasource connection to get data from.',
-        ])
-        ->addOption('theme', [
-            'short' => 't',
-            'help' => 'The theme to use when baking code.',
-            'choices' => $bakeThemes,
         ]);
 
         return $parser;
