@@ -11,17 +11,19 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\TestCase\Shell\Task;
+namespace Migrations\Test\Command;
 
+use Cake\Console\BaseCommand;
 use Cake\Console\Exception\StopException;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
-use Cake\TestSuite\TestCase;
+use Migrations\Command\BakeMigrationCommand;
+use Migrations\Test\TestCase\TestCase;
 
 /**
- * MigrationTaskTest class
+ * BakeMigrationCommandTest class
  */
-class MigrationTaskTest extends TestCase
+class BakeMigrationCommandTest extends TestCase
 {
     use StringCompareTrait;
 
@@ -34,17 +36,7 @@ class MigrationTaskTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
-        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->Task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'createFile'])
-            ->setConstructorArgs([$inputOutput])
-            ->getMock();
-
-        $this->Task->name = 'Migration';
-        $this->Task->connection = 'test';
+        $this->useCommandRunner();
     }
 
     public function tearDown(): void
@@ -65,60 +57,48 @@ class MigrationTaskTest extends TestCase
      */
     public function testNoContents()
     {
-        $result = $this->Task->bake('NoContents');
+        $this->exec('bake migration NoContents --connection test');
+
+        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_NoContents.php');
+        $this->generatedFile = current($file);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    /**
+     * data provider for testCreate
+     *
+     * @return void
+     */
+    public static function nameVariations()
+    {
+        return [
+            ['name', '.php'],
+            ['name created modified', 'Datetime.php'],
+            ['id:integer:primary_key name created modified', 'PrimaryKey.php'],
+            ['id:uuid:primary_key name created modified', 'PrimaryKeyUuid.php'],
+            ['name:string[128] counter:integer[8]', 'FieldLength.php'],
+        ];
     }
 
     /**
      * Test the execute method.
      *
+     * @dataProvider nameVariations
      * @return void
      */
-    public function testCreate()
+    public function testCreate($name, $fileSuffix)
     {
-        $this->Task->args = [
-            'create_users',
-            'name',
-        ];
-        $result = $this->Task->bake('CreateUsers');
-        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+        $this->exec("bake migration CreateUsers  {$name} --connection test");
 
-        $this->Task->args = [
-            'create_users',
-            'name',
-            'created',
-            'modified',
-        ];
-        $result = $this->Task->bake('CreateUsers');
-        $this->assertSameAsFile(__FUNCTION__ . 'Datetime.php', $result);
+        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $filePath = current($file);
 
-        $this->Task->args = [
-            'create_users',
-            'id:integer:primary_key',
-            'name',
-            'created',
-            'modified',
-        ];
-        $result = $this->Task->bake('CreateUsers');
-        $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKey.php', $result);
-
-        $this->Task->args = [
-            'create_users',
-            'id:uuid:primary_key',
-            'name',
-            'created',
-            'modified',
-        ];
-        $result = $this->Task->bake('CreateUsers');
-        $this->assertSameAsFile(__FUNCTION__ . 'PrimaryKeyUuid.php', $result);
-
-        $this->Task->args = [
-            'create_users',
-            'name:string[128]',
-            'counter:integer[8]',
-        ];
-        $result = $this->Task->bake('CreateUsers');
-        $this->assertSameAsFile(__FUNCTION__ . 'FieldLength.php', $result);
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+        $this->assertSameAsFile(__FUNCTION__ . $fileSuffix, $result);
     }
 
     /**
@@ -126,22 +106,10 @@ class MigrationTaskTest extends TestCase
      */
     public function testCreateDuplicateName()
     {
-        $this->expectException(StopException::class);
-        $this->expectExceptionMessage('A migration with the name `CreateUsers` already exists. Please use a different name.');
-        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err', 'error'])
-            ->setConstructorArgs([$inputOutput])
-            ->getMock();
-
-        $task->name = 'Migration';
-        $task->connection = 'test';
-
-        $task->bake('CreateUsers');
-        $task->bake('CreateUsers');
+        $this->exec('bake migration CreateUsers --connection test');
+        $this->exec('bake migration CreateUsers --connection test');
+        $this->assertExitCode(BaseCommand::CODE_ERROR);
+        $this->assertErrorContains('A migration with the name `CreateUsers` already exists. Please use a different name.');
     }
 
     /**
@@ -149,26 +117,13 @@ class MigrationTaskTest extends TestCase
      */
     public function testCreateDuplicateNameWithForce()
     {
-        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationTask')
-            ->setMethods(['in', 'err'])
-            ->setConstructorArgs([$inputOutput])
-            ->getMock();
-
-        $task->name = 'Migration';
-        $task->connection = 'test';
-        $task->params['force'] = true;
-
-        $task->bake('CreateUsers');
+        $this->exec('bake migration CreateUsers --connection test --force');
 
         $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $filePath = current($file);
         sleep(1);
 
-        $task->bake('CreateUsers');
+        $this->exec('bake migration CreateUsers --connection test --force');
         $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $this->assertNotEquals($filePath, current($file));
     }
@@ -181,13 +136,10 @@ class MigrationTaskTest extends TestCase
      */
     public function testAddPrimaryKeyToExistingTable()
     {
-        $this->Task->args = [
-            'add_pk_to_users',
-            'somefield:primary_key',
-        ];
-        $this->expectException(StopException::class);
-        $this->expectExceptionMessage('Adding a primary key to an already existing table is not supported.');
-        $this->Task->bake('AddPkToUsers');
+        $this->exec('bake migration AddPkToUsers somefield:primary_key --connection test');
+
+        $this->assertExitCode(BaseCommand::CODE_ERROR);
+        $this->assertErrorContains('Adding a primary key to an already existing table is not supported.');
     }
 
     /**
@@ -198,13 +150,10 @@ class MigrationTaskTest extends TestCase
      */
     public function testAddPrimaryKeyToExistingUsersTable()
     {
-        $this->Task->args = [
-            'alter_users',
-            'somefield:primary_key',
-        ];
-        $this->expectException(StopException::class);
-        $this->expectExceptionMessage('Adding a primary key to an already existing table is not supported.');
-        $this->Task->bake('AlterUsers');
+        $this->exec('bake migration AlterUsers somefield:primary_key --connection test');
+
+        $this->assertExitCode(BaseCommand::CODE_ERROR);
+        $this->assertErrorContains('Adding a primary key to an already existing table is not supported.');
     }
 
     /**
@@ -213,155 +162,156 @@ class MigrationTaskTest extends TestCase
      */
     public function testDetectAction()
     {
+        $command = new BakeMigrationCommand();
         $this->assertEquals(
             ['create_table', 'groups'],
-            $this->Task->detectAction('CreateGroups')
+            $command->detectAction('CreateGroups')
         );
         $this->assertEquals(
             ['create_table', 'users'],
-            $this->Task->detectAction('CreateUsers')
+            $command->detectAction('CreateUsers')
         );
         $this->assertEquals(
             ['create_table', 'groups_users'],
-            $this->Task->detectAction('CreateGroupsUsers')
+            $command->detectAction('CreateGroupsUsers')
         );
         $this->assertEquals(
             ['create_table', 'articles_i18n'],
-            $this->Task->detectAction('CreateArticlesI18n')
+            $command->detectAction('CreateArticlesI18n')
         );
 
         $this->assertEquals(
             ['drop_table', 'groups'],
-            $this->Task->detectAction('DropGroups')
+            $command->detectAction('DropGroups')
         );
         $this->assertEquals(
             ['drop_table', 'users'],
-            $this->Task->detectAction('DropUsers')
+            $command->detectAction('DropUsers')
         );
         $this->assertEquals(
             ['drop_table', 'groups_users'],
-            $this->Task->detectAction('DropGroupsUsers')
+            $command->detectAction('DropGroupsUsers')
         );
         $this->assertEquals(
             ['drop_table', 'articles_i18n'],
-            $this->Task->detectAction('DropArticlesI18n')
+            $command->detectAction('DropArticlesI18n')
         );
 
         $this->assertEquals(
             ['add_field', 'groups'],
-            $this->Task->detectAction('AddFieldToGroups')
+            $command->detectAction('AddFieldToGroups')
         );
         $this->assertEquals(
             ['add_field', 'users'],
-            $this->Task->detectAction('AddFieldToUsers')
+            $command->detectAction('AddFieldToUsers')
         );
         $this->assertEquals(
             ['add_field', 'groups_users'],
-            $this->Task->detectAction('AddFieldToGroupsUsers')
+            $command->detectAction('AddFieldToGroupsUsers')
         );
         $this->assertEquals(
             ['add_field', 'groups'],
-            $this->Task->detectAction('AddThingToGroups')
+            $command->detectAction('AddThingToGroups')
         );
         $this->assertEquals(
             ['add_field', 'groups'],
-            $this->Task->detectAction('AddTokenToGroups')
+            $command->detectAction('AddTokenToGroups')
         );
         $this->assertEquals(
             ['add_field', 'users'],
-            $this->Task->detectAction('AddAnotherFieldToUsers')
+            $command->detectAction('AddAnotherFieldToUsers')
         );
         $this->assertEquals(
             ['add_field', 'groups_users'],
-            $this->Task->detectAction('AddSomeFieldToGroupsUsers')
+            $command->detectAction('AddSomeFieldToGroupsUsers')
         );
         $this->assertEquals(
             ['add_field', 'todos'],
-            $this->Task->detectAction('AddSomeFieldToTodos')
+            $command->detectAction('AddSomeFieldToTodos')
         );
         $this->assertEquals(
             ['add_field', 'articles_i18n'],
-            $this->Task->detectAction('AddSomeFieldToArticlesI18n')
+            $command->detectAction('AddSomeFieldToArticlesI18n')
         );
 
         $this->assertEquals(
             ['drop_field', 'groups'],
-            $this->Task->detectAction('RemoveFieldsFromGroups')
+            $command->detectAction('RemoveFieldsFromGroups')
         );
         $this->assertEquals(
             ['drop_field', 'users'],
-            $this->Task->detectAction('RemoveFieldsFromUsers')
+            $command->detectAction('RemoveFieldsFromUsers')
         );
         $this->assertEquals(
             ['drop_field', 'groups_users'],
-            $this->Task->detectAction('RemoveFieldsFromGroupsUsers')
+            $command->detectAction('RemoveFieldsFromGroupsUsers')
         );
         $this->assertEquals(
             ['drop_field', 'groups'],
-            $this->Task->detectAction('RemoveThingFromGroups')
+            $command->detectAction('RemoveThingFromGroups')
         );
         $this->assertEquals(
             ['drop_field', 'users'],
-            $this->Task->detectAction('RemoveAnotherFieldFromUsers')
+            $command->detectAction('RemoveAnotherFieldFromUsers')
         );
         $this->assertEquals(
             ['drop_field', 'groups_users'],
-            $this->Task->detectAction('RemoveSomeFieldFromGroupsUsers')
+            $command->detectAction('RemoveSomeFieldFromGroupsUsers')
         );
         $this->assertEquals(
             ['drop_field', 'fromages'],
-            $this->Task->detectAction('RemoveSomeFieldFromFromages')
+            $command->detectAction('RemoveSomeFieldFromFromages')
         );
         $this->assertEquals(
             ['drop_field', 'fromages'],
-            $this->Task->detectAction('RemoveFromageFromFromages')
+            $command->detectAction('RemoveFromageFromFromages')
         );
         $this->assertEquals(
             ['drop_field', 'articles_i18n'],
-            $this->Task->detectAction('RemoveFromageFromArticlesI18n')
+            $command->detectAction('RemoveFromageFromArticlesI18n')
         );
 
         $this->assertEquals(
             ['alter_table', 'groups'],
-            $this->Task->detectAction('AlterGroups')
+            $command->detectAction('AlterGroups')
         );
         $this->assertEquals(
             ['alter_table', 'users'],
-            $this->Task->detectAction('AlterUsers')
+            $command->detectAction('AlterUsers')
         );
         $this->assertEquals(
             ['alter_table', 'groups_users'],
-            $this->Task->detectAction('AlterGroupsUsers')
+            $command->detectAction('AlterGroupsUsers')
         );
         $this->assertEquals(
             ['alter_table', 'articles_i18n'],
-            $this->Task->detectAction('AlterArticlesI18n')
+            $command->detectAction('AlterArticlesI18n')
         );
 
         $this->assertSame(
             [],
-            $this->Task->detectAction('ReaddColumnsToTable')
+            $command->detectAction('ReaddColumnsToTable')
         );
 
         $this->assertEquals(
             ['alter_field', 'groups'],
-            $this->Task->detectAction('AlterFieldOnGroups')
+            $command->detectAction('AlterFieldOnGroups')
         );
         $this->assertEquals(
             ['alter_field', 'users'],
-            $this->Task->detectAction('AlterFieldOnUsers')
+            $command->detectAction('AlterFieldOnUsers')
         );
         $this->assertEquals(
             ['alter_field', 'groups_users'],
-            $this->Task->detectAction('AlterFieldOnGroupsUsers')
+            $command->detectAction('AlterFieldOnGroupsUsers')
         );
         $this->assertEquals(
             ['alter_field', 'todos'],
-            $this->Task->detectAction('AlterFieldOnTodos')
+            $command->detectAction('AlterFieldOnTodos')
         );
         $this->assertEquals(
             ['alter_field', 'articles_i18n'],
-            $this->Task->detectAction('AlterFieldOnArticlesI18n')
+            $command->detectAction('AlterFieldOnArticlesI18n')
         );
     }
 }

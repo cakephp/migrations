@@ -75,6 +75,26 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * {@inheritDoc}
      */
+    public function execute(Arguments $args, ConsoleIo $io): ?int
+    {
+        $this->extractCommonProperties($args);
+        $name = $args->getArgumentAt(0);
+        if (empty($name)) {
+            $io->err('You must provide a name to bake a ' . $this->name());
+            $this->abort();
+
+            return null;
+        }
+        $name = $this->_getName($name);
+        $name = Inflector::camelize($name);
+        $this->bake($name, $args, $io);
+
+        return static::CODE_SUCCESS;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->io = $io;
@@ -141,11 +161,14 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
-        $parser = parent::buildOptionParser($parser);
+        $parser = $this->_setCommonOptions($parser);
 
         $parser->setDescription(
             'Bake migration class.'
-        )->addOption('force', [
+        )->addOption('no-test', [
+            'boolean' => true,
+            'help' => 'Do not generate a test skeleton.',
+        ])->addOption('force', [
             'short' => 'f',
             'boolean' => true,
             'help' => 'Force overwriting existing file if a migration already exists with the same name.',
