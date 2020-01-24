@@ -60,7 +60,7 @@
          * Метод изменения.
          *
          * Более подробная информация об этом методе доступна здесь:
-         * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
         public function change()
@@ -134,7 +134,7 @@
 :doc:`/bake/usage`.
 
 Пожалуйста, убедитесь, что вы читали официальную
-`Phinx documentation <http://docs.phinx.org/en/latest/migrations.html>`_
+`Phinx documentation <https://book.cakephp.org/phinx/0/en/migrations.html>`_
 чтобы узнать полный список методов, которые вы можете использовать для
 записи файлов миграции.
 
@@ -260,7 +260,7 @@
          * Метод изменения.
          *
          * Более подробная информация об этом методе доступна здесь:
-         * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
         public function change()
@@ -633,10 +633,10 @@
 
 Начиная с 1.5.5, вы можете использовать оболочку ``migrations`` для засеивания
 вашей базы данных. Это использует
-`Phinx library seed feature <http://docs.phinx.org/en/latest/seeding.html>`_.
+`Phinx library seed feature <https://book.cakephp.org/phinx/0/en/seeding.html>`_.
 По умолчанию файлы семян будут искать в каталоге ``config/Seeds`` вашего приложения.
 Пожалуйста, убедитесь, что вы следуете
-`Phinx instructions to build your seed files <http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class>`_.
+`Phinx instructions to build your seed files <https://book.cakephp.org/phinx/0/en/seeding.html#creating-a-new-seed-class>`_.
 
 Что касается миграций, для файлов семян предоставляется интерфейс ``bake``::
 
