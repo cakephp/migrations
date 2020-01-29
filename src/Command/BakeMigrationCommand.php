@@ -13,8 +13,10 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell\Task;
+namespace Migrations\Command;
 
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
@@ -22,25 +24,32 @@ use Cake\Utility\Inflector;
 use Migrations\Util\ColumnParser;
 
 /**
- * Task class for generating migration snapshot files.
+ * Command class for generating migration snapshot files.
  *
- * @property \Bake\Shell\Task\TestTask $Test
  */
-class MigrationTask extends SimpleMigrationTask
+class BakeMigrationCommand extends BakeSimpleMigrationCommand
 {
     protected $_name;
 
     /**
      * {@inheritDoc}
      */
-    public function bake(string $name): string
+    public static function defaultName(): string
+    {
+        return 'bake migration';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         EventManager::instance()->on('Bake.initialize', function (Event $event) {
             $event->getSubject()->loadHelper('Migrations.Migration');
         });
         $this->_name = $name;
 
-        return parent::bake($name);
+        parent::bake($name, $args, $io);
     }
 
     /**
@@ -54,7 +63,7 @@ class MigrationTask extends SimpleMigrationTask
     /**
      * {@inheritdoc}
      */
-    public function templateData(): array
+    public function templateData(Arguments $arguments): array
     {
         $className = $this->_name;
         $namespace = Configure::read('App.namespace');
@@ -77,7 +86,7 @@ class MigrationTask extends SimpleMigrationTask
             ];
         }
 
-        $arguments = $this->args;
+        $arguments = $arguments->getArguments();
         unset($arguments[0]);
         $columnParser = new ColumnParser();
         $fields = $columnParser->parseFields($arguments);
@@ -85,7 +94,7 @@ class MigrationTask extends SimpleMigrationTask
         $primaryKey = $columnParser->parsePrimaryKey($arguments);
 
         if (in_array($action[0], ['alter_table', 'add_field']) && !empty($primaryKey)) {
-            $this->abort('Adding a primary key to an already existing table is not supported.');
+            $this->io->abort('Adding a primary key to an already existing table is not supported.');
         }
 
         [$action, $table] = $action;
