@@ -387,6 +387,13 @@ class TestAutoIdDisabledSnapshot56 extends AbstractMigration
             ->update();
     }
 
+    /**
+    * Down Method.
+    *
+    * More information on this method is available here:
+    * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
+    * @return void
+    */
     public function down()
     {
         $this->table('articles')
