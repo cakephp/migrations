@@ -63,7 +63,7 @@ Aqui segue um exemplo de migração::
          * Change Method.
          *
          * More information on this method is available here:
-         * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
         public function change()
@@ -265,7 +265,7 @@ A linha de comando acima irá gerar um arquivo de migração parecido com este::
          * Change Method.
          *
          * More information on this method is available here:
-         * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
         public function change()
