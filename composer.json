@@ -27,7 +27,7 @@
         "phpunit/phpunit": "^5.7.14|^6.0",
         "cakephp/cakephp": "^3.6.0",
         "cakephp/bake": "^1.7.0",
-        "cakephp/cakephp-codesniffer": "dev-master"
+        "cakephp/cakephp-codesniffer": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -36,7 +36,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests/",
+            "Cake\\Test\\": "vendor/cakephp/cakephp/tests/",
             "Migrations\\PHPStan\\": "tests/PHPStan/",
             "Migrations\\Test\\": "tests/",
             "TestApp\\": "tests/test_app/App/",
@@ -44,7 +44,7 @@
         }
     },
     "suggest": {
-        "cakephp/bake": "Required if you want to generate migrations."
+        "cakephp/bake": "If you want to generate migrations."
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
