@@ -77,3 +77,6 @@ script:
 
 after_success:
   - if [[ $CODECOVERAGE == 1 ]]; then bash <(curl -s https://codecov.io/bash); fi
+
+notifications:
+  email: false
