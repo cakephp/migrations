@@ -68,7 +68,7 @@ class Create extends CreateCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->parentExecute($input, $output);
+        $result = $this->parentExecute($input, $output);
 
         $output->writeln('<info>renaming file in CamelCase to follow CakePHP convention...</info>');
 
@@ -94,6 +94,6 @@ class Create extends CreateCommand
             }
         }
 
-        return BaseCommand::CODE_SUCCESS;
+        return $result !== null ? $result : BaseCommand::CODE_SUCCESS;
     }
 }

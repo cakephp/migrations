@@ -63,9 +63,9 @@ class Migrate extends MigrateCommand
         if ($event->isStopped()) {
             return $event->result ? BaseCommand::CODE_SUCCESS : BaseCommand::CODE_ERROR;
         }
-        $this->parentExecute($input, $output);
+        $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterMigrate');
 
-        return BaseCommand::CODE_SUCCESS;
+        return $result !== null ? $result : BaseCommand::CODE_SUCCESS;
     }
 }

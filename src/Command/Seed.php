@@ -51,7 +51,7 @@ class Seed extends SeedRun
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return mixed
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -68,9 +68,9 @@ class Seed extends SeedRun
         $this->setInput($input);
         $this->bootstrap($input, $output);
         $this->getManager()->setInput($input);
-        $this->parentExecute($input, $output);
+        $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
 
-        return BaseCommand::CODE_SUCCESS;
+        return $result !== null ? $result : BaseCommand::CODE_SUCCESS;
     }
 }
