@@ -22,10 +22,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends CreateCommand
 {
-    use CommandTrait;
-    use ConfigurationTrait {
+    use CommandTrait {
         execute as parentExecute;
     }
+    use ConfigurationTrait;
 
     /**
      * {@inheritdoc}
