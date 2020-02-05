@@ -31,6 +31,7 @@ trait CommandTrait
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->beforeExecute($input, $output);
+
         return parent::execute($input, $output);
     }
 
