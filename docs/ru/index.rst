@@ -60,7 +60,7 @@
          * Метод изменения.
          *
          * Более подробная информация об этом методе доступна здесь:
-         * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
         public function change()
@@ -260,7 +260,7 @@
          * Метод изменения.
          *
          * Более подробная информация об этом методе доступна здесь:
-         * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
         public function change()
