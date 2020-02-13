@@ -157,7 +157,7 @@ trait TableFinderTrait
 
         $namespacedClassName = App::className($className, 'Model/Table', 'Table');
 
-        if (!class_exists($namespacedClassName)) {
+        if ($namespacedClassName === null || !class_exists($namespacedClassName)) {
             return $tables;
         }
 
