@@ -74,7 +74,6 @@ trait SnapshotTrait
         $this->_io->out('Marking the migration ' . $fileName . ' as migrated...');
         $command = new MigrationsMarkMigratedCommand();
         $command->run($args, $this->_io);
-
     }
 
     /**
