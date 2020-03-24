@@ -106,7 +106,7 @@ class MigrationDiffTask extends SimpleMigrationTask
             $this->abort('Your migrations history is not in sync with your migrations files. ' .
                 'Make sure all your migrations have been migrated before baking a diff.');
 
-            return 1;
+            return '1';
         }
 
         if (empty($this->migrationsFiles) && empty($this->migratedItems)) {
@@ -136,7 +136,7 @@ class MigrationDiffTask extends SimpleMigrationTask
 
         $connection = ConnectionManager::get($this->connection);
         $this->tables = $connection->getSchemaCollection()->listTables();
-        $tableExists = in_array($this->phinxTable, $this->tables);
+        $tableExists = in_array($this->phinxTable, $this->tables, true);
 
         $migratedItems = [];
         if ($tableExists) {
@@ -254,14 +254,14 @@ class MigrationDiffTask extends SimpleMigrationTask
                 unset($oldColumn['collate']);
 
                 if (
-                    in_array($columnName, $oldColumns) &&
+                    in_array($columnName, $oldColumns, true) &&
                     $column !== $oldColumn
                 ) {
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
 
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
                         $phinxAttributeName = $attribute;
-                        if ($attribute == 'length') {
+                        if ($attribute === 'length') {
                             $phinxAttributeName = 'limit';
                         }
                         if (!isset($changedAttributes[$phinxAttributeName])) {
@@ -343,7 +343,7 @@ class MigrationDiffTask extends SimpleMigrationTask
                 $constraint = $currentSchema->getConstraint($constraintName);
 
                 if (
-                    in_array($constraintName, $oldConstraints) &&
+                    in_array($constraintName, $oldConstraints, true) &&
                     $constraint !== $this->dumpSchema[$table]->getConstraint($constraintName)
                 ) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] =
@@ -395,7 +395,7 @@ class MigrationDiffTask extends SimpleMigrationTask
                 $index = $currentSchema->getIndex($indexName);
 
                 if (
-                    in_array($indexName, $oldIndexes) &&
+                    in_array($indexName, $oldIndexes, true) &&
                     $index !== $this->dumpSchema[$table]->getIndex($indexName)
                 ) {
                     $this->templateData[$table]['indexes']['remove'][$indexName] =

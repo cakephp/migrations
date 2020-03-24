@@ -57,7 +57,7 @@ class Migrations
      * Useful if some logic needs to be applied in the ConfigurationTrait depending
      * on the command
      *
-     * @var array
+     * @var string
      */
     protected $command;
 
@@ -91,9 +91,9 @@ class Migrations
      * Sets the command
      *
      * @param string $command Command name to store.
-     * @return self
+     * @return $this
      */
-    public function setCommand($command)
+    public function setCommand(string $command)
     {
         $this->command = $command;
 
@@ -135,7 +135,7 @@ class Migrations
      *
      * @return array The migrations list and their statuses
      */
-    public function status($options = [])
+    public function status(array $options = [])
     {
         $this->setCommand('status');
         $input = $this->getInput('Status', [], $options);
@@ -159,7 +159,7 @@ class Migrations
      *
      * @return bool Success
      */
-    public function migrate($options = [])
+    public function migrate(array $options = [])
     {
         $this->setCommand('migrate');
         $input = $this->getInput('Migrate', [], $options);
@@ -191,7 +191,7 @@ class Migrations
      *
      * @return bool Success
      */
-    public function rollback($options = [])
+    public function rollback(array $options = [])
     {
         $this->setCommand('rollback');
         $input = $this->getInput('Rollback', [], $options);
@@ -221,7 +221,7 @@ class Migrations
      *
      * @return bool Success
      */
-    public function markMigrated($version = null, $options = [])
+    public function markMigrated($version = null, array $options = [])
     {
         $this->setCommand('mark_migrated');
 
@@ -262,7 +262,7 @@ class Migrations
      *
      * @return bool Success
      */
-    public function seed($options = [])
+    public function seed(array $options = [])
     {
         $this->setCommand('seed');
         $input = $this->getInput('Seed', [], $options);
@@ -288,7 +288,7 @@ class Migrations
      *
      * @return mixed The result of the CakeManager::$method() call
      */
-    protected function run($method, $params, $input)
+    protected function run($method, array $params, $input)
     {
         if ($this->configuration instanceof Config) {
             $migrationPaths = $this->getConfig()->getMigrationPaths();
@@ -310,8 +310,10 @@ class Migrations
         $manager->setInput($input);
 
         if ($pdo !== null) {
+            /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
             $adapter = $this->manager->getEnvironment('default')->getAdapter();
             while ($adapter instanceof WrapperInterface) {
+                /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
                 $adapter = $adapter->getAdapter();
             }
             $adapter->setConnection($pdo);
@@ -352,7 +354,7 @@ class Migrations
                 $environment = $this->manager->getEnvironment('default');
                 $oldConfig = $environment->getOptions();
                 unset($oldConfig['connection']);
-                if ($oldConfig == $defaultEnvironment) {
+                if ($oldConfig === $defaultEnvironment) {
                     $defaultEnvironment['connection'] = $environment
                         ->getAdapter()
                         ->getConnection();
@@ -403,11 +405,13 @@ class Migrations
      * @return \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
      * Manager to properly run
      */
-    public function getInput($command, $arguments, $options)
+    public function getInput($command, array $arguments, array $options)
     {
         $className = '\Migrations\Command\\' . $command;
         $options = $arguments + $this->prepareOptions($options);
-        $definition = (new $className())->getDefinition();
+        /** @var \Symfony\Component\Console\Command\Command $command */
+        $command = new $className();
+        $definition = $command->getDefinition();
 
         return new ArrayInput($options, $definition);
     }
@@ -418,7 +422,7 @@ class Migrations
      * @param array $options Simple key-values array to pass to the InputInterface
      * @return array Prepared $options
      */
-    protected function prepareOptions($options = [])
+    protected function prepareOptions(array $options = [])
     {
         $options = array_merge($this->default, $options);
         if (!$options) {

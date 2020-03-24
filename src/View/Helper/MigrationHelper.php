@@ -173,7 +173,7 @@ class MigrationHelper extends Helper
         $columns = [];
         $tablePrimaryKeys = $tableSchema->getPrimaryKey();
         foreach ($tableSchema->columns() as $column) {
-            if (in_array($column, $tablePrimaryKeys)) {
+            if (in_array($column, $tablePrimaryKeys, true)) {
                 continue;
             }
             $columns[$column] = $this->column($tableSchema, $column);
@@ -274,7 +274,7 @@ class MigrationHelper extends Helper
         $primaryKeys = [];
         $tablePrimaryKeys = $tableSchema->getPrimaryKey();
         foreach ($tableSchema->columns() as $column) {
-            if (in_array($column, $tablePrimaryKeys)) {
+            if (in_array($column, $tablePrimaryKeys, true)) {
                 $primaryKeys[] = ['name' => $column, 'info' => $this->column($tableSchema, $column)];
             }
         }
@@ -289,7 +289,7 @@ class MigrationHelper extends Helper
      * @param array $tables List of tables to check
      * @return bool
      */
-    public function hasUnsignedPrimaryKey($tables)
+    public function hasUnsignedPrimaryKey(array $tables)
     {
         foreach ($tables as $table) {
             $tableSchema = $table;
@@ -347,7 +347,7 @@ class MigrationHelper extends Helper
      * @param array $options Array of options to compute the final list from.
      * @return array
      */
-    public function getColumnOption($options)
+    public function getColumnOption(array $options)
     {
         $wantedOptions = array_flip([
             'length',
@@ -457,7 +457,7 @@ class MigrationHelper extends Helper
                     break;
             }
 
-            if (!in_array($option, $validOptions)) {
+            if (!in_array($option, $validOptions, true)) {
                 continue;
             }
 
@@ -613,12 +613,12 @@ class MigrationHelper extends Helper
         $indexes = $this->indexes($table);
         $foreignKeys = [];
         foreach ($constraints as $constraint) {
-            if ($constraint['type'] == 'foreign') {
+            if ($constraint['type'] === 'foreign') {
                 $foreignKeys[] = $constraint['columns'];
             }
         }
         $indexes = array_filter($indexes, function ($index) use ($foreignKeys) {
-            return !in_array($index['columns'], $foreignKeys);
+            return !in_array($index['columns'], $foreignKeys, true);
         });
         $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
 
@@ -631,7 +631,7 @@ class MigrationHelper extends Helper
      * @param array $tables The tables to create element data for.
      * @return array
      */
-    public function getCreateTablesElementData($tables)
+    public function getCreateTablesElementData(array $tables)
     {
         $result = [
             'constraints' => [],
@@ -646,7 +646,7 @@ class MigrationHelper extends Helper
             $tableConstraintsNoUnique = array_filter(
                 $data['constraints'],
                 function ($constraint) {
-                    return $constraint['type'] != 'unique';
+                    return $constraint['type'] !== 'unique';
                 }
             );
             if ($tableConstraintsNoUnique) {

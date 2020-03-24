@@ -93,7 +93,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
         $indexes = $columnParser->parseIndexes($arguments);
         $primaryKey = $columnParser->parsePrimaryKey($arguments);
 
-        if (in_array($action[0], ['alter_table', 'add_field']) && !empty($primaryKey)) {
+        if (in_array($action[0], ['alter_table', 'add_field'], true) && !empty($primaryKey)) {
             $this->io->abort('Adding a primary key to an already existing table is not supported.');
         }
 
