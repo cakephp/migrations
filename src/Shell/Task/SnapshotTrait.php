@@ -13,6 +13,9 @@ declare(strict_types=1);
  */
 namespace Migrations\Shell\Task;
 
+use Migrations\Command\MigrationsDumpCommand;
+use Migrations\Command\MigrationsMarkMigratedCommand;
+
 /**
  * Trait needed for all "snapshot" type of bake operations.
  * Snapshot type operations are : baking a snapshot and baking a diff.
@@ -54,17 +57,23 @@ trait SnapshotTrait
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         [$version, ] = explode('_', $fileName, 2);
 
-        $dispatchCommand = 'migrations mark_migrated -t ' . $version . ' -o';
+        $args = [];
+        $args[] = '-t';
+        $args[] = $version;
+        $args[] = '-o';
         if (!empty($this->params['connection'])) {
-            $dispatchCommand .= ' -c ' . $this->params['connection'];
+            $args[] = '-c';
+            $args[] = $this->params['connection'];
         }
 
         if (!empty($this->params['plugin'])) {
-            $dispatchCommand .= ' -p ' . $this->params['plugin'];
+            $args[] = '-p';
+            $args[] = $this->params['plugin'];
         }
 
         $this->_io->out('Marking the migration ' . $fileName . ' as migrated...');
-        $this->dispatchShell($dispatchCommand);
+        $command = new MigrationsMarkMigratedCommand();
+        $command->run($args, $this->_io);
     }
 
     /**
@@ -75,16 +84,19 @@ trait SnapshotTrait
      */
     protected function refreshDump()
     {
-        $dispatchCommand = 'migrations dump';
+        $args = [];
         if (!empty($this->params['connection'])) {
-            $dispatchCommand .= ' -c ' . $this->params['connection'];
+            $args[] = '-c';
+            $args[] = $this->params['connection'];
         }
 
         if (!empty($this->params['plugin'])) {
-            $dispatchCommand .= ' -p ' . $this->params['plugin'];
+            $args[] = '-p';
+            $args[] = $this->params['plugin'];
         }
 
         $this->_io->out('Creating a dump of the new database state...');
-        $this->dispatchShell($dispatchCommand);
+        $command = new MigrationsDumpCommand();
+        $command->run($args, $this->_io);
     }
 }
