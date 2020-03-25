@@ -13,6 +13,9 @@ declare(strict_types=1);
  */
 namespace Migrations\Command;
 
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
+
 /**
  * Trait needed for all "snapshot" type of bake operations.
  * Snapshot type operations are : baking a snapshot and baking a diff.
@@ -20,22 +23,17 @@ namespace Migrations\Command;
 trait SnapshotTrait
 {
     /**
-     * After a file has been successfully created, we mark the newly
-     * created migration as applied
-     *
-     * @param string $path Where to put the file.
-     * @param string $contents Content to put in the file.
-     * @return bool Success
+     * {@inheritDoc}
      */
-    public function createFile(string $path, string $contents): bool
+    protected function createFile(string $path, string $contents, Arguments $args, ConsoleIo $io): bool
     {
-        $createFile = parent::createFile($path, $contents);
+        $createFile = parent::createFile($path, $contents, $args, $io);
 
         if ($createFile) {
-            $this->markSnapshotApplied($path);
+            $this->markSnapshotApplied($path, $args, $io);
 
-            if (!isset($this->params['no-lock']) || !$this->params['no-lock']) {
-                $this->refreshDump();
+            if (!$args->getOption('no-lock')) {
+                $this->refreshDump($args, $io);
             }
         }
 
@@ -49,28 +47,28 @@ trait SnapshotTrait
      * @param string $path Path to the newly created snapshot
      * @return void
      */
-    protected function markSnapshotApplied($path)
+    protected function markSnapshotApplied($path, Arguments $args, ConsoleIo $io)
     {
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         [$version, ] = explode('_', $fileName, 2);
 
-        $args = [];
-        $args[] = '-t';
-        $args[] = $version;
-        $args[] = '-o';
-        if (!empty($this->params['connection'])) {
-            $args[] = '-c';
-            $args[] = $this->params['connection'];
+        $newArgs = [];
+        $newArgs[] = '-t';
+        $newArgs[] = $version;
+        $newArgs[] = '-o';
+
+        if (!empty($args->getOption('connection'))) {
+            $newArgs[] = '-c';
+            $newArgs[] = $args->getOption('connection');
         }
 
-        if (!empty($this->params['plugin'])) {
-            $args[] = '-p';
-            $args[] = $this->params['plugin'];
+        if (!empty($args->getOption('plugin'))) {
+            $newArgs[] = '-p';
+            $newArgs[] = $args->getOption('plugin');
         }
 
-        $this->_io->out('Marking the migration ' . $fileName . ' as migrated...');
-        $command = new MigrationsMarkMigratedCommand();
-        $command->run($args, $this->_io);
+        $io->out('Marking the migration ' . $fileName . ' as migrated...');
+        $this->executeCommand(MigrationsMarkMigratedCommand::class, $newArgs, $io);
     }
 
     /**
@@ -79,21 +77,21 @@ trait SnapshotTrait
      *
      * @return void
      */
-    protected function refreshDump()
+    protected function refreshDump(Arguments $args, ConsoleIo $io)
     {
-        $args = [];
-        if (!empty($this->params['connection'])) {
-            $args[] = '-c';
-            $args[] = $this->params['connection'];
+        $newArgs = [];
+
+        if (!empty($args->getOption('connection'))) {
+            $newArgs[] = '-c';
+            $newArgs[] = $args->getOption('connection');
         }
 
-        if (!empty($this->params['plugin'])) {
-            $args[] = '-p';
-            $args[] = $this->params['plugin'];
+        if (!empty($args->getOption('plugin'))) {
+            $newArgs[] = '-p';
+            $newArgs[] = $args->getOption('plugin');
         }
 
-        $this->_io->out('Creating a dump of the new database state...');
-        $command = new MigrationsDumpCommand();
-        $command->run($args, $this->_io);
+        $io->out('Creating a dump of the new database state...');
+        $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
     }
 }
