@@ -33,7 +33,7 @@ class BakeSeedCommandTest extends TestCase
     /**
      * ConsoleIo mock
      *
-     * @var \Cake\Console\ConsoleIo|\PHPUnit_Framework_MockObject_MockObject
+     * @var \Cake\Console\ConsoleIo|\PHPUnit\Framework\MockObject\MockObject
      */
     public $io;
 

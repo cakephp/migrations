@@ -33,6 +33,7 @@ trait SchemaTrait
     protected function _getSchema(InputInterface $input, OutputInterface $output): ?CachedCollection
     {
         $connectionName = $input->getOption('connection');
+        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get($connectionName);
 
         if (!method_exists($connection, 'getSchemaCollection')) {

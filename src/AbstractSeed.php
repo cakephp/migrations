@@ -104,6 +104,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
 
         $seedPaths = $config->getSeedPaths();
         require_once array_pop($seedPaths) . DS . $seeder . '.php';
+        /** @var \Phinx\Seed\SeedInterface $seeder */
         $seeder = new $seeder();
         $seeder->setOutput($this->getOutput());
         $seeder->setAdapter($this->getAdapter());
@@ -115,10 +116,12 @@ abstract class AbstractSeed extends BaseAbstractSeed
      * Sets the InputInterface this Seed class is being used with.
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input object.
-     * @return void
+     * @return $this
      */
     public function setInput(InputInterface $input)
     {
         $this->input = $input;
+
+        return $this;
     }
 }

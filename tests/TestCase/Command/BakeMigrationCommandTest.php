@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\Command;
 
 use Cake\Console\BaseCommand;
-use Cake\Console\Exception\StopException;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Migrations\Command\BakeMigrationCommand;

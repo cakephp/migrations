@@ -25,8 +25,6 @@ use Migrations\Util\UtilTrait;
 
 /**
  * Task class for generating migration snapshot files.
- *
- * @property \Bake\Shell\Task\TestTask $Test
  */
 class MigrationSnapshotTask extends SimpleMigrationTask
 {

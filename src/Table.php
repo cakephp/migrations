@@ -16,7 +16,11 @@ namespace Migrations;
 use Cake\Collection\Collection;
 use Cake\ORM\TableRegistry;
 use Phinx\Db\Table as BaseTable;
+use Phinx\Db\Table\Column;
 
+/**
+ * @method \Migrations\CakeAdapter getAdapter()
+ */
 class Table extends BaseTable
 {
     /**
@@ -24,15 +28,15 @@ class Table extends BaseTable
      * Can either be a string or an array in case of composite
      * primary key.
      *
-     * @var string|array
+     * @var string|string[]
      */
     protected $primaryKey;
 
     /**
      * Add a primary key to a database table.
      *
-     * @param string|array $columns Table Column(s)
-     * @return \Migrations\Table
+     * @param string|string[] $columns Table Column(s)
+     * @return $this
      */
     public function addPrimaryKey($columns)
     {
@@ -75,7 +79,7 @@ class Table extends BaseTable
      * @param array $options Options
      * @return array Converted options
      */
-    protected function convertedAutoIncrement($options)
+    protected function convertedAutoIncrement(array $options)
     {
         if (isset($options['autoIncrement']) && $options['autoIncrement'] === true) {
             $options['identity'] = true;
@@ -108,7 +112,9 @@ class Table extends BaseTable
             $connectionConfig = $cakeConnection->config();
             $encodingRequest = sprintf($encodingRequest, $connectionConfig['database']);
 
-            $defaultEncoding = $cakeConnection->execute($encodingRequest)->fetch('assoc');
+            /** @var \Cake\Database\StatementInterface $statement */
+            $statement = $cakeConnection->execute($encodingRequest);
+            $defaultEncoding = $statement->fetch('assoc');
             if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
                 $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];
             }
@@ -141,7 +147,7 @@ class Table extends BaseTable
      */
     public function dropForeignKey($columns, $constraint = null)
     {
-        if ($this->getAdapter()->getAdapterType() == 'sqlite') {
+        if ($this->getAdapter()->getAdapterType() === 'sqlite') {
             return $this;
         }
 
@@ -175,9 +181,10 @@ class Table extends BaseTable
                 return $action instanceof \Phinx\Db\Action\AddColumn;
             })
             ->map(function ($action) {
+                /** @var \Phinx\Db\Action\ChangeColumn|\Phinx\Db\Action\RenameColumn|\Phinx\Db\Action\RemoveColumn|\Phinx\Db\Action\AddColumn $action */
                 return $action->getColumn();
             });
-        $primaryKeyColumns = $columnsCollection->filter(function ($columnDef, $key) use ($primaryKey) {
+        $primaryKeyColumns = $columnsCollection->filter(function (Column $columnDef, $key) use ($primaryKey) {
             return isset($primaryKey[$columnDef->getName()]);
         })->toArray();
 

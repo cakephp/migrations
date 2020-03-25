@@ -26,7 +26,7 @@ trait TableFinderTrait
     /**
      * Tables to skip
      *
-     * @var array
+     * @var string[]
      */
     public $skipTables = ['phinxlog'];
 
@@ -46,7 +46,7 @@ trait TableFinderTrait
      * @param array $options Array of options passed to a shell call.
      * @return array
      */
-    protected function getTablesToBake(CollectionInterface $collection, $options = [])
+    protected function getTablesToBake(CollectionInterface $collection, array $options = [])
     {
         $options = array_merge(['require-table' => false, 'plugin' => null], $options);
         $tables = $collection->listTables();
@@ -73,14 +73,14 @@ trait TableFinderTrait
                     }
                 }
 
-                if (!in_array($table, $tables)) {
+                if (!in_array($table, $tables, true)) {
                     unset($tableNamesInModel[$num]);
                 }
             }
             $tables = $tableNamesInModel;
         } else {
             foreach ($tables as $num => $table) {
-                if (in_array($table, $this->skipTables) || (strpos($table, $this->skipTablesRegex) !== false)) {
+                if (in_array($table, $this->skipTables, true) || (strpos($table, $this->skipTablesRegex) !== false)) {
                     unset($tables[$num]);
                     continue;
                 }
@@ -169,7 +169,9 @@ trait TableFinderTrait
         $table = TableRegistry::get($className);
         foreach ($table->associations()->keys() as $key) {
             if ($table->associations()->get($key)->type() === 'belongsToMany') {
-                $tables[] = $table->associations()->get($key)->junction()->getTable();
+                /** @var \Cake\ORM\Association\BelongsToMany $belongsToMany */
+                $belongsToMany = $table->associations()->get($key);
+                $tables[] = $belongsToMany->junction()->getTable();
             }
         }
         $tableName = $table->getTable();
