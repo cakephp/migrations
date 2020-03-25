@@ -178,7 +178,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      */
     public function templateData(Arguments $arguments): array
     {
-        $this->dumpSchema = $this->getDumpSchema();
+        $this->dumpSchema = $this->getDumpSchema($arguments);
         $this->currentSchema = $this->getCurrentSchema();
         $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
 
@@ -492,16 +492,16 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * @return array Full database schema : the key is the name of the table and the value is
      * an instance of \Cake\Database\Schema\Table.
      */
-    protected function getDumpSchema()
+    protected function getDumpSchema(Arguments $args)
     {
         $inputArgs = [];
 
         $connectionName = 'default';
-        if (!empty($this->params['connection'])) {
-            $connectionName = $inputArgs['--connection'] = $this->params['connection'];
+        if (!empty($args->getOption('connection'))) {
+            $connectionName = $inputArgs['--connection'] = $args->getOption('connection');
         }
-        if (!empty($this->params['plugin'])) {
-            $inputArgs['--plugin'] = $this->params['plugin'];
+        if (!empty($args->getOption('plugin'))) {
+            $inputArgs['--plugin'] = $args->getOption('plugin');
         }
 
         $className = '\Migrations\Command\Dump';
@@ -513,7 +513,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
                 'the `cake migrations dump` command';
-            $this->abort($msg);
+            $this->io->abort($msg);
         }
 
         return unserialize(file_get_contents($path));

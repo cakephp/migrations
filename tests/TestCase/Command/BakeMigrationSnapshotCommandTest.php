@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\TestCase\Shell\Task;
+namespace Migrations\Test\Command;
 
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
@@ -23,7 +23,7 @@ use Migrations\Test\TestCase\Shell\TestClassWithSnapshotTrait;
 /**
  * MigrationSnapshotTaskTest class
  */
-class MigrationSnapshotTaskTest extends TestCase
+class BakeMigrationDiffCommandTest extends TestCase
 {
     use StringCompareTrait;
 
