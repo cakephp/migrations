@@ -13,8 +13,10 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell\Task;
+namespace Migrations\Command;
 
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
@@ -28,7 +30,7 @@ use Migrations\Util\UtilTrait;
  *
  * @property \Bake\Shell\Task\TestTask $Test
  */
-class MigrationSnapshotTask extends SimpleMigrationTask
+class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
 {
     use SnapshotTrait;
     use TableFinderTrait;
@@ -39,7 +41,15 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function bake(string $name): string
+    public static function defaultName(): string
+    {
+        return 'bake migration_snapshot';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
@@ -49,7 +59,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         });
         $this->_name = $name;
 
-        return parent::bake($name);
+        parent::bake($name, $args, $io);
     }
 
     /**
@@ -63,7 +73,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function templateData(): array
+    public function templateData(Arguments $arguments): array
     {
         $namespace = Configure::read('App.namespace');
         $pluginPath = '';
@@ -74,7 +84,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
 
         $collection = $this->getCollection($this->connection);
         $options = [
-            'require-table' => $this->params['require-table'],
+            'require-table' => $arguments->getOption('require-table'),
             'plugin' => $this->plugin,
         ];
         $tables = $this->getTablesToBake($collection, $options);
@@ -84,8 +94,8 @@ class MigrationSnapshotTask extends SimpleMigrationTask
         $tables = array_combine($tables, $tables);
 
         $autoId = true;
-        if (isset($this->params['disable-autoid'])) {
-            $autoId = !$this->params['disable-autoid'];
+        if ($arguments->hasOption('disable-autoid')) {
+            $autoId = !$arguments->getOption('disable-autoid');
         }
 
         return [

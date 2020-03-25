@@ -11,10 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell\Task;
-
-use Migrations\Command\MigrationsDumpCommand;
-use Migrations\Command\MigrationsMarkMigratedCommand;
+namespace Migrations\Command;
 
 /**
  * Trait needed for all "snapshot" type of bake operations.
