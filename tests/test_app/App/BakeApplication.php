@@ -8,6 +8,8 @@ use Cake\Http\BaseApplication;
 use Cake\Http\MiddlewareQueue;
 use Cake\Routing\RouteBuilder;
 use Migrations\Test\Command\CustomBakeMigrationDiffCommand;
+use Migrations\Test\Command\CustomRemoveBakeMigrationDiffCommand;
+use Migrations\Test\Command\CustomSimpleBakeMigrationDiffCommand;
 
 class BakeApplication extends BaseApplication
 {
@@ -24,6 +26,9 @@ class BakeApplication extends BaseApplication
     {
         $commands = parent::console($commands);
         $commands->add('custom bake migration_diff', CustomBakeMigrationDiffCommand::class);
+        $commands->add('customSimple bake migration_diff', CustomSimpleBakeMigrationDiffCommand::class);
+        $commands->add('customRemove bake migration_diff', CustomRemoveBakeMigrationDiffCommand::class);
+
         return $commands;
     }
 

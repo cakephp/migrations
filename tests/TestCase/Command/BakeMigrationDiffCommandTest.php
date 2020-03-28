@@ -36,9 +36,34 @@ class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
     {
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-        $file = unserialize(file_get_contents($diffDumpPath));
 
-        return $file;
+        return unserialize(file_get_contents($diffDumpPath));
+    }
+
+}
+class CustomSimpleBakeMigrationDiffCommand extends BakeMigrationDiffCommand
+{
+    public $pathFragment = 'config/MigrationsDiffSimple/';
+
+    protected function getDumpSchema(Arguments $args)
+    {
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+
+        return unserialize(file_get_contents($diffDumpPath));
+    }
+
+}
+class CustomRemoveBakeMigrationDiffCommand extends BakeMigrationDiffCommand
+{
+    public $pathFragment = 'config/MigrationsDiffAddRemove/';
+
+    protected function getDumpSchema(Arguments $args)
+    {
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+
+        return unserialize(file_get_contents($diffDumpPath));
     }
 
 }
@@ -98,30 +123,6 @@ class BakeMigrationDiffCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS phinxlog');
         $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
         $connection->execute('DROP TABLE IF EXISTS users');
-    }
-
-    /**
-     * Returns a MigrationSnapshotTask mock object properly configured
-     *
-     * @param array $mockedMethods List of methods to mock
-     * @return \Migrations\Shell\Task\MigrationSnapshotTask mock
-     */
-    public function getTaskMock($mockedMethods = [])
-    {
-        $mockedMethods = $mockedMethods ?: ['in', 'dispatchShell'];
-
-        $this->out = new TestCompletionStringOutput();
-        $io = new ConsoleIo($this->out, $this->out);
-
-        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationDiffTask')
-            ->setMethods($mockedMethods)
-            ->setConstructorArgs([$io])
-            ->getMock();
-
-        $task->name = 'Migration';
-        $task->connection = 'test';
-
-        return $task;
     }
 
     /**
@@ -277,7 +278,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
-        $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffSimple' . DS;
+        $destinationConfigDir = ROOT . DS . 'config' . DS . 'MigrationsDiffSimple' . DS;
         $destination = $destinationConfigDir . '20160415220805_TheDiffSimple' . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
@@ -300,28 +301,16 @@ class BakeMigrationDiffCommandTest extends TestCase
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
 
-        $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
-        $this->Task
-            ->method('getDumpSchema')
-            ->will($this->returnValue(unserialize(file_get_contents($destinationDumpPath))));
-
-        $this->Task->expects($this->at(1))
-            ->method('dispatchShell')
-            ->with($this->stringContains('migrations mark_migrated'));
-        $this->Task->expects($this->at(2))
-            ->method('dispatchShell')
-            ->with($this->stringContains('migrations dump'));
-
-        $this->Task->params['connection'] = 'test_comparisons';
-        $this->Task->pathFragment = 'config/MigrationsDiffSimple/';
-        $this->Task->connection = 'test_comparisons';
-
         $bakeName = $this->getBakeName('TheDiffSimple');
-        $result = $this->Task->bake($bakeName);
+        $this->exec("customSimple bake migration_diff {$bakeName} -c test_comparisons");
 
-        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
+        $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
 
-        $this->assertCorrectSnapshot($bakeName, $result);
+        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiffSimple*');
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
+        $this->assertCorrectSnapshot($bakeName, file_get_contents($destinationConfigDir . $generatedMigration));
 
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
@@ -353,7 +342,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
-        $destinationConfigDir = ROOT . 'config' . DS . 'MigrationsDiffAddRemove' . DS;
+        $destinationConfigDir = ROOT . DS . 'config' . DS . 'MigrationsDiffAddRemove' . DS;
         $destination = $destinationConfigDir . '20160415220805_TheDiffAddRemove' . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
@@ -376,27 +365,17 @@ class BakeMigrationDiffCommandTest extends TestCase
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
 
-        $this->Task = $this->getTaskMock(['getDumpSchema', 'dispatchShell']);
-        $this->Task
-            ->method('getDumpSchema')
-            ->will($this->returnValue(unserialize(file_get_contents($destinationDumpPath))));
-
-        $this->Task->expects($this->at(1))
-            ->method('dispatchShell')
-            ->with($this->stringContains('migrations mark_migrated'));
-        $this->Task->expects($this->at(2))
-            ->method('dispatchShell')
-            ->with($this->stringContains('migrations dump'));
-
-        $this->Task->params['connection'] = 'test_comparisons';
-        $this->Task->pathFragment = 'config/MigrationsDiffAddRemove/';
-        $this->Task->connection = 'test_comparisons';
-
         $bakeName = $this->getBakeName('TheDiffAddRemove');
-        $result = $this->Task->bake($bakeName);
+
+        $this->exec("customRemove bake migration_diff {$bakeName} -c test_comparisons");
+
+        $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
 
         $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
-        $this->assertCorrectSnapshot($bakeName, $result);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
+        $this->assertCorrectSnapshot($bakeName, file_get_contents($destinationConfigDir . $generatedMigration));
 
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
