@@ -14,9 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\Command;
 
 use Cake\Console\BaseCommand;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
-use Cake\Console\Exception\StopException;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\TableSchema;
@@ -24,49 +21,8 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Migrations\Migrations;
-use Migrations\Test\TestCase\Shell\TestCompletionStringOutput;
 use Migrations\Test\TestCase\TestCase;
-use Migrations\Command\BakeMigrationDiffCommand;
 
-class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
-{
-    public $pathFragment = 'config/MigrationsDiff/';
-
-    protected function getDumpSchema(Arguments $args)
-    {
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-
-        return unserialize(file_get_contents($diffDumpPath));
-    }
-
-}
-class CustomSimpleBakeMigrationDiffCommand extends BakeMigrationDiffCommand
-{
-    public $pathFragment = 'config/MigrationsDiffSimple/';
-
-    protected function getDumpSchema(Arguments $args)
-    {
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-
-        return unserialize(file_get_contents($diffDumpPath));
-    }
-
-}
-class CustomRemoveBakeMigrationDiffCommand extends BakeMigrationDiffCommand
-{
-    public $pathFragment = 'config/MigrationsDiffAddRemove/';
-
-    protected function getDumpSchema(Arguments $args)
-    {
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-
-        return unserialize(file_get_contents($diffDumpPath));
-    }
-
-}
 /**
  * MigrationSnapshotTaskTest class
  */
@@ -95,7 +51,6 @@ class BakeMigrationDiffCommandTest extends TestCase
         $this->generatedFiles = [];
         $this->cleanupDatabase();
         $this->useCommandRunner();
-        $this->configApplication(Configure::read('App.namespace') . '\BakeApplication',[]);
     }
 
     public function tearDown(): void
