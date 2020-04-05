@@ -16,14 +16,14 @@ namespace Migrations\Test\Command;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
-use Cake\TestSuite\TestCase;
 use Cake\Utility\Inflector;
 use Migrations\Test\TestCase\Shell\TestClassWithSnapshotTrait;
+use Migrations\Test\TestCase\TestCase;
 
 /**
  * MigrationSnapshotTaskTest class
  */
-class BakeMigrationDiffCommandTest extends TestCase
+class BakeMigrationSnapshotCommandTest extends TestCase
 {
     use StringCompareTrait;
 
@@ -61,11 +61,13 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
-        $this->Task = $this->getTaskMock();
+        $this->migrationPath = ROOT . DS . 'config' . DS . 'Migrations' . DS;
+
         $this->loadPlugins([
             'Migrations' => ['boostrap' => true],
         ]);
         $this->generatedFiles = [];
+        $this->useCommandRunner();
     }
 
     /**
@@ -83,36 +85,6 @@ class BakeMigrationDiffCommandTest extends TestCase
                 unlink($file);
             }
         }
-    }
-
-    /**
-     * Returns a MigrationSnapshotTask mock object properly configured
-     *
-     * @param array $mockedMethods List of methods to mock
-     * @return \Migrations\Shell\Task\MigrationSnapshotTask mock
-     */
-    public function getTaskMock($mockedMethods = [])
-    {
-        $mockedMethods = $mockedMethods ?: [
-            'dispatchShell',
-            'findTables',
-            'fetchTableName',
-            'refreshDump',
-        ];
-
-        $inputOutput = $this->getMockBuilder('\Cake\Console\ConsoleIo')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $task = $this->getMockBuilder('\Migrations\Shell\Task\MigrationSnapshotTask')
-            ->setMethods($mockedMethods)
-            ->setConstructorArgs([$inputOutput])
-            ->getMock();
-
-        $task->name = 'Migration';
-        $task->connection = 'test';
-
-        return $task;
     }
 
     /**
@@ -147,28 +119,18 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testNotEmptySnapshot()
     {
-        $this->Task->params['require-table'] = false;
-        $this->Task->params['connection'] = 'test';
-        $this->Task->params['plugin'] = 'BogusPlugin';
-
-        $this->Task->expects($this->once())
-            ->method('dispatchShell')
-            ->with(
-                $this->logicalAnd(
-                    $this->stringContains('migrations mark_migrated -t'),
-                    $this->stringContains('-o -c test -p BogusPlugin')
-                )
-            );
-
-        $this->Task->expects($this->once())
-            ->method('refreshDump');
-
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
-        $result = $this->Task->bake($bakeName);
+        $this->exec("bake migration_snapshot {$bakeName} -c test");
 
-        $this->generatedFiles = glob($this->Task->getPath() . '*_TestNotEmptySnapshot*.php');
+        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*.php');
+        $this->generatedFiles = $generatedMigration;
+        $this->generatedFiles[] = $this->migrationPath . "schema-dump-test.lock";
+        $generatedMigration = basename($generatedMigration[0]);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
         $this->assertNotEmpty($this->generatedFiles);
-        $this->assertCorrectSnapshot($bakeName, $result);
+        $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
     }
 
     /**
@@ -178,27 +140,17 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testNotEmptySnapshotNoLock()
     {
-        $this->Task->params['require-table'] = false;
-        $this->Task->params['connection'] = 'test';
-        $this->Task->params['plugin'] = 'BogusPlugin';
-        $this->Task->params['no-lock'] = true;
-
-        $this->Task->expects($this->once())
-            ->method('dispatchShell')
-            ->with(
-                $this->logicalAnd(
-                    $this->stringContains('migrations mark_migrated -t'),
-                    $this->stringContains('-o -c test -p BogusPlugin')
-                )
-            );
-
-        $this->Task->expects($this->never())
-            ->method('refreshDump');
-
         $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
-        $this->Task->bake($bakeName);
+        $this->exec("bake migration_snapshot {$bakeName} -c test --no-lock");
 
-        $this->generatedFiles = glob($this->Task->getPath() . '*_TestNotEmptySnapshotNoLock*.php');
+        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshotNoLock*.php');
+        $this->generatedFiles = $generatedMigration;
+        $this->generatedFiles[] = $this->migrationPath . "schema-dump-test.lock";
+        $generatedMigration = basename($generatedMigration[0]);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputNotContains('Creating a dump of the new database state...');
+        $this->assertNotEmpty($this->generatedFiles);
     }
 
     /**
@@ -208,17 +160,18 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testAutoIdDisabledSnapshot()
     {
-        $this->Task->params['require-table'] = false;
-        $this->Task->params['disable-autoid'] = true;
-        $this->Task->params['connection'] = 'test';
-        $this->Task->params['plugin'] = 'BogusPlugin';
-
         $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
-        $result = $this->Task->bake($bakeName);
+        $this->exec("bake migration_snapshot {$bakeName} -c test --disable-autoid");
 
-        $this->generatedFiles = glob($this->Task->getPath() . '*_TestAutoIdDisabledSnapshot*.php');
+        $generatedMigration = glob($this->migrationPath . '*_TestAutoIdDisabledSnapshot*.php');
+        $this->generatedFiles = $generatedMigration;
+        $this->generatedFiles[] = $this->migrationPath . "schema-dump-test.lock";
+        $generatedMigration = basename($generatedMigration[0]);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
         $this->assertNotEmpty($this->generatedFiles);
-        $this->assertCorrectSnapshot($bakeName, $result);
+        $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
     }
 
     /**
@@ -228,16 +181,20 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testPluginBlog()
     {
-        $task = $this->getTaskMock(['in', 'err', 'dispatchShell', 'createFile']);
-        $task->params['require-table'] = false;
-        $task->params['connection'] = 'test';
-        $task->params['plugin'] = 'TestBlog';
-        $task->plugin = 'TestBlog';
-
         $bakeName = $this->getBakeName('TestPluginBlog');
-        $result = $task->bake($bakeName);
+        $this->exec("bake migration_snapshot {$bakeName} -c test -p TestBlog");
 
-        $this->assertCorrectSnapshot($bakeName, $result);
+        $path = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $generatedMigration = glob($path . '*_TestPluginBlog*.php');
+        $this->generatedFiles = $generatedMigration;
+        $this->generatedFiles[] = $path . "schema-dump-test.lock";
+        $generatedMigration = basename($generatedMigration[0]);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
+        $this->assertNotEmpty($this->generatedFiles);
+        $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
     }
 
     /**
