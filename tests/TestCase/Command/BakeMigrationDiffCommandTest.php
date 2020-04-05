@@ -150,7 +150,7 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->exec('bake migration_diff EmptyHistoryNoMigrations -c test -p Blog');
 
-        $path = ROOT . 'Plugin' . DS . 'Blog' . DS . 'config' . DS . 'Migrations' . DS;
+        $path = ROOT  . DS . 'Plugin' . DS . 'Blog' . DS . 'config' . DS . 'Migrations' . DS;
         $this->generatedFiles = glob($path . '*_EmptyHistoryNoMigrations.php');
 
         $this->assertFileExists($path. DS . 'schema-dump-test.lock', 'Cannot test contents, file does not exist.');
