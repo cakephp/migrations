@@ -40,7 +40,7 @@ if (!defined('DS')) {
 define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS);
 define('ROOT', $root . DS . 'tests' . DS . 'test_app');
 define('APP_DIR', 'App');
-define('APP', ROOT . DS. 'App' . DS);
+define('APP', ROOT . DS . 'App' . DS);
 define('TMP', sys_get_temp_dir() . DS);
 define('CACHE', sys_get_temp_dir() . DS . 'cache' . DS);
 if (!defined('CONFIG')) {
@@ -51,8 +51,8 @@ Configure::write('App', [
     'namespace' => 'TestApp',
     'encoding' => 'UTF-8',
     'paths' => [
-        'plugins' => [ROOT . DS. 'Plugin' . DS],
-        'templates' => [ROOT . DS. 'App' . DS . 'Template' . DS],
+        'plugins' => [ROOT . DS . 'Plugin' . DS],
+        'templates' => [ROOT . DS . 'App' . DS . 'Template' . DS],
     ],
 ]);
 

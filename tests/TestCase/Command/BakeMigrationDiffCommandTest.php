@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\Command;
 
 use Cake\Console\BaseCommand;
-use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -105,7 +104,7 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->exec('bake migration_diff EmptyHistoryNoMigrations -c test -p Blog');
 
-        $path = ROOT  . DS . 'Plugin' . DS . 'Blog' . DS . 'config' . DS . 'Migrations' . DS;
+        $path = ROOT . DS . 'Plugin' . DS . 'Blog' . DS . 'config' . DS . 'Migrations' . DS;
         $this->generatedFiles = glob($path . '*_EmptyHistoryNoMigrations.php');
 
         $this->assertFileExists($path . 'schema-dump-test.lock', 'Cannot test contents, file does not exist.');

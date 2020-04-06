@@ -132,7 +132,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
 
         $emptyFile = $this->getPath($args) . '.gitkeep';
         $this->deleteEmptyFile($emptyFile, $io);
-
     }
 
     /**

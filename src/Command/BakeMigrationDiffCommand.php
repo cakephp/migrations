@@ -133,7 +133,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
     /**
      * Sets up everything the baking process needs
-     *
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @return void
      */
     protected function setup(Arguments $args)
@@ -455,6 +455,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * there are no migration files.
      *
      * @param string $name Name.
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io
      * @return string Value of the snapshot baking dispatch process
      */
     protected function bakeSnapshot($name, Arguments $args, ConsoleIo $io)
@@ -476,7 +478,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
         $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs, $io);
 
-
         if ($exitCode === 1) {
             $io->abort('Something went wrong during the snapshot baking. Please try again.');
         }
@@ -487,7 +488,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * Fetch the correct schema dump based on the arguments and options passed to the shell call
      * and returns it as an array
-     *
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @return array Full database schema : the key is the name of the table and the value is
      * an instance of \Cake\Database\Schema\Table.
      */
