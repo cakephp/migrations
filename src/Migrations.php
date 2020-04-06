@@ -384,6 +384,7 @@ class Migrations
             if ($this->input->getOption('connection')) {
                 $connectionName = $this->input->getOption('connection');
             }
+            /** @var \Cake\Database\Connection $connection */
             $connection = ConnectionManager::get($connectionName);
 
             $env = $this->manager->getEnvironment('default');
@@ -424,7 +425,7 @@ class Migrations
      */
     protected function prepareOptions(array $options = [])
     {
-        $options = array_merge($this->default, $options);
+        $options += $this->default;
         if (!$options) {
             return $options;
         }

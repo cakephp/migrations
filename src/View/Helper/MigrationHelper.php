@@ -262,7 +262,7 @@ class MigrationHelper extends Helper
     /**
      * Returns the primary key data for a given table
      *
-     * @param string $table Name of the table ot retrieve primary key for
+     * @param string|\Cake\Database\Schema\TableSchema $table Name of the table ot retrieve primary key for
      * @return array
      */
     public function primaryKeys($table)
@@ -392,7 +392,7 @@ class MigrationHelper extends Helper
     /**
      * Returns a string-like representation of a value
      *
-     * @param string $value A value to represent as a string
+     * @param string|bool|null $value A value to represent as a string
      * @param bool $numbersAsString Set tu true to return as string.
      * @return mixed
      */
@@ -420,7 +420,7 @@ class MigrationHelper extends Helper
     /**
      * Returns an array of attributes for a given table column
      *
-     * @param string $table Name of the table to retrieve columns for
+     * @param \Cake\Database\Schema\TableSchema|string $table Name of the table to retrieve columns for
      * @param string $column A column to retrieve attributes for
      * @return array
      */

@@ -31,7 +31,7 @@ trait ConfigurationTrait
     /**
      * The configuration object that phinx uses for connecting to the database
      *
-     * @var \Phinx\Config\Config
+     * @var \Phinx\Config\Config|null
      */
     protected $configuration;
 
@@ -45,9 +45,19 @@ trait ConfigurationTrait
     /**
      * The console input instance
      *
-     * @var \Symfony\Component\Console\Input\InputInterface
+     * @var \Symfony\Component\Console\Input\InputInterface|null
      */
     protected $input;
+
+    /**
+     * @return \Symfony\Component\Console\Input\InputInterface
+     */
+    protected function input(): InputInterface {
+        if ($this->input === null) {
+            throw new \RuntimeException('Input not set');
+        }
+        return $this->input;
+    }
 
     /**
      * Overrides the original method from phinx in order to return a tailored
@@ -62,9 +72,9 @@ trait ConfigurationTrait
             return $this->configuration;
         }
 
-        $migrationsPath = $this->getOperationsPath($this->input);
-        $seedsPath = $this->getOperationsPath($this->input, 'Seeds');
-        $plugin = $this->getPlugin($this->input);
+        $migrationsPath = $this->getOperationsPath($this->input());
+        $seedsPath = $this->getOperationsPath($this->input(), 'Seeds');
+        $plugin = $this->getPlugin($this->input());
 
         if (!is_dir($migrationsPath)) {
             mkdir($migrationsPath, 0777, true);
@@ -76,7 +86,7 @@ trait ConfigurationTrait
 
         $phinxTable = $this->getPhinxTable($plugin);
 
-        $connection = $this->getConnectionName($this->input);
+        $connection = $this->getConnectionName($this->input());
 
         $connectionConfig = ConnectionManager::getConfig($connection);
         $adapterName = $this->getAdapterName($connectionConfig['driver']);

@@ -48,7 +48,10 @@ trait TableFinderTrait
      */
     protected function getTablesToBake(CollectionInterface $collection, array $options = [])
     {
-        $options = array_merge(['require-table' => false, 'plugin' => null], $options);
+        $options += [
+            'require-table' => false,
+            'plugin' => null,
+        ];
         $tables = $collection->listTables();
 
         if (empty($tables)) {

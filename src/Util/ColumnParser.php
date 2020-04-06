@@ -210,7 +210,7 @@ class ColumnParser
      * Retrieves a type that should be used for a specific field
      *
      * @param string $field Name of field
-     * @param string $type User-specified type
+     * @param string|null $type User-specified type
      * @return string
      */
     public function getType($field, $type)
