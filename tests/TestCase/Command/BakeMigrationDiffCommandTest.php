@@ -108,8 +108,8 @@ class BakeMigrationDiffCommandTest extends TestCase
         $path = ROOT  . DS . 'Plugin' . DS . 'Blog' . DS . 'config' . DS . 'Migrations' . DS;
         $this->generatedFiles = glob($path . '*_EmptyHistoryNoMigrations.php');
 
-        $this->assertFileExists($path. DS . 'schema-dump-test.lock', 'Cannot test contents, file does not exist.');
-        $this->generatedFiles[] = $path. DS . 'schema-dump-test.lock';
+        $this->assertFileExists($path . 'schema-dump-test.lock', 'Cannot test contents, file does not exist.');
+        $this->generatedFiles[] = $path . 'schema-dump-test.lock';
 
         $this->assertOutputContains('Your migrations history is empty and you do not have any migrations files.');
         $this->assertOutputNotContains('Something went wrong during the snapshot baking. Please try again.');

@@ -10,6 +10,14 @@ class CustomRemoveBakeMigrationDiffCommand extends BakeMigrationDiffCommand
 {
     public $pathFragment = 'config/MigrationsDiffAddRemove/';
 
+    /**
+     * {@inheritDoc}
+     */
+    public static function defaultName(): string
+    {
+        return 'customRemove bake migration_diff';
+    }
+
     protected function getDumpSchema(Arguments $args)
     {
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
