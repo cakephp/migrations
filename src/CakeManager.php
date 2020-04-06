@@ -96,9 +96,9 @@ class CakeManager extends Manager
                 ];
 
                 if (!$isJson) {
-                    $migrationParams = array_merge($migrationParams, [
+                    $migrationParams = [
                         'missing' => true,
-                    ]);
+                    ] + $migrationParams;
                 }
 
                 $migrations[$version] = $migrationParams;
