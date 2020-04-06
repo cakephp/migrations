@@ -17,7 +17,7 @@ use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
-use Migrations\Test\TestCase\Shell\TestClassWithSnapshotTrait;
+use Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait;
 use Migrations\Test\TestCase\TestCase;
 
 /**
@@ -95,7 +95,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testGetTableNames()
     {
-        $class = $this->getMockBuilder('\Migrations\Test\TestCase\Shell\TestClassWithSnapshotTrait')
+        $class = $this->getMockBuilder('\Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait')
             ->setMethods(['findTables', 'fetchTableName'])
             ->getMock();
 
