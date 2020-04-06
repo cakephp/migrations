@@ -41,7 +41,7 @@ class BakeMigrationCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $createUsers = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $createUsers = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         if ($createUsers) {
             foreach ($createUsers as $file) {
                 unlink($file);
@@ -58,7 +58,7 @@ class BakeMigrationCommandTest extends TestCase
     {
         $this->exec('bake migration NoContents --connection test');
 
-        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_NoContents.php');
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_NoContents.php');
         $this->generatedFile = current($file);
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
@@ -92,7 +92,7 @@ class BakeMigrationCommandTest extends TestCase
     {
         $this->exec("bake migration CreateUsers  {$name} --connection test");
 
-        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $filePath = current($file);
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
@@ -118,12 +118,12 @@ class BakeMigrationCommandTest extends TestCase
     {
         $this->exec('bake migration CreateUsers --connection test --force');
 
-        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $filePath = current($file);
         sleep(1);
 
         $this->exec('bake migration CreateUsers --connection test --force');
-        $file = glob(ROOT . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $this->assertNotEquals($filePath, current($file));
     }
 
