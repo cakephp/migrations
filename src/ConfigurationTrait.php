@@ -45,7 +45,7 @@ trait ConfigurationTrait
     /**
      * The console input instance
      *
-     * @var \Symfony\Component\Console\Input\Input
+     * @var \Symfony\Component\Console\Input\InputInterface
      */
     protected $input;
 

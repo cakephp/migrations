@@ -28,11 +28,12 @@ trait SchemaTrait
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input object.
      * @param \Symfony\Component\Console\Output\OutputInterface $output Output object.
-     * @return null|\Cake\Database\Schema\CachedCollection
+     * @return \Cake\Database\Schema\CachedCollection|null
      */
     protected function _getSchema(InputInterface $input, OutputInterface $output): ?CachedCollection
     {
         $connectionName = $input->getOption('connection');
+        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get($connectionName);
 
         if (!method_exists($connection, 'getSchemaCollection')) {
@@ -56,6 +57,9 @@ trait SchemaTrait
 
         $connection->cacheMetadata(true);
 
+        /**
+         * @var \Cake\Database\Schema\CachedCollection
+         */
         return $connection->getSchemaCollection();
     }
 }

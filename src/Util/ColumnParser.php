@@ -44,7 +44,7 @@ class ColumnParser
      * @param array $arguments A list of arguments being parsed
      * @return array
      */
-    public function parseFields($arguments)
+    public function parseFields(array $arguments)
     {
         $fields = [];
         $arguments = $this->validArguments($arguments);
@@ -54,9 +54,9 @@ class ColumnParser
             $type = Hash::get($matches, 2, '');
             $indexType = Hash::get($matches, 3);
 
-            $typeIsPk = in_array($type, ['primary', 'primary_key']);
+            $typeIsPk = in_array($type, ['primary', 'primary_key'], true);
             $isPrimaryKey = false;
-            if ($typeIsPk || in_array($indexType, ['primary', 'primary_key'])) {
+            if ($typeIsPk || in_array($indexType, ['primary', 'primary_key'], true)) {
                 $isPrimaryKey = true;
 
                 if ($typeIsPk) {
@@ -97,7 +97,7 @@ class ColumnParser
      * @param array $arguments A list of arguments being parsed
      * @return array
      */
-    public function parseIndexes($arguments)
+    public function parseIndexes(array $arguments)
     {
         $indexes = [];
         $arguments = $this->validArguments($arguments);
@@ -109,8 +109,8 @@ class ColumnParser
             $indexName = Hash::get($matches, 4);
 
             if (
-                in_array($type, ['primary', 'primary_key']) ||
-                in_array($indexType, ['primary', 'primary_key']) ||
+                in_array($type, ['primary', 'primary_key'], true) ||
+                in_array($indexType, ['primary', 'primary_key'], true) ||
                 $indexType === null
             ) {
                 continue;
@@ -146,7 +146,7 @@ class ColumnParser
      * @param array $arguments A list of arguments being parsed
      * @return array
      */
-    public function parsePrimaryKey($arguments)
+    public function parsePrimaryKey(array $arguments)
     {
         $primaryKey = [];
         $arguments = $this->validArguments($arguments);
@@ -156,7 +156,10 @@ class ColumnParser
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
 
-            if (in_array($type, ['primary', 'primary_key']) || in_array($indexType, ['primary', 'primary_key'])) {
+            if (
+                in_array($type, ['primary', 'primary_key'], true)
+                || in_array($indexType, ['primary', 'primary_key'], true)
+            ) {
                 $primaryKey[] = $field;
             }
         }
@@ -170,7 +173,7 @@ class ColumnParser
      * @param array $arguments A list of arguments
      * @return array
      */
-    public function validArguments($arguments)
+    public function validArguments(array $arguments)
     {
         $collection = new Collection($arguments);
 
@@ -219,14 +222,14 @@ class ColumnParser
             return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
         $fieldType = $type;
-        if ($type === null || !in_array($type, $validTypes)) {
+        if ($type === null || !in_array($type, $validTypes, true)) {
             if ($type === 'primary') {
                 $fieldType = 'integer';
             } elseif ($field === 'id') {
                 $fieldType = 'integer';
-            } elseif (in_array($field, ['created', 'modified', 'updated']) || substr($field, -3) === '_at') {
+            } elseif (in_array($field, ['created', 'modified', 'updated'], true) || substr($field, -3) === '_at') {
                 $fieldType = 'datetime';
-            } elseif (in_array($field, ['latitude', 'longitude'])) {
+            } elseif (in_array($field, ['latitude', 'longitude'], true)) {
                 $fieldType = 'decimal';
             } else {
                 $fieldType = 'string';

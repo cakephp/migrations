@@ -241,7 +241,7 @@ class CakeManager extends Manager
 
         $versionArg = $input->getArgument('version');
         $targetArg = $input->getOption('target');
-        $hasAllVersion = in_array($versionArg, ['all', '*']);
+        $hasAllVersion = in_array($versionArg, ['all', '*'], true);
         if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
             return $versions;
         }
@@ -277,7 +277,7 @@ class CakeManager extends Manager
      * the command output
      * @return void
      */
-    public function markVersionsAsMigrated($path, $versions, $output)
+    public function markVersionsAsMigrated($path, array $versions, $output)
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
@@ -339,11 +339,13 @@ class CakeManager extends Manager
      * Sets the InputInterface the Manager is dealing with for the current shell call
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Instance of InputInterface
-     * @return void
+     * @return $this
      */
     public function setInput(InputInterface $input)
     {
         $this->input = $input;
+
+        return $this;
     }
 
     /**

@@ -19,6 +19,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @method \Migrations\CakeManager getManager()
+ */
 class Status extends StatusCommand
 {
     use CommandTrait;

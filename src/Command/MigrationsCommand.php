@@ -125,13 +125,13 @@ class MigrationsCommand extends Command
         $app->setAutoExit(false);
         $exitCode = $app->run($input, $this->getOutput());
 
-        if (in_array('-h', $this->argv) || in_array('--help', $this->argv)) {
+        if (in_array('-h', $this->argv, true) || in_array('--help', $this->argv, true)) {
             return $exitCode;
         }
 
         if (
-            isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
-            !in_array('--no-lock', $this->argv) &&
+            isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback'], true) &&
+            !in_array('--no-lock', $this->argv, true) &&
             $exitCode === 0
         ) {
             $newArgs = [];
