@@ -90,7 +90,7 @@ class DumpTest extends TestCase
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
         $this->Connection->execute('DROP TABLE IF EXISTS parts');
-        $this->dumpfile = ROOT . 'config/TestsMigrations/schema-dump-test.lock';
+        $this->dumpfile = ROOT . DS . 'config/TestsMigrations/schema-dump-test.lock';
     }
 
     /**

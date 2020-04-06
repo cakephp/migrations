@@ -865,7 +865,7 @@ class MigrationsTest extends TestCase
      */
     public function testMigrateSnapshots($basePath, $files)
     {
-        $destination = ROOT . 'config' . DS . 'SnapshotTests' . DS;
+        $destination = ROOT . DS . 'config' . DS . 'SnapshotTests' . DS;
 
         if (!file_exists($destination)) {
             mkdir($destination);

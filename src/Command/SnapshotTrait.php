@@ -57,12 +57,12 @@ trait SnapshotTrait
         $newArgs[] = $version;
         $newArgs[] = '-o';
 
-        if (!empty($args->getOption('connection'))) {
+        if ($args->getOption('connection')) {
             $newArgs[] = '-c';
             $newArgs[] = $args->getOption('connection');
         }
 
-        if (!empty($args->getOption('plugin'))) {
+        if ($args->getOption('plugin')) {
             $newArgs[] = '-p';
             $newArgs[] = $args->getOption('plugin');
         }
@@ -81,12 +81,12 @@ trait SnapshotTrait
     {
         $newArgs = [];
 
-        if (!empty($args->getOption('connection'))) {
+        if ($args->getOption('connection')) {
             $newArgs[] = '-c';
             $newArgs[] = $args->getOption('connection');
         }
 
-        if (!empty($args->getOption('plugin'))) {
+        if ($args->getOption('plugin')) {
             $newArgs[] = '-p';
             $newArgs[] = $args->getOption('plugin');
         }

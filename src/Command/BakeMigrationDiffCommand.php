@@ -464,12 +464,12 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $newArgs = [];
         $newArgs[] = $name;
 
-        if (!empty($args->getOption('connection'))) {
+        if ($args->getOption('connection')) {
             $newArgs[] = '-c';
             $newArgs[] = $args->getOption('connection');
         }
 
-        if (!empty($args->getOption('plugin'))) {
+        if ($args->getOption('plugin')) {
             $newArgs[] = '-p';
             $newArgs[] = $args->getOption('plugin');
         }
