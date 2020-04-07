@@ -81,8 +81,8 @@ class MigrationsTest extends TestCase
         $adapter->setConnection($connection);
 
         $tables = (new Collection($this->Connection))->listTables();
-        foreach($tables as $table) {
-            if ('phinxlog' === $table) {
+        foreach ($tables as $table) {
+            if ($table === 'phinxlog') {
                 continue;
             }
             $this->Connection->execute("DROP TABLE IF EXISTS {$table}");
@@ -891,7 +891,7 @@ class MigrationsTest extends TestCase
 
         foreach ($files as $file) {
             [$filename, $timestamp] = $file;
-            $copiedFileName = $timestamp . '_' . $filename  . 'NewSuffix' . '.php';
+            $copiedFileName = $timestamp . '_' . $filename . 'NewSuffix' . '.php';
 
             if (!file_exists($destination . $copiedFileName)) {
                 copy(
