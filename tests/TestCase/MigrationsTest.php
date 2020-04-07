@@ -41,6 +41,11 @@ class MigrationsTest extends TestCase
     protected $Connection;
 
     /**
+     * @var string[]
+     */
+    protected $generatedFiles = [];
+
+    /**
      * Setup method
      *
      * @return void
@@ -48,6 +53,7 @@ class MigrationsTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        $this->generatedFiles = [];
         $params = [
             'connection' => 'test',
             'source' => 'TestsMigrations',
@@ -75,6 +81,12 @@ class MigrationsTest extends TestCase
         $adapter->setConnection($connection);
 
         $tables = (new Collection($this->Connection))->listTables();
+        foreach($tables as $table) {
+            if ('phinxlog' === $table) {
+                continue;
+            }
+            $this->Connection->execute("DROP TABLE IF EXISTS {$table}");
+        }
         if (in_array('phinxlog', $tables)) {
             $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
             $query = $this->Connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
@@ -93,6 +105,12 @@ class MigrationsTest extends TestCase
     {
         parent::tearDown();
         unset($this->Connection, $this->migrations);
+
+        foreach ($this->generatedFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -873,13 +891,21 @@ class MigrationsTest extends TestCase
 
         foreach ($files as $file) {
             [$filename, $timestamp] = $file;
-            $copiedFileName = $timestamp . '_' . $filename . '.php';
+            $copiedFileName = $timestamp . '_' . $filename  . 'NewSuffix' . '.php';
 
             if (!file_exists($destination . $copiedFileName)) {
                 copy(
                     $basePath . $filename . '.php',
                     $destination . $copiedFileName
                 );
+                $this->generatedFiles[] = $destination . $copiedFileName;
+
+                //change class name to avoid conflict with other classes
+                //to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
+                $content = file_get_contents($destination . $copiedFileName);
+                $pattern = ' extends AbstractMigration';
+                $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
+                file_put_contents($destination . $copiedFileName, $content);
             }
             $tables = (new Collection($this->Connection))->listTables();
 
@@ -887,7 +913,6 @@ class MigrationsTest extends TestCase
             $this->assertTrue($result);
 
             $this->migrations->rollback(['target' => 'all', 'source' => 'SnapshotTests']);
-            unlink($destination . $copiedFileName);
         }
     }
 
