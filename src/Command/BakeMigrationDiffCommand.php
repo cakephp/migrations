@@ -458,7 +458,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * @param string $name Name.
      * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io
-     * @return string Value of the snapshot baking dispatch process
+     * @return int|null Value of the snapshot baking dispatch process
      */
     protected function bakeSnapshot($name, Arguments $args, ConsoleIo $io)
     {
