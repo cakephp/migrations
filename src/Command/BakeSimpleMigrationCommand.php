@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Bake\Command\SimpleBakeCommand;
+use Bake\Utility\TemplateRenderer;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
@@ -121,12 +122,28 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             }
         }
 
-        $newArgs = new Arguments(
-            $args->getArguments(),
-            ['no-test' => true] + $args->getOptions(),
-            ['name']
-        );
-        parent::bake($name, $newArgs, $io);
+        $renderer = new TemplateRenderer();
+        $renderer->set('name', $name);
+        $renderer->set($this->templateData($args));
+        $contents = $renderer->generate($this->template());
+
+        $filename = $this->getPath($args) . $this->fileName($name);
+        $this->createFile($filename, $contents, $args, $io);
+
+        $emptyFile = $this->getPath($args) . '.gitkeep';
+        $this->deleteEmptyFile($emptyFile, $io);
+    }
+
+    /**
+     * @param string $path Where to put the file.
+     * @param string $contents Content to put in the file.
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io
+     * @return bool Success
+     */
+    protected function createFile(string $path, string $contents, Arguments $args, ConsoleIo $io): bool
+    {
+        return $io->createFile($path, $contents);
     }
 
     /**

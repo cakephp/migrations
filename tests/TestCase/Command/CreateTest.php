@@ -105,7 +105,7 @@ class CreateTest extends TestCase
             '--connection' => 'test',
         ]);
 
-        $files = glob(ROOT . 'config' . DS . 'Create' . DS . '*_TestCreate*.php');
+        $files = glob(ROOT . DS . 'config' . DS . 'Create' . DS . '*_TestCreate*.php');
         $this->generatedFiles = $files;
         $this->assertNotEmpty($files);
 

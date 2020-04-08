@@ -13,8 +13,10 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Shell\Task;
+namespace Migrations\Command;
 
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -28,7 +30,7 @@ use Symfony\Component\Console\Input\ArrayInput;
  *
  * @property \Bake\Shell\Task\TestTask $Test
  */
-class MigrationDiffTask extends SimpleMigrationTask
+class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 {
     use SnapshotTrait;
     use UtilTrait;
@@ -98,19 +100,25 @@ class MigrationDiffTask extends SimpleMigrationTask
     /**
      * {@inheritDoc}
      */
-    public function bake(string $name): string
+    public static function defaultName(): string
     {
-        $this->setup();
+        return 'bake migration_diff';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    {
+        $this->setup($args);
 
         if (!$this->checkSync()) {
-            $this->abort('Your migrations history is not in sync with your migrations files. ' .
+            $io->abort('Your migrations history is not in sync with your migrations files. ' .
                 'Make sure all your migrations have been migrated before baking a diff.');
-
-            return '1';
         }
 
         if (empty($this->migrationsFiles) && empty($this->migratedItems)) {
-            return $this->bakeSnapshot($name);
+            $this->bakeSnapshot($name, $args, $io);
         }
 
         $collection = $this->getCollection($this->connection);
@@ -120,17 +128,17 @@ class MigrationDiffTask extends SimpleMigrationTask
             ]);
         });
 
-        return parent::bake($name);
+        parent::bake($name, $args, $io);
     }
 
     /**
      * Sets up everything the baking process needs
-     *
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @return void
      */
-    public function setup()
+    protected function setup(Arguments $args)
     {
-        $this->migrationsPath = $this->getPath();
+        $this->migrationsPath = $this->getPath($args);
         $this->migrationsFiles = glob($this->migrationsPath . '*.php');
         $this->phinxTable = $this->getPhinxTable($this->plugin);
 
@@ -165,13 +173,11 @@ class MigrationDiffTask extends SimpleMigrationTask
     }
 
     /**
-     * Process and prepare the data needed for the bake template to be generated.
-     *
-     * @return array
+     * {@inheritDoc}
      */
-    public function templateData(): array
+    public function templateData(Arguments $arguments): array
     {
-        $this->dumpSchema = $this->getDumpSchema();
+        $this->dumpSchema = $this->getDumpSchema($arguments);
         $this->currentSchema = $this->getCurrentSchema();
         $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
 
@@ -449,49 +455,53 @@ class MigrationDiffTask extends SimpleMigrationTask
      * there are no migration files.
      *
      * @param string $name Name.
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io
      * @return string Value of the snapshot baking dispatch process
      */
-    protected function bakeSnapshot($name)
+    protected function bakeSnapshot($name, Arguments $args, ConsoleIo $io)
     {
-        $this->out('Your migrations history is empty and you do not have any migrations files.');
-        $this->out('Falling back to baking a snapshot...');
-        $dispatchCommand = 'bake migration_snapshot ' . $name;
+        $io->out('Your migrations history is empty and you do not have any migrations files.');
+        $io->out('Falling back to baking a snapshot...');
+        $newArgs = [];
+        $newArgs[] = $name;
 
-        if (!empty($this->params['connection'])) {
-            $dispatchCommand .= ' -c ' . $this->params['connection'];
-        }
-        if (!empty($this->params['plugin'])) {
-            $dispatchCommand .= ' -p ' . $this->params['plugin'];
-        }
-
-        $dispatch = $this->dispatchShell([
-            'command' => $dispatchCommand,
-        ]);
-
-        if ($dispatch === 1) {
-            $this->abort('Something went wrong during the snapshot baking. Please try again.');
+        if ($args->getOption('connection')) {
+            $newArgs[] = '-c';
+            $newArgs[] = $args->getOption('connection');
         }
 
-        return (string)$dispatch;
+        if ($args->getOption('plugin')) {
+            $newArgs[] = '-p';
+            $newArgs[] = $args->getOption('plugin');
+        }
+
+        $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs, $io);
+
+        if ($exitCode === 1) {
+            $io->abort('Something went wrong during the snapshot baking. Please try again.');
+        }
+
+        return $exitCode;
     }
 
     /**
      * Fetch the correct schema dump based on the arguments and options passed to the shell call
      * and returns it as an array
-     *
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @return array Full database schema : the key is the name of the table and the value is
      * an instance of \Cake\Database\Schema\Table.
      */
-    protected function getDumpSchema()
+    protected function getDumpSchema(Arguments $args)
     {
         $inputArgs = [];
 
         $connectionName = 'default';
-        if (!empty($this->params['connection'])) {
-            $connectionName = $inputArgs['--connection'] = $this->params['connection'];
+        if (!empty($args->getOption('connection'))) {
+            $connectionName = $inputArgs['--connection'] = $args->getOption('connection');
         }
-        if (!empty($this->params['plugin'])) {
-            $inputArgs['--plugin'] = $this->params['plugin'];
+        if (!empty($args->getOption('plugin'))) {
+            $inputArgs['--plugin'] = $args->getOption('plugin');
         }
 
         $className = '\Migrations\Command\Dump';
@@ -503,7 +513,7 @@ class MigrationDiffTask extends SimpleMigrationTask
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
                 'the `cake migrations dump` command';
-            $this->abort($msg);
+            $this->io->abort($msg);
         }
 
         return unserialize(file_get_contents($path));

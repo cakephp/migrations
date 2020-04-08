@@ -13,8 +13,8 @@ declare(strict_types=1);
  */
 namespace Migrations\Command;
 
+use Cake\Command\Command;
 use Cake\Console\Arguments;
-use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Migrations\MigrationsDispatcher;

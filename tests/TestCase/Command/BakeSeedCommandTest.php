@@ -63,7 +63,7 @@ class BakeSeedCommandTest extends TestCase
      */
     public function testBasicBaking()
     {
-        $this->generatedFile = ROOT . 'config/Seeds/ArticlesSeed.php';
+        $this->generatedFile = ROOT . DS . 'config/Seeds/ArticlesSeed.php';
         $this->exec('bake seed Articles --connection test');
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
@@ -78,7 +78,7 @@ class BakeSeedCommandTest extends TestCase
      */
     public function testWithData()
     {
-        $this->generatedFile = ROOT . 'config/Seeds/EventsSeed.php';
+        $this->generatedFile = ROOT . DS . 'config/Seeds/EventsSeed.php';
         $this->exec('bake seed Events --connection test --data');
 
         $path = __FUNCTION__ . '.php';
@@ -98,7 +98,7 @@ class BakeSeedCommandTest extends TestCase
      */
     public function testWithDataAndFields()
     {
-        $this->generatedFile = ROOT . 'config/Seeds/EventsSeed.php';
+        $this->generatedFile = ROOT . DS . 'config/Seeds/EventsSeed.php';
         $this->exec('bake seed Events --connection test --data --fields title,description');
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
@@ -113,7 +113,7 @@ class BakeSeedCommandTest extends TestCase
      */
     public function testWithDataAndLimit()
     {
-        $this->generatedFile = ROOT . 'config/Seeds/EventsSeed.php';
+        $this->generatedFile = ROOT . DS . 'config/Seeds/EventsSeed.php';
         $this->exec('bake seed Events --connection test --data --limit 2');
 
         $path = __FUNCTION__ . '.php';
@@ -133,7 +133,7 @@ class BakeSeedCommandTest extends TestCase
      */
     public function testPrettifyArray()
     {
-        $this->generatedFile = ROOT . 'config/Seeds/TextsSeed.php';
+        $this->generatedFile = ROOT . DS . 'config/Seeds/TextsSeed.php';
         $this->exec('bake seed Texts --connection test --data');
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
