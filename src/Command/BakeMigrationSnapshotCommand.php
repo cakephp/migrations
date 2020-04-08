@@ -37,7 +37,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     protected $_name;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {
@@ -45,7 +45,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
@@ -61,7 +61,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function template(): string
     {
@@ -69,7 +69,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function templateData(Arguments $arguments): array
     {

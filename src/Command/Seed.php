@@ -29,7 +29,7 @@ class Seed extends SeedRun
     use EventDispatcherTrait;
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected function configure()
     {

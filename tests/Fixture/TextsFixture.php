@@ -5,7 +5,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 
 /**
  * TextsFixture
- *
  */
 class TextsFixture extends TestFixture
 {

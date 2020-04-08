@@ -12,7 +12,7 @@ class CustomSimpleBakeMigrationDiffCommand extends BakeMigrationDiffCommand
     public $pathFragment = 'config/MigrationsDiffSimple/';
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {

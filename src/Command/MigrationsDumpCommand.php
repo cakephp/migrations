@@ -17,7 +17,6 @@ namespace Migrations\Command;
  * This class is needed in order to provide a correct autocompletion feature
  * when using the CakePHP migrations plugin. It has no effect on the
  * migrations process.
- *
  */
 class MigrationsDumpCommand extends MigrationsCommand
 {

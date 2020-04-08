@@ -14,7 +14,7 @@ class CacheClear extends BaseCommand
     use SchemaTrait;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function configure()
     {
@@ -39,7 +39,7 @@ class CacheClear extends BaseCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

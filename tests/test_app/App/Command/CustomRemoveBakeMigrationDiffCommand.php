@@ -12,7 +12,7 @@ class CustomRemoveBakeMigrationDiffCommand extends BakeMigrationDiffCommand
     public $pathFragment = 'config/MigrationsDiffAddRemove/';
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {

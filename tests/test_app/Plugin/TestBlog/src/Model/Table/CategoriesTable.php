@@ -7,7 +7,6 @@ use Cake\ORM\Table;
 
 /**
  * Articles Model
- *
  */
 class CategoriesTable extends Table
 {

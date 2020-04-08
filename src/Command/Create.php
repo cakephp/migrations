@@ -30,7 +30,7 @@ class Create extends CreateCommand
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected function configure()
     {

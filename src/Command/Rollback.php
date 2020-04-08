@@ -29,7 +29,7 @@ class Rollback extends RollbackCommand
     use EventDispatcherTrait;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function configure()
     {

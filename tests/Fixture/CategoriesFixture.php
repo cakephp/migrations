@@ -17,7 +17,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 
 /**
  * Class CategoriesFixture
- *
  */
 class CategoriesFixture extends TestFixture
 {

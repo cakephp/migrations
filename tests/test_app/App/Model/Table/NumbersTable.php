@@ -17,7 +17,6 @@ use Cake\ORM\Table;
 
 /**
  * Numbers Model
- *
  */
 class NumbersTable extends Table
 {

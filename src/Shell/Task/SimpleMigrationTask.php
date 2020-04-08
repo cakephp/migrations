@@ -34,7 +34,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public $pathFragment = 'config/Migrations/';
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function name(): string
     {
@@ -42,7 +42,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function fileName($name): string
     {
@@ -52,7 +52,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getPath(): string
     {
@@ -65,7 +65,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function bake(string $name): string
     {

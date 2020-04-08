@@ -23,7 +23,7 @@ use Cake\Console\ConsoleIo;
 trait SnapshotTrait
 {
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function createFile(string $path, string $contents, Arguments $args, ConsoleIo $io): bool
     {
@@ -43,6 +43,7 @@ trait SnapshotTrait
     /**
      * Will mark a snapshot created, the snapshot being identified by its
      * full file path.
+     *
      * @param string $path Path to the newly created snapshot
      * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io
@@ -75,6 +76,7 @@ trait SnapshotTrait
     /**
      * After a file has been successfully created, we refresh the dump of the database
      * to be able to generate a new diff afterward.
+     *
      * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return void

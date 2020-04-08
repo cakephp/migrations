@@ -93,12 +93,12 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     protected $commonTables;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected $templateData = [];
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {
@@ -106,7 +106,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
@@ -133,6 +133,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
     /**
      * Sets up everything the baking process needs
+     *
      * @param \Cake\Console\Arguments $args The command arguments.
      * @return void
      */
@@ -173,7 +174,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function templateData(Arguments $arguments): array
     {
@@ -488,6 +489,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * Fetch the correct schema dump based on the arguments and options passed to the shell call
      * and returns it as an array
+     *
      * @param \Cake\Console\Arguments $args The command arguments.
      * @return array Full database schema : the key is the name of the table and the value is
      * an instance of \Cake\Database\Schema\Table.
@@ -546,7 +548,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function template(): string
     {
