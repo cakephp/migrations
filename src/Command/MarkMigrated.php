@@ -50,7 +50,7 @@ class MarkMigrated extends AbstractCommand
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected function configure()
     {

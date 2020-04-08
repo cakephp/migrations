@@ -71,6 +71,7 @@ class Migrations
 
     /**
      * Constructor
+     *
      * @param array $default Default option to be used when calling a method.
      * Available options are :
      * - `connection` The datasource connection to use
@@ -132,7 +133,6 @@ class Migrations
      * - `connection` The datasource connection to use
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
-     *
      * @return array The migrations list and their statuses
      */
     public function status(array $options = [])
@@ -156,7 +156,6 @@ class Migrations
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
      * - `date` The date to migrate to
-     *
      * @return bool Success
      */
     public function migrate(array $options = [])
@@ -188,7 +187,6 @@ class Migrations
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
      * - `date` The date to rollback to
-     *
      * @return bool Success
      */
     public function rollback(array $options = [])
@@ -218,7 +216,6 @@ class Migrations
      * - `connection` The datasource connection to use
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
-     *
      * @return bool Success
      */
     public function markMigrated($version = null, array $options = [])
@@ -259,7 +256,6 @@ class Migrations
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
      * - `seed` The seed file to use
-     *
      * @return bool Success
      */
     public function seed(array $options = [])
@@ -285,7 +281,6 @@ class Migrations
      * @param array $params Manager params to pass
      * @param \Symfony\Component\Console\Input\InputInterface $input InputInterface needed for the
      * Manager to properly run
-     *
      * @return mixed The result of the CakeManager::$method() call
      */
     protected function run($method, array $params, $input)

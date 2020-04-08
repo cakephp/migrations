@@ -52,10 +52,12 @@ trait ConfigurationTrait
     /**
      * @return \Symfony\Component\Console\Input\InputInterface
      */
-    protected function input(): InputInterface {
+    protected function input(): InputInterface
+    {
         if ($this->input === null) {
             throw new \RuntimeException('Input not set');
         }
+
         return $this->input;
     }
 

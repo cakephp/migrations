@@ -46,11 +46,17 @@ class Table extends BaseTable
     }
 
     /**
+     * {@inheritDoc}
+     *
      * You can pass `autoIncrement` as an option and it will be converted
      * to the correct option for phinx to create the column with an
      * auto increment attribute
      *
-     * {@inheritdoc}
+     * @param string|\Phinx\Db\Table\Column $columnName Column Name
+     * @param string|\Phinx\Util\Literal|null $type Column Type
+     * @param array $options Column Options
+     * @throws \InvalidArgumentException
+     * @return $this
      */
     public function addColumn($columnName, $type = null, $options = [])
     {
@@ -60,17 +66,22 @@ class Table extends BaseTable
     }
 
     /**
+     * {@inheritDoc}
+     *
      * You can pass `autoIncrement` as an option and it will be converted
      * to the correct option for phinx to create the column with an
      * auto increment attribute
      *
-     * {@inheritdoc}
+     * @param string $columnName Column Name
+     * @param string|\Phinx\Db\Table\Column|\Phinx\Util\Literal $newColumnType New Column Type
+     * @param array $options Options
+     * @return $this
      */
-    public function changeColumn($columnName, $type, array $options = [])
+    public function changeColumn($columnName, $newColumnType, array $options = [])
     {
         $options = $this->convertedAutoIncrement($options);
 
-        return parent::changeColumn($columnName, $type, $options);
+        return parent::changeColumn($columnName, $newColumnType, $options);
     }
 
     /**
@@ -90,11 +101,13 @@ class Table extends BaseTable
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * If using MySQL and no collation information has been given to the table options, a request to the information
      * schema will be made to get the default database collation and apply it to the database. This is to prevent
      * phinx default mechanism to put the collation to a default of "utf8_general_ci".
+     *
+     * @return void
      */
     public function create()
     {
@@ -126,11 +139,13 @@ class Table extends BaseTable
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * After a table update, the TableRegistry should be cleared in order to prevent issues with
      * table schema stored in Table objects having columns that might have been renamed or removed during
      * the update process.
+     *
+     * @return void
      */
     public function update()
     {
@@ -144,6 +159,10 @@ class Table extends BaseTable
      * We disable foreign key deletion for the SQLite adapter as SQLite does not support the feature natively and the
      * process implemented by Phinx has serious side-effects (for instance it rename FK references in existing tables
      * which breaks the database schema cohesion).
+     *
+     * @param string|array $columns Column(s)
+     * @param string|null $constraint Constraint names
+     * @return $this
      */
     public function dropForeignKey($columns, $constraint = null)
     {

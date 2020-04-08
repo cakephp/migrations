@@ -19,7 +19,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 
 /**
  * Class ProductsFixture
- *
  */
 class ProductsFixture extends TestFixture
 {
@@ -56,7 +55,7 @@ class ProductsFixture extends TestFixture
     ];
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function init(): void
     {

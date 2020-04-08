@@ -32,7 +32,7 @@ class CommandTester
     /**
      * Constructor.
      *
-     * @param Command $command A Command instance to test
+     * @param \Symfony\Component\Console\Command\Command $command A Command instance to test
      */
     public function __construct(Command $command)
     {
@@ -50,7 +50,6 @@ class CommandTester
      *
      * @param array $input   An array of command arguments and options
      * @param array $options An array of execution options
-     *
      * @return int The command exit code
      */
     public function execute(array $input, array $options = [])
@@ -89,7 +88,6 @@ class CommandTester
      * Gets the display returned by the last execution of the command.
      *
      * @param bool $normalize Whether to normalize end of lines to \n or not
-     *
      * @return string The display
      */
     public function getDisplay($normalize = false)
@@ -108,7 +106,7 @@ class CommandTester
     /**
      * Gets the input instance used by the last execution of the command.
      *
-     * @return InputInterface The current input instance
+     * @return \Migrations\Test\InputInterface The current input instance
      */
     public function getInput()
     {
@@ -118,7 +116,7 @@ class CommandTester
     /**
      * Gets the output instance used by the last execution of the command.
      *
-     * @return OutputInterface The current output instance
+     * @return \Migrations\Test\OutputInterface The current output instance
      */
     public function getOutput()
     {
@@ -140,8 +138,7 @@ class CommandTester
      *
      * @param array An array of strings representing each input
      *              passed to the command input stream.
-     *
-     * @return CommandTester
+     * @return \Migrations\Test\CommandTester
      */
     public function setInputs(array $inputs)
     {

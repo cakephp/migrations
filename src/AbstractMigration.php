@@ -30,8 +30,12 @@ class AbstractMigration extends BaseAbstractMigration
     public $autoId = true;
 
     /**
-     * {@inheritdoc}
+     * Returns an instance of the Table class.
      *
+     * You can use this class to create and manipulate tables.
+     *
+     * @param string $tableName Table Name
+     * @param array $options Options
      * @return \Migrations\Table
      */
     public function table($tableName, $options = [])

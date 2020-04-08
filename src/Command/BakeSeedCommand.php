@@ -40,7 +40,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     protected $_name;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {
@@ -48,7 +48,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function name(): string
     {
@@ -56,7 +56,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function fileName($name): string
     {
@@ -64,7 +64,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getPath(Arguments $args): string
     {
@@ -77,7 +77,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function template(): string
     {
@@ -134,7 +134,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {

@@ -116,7 +116,7 @@ class CakeManager extends Manager
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function migrateToDateTime($environment, \DateTime $dateTime, $fake = false)
     {
@@ -144,7 +144,7 @@ class CakeManager extends Manager
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function rollbackToDateTime($environment, \DateTime $dateTime, $force = false)
     {
@@ -349,11 +349,14 @@ class CakeManager extends Manager
     }
 
     /**
+     * Gets an array of database seeders.
+     *
      * Overload the basic behavior to add an instance of the InputInterface the shell call is
      * using in order to gives the ability to the AbstractSeed::call() method to propagate options
      * to the other MigrationsDispatcher it is generating.
      *
-     * {@inheritdoc}
+     * @throws \InvalidArgumentException
+     * @return \Phinx\Seed\AbstractSeed[]
      */
     public function getSeeds()
     {

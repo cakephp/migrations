@@ -14,7 +14,7 @@ class CacheBuild extends BaseCommand
     use SchemaTrait;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function configure()
     {
@@ -39,7 +39,7 @@ class CacheBuild extends BaseCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

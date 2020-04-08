@@ -17,12 +17,11 @@ use Cake\TestSuite\Fixture\TestFixture;
 
 /**
  * Class OrdersFixture
- *
  */
 class OrdersFixture extends TestFixture
 {
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public $table = 'orders';
 

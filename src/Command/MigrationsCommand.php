@@ -43,7 +43,7 @@ class MigrationsCommand extends Command
     protected static $commandName = '';
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {
@@ -183,7 +183,9 @@ class MigrationsCommand extends Command
      * Override the default behavior to save the command called
      * in order to pass it to the command dispatcher
      *
-     * {@inheritDoc}
+     * @param array $argv Arguments from the CLI environment.
+     * @param \Cake\Console\ConsoleIo $io The console io
+     * @return int|null Exit code or null for success.
      */
     public function run(array $argv, ConsoleIo $io): ?int
     {

@@ -25,14 +25,13 @@ use Migrations\Util\ColumnParser;
 
 /**
  * Command class for generating migration snapshot files.
- *
  */
 class BakeMigrationCommand extends BakeSimpleMigrationCommand
 {
     protected $_name;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public static function defaultName(): string
     {
@@ -40,7 +39,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
@@ -53,7 +52,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function template(): string
     {
@@ -61,7 +60,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function templateData(Arguments $arguments): array
     {
