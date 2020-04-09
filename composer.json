@@ -19,7 +19,7 @@
     },
     "require": {
         "php": ">=7.2.0",
-        "robmorgan/phinx": "0.next-dev",
+        "robmorgan/phinx": "^0.12",
         "cakephp/orm": "^4.0",
         "cakephp/cache": "^4.0"
     },
@@ -45,7 +45,6 @@
     "suggest": {
         "cakephp/bake": "Required if you want to generate migrations."
     },
-    "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
         "check": [
