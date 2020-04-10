@@ -506,7 +506,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $inputArgs['--plugin'] = $args->getOption('plugin');
         }
 
-        $className = '\Migrations\Command\Dump';
+        $className = '\Migrations\Command\Phinx\Dump';
         $definition = (new $className())->getDefinition();
 
         $input = new ArrayInput($inputArgs, $definition);
