@@ -43,7 +43,8 @@
         }
     },
     "suggest": {
-        "cakephp/bake": "Required if you want to generate migrations."
+        "cakephp/bake": "Required if you want to generate migrations.",
+        "dereuromark/cakephp-ide-helper": "If you want to have IDE suggest/autocomplete when creating migrations."
     },
     "prefer-stable": true,
     "scripts": {
