@@ -1092,3 +1092,11 @@ for instance when deploying on your production environment, by using the
     bin/cake migrations rollback --no-lock
 
     bin/cake bake migration_snapshot MyMigration --no-lock
+
+IDE autocomplete support
+------------------------
+
+The `IdeHelper plugin
+<https://github.com/dereuromark/cakephp-ide-helper>`__ can help
+you to get more IDE support for the tables, their column names and possible column types.
+Specifically PHPStorm understands the meta information and can help you autocomplete those.
