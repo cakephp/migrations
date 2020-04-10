@@ -26,13 +26,27 @@ class TestClassWithSnapshotTrait
         getTableNames as public publicGetTableNames;
     }
 
+    /**
+     * @var string
+     */
     public $connection;
 
+    /**
+     * @param string $className
+     * @param string|null $pluginName
+     *
+     * @return string[]
+     */
     public function fetchTableName($className, $pluginName = null)
     {
         return $this->publicFetchTableName($className, $pluginName);
     }
 
+    /**
+     * @param string|null $pluginName
+     *
+     * @return string[]
+     */
     public function getTableNames($pluginName = null)
     {
         return $this->publicGetTableNames($pluginName);

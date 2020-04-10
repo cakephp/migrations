@@ -21,13 +21,13 @@ use Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait;
 use Migrations\Test\TestCase\TestCase;
 
 /**
- * MigrationSnapshotTaskTest class
+ * BakeMigrationSnapshotCommandTest class
  */
 class BakeMigrationSnapshotCommandTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = [
+    protected $fixtures = [
         'plugin.Migrations.Users',
         'plugin.Migrations.SpecialTags',
         'plugin.Migrations.SpecialPk',
@@ -44,13 +44,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      * @var string[]
      */
     protected $generatedFiles = [];
-
-    /**
-     * Mock of \Migrations\Shell\Task\MigrationSnapshotTask
-     *
-     * @var \Migrations\Shell\Task\MigrationSnapshotTask
-     */
-    public $Task;
 
     /**
      * setup method
@@ -78,7 +71,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        unset($this->Task);
 
         foreach ($this->generatedFiles as $file) {
             if (file_exists($file)) {
@@ -88,7 +80,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     }
 
     /**
-     * Test that the MigrationSnapshotTask::getTableNames properly returns the table list
+     * Test that the BakeMigrationSnapshotCommand::getTableNames properly returns the table list
      * when we want tables from a plugin
      *
      * @return void

@@ -29,8 +29,6 @@ class BakeMigrationDiffCommandTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $out;
-
     /**
      * @var string[]
      */

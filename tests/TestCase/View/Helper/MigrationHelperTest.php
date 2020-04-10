@@ -25,7 +25,7 @@ use Migrations\View\Helper\MigrationHelper;
  */
 class MigrationHelperTest extends TestCase
 {
-    public $fixtures = [
+    protected $fixtures = [
         'plugin.Migrations.Users',
         'plugin.Migrations.SpecialTags',
     ];

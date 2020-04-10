@@ -97,7 +97,7 @@ trait TableFinderTrait
      * Gets list Tables Names
      *
      * @param string|null $pluginName Plugin name if exists.
-     * @return array
+     * @return string[]
      */
     protected function getTableNames($pluginName = null)
     {
@@ -148,7 +148,7 @@ trait TableFinderTrait
      *
      * @param string $className Name of Table Class.
      * @param string|null $pluginName Plugin name if exists.
-     * @return array
+     * @return string[]
      */
     protected function fetchTableName($className, $pluginName = null)
     {
