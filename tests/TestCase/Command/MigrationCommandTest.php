@@ -133,7 +133,7 @@ class MigrationCommandTest extends TestCase
             'getOutput',
         ];
 
-        $mock = $this->getMockBuilder('\Migrations\Command\\' . $command)
+        $mock = $this->getMockBuilder('Migrations\Command\\' . $command)
         ->setMethods($mockedMethods)
         ->getMock();
 

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Command;
+namespace Migrations\Command\Phinx;
 
 use Cake\Datasource\ConnectionManager;
 use Migrations\CakeAdapter;

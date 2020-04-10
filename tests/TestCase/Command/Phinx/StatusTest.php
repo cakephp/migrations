@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\Command;
+namespace Migrations\Test\Command\Phinx;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -23,9 +23,9 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
 /**
- * SeedTest class
+ * MarkMigratedTest class
  */
-class SeedTest extends TestCase
+class StatusTest extends TestCase
 {
     /**
      * Instance of a Symfony Command object
@@ -49,6 +49,13 @@ class SeedTest extends TestCase
     protected $Connection;
 
     /**
+     * Instance of a CommandTester object
+     *
+     * @var \Symfony\Component\Console\Tester\CommandTester
+     */
+    protected $commandTester;
+
+    /**
      * Instance of a StreamOutput object.
      * It will store the output from the CommandTester
      *
@@ -68,8 +75,11 @@ class SeedTest extends TestCase
         $this->Connection = ConnectionManager::get('test');
         $this->Connection->connect();
         $this->pdo = $this->Connection->getDriver()->getConnection();
+        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
+
         $application = new MigrationsDispatcher('testing');
-        $this->command = $application->find('seed');
+        $this->command = $application->find('status');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
     }
 
@@ -88,7 +98,7 @@ class SeedTest extends TestCase
     }
 
     /**
-     * Test executing the "seed" command in a standard way
+     * Test executing the "status" command
      *
      * @return void
      */
@@ -96,130 +106,105 @@ class SeedTest extends TestCase
     {
         $params = [
             '--connection' => 'test',
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
+        $commandTester->execute(['command' => $this->command->getName()] + $params);
+
+        $display = $this->getDisplayFromOutput();
+        $this->assertTextContains('down  20150704160200  CreateNumbersTable', $display);
+        $this->assertTextContains('down  20150724233100  UpdateNumbersTable', $display);
+        $this->assertTextContains('down  20150826191400  CreateLettersTable', $display);
+    }
+
+    /**
+     * Test executing the "status" command with the JSON option
+     *
+     * @return void
+     */
+    public function testExecuteJson()
+    {
+        $params = [
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations',
+            '--format' => 'json',
+        ];
+        $commandTester = $this->getCommandTester($params);
+        $commandTester->execute(['command' => $this->command->getName()] + $params);
+        $display = $this->getDisplayFromOutput();
+
+        $expected = '{"status":"down","id":"20150704160200","name":"CreateNumbersTable"},' .
+            '{"status":"down","id":"20150724233100","name":"UpdateNumbersTable"},' .
+            '{"status":"down","id":"20150826191400","name":"CreateLettersTable"}';
+
+        $this->assertTextContains($expected, $display);
+    }
+
+    /**
+     * Test executing the "status" command with the migrated migrations
+     *
+     * @return void
+     */
+    public function testExecuteWithMigrated()
+    {
+        $params = [
+            '--connection' => 'test',
+            '--source' => 'TestsMigrations',
+        ];
+        $this->getCommandTester($params);
         $migrations = $this->getMigrations();
         $migrations->migrate();
 
-        $commandTester->execute([
-            'command' => $this->command->getName(),
+        $params = [
             '--connection' => 'test',
-            '--seed' => 'NumbersSeed',
-        ]);
+            '--source' => 'TestsMigrations',
+        ];
+        $commandTester = $this->getCommandTester($params);
+        $commandTester->execute(['command' => $this->command->getName()] + $params);
 
         $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('== NumbersSeed: seeded', $display);
-
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->order('id DESC')
-            ->limit(1)
-            ->execute()->fetchAll('assoc');
-        $expected = [
-            [
-                'id' => '1',
-                'number' => '10',
-                'radix' => '10',
-            ],
-        ];
-        $this->assertEquals($expected, $result);
+        $this->assertTextContains('up  20150704160200  CreateNumbersTable', $display);
+        $this->assertTextContains('up  20150724233100  UpdateNumbersTable', $display);
+        $this->assertTextContains('up  20150826191400  CreateLettersTable', $display);
 
         $migrations->rollback(['target' => 'all']);
     }
 
     /**
-     * Test executing the "seed" command with custom params
+     * Test executing the "status" command with inconsistency in the migrations files
      *
      * @return void
      */
-    public function testExecuteCustomParams()
+    public function testExecuteWithInconsistency()
     {
         $params = [
             '--connection' => 'test',
-            '--source' => 'AltSeeds',
+            '--source' => 'TestsMigrations',
         ];
-        $commandTester = $this->getCommandTester($params);
+        $this->getCommandTester($params);
         $migrations = $this->getMigrations();
         $migrations->migrate();
 
-        $commandTester->execute([
-            'command' => $this->command->getName(),
-            '--connection' => 'test',
-            '--source' => 'AltSeeds',
-        ]);
+        $migrationPaths = $migrations->getConfig()->getMigrationPaths();
+        $migrationPath = array_pop($migrationPaths);
+        $origin = $migrationPath . DS . '20150724233100_update_numbers_table.php';
+        $destination = $migrationPath . DS . '_20150724233100_update_numbers_table.php';
+        rename($origin, $destination);
 
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('== NumbersAltSeed: seeded', $display);
-
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->order('id DESC')
-            ->limit(1)
-            ->execute()->fetchAll('assoc');
-        $expected = [
-            [
-                'id' => '2',
-                'number' => '5',
-                'radix' => '10',
-            ],
-        ];
-        $this->assertEquals($expected, $result);
-        $migrations->rollback(['target' => 'all']);
-    }
-
-    /**
-     * Test executing the "seed" command with wrong custom params (no seed found)
-     *
-     * @return void
-     */
-    public function testExecuteWrongCustomParams()
-    {
         $params = [
             '--connection' => 'test',
-            '--source' => 'DerpSeeds',
+            '--source' => 'TestsMigrations',
         ];
         $commandTester = $this->getCommandTester($params);
-        $migrations = $this->getMigrations();
-        $migrations->migrate();
-
-        $commandTester->execute([
-            'command' => $this->command->getName(),
-            '--connection' => 'test',
-            '--source' => 'DerpSeeds',
-        ]);
+        $commandTester->execute(['command' => $this->command->getName()] + $params);
 
         $display = $this->getDisplayFromOutput();
-        $this->assertTextNotContains('seeded', $display);
-        $migrations->rollback(['target' => 'all']);
-    }
+        $this->assertTextContains('up  20150704160200  CreateNumbersTable', $display);
+        $this->assertTextContains('up  20150724233100  UpdateNumbersTable  ** MISSING **', $display);
+        $this->assertTextContains('up  20150826191400  CreateLettersTable', $display);
 
-    /**
-     * Test executing the "seed" command with seeders using the call method
-     *
-     * @return void
-     */
-    public function testExecuteSeedCallingOtherSeeders()
-    {
-        $params = [
-            '--connection' => 'test',
-            '--source' => 'CallSeeds',
-        ];
-        $commandTester = $this->getCommandTester($params);
-        $migrations = $this->getMigrations();
-        $migrations->migrate();
+        rename($destination, $origin);
 
-        $commandTester->execute([
-            'command' => $this->command->getName(),
-            '--connection' => 'test',
-            '--source' => 'CallSeeds',
-            '--seed' => 'DatabaseSeed',
-        ]);
-
-        $display = $this->getDisplayFromOutput();
-        $this->assertTextContains('==== NumbersCallSeed: seeded', $display);
-        $this->assertTextContains('==== LettersSeed: seeded', $display);
         $migrations->rollback(['target' => 'all']);
     }
 
@@ -263,11 +248,11 @@ class SeedTest extends TestCase
             'source' => 'TestsMigrations',
         ];
         $migrations = new Migrations($params);
+
         $adapter = $migrations
             ->getManager($this->command->getConfig())
             ->getEnvironment('default')
             ->getAdapter();
-
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
@@ -277,7 +262,7 @@ class SeedTest extends TestCase
     }
 
     /**
-     * Extract the content that was stored in self::$output.
+     * Extract the content that was stored in self::$streamOutput.
      *
      * @return string
      */

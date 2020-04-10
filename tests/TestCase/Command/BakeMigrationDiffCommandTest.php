@@ -70,13 +70,15 @@ class BakeMigrationDiffCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS categories');
         $connection->execute('DROP TABLE IF EXISTS blog_phinxlog');
 
-        $connection = ConnectionManager::get('test_comparisons');
-        $connection->execute('DROP TABLE IF EXISTS articles');
-        $connection->execute('DROP TABLE IF EXISTS tags');
-        $connection->execute('DROP TABLE IF EXISTS categories');
-        $connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
-        $connection->execute('DROP TABLE IF EXISTS users');
+        if (env('DB') !== 'sqlite') {
+            $connection = ConnectionManager::get('test_comparisons');
+            $connection->execute('DROP TABLE IF EXISTS articles');
+            $connection->execute('DROP TABLE IF EXISTS tags');
+            $connection->execute('DROP TABLE IF EXISTS categories');
+            $connection->execute('DROP TABLE IF EXISTS phinxlog');
+            $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
+            $connection->execute('DROP TABLE IF EXISTS users');
+        }
     }
 
     /**

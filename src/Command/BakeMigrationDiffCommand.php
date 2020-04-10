@@ -22,6 +22,7 @@ use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
+use Migrations\Command\Phinx\Dump;
 use Migrations\Util\UtilTrait;
 use Symfony\Component\Console\Input\ArrayInput;
 
@@ -506,7 +507,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $inputArgs['--plugin'] = $args->getOption('plugin');
         }
 
-        $className = '\Migrations\Command\Dump';
+        $className = Dump::class;
         $definition = (new $className())->getDefinition();
 
         $input = new ArrayInput($inputArgs, $definition);

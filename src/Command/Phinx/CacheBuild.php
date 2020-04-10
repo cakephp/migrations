@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Migrations\Command;
+namespace Migrations\Command\Phinx;
 
 use Migrations\Util\SchemaTrait;
 use Symfony\Component\Console\Input\InputArgument;
