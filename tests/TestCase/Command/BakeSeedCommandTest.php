@@ -19,7 +19,7 @@ use Cake\TestSuite\StringCompareTrait;
 use Migrations\Test\TestCase\TestCase;
 
 /**
- * MigrationTaskTest class
+ * BakeSeedCommandTest class
  */
 class BakeSeedCommandTest extends TestCase
 {
@@ -36,13 +36,6 @@ class BakeSeedCommandTest extends TestCase
      * @var \Cake\Console\ConsoleIo|\PHPUnit\Framework\MockObject\MockObject
      */
     protected $io;
-
-    /**
-     * Test subject
-     *
-     * @var \Migrations\Shell\Task\SeedTask
-     */
-    protected $Task;
 
     /**
      * setup method
