@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use Migrations\Command\Phinx;
 use Symfony\Component\Console\Application;
 
 /**
@@ -22,15 +23,15 @@ use Symfony\Component\Console\Application;
 class MigrationsDispatcher extends Application
 {
     public static $phinxCommands = [
-        'Create' => Command\Create::class,
-        'Dump' => Command\Dump::class,
-        'MarkMigrated' => Command\MarkMigrated::class,
-        'Migrate' => Command\Migrate::class,
-        'Rollback' => Command\Rollback::class,
-        'Seed' => Command\Seed::class,
-        'Status' => Command\Status::class,
-        'CacheBuild' => Command\CacheBuild::class,
-        'CacheClear' => Command\CacheClear::class,
+        'Create' => Phinx\Create::class,
+        'Dump' => Phinx\Dump::class,
+        'MarkMigrated' => Phinx\MarkMigrated::class,
+        'Migrate' => Phinx\Migrate::class,
+        'Rollback' => Phinx\Rollback::class,
+        'Seed' => Phinx\Seed::class,
+        'Status' => Phinx\Status::class,
+        'CacheBuild' => Phinx\CacheBuild::class,
+        'CacheClear' => Phinx\CacheClear::class,
     ];
     /**
      * Class Constructor.

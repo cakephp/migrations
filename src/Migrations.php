@@ -403,7 +403,7 @@ class Migrations
      */
     public function getInput($command, array $arguments, array $options)
     {
-        $className = '\Migrations\Command\\' . $command;
+        $className = '\Migrations\Command\Phinx\\' . $command;
         $options = $arguments + $this->prepareOptions($options);
         /** @var \Symfony\Component\Console\Command\Command $command */
         $command = new $className();

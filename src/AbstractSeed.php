@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
-use Migrations\Command\Seed;
+use Migrations\Command\Phinx\Seed;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;

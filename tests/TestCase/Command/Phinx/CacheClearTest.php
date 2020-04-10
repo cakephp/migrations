@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Migrations\Test\Command;
+namespace Migrations\Test\Command\Phinx;
 
 use Cake\Cache\Cache;
 use Cake\Datasource\ConnectionManager;

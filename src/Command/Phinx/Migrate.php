@@ -11,21 +11,21 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Command;
+namespace Migrations\Command\Phinx;
 
 use Cake\Event\EventDispatcherTrait;
 use Migrations\ConfigurationTrait;
-use Phinx\Console\Command\SeedRun;
+use Phinx\Console\Command\Migrate as MigrateCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Seed extends SeedRun
+class Migrate extends MigrateCommand
 {
-    use CommandTrait {
+    use CommandTrait;
+    use ConfigurationTrait {
         execute as parentExecute;
     }
-    use ConfigurationTrait;
     use EventDispatcherTrait;
 
     /**
@@ -33,18 +33,37 @@ class Seed extends SeedRun
      */
     protected function configure()
     {
-        $this->setName('seed')
-            ->setDescription('Seed the database with data')
+        $this->setName('migrate')
+            ->setDescription('Migrate the database')
             ->setHelp('runs all available migrations, optionally up to a specific version')
+            ->addOption('--target', '-t', InputOption::VALUE_REQUIRED, 'The version number to migrate to')
+            ->addOption('--date', '-d', InputOption::VALUE_REQUIRED, 'The date to migrate to')
             ->addOption(
-                '--seed',
-                null,
-                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'What is the name of the seeder?'
+                '--dry-run',
+                '-x',
+                InputOption::VALUE_NONE,
+                'Dump queries to standard output instead of executing it'
             )
-            ->addOption('--plugin', '-p', InputOption::VALUE_REQUIRED, 'The plugin containing the migrations')
+            ->addOption(
+                '--plugin',
+                '-p',
+                InputOption::VALUE_REQUIRED,
+                'The plugin containing the migrations'
+            )
             ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
-            ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in');
+            ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
+            ->addOption(
+                '--fake',
+                null,
+                InputOption::VALUE_NONE,
+                "Mark any migrations selected as run, but don't actually execute them"
+            )
+            ->addOption(
+                '--no-lock',
+                null,
+                InputOption::VALUE_NONE,
+                'If present, no lock file will be generated after migrating'
+            );
     }
 
     /**
@@ -57,21 +76,12 @@ class Seed extends SeedRun
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $event = $this->dispatchEvent('Migration.beforeSeed');
+        $event = $this->dispatchEvent('Migration.beforeMigrate');
         if ($event->isStopped()) {
             return $event->getResult() ? BaseCommand::CODE_SUCCESS : BaseCommand::CODE_ERROR;
         }
-
-        $seed = $input->getOption('seed');
-        if (!empty($seed) && !is_array($seed)) {
-            $input->setOption('seed', [$seed]);
-        }
-
-        $this->setInput($input);
-        $this->bootstrap($input, $output);
-        $this->getManager()->setInput($input);
         $this->parentExecute($input, $output);
-        $this->dispatchEvent('Migration.afterSeed');
+        $this->dispatchEvent('Migration.afterMigrate');
 
         return BaseCommand::CODE_SUCCESS;
     }

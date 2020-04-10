@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test;
 
-use Migrations\Command\Status;
+use Migrations\Command\Phinx\Status;
 
 class ExampleCommand extends Status
 {
