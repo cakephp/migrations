@@ -25,7 +25,7 @@ class BakeSeedCommandTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = [
+    protected $fixtures = [
         'plugin.Migrations.Events',
         'plugin.Migrations.Texts',
     ];
@@ -35,14 +35,14 @@ class BakeSeedCommandTest extends TestCase
      *
      * @var \Cake\Console\ConsoleIo|\PHPUnit\Framework\MockObject\MockObject
      */
-    public $io;
+    protected $io;
 
     /**
      * Test subject
      *
      * @var \Migrations\Shell\Task\SeedTask
      */
-    public $Task;
+    protected $Task;
 
     /**
      * setup method

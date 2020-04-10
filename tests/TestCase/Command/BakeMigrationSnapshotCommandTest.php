@@ -27,7 +27,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 {
     use StringCompareTrait;
 
-    public $fixtures = [
+    protected $fixtures = [
         'plugin.Migrations.Users',
         'plugin.Migrations.SpecialTags',
         'plugin.Migrations.SpecialPk',
@@ -50,7 +50,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @var \Migrations\Shell\Task\MigrationSnapshotTask
      */
-    public $Task;
+    protected $Task;
 
     /**
      * setup method

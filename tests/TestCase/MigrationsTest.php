@@ -31,7 +31,7 @@ class MigrationsTest extends TestCase
      *
      * @var \Migrations\Migrations
      */
-    public $migrations;
+    protected $migrations;
 
     /**
      * Instance of a Cake Connection object
