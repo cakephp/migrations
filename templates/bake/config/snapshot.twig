@@ -57,7 +57,7 @@ class {{ name }} extends AbstractMigration
     public function down()
     {
 {%  set returnedData = Migration.getReturnedData() %}
-{%  if returnedData['dropForeignKeys'] is not empty %}
+{%  if returnedData and returnedData['dropForeignKeys'] is not empty %}
 {%      for table, columnsList in Migration.returnedData['dropForeignKeys'] %}
 {%          set maxKey = columnsList|length - 1 %}
         $this->table('{{ table }}')
