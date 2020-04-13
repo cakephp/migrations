@@ -43,7 +43,7 @@
         }
     },
     "suggest": {
-        "cakephp/bake": "Required if you want to generate migrations."
+        "cakephp/bake": "If you want to generate migrations."
     },
     "prefer-stable": true,
     "scripts": {

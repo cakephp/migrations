@@ -1,25 +1,26 @@
 # User specific & automatically generated files #
 #################################################
-/build
-/dist
-/tags
-/composer.lock
-/phpunit.xml
-/phpcs.xml
-/vendor
+build/
+dist/
+tags/
+composer.lock
+phpunit.xml
+phpcs.xml
+vendor/
 *.mo
 debug.log
 error.log
 /tests/test_app/config/Create/*
 /tests/test_app/config/Migrations/*
+/tests/test_app/config/SnapshotTests/*
 /tests/test_app/config/TestsMigrations/schema-dump-test.lock
 /tests/test_app/Plugin/TestBlog/config/Migrations/*
 .phpunit.result.cache
 
 # IDE and editor specific files #
 #################################
-/nbproject
-.idea
+nbproject/
+.idea/
 
 # OS generated files #
 ######################

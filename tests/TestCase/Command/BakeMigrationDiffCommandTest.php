@@ -116,6 +116,35 @@ class BakeMigrationDiffCommandTest extends TestCase
     }
 
     /**
+     * Tests that baking a diff while history is empty and no migration files exists
+     * will fall back to baking a snapshot.
+     * If the snapshot baking returns an error, an error is raised by the diff task
+     *
+     * @return void
+     */
+    public function testEmptyHistoryNoMigrationsError()
+    {
+        $this->Task = $this->getTaskMock(['abort', 'dispatchShell']);
+        $this->Task->params['require-table'] = false;
+        $this->Task->params['connection'] = 'test';
+        $this->Task->params['plugin'] = 'Blog';
+        $this->Task->plugin = 'Blog';
+
+        $this->Task->expects($this->once())
+            ->method('dispatchShell')
+            ->with([
+                'command' => 'bake migration_snapshot EmptyHistoryNoMigrations -c test -p Blog',
+            ])
+            ->will($this->returnValue(1));
+
+        $this->Task->expects($this->any())
+            ->method('abort')
+            ->with('Something went wrong during the snapshot baking. Please try again.');
+
+        $this->Task->bake('EmptyHistoryNoMigrations');
+    }
+
+    /**
      * Tests baking a diff
      *
      * @return void

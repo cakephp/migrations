@@ -135,7 +135,7 @@ estão exemplos de arquivos de migração:
 A maneira mais fácil de criar um arquivo de migrações é usando o
 :doc:`/bake/usage` a linha de comando.
 
-Por favor, leia a `documentação do Phinx <http://docs.phinx.org/en/latest/migrations.html>`
+Por favor, leia a `documentação do Phinx <https://book.cakephp.org/phinx/0/en/migrations.html>`
 a fim de conhecer a lista completa dos métodos que você pode usar para escrever
 os arquivos de migração.
 
@@ -633,10 +633,10 @@ como migradas::
 
 A partir da versão 1.5.5, você pode usar a **shell** de ``migrations`` para
 popular seu banco de dados. Essa função é oferecida graças ao
-`recurso de seed da biblioteca Phinx <http://docs.phinx.org/en/latest/seeding.html>`_.
+`recurso de seed da biblioteca Phinx <https://book.cakephp.org/phinx/0/en/seeding.html>`_.
 Por padrão, arquivos **seed** ficarão no diretório ``config/Seeds`` de sua
 aplicação. Por favor, tenha certeza de seguir as
-`instruções do Phinx para construir seus arquivos de seed <http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class>`_.
+`instruções do Phinx para construir seus arquivos de seed <https://book.cakephp.org/phinx/0/en/seeding.html#creating-a-new-seed-class>`_.
 
 Assim como nos **migrations**, uma interface do ```bake`` é oferecida para gerar
 arquivos de **seed**::

@@ -141,7 +141,7 @@ Migrations
 コマンドを使用することです。
 
 マイグレーションファイルに記述可能なメソッドの一覧については、オフィシャルの
-`Phinx ドキュメント <http://docs.phinx.org/en/latest/migrations.html>`_
+`Phinx ドキュメント <https://book.cakephp.org/phinx/0/en/migrations.html>`_
 をご覧ください。
 
 .. note::
@@ -666,10 +666,10 @@ JSON 形式の文字列として結果を出力できます。 :
 ----------------------------------------
 
 1.5.5 より、データベースの初期データ投入のために ``migrations`` シェルが使用できます。
-これは、 `Phinx ライブラリーの seed 機能 <http://docs.phinx.org/en/latest/seeding.html>`_
+これは、 `Phinx ライブラリーの seed 機能 <https://book.cakephp.org/phinx/0/en/seeding.html>`_
 を利用しています。デフォルトで、seed ファイルは、あなたのアプリケーションの ``config/Seeds``
 ディレクトリーの中に置かれます。 `seed ファイル作成のための Phinx の命令
-<http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class>`_
+<https://book.cakephp.org/phinx/0/en/seeding.html#creating-a-new-seed-class>`_
 を確認してください。
 
 マイグレーションに関して、 seed ファイルのための ``bake`` インターフェースが提供されます。 :

@@ -181,9 +181,11 @@ trait TableFinderTrait
         $splitted = array_reverse(explode('.', $tableName, 2));
         if (isset($splitted[1])) {
             $config = ConnectionManager::getConfig($this->connection);
-            $key = isset($config['schema']) ? 'schema' : 'database';
-            if ($config[$key] === $splitted[1]) {
-                $tableName = $splitted[0];
+            if ($config) {
+                $key = isset($config['schema']) ? 'schema' : 'database';
+                if ($config[$key] === $splitted[1]) {
+                    $tableName = $splitted[0];
+                }
             }
         }
         $tables[] = $tableName;
