@@ -79,6 +79,6 @@ class Rollback extends RollbackCommand
         $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterRollback');
 
-        return $result !== null ? $result : BaseCommand::CODE_SUCCESS;
+        return $result ?? BaseCommand::CODE_SUCCESS;
     }
 }

@@ -96,6 +96,6 @@ class Create extends CreateCommand
             }
         }
 
-        return $result !== null ? $result : BaseCommand::CODE_SUCCESS;
+        return $result ?? BaseCommand::CODE_SUCCESS;
     }
 }

@@ -73,6 +73,6 @@ class Seed extends SeedRun
         $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
 
-        return $result !== null ? $result : BaseCommand::CODE_SUCCESS;
+        return $result ?? BaseCommand::CODE_SUCCESS;
     }
 }
