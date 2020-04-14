@@ -70,9 +70,9 @@ class Seed extends SeedRun
         $this->setInput($input);
         $this->bootstrap($input, $output);
         $this->getManager()->setInput($input);
-        $this->parentExecute($input, $output);
+        $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
 
-        return BaseCommand::CODE_SUCCESS;
+        return $result ?? BaseCommand::CODE_SUCCESS;
     }
 }

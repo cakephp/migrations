@@ -22,10 +22,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Migrate extends MigrateCommand
 {
-    use CommandTrait;
-    use ConfigurationTrait {
+    use CommandTrait {
         execute as parentExecute;
     }
+    use ConfigurationTrait;
     use EventDispatcherTrait;
 
     /**
@@ -80,9 +80,9 @@ class Migrate extends MigrateCommand
         if ($event->isStopped()) {
             return $event->getResult() ? BaseCommand::CODE_SUCCESS : BaseCommand::CODE_ERROR;
         }
-        $this->parentExecute($input, $output);
+        $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterMigrate');
 
-        return BaseCommand::CODE_SUCCESS;
+        return $result ?? BaseCommand::CODE_SUCCESS;
     }
 }

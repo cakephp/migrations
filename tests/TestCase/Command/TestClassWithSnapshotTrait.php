@@ -34,7 +34,6 @@ class TestClassWithSnapshotTrait
     /**
      * @param string $className
      * @param string|null $pluginName
-     *
      * @return string[]
      */
     public function fetchTableName($className, $pluginName = null)
@@ -44,7 +43,6 @@ class TestClassWithSnapshotTrait
 
     /**
      * @param string|null $pluginName
-     *
      * @return string[]
      */
     public function getTableNames($pluginName = null)

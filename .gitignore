@@ -1,12 +1,12 @@
 # User specific & automatically generated files #
 #################################################
-/build
-/dist
-/tags
-/composer.lock
-/phpunit.xml
-/phpcs.xml
-/vendor
+build/
+dist/
+tags/
+composer.lock
+phpunit.xml
+phpcs.xml
+vendor/
 *.mo
 debug.log
 error.log
@@ -18,8 +18,8 @@ error.log
 
 # IDE and editor specific files #
 #################################
-/nbproject
-.idea
+nbproject/
+.idea/
 
 # OS generated files #
 ######################

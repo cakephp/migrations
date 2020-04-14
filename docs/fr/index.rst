@@ -144,7 +144,7 @@ Voici quelques exemples de noms de fichiers de migration:
 La meilleure façon de créer un fichier de migration est d'utiliser la ligne de
 commande :doc:`/bake/usage`.
 
-Assurez-vous de bien lire la `documentation officielle de Phinx <http://docs.phinx.org/en/latest/migrations.html>`_ afin de connaître la liste
+Assurez-vous de bien lire la `documentation officielle de Phinx <https://book.cakephp.org/phinx/0/en/migrations.html>`_ afin de connaître la liste
 complète des méthodes que vous pouvez utiliser dans l'écriture des fichiers de
 migration.
 
@@ -713,10 +713,10 @@ trouvées seront marquées comme "migrées":
 
 Depuis la version 1.5.5, vous pouvez utiliser le shell ``migrations`` pour
 remplir votre base de données. Cela vient de la `fonctionnalité de seed
-de la librairie Phinx <http://docs.phinx.org/en/latest/seeding.html>`_.
+de la librairie Phinx <https://book.cakephp.org/phinx/0/en/seeding.html>`_.
 Par défaut, les fichiers de seed vont être recherchés dans le répertoire
 ``config/Seeds`` de votre application. Assurez-vous de suivre les
-`instructions de Phinx pour construire les fichiers de seed <http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class>`_.
+`instructions de Phinx pour construire les fichiers de seed <https://book.cakephp.org/phinx/0/en/seeding.html#creating-a-new-seed-class>`_.
 
 En ce qui concerne migrations, une interface ``bake`` est fournie pour les
 fichiers de seed:
