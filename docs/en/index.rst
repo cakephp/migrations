@@ -143,7 +143,7 @@ The easiest way to create a migrations file is by using ``bin/cake bake
 migration`` CLI command.
 
 Please make sure you read the official
-`Phinx documentation <http://docs.phinx.org/en/latest/migrations.html>`_
+`Phinx documentation <https://book.cakephp.org/phinx/0/en/migrations.html>`_
 in order to know the complete list of methods you can use for writing migration
 files.
 
@@ -702,10 +702,10 @@ value. If you use it, it will mark all found migrations as migrated:
 --------------------------------
 
 As of 1.5.5, you can use the ``migrations`` shell to seed your database. This
-leverages the `Phinx library seed feature <http://docs.phinx.org/en/latest/seeding.html>`_.
+leverages the `Phinx library seed feature <https://book.cakephp.org/phinx/0/en/seeding.html>`_.
 By default, seed files will be looked for in the ``config/Seeds`` directory of
 your application. Please make sure you follow
-`Phinx instructions to build your seed files <http://docs.phinx.org/en/latest/seeding.html#creating-a-new-seed-class>`_.
+`Phinx instructions to build your seed files <https://book.cakephp.org/phinx/0/en/seeding.html#creating-a-new-seed-class>`_.
 
 As for migrations, a ``bake`` interface is provided for seed files:
 
