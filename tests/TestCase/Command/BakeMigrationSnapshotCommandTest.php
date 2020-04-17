@@ -17,7 +17,6 @@ use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
-use Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait;
 use Migrations\Test\TestCase\TestCase;
 
 /**
