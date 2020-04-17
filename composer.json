@@ -26,8 +26,8 @@
     "require-dev": {
         "phpunit/phpunit": "~8.5.0",
         "cakephp/cakephp": "^4.0",
-        "cakephp/bake": "^2.0",
-        "cakephp/cakephp-codesniffer": "^4.0"
+        "cakephp/bake": "^2.0.9",
+        "cakephp/cakephp-codesniffer": "~4.1.0"
     },
     "autoload": {
         "psr-4": {
