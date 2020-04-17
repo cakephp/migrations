@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\Util;
+namespace Migrations\Test\TestCase\Util;
 
 use Cake\TestSuite\TestCase;
 use Migrations\Util\ColumnParser;
@@ -35,7 +35,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::parseFields
+     * @covers \Migrations\Util\ColumnParser::parseFields()
      */
     public function testParseFields()
     {
@@ -228,7 +228,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::parseIndexes
+     * @covers \Migrations\Util\ColumnParser::parseIndexes()
      */
     public function testParseIndexes()
     {
@@ -251,7 +251,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::parsePrimaryKey
+     * @covers \Migrations\Util\ColumnParser::parsePrimaryKey()
      */
     public function testParsePrimaryKey()
     {
@@ -265,7 +265,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::validArguments
+     * @covers \Migrations\Util\ColumnParser::validArguments()
      */
     public function testValidArguments()
     {
@@ -320,7 +320,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::getType
+     * @covers \Migrations\Util\ColumnParser::getType()
      */
     public function testGetType()
     {
@@ -345,7 +345,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::getTypeAndLength
+     * @covers \Migrations\Util\ColumnParser::getTypeAndLength()
      */
     public function testGetTypeAndLength()
     {
@@ -362,7 +362,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::getLength
+     * @covers \Migrations\Util\ColumnParser::getLength()
      */
     public function testGetLength()
     {
@@ -374,7 +374,7 @@ class ColumnParserTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Util\ColumnParser::getIndexName
+     * @covers \Migrations\Util\ColumnParser::getIndexName()
      */
     public function testGetIndexName()
     {

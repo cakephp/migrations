@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test;
+namespace Migrations\Test\TestCase\Helper;
 
 use Cake\Cache\Cache;
 use Cake\Database\Schema\Collection;
@@ -25,6 +25,9 @@ use Migrations\View\Helper\MigrationHelper;
  */
 class MigrationHelperTest extends TestCase
 {
+    /**
+     * @var string[]
+     */
     protected $fixtures = [
         'plugin.Migrations.Users',
         'plugin.Migrations.SpecialTags',
@@ -56,7 +59,7 @@ class MigrationHelperTest extends TestCase
             'comment' => null,
         ];
 
-        if (getenv('DB') == 'mysql') {
+        if (getenv('DB') === 'mysql') {
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
@@ -65,7 +68,7 @@ class MigrationHelperTest extends TestCase
             ];
         }
 
-        if (getenv('DB') == 'pgsql') {
+        if (getenv('DB') === 'pgsql') {
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
@@ -87,7 +90,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::tableMethod
+     * @covers \Migrations\View\Helper\MigrationHelper::tableMethod()
      */
     public function testTableMethod()
     {
@@ -97,7 +100,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::indexMethod
+     * @covers \Migrations\View\Helper\MigrationHelper::indexMethod()
      */
     public function testIndexMethod()
     {
@@ -107,7 +110,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::columnMethod
+     * @covers \Migrations\View\Helper\MigrationHelper::columnMethod()
      */
     public function testColumnMethod()
     {
@@ -117,7 +120,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::columns
+     * @covers \Migrations\View\Helper\MigrationHelper::columns()
      */
     public function testColumns()
     {
@@ -166,7 +169,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::column
+     * @covers \Migrations\View\Helper\MigrationHelper::column()
      */
     public function testColumn()
     {
@@ -230,7 +233,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::value
+     * @covers \Migrations\View\Helper\MigrationHelper::value()
      */
     public function testValue()
     {
@@ -253,7 +256,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::attributes
+     * @covers \Migrations\View\Helper\MigrationHelper::attributes()
      */
     public function testAttributes()
     {
@@ -311,7 +314,7 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
-     * @covers Migrations\View\Helper\MigrationHelper::stringifyList
+     * @covers \Migrations\View\Helper\MigrationHelper::stringifyList()
      */
     public function testStringifyList()
     {

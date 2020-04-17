@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Migrations\Test\Command\Phinx;
+namespace Migrations\Test\TestCase\Command\Phinx;
 
 use Cake\Cache\Cache;
 use Cake\Core\Plugin;

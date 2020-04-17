@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\Command;
+namespace Migrations\Test\TestCase\Command;
 
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
@@ -44,6 +44,11 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      * @var string[]
      */
     protected $generatedFiles = [];
+
+    /**
+     * @var string
+     */
+    protected $migrationPath;
 
     /**
      * setup method
@@ -87,7 +92,8 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testGetTableNames()
     {
-        $class = $this->getMockBuilder('\Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait')
+        /** @var \Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait|\PHPUnit\Framework\MockObject\MockObject $class */
+        $class = $this->getMockBuilder(TestClassWithSnapshotTrait::class)
             ->setMethods(['findTables', 'fetchTableName'])
             ->getMock();
 
