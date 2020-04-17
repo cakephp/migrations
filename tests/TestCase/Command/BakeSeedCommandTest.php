@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\Command;
+namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\BaseCommand;
 use Cake\Core\Plugin;
@@ -25,6 +25,9 @@ class BakeSeedCommandTest extends TestCase
 {
     use StringCompareTrait;
 
+    /**
+     * @var string[]
+     */
     protected $fixtures = [
         'plugin.Migrations.Events',
         'plugin.Migrations.Texts',

@@ -11,13 +11,14 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test;
+namespace Migrations\Test\TestCase;
 
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
+use Migrations\CakeAdapter;
 use Migrations\Migrations;
 use Phinx\Db\Adapter\WrapperInterface;
 
@@ -145,7 +146,7 @@ class MigrationsTest extends TestCase
             ->getEnvironment('default')
             ->getAdapter();
 
-        $this->assertInstanceOf('\Migrations\CakeAdapter', $adapter);
+        $this->assertInstanceOf(CakeAdapter::class, $adapter);
     }
 
     /**

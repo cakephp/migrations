@@ -15,6 +15,7 @@ namespace Migrations\Test\Command\Phinx;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
+use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -144,7 +145,7 @@ class MarkMigratedTest extends TestCase
         $env = $this->command->getManager()->getEnvironment('default');
         $migrations = $this->command->getManager()->getMigrations('default');
 
-        $manager = $this->getMockBuilder('\Migrations\CakeManager')
+        $manager = $this->getMockBuilder(CakeManager::class)
             ->setMethods(['getEnvironment', 'markMigrated', 'getMigrations'])
             ->setConstructorArgs([$config, new ArgvInput([]), new StreamOutput(fopen('php://memory', 'a', false))])
             ->getMock();

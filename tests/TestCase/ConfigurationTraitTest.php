@@ -11,19 +11,27 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test;
+namespace Migrations\Test\TestCase;
 
 use Cake\Core\BasePlugin;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
+use Migrations\Test\ExampleCommand;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Tests the ConfigurationTrait
  */
 class ConfigurationTraitTest extends TestCase
 {
+    /**
+     * @var \Migrations\Test\ExampleCommand
+     */
+    protected $command;
+
     /**
      * Setup method
      *
@@ -88,7 +96,8 @@ class ConfigurationTraitTest extends TestCase
             ],
         ]);
 
-        $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
+        /** @var \Symfony\Component\Console\Input\InputInterface|\PHPUnit\Framework\MockObject\MockObject $input */
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
         $this->command->setInput($input);
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
@@ -125,7 +134,8 @@ class ConfigurationTraitTest extends TestCase
     public function testCacheMetadataDisabled()
     {
         $input = new ArrayInput([], $this->command->getDefinition());
-        $output = $this->getMockBuilder('\Symfony\Component\Console\Output\OutputInterface')->getMock();
+        /** @var \Symfony\Component\Console\Output\OutputInterface|\PHPUnit\Framework\MockObject\MockObject $output */
+        $output = $this->getMockBuilder(OutputInterface::class)->getMock();
         $this->command->setInput($input);
 
         $input->setOption('connection', 'test');
@@ -146,7 +156,7 @@ class ConfigurationTraitTest extends TestCase
             'name' => 'MyPlugin',
             'path' => $tmpPath,
         ]));
-        $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
         $this->command->setInput($input);
 
         $input->expects($this->at(1))
@@ -188,7 +198,7 @@ class ConfigurationTraitTest extends TestCase
             ],
         ]);
 
-        $input = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')->getMock();
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
         $this->command->setInput($input);
 
         $input->expects($this->at(5))
