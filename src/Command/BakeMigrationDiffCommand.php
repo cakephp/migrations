@@ -259,7 +259,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 $column = $currentSchema->getColumn($columnName);
                 $oldColumn = $this->dumpSchema[$table]->getColumn($columnName);
                 unset($column['collate']);
+                unset($column['fixed']);
                 unset($oldColumn['collate']);
+                unset($oldColumn['fixed']);
 
                 if (
                     in_array($columnName, $oldColumns, true) &&
