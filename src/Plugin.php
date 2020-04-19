@@ -54,7 +54,7 @@ class Plugin extends BasePlugin
             return $collection->addMany($commands);
         }
         if (!CorePlugin::isLoaded($this->name)) {
-            return [];
+            return $collection;
         }
         $path = CorePlugin::classPath($this->name);
         $namespace = str_replace('/', '\\', $this->name);
