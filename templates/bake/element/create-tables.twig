@@ -58,12 +58,13 @@
             )
 {%     endfor %}
             ->create();
-{% endfor %}
+{% endfor -%}
 {% if createData.constraints %}
 {%   for table, tableConstraints in createData.constraints %}
-{%     element 'Migrations.add-foreign-keys' {
+{{-     element('Migrations.add-foreign-keys', {
          constraints: tableConstraints,
          table: table
-       } %}
-{%   endfor %}
-{% endif %}
+       })
+-}}
+{%   endfor -%}
+{% endif -%}

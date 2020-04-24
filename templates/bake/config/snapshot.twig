@@ -40,12 +40,12 @@ class {{ name }} extends AbstractMigration
      */
     public function up()
     {
-{% element 'Migrations.create-tables' {
+{{~ element('Migrations.create-tables', {
     tables: tables,
     autoId: autoId,
     useSchema: false
-} %}
-    }
+})
+}}    }
 
     /**
      * Down Method.

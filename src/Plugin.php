@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use Cake\Console\CommandCollection;
 use Cake\Core\BasePlugin;
 
 /**
@@ -33,4 +34,46 @@ class Plugin extends BasePlugin
      * @var bool
      */
     protected $routesEnabled = false;
+
+    protected $migrationCommandsList = [
+        Command\MigrationsCommand::class,
+        Command\MigrationsCreateCommand::class,
+        Command\MigrationsDumpCommand::class,
+        Command\MigrationsMarkMigratedCommand::class,
+        Command\MigrationsMigrateCommand::class,
+        Command\MigrationsCacheBuildCommand::class,
+        Command\MigrationsCacheClearCommand::class,
+        Command\MigrationsRollbackCommand::class,
+        Command\MigrationsSeedCommand::class,
+        Command\MigrationsStatusCommand::class,
+    ];
+
+    /**
+     * Add migrations commands.
+     *
+     * @param \Cake\Console\CommandCollection $collection The command collection to update
+     * @return \Cake\Console\CommandCollection
+     */
+    public function console(CommandCollection $collection): CommandCollection
+    {
+        if (class_exists('Bake\Command\SimpleBakeCommand')) {
+            $commands = $collection->discoverPlugin($this->getName());
+
+            return $collection->addMany($commands);
+        }
+        $commands = [];
+        foreach ($this->migrationCommandsList as $class) {
+            $name = $class::defaultName();
+            // If the short name has been used, use the full name.
+            // This allows app commands to have name preference.
+            // and app commands to overwrite migration commands.
+            if (!$collection->has($name)) {
+                $commands[$name] = $class;
+            }
+            // full name
+            $commands['migrations.' . $name] = $class;
+        }
+
+        return $collection->addMany($commands);
+    }
 }
