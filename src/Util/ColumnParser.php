@@ -250,6 +250,10 @@ class ColumnParser
         $length = null;
         if ($type === 'string') {
             $length = 255;
+        } elseif ($type === 'tinyinteger') {
+            $length = 3;
+        } elseif ($type === 'smallinteger') {
+            $length = 6;
         } elseif ($type === 'integer') {
             $length = 11;
         } elseif ($type === 'biginteger') {
