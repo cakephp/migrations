@@ -5,6 +5,7 @@ namespace Migrations\Util;
 
 use Cake\Collection\Collection;
 use Cake\Utility\Hash;
+use Phinx\Db\Adapter\AdapterInterface;
 use ReflectionClass;
 
 /**
@@ -215,7 +216,7 @@ class ColumnParser
      */
     public function getType($field, $type)
     {
-        $reflector = new ReflectionClass('Phinx\Db\Adapter\AdapterInterface');
+        $reflector = new ReflectionClass(AdapterInterface::class);
         $collection = new Collection($reflector->getConstants());
 
         $validTypes = $collection->filter(function ($value, $constant) {
@@ -250,6 +251,10 @@ class ColumnParser
         $length = null;
         if ($type === 'string') {
             $length = 255;
+        } elseif ($type === 'tinyinteger') {
+            $length = 4;
+        } elseif ($type === 'smallinteger') {
+            $length = 6;
         } elseif ($type === 'integer') {
             $length = 11;
         } elseif ($type === 'biginteger') {

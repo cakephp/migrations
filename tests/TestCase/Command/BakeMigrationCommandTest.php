@@ -69,7 +69,7 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * data provider for testCreate
      *
-     * @return void
+     * @return array
      */
     public static function nameVariations()
     {
@@ -156,7 +156,7 @@ class BakeMigrationCommandTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Shell\Task\MigrationTask::detectAction()
+     * @covers \Migrations\Command\BakeMigrationCommand::detectAction()
      * @return void
      */
     public function testDetectAction()
