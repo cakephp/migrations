@@ -64,6 +64,7 @@ class Seed extends SeedRun
 
         $seed = $input->getOption('seed');
         if (!empty($seed) && !is_array($seed)) {
+            /** @psalm-suppress InvalidScalarArgument */
             $input->setOption('seed', [$seed]);
         }
 

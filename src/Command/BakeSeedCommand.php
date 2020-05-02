@@ -37,6 +37,9 @@ class BakeSeedCommand extends SimpleBakeCommand
      */
     public $pathFragment = 'config/Seeds/';
 
+    /**
+     * @var string
+     */
     protected $_name;
 
     /**
@@ -97,8 +100,10 @@ class BakeSeedCommand extends SimpleBakeCommand
             $namespace = $this->_pluginNamespace($this->plugin);
         }
 
+        /** @psalm-suppress PossiblyNullArgument */
         $table = Inflector::tableize($arguments->getArgumentAt(0));
         if ($arguments->hasOption('table')) {
+            /** @var string $table */
             $table = $arguments->getOption('table');
         }
 
@@ -106,6 +111,7 @@ class BakeSeedCommand extends SimpleBakeCommand
         if ($arguments->getOption('data')) {
             $limit = (int)$arguments->getOption('limit');
 
+            /** @var string $fields */
             $fields = $arguments->getOption('fields') ?: '*';
             if ($fields !== '*') {
                 $fields = explode(',', $fields);
@@ -121,6 +127,7 @@ class BakeSeedCommand extends SimpleBakeCommand
                 $query->limit($limit);
             }
 
+            /** @var array $records */
             $records = $connection->execute($query->sql())->fetchAll('assoc');
             $records = $this->prettifyArray($records);
         }

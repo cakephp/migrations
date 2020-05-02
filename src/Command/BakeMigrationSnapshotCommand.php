@@ -34,6 +34,9 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     use TableFinderTrait;
     use UtilTrait;
 
+    /**
+     * @var string
+     */
     protected $_name;
 
     /**

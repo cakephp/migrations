@@ -206,11 +206,6 @@ class ConfigurationTraitTest extends TestCase
             ->with('connection')
             ->will($this->returnValue('custom'));
 
-        $input->expects($this->at(6))
-            ->method('getOption')
-            ->with('connection')
-            ->will($this->returnValue('custom'));
-
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
 

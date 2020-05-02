@@ -44,6 +44,7 @@ class CacheClear extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $schema = $this->_getSchema($input, $output);
+        /** @var string $name */
         $name = $input->getArgument('name');
         if (!$schema) {
             return static::CODE_ERROR;

@@ -41,6 +41,9 @@ class MigrationHelper extends Helper
      */
     public $tableStatements = [];
 
+    /**
+     * @var array
+     */
     public $returnedData = [];
 
     /**
@@ -167,8 +170,8 @@ class MigrationHelper extends Helper
     public function columns($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof TableSchema)) {
-            $tableSchema = $this->schema($table);
+        if (!($tableSchema instanceof TableSchema)) {
+            $tableSchema = $this->schema($tableSchema);
         }
         $columns = [];
         $tablePrimaryKeys = $tableSchema->getPrimaryKey();
@@ -192,8 +195,8 @@ class MigrationHelper extends Helper
     public function indexes($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof TableSchema)) {
-            $tableSchema = $this->schema($table);
+        if (!($tableSchema instanceof TableSchema)) {
+            $tableSchema = $this->schema($tableSchema);
         }
 
         $tableIndexes = $tableSchema->indexes();
@@ -217,8 +220,8 @@ class MigrationHelper extends Helper
     public function constraints($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof TableSchema)) {
-            $tableSchema = $this->schema($table);
+        if (!($tableSchema instanceof TableSchema)) {
+            $tableSchema = $this->schema($tableSchema);
         }
 
         $constraints = [];
@@ -268,8 +271,8 @@ class MigrationHelper extends Helper
     public function primaryKeys($table)
     {
         $tableSchema = $table;
-        if (!($table instanceof TableSchema)) {
-            $tableSchema = $this->schema($table);
+        if (!($tableSchema instanceof TableSchema)) {
+            $tableSchema = $this->schema($tableSchema);
         }
         $primaryKeys = [];
         $tablePrimaryKeys = $tableSchema->getPrimaryKey();
@@ -318,6 +321,7 @@ class MigrationHelper extends Helper
     public function primaryKeysColumnsList($table)
     {
         $primaryKeys = $this->primaryKeys($table);
+        /** @var array $primaryKeysColumns */
         $primaryKeysColumns = Hash::extract($primaryKeys, '{n}.name');
         sort($primaryKeysColumns);
 
@@ -427,7 +431,7 @@ class MigrationHelper extends Helper
     public function attributes($table, $column)
     {
         $tableSchema = $table;
-        if (!($table instanceof TableSchema)) {
+        if (!($tableSchema instanceof TableSchema)) {
             $tableSchema = $this->schema($table);
         }
         $validOptions = [
@@ -442,6 +446,10 @@ class MigrationHelper extends Helper
 
         $attributes = [];
         $options = $tableSchema->getColumn($column);
+        if ($options === null) {
+            return [];
+        }
+
         foreach ($options as $_option => $value) {
             $option = $_option;
             switch ($_option) {

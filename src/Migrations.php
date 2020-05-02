@@ -167,6 +167,7 @@ class Migrations
 
         if ($input->getOption('date')) {
             $method = 'migrateToDateTime';
+            /** @psalm-suppress PossiblyInvalidArgument */
             $params[1] = new \DateTime($input->getOption('date'));
         }
 
@@ -198,6 +199,7 @@ class Migrations
 
         if ($input->getOption('date')) {
             $method = 'rollbackToDateTime';
+            /** @psalm-suppress PossiblyInvalidArgument */
             $params[1] = new \DateTime($input->getOption('date'));
         }
 
@@ -374,19 +376,19 @@ class Migrations
      */
     public function setAdapter()
     {
-        if ($this->input !== null) {
-            $connectionName = 'default';
-            if ($this->input->getOption('connection')) {
-                $connectionName = $this->input->getOption('connection');
-            }
-            /** @var \Cake\Database\Connection $connection */
-            $connection = ConnectionManager::get($connectionName);
+        if ($this->input === null) {
+            return;
+        }
 
-            $env = $this->manager->getEnvironment('default');
-            $adapter = $env->getAdapter();
-            if (!$adapter instanceof CakeAdapter) {
-                $env->setAdapter(new CakeAdapter($adapter, $connection));
-            }
+        /** @var string $connectionName */
+        $connectionName = $this->input()->getOption('connection') ?: 'default';
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get($connectionName);
+
+        $env = $this->manager->getEnvironment('default');
+        $adapter = $env->getAdapter();
+        if (!$adapter instanceof CakeAdapter) {
+            $env->setAdapter(new CakeAdapter($adapter, $connection));
         }
     }
 

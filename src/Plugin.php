@@ -35,6 +35,9 @@ class Plugin extends BasePlugin
      */
     protected $routesEnabled = false;
 
+    /**
+     * @var array
+     */
     protected $migrationCommandsList = [
         Command\MigrationsCommand::class,
         Command\MigrationsCreateCommand::class,

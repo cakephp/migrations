@@ -58,7 +58,9 @@ class Status extends StatusCommand
         $this->beforeExecute($input, $output);
         $this->bootstrap($input, $output);
 
+        /** @var string $environment */
         $environment = $input->getOption('environment');
+        /** @var string|null $format */
         $format = $input->getOption('format');
 
         if ($environment === null) {
@@ -72,6 +74,7 @@ class Status extends StatusCommand
         }
 
         // print the status
+        /** @var array $migrations */
         $migrations = $this->getManager()->printStatus($environment, $format);
 
         switch ($format) {

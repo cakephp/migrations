@@ -83,6 +83,7 @@ class Dump extends AbstractCommand
         $this->output($output);
 
         $path = $this->getOperationsPath($input);
+        /** @var string $connectionName */
         $connectionName = $input->getOption('connection') ?: 'default';
         $connection = ConnectionManager::get($connectionName);
         $collection = $connection->getSchemaCollection();

@@ -151,6 +151,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $migratedItems = [];
         if ($tableExists) {
             $query = $connection->newQuery();
+            /** @var array $migratedItems */
             $migratedItems = $query
                 ->select(['version'])
                 ->from($this->phinxTable)
@@ -243,6 +244,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $addedColumns = array_diff($currentColumns, $oldColumns);
             foreach ($addedColumns as $columnName) {
                 $column = $currentSchema->getColumn($columnName);
+                /** @var int $key */
                 $key = array_search($columnName, $currentColumns);
                 if ($key > 0) {
                     $column['after'] = $currentColumns[$key - 1];
@@ -309,6 +311,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             if (!empty($removedColumns)) {
                 foreach ($removedColumns as $columnName) {
                     $column = $this->dumpSchema[$table]->getColumn($columnName);
+                    /** @var int $key */
                     $key = array_search($columnName, $oldColumns);
                     if ($key > 0) {
                         $column['after'] = $oldColumns[$key - 1];

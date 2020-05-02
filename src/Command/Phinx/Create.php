@@ -76,6 +76,7 @@ class Create extends CreateCommand
 
         $migrationPaths = $this->getConfig()->getMigrationPaths();
         $migrationPath = array_pop($migrationPaths) . DS;
+        /** @var string $name */
         $name = $input->getArgument('name');
         [$phinxTimestamp, $phinxName] = explode('_', Util::mapClassNameToFileName($name), 2);
         $migrationFilename = glob($migrationPath . '*' . $phinxName);
