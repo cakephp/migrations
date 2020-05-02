@@ -5,16 +5,6 @@
       <code>array|string</code>
     </ImplementedReturnTypeMismatch>
   </file>
-  <file src="src/Command/Phinx/CacheBuild.php">
-    <MissingReturnType occurrences="1">
-      <code>configure</code>
-    </MissingReturnType>
-  </file>
-  <file src="src/Command/Phinx/CacheClear.php">
-    <MissingReturnType occurrences="1">
-      <code>configure</code>
-    </MissingReturnType>
-  </file>
   <file src="src/Command/Phinx/Seed.php">
     <PossiblyNullReference occurrences="1">
       <code>setInput</code>

@@ -29,7 +29,9 @@ class Rollback extends RollbackCommand
     use EventDispatcherTrait;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {

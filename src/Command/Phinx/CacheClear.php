@@ -14,7 +14,9 @@ class CacheClear extends BaseCommand
     use SchemaTrait;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {

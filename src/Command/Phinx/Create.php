@@ -30,7 +30,9 @@ class Create extends CreateCommand
     use ConfigurationTrait;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {

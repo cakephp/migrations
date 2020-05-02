@@ -50,7 +50,9 @@ class MarkMigrated extends AbstractCommand
     }
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {

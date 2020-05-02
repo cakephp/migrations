@@ -94,7 +94,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     protected $commonTables;
 
     /**
-     * @inheritDoc
+     * @var array
      */
     protected $templateData = [];
 

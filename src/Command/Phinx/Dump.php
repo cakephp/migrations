@@ -40,7 +40,9 @@ class Dump extends AbstractCommand
     protected $output;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {
