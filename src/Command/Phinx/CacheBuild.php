@@ -14,7 +14,9 @@ class CacheBuild extends BaseCommand
     use SchemaTrait;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {
@@ -43,6 +45,7 @@ class CacheBuild extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        /** @var string $name */
         $name = $input->getArgument('name');
         $schema = $this->_getSchema($input, $output);
         if (!$schema) {

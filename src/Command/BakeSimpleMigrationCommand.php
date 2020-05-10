@@ -152,7 +152,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      * If the name is invalid, the task will exit
      *
      * @param string|null $name Name for the generated migration
-     * @return string|null Name of the migration file or null if empty
+     * @return string Name of the migration file
      */
     protected function getMigrationName($name = null)
     {
@@ -160,6 +160,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             $this->io->abort('Choose a migration name to bake in CamelCase format');
         }
 
+        /** @psalm-suppress PossiblyNullArgument */
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
 

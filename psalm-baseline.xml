@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="3.11.2@d470903722cfcbc1cd04744c5491d3e6d13ec3d9">
+  <file src="src/CakeManager.php">
+    <ImplementedReturnTypeMismatch occurrences="1">
+      <code>array|string</code>
+    </ImplementedReturnTypeMismatch>
+  </file>
+  <file src="src/Command/Phinx/Seed.php">
+    <PossiblyNullReference occurrences="1">
+      <code>setInput</code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Shell/Task/SimpleMigrationTask.php">
+    <PossiblyNullArgument occurrences="1">
+      <code>$name</code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/TableFinderTrait.php">
+    <InternalClass occurrences="1">
+      <code>new Filesystem()</code>
+    </InternalClass>
+    <InternalMethod occurrences="1">
+      <code>find</code>
+    </InternalMethod>
+  </file>
+  <file src="src/Util/ColumnParser.php">
+    <PossiblyNullArgument occurrences="1">
+      <code>$fieldType</code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Util/UtilTrait.php">
+    <InvalidReturnType occurrences="1">
+      <code>string|null</code>
+    </InvalidReturnType>
+  </file>
+</files>

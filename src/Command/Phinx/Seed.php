@@ -29,7 +29,9 @@ class Seed extends SeedRun
     use EventDispatcherTrait;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {
@@ -64,6 +66,7 @@ class Seed extends SeedRun
 
         $seed = $input->getOption('seed');
         if (!empty($seed) && !is_array($seed)) {
+            /** @psalm-suppress InvalidScalarArgument */
             $input->setOption('seed', [$seed]);
         }
 

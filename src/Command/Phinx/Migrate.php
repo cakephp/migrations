@@ -29,7 +29,9 @@ class Migrate extends MigrateCommand
     use EventDispatcherTrait;
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {

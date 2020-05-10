@@ -22,6 +22,9 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class CakeManager extends Manager
 {
+    /**
+     * @var int
+     */
     public $maxNameLength = 0;
 
     /**
@@ -146,7 +149,7 @@ class CakeManager extends Manager
     /**
      * @inheritDoc
      */
-    public function rollbackToDateTime($environment, \DateTime $dateTime, $force = false)
+    public function rollbackToDateTime(string $environment, \DateTime $dateTime, bool $force = false): void
     {
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
@@ -246,6 +249,7 @@ class CakeManager extends Manager
             return $versions;
         }
 
+        /** @var string $version */
         $version = $targetArg ?: $versionArg;
 
         if ($input->getOption('only') || !empty($versionArg)) {
@@ -329,6 +333,7 @@ class CakeManager extends Manager
         $class = ucwords($class);
         $class = str_replace(' ', '', $class);
         if (strpos($class, '.') !== false) {
+            /** @psalm-suppress PossiblyFalseArgument */
             $class = substr($class, 0, strpos($class, '.'));
         }
 
@@ -362,7 +367,7 @@ class CakeManager extends Manager
     {
         parent::getSeeds();
         if (empty($this->seeds)) {
-            return $this->seeds;
+            return [];
         }
 
         foreach ($this->seeds as $class => $instance) {

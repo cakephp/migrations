@@ -72,6 +72,7 @@ trait TableFinderTrait
 
                     $config = ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
+                    /** @psalm-suppress PossiblyNullArrayAccess */
                     if ($config[$key] === $splitted[1]) {
                         $table = $splitted[0];
                     }
@@ -131,6 +132,7 @@ trait TableFinderTrait
         if ($pluginName) {
             $path = CorePlugin::path($pluginName) . 'src' . DS . $path;
         } else {
+            /** @psalm-suppress UndefinedConstant */
             $path = APP . $path;
         }
 
@@ -170,8 +172,9 @@ trait TableFinderTrait
             return $tables;
         }
 
-        $table = TableRegistry::get($className);
+        $table = TableRegistry::getTableLocator()->get($className);
         foreach ($table->associations()->keys() as $key) {
+            /** @psalm-suppress PossiblyNullReference */
             if ($table->associations()->get($key)->type() === 'belongsToMany') {
                 /** @var \Cake\ORM\Association\BelongsToMany $belongsToMany */
                 $belongsToMany = $table->associations()->get($key);

@@ -212,9 +212,9 @@ class ColumnParser
      *
      * @param string $field Name of field
      * @param string|null $type User-specified type
-     * @return string
+     * @return string|null
      */
-    public function getType($field, $type)
+    public function getType($field, $type): ?string
     {
         $reflector = new ReflectionClass(AdapterInterface::class);
         $collection = new Collection($reflector->getConstants());
@@ -244,7 +244,8 @@ class ColumnParser
      * Returns the default length to be used for a given fie
      *
      * @param string $type User-specified type
-     * @return int
+     * @return int|int[]
+     * @psalm-suppress InvalidNullableReturnType
      */
     public function getLength($type)
     {
@@ -263,6 +264,7 @@ class ColumnParser
             $length = [10, 6];
         }
 
+        /** @psalm-suppress NullableReturnStatement */
         return $length;
     }
 

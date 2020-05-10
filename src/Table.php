@@ -150,7 +150,7 @@ class Table extends BaseTable
     public function update()
     {
         parent::update();
-        TableRegistry::clear();
+        TableRegistry::getTableLocator()->clear();
     }
 
     /**

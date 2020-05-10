@@ -28,7 +28,7 @@ trait UtilTrait
      * @param \Symfony\Component\Console\Input\InputInterface $input Input of the current command.
      * @return string|null
      */
-    protected function getPlugin(InputInterface $input)
+    protected function getPlugin(InputInterface $input): ?string
     {
         $plugin = $input->getOption('plugin') ?: null;
 

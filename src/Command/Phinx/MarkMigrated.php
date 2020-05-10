@@ -50,7 +50,9 @@ class MarkMigrated extends AbstractCommand
     }
 
     /**
-     * @inheritDoc
+     * Configures the current command.
+     *
+     * @return void
      */
     protected function configure()
     {
@@ -149,7 +151,7 @@ class MarkMigrated extends AbstractCommand
      */
     protected function isUsingDeprecatedAll()
     {
-        $version = $this->input->getArgument('version');
+        $version = $this->input()->getArgument('version');
 
         return $version === 'all' || $version === '*';
     }
@@ -161,7 +163,7 @@ class MarkMigrated extends AbstractCommand
      */
     protected function hasExclude()
     {
-        return $this->input->getOption('exclude');
+        return (bool)$this->input()->getOption('exclude');
     }
 
     /**
@@ -171,7 +173,7 @@ class MarkMigrated extends AbstractCommand
      */
     protected function hasOnly()
     {
-        return $this->input->getOption('only');
+        return (bool)$this->input()->getOption('only');
     }
 
     /**
@@ -181,7 +183,7 @@ class MarkMigrated extends AbstractCommand
      */
     protected function isUsingDeprecatedVersion()
     {
-        $version = $this->input->getArgument('version');
+        $version = $this->input()->getArgument('version');
 
         return $version && $version !== 'all' && $version !== '*';
     }
@@ -195,7 +197,7 @@ class MarkMigrated extends AbstractCommand
     {
         return ($this->hasExclude() && $this->hasOnly()) ||
             ($this->hasExclude() || $this->hasOnly()) &&
-            $this->input->getOption('target') === null;
+            $this->input()->getOption('target') === null;
     }
 
     /**

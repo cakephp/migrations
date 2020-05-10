@@ -28,6 +28,9 @@ use Migrations\Util\ColumnParser;
  */
 class BakeMigrationCommand extends BakeSimpleMigrationCommand
 {
+    /**
+     * @var string
+     */
     protected $_name;
 
     /**
