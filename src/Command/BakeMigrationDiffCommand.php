@@ -542,7 +542,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         }
 
         $connection = ConnectionManager::get($this->connection);
-        $connection->cacheMetadata(false);
+        if (method_exists($connection, 'cacheMetadata')) {
+            $connection->cacheMetadata(false);
+        }
         $collection = $connection->getSchemaCollection();
         foreach ($this->tables as $table) {
             if (preg_match("/^.*phinxlog$/", $table) === 1) {
