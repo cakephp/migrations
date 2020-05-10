@@ -7,7 +7,9 @@
 
 This is a Database Migrations system for CakePHP.
 
-The plugin consists of a CakePHP shell wrapper for the [Phinx](https://book.cakephp.org/4.0/en/phinx.html) migrations library.
+The plugin consists of a CakePHP shell wrapper for the [Phinx](https://book.cakephp.org/phinx/0/en/index.html) migrations library.
+
+This branch is for use with CakePHP **4.x**. See [version map](https://github.com/cakephp/migrations/wiki#version-map) for details.
 
 ## Installation
 
