@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\Command\Phinx;
+namespace Migrations\Test\TestCase\Command\Phinx;
 
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
@@ -128,7 +128,7 @@ class DumpTest extends TestCase
             '--connection' => 'test',
             '--source' => 'TestsMigrations',
         ]);
-        $this->assertEquals(serialize([]), file_get_contents($this->dumpfile));
+        $this->assertSame(serialize([]), file_get_contents($this->dumpfile));
     }
 
     /**

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations\Test\TestCase\Helper;
+namespace Migrations\Test\TestCase\View\Helper;
 
 use Cake\Cache\Cache;
 use Cake\Database\Schema\Collection;
@@ -94,9 +94,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testTableMethod()
     {
-        $this->assertEquals('drop', $this->Helper->tableMethod('drop_table'));
-        $this->assertEquals('create', $this->Helper->tableMethod('create_table'));
-        $this->assertEquals('update', $this->Helper->tableMethod('other_method'));
+        $this->assertSame('drop', $this->Helper->tableMethod('drop_table'));
+        $this->assertSame('create', $this->Helper->tableMethod('create_table'));
+        $this->assertSame('update', $this->Helper->tableMethod('other_method'));
     }
 
     /**
@@ -104,9 +104,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testIndexMethod()
     {
-        $this->assertEquals('removeIndex', $this->Helper->indexMethod('drop_field'));
-        $this->assertEquals('addIndex', $this->Helper->indexMethod('add_field'));
-        $this->assertEquals('addIndex', $this->Helper->indexMethod('alter_field'));
+        $this->assertSame('removeIndex', $this->Helper->indexMethod('drop_field'));
+        $this->assertSame('addIndex', $this->Helper->indexMethod('add_field'));
+        $this->assertSame('addIndex', $this->Helper->indexMethod('alter_field'));
     }
 
     /**
@@ -114,9 +114,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testColumnMethod()
     {
-        $this->assertEquals('removeColumn', $this->Helper->columnMethod('drop_field'));
-        $this->assertEquals('addColumn', $this->Helper->columnMethod('add_field'));
-        $this->assertEquals('changeColumn', $this->Helper->columnMethod('alter_field'));
+        $this->assertSame('removeColumn', $this->Helper->columnMethod('drop_field'));
+        $this->assertSame('addColumn', $this->Helper->columnMethod('add_field'));
+        $this->assertSame('changeColumn', $this->Helper->columnMethod('alter_field'));
     }
 
     /**
@@ -237,22 +237,22 @@ class MigrationHelperTest extends TestCase
      */
     public function testValue()
     {
-        $this->assertEquals('null', $this->Helper->value(null));
-        $this->assertEquals('null', $this->Helper->value('null'));
-        $this->assertEquals('true', $this->Helper->value(true));
-        $this->assertEquals('false', $this->Helper->value(false));
-        $this->assertEquals(1, $this->Helper->value(1));
-        $this->assertEquals(-1, $this->Helper->value(-1));
-        $this->assertEquals(1.5, $this->Helper->value(1.5));
-        $this->assertEquals(1.5, $this->Helper->value('1.5'));
-        $this->assertEquals(1, $this->Helper->value('1'));
+        $this->assertSame('null', $this->Helper->value(null));
+        $this->assertSame('null', $this->Helper->value('null'));
+        $this->assertSame('true', $this->Helper->value(true));
+        $this->assertSame('false', $this->Helper->value(false));
+        $this->assertSame(1, $this->Helper->value(1));
+        $this->assertSame(-1, $this->Helper->value(-1));
+        $this->assertSame(1.5, $this->Helper->value(1.5));
+        $this->assertSame(1.5, $this->Helper->value('1.5'));
+        $this->assertSame(1, $this->Helper->value('1'));
         $this->assertIsFloat($this->Helper->value('1'));
         $this->assertIsString($this->Helper->value('1', true));
         $this->assertIsString($this->Helper->value('1.5', true));
         $this->assertIsString($this->Helper->value(1, true));
         $this->assertIsString($this->Helper->value(1.5, true));
-        $this->assertEquals("'one'", $this->Helper->value('one'));
-        $this->assertEquals("'o\\\"ne'", $this->Helper->value('o"ne'));
+        $this->assertSame("'one'", $this->Helper->value('one'));
+        $this->assertSame("'o\\\"ne'", $this->Helper->value('o"ne'));
     }
 
     /**
@@ -318,20 +318,20 @@ class MigrationHelperTest extends TestCase
      */
     public function testStringifyList()
     {
-        $this->assertEquals("", $this->Helper->stringifyList([]));
-        $this->assertEquals("
+        $this->assertSame("", $this->Helper->stringifyList([]));
+        $this->assertSame("
         'key' => 'value',
     ", $this->Helper->stringifyList([
             'key' => 'value',
         ]));
-        $this->assertEquals("
+        $this->assertSame("
         'key' => 'value',
         'other_key' => 'other_value',
     ", $this->Helper->stringifyList([
             'key' => 'value',
             'other_key' => 'other_value',
         ]));
-        $this->assertEquals("
+        $this->assertSame("
         'key' => 'value',
         'other_key' => [
             'key' => 'value',

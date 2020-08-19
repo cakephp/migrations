@@ -227,12 +227,12 @@ class MigrationsTest extends TestCase
         // Tests that if a collation is defined, it is used
         $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
         $options = $numbersTable->getSchema()->getOptions();
-        $this->assertEquals('utf8_bin', $options['collation']);
+        $this->assertSame('utf8_bin', $options['collation']);
 
         // Tests that if a collation is not defined, it will use the database default one
         $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
         $options = $lettersTable->getSchema()->getOptions();
-        $this->assertEquals('utf8mb4_general_ci', $options['collation']);
+        $this->assertSame('utf8mb4_general_ci', $options['collation']);
 
         $this->migrations->rollback(['target' => 'all']);
     }
