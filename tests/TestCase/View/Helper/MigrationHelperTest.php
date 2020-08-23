@@ -198,7 +198,7 @@ class MigrationHelperTest extends TestCase
      */
     public function testColumn()
     {
-        $tableSchema = $this->Collection->describe('users');
+        $tableSchema = $this->collection->describe('users');
         $this->assertEquals([
             'columnType' => 'integer',
             'options' => [
