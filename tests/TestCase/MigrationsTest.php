@@ -16,7 +16,6 @@ namespace Migrations\Test\TestCase;
 use Cake\Core\Plugin;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeAdapter;
 use Migrations\Migrations;
@@ -89,7 +88,7 @@ class MigrationsTest extends TestCase
             $this->Connection->execute("DROP TABLE IF EXISTS {$table}");
         }
         if (in_array('phinxlog', $tables)) {
-            $ormTable = TableRegistry::get('phinxlog', ['connection' => $this->Connection]);
+            $ormTable = $this->getTableLocator()->get('phinxlog', ['connection' => $this->Connection]);
             $query = $this->Connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
             foreach ($query as $stmt) {
                 $this->Connection->execute($stmt);
@@ -180,14 +179,14 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expectedStatus, $status);
 
-        $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
+        $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $columns = $numbersTable->getSchema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
         $primaryKey = $numbersTable->getSchema()->getPrimaryKey();
         $this->assertEquals($primaryKey, ['id']);
 
-        $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
+        $lettersTable = $this->getTableLocator()->get('Letters', ['connection' => $this->Connection]);
         $columns = $lettersTable->getSchema()->columns();
         $expected = ['id', 'letter'];
         $this->assertEquals($expected, $columns);
@@ -225,12 +224,12 @@ class MigrationsTest extends TestCase
         $this->assertTrue($migrate);
 
         // Tests that if a collation is defined, it is used
-        $numbersTable = TableRegistry::get('Numbers', ['connection' => $this->Connection]);
+        $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $options = $numbersTable->getSchema()->getOptions();
         $this->assertEquals('utf8_bin', $options['collation']);
 
         // Tests that if a collation is not defined, it will use the database default one
-        $lettersTable = TableRegistry::get('Letters', ['connection' => $this->Connection]);
+        $lettersTable = $this->getTableLocator()->get('Letters', ['connection' => $this->Connection]);
         $options = $lettersTable->getSchema()->getOptions();
         $this->assertEquals('utf8mb4_general_ci', $options['collation']);
 
