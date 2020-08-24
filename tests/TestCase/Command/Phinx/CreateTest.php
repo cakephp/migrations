@@ -20,23 +20,16 @@ class CreateTest extends TestCase
     /**
      * Instance of a Symfony Command object
      *
-     * @var \Symfony\Component\Console\Command\Command
+     * @var \Symfony\Component\Console\Command\Command|\Phinx\Console\Command\AbstractCommand
      */
     protected $command;
-
-    /**
-     * Instance of a Phinx Config object
-     *
-     * @var \Phinx\Config\Config
-     */
-    protected $config = [];
 
     /**
      * Instance of a Cake Connection object
      *
      * @var \Cake\Database\Connection
      */
-    protected $Connection;
+    protected $connection;
 
     /**
      * Instance of a StreamOutput object.
@@ -60,7 +53,7 @@ class CreateTest extends TestCase
     {
         parent::setUp();
 
-        $this->Connection = ConnectionManager::get('test');
+        $this->connection = ConnectionManager::get('test');
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('create');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -76,7 +69,7 @@ class CreateTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        unset($this->Connection, $this->command, $this->streamOutput);
+        unset($this->connection, $this->command, $this->streamOutput);
 
         foreach ($this->generatedFiles as $file) {
             if (file_exists($file)) {
@@ -120,12 +113,13 @@ class CreateTest extends TestCase
      * This is mandatory for the SQLite database vendor, so phinx objects interacting
      * with the database have the same connection resource as CakePHP objects.
      *
-     * @return \Symfony\Component\Console\Tester\CommandTester
+     * @param array $params
+     * @return \Migrations\Test\CommandTester
      */
     protected function getCommandTester($params)
     {
-        if (!$this->Connection->getDriver()->isConnected()) {
-            $this->Connection->getDriver()->connect();
+        if (!$this->connection->getDriver()->isConnected()) {
+            $this->connection->getDriver()->connect();
         }
 
         $input = new ArrayInput($params, $this->command->getDefinition());
@@ -135,7 +129,7 @@ class CreateTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->Connection->getDriver()->getConnection());
+        $adapter->setConnection($this->connection->getDriver()->getConnection());
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 

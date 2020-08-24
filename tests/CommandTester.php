@@ -23,10 +23,29 @@ use Symfony\Component\Console\Input\ArrayInput;
  */
 class CommandTester
 {
+    /**
+     * @var \Symfony\Component\Console\Command\Command
+     */
     private $command;
+
+    /**
+     * @var \Symfony\Component\Console\Input\InputInterface
+     */
     private $input;
+
+    /**
+     * @var \Symfony\Component\Console\Output\OutputInterface
+     */
     private $output;
+
+    /**
+     * @var array
+     */
     private $inputs = [];
+
+    /**
+     * @var int
+     */
     private $statusCode;
 
     /**
@@ -106,7 +125,7 @@ class CommandTester
     /**
      * Gets the input instance used by the last execution of the command.
      *
-     * @return \Migrations\Test\InputInterface The current input instance
+     * @return \Symfony\Component\Console\Input\InputInterface The current input instance
      */
     public function getInput()
     {
@@ -116,7 +135,7 @@ class CommandTester
     /**
      * Gets the output instance used by the last execution of the command.
      *
-     * @return \Migrations\Test\OutputInterface The current output instance
+     * @return \Symfony\Component\Console\Output\OutputInterface The current output instance
      */
     public function getOutput()
     {
@@ -136,9 +155,9 @@ class CommandTester
     /**
      * Sets the user inputs.
      *
-     * @param array An array of strings representing each input
-     *              passed to the command input stream.
-     * @return \Migrations\Test\CommandTester
+     * @param array $inputs An array of strings representing each input
+     *   passed to the command input stream.
+     * @return $this
      */
     public function setInputs(array $inputs)
     {
@@ -147,6 +166,11 @@ class CommandTester
         return $this;
     }
 
+    /**
+     * @param array $inputs
+     *
+     * @return resource|false
+     */
     private static function createStream(array $inputs)
     {
         $stream = fopen('php://memory', 'r+', false);

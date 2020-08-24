@@ -22,13 +22,6 @@ class CacheBuildTest extends TestCase
     protected $command;
 
     /**
-     * Instance of a Phinx Config object
-     *
-     * @var \Phinx\Config\Config
-     */
-    protected $config = [];
-
-    /**
      * Instance of a Cake Connection object
      *
      * @var \Cake\Database\Connection
@@ -103,7 +96,8 @@ class CacheBuildTest extends TestCase
      * This is mandatory for the SQLite database vendor, so phinx objects interacting
      * with the database have the same connection resource as CakePHP objects.
      *
-     * @return \Symfony\Component\Console\Tester\CommandTester
+     * @param array $params
+     * @return \Migrations\Test\CommandTester
      */
     protected function getCommandTester($params)
     {
