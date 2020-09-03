@@ -23,12 +23,12 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
             ])
             ->addColumn('note', 'string', [
@@ -38,7 +38,7 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('counter', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
                 'signed' => false,
             ])
@@ -59,12 +59,12 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
+                    'product_id',
                 ]
             )
             ->addIndex(
                 [
-                    'product_id',
+                    'category_id',
                 ]
             )
             ->addIndex(
@@ -77,7 +77,7 @@ class TestNotEmptySnapshot extends AbstractMigration
         $this->table('categories')
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
@@ -124,12 +124,12 @@ class TestNotEmptySnapshot extends AbstractMigration
         $this->table('orders')
             ->addColumn('product_category', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => false,
             ])
             ->addColumn('product_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => false,
             ])
             ->addIndex(
@@ -148,7 +148,7 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('number', 'integer', [
                 'default' => null,
-                'limit' => 10,
+                'limit' => null,
                 'null' => true,
                 'signed' => false,
             ])
@@ -167,7 +167,7 @@ class TestNotEmptySnapshot extends AbstractMigration
             ])
             ->addColumn('category_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
             ])
             ->addColumn('created', 'timestamp', [
@@ -221,17 +221,17 @@ class TestNotEmptySnapshot extends AbstractMigration
         $this->table('special_tags')
             ->addColumn('article_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => false,
             ])
             ->addColumn('author_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
             ])
             ->addColumn('tag_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => false,
             ])
             ->addColumn('highlighted', 'boolean', [
@@ -290,21 +290,21 @@ class TestNotEmptySnapshot extends AbstractMigration
 
         $this->table('articles')
             ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
-                [
-                    'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION',
-                ]
-            )
-            ->addForeignKey(
                 'product_id',
                 'products',
                 'id',
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
+                ]
+            )
+            ->addForeignKey(
+                'category_id',
+                'categories',
+                'id',
+                [
+                    'update' => 'NO_ACTION',
+                    'delete' => 'NO_ACTION',
                 ]
             )
             ->update();
@@ -351,10 +351,10 @@ class TestNotEmptySnapshot extends AbstractMigration
     {
         $this->table('articles')
             ->dropForeignKey(
-                'category_id'
+                'product_id'
             )
             ->dropForeignKey(
-                'product_id'
+                'category_id'
             )->save();
 
         $this->table('orders')

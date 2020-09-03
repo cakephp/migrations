@@ -17,6 +17,12 @@ class TheDiffAddRemoveMysql extends AbstractMigration
 
         $this->table('articles')
             ->removeColumn('excerpt')
+            ->changeColumn('id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
             ->update();
 
         $this->table('articles')
@@ -44,6 +50,12 @@ class TheDiffAddRemoveMysql extends AbstractMigration
                 'after' => 'title',
                 'default' => null,
                 'length' => null,
+                'null' => false,
+            ])
+            ->changeColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'length' => 11,
                 'null' => false,
             ])
             ->removeColumn('the_text')
