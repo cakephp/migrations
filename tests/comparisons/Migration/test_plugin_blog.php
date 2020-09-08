@@ -77,7 +77,7 @@ class TestPluginBlog extends AbstractMigration
         $this->table('categories')
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
