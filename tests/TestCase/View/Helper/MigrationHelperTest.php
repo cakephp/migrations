@@ -88,7 +88,7 @@ class MigrationHelperTest extends TestCase
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
-                'integerLimit' => 11,
+                'integerLimit' => null,
                 'comment' => '',
             ];
         }
@@ -328,7 +328,7 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->attributes('users', 'updated'));
 
         $this->assertEquals([
-            'limit' => 11,
+            'limit' => $this->values['integerLimit'],
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,

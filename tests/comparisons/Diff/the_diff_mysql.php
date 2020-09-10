@@ -23,7 +23,19 @@ class TheDiffMysql extends AbstractMigration
 
         $this->table('articles')
             ->removeColumn('content')
+            ->changeColumn('id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
             ->changeColumn('title', 'text', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->changeColumn('rating', 'integer', [
                 'default' => null,
                 'length' => null,
                 'limit' => null,
@@ -32,6 +44,21 @@ class TheDiffMysql extends AbstractMigration
             ->changeColumn('name', 'string', [
                 'default' => null,
                 'limit' => 10,
+                'null' => false,
+            ])
+            ->changeColumn('user_id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->update();
+
+        $this->table('users')
+            ->changeColumn('id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
                 'null' => false,
             ])
             ->update();
@@ -43,7 +70,7 @@ class TheDiffMysql extends AbstractMigration
             ])
             ->addColumn('user_id', 'integer', [
                 'default' => null,
-                'limit' => 11,
+                'limit' => null,
                 'null' => false,
             ])
             ->addIndex(
@@ -74,7 +101,7 @@ class TheDiffMysql extends AbstractMigration
             ->addColumn('category_id', 'integer', [
                 'after' => 'user_id',
                 'default' => null,
-                'length' => 11,
+                'length' => null,
                 'null' => false,
             ])
             ->addColumn('average_note', 'decimal', [
@@ -164,14 +191,30 @@ class TheDiffMysql extends AbstractMigration
                 'length' => null,
                 'null' => false,
             ])
+            ->changeColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
             ->changeColumn('title', 'string', [
                 'default' => null,
                 'length' => 255,
                 'null' => false,
             ])
+            ->changeColumn('rating', 'integer', [
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
             ->changeColumn('name', 'string', [
                 'default' => null,
                 'length' => 255,
+                'null' => false,
+            ])
+            ->changeColumn('user_id', 'integer', [
+                'default' => null,
+                'length' => 11,
                 'null' => false,
             ])
             ->removeColumn('category_id')
@@ -201,6 +244,15 @@ class TheDiffMysql extends AbstractMigration
                     'name' => 'BY_NAME',
                 ]
             )
+            ->update();
+
+        $this->table('users')
+            ->changeColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
             ->update();
 
         $this->table('articles')
