@@ -168,7 +168,6 @@ class CommandTester
 
     /**
      * @param array $inputs
-     *
      * @return resource|false
      */
     private static function createStream(array $inputs)
