@@ -230,7 +230,7 @@ class ColumnParser
                 $fieldType = 'integer';
             } elseif (in_array($field, ['created', 'modified', 'updated'], true) || substr($field, -3) === '_at') {
                 $fieldType = 'datetime';
-            } elseif (in_array($field, ['latitude', 'longitude'], true)) {
+            } elseif (in_array($field, ['latitude', 'longitude', 'lat', 'lng'], true)) {
                 $fieldType = 'decimal';
             } else {
                 $fieldType = 'string';
