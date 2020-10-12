@@ -86,6 +86,7 @@ abstract class TestCase extends BaseTestCase
      *
      * @param array $files The list of files to check.
      * @param string $message The message to use if a check fails.
+     * @return void
      */
     protected function assertFilesExist(array $files, $message = '')
     {

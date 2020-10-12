@@ -374,7 +374,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @param string $configDir The config directory to look in.
      * @param string $needle The filename pattern to find.
-     * @return string[]
+     * @return string
      */
     public function getGeneratedMigrationName($configDir, $needle)
     {

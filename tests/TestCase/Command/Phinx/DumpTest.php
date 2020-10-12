@@ -41,18 +41,11 @@ class DumpTest extends TestCase
     protected $command;
 
     /**
-     * Instance of a Phinx Config object
-     *
-     * @var \Phinx\Config\Config
-     */
-    protected $config = [];
-
-    /**
      * Instance of a Cake Connection object
      *
      * @var \Cake\Database\Connection
      */
-    protected $Connection;
+    protected $connection;
 
     /**
      * Instance of a StreamOutput object.
@@ -68,6 +61,11 @@ class DumpTest extends TestCase
     protected $dumpfile = '';
 
     /**
+     * @var \PDO|object
+     */
+    protected $pdo;
+
+    /**
      * setup method
      *
      * @return void
@@ -76,19 +74,19 @@ class DumpTest extends TestCase
     {
         parent::setUp();
 
-        $this->Connection = ConnectionManager::get('test');
-        $this->Connection->connect();
-        $this->pdo = $this->Connection->getDriver()->getConnection();
+        $this->connection = ConnectionManager::get('test');
+        $this->connection->connect();
+        $this->pdo = $this->connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
 
         $this->fixtureManager->shutDown();
-        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
-        $this->Connection->execute('DROP TABLE IF EXISTS letters');
-        $this->Connection->execute('DROP TABLE IF EXISTS parts');
+        $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS numbers');
+        $this->connection->execute('DROP TABLE IF EXISTS letters');
+        $this->connection->execute('DROP TABLE IF EXISTS parts');
         $this->dumpfile = ROOT . DS . 'config/TestsMigrations/schema-dump-test.lock';
     }
 
@@ -101,12 +99,12 @@ class DumpTest extends TestCase
     {
         $this->fixtureManager->shutDown();
         parent::tearDown();
-        $this->Connection->getDriver()->setConnection($this->pdo);
-        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
-        $this->Connection->execute('DROP TABLE IF EXISTS letters');
-        $this->Connection->execute('DROP TABLE IF EXISTS parts');
-        unset($this->Connection, $this->command, $this->streamOutput);
+        $this->connection->getDriver()->setConnection($this->pdo);
+        $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS numbers');
+        $this->connection->execute('DROP TABLE IF EXISTS letters');
+        $this->connection->execute('DROP TABLE IF EXISTS parts');
+        unset($this->connection, $this->command, $this->streamOutput);
     }
 
     /**
@@ -172,7 +170,8 @@ class DumpTest extends TestCase
      * This is mandatory for the SQLite database vendor, so phinx objects interacting
      * with the database have the same connection resource as CakePHP objects.
      *
-     * @return \Symfony\Component\Console\Tester\CommandTester
+     * @param array $params
+     * @return \Migrations\Test\CommandTester
      */
     protected function getCommandTester($params)
     {
@@ -218,12 +217,12 @@ class DumpTest extends TestCase
 
         $adapter->setConnection($this->pdo);
 
-        $tables = (new Collection($this->Connection))->listTables();
+        $tables = (new Collection($this->connection))->listTables();
         if (in_array('phinxlog', $tables)) {
-            $ormTable = $this->getTableLocator()->get('phinxlog', ['connection' => $this->Connection]);
-            $query = $this->Connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
+            $ormTable = $this->getTableLocator()->get('phinxlog', ['connection' => $this->connection]);
+            $query = $this->connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
             foreach ($query as $stmt) {
-                $this->Connection->execute($stmt);
+                $this->connection->execute($stmt);
             }
         }
 
