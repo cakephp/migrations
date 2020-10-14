@@ -187,7 +187,7 @@ class ColumnParser
      * Get the type and length of a field based on the field and the type passed
      *
      * @param string $field Name of field
-     * @param string $type User-specified type
+     * @param string|null $type User-specified type
      * @return array First value is the field type, second value is the field length. If no length
      * can be extracted, null is returned for the second value
      */
@@ -230,7 +230,7 @@ class ColumnParser
                 $fieldType = 'integer';
             } elseif (in_array($field, ['created', 'modified', 'updated'], true) || substr($field, -3) === '_at') {
                 $fieldType = 'datetime';
-            } elseif (in_array($field, ['latitude', 'longitude'], true)) {
+            } elseif (in_array($field, ['latitude', 'longitude', 'lat', 'lng'], true)) {
                 $fieldType = 'decimal';
             } else {
                 $fieldType = 'string';
@@ -272,8 +272,8 @@ class ColumnParser
      * Returns the default length to be used for a given fie
      *
      * @param string $field Name of field
-     * @param string $indexType Type of index
-     * @param string $indexName Name of index
+     * @param string|null $indexType Type of index
+     * @param string|null $indexName Name of index
      * @param bool $indexUnique Whether this is a unique index or not
      * @return string
      */

@@ -264,7 +264,7 @@ an invalid value. Default field type is ``string``:
 
 * id: integer
 * created, modified, updated: datetime
-* latitude, longitude: decimal
+* latitude, longitude (or short forms lat, lng): decimal
 
 Creating a table
 ----------------

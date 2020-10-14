@@ -14,6 +14,21 @@ class TheDiffSimpleMysql extends AbstractMigration
      */
     public function up()
     {
+
+        $this->table('articles')
+            ->changeColumn('id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->changeColumn('rating', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->update();
         $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => null,
@@ -31,7 +46,7 @@ class TheDiffSimpleMysql extends AbstractMigration
             ->addColumn('user_id', 'integer', [
                 'after' => 'name',
                 'default' => null,
-                'length' => 11,
+                'length' => null,
                 'null' => false,
             ])
             ->addIndex(
@@ -76,6 +91,17 @@ class TheDiffSimpleMysql extends AbstractMigration
             ->update();
 
         $this->table('articles')
+            ->changeColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
+            ->changeColumn('rating', 'integer', [
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
             ->removeColumn('user_id')
             ->update();
 

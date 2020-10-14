@@ -24,6 +24,11 @@ use Migrations\Util\ColumnParser;
 class ColumnParserTest extends TestCase
 {
     /**
+     * @var \Migrations\Util\ColumnParser
+     */
+    protected $columnParser;
+
+    /**
      * Setup method
      *
      * @return void

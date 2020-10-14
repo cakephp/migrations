@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Migrations;
 
 use Cake\Collection\Collection;
-use Cake\ORM\TableRegistry;
+use Cake\ORM\Locator\LocatorAwareTrait;
 use Phinx\Db\Table as BaseTable;
 use Phinx\Db\Table\Column;
 
@@ -23,6 +23,8 @@ use Phinx\Db\Table\Column;
  */
 class Table extends BaseTable
 {
+    use LocatorAwareTrait;
+
     /**
      * Primary key for this table.
      * Can either be a string or an array in case of composite
@@ -150,7 +152,7 @@ class Table extends BaseTable
     public function update()
     {
         parent::update();
-        TableRegistry::getTableLocator()->clear();
+        $this->getTableLocator()->clear();
     }
 
     /**

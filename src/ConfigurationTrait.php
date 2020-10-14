@@ -110,7 +110,7 @@ trait ConfigurationTrait
             'migration_base_class' => 'Migrations\AbstractMigration',
             'environments' => [
                 'default_migration_table' => $phinxTable,
-                'default_database' => 'default',
+                'default_environment' => 'default',
                 'default' => [
                     'adapter' => $adapterName,
                     'host' => $connectionConfig['host'] ?? null,

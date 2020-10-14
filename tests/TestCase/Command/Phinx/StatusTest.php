@@ -30,16 +30,9 @@ class StatusTest extends TestCase
     /**
      * Instance of a Symfony Command object
      *
-     * @var \Symfony\Component\Console\Command\Command
+     * @var \Symfony\Component\Console\Command\Command|\Phinx\Console\Command\AbstractCommand
      */
     protected $command;
-
-    /**
-     * Instance of a Phinx Config object
-     *
-     * @var \Phinx\Config\Config
-     */
-    protected $config = [];
 
     /**
      * Instance of a Cake Connection object
@@ -62,6 +55,11 @@ class StatusTest extends TestCase
      * @var \Symfony\Component\Console\Output\StreamOutput
      */
     protected $streamOutput;
+
+    /**
+     * @var \PDO|object
+     */
+    protected $pdo;
 
     /**
      * setup method
@@ -215,7 +213,8 @@ class StatusTest extends TestCase
      * This is mandatory for the SQLite database vendor, so phinx objects interacting
      * with the database have the same connection resource as CakePHP objects.
      *
-     * @return \Symfony\Component\Console\Tester\CommandTester
+     * @param array $params
+     * @return \Migrations\Test\CommandTester
      */
     protected function getCommandTester($params)
     {

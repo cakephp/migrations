@@ -35,18 +35,11 @@ class SeedTest extends TestCase
     protected $command;
 
     /**
-     * Instance of a Phinx Config object
-     *
-     * @var \Phinx\Config\Config
-     */
-    protected $config = [];
-
-    /**
      * Instance of a Cake Connection object
      *
      * @var \Cake\Database\Connection
      */
-    protected $Connection;
+    protected $connection;
 
     /**
      * Instance of a StreamOutput object.
@@ -57,6 +50,11 @@ class SeedTest extends TestCase
     protected $streamOutput;
 
     /**
+     * @var \PDO|object
+     */
+    protected $pdo;
+
+    /**
      * setup method
      *
      * @return void
@@ -65,9 +63,9 @@ class SeedTest extends TestCase
     {
         parent::setUp();
 
-        $this->Connection = ConnectionManager::get('test');
-        $this->Connection->connect();
-        $this->pdo = $this->Connection->getDriver()->getConnection();
+        $this->connection = ConnectionManager::get('test');
+        $this->connection->connect();
+        $this->pdo = $this->connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('seed');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -81,10 +79,10 @@ class SeedTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $this->Connection->getDriver()->setConnection($this->pdo);
-        $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $this->Connection->execute('DROP TABLE IF EXISTS numbers');
-        unset($this->Connection, $this->command, $this->streamOutput);
+        $this->connection->getDriver()->setConnection($this->pdo);
+        $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS numbers');
+        unset($this->connection, $this->command, $this->streamOutput);
     }
 
     /**
@@ -110,7 +108,7 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('== NumbersSeed: seeded', $display);
 
-        $result = $this->Connection->newQuery()
+        $result = $this->connection->newQuery()
             ->select(['*'])
             ->from('numbers')
             ->order('id DESC')
@@ -152,7 +150,7 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('== NumbersAltSeed: seeded', $display);
 
-        $result = $this->Connection->newQuery()
+        $result = $this->connection->newQuery()
             ->select(['*'])
             ->from('numbers')
             ->order('id DESC')
@@ -230,7 +228,8 @@ class SeedTest extends TestCase
      * This is mandatory for the SQLite database vendor, so phinx objects interacting
      * with the database have the same connection resource as CakePHP objects.
      *
-     * @return \Symfony\Component\Console\Tester\CommandTester
+     * @param array $params
+     * @return \Migrations\Test\CommandTester
      */
     protected function getCommandTester($params)
     {

@@ -34,6 +34,31 @@ class MigrationHelperTest extends TestCase
     ];
 
     /**
+     * @var \Cake\Datasource\ConnectionInterface
+     */
+    protected $connection;
+
+    /**
+     * @var \Cake\Database\Schema\Collection
+     */
+    protected $collection;
+
+    /**
+     * @var \Cake\View\View
+     */
+    protected $view;
+
+    /**
+     * @var \Migrations\View\Helper\MigrationHelper
+     */
+    protected $helper;
+
+    /**
+     * @var array
+     */
+    protected $values;
+
+    /**
      * setUp method
      *
      * @return void
@@ -41,11 +66,11 @@ class MigrationHelperTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->Connection = ConnectionManager::get('test');
-        $this->Collection = new Collection($this->Connection);
-        $this->View = new View();
-        $this->Helper = new MigrationHelper($this->View, [
-            'collection' => $this->Collection,
+        $this->connection = ConnectionManager::get('test');
+        $this->collection = new Collection($this->connection);
+        $this->view = new View();
+        $this->helper = new MigrationHelper($this->view, [
+            'collection' => $this->collection,
         ]);
         Cache::clear('_cake_model_');
         Cache::enable();
@@ -63,7 +88,7 @@ class MigrationHelperTest extends TestCase
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
-                'integerLimit' => 11,
+                'integerLimit' => null,
                 'comment' => '',
             ];
         }
@@ -86,7 +111,7 @@ class MigrationHelperTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        unset($this->Helper, $this->View, $this->Collection, $this->Connection);
+        unset($this->helper, $this->view, $this->collection, $this->connection);
     }
 
     /**
@@ -94,9 +119,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testTableMethod()
     {
-        $this->assertSame('drop', $this->Helper->tableMethod('drop_table'));
-        $this->assertSame('create', $this->Helper->tableMethod('create_table'));
-        $this->assertSame('update', $this->Helper->tableMethod('other_method'));
+        $this->assertSame('drop', $this->helper->tableMethod('drop_table'));
+        $this->assertSame('create', $this->helper->tableMethod('create_table'));
+        $this->assertSame('update', $this->helper->tableMethod('other_method'));
     }
 
     /**
@@ -104,9 +129,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testIndexMethod()
     {
-        $this->assertSame('removeIndex', $this->Helper->indexMethod('drop_field'));
-        $this->assertSame('addIndex', $this->Helper->indexMethod('add_field'));
-        $this->assertSame('addIndex', $this->Helper->indexMethod('alter_field'));
+        $this->assertSame('removeIndex', $this->helper->indexMethod('drop_field'));
+        $this->assertSame('addIndex', $this->helper->indexMethod('add_field'));
+        $this->assertSame('addIndex', $this->helper->indexMethod('alter_field'));
     }
 
     /**
@@ -114,9 +139,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testColumnMethod()
     {
-        $this->assertSame('removeColumn', $this->Helper->columnMethod('drop_field'));
-        $this->assertSame('addColumn', $this->Helper->columnMethod('add_field'));
-        $this->assertSame('changeColumn', $this->Helper->columnMethod('alter_field'));
+        $this->assertSame('removeColumn', $this->helper->columnMethod('drop_field'));
+        $this->assertSame('addColumn', $this->helper->columnMethod('add_field'));
+        $this->assertSame('changeColumn', $this->helper->columnMethod('alter_field'));
     }
 
     /**
@@ -165,7 +190,7 @@ class MigrationHelperTest extends TestCase
                     'comment' => $this->values['comment'],
                 ],
             ],
-        ], $this->Helper->columns('users'));
+        ], $this->helper->columns('users'));
     }
 
     /**
@@ -173,7 +198,7 @@ class MigrationHelperTest extends TestCase
      */
     public function testColumn()
     {
-        $tableSchema = $this->Collection->describe('users');
+        $tableSchema = $this->collection->describe('users');
         $this->assertEquals([
             'columnType' => 'integer',
             'options' => [
@@ -185,7 +210,7 @@ class MigrationHelperTest extends TestCase
                 'signed' => true,
                 'autoIncrement' => true,
             ],
-        ], $this->Helper->column($tableSchema, 'id'));
+        ], $this->helper->column($tableSchema, 'id'));
 
         $this->assertEquals([
             'columnType' => 'string',
@@ -196,7 +221,7 @@ class MigrationHelperTest extends TestCase
                 'precision' => null,
                 'comment' => $this->values['comment'],
             ],
-        ], $this->Helper->column($tableSchema, 'username'));
+        ], $this->helper->column($tableSchema, 'username'));
 
         $this->assertEquals([
             'columnType' => 'string',
@@ -207,7 +232,7 @@ class MigrationHelperTest extends TestCase
                 'precision' => null,
                 'comment' => $this->values['comment'],
             ],
-        ], $this->Helper->column($tableSchema, 'password'));
+        ], $this->helper->column($tableSchema, 'password'));
 
         $this->assertEquals([
             'columnType' => 'timestamp',
@@ -218,7 +243,7 @@ class MigrationHelperTest extends TestCase
                 'precision' => null,
                 'comment' => $this->values['comment'],
             ],
-        ], $this->Helper->column($tableSchema, 'created'));
+        ], $this->helper->column($tableSchema, 'created'));
 
         $this->assertEquals([
             'columnType' => 'timestamp',
@@ -229,7 +254,7 @@ class MigrationHelperTest extends TestCase
                 'precision' => null,
                 'comment' => $this->values['comment'],
             ],
-        ], $this->Helper->column($tableSchema, 'updated'));
+        ], $this->helper->column($tableSchema, 'updated'));
     }
 
     /**
@@ -237,22 +262,22 @@ class MigrationHelperTest extends TestCase
      */
     public function testValue()
     {
-        $this->assertSame('null', $this->Helper->value(null));
-        $this->assertSame('null', $this->Helper->value('null'));
-        $this->assertSame('true', $this->Helper->value(true));
-        $this->assertSame('false', $this->Helper->value(false));
-        $this->assertSame(1, $this->Helper->value(1));
-        $this->assertSame(-1, $this->Helper->value(-1));
-        $this->assertSame(1.5, $this->Helper->value(1.5));
-        $this->assertSame(1.5, $this->Helper->value('1.5'));
-        $this->assertSame(1, $this->Helper->value('1'));
-        $this->assertIsFloat($this->Helper->value('1'));
-        $this->assertIsString($this->Helper->value('1', true));
-        $this->assertIsString($this->Helper->value('1.5', true));
-        $this->assertIsString($this->Helper->value(1, true));
-        $this->assertIsString($this->Helper->value(1.5, true));
-        $this->assertSame("'one'", $this->Helper->value('one'));
-        $this->assertSame("'o\\\"ne'", $this->Helper->value('o"ne'));
+        $this->assertSame('null', $this->helper->value(null));
+        $this->assertSame('null', $this->helper->value('null'));
+        $this->assertSame('true', $this->helper->value(true));
+        $this->assertSame('false', $this->helper->value(false));
+        $this->assertSame(1, $this->helper->value(1));
+        $this->assertSame(-1, $this->helper->value(-1));
+        $this->assertSame(1.5, $this->helper->value(1.5));
+        $this->assertSame(1.5, $this->helper->value('1.5'));
+        $this->assertSame(1, $this->helper->value('1'));
+        $this->assertIsFloat($this->helper->value('1'));
+        $this->assertIsString($this->helper->value('1', true));
+        $this->assertIsString($this->helper->value('1.5', true));
+        $this->assertIsString($this->helper->value(1, true));
+        $this->assertIsString($this->helper->value(1.5, true));
+        $this->assertSame("'one'", $this->helper->value('one'));
+        $this->assertSame("'o\\\"ne'", $this->helper->value('o"ne'));
     }
 
     /**
@@ -268,7 +293,7 @@ class MigrationHelperTest extends TestCase
             'comment' => $this->values['comment'],
             'signed' => true,
             'autoIncrement' => true,
-        ], $this->Helper->attributes('users', 'id'));
+        ], $this->helper->attributes('users', 'id'));
 
         $this->assertEquals([
             'limit' => 256,
@@ -276,7 +301,7 @@ class MigrationHelperTest extends TestCase
             'default' => $this->values['null'],
             'precision' => null,
             'comment' => $this->values['comment'],
-        ], $this->Helper->attributes('users', 'username'));
+        ], $this->helper->attributes('users', 'username'));
 
         $this->assertEquals([
             'limit' => 256,
@@ -284,7 +309,7 @@ class MigrationHelperTest extends TestCase
             'default' => $this->values['null'],
             'precision' => null,
             'comment' => $this->values['comment'],
-        ], $this->Helper->attributes('users', 'password'));
+        ], $this->helper->attributes('users', 'password'));
 
         $this->assertEquals([
             'limit' => null,
@@ -292,7 +317,7 @@ class MigrationHelperTest extends TestCase
             'default' => $this->values['null'],
             'precision' => null,
             'comment' => $this->values['comment'],
-        ], $this->Helper->attributes('users', 'created'));
+        ], $this->helper->attributes('users', 'created'));
 
         $this->assertEquals([
             'limit' => null,
@@ -300,17 +325,17 @@ class MigrationHelperTest extends TestCase
             'default' => $this->values['null'],
             'precision' => null,
             'comment' => null,
-        ], $this->Helper->attributes('users', 'updated'));
+        ], $this->helper->attributes('users', 'updated'));
 
         $this->assertEquals([
-            'limit' => 11,
+            'limit' => $this->values['integerLimit'],
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,
             'comment' => $this->values['comment'],
             'signed' => true,
             'autoIncrement' => null,
-        ], $this->Helper->attributes('special_tags', 'article_id'));
+        ], $this->helper->attributes('special_tags', 'article_id'));
     }
 
     /**
@@ -318,16 +343,16 @@ class MigrationHelperTest extends TestCase
      */
     public function testStringifyList()
     {
-        $this->assertSame("", $this->Helper->stringifyList([]));
+        $this->assertSame("", $this->helper->stringifyList([]));
         $this->assertSame("
         'key' => 'value',
-    ", $this->Helper->stringifyList([
+    ", $this->helper->stringifyList([
             'key' => 'value',
         ]));
         $this->assertSame("
         'key' => 'value',
         'other_key' => 'other_value',
-    ", $this->Helper->stringifyList([
+    ", $this->helper->stringifyList([
             'key' => 'value',
             'other_key' => 'other_value',
         ]));
@@ -337,7 +362,7 @@ class MigrationHelperTest extends TestCase
             'key' => 'value',
             'other_key' => 'other_value',
         ],
-    ", $this->Helper->stringifyList([
+    ", $this->helper->stringifyList([
             'key' => 'value',
             'other_key' => [
                 'key' => 'value',
