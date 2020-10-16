@@ -119,9 +119,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testTableMethod()
     {
-        $this->assertEquals('drop', $this->helper->tableMethod('drop_table'));
-        $this->assertEquals('create', $this->helper->tableMethod('create_table'));
-        $this->assertEquals('update', $this->helper->tableMethod('other_method'));
+        $this->assertSame('drop', $this->helper->tableMethod('drop_table'));
+        $this->assertSame('create', $this->helper->tableMethod('create_table'));
+        $this->assertSame('update', $this->helper->tableMethod('other_method'));
     }
 
     /**
@@ -129,9 +129,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testIndexMethod()
     {
-        $this->assertEquals('removeIndex', $this->helper->indexMethod('drop_field'));
-        $this->assertEquals('addIndex', $this->helper->indexMethod('add_field'));
-        $this->assertEquals('addIndex', $this->helper->indexMethod('alter_field'));
+        $this->assertSame('removeIndex', $this->helper->indexMethod('drop_field'));
+        $this->assertSame('addIndex', $this->helper->indexMethod('add_field'));
+        $this->assertSame('addIndex', $this->helper->indexMethod('alter_field'));
     }
 
     /**
@@ -139,9 +139,9 @@ class MigrationHelperTest extends TestCase
      */
     public function testColumnMethod()
     {
-        $this->assertEquals('removeColumn', $this->helper->columnMethod('drop_field'));
-        $this->assertEquals('addColumn', $this->helper->columnMethod('add_field'));
-        $this->assertEquals('changeColumn', $this->helper->columnMethod('alter_field'));
+        $this->assertSame('removeColumn', $this->helper->columnMethod('drop_field'));
+        $this->assertSame('addColumn', $this->helper->columnMethod('add_field'));
+        $this->assertSame('changeColumn', $this->helper->columnMethod('alter_field'));
     }
 
     /**
@@ -262,22 +262,22 @@ class MigrationHelperTest extends TestCase
      */
     public function testValue()
     {
-        $this->assertEquals('null', $this->helper->value(null));
-        $this->assertEquals('null', $this->helper->value('null'));
-        $this->assertEquals('true', $this->helper->value(true));
-        $this->assertEquals('false', $this->helper->value(false));
-        $this->assertEquals(1, $this->helper->value(1));
-        $this->assertEquals(-1, $this->helper->value(-1));
-        $this->assertEquals(1.5, $this->helper->value(1.5));
-        $this->assertEquals(1.5, $this->helper->value('1.5'));
-        $this->assertEquals(1, $this->helper->value('1'));
+        $this->assertSame('null', $this->helper->value(null));
+        $this->assertSame('null', $this->helper->value('null'));
+        $this->assertSame('true', $this->helper->value(true));
+        $this->assertSame('false', $this->helper->value(false));
+        $this->assertSame(1.0, $this->helper->value(1));
+        $this->assertSame(-1.0, $this->helper->value(-1));
+        $this->assertSame(1.5, $this->helper->value(1.5));
+        $this->assertSame(1.5, $this->helper->value('1.5'));
+        $this->assertSame(1.0, $this->helper->value('1'));
         $this->assertIsFloat($this->helper->value('1'));
         $this->assertIsString($this->helper->value('1', true));
         $this->assertIsString($this->helper->value('1.5', true));
         $this->assertIsString($this->helper->value(1, true));
         $this->assertIsString($this->helper->value(1.5, true));
-        $this->assertEquals("'one'", $this->helper->value('one'));
-        $this->assertEquals("'o\\\"ne'", $this->helper->value('o"ne'));
+        $this->assertSame("'one'", $this->helper->value('one'));
+        $this->assertSame("'o\\\"ne'", $this->helper->value('o"ne'));
     }
 
     /**
@@ -343,20 +343,20 @@ class MigrationHelperTest extends TestCase
      */
     public function testStringifyList()
     {
-        $this->assertEquals("", $this->helper->stringifyList([]));
-        $this->assertEquals("
+        $this->assertSame("", $this->helper->stringifyList([]));
+        $this->assertSame("
         'key' => 'value',
     ", $this->helper->stringifyList([
             'key' => 'value',
         ]));
-        $this->assertEquals("
+        $this->assertSame("
         'key' => 'value',
         'other_key' => 'other_value',
     ", $this->helper->stringifyList([
             'key' => 'value',
             'other_key' => 'other_value',
         ]));
-        $this->assertEquals("
+        $this->assertSame("
         'key' => 'value',
         'other_key' => [
             'key' => 'value',

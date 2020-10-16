@@ -329,24 +329,24 @@ class ColumnParserTest extends TestCase
      */
     public function testGetType()
     {
-        $this->assertEquals('integer', $this->columnParser->getType('id', null));
-        $this->assertEquals('integer', $this->columnParser->getType('id', 'primary_key'));
-        $this->assertEquals('integer', $this->columnParser->getType('id', 'integer'));
-        $this->assertEquals('integer', $this->columnParser->getType('id', 'other'));
-        $this->assertEquals('uuid', $this->columnParser->getType('id', 'uuid'));
-        $this->assertEquals('uuid', $this->columnParser->getType('created', 'uuid'));
-        $this->assertEquals('datetime', $this->columnParser->getType('created', null));
-        $this->assertEquals('datetime', $this->columnParser->getType('modified', null));
-        $this->assertEquals('datetime', $this->columnParser->getType('updated', null));
-        $this->assertEquals('datetime', $this->columnParser->getType('created_at', null));
-        $this->assertEquals('datetime', $this->columnParser->getType('deleted_at', null));
-        $this->assertEquals('datetime', $this->columnParser->getType('changed_at', null));
-        $this->assertEquals('string', $this->columnParser->getType('some_field', null));
-        $this->assertEquals('string', $this->columnParser->getType('some_field', 'string'));
-        $this->assertEquals('boolean', $this->columnParser->getType('field', 'boolean'));
-        $this->assertEquals('polygon', $this->columnParser->getType('field', 'polygon'));
-        $this->assertEquals('decimal', $this->columnParser->getType('latitude', null));
-        $this->assertEquals('decimal', $this->columnParser->getType('longitude', null));
+        $this->assertSame('integer', $this->columnParser->getType('id', null));
+        $this->assertSame('integer', $this->columnParser->getType('id', 'primary_key'));
+        $this->assertSame('integer', $this->columnParser->getType('id', 'integer'));
+        $this->assertSame('integer', $this->columnParser->getType('id', 'other'));
+        $this->assertSame('uuid', $this->columnParser->getType('id', 'uuid'));
+        $this->assertSame('uuid', $this->columnParser->getType('created', 'uuid'));
+        $this->assertSame('datetime', $this->columnParser->getType('created', null));
+        $this->assertSame('datetime', $this->columnParser->getType('modified', null));
+        $this->assertSame('datetime', $this->columnParser->getType('updated', null));
+        $this->assertSame('datetime', $this->columnParser->getType('created_at', null));
+        $this->assertSame('datetime', $this->columnParser->getType('deleted_at', null));
+        $this->assertSame('datetime', $this->columnParser->getType('changed_at', null));
+        $this->assertSame('string', $this->columnParser->getType('some_field', null));
+        $this->assertSame('string', $this->columnParser->getType('some_field', 'string'));
+        $this->assertSame('boolean', $this->columnParser->getType('field', 'boolean'));
+        $this->assertSame('polygon', $this->columnParser->getType('field', 'polygon'));
+        $this->assertSame('decimal', $this->columnParser->getType('latitude', null));
+        $this->assertSame('decimal', $this->columnParser->getType('longitude', null));
     }
 
     /**
@@ -371,9 +371,9 @@ class ColumnParserTest extends TestCase
      */
     public function testGetLength()
     {
-        $this->assertEquals(255, $this->columnParser->getLength('string'));
-        $this->assertEquals(11, $this->columnParser->getLength('integer'));
-        $this->assertEquals(20, $this->columnParser->getLength('biginteger'));
+        $this->assertSame(255, $this->columnParser->getLength('string'));
+        $this->assertSame(11, $this->columnParser->getLength('integer'));
+        $this->assertSame(20, $this->columnParser->getLength('biginteger'));
         $this->assertEquals([10, 6], $this->columnParser->getLength('decimal'));
         $this->assertNull($this->columnParser->getLength('text'));
     }
@@ -383,14 +383,14 @@ class ColumnParserTest extends TestCase
      */
     public function testGetIndexName()
     {
-        $this->assertEquals('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', true));
-        $this->assertEquals('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', false));
-        $this->assertEquals('SOME_INDEX', $this->columnParser->getIndexName('id', 'primary', 'SOME_INDEX', false));
-        $this->assertEquals('SOME_INDEX', $this->columnParser->getIndexName('id', 'primary', 'SOME_INDEX', true));
+        $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', true));
+        $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', false));
+        $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', 'primary', 'SOME_INDEX', false));
+        $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', 'primary', 'SOME_INDEX', true));
 
-        $this->assertEquals('UNIQUE_ID', $this->columnParser->getIndexName('id', null, null, true));
-        $this->assertEquals('BY_ID', $this->columnParser->getIndexName('id', null, null, false));
-        $this->assertEquals('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, false));
-        $this->assertEquals('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, true));
+        $this->assertSame('UNIQUE_ID', $this->columnParser->getIndexName('id', null, null, true));
+        $this->assertSame('BY_ID', $this->columnParser->getIndexName('id', null, null, false));
+        $this->assertSame('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, false));
+        $this->assertSame('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, true));
     }
 }

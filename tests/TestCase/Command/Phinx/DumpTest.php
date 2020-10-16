@@ -125,7 +125,7 @@ class DumpTest extends TestCase
             '--connection' => 'test',
             '--source' => 'TestsMigrations',
         ]);
-        $this->assertEquals(serialize([]), file_get_contents($this->dumpfile));
+        $this->assertSame(serialize([]), file_get_contents($this->dumpfile));
     }
 
     /**

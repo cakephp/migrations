@@ -104,24 +104,24 @@ class ConfigurationTraitTest extends TestCase
 
         $expected = ROOT . DS . 'config' . DS . 'Migrations';
         $migrationPaths = $config->getMigrationPaths();
-        $this->assertEquals($expected, array_pop($migrationPaths));
+        $this->assertSame($expected, array_pop($migrationPaths));
 
-        $this->assertEquals(
+        $this->assertSame(
             'phinxlog',
             $config['environments']['default_migration_table']
         );
 
         $environment = $config['environments']['default'];
-        $this->assertEquals('mysql', $environment['adapter']);
-        $this->assertEquals('foo.bar', $environment['host']);
+        $this->assertSame('mysql', $environment['adapter']);
+        $this->assertSame('foo.bar', $environment['host']);
 
-        $this->assertEquals('root', $environment['user']);
-        $this->assertEquals('the_password', $environment['pass']);
-        $this->assertEquals('the_database', $environment['name']);
-        $this->assertEquals('utf-8', $environment['charset']);
-        $this->assertEquals('/certs/my_cert', $environment['mysql_attr_ssl_ca']);
-        $this->assertEquals('ssl_key_value', $environment['mysql_attr_ssl_key']);
-        $this->assertEquals('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
+        $this->assertSame('root', $environment['user']);
+        $this->assertSame('the_password', $environment['pass']);
+        $this->assertSame('the_database', $environment['name']);
+        $this->assertSame('utf-8', $environment['charset']);
+        $this->assertSame('/certs/my_cert', $environment['mysql_attr_ssl_ca']);
+        $this->assertSame('ssl_key_value', $environment['mysql_attr_ssl_key']);
+        $this->assertSame('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
     }
 
     /**
@@ -172,7 +172,7 @@ class ConfigurationTraitTest extends TestCase
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
 
-        $this->assertEquals(
+        $this->assertSame(
             'my_plugin_phinxlog',
             $config['environments']['default_migration_table']
         );
@@ -211,20 +211,20 @@ class ConfigurationTraitTest extends TestCase
 
         $expected = ROOT . DS . 'config' . DS . 'Migrations';
         $migrationPaths = $config->getMigrationPaths();
-        $this->assertEquals($expected, array_pop($migrationPaths));
+        $this->assertSame($expected, array_pop($migrationPaths));
 
-        $this->assertEquals(
+        $this->assertSame(
             'phinxlog',
             $config['environments']['default_migration_table']
         );
 
         $environment = $config['environments']['default'];
-        $this->assertEquals('mysql', $environment['adapter']);
-        $this->assertEquals('foo.bar.baz', $environment['host']);
+        $this->assertSame('mysql', $environment['adapter']);
+        $this->assertSame('foo.bar.baz', $environment['host']);
 
-        $this->assertEquals('rooty', $environment['user']);
-        $this->assertEquals('the_password2', $environment['pass']);
-        $this->assertEquals('the_database2', $environment['name']);
-        $this->assertEquals('utf-8', $environment['charset']);
+        $this->assertSame('rooty', $environment['user']);
+        $this->assertSame('the_password2', $environment['pass']);
+        $this->assertSame('the_database2', $environment['name']);
+        $this->assertSame('utf-8', $environment['charset']);
     }
 }
