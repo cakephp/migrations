@@ -266,11 +266,11 @@ class MigrationHelperTest extends TestCase
         $this->assertSame('null', $this->helper->value('null'));
         $this->assertSame('true', $this->helper->value(true));
         $this->assertSame('false', $this->helper->value(false));
-        $this->assertSame(1, $this->helper->value(1));
-        $this->assertSame(-1, $this->helper->value(-1));
+        $this->assertSame(1.0, $this->helper->value(1));
+        $this->assertSame(-1.0, $this->helper->value(-1));
         $this->assertSame(1.5, $this->helper->value(1.5));
         $this->assertSame(1.5, $this->helper->value('1.5'));
-        $this->assertSame(1, $this->helper->value('1'));
+        $this->assertSame(1.0, $this->helper->value('1'));
         $this->assertIsFloat($this->helper->value('1'));
         $this->assertIsString($this->helper->value('1', true));
         $this->assertIsString($this->helper->value('1.5', true));
