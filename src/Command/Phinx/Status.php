@@ -109,7 +109,7 @@ class Status extends StatusCommand
             foreach ($migrations as $migration) {
                 $status = $migration['status'] === 'up' ? '     <info>up</info> ' : '   <error>down</error> ';
                 $maxNameLength = $this->getManager()->maxNameLength;
-                $name = $migration['name'] !== false ?
+                $name = $migration['name'] ?
                     ' <comment>' . str_pad($migration['name'], $maxNameLength, ' ') . ' </comment>' :
                     ' <error>** MISSING **</error>';
 

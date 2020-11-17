@@ -69,7 +69,7 @@ class CakeManager extends Manager
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $this->maxNameLength = $versions ? max(array_map(function ($version) {
-                return strlen($version['migration_name']);
+                return strlen((string)$version['migration_name']);
             }, $versions)) : 0;
 
             foreach ($this->getMigrations('default') as $migration) {
