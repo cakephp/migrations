@@ -122,7 +122,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             }
         }
 
-        $renderer = new TemplateRenderer();
+        $renderer = new TemplateRenderer($this->theme);
         $renderer->set('name', $name);
         $renderer->set($this->templateData($args));
         $contents = $renderer->generate($this->template());
