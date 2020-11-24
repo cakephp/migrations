@@ -93,6 +93,10 @@ class ConfigurationTraitTest extends TestCase
                 'ssl_ca' => '/certs/my_cert',
                 'ssl_key' => 'ssl_key_value',
                 'ssl_cert' => 'ssl_cert_value',
+                'flags' => [
+                    \PDO::MYSQL_ATTR_SSL_CA => 'flags do not overwrite config',
+                    \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+                ],
             ],
         ]);
 
@@ -122,6 +126,7 @@ class ConfigurationTraitTest extends TestCase
         $this->assertSame('/certs/my_cert', $environment['mysql_attr_ssl_ca']);
         $this->assertSame('ssl_key_value', $environment['mysql_attr_ssl_key']);
         $this->assertSame('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
+        $this->assertFalse($environment['mysql_attr_ssl_verify_server_cert']);
     }
 
     /**

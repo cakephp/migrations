@@ -146,6 +146,28 @@ trait ConfigurationTrait
                  */
                 $config['environments']['default']['mysql_attr_ssl_ca'] = $connectionConfig['ssl_ca'];
             }
+
+            /** @psalm-suppress PossiblyNullReference */
+            if (!empty($connectionConfig['flags'])) {
+                /**
+                 * @psalm-suppress PossiblyNullArrayAccess
+                 * @psalm-suppress PossiblyNullArgument
+                 */
+                $config['environments']['default'] +=
+                    $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
+            }
+        }
+
+        if ($adapterName === 'sqlsrv') {
+            /** @psalm-suppress PossiblyNullReference */
+            if (!empty($connectionConfig['flags'])) {
+                /**
+                 * @psalm-suppress PossiblyNullArrayAccess
+                 * @psalm-suppress PossiblyNullArgument
+                 */
+                $config['environments']['default'] +=
+                    $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
+            }
         }
 
         return $this->configuration = new Config($config);
@@ -190,5 +212,59 @@ trait ConfigurationTrait
     protected function getConnectionName(InputInterface $input)
     {
         return $input->getOption('connection') ?: 'default';
+    }
+
+    /**
+     * Translates driver specific connection flags (PDO attributes) to
+     * Phinx compatible adapter options.
+     *
+     * Currently Phinx supports the `PDO::MYSQL_ATTR_*` and
+     * `PDO::SQLSRV_ATTR_*` attributes.
+     *
+     * ### Example:
+     *
+     * ```
+     * [
+     *     \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+     *     \PDO::SQLSRV_ATTR_DIRECT_QUERY => true,
+     *     // ...
+     * ]
+     * ```
+     *
+     * will be translated to:
+     *
+     * ```
+     * [
+     *     'mysql_attr_ssl_verify_server_cert' => false,
+     *     'sqlsrv_attr_direct_query' => true,
+     *     // ...
+     * ]
+     * ```
+     *
+     * @param array $flags An array of connection flags.
+     * @param string $adapterName The adapter name, eg `mysql` or `sqlsrv`.
+     * @return array An array of Phinx compatible connection attribute options.
+     */
+    protected function translateConnectionFlags(array $flags, $adapterName)
+    {
+        $pdo = new \ReflectionClass(\PDO::class);
+        $constants = $pdo->getConstants();
+
+        $attributes = [];
+        foreach ($constants as $name => $value) {
+            $name = strtolower($name);
+            if (strpos($name, "{$adapterName}_attr_") === 0) {
+                $attributes[$value] = $name;
+            }
+        }
+
+        $options = [];
+        foreach ($flags as $flag => $value) {
+            if (isset($attributes[$flag])) {
+                $options[$attributes[$flag]] = $value;
+            }
+        }
+
+        return $options;
     }
 }
