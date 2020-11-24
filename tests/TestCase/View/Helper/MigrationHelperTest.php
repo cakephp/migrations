@@ -212,10 +212,15 @@ class MigrationHelperTest extends TestCase
     public function testColumn()
     {
         $tableSchema = $this->collection->describe('users');
+
+        $primaryKeyLimit = $this->values['integerLimit'];
+        if (getenv('PREFER_LOWEST')) {
+            $primaryKeyLimit = null;
+        }
         $this->assertEquals([
             'columnType' => 'integer',
             'options' => [
-                'limit' => $this->values['integerLimit'],
+                'limit' => $primaryKeyLimit,
                 'null' => false,
                 'default' => $this->values['integerNull'],
                 'precision' => null,
@@ -298,8 +303,13 @@ class MigrationHelperTest extends TestCase
      */
     public function testAttributes()
     {
+        $primaryKeyLimit = $this->values['integerLimit'];
+        if (getenv('PREFER_LOWEST')) {
+            $primaryKeyLimit = null;
+        }
+
         $this->assertEquals([
-            'limit' => $this->values['integerLimit'],
+            'limit' => $primaryKeyLimit,
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,

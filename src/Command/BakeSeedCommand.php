@@ -92,6 +92,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      *
      * @param \Cake\Console\Arguments $arguments The arguments for the command
      * @return array
+     * @phpstan-return array<string, mixed>
      */
     public function templateData(Arguments $arguments): array
     {
