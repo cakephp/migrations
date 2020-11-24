@@ -32,16 +32,16 @@
 
         <!-- SQLite
         <env name="DB" value="sqlite"/>
-        <env name="DB_DSN" value="sqlite://127.0.0.1/cakephp_test"/>
+        <env name="DB_URL" value="sqlite://127.0.0.1/cakephp_test"/>
         -->
         <!-- Postgres
         <env name="DB" value="postgres"/>
-        <env name="DB_DSN" value="postgres://localhost/cake_test?timezone=UTC"/>
+        <env name="DB_URL" value="postgres://localhost/cake_test?timezone=UTC"/>
         -->
         <!-- Mysql
         <env name="DB" value="mysql"/>
-        <env name="DB_DSN" value="mysql://localhost/cake_test?timezone=UTC"/>
-        <env name="DB_DSN_COMPARE" value="mysql://localhost/cake_comparison"/>
+        <env name="DB_URL" value="mysql://localhost/cake_test?timezone=UTC"/>
+        <env name="DB_URL_COMPARE" value="mysql://localhost/cake_comparison"/>
         -->
     </php>
 </phpunit>

@@ -73,11 +73,11 @@ Cake\Cache\Cache::setConfig([
 // Store initial state
 Router::reload();
 
-if (!getenv('DB_DSN')) {
-    putenv('DB_DSN=sqlite://127.0.0.1/cakephp_test');
+if (!getenv('DB_URL')) {
+    putenv('DB_URL=sqlite://127.0.0.1/cakephp_test');
 }
 if (!getenv('DB')) {
-    $dsn = getenv('DB_DSN');
+    $dsn = getenv('DB_URL');
     $db = 'sqlite';
     if (preg_match('#^(.+)://#', $dsn, $matches)) {
         $db = $matches[1];
@@ -87,10 +87,10 @@ if (!getenv('DB')) {
     }
     putenv('DB=' . $db);
 }
-ConnectionManager::setConfig('test', ['url' => getenv('DB_DSN')]);
+ConnectionManager::setConfig('test', ['url' => getenv('DB_URL')]);
 
-if (getenv('DB_DSN_COMPARE') !== false) {
-    ConnectionManager::setConfig('test_comparisons', ['url' => getenv('DB_DSN_COMPARE')]);
+if (getenv('DB_URL_COMPARE') !== false) {
+    ConnectionManager::setConfig('test_comparisons', ['url' => getenv('DB_URL_COMPARE')]);
 }
 
 Plugin::getCollection()->add(new \Migrations\Plugin());

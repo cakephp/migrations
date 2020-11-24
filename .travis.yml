@@ -10,14 +10,14 @@ services:
 
 env:
   matrix:
-    - DB=mysql DB_DSN='mysql://root@127.0.0.1/cakephp_test?encoding=utf8mb4' DB_DSN_COMPARE='mysql://root@127.0.0.1/cakephp_comparisons'
+    - DB=mysql DB_URL='mysql://root@127.0.0.1/cakephp_test?encoding=utf8mb4' DB_URL_COMPARE='mysql://root@127.0.0.1/cakephp_comparisons'
     - DB=sqlite
   global:
     - DEFAULT=1
 
 matrix:
   allow_failures:
-    - env: DB=pgsql DB_DSN='postgres://postgres@127.0.0.1/cakephp_test' DB_DSN_COMPARE='postgres://postgres@127.0.0.1/cakephp_comparisons'
+    - env: DB=pgsql DB_URL='postgres://postgres@127.0.0.1/cakephp_test' DB_URL_COMPARE='postgres://postgres@127.0.0.1/cakephp_comparisons'
 
   fast_finish: true
 
@@ -25,7 +25,7 @@ matrix:
     - php: 7.2
       dist: trusty
       sudo: required
-      env: DB=mysql DB_DSN='mysql://root@127.0.0.1/cakephp_test?encoding=utf8mb4' DBV=56 DB_DSN_COMPARE='mysql://root@127.0.0.1/cakephp_comparisons'
+      env: DB=mysql DB_URL='mysql://root@127.0.0.1/cakephp_test?encoding=utf8mb4' DBV=56 DB_URL_COMPARE='mysql://root@127.0.0.1/cakephp_comparisons'
       addons:
         apt:
           packages:
@@ -36,7 +36,7 @@ matrix:
     - php: 7.3
       dist: trusty
       sudo: required
-      env: CODECOVERAGE=1 DEFAULT=0 DB=mysql DB_DSN='mysql://root@127.0.0.1/cakephp_test?encoding=utf8mb4' DBV=56 DB_DSN_COMPARE='mysql://root@127.0.0.1/cakephp_comparisons'
+      env: CODECOVERAGE=1 DEFAULT=0 DB=mysql DB_URL='mysql://root@127.0.0.1/cakephp_test?encoding=utf8mb4' DBV=56 DB_URL_COMPARE='mysql://root@127.0.0.1/cakephp_comparisons'
       addons:
         apt:
           packages:
@@ -45,7 +45,7 @@ matrix:
           - mysql-client-5.6
 
     - php: 7.2
-      env: DB=pgsql DB_DSN='postgres://postgres@127.0.0.1/cakephp_test' DB_DSN_COMPARE='postgres://postgres@127.0.0.1/cakephp_comparisons'
+      env: DB=pgsql DB_URL='postgres://postgres@127.0.0.1/cakephp_test' DB_URL_COMPARE='postgres://postgres@127.0.0.1/cakephp_comparisons'
 
     - php: 7.2
       env: PREFER_LOWEST=1
