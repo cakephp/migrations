@@ -77,7 +77,15 @@ if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite://127.0.0.1/cakephp_test');
 }
 if (!getenv('DB')) {
-    putenv('DB=sqlite');
+    $dsn = getenv('db_dsn');
+    $db = 'sqlite';
+    if (preg_match('#^(.+)://#', $dsn, $matches)) {
+        $db = $matches[1];
+    }
+    if ($db === 'postgres') {
+        $db = 'pgsql';
+    }
+    putenv('DB=' . $db);
 }
 ConnectionManager::setConfig('test', ['url' => getenv('db_dsn')]);
 

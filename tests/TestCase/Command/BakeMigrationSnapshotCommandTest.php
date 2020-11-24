@@ -40,11 +40,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     ];
 
     /**
-     * @var string[]
-     */
-    protected $generatedFiles = [];
-
-    /**
      * @var string
      */
     protected $migrationPath;
