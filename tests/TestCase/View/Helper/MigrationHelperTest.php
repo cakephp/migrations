@@ -56,6 +56,11 @@ class MigrationHelperTest extends TestCase
     /**
      * @var array
      */
+    protected $types;
+
+    /**
+     * @var array
+     */
     protected $values;
 
     /**
@@ -77,10 +82,14 @@ class MigrationHelperTest extends TestCase
         $this->loadFixtures('Users');
         $this->loadFixtures('SpecialTags');
 
+        $this->types = [
+            'timestamp' => 'timestamp',
+        ];
         $this->values = [
             'null' => null,
             'integerNull' => null,
-            'integerLimit' => null,
+            'integerLimit' => 11,
+            'precision' => null,
             'comment' => null,
         ];
 
@@ -94,11 +103,15 @@ class MigrationHelperTest extends TestCase
         }
 
         if (getenv('DB') === 'pgsql') {
+            $this->types = [
+                'timestamp' => 'timestampfractional',
+            ];
             $this->values = [
                 'null' => null,
                 'integerNull' => null,
                 'integerLimit' => 10,
                 'comment' => null,
+                'precision' => 6,
             ];
         }
     }
@@ -171,22 +184,22 @@ class MigrationHelperTest extends TestCase
                 ],
             ],
             'created' => [
-                'columnType' => 'timestamp',
+                'columnType' => $this->types['timestamp'],
                 'options' => [
                     'limit' => null,
                     'null' => true,
                     'default' => $this->values['null'],
-                    'precision' => null,
+                    'precision' => $this->values['precision'],
                     'comment' => $this->values['comment'],
                 ],
             ],
             'updated' => [
-                'columnType' => 'timestamp',
+                'columnType' => $this->types['timestamp'],
                 'options' => [
                     'limit' => null,
                     'null' => true,
                     'default' => $this->values['null'],
-                    'precision' => null,
+                    'precision' => $this->values['precision'],
                     'comment' => $this->values['comment'],
                 ],
             ],
@@ -199,10 +212,15 @@ class MigrationHelperTest extends TestCase
     public function testColumn()
     {
         $tableSchema = $this->collection->describe('users');
+
+        $primaryKeyLimit = $this->values['integerLimit'];
+        if (getenv('PREFER_LOWEST')) {
+            $primaryKeyLimit = null;
+        }
         $this->assertEquals([
             'columnType' => 'integer',
             'options' => [
-                'limit' => $this->values['integerLimit'],
+                'limit' => $primaryKeyLimit,
                 'null' => false,
                 'default' => $this->values['integerNull'],
                 'precision' => null,
@@ -235,23 +253,23 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->column($tableSchema, 'password'));
 
         $this->assertEquals([
-            'columnType' => 'timestamp',
+            'columnType' => $this->types['timestamp'],
             'options' => [
                 'limit' => null,
                 'null' => true,
                 'default' => $this->values['null'],
-                'precision' => null,
+                'precision' => $this->values['precision'],
                 'comment' => $this->values['comment'],
             ],
         ], $this->helper->column($tableSchema, 'created'));
 
         $this->assertEquals([
-            'columnType' => 'timestamp',
+            'columnType' => $this->types['timestamp'],
             'options' => [
                 'limit' => null,
                 'null' => true,
                 'default' => $this->values['null'],
-                'precision' => null,
+                'precision' => $this->values['precision'],
                 'comment' => $this->values['comment'],
             ],
         ], $this->helper->column($tableSchema, 'updated'));
@@ -285,8 +303,13 @@ class MigrationHelperTest extends TestCase
      */
     public function testAttributes()
     {
+        $primaryKeyLimit = $this->values['integerLimit'];
+        if (getenv('PREFER_LOWEST')) {
+            $primaryKeyLimit = null;
+        }
+
         $this->assertEquals([
-            'limit' => $this->values['integerLimit'],
+            'limit' => $primaryKeyLimit,
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,
@@ -315,7 +338,7 @@ class MigrationHelperTest extends TestCase
             'limit' => null,
             'null' => true,
             'default' => $this->values['null'],
-            'precision' => null,
+            'precision' => $this->values['precision'],
             'comment' => $this->values['comment'],
         ], $this->helper->attributes('users', 'created'));
 
@@ -323,7 +346,7 @@ class MigrationHelperTest extends TestCase
             'limit' => null,
             'null' => true,
             'default' => $this->values['null'],
-            'precision' => null,
+            'precision' => $this->values['precision'],
             'comment' => null,
         ], $this->helper->attributes('users', 'updated'));
 

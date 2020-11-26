@@ -152,7 +152,7 @@ class DumpTest extends TestCase
         $this->assertFileExists($this->dumpfile);
         $generatedDump = unserialize(file_get_contents($this->dumpfile));
 
-        $this->assertCount(2, $generatedDump);
+        $this->assertCount(2, array_keys($generatedDump));
         $this->assertArrayHasKey('letters', $generatedDump);
         $this->assertArrayHasKey('numbers', $generatedDump);
         $this->assertInstanceOf(TableSchema::class, $generatedDump['numbers']);
