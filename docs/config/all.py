@@ -48,4 +48,4 @@ source_path = 'docs/'
 
 hide_page_contents = ('search', '404', 'contents')
 
-is_prerelease = false
+is_prerelease = False
