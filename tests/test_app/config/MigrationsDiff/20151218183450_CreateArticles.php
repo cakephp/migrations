@@ -2,6 +2,8 @@
 
 use Migrations\AbstractMigration;
 
+// phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
+// phpcs:disable PSR2R.Classes.ClassFileName.NoMatch
 class CreateArticles extends AbstractMigration
 {
     public function change()

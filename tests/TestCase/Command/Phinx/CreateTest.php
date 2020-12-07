@@ -101,7 +101,6 @@ class CreateTest extends TestCase
         $files = glob(ROOT . DS . 'config' . DS . 'Create' . DS . '*_TestCreate*.php');
         $this->generatedFiles = $files;
         $this->assertNotEmpty($files);
-
         $file = current($files);
         $this->assertSameAsFile('TestCreate.php', file_get_contents($file));
     }
