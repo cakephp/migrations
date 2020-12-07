@@ -32,7 +32,7 @@ languages = ['en', 'fr', 'ja', 'pt', 'ru']
 
 # The GitHub branch name for this version of the docs
 # for edit links to point at.
-branch = '4.x'
+branch = 'master'
 
 # Current version being built
 version = '3.x'
@@ -48,4 +48,4 @@ source_path = 'docs/'
 
 hide_page_contents = ('search', '404', 'contents')
 
-is_prerelease = True
+is_prerelease = False
