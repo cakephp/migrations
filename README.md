@@ -15,7 +15,7 @@ You can install this plugin into your CakePHP application using [Composer](http:
 
 Run the following command
 ```sh
-composer require cakephp/migrations
+composer require cakephp/migrations:dev-cake3
  ```
 
 ## Configuration
