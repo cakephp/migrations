@@ -26,7 +26,6 @@ class MigratorTest extends TestCase
 
     public function setUp(): void
     {
-        (new SchemaCleaner())->dropTables('test');
         $this->setDummyConnections();
     }
 
@@ -45,20 +44,6 @@ class MigratorTest extends TestCase
             ->fetch();
     }
 
-    public function testGetConfigFromDatasource(): void
-    {
-        $expect = [
-            ['source' => 'FooSource', 'connection' => 'test_migrator'],
-            ['plugin' => 'FooPlugin', 'connection' => 'test_migrator'],
-            ['plugin' => 'BarPlugin', 'connection' => 'test_migrator_2'],
-            ['connection' => 'test_migrator_3'],
-        ];
-
-        $migrator = Migrator::migrate();
-        $config = $migrator->getConfigs();
-        $this->assertSame($expect, $config);
-    }
-
     public function testMigrate(): void
     {
         Migrator::migrate();
@@ -70,10 +55,7 @@ class MigratorTest extends TestCase
         $this->assertSame(['MarkMigratedTest'], $appMigrations);
         $this->assertSame(['FooMigration'], $fooPluginMigrations);
         $this->assertSame(['BarMigration'], $barPluginMigrations);
-    }
 
-    public function testTableRegistryConnectionName(): void
-    {
         $Letters = TableRegistry::getTableLocator()->get('Letters');
         $this->assertSame('test', $Letters->getConnection()->configName());
     }

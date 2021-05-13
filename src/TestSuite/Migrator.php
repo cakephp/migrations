@@ -16,36 +16,16 @@ namespace Migrations\TestSuite;
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Schema\SchemaCleaner;
+use Cake\TestSuite\Schema\SchemaManager;
 use Cake\TestSuite\TestConnectionManager;
 use Migrations\Migrations;
 
-class Migrator
+class Migrator extends SchemaManager
 {
-    /**
-     * @var ConfigReader
-     */
-    protected $configReader;
-
     /**
      * @var ConsoleIo
      */
     protected $io;
-
-    /**
-     * Migrator constructor.
-     * @param bool $verbose
-     * @param null $configReader
-     */
-    final public function __construct(bool $verbose, ?ConfigReader $configReader = null)
-    {
-        $this->io = new ConsoleIo();
-        $this->io->level($verbose ? ConsoleIo::NORMAL : ConsoleIo::QUIET);
-        $this->configReader = $configReader ?? new ConfigReader();
-
-        // Make sure that the connections are aliased, in case
-        // the migrations invoke the table registry.
-        TestConnectionManager::aliasConnections();
-    }
 
     /**
      * General command to run before your tests run
@@ -59,49 +39,16 @@ class Migrator
     {
         $migrator = new static($verbose);
 
-        $migrator->configReader->readMigrationsInDatasources();
-        $migrator->configReader->readConfig($config);
-        $migrator->handleMigrationsStatus();
+        // Ensures that the connections are aliased, in case
+        // the migrations invoke the table registry.
+        TestConnectionManager::aliasConnections();
+
+        $configReader = new ConfigReader();
+        $configReader->readMigrationsInDatasources();
+        $configReader->readConfig($config);
+        $migrator->handleMigrationsStatus($configReader->getConfig());
 
         return $migrator;
-    }
-
-    /**
-     * Import the schema from a file, or an array of files.
-     *
-     * @param string $connectionName Connection
-     * @param string|string[] $file File to dump
-     * @param bool $verbose Set to true to display messages
-     * @return void
-     * @throws \Exception if the truncation failed
-     * @throws \RuntimeException if the file could not be processed
-     */
-    public static function dump(string $connectionName, $file, bool $verbose = false)
-    {
-        $files = (array)$file;
-
-        $migrator = new static($verbose);
-        $schemaCleaner = new SchemaCleaner($migrator->io);
-        $schemaCleaner->dropTables($connectionName);
-
-        foreach ($files as $file) {
-            if (!file_exists($file)) {
-                throw new \RuntimeException('The file ' . $file . ' could not found.');
-            }
-
-            $sql = file_get_contents($file);
-            if ($sql === false) {
-                throw new \RuntimeException('The file ' . $file . ' could not read.');
-            }
-
-            ConnectionManager::get($connectionName)->execute($sql);
-
-            $migrator->io->success(
-                'Dump of schema in file ' . $file . ' for connection ' . $connectionName . ' successful.'
-            );
-        }
-
-        $schemaCleaner->truncateTables($connectionName);
     }
 
     /**
@@ -131,17 +78,15 @@ class Migrator
      * @return $this
      * @throws \Exception
      */
-    protected function handleMigrationsStatus(): self
+    protected function handleMigrationsStatus(array $configs): self
     {
-        $schemaCleaner = new SchemaCleaner($this->io);
         $connectionsToDrop = [];
-        foreach ($this->getConfigs() as &$config) {
+        foreach ($configs as &$config) {
             $connectionName = $config['connection'] = $config['connection'] ?? 'test';
             $this->io->info("Reading migrations status for {$this->stringifyConfig($config)}...");
             $migrations = new Migrations($config);
             if ($this->isStatusChanged($migrations)) {
-                if (!in_array($connectionName, $connectionsToDrop))
-                {
+                if (!in_array($connectionName, $connectionsToDrop)) {
                     $connectionsToDrop[] = $connectionName;
                 }
             }
@@ -153,12 +98,13 @@ class Migrator
             return $this;
         }
 
+        $schemaCleaner = new SchemaCleaner($this->io);
         foreach ($connectionsToDrop as $connectionName) {
             $schemaCleaner->dropTables($connectionName);
         }
 
-        foreach ($this->getConfigs() as $config) {
-            $this->runMigrations($config);
+        foreach ($configs as $migration) {
+            $this->runMigrations($migration);
         }
 
         // Truncate all created tables, except migration tables
@@ -171,7 +117,6 @@ class Migrator
 
         return $this;
     }
-
 
     /**
      * Unset the phinx migration tables from an array of tables.
@@ -219,6 +164,8 @@ class Migrator
 
     /**
      * Stringify the migration parameters.
+     * This is used to display readable messages
+     * on the command line.
      *
      * @param string[] $config Config array
      * @return string
@@ -233,21 +180,5 @@ class Migrator
         }
 
         return implode(', ', $options);
-    }
-
-    /**
-     * @return array
-     */
-    public function getConfigs(): array
-    {
-        return $this->getConfigReader()->getConfig();
-    }
-
-    /**
-     * @return ConfigReader
-     */
-    protected function getConfigReader(): ConfigReader
-    {
-        return $this->configReader;
     }
 }
