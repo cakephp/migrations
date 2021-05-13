@@ -75,6 +75,7 @@ class Migrator extends SchemaManager
     /**
      * If a migration is missing or down, all tables of the considered connection are dropped.
      *
+     * @param array $configs Array of migration configurations to handle.
      * @return $this
      * @throws \Exception
      */
