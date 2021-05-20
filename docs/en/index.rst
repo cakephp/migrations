@@ -769,7 +769,7 @@ To seed your database, you can use the ``seed`` subcommand:
     # You can specify only one seeder to be run using the `--seed` option
     bin/cake migrations seed --seed ArticlesSeed
 
-    # You can run seeders from an alternative directory
+    # You can run seeders from an alternative directory, relative to config
     bin/cake migrations seed --source AlternativeSeeds
 
     # You can run seeders from a plugin
