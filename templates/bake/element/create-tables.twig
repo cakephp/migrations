@@ -41,10 +41,10 @@
 {%             if constraint['columns'] != primaryKeysColumns %}
             ->addIndex(
                 [{{ Migration.stringifyList(constraint['columns'], {'indent': 5}) | raw }}],
-{%         set params = {'name': name} %}
-{%         if constraint['type'] == 'unique' %}
-{%              set params = params|merge({'unique': true}) %}
-{%         endif %}
+{%                 set params = {'name': name} %}
+{%                 if constraint['type'] == 'unique' %}
+{%                     set params = params|merge({'unique': true}) %}
+{%                 endif %}
                 [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
             )
 {%             endif %}
@@ -56,7 +56,7 @@
                 [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}],
 {%         set params = {'name': indexName} %}
 {%         if index['type'] == 'fulltext' %}
-{%              set params = params|merge({'fulltext': true}) %}
+{%             set params = params|merge({'fulltext': true}) %}
 {%         endif %}
                 [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
             )
