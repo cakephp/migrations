@@ -79,8 +79,6 @@ class MigrationHelperTest extends TestCase
         ]);
         Cache::clear('_cake_model_');
         Cache::enable();
-        $this->loadFixtures('Users');
-        $this->loadFixtures('SpecialTags');
 
         $this->types = [
             'timestamp' => 'timestamp',
