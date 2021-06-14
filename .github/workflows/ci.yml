@@ -16,7 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         php-version: ['7.2', '7.4']
-        db-type: [mysql, pgsql, sqlite]
+        #db-type: [mysql, pgsql, sqlite]
+        db-type: [mysql, sqlite]
         prefer-lowest: ['']
         include:
           - php-version: '7.2'
