@@ -117,7 +117,7 @@ class MarkMigrated extends AbstractCommand
 
         if ($this->invalidOnlyOrExclude()) {
             $output->writeln(
-                "<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>"
+                '<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>'
             );
 
             return BaseCommand::CODE_ERROR;
@@ -134,7 +134,7 @@ class MarkMigrated extends AbstractCommand
         try {
             $versions = $this->getManager()->getVersionsToMark($input);
         } catch (InvalidArgumentException $e) {
-            $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
+            $output->writeln(sprintf('<error>%s</error>', $e->getMessage()));
 
             return BaseCommand::CODE_ERROR;
         }
@@ -207,9 +207,9 @@ class MarkMigrated extends AbstractCommand
      */
     protected function outputDeprecatedAllMessage()
     {
-        $msg = "DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead";
+        $msg = 'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead';
         $output = $this->output();
-        $output->writeln(sprintf("<comment>%s</comment>", $msg));
+        $output->writeln(sprintf('<comment>%s</comment>', $msg));
     }
 
     /**
@@ -222,6 +222,6 @@ class MarkMigrated extends AbstractCommand
         $msg = 'DEPRECATED: VERSION as argument is deprecated. Use: ' .
             '`bin/cake migrations mark_migrated --target=VERSION --only`';
         $output = $this->output();
-        $output->writeln(sprintf("<comment>%s</comment>", $msg));
+        $output->writeln(sprintf('<comment>%s</comment>', $msg));
     }
 }

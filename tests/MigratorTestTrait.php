@@ -20,7 +20,7 @@ trait MigratorTestTrait
 {
     public function setDummyConnections(): void
     {
-        $testConfig = ['url' => getenv('db_dsn')];
+        $testConfig = ['url' => getenv('DB_URL')];
         $testConfig['migrations'] = [
             ['source' => 'FooSource'],
             ['plugin' => 'FooPlugin'],

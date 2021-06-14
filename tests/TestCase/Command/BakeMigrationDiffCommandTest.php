@@ -328,7 +328,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function getBakeName($name)
     {
-        $name .= ucfirst(getenv("DB"));
+        $name .= ucfirst(getenv('DB'));
 
         return $name;
     }
@@ -360,7 +360,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function assertCorrectSnapshot($bakeName, $result)
     {
-        $dbenv = getenv("DB");
+        $dbenv = getenv('DB');
         $bakeName = Inflector::underscore($bakeName);
         if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);

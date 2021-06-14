@@ -41,8 +41,8 @@ define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS
 define('ROOT', $root . DS . 'tests' . DS . 'test_app');
 define('APP_DIR', 'App');
 define('APP', ROOT . DS . 'App' . DS);
-define('TMP', sys_get_temp_dir() . DS);
-define('CACHE', sys_get_temp_dir() . DS . 'cache' . DS);
+define('TMP', sys_get_temp_dir() . DS . 'cake-migrations');
+define('CACHE', TMP . DS . 'cache' . DS);
 if (!defined('CONFIG')) {
     define('CONFIG', ROOT . DS . 'config' . DS);
 }

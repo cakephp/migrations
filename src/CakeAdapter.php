@@ -41,7 +41,7 @@ class CakeAdapter extends AdapterWrapper
     public function __construct(AdapterInterface $adapter, ?Connection $connection = null)
     {
         if ($connection === null) {
-            throw new \InvalidArgumentException("The cake connection cannot be null");
+            throw new \InvalidArgumentException('The cake connection cannot be null');
         }
 
         parent::__construct($adapter);

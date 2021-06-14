@@ -28,7 +28,7 @@ class ConfigReader
      *
      * @return $this
      */
-    public function readMigrationsInDatasources(): self
+    public function readMigrationsInDatasources()
     {
         foreach ($this->getActiveConnections() as $connectionName) {
             $connection = ConnectionManager::getConfig($connectionName);
@@ -44,7 +44,6 @@ class ConfigReader
                     foreach ($config as $k => $v) {
                         $config[$k]['connection'] = $config[$k]['connection'] ?? $connectionName;
                     }
-
                 }
                 $this->config = array_merge($this->config, $config);
             }
@@ -59,7 +58,7 @@ class ConfigReader
      * @param  string[]|array[] $config An array of migration configs
      * @return $this
      */
-    public function readConfig(array $config = []): self
+    public function readConfig(array $config = [])
     {
         if (!empty($config)) {
             $this->normalizeArray($config);
@@ -71,6 +70,11 @@ class ConfigReader
         return $this;
     }
 
+    /**
+     * Helper method to process connection configuration.
+     *
+     * @return void
+     */
     public function processConfig(): void
     {
         foreach ($this->config as $k => $config) {
@@ -100,7 +104,6 @@ class ConfigReader
 
     /**
      * @param string $connectionName Connection name
-     *
      * @return bool
      */
     public function skipConnection(string $connectionName): bool
@@ -121,7 +124,7 @@ class ConfigReader
     /**
      * Make array an array of arrays
      *
-     * @param  array $array
+     * @param  array $array Input data to normalize (pass by ref)
      * @return void
      */
     public function normalizeArray(array &$array): void

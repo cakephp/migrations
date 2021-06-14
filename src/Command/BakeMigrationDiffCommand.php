@@ -547,7 +547,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         }
         $collection = $connection->getSchemaCollection();
         foreach ($this->tables as $table) {
-            if (preg_match("/^.*phinxlog$/", $table) === 1) {
+            if (preg_match('/^.*phinxlog$/', $table) === 1) {
                 continue;
             }
 

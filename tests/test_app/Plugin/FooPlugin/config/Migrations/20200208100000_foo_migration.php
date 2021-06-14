@@ -7,6 +7,7 @@ declare(strict_types=1);
  * Redistributions of files must retain the above copyright notice.
  *
  * @copyright Copyright (c) 2020 Juan Pablo Ramirez and Nicolas Masson
+ * @copyright Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  * @link      https://webrider.de/
  * @since     1.0.0
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
