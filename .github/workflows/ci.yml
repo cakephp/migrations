@@ -116,7 +116,7 @@ jobs:
         php-version: '7.4'
         extensions: mbstring, intl
         coverage: none
-        tools: psalm:~3.11.2, phpstan:^0.12, cs2pr
+        tools: psalm:^3.11, phpstan:^0.12, cs2pr
 
     - name: Composer Install
       run: composer install

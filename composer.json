@@ -27,7 +27,7 @@
         "phpunit/phpunit": "~8.5.0",
         "cakephp/cakephp": "dev-4.next as 4.3.0",
         "cakephp/bake": "^2.1.0",
-        "cakephp/cakephp-codesniffer": "~4.1.0"
+        "cakephp/cakephp-codesniffer": "~4.1"
     },
     "autoload": {
         "psr-4": {

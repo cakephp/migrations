@@ -27,7 +27,7 @@ class Migrator extends SchemaManager
      *
      * @param array $config Configuration data
      * @param bool  $verbose Set to true to display messages
-     * @return self
+     * @return static
      */
     public static function migrate(array $config = [], $verbose = false): Migrator
     {
@@ -138,7 +138,7 @@ class Migrator extends SchemaManager
     /**
      * Checks if any migrations are up but missing.
      *
-     * @param  \Migrations\Migrations $migrations The migration collection to check.
+     * @param \Migrations\Migrations $migrations The migration collection to check.
      * @return bool
      */
     protected function isStatusChanged(Migrations $migrations): bool
