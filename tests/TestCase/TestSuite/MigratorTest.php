@@ -56,8 +56,8 @@ class MigratorTest extends TestCase
         $this->assertSame(['FooMigration'], $fooPluginMigrations);
         $this->assertSame(['BarMigration'], $barPluginMigrations);
 
-        $Letters = TableRegistry::getTableLocator()->get('Letters');
-        $this->assertSame('test', $Letters->getConnection()->configName());
+        $letters = TableRegistry::getTableLocator()->get('Letters');
+        $this->assertSame('test', $letters->getConnection()->configName());
     }
 
     public function testDropTablesForMissingMigrations(): void

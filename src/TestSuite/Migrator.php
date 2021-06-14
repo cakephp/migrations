@@ -64,11 +64,10 @@ class Migrator extends SchemaManager
 
         $msg = 'Migrations for ' . $this->stringifyConfig($config);
 
-
         if ($result === true) {
             $this->io->success($msg . ' successfully run.');
         } else {
-            $this->io->error( $msg . ' failed.');
+            $this->io->error($msg . ' failed.');
         }
     }
 
@@ -79,7 +78,7 @@ class Migrator extends SchemaManager
      * @return $this
      * @throws \Exception
      */
-    protected function handleMigrationsStatus(array $configs): self
+    protected function handleMigrationsStatus(array $configs)
     {
         $connectionsToDrop = [];
         foreach ($configs as &$config) {
@@ -122,13 +121,14 @@ class Migrator extends SchemaManager
     /**
      * Unset the phinx migration tables from an array of tables.
      *
-     * @param  string[] $tables
+     * @param string[] $tables The list of tables to remove items from.
      * @return array
      */
     protected function unsetMigrationTables(array $tables): array
     {
         $endsWithPhinxlog = function (string $string) {
             $needle = 'phinxlog';
+
             return substr($string, -strlen($needle)) === $needle;
         };
 
@@ -144,7 +144,7 @@ class Migrator extends SchemaManager
     /**
      * Checks if any migrations are up but missing.
      *
-     * @param  Migrations $migrations
+     * @param  \Migrations\Migrations $migrations The migration collection to check.
      * @return bool
      */
     protected function isStatusChanged(Migrations $migrations): bool
@@ -152,10 +152,12 @@ class Migrator extends SchemaManager
         foreach ($migrations->status() as $migration) {
             if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
                 $this->io->info('Missing migration(s) detected.');
+
                 return true;
             }
             if ($migration['status'] === 'down') {
                 $this->io->info('New migration(s) found.');
+
                 return true;
             }
         }
@@ -176,7 +178,7 @@ class Migrator extends SchemaManager
         $options = [];
         foreach (['connection', 'plugin', 'source', 'target'] as $option) {
             if (isset($config[$option])) {
-                $options[] = $option . ' "'.$config[$option].'"';
+                $options[] = sprintf('%s "%s"', $option, $config[$option]);
             }
         }
 
