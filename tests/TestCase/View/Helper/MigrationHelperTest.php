@@ -362,7 +362,7 @@ class MigrationHelperTest extends TestCase
      */
     public function testStringifyList()
     {
-        $this->assertSame("", $this->helper->stringifyList([]));
+        $this->assertSame('', $this->helper->stringifyList([]));
         $this->assertSame("
         'key' => 'value',
     ", $this->helper->stringifyList([

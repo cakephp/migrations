@@ -72,8 +72,8 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations create');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = "--class -l --connection -c --help -h --path --plugin -p --quiet";
-        $expected .= " -q --source -s --template -t --verbose -v";
+        $expected = '--class -l --connection -c --help -h --path --plugin -p --quiet';
+        $expected .= ' -q --source -s --template -t --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);
@@ -93,8 +93,8 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations mark_migrated');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = "--connection -c --exclude -x --help -h --only -o --plugin -p --quiet -q";
-        $expected .= " --source -s --target -t --verbose -v";
+        $expected = '--connection -c --exclude -x --help -h --only -o --plugin -p --quiet -q';
+        $expected .= ' --source -s --target -t --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);
@@ -114,8 +114,8 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations migrate');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = "--connection -c --date -d --dry-run -x --fake --help -h --no-lock --plugin -p";
-        $expected .= " --quiet -q --source -s --target -t --verbose -v";
+        $expected = '--connection -c --date -d --dry-run -x --fake --help -h --no-lock --plugin -p';
+        $expected .= ' --quiet -q --source -s --target -t --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);
@@ -135,8 +135,8 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations rollback');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = "--connection -c --date -d --dry-run -x --fake --force -f --help -h --no-lock --plugin -p";
-        $expected .= " --quiet -q --source -s --target -t --verbose -v";
+        $expected = '--connection -c --date -d --dry-run -x --fake --force -f --help -h --no-lock --plugin -p';
+        $expected .= ' --quiet -q --source -s --target -t --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);
@@ -156,7 +156,7 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations status');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = "--connection -c --format -f --help -h --plugin -p --quiet -q --source -s --verbose -v";
+        $expected = '--connection -c --format -f --help -h --plugin -p --quiet -q --source -s --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);

@@ -87,7 +87,7 @@ class Migrator extends SchemaManager
         }
 
         if (empty($connectionsToDrop)) {
-            $this->io->success("No migration changes detected.");
+            $this->io->success('No migration changes detected.');
 
             return $this;
         }
