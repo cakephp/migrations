@@ -40,12 +40,12 @@ class ConfigReaderTest extends TestCase
     {
         $config = [
             ['connection' => 'Foo', 'plugin' => 'Bar',],
-            ['plugin' => 'Bar',]
+            ['plugin' => 'Bar',],
         ];
 
         $expect = [
             ['connection' => 'Foo', 'plugin' => 'Bar',],
-            ['plugin' => 'Bar', 'connection' => 'test',]
+            ['plugin' => 'Bar', 'connection' => 'test',],
         ];
 
         $this->ConfigReader->readConfig($config);
@@ -56,7 +56,7 @@ class ConfigReaderTest extends TestCase
     public function testSetConfigFromEmptyInjection(): void
     {
         $expect = [
-            ['connection' => 'test']
+            ['connection' => 'test'],
         ];
 
         $this->ConfigReader->readConfig();
@@ -68,7 +68,7 @@ class ConfigReaderTest extends TestCase
     {
         $config1 = [
             'connection' => 'Foo1_testSetConfigWithConfigureAndInjection',
-            'plugin' => 'Bar1_testSetConfigWithConfigureAndInjection'
+            'plugin' => 'Bar1_testSetConfigWithConfigureAndInjection',
         ];
 
         $this->ConfigReader->readConfig($config1);
