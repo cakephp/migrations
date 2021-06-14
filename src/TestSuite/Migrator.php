@@ -13,7 +13,6 @@ declare(strict_types=1);
  */
 namespace Migrations\TestSuite;
 
-use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Schema\SchemaCleaner;
 use Cake\TestSuite\Schema\SchemaManager;
@@ -23,17 +22,12 @@ use Migrations\Migrations;
 class Migrator extends SchemaManager
 {
     /**
-     * @var ConsoleIo
-     */
-    protected $io;
-
-    /**
      * General command to run before your tests run
      * E.g. in tests/bootstrap.php
      *
-     * @param array $config
+     * @param array $config Configuration data
      * @param bool  $verbose Set to true to display messages
-     * @return Migrator
+     * @return self
      */
     public static function migrate(array $config = [], $verbose = false): Migrator
     {
