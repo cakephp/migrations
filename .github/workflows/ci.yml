@@ -16,8 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         php-version: ['7.2', '7.4']
-        #db-type: [mysql, pgsql, sqlite]
-        db-type: [mysql, sqlite]
+        db-type: [mysql, pgsql, sqlite]
         prefer-lowest: ['']
         include:
           - php-version: '7.2'
@@ -30,8 +29,8 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_PASSWORD: postgres
-
+          POSTGRES_PASSWORD: pg-password
+          POSTGRES_DB: cakephp_test
 
     steps:
     - uses: actions/checkout@v2
@@ -42,12 +41,6 @@ jobs:
         sudo service mysql start
         mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_test DEFAULT COLLATE=utf8mb4_general_ci;'
         mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
-
-    - name: Setup Postgres
-      if: matrix.db-type == 'pgsql'
-      run: |
-        psql -c 'CREATE DATABASE cakephp_test;' -U postgres
-        psql -c 'CREATE DATABASE cakephp_comparisons;' -U postgres
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -86,12 +79,13 @@ jobs:
           export DB='sqlite'
         fi
         if [[ ${{ matrix.db-type }} == 'mysql' ]]; then
+          export DB='mysql'
           export DB_URL='mysql://root:root@127.0.0.1/cakephp_test'
           export DB_URL_COMPARE='mysql://root:root@127.0.0.1/cakephp_comparisons'
         fi
         if [[ ${{ matrix.db-type }} == 'pgsql' ]]; then
-          export DB_URL='postgres://postgres:postgres@127.0.0.1/cakephp_test'
-          export DB_URL_COMPARE='postgres://postgres:postgres@127.0.0.1/cakephp_comparisons'
+          export DB='pgsql'
+          export DB_URL='postgres://postgres:pg-password@127.0.0.1/cakephp_test'
         fi
         if [[ ${{ matrix.php-version }} == '7.4' && ${{ matrix.db-type }} == 'mysql' ]]; then
           vendor/bin/phpunit --coverage-clover=coverage.xml
