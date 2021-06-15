@@ -17,7 +17,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -50,11 +50,15 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -80,12 +84,12 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 100,
                 'null' => true,
             ])
@@ -93,11 +97,15 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -139,14 +147,27 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->create();
 
+        $this->table('parts')
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+            ])
+            ->create();
+
         $this->table('products')
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 100,
                 'null' => true,
             ])
@@ -159,22 +180,26 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
-                    'slug',
+                    'id',
+                    'category_id',
                 ],
                 ['unique' => true]
             )
             ->addIndex(
                 [
-                    'id',
-                    'category_id',
+                    'slug',
                 ],
                 ['unique' => true]
             )
@@ -197,7 +222,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'null' => false,
             ])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -228,6 +253,8 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -252,12 +279,12 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
 
         $this->table('users')
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -265,11 +292,15 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('updated', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->create();
 
@@ -359,6 +390,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
         $this->table('orders')->drop()->save();
+        $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();
         $this->table('special_pks')->drop()->save();
         $this->table('special_tags')->drop()->save();

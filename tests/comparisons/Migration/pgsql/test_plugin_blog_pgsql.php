@@ -17,7 +17,7 @@ class TestPluginBlogPgsql extends AbstractMigration
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -50,11 +50,15 @@ class TestPluginBlogPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -70,40 +74,6 @@ class TestPluginBlogPgsql extends AbstractMigration
                 [
                     'title',
                 ]
-            )
-            ->create();
-
-        $this->table('categories')
-            ->addColumn('parent_id', 'integer', [
-                'default' => null,
-                'limit' => 10,
-                'null' => true,
-            ])
-            ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
-                'limit' => 255,
-                'null' => true,
-            ])
-            ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
-                'limit' => 255,
-                'null' => true,
-            ])
-            ->addColumn('created', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addColumn('modified', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addIndex(
-                [
-                    'slug',
-                ],
-                ['unique' => true]
             )
             ->create();
 
@@ -157,10 +127,9 @@ class TestPluginBlogPgsql extends AbstractMigration
             )
             ->dropForeignKey(
                 'product_id'
-            );
+            )->save();
 
         $this->table('articles')->drop()->save();
-        $this->table('categories')->drop()->save();
         $this->table('parts')->drop()->save();
     }
 }

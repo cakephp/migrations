@@ -26,7 +26,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
@@ -59,11 +59,15 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -96,12 +100,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'null' => true,
             ])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 100,
                 'null' => true,
             ])
@@ -109,11 +113,15 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -163,6 +171,26 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             )
             ->create();
 
+        $this->table('parts')
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 10,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('number', 'integer', [
+                'default' => null,
+                'limit' => 10,
+                'null' => true,
+            ])
+            ->create();
+
         $this->table('products')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
@@ -172,12 +200,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('slug', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 100,
                 'null' => true,
             ])
@@ -190,22 +218,26 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
-                    'slug',
+                    'id',
+                    'category_id',
                 ],
                 ['unique' => true]
             )
             ->addIndex(
                 [
-                    'id',
-                    'category_id',
+                    'slug',
                 ],
                 ['unique' => true]
             )
@@ -229,7 +261,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -267,6 +299,8 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -298,12 +332,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('username', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
             ->addColumn('password', 'string', [
-                'default' => 'NULL::character varying',
+                'default' => null,
                 'limit' => 256,
                 'null' => true,
             ])
@@ -311,11 +345,15 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->addColumn('updated', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 6,
+                'scale' => 6,
             ])
             ->create();
 
@@ -405,6 +443,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
         $this->table('orders')->drop()->save();
+        $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();
         $this->table('special_pks')->drop()->save();
         $this->table('special_tags')->drop()->save();
