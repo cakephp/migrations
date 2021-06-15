@@ -426,7 +426,7 @@ class MigrationHelper extends Helper
             return (float)$value;
         }
 
-        return sprintf("'%s'", addslashes($value));
+        return sprintf("'%s'", addslashes((string)$value));
     }
 
     /**
