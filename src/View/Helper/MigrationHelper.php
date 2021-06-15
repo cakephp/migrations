@@ -426,7 +426,7 @@ class MigrationHelper extends Helper
             return (float)$value;
         }
 
-        return sprintf("'%s'", addslashes((string)$value));
+        return sprintf("'%s'", addslashes($value));
     }
 
     /**
@@ -466,7 +466,7 @@ class MigrationHelper extends Helper
                     break;
                 case 'unsigned':
                     $option = 'signed';
-                    $value = (bool)!$value;
+                    $value = !$value;
                     break;
                 case 'unique':
                     $value = (bool)$value;
@@ -636,7 +636,7 @@ class MigrationHelper extends Helper
         $indexes = array_filter($indexes, function ($index) use ($foreignKeys) {
             return !in_array($index['columns'], $foreignKeys, true);
         });
-        $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
+        $result = compact('constraints', 'indexes', 'foreignKeys');
 
         return $result;
     }
