@@ -45,7 +45,7 @@ jobs:
     - name: Setup Postgres
       if: matrix.db-type == 'pgsql'
       run: |
-        docker exec postgres psql -U postgres -c 'CREATE DATABASE cakephp_comparisons;'
+        PGPASSWORD=pg-password psql -h 127.0.0.1 -U postgres -c 'CREATE DATABASE cakephp_comparisons;'
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
