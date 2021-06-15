@@ -102,9 +102,6 @@ class MigrationHelperTest extends TestCase
         }
 
         if (getenv('DB') === 'pgsql') {
-            $this->types = [
-                'timestamp' => 'timestampfractional',
-            ];
             $this->values = [
                 'null' => null,
                 'integerLimit' => null,

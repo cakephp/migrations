@@ -339,8 +339,14 @@ class MigrationHelper extends Helper
      */
     public function column($tableSchema, $column)
     {
+        $columnType = $tableSchema->getColumnType($column);
+        // Phinx doesn't understand timestampfractional.
+        if ($columnType === 'timestampfractional') {
+            $columnType = 'timestamp';
+        }
+
         return [
-            'columnType' => $tableSchema->getColumnType($column),
+            'columnType' => $columnType,
             'options' => $this->attributes($tableSchema, $column),
         ];
     }
@@ -460,7 +466,7 @@ class MigrationHelper extends Helper
                     break;
                 case 'unsigned':
                     $option = 'signed';
-                    $value = (bool)!$value;
+                    $value = !$value;
                     break;
                 case 'unique':
                     $value = (bool)$value;
@@ -630,7 +636,7 @@ class MigrationHelper extends Helper
         $indexes = array_filter($indexes, function ($index) use ($foreignKeys) {
             return !in_array($index['columns'], $foreignKeys, true);
         });
-        $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
+        $result = compact('constraints', 'indexes', 'foreignKeys');
 
         return $result;
     }
