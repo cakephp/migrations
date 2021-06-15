@@ -42,6 +42,11 @@ jobs:
         mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_test DEFAULT COLLATE=utf8mb4_general_ci;'
         mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
 
+    - name: Setup Postgres
+      if: matrix.db-type == 'pgsql'
+      run: |
+        docker exec postgres psql -U postgres -c 'CREATE DATABASE cakephp_comparisons;'
+
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
