@@ -134,7 +134,7 @@ jobs:
       run: vendor/bin/phpcs --report=checkstyle src/ tests/ | cs2pr
 
     - name: Run psalm
-      run: psalm --output-format=github
+      run: vendor/bin/psalm.phar --output-format=github
 
     - name: Run phpstan
       run: phpstan analyse src/
