@@ -11,6 +11,9 @@
 >
     <projectFiles>
         <directory name="src"/>
+        <ignoreFiles>
+            <directory name="tests/test_app" />
+        </ignoreFiles>
     </projectFiles>
 
     <issueHandlers>
