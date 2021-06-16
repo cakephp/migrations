@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="3.11.2@d470903722cfcbc1cd04744c5491d3e6d13ec3d9">
+<files psalm-version="4.x-dev@">
   <file src="src/CakeManager.php">
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$Migration</code>
+    </ArgumentTypeCoercion>
     <ImplementedReturnTypeMismatch occurrences="1">
       <code>array|string</code>
     </ImplementedReturnTypeMismatch>
+  </file>
+  <file src="src/Command/BakeSeedCommand.php">
+    <RedundantCondition occurrences="1">
+      <code>return $line !== false;</code>
+    </RedundantCondition>
   </file>
   <file src="src/Command/Phinx/Seed.php">
     <PossiblyNullReference occurrences="1">
       <code>setInput</code>
     </PossiblyNullReference>
+  </file>
+  <file src="src/MigrationsDispatcher.php">
+    <ArgumentTypeCoercion occurrences="1">
+      <code>new $value()</code>
+    </ArgumentTypeCoercion>
   </file>
   <file src="src/Shell/Task/SimpleMigrationTask.php">
     <PossiblyNullArgument occurrences="1">
@@ -32,5 +45,30 @@
     <InvalidReturnType occurrences="1">
       <code>string|null</code>
     </InvalidReturnType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Create.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Migrate.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Rollback.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/SeedRun.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Status.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
   </file>
 </files>

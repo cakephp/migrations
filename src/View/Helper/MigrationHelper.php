@@ -404,7 +404,7 @@ class MigrationHelper extends Helper
     /**
      * Returns a string-like representation of a value
      *
-     * @param string|bool|null $value A value to represent as a string
+     * @param string|int|bool|null $value A value to represent as a string
      * @param bool $numbersAsString Set tu true to return as string.
      * @return mixed
      */
