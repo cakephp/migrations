@@ -49,7 +49,7 @@ class CacheClearTest extends TestCase
         $this->connection = ConnectionManager::get('test');
         $this->connection->cacheMetadata(true);
         $this->connection->execute('DROP TABLE IF EXISTS blog');
-        $this->connection->execute("CREATE TABLE blog (id int NOT NULL, title varchar(200) NOT NULL)");
+        $this->connection->execute('CREATE TABLE blog (id int NOT NULL, title varchar(200) NOT NULL)');
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('orm-cache-clear');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
