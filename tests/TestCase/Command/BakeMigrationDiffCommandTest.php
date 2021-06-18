@@ -72,7 +72,7 @@ class BakeMigrationDiffCommandTest extends TestCase
             !ConnectionManager::getConfig('test_comparisons'),
             'No test_comparisons connection defined.'
         );
-        $connection = $;
+        $connection = ConnectionManager::get('test_comparisons');
         $connection->execute('DROP TABLE IF EXISTS articles');
         $connection->execute('DROP TABLE IF EXISTS tags');
         $connection->execute('DROP TABLE IF EXISTS categories');
