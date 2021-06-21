@@ -68,15 +68,17 @@ class BakeMigrationDiffCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS categories');
         $connection->execute('DROP TABLE IF EXISTS blog_phinxlog');
 
-        if (env('DB') !== 'sqlite') {
-            $connection = ConnectionManager::get('test_comparisons');
-            $connection->execute('DROP TABLE IF EXISTS articles');
-            $connection->execute('DROP TABLE IF EXISTS tags');
-            $connection->execute('DROP TABLE IF EXISTS categories');
-            $connection->execute('DROP TABLE IF EXISTS phinxlog');
-            $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
-            $connection->execute('DROP TABLE IF EXISTS users');
-        }
+        $this->skipIf(
+            !ConnectionManager::getConfig('test_comparisons'),
+            'No test_comparisons connection defined.'
+        );
+        $connection = ConnectionManager::get('test_comparisons');
+        $connection->execute('DROP TABLE IF EXISTS articles');
+        $connection->execute('DROP TABLE IF EXISTS tags');
+        $connection->execute('DROP TABLE IF EXISTS categories');
+        $connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
+        $connection->execute('DROP TABLE IF EXISTS users');
     }
 
     /**
@@ -328,7 +330,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function getBakeName($name)
     {
-        $name .= ucfirst(getenv("DB"));
+        $name .= ucfirst(getenv('DB'));
 
         return $name;
     }
@@ -360,7 +362,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function assertCorrectSnapshot($bakeName, $result)
     {
-        $dbenv = getenv("DB");
+        $dbenv = getenv('DB');
         $bakeName = Inflector::underscore($bakeName);
         if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);

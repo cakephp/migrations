@@ -339,8 +339,14 @@ class MigrationHelper extends Helper
      */
     public function column($tableSchema, $column)
     {
+        $columnType = $tableSchema->getColumnType($column);
+        // Phinx doesn't understand timestampfractional.
+        if ($columnType === 'timestampfractional') {
+            $columnType = 'timestamp';
+        }
+
         return [
-            'columnType' => $tableSchema->getColumnType($column),
+            'columnType' => $columnType,
             'options' => $this->attributes($tableSchema, $column),
         ];
     }
@@ -530,9 +536,9 @@ class MigrationHelper extends Helper
         $join = ', ';
         if ($options['indent']) {
             $join = ',';
-            $start = "\n" . str_repeat("    ", $options['indent']);
+            $start = "\n" . str_repeat('    ', $options['indent']);
             $join .= $start;
-            $end = "\n" . str_repeat("    ", $options['indent'] - 1);
+            $end = "\n" . str_repeat('    ', $options['indent'] - 1);
         }
 
         return $start . implode($join, $list) . ',' . $end;

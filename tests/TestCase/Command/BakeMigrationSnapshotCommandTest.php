@@ -116,7 +116,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*.php');
         $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $this->migrationPath . "schema-dump-test.lock";
+        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
@@ -137,7 +137,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshotNoLock*.php');
         $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $this->migrationPath . "schema-dump-test.lock";
+        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
@@ -157,7 +157,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $generatedMigration = glob($this->migrationPath . '*_TestAutoIdDisabledSnapshot*.php');
         $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $this->migrationPath . "schema-dump-test.lock";
+        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
@@ -180,7 +180,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $generatedMigration = glob($path . '*_TestPluginBlog*.php');
         $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $path . "schema-dump-test.lock";
+        $this->generatedFiles[] = $path . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
@@ -231,7 +231,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function getBakeName($name)
     {
-        $dbenv = getenv("DB");
+        $dbenv = getenv('DB');
         if ($dbenv !== 'mysql') {
             $name .= ucfirst($dbenv);
         } else {
@@ -253,7 +253,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function assertCorrectSnapshot($bakeName, $result)
     {
-        $dbenv = getenv("DB");
+        $dbenv = getenv('DB');
         $bakeName = Inflector::underscore($bakeName);
         if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);
