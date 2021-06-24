@@ -831,6 +831,55 @@ Dump files are created in the same directory as your migrations files.
 You can also use the ``--source``, ``--connection`` and ``--plugin`` options
 just like for the ``migrate`` command.
 
+
+Using Migrations for Tests
+==========================
+
+If you are using migrations for your application schema you can also use those
+same migrations to build schema in your tests. In your application's
+``tests/bootstrap.php`` file you can use the ``Migator`` class to build schema
+when tests are run. The ``Migrator`` will use existing schema if it is current,
+and if the migration history that is in the database differs from what is in the
+filesystem, all tables will be dropped and migrations will be rerun from the
+beginning::
+
+    // in tests/bootstrap.php
+    use Migrations\TestSuite\Migrator;
+
+    // Simple setup for with no plugins
+    Migrator::migrate();
+
+    // Run migrations for multiple plugins
+    Migrator::migrate([
+        ['plugin' => 'Contacts'],
+        // Run the Documents migrations on the test_docs connection.
+        ['plugin' => 'Documents', 'connection' => 'test_docs'],
+    ]);
+
+You can also configure how migrations should be run in tests from your
+``Datasources`` configuration. Datasources can use the ``migrations`` key
+to define whether it should be included or which plugins should have migrations
+run on that connection::
+
+    // in config/app_local.php
+    <?php
+    return {
+        'Datasources' => {
+            'test' => {
+                // ...
+                // Will have migrations run.
+                'migrations' => true,
+            },
+            'test_plugin' => {
+                // ...
+                // Will have migrations for Cms and Vendor/Blog run.
+                'migrations' => ['Cms', 'Vendor/Blog'],
+            },
+        },
+    };
+
+.. versionadded: 3.2.0
+
 Using Migrations In Plugins
 ===========================
 
