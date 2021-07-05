@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Migrations\TestSuite;
 
 use Cake\Datasource\ConnectionManager;
-use Cake\TestSuite\Schema\SchemaCleaner;
-use Cake\TestSuite\Schema\SchemaManager;
+use Cake\TestSuite\Fixture\SchemaCleaner;
+use Cake\TestSuite\Fixture\SchemaManager;
 use Cake\TestSuite\TestConnectionManager;
 use Migrations\Migrations;
 
