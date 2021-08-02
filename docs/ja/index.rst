@@ -120,7 +120,7 @@ Migrations
     bin/cake migrations migrate
 
 以下の ``migrations`` コマンドは、 ``rollback`` を実行するとあなたのデータベースから
-テーブルが削除されます。 :
+テーブルが削除されます。 
 
 .. code-block:: bash
 
