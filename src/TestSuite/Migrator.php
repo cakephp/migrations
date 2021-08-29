@@ -32,6 +32,10 @@ class Migrator extends SchemaManager
     public static function migrate(array $config = [], $verbose = false): Migrator
     {
         $migrator = new static($verbose);
+        // Don't recreate schema if we are in a phpunit separate process test.
+        if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
+            return $migrator;
+        }
 
         // Ensures that the connections are aliased, in case
         // the migrations invoke the table registry.
