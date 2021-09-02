@@ -15,7 +15,7 @@ namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
-use Cake\TestSuite\Schema\SchemaCleaner;
+use Cake\TestSuite\Fixture\SchemaCleaner;
 use Cake\TestSuite\TestCase;
 use Migrations\Test\MigratorTestTrait;
 use Migrations\TestSuite\Migrator;
@@ -26,12 +26,15 @@ class MigratorTest extends TestCase
 
     public function setUp(): void
     {
+        $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
+        unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
         $this->setDummyConnections();
     }
 
     public function tearDown(): void
     {
         (new SchemaCleaner())->dropTables('test');
+        $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
     }
 
     private function fetchMigrationsInDB(string $dbTable): array
