@@ -70,6 +70,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
+        ConnectionManager::drop('alternative');
 
         foreach ($this->generatedFiles as $file) {
             if (file_exists($file)) {

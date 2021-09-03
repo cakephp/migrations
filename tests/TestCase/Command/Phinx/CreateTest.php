@@ -88,22 +88,22 @@ class CreateTest extends TestCase
         $params = [
             '--connection' => 'test',
             '--source' => 'Create',
-            'name' => 'TestCreate',
+            'name' => 'TestCreateChange',
         ];
         $commandTester = $this->getCommandTester($params);
 
         $commandTester->execute([
             'command' => $this->command->getName(),
-            'name' => 'TestCreate',
+            'name' => 'TestCreateChange',
             '--connection' => 'test',
         ]);
 
-        $files = glob(ROOT . DS . 'config' . DS . 'Create' . DS . '*_TestCreate*.php');
+        $files = glob(ROOT . DS . 'config' . DS . 'Create' . DS . '*_TestCreateChange*.php');
         $this->generatedFiles = $files;
         $this->assertNotEmpty($files);
 
         $file = current($files);
-        $this->assertSameAsFile('TestCreate.php', file_get_contents($file));
+        $this->assertSameAsFile('TestCreateChange.php', file_get_contents($file));
     }
 
     /**
