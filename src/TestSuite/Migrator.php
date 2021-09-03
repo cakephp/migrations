@@ -13,25 +13,32 @@ declare(strict_types=1);
  */
 namespace Migrations\TestSuite;
 
+use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Fixture\SchemaCleaner;
-use Cake\TestSuite\Fixture\SchemaManager;
+use Cake\TestSuite\Fixture\SchemaLoader;
 use Cake\TestSuite\TestConnectionManager;
 use Migrations\Migrations;
 
-class Migrator extends SchemaManager
+class Migrator extends SchemaLoader
 {
     /**
      * General command to run before your tests run
      * E.g. in tests/bootstrap.php
      *
      * @param array $config Configuration data
-     * @param bool  $verbose Set to true to display messages
-     * @return static
+     * @param bool  $verbose Set to true to display verbose output
+     * @return self
      */
     public static function migrate(array $config = [], $verbose = false): Migrator
     {
-        $migrator = new static($verbose);
+        $migrator = new self([
+            'outputLevel' => $verbose ? ConsoleIo::VERBOSE : ConsoleIo::QUIET,
+        ]);
+        // Don't recreate schema if we are in a phpunit separate process test.
+        if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
+            return $migrator;
+        }
 
         // Ensures that the connections are aliased, in case
         // the migrations invoke the table registry.

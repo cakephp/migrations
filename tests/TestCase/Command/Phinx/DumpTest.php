@@ -82,7 +82,7 @@ class DumpTest extends TestCase
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
 
-        $this->fixtureManager->shutDown();
+        static::$fixtureManager->shutDown();
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         $this->connection->execute('DROP TABLE IF EXISTS letters');
@@ -97,7 +97,7 @@ class DumpTest extends TestCase
      */
     public function tearDown(): void
     {
-        $this->fixtureManager->shutDown();
+        static::$fixtureManager->shutDown();
         parent::tearDown();
         $this->connection->getDriver()->setConnection($this->pdo);
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
