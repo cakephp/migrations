@@ -28,7 +28,7 @@ class Migrator extends SchemaLoader
      *
      * @param array $config Configuration data
      * @param bool  $verbose Set to true to display verbose output
-     * @return static
+     * @return self
      */
     public static function migrate(array $config = [], $verbose = false): Migrator
     {
