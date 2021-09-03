@@ -32,7 +32,7 @@ class Migrator extends SchemaLoader
      */
     public static function migrate(array $config = [], $verbose = false): Migrator
     {
-        $migrator = new static([
+        $migrator = new self([
             'outputLevel' => $verbose ? ConsoleIo::VERBOSE : ConsoleIo::QUIET,
         ]);
         // Don't recreate schema if we are in a phpunit separate process test.
