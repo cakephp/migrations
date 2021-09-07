@@ -17,7 +17,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Fixture\SchemaCleaner;
 use Cake\TestSuite\Fixture\SchemaLoader;
-use Cake\TestSuite\TestConnectionManager;
 use Migrations\Migrations;
 
 class Migrator extends SchemaLoader
@@ -39,10 +38,6 @@ class Migrator extends SchemaLoader
         if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
             return $migrator;
         }
-
-        // Ensures that the connections are aliased, in case
-        // the migrations invoke the table registry.
-        TestConnectionManager::aliasConnections();
 
         $configReader = new ConfigReader();
         $configReader->readMigrationsInDatasources();
