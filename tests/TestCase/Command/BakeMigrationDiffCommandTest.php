@@ -69,7 +69,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS blog_phinxlog');
 
         $this->skipIf(
-            !ConnectionManager::getConfig('test_comparisions'),
+            !ConnectionManager::getConfig('test_comparisons'),
             'No test_comparisons connection defined.'
         );
         $connection = ConnectionManager::get('test_comparisons');
