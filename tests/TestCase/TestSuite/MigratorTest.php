@@ -49,7 +49,7 @@ class MigratorTest extends TestCase
 
     public function testMigrate(): void
     {
-        Migrator::migrate();
+        (new Migrator())->run();
 
         $appMigrations = $this->fetchMigrationsInDB('phinxlog');
         $fooPluginMigrations = $this->fetchMigrationsInDB('foo_plugin_phinxlog');
@@ -65,7 +65,8 @@ class MigratorTest extends TestCase
 
     public function testDropTablesForMissingMigrations(): void
     {
-        Migrator::migrate();
+        $migrator = new Migrator();
+        $migrator->run();
 
         $connection = ConnectionManager::get('test');
         $connection->insert('phinxlog', ['version' => 1, 'migration_name' => 'foo',]);
@@ -73,7 +74,7 @@ class MigratorTest extends TestCase
         $count = $connection->newQuery()->select('version')->from('phinxlog')->execute()->count();
         $this->assertSame(2, $count);
 
-        Migrator::migrate();
+        $migrator->run();
         $count = $connection->newQuery()->select('version')->from('phinxlog')->execute()->count();
         $this->assertSame(1, $count);
     }
