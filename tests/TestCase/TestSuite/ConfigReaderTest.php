@@ -28,11 +28,14 @@ class ConfigReaderTest extends TestCase
 
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->ConfigReader = new ConfigReader();
     }
 
     public function tearDown(): void
     {
+        parent::tearDown();
         unset($this->ConfigReader);
     }
 

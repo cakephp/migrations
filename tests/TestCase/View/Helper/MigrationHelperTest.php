@@ -71,6 +71,7 @@ class MigrationHelperTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
         $this->connection = ConnectionManager::get('test');
         $this->collection = new Collection($this->connection);
         $this->view = new View();
