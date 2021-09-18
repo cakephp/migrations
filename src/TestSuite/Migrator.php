@@ -14,37 +14,65 @@ declare(strict_types=1);
 namespace Migrations\TestSuite;
 
 use Cake\Console\ConsoleIo;
+use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Fixture\SchemaCleaner;
-use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\Migrations;
 
-class Migrator extends SchemaLoader
+class Migrator
 {
+    use InstanceConfigTrait;
+
+    /**
+     * @var \Cake\Console\ConsoleIo
+     */
+    protected $io;
+
+    /**
+     * @var \Cake\TestSuite\Fixture\SchemaCleaner
+     */
+    protected $schemaCleaner;
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $_defaultConfig = [
+        'outputLevel' => ConsoleIo::QUIET,
+    ];
+
+    /**
+     * Constructor.
+     *
+     * @param array<string, mixed> $config Config settings
+     */
+    public function __construct(array $config = [])
+    {
+        $this->setConfig($config);
+
+        $this->io = new ConsoleIo();
+        $this->io->level($this->getConfig('outputLevel'));
+
+        $this->schemaCleaner = new SchemaCleaner($this->io);
+    }
+
     /**
      * General command to run before your tests run
      * E.g. in tests/bootstrap.php
      *
      * @param array $config Configuration data
-     * @param bool  $verbose Set to true to display verbose output
-     * @return self
+     * @return void
      */
-    public static function migrate(array $config = [], $verbose = false): Migrator
+    public function run(array $config = []): void
     {
-        $migrator = new self([
-            'outputLevel' => $verbose ? ConsoleIo::VERBOSE : ConsoleIo::QUIET,
-        ]);
         // Don't recreate schema if we are in a phpunit separate process test.
         if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
-            return $migrator;
+            return;
         }
 
         $configReader = new ConfigReader();
         $configReader->readMigrationsInDatasources();
         $configReader->readConfig($config);
-        $migrator->handleMigrationsStatus($configReader->getConfig());
-
-        return $migrator;
+        $this->handleMigrationsStatus($configReader->getConfig());
     }
 
     /**
@@ -94,9 +122,8 @@ class Migrator extends SchemaLoader
             return $this;
         }
 
-        $schemaCleaner = new SchemaCleaner($this->io);
         foreach ($connectionsToDrop as $connectionName) {
-            $schemaCleaner->dropTables($connectionName);
+            $this->schemaCleaner->dropTables($connectionName);
         }
 
         foreach ($configs as $migration) {
@@ -108,7 +135,7 @@ class Migrator extends SchemaLoader
             $schema = ConnectionManager::get($connectionName)->getSchemaCollection();
             $allTables = $schema->listTables();
             $tablesToTruncate = $this->unsetMigrationTables($allTables);
-            $schemaCleaner->truncateTables($connectionName, $tablesToTruncate);
+            $this->schemaCleaner->truncateTables($connectionName, $tablesToTruncate);
         }
 
         return $this;
