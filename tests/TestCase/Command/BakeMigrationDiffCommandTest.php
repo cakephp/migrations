@@ -42,11 +42,11 @@ class BakeMigrationDiffCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
         $this->loadPlugins([
             'Migrations' => ['boostrap' => true],
         ]);
         $this->generatedFiles = [];
-        $this->cleanupDatabase();
         $this->useCommandRunner();
     }
 
@@ -58,27 +58,6 @@ class BakeMigrationDiffCommandTest extends TestCase
                 unlink($file);
             }
         }
-        $this->cleanupDatabase();
-    }
-
-    protected function cleanupDatabase()
-    {
-        $connection = ConnectionManager::get('test');
-        $connection->execute('DROP TABLE IF EXISTS articles');
-        $connection->execute('DROP TABLE IF EXISTS categories');
-        $connection->execute('DROP TABLE IF EXISTS blog_phinxlog');
-
-        $this->skipIf(
-            !ConnectionManager::getConfig('test_comparisons'),
-            'No test_comparisons connection defined.'
-        );
-        $connection = ConnectionManager::get('test_comparisons');
-        $connection->execute('DROP TABLE IF EXISTS articles');
-        $connection->execute('DROP TABLE IF EXISTS tags');
-        $connection->execute('DROP TABLE IF EXISTS categories');
-        $connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
-        $connection->execute('DROP TABLE IF EXISTS users');
     }
 
     /**

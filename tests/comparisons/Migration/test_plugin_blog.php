@@ -59,52 +59,18 @@ class TestPluginBlog extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'product_id',
+                    'category_id',
                 ]
             )
             ->addIndex(
                 [
-                    'category_id',
+                    'product_id',
                 ]
             )
             ->addIndex(
                 [
                     'title',
                 ]
-            )
-            ->create();
-
-        $this->table('categories')
-            ->addColumn('parent_id', 'integer', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addColumn('title', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => true,
-            ])
-            ->addColumn('slug', 'string', [
-                'default' => null,
-                'limit' => 100,
-                'null' => true,
-            ])
-            ->addColumn('created', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addColumn('modified', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addIndex(
-                [
-                    'slug',
-                ],
-                ['unique' => true]
             )
             ->create();
 
@@ -124,21 +90,21 @@ class TestPluginBlog extends AbstractMigration
 
         $this->table('articles')
             ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
-            ->addForeignKey(
                 'category_id',
                 'categories',
                 'id',
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
+                ]
+            )
+            ->addForeignKey(
+                'product_id',
+                'products',
+                'id',
+                [
+                    'update' => 'CASCADE',
+                    'delete' => 'CASCADE',
                 ]
             )
             ->update();
@@ -155,14 +121,13 @@ class TestPluginBlog extends AbstractMigration
     {
         $this->table('articles')
             ->dropForeignKey(
-                'product_id'
+                'category_id'
             )
             ->dropForeignKey(
-                'category_id'
+                'product_id'
             )->save();
 
         $this->table('articles')->drop()->save();
-        $this->table('categories')->drop()->save();
         $this->table('parts')->drop()->save();
     }
 }
