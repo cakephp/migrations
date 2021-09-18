@@ -77,44 +77,6 @@ class TestPluginBlogPgsql extends AbstractMigration
             )
             ->create();
 
-        $this->table('categories')
-            ->addColumn('parent_id', 'integer', [
-                'default' => null,
-                'limit' => 10,
-                'null' => true,
-            ])
-            ->addColumn('title', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => true,
-            ])
-            ->addColumn('slug', 'string', [
-                'default' => null,
-                'limit' => 100,
-                'null' => true,
-            ])
-            ->addColumn('created', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-                'precision' => 6,
-                'scale' => 6,
-            ])
-            ->addColumn('modified', 'timestamp', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-                'precision' => 6,
-                'scale' => 6,
-            ])
-            ->addIndex(
-                [
-                    'slug',
-                ],
-                ['unique' => true]
-            )
-            ->create();
-
         $this->table('parts')
             ->addColumn('name', 'string', [
                 'default' => null,
@@ -168,7 +130,6 @@ class TestPluginBlogPgsql extends AbstractMigration
             )->save();
 
         $this->table('articles')->drop()->save();
-        $this->table('categories')->drop()->save();
         $this->table('parts')->drop()->save();
     }
 }
