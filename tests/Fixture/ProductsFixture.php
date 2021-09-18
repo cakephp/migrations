@@ -23,38 +23,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 class ProductsFixture extends TestFixture
 {
     /**
-     * fields property
-     *
-     * @var array
-     */
-    public $fields = [
-        'id' => ['type' => 'integer'],
-        'title' => ['type' => 'string', 'null' => true, 'length' => 255],
-        'slug' => ['type' => 'string', 'null' => true, 'length' => 100],
-        'category_id' => ['type' => 'integer', 'length' => 11],
-        'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
-        'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
-        '_indexes' => [
-            'title_idx_ft' => [
-                'type' => 'index',
-                'columns' => ['title'],
-            ],
-        ],
-        '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'products_unique_slug' => ['type' => 'unique', 'columns' => ['slug']],
-            'products_category_unique' => ['type' => 'unique', 'columns' => ['category_id', 'id']],
-            'category_idx' => [
-                'type' => 'foreign',
-                'columns' => ['category_id'],
-                'references' => ['categories', 'id'],
-                'update' => 'cascade',
-                'delete' => 'cascade',
-            ],
-        ],
-    ];
-
-    /**
      * @inheritDoc
      */
     public function init(): void

@@ -20,21 +20,4 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class CategoriesFixture extends TestFixture
 {
-    /**
-     * fields property
-     *
-     * @var array
-     */
-    public $fields = [
-        'id' => ['type' => 'integer'],
-        'parent_id' => ['type' => 'integer', 'length' => 11],
-        'title' => ['type' => 'string', 'null' => true, 'length' => 255],
-        'slug' => ['type' => 'string', 'null' => true, 'length' => 100],
-        'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
-        'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
-        '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'categories_unique_slug' => ['type' => 'unique', 'columns' => ['slug']],
-        ],
-    ];
 }

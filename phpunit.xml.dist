@@ -10,14 +10,9 @@
         </testsuite>
     </testsuites>
 
-    <!-- Setup a listener for fixtures -->
-    <listeners>
-        <listener class="Cake\TestSuite\Fixture\FixtureInjector">
-            <arguments>
-                <object class="Cake\TestSuite\Fixture\FixtureManager"/>
-            </arguments>
-        </listener>
-    </listeners>
+    <extensions>
+        <extension class="Cake\TestSuite\Fixture\PHPUnitExtension" />
+    </extensions>
 
     <!-- Prevent coverage reports from looking in tests, vendors, config folders -->
     <filter>
@@ -27,6 +22,7 @@
     </filter>
 
     <php>
+        <env name="FIXTURE_SCHEMA_METADATA" value="./tests/schema.php"/>
         <ini name="memory_limit" value="-1"/>
         <ini name="apc.enable_cli" value="1"/>
 

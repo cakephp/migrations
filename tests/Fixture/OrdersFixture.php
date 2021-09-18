@@ -20,37 +20,4 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class OrdersFixture extends TestFixture
 {
-    /**
-     * @inheritDoc
-     */
-    public $table = 'orders';
-
-    /**
-     * fields property
-     *
-     * @var array
-     */
-    public $fields = [
-        'id' => ['type' => 'integer'],
-        'product_category' => ['type' => 'integer', 'null' => false, 'length' => 11],
-        'product_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
-        '_indexes' => [
-            'product_category' => [
-                'type' => 'index',
-                'columns' => ['product_category', 'product_id'],
-            ],
-        ],
-        '_constraints' => [
-            'primary' => [
-                'type' => 'primary', 'columns' => ['id'],
-            ],
-            'product_id_fk' => [
-                'type' => 'foreign',
-                'columns' => ['product_category', 'product_id'],
-                'references' => ['products', ['category_id', 'id']],
-                'update' => 'cascade',
-                'delete' => 'cascade',
-            ],
-        ],
-    ];
 }

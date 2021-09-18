@@ -9,21 +9,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 class EventsFixture extends TestFixture
 {
     /**
-     * Fields
-     *
-     * @var array
-     */
-    // @codingStandardsIgnoreStart
-    public $fields = [
-        'id' => ['type' => 'integer'],
-        'title' => ['type' => 'string', 'null' => true],
-        'description' => 'text',
-        'published' => ['type' => 'string', 'length' => 1, 'default' => 'N'],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]]
-    ];
-    // @codingStandardsIgnoreEnd
-
-    /**
      * Records
      *
      * @var array
