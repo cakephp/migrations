@@ -137,6 +137,31 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
             ->addPrimaryKey(['id', 'name'])
             ->create();
 
+        $this->table('events')
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('description', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('published', 'string', [
+                'default' => 'N',
+                'limit' => 1,
+                'null' => true,
+            ])
+            ->create();
+
         $this->table('orders')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
@@ -425,6 +450,7 @@ class TestAutoIdDisabledSnapshotSqlite extends AbstractMigration
         $this->table('articles')->drop()->save();
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
+        $this->table('events')->drop()->save();
         $this->table('orders')->drop()->save();
         $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();
