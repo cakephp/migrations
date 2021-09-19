@@ -64,11 +64,6 @@ class TestPluginBlog extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'product_id',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ]
             )
@@ -98,15 +93,6 @@ class TestPluginBlog extends AbstractMigration
                     'delete' => 'NO_ACTION',
                 ]
             )
-            ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
             ->update();
     }
 
@@ -122,9 +108,6 @@ class TestPluginBlog extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->dropForeignKey(
-                'product_id'
             )->save();
 
         $this->table('articles')->drop()->save();

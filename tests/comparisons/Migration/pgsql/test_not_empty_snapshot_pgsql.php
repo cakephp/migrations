@@ -67,11 +67,6 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'product_id',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ]
             )
@@ -332,15 +327,6 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                     'delete' => 'NO_ACTION',
                 ]
             )
-            ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
             ->update();
 
         $this->table('orders')
@@ -386,9 +372,6 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->dropForeignKey(
-                'product_id'
             )->save();
 
         $this->table('orders')

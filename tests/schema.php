@@ -104,13 +104,6 @@ return [
                 'update' => 'noAction',
                 'delete' => 'noAction',
             ],
-            'product_idx' => [
-                'type' => 'foreign',
-                'columns' => ['product_id'],
-                'references' => ['products', 'id'],
-                'update' => 'cascade',
-                'delete' => 'cascade',
-            ],
         ],
     ],
     [
