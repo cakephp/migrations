@@ -882,7 +882,7 @@ class MigrationsTest extends TestCase
      */
     public function testMigrateSnapshots($basePath, $files)
     {
-        $this->markTestSkipped("This test is failing and seems low value.");
+        $this->markTestSkipped('This test is failing and seems low value.');
         $destination = ROOT . DS . 'config' . DS . 'SnapshotTests' . DS;
 
         if (!file_exists($destination)) {

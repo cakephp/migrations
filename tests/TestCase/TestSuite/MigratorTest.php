@@ -15,7 +15,6 @@ namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
-use Cake\TestSuite\Fixture\SchemaCleaner;
 use Cake\TestSuite\TestCase;
 use Migrations\Test\MigratorTestTrait;
 use Migrations\TestSuite\Migrator;
