@@ -10,8 +10,4 @@ use Cake\ORM\Table;
  */
 class CategoriesTable extends Table
 {
-    public function initialize(array $config): void
-    {
-        $this->setTable('cakephp_test.categories');
-    }
 }
