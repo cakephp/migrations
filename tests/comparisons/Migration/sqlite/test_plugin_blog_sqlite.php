@@ -58,11 +58,6 @@ class TestPluginBlogSqlite extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'product_id',
-                ]
-            )
-            ->addIndex(
-                [
                     'category_id',
                 ]
             )
@@ -123,15 +118,6 @@ class TestPluginBlogSqlite extends AbstractMigration
 
         $this->table('articles')
             ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
-            ->addForeignKey(
                 'category_id',
                 'categories',
                 'id',
@@ -153,9 +139,6 @@ class TestPluginBlogSqlite extends AbstractMigration
     public function down()
     {
         $this->table('articles')
-            ->dropForeignKey(
-                'product_id'
-            )
             ->dropForeignKey(
                 'category_id'
             )->save();

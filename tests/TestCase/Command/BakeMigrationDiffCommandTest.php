@@ -42,11 +42,11 @@ class BakeMigrationDiffCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
         $this->loadPlugins([
             'Migrations' => ['boostrap' => true],
         ]);
         $this->generatedFiles = [];
-        $this->cleanupDatabase();
         $this->useCommandRunner();
     }
 
@@ -58,27 +58,6 @@ class BakeMigrationDiffCommandTest extends TestCase
                 unlink($file);
             }
         }
-        $this->cleanupDatabase();
-    }
-
-    protected function cleanupDatabase()
-    {
-        $connection = ConnectionManager::get('test');
-        $connection->execute('DROP TABLE IF EXISTS articles');
-        $connection->execute('DROP TABLE IF EXISTS categories');
-        $connection->execute('DROP TABLE IF EXISTS blog_phinxlog');
-
-        $this->skipIf(
-            !ConnectionManager::getConfig('test_comparisons'),
-            'No test_comparisons connection defined.'
-        );
-        $connection = ConnectionManager::get('test_comparisons');
-        $connection->execute('DROP TABLE IF EXISTS articles');
-        $connection->execute('DROP TABLE IF EXISTS tags');
-        $connection->execute('DROP TABLE IF EXISTS categories');
-        $connection->execute('DROP TABLE IF EXISTS phinxlog');
-        $connection->execute('DROP TABLE IF EXISTS articles_phinxlog');
-        $connection->execute('DROP TABLE IF EXISTS users');
     }
 
     /**
@@ -124,7 +103,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiff()
     {
-        $this->skipIf(env('DB') === 'sqlite');
+        $this->skipIf(env('DB_URL_COMPARE') !== false);
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . env('DB') . '.php';
@@ -201,7 +180,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffSimple()
     {
-        $this->skipIf(env('DB') === 'sqlite');
+        $this->skipIf(env('DB_URL_COMPARE') !== false);
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
@@ -265,7 +244,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffAddRemove()
     {
-        $this->skipIf(env('DB') === 'sqlite');
+        $this->skipIf(env('DB_URL_COMPARE') !== false);
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';

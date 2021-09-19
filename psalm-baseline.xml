@@ -50,12 +50,6 @@
       <code>$fieldType</code>
     </PossiblyNullArgument>
   </file>
-  <file src="src/Util/UtilTrait.php">
-    <InvalidReturnType occurrences="1">
-      <code>string|null</code>
-    </InvalidReturnType>
-  </file>
-<<<<<<< HEAD
   <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Create.php">
     <NonInvariantDocblockPropertyType occurrences="1">
       <code>$defaultName</code>
@@ -80,11 +74,5 @@
     <NonInvariantDocblockPropertyType occurrences="1">
       <code>$defaultName</code>
     </NonInvariantDocblockPropertyType>
-=======
-  <file src="vendor/symfony/console/Attribute/AsCommand.php">
-    <ParseError occurrences="1">
-      <code>public</code>
-    </ParseError>
->>>>>>> master
   </file>
 </files>

@@ -44,6 +44,7 @@ class CacheBuildTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
         Cache::enable();
         $this->connection = ConnectionManager::get('test');
         $this->connection->cacheMetadata(true);
@@ -63,6 +64,7 @@ class CacheBuildTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
+
         Cache::disable();
         $this->connection->cacheMetadata(false);
         $this->connection->execute('DROP TABLE IF EXISTS blog');

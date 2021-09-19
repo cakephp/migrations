@@ -9,18 +9,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 class TextsFixture extends TestFixture
 {
     /**
-     * Fields
-     *
-     * @var array
-     */
-    // @codingStandardsIgnoreStart
-    public $fields = [
-        'title' => ['type' => 'string'],
-        'description' => 'text',
-    ];
-    // @codingStandardsIgnoreEnd
-
-    /**
      * Records
      *
      * @var array

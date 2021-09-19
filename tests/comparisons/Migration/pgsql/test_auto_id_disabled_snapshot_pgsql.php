@@ -76,11 +76,6 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'product_id',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ]
             )
@@ -143,6 +138,31 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'null' => false,
             ])
             ->addPrimaryKey(['id', 'name'])
+            ->create();
+
+        $this->table('events')
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => 10,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('description', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('published', 'string', [
+                'default' => 'N',
+                'limit' => 1,
+                'null' => true,
+            ])
             ->create();
 
         $this->table('orders')
@@ -367,15 +387,6 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                     'delete' => 'NO_ACTION',
                 ]
             )
-            ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
             ->update();
 
         $this->table('orders')
@@ -421,9 +432,6 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->dropForeignKey(
-                'product_id'
             )->save();
 
         $this->table('orders')
@@ -442,6 +450,7 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
         $this->table('articles')->drop()->save();
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
+        $this->table('events')->drop()->save();
         $this->table('orders')->drop()->save();
         $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();
