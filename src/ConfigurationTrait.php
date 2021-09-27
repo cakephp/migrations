@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
@@ -78,11 +79,11 @@ trait ConfigurationTrait
         $seedsPath = $this->getOperationsPath($this->input(), 'Seeds');
         $plugin = $this->getPlugin($this->input());
 
-        if (!is_dir($migrationsPath)) {
+        if (Configure::read('debug') && !is_dir($migrationsPath)) {
             mkdir($migrationsPath, 0777, true);
         }
 
-        if (!is_dir($seedsPath)) {
+        if (Configure::read('debug') && !is_dir($seedsPath)) {
             mkdir($seedsPath, 0777, true);
         }
 
