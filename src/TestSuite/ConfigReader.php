@@ -75,7 +75,7 @@ class ConfigReader
      *
      * @return void
      */
-    public function processConfig(): void
+    private function processConfig(): void
     {
         foreach ($this->config as $k => $config) {
             $this->config[$k]['connection'] = $this->config[$k]['connection'] ?? 'test';
@@ -90,7 +90,7 @@ class ConfigReader
      *
      * @return array
      */
-    public function getActiveConnections(): array
+    private function getActiveConnections(): array
     {
         $connections = ConnectionManager::configured();
         foreach ($connections as $i => $connectionName) {
@@ -106,7 +106,7 @@ class ConfigReader
      * @param string $connectionName Connection name
      * @return bool
      */
-    public function skipConnection(string $connectionName): bool
+    private function skipConnection(string $connectionName): bool
     {
         // CakePHP 4 solves a DebugKit issue by creating an Sqlite connection
         // in tests/bootstrap.php. This connection should be ignored.
