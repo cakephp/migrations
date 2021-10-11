@@ -148,25 +148,13 @@ trait ConfigurationTrait
             }
         }
 
-        if (($adapterName === 'pgsql' || $adapterName === 'mysql') && !empty($connectionConfig['flags'])) {
+        if (!empty($connectionConfig['flags'])) {
             /**
              * @psalm-suppress PossiblyNullArrayAccess
              * @psalm-suppress PossiblyNullArgument
              */
             $config['environments']['default'] +=
                 $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
-        }
-
-        if ($adapterName === 'sqlsrv') {
-            /** @psalm-suppress PossiblyNullReference */
-            if (!empty($connectionConfig['flags'])) {
-                /**
-                 * @psalm-suppress PossiblyNullArrayAccess
-                 * @psalm-suppress PossiblyNullArgument
-                 */
-                $config['environments']['default'] +=
-                    $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
-            }
         }
 
         return $this->configuration = new Config($config);
@@ -221,6 +209,7 @@ trait ConfigurationTrait
      *
      * - *Most* of `PDO::ATTR_*`
      * - `PDO::MYSQL_ATTR_*`
+     * - `PDO::PGSQL_ATTR_*`
      * - `PDO::SQLSRV_ATTR_*`
      *
      * ### Example:
