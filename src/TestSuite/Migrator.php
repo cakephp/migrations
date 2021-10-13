@@ -16,7 +16,7 @@ namespace Migrations\TestSuite;
 use Cake\Console\ConsoleIo;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\ConnectionManager;
-use Cake\TestSuite\Fixture\SchemaCleaner;
+use Cake\TestSuite\ConnectionHelper;
 use Migrations\Migrations;
 
 class Migrator
@@ -29,9 +29,9 @@ class Migrator
     protected $io;
 
     /**
-     * @var \Cake\TestSuite\Fixture\SchemaCleaner
+     * @var \Cake\TestSuite\ConnectionHelper
      */
-    protected $schemaCleaner;
+    protected $helper;
 
     /**
      * @var array<string, mixed>
@@ -52,7 +52,7 @@ class Migrator
         $this->io = new ConsoleIo();
         $this->io->level($this->getConfig('outputLevel'));
 
-        $this->schemaCleaner = new SchemaCleaner($this->io);
+        $this->helper = new ConnectionHelper();
     }
 
     /**
@@ -123,7 +123,7 @@ class Migrator
         }
 
         foreach ($connectionsToDrop as $connectionName) {
-            $this->schemaCleaner->dropTables($connectionName);
+            $this->helper->dropTables($connectionName);
         }
 
         foreach ($configs as $migration) {
@@ -135,7 +135,7 @@ class Migrator
             $schema = ConnectionManager::get($connectionName)->getSchemaCollection();
             $allTables = $schema->listTables();
             $tablesToTruncate = $this->unsetMigrationTables($allTables);
-            $this->schemaCleaner->truncateTables($connectionName, $tablesToTruncate);
+            $this->helper->truncateTables($connectionName, $tablesToTruncate);
         }
 
         return $this;
