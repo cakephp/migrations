@@ -38,7 +38,7 @@
   </file>
   <file src="src/TestSuite/Migrator.php">
     <InternalClass occurrences="1">
-      <code>new SchemaCleaner($this-&gt;io)</code>
+      <code>new ConnectionHelper()</code>
     </InternalClass>
     <InternalMethod occurrences="2">
       <code>dropTables</code>
