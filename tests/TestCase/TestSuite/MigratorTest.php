@@ -13,15 +13,15 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
+use Cake\Database\Connection;
+use Cake\Database\Driver\Sqlite;
 use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
-use Migrations\Test\MigratorTestTrait;
 use Migrations\TestSuite\Migrator;
 
 class MigratorTest extends TestCase
 {
-    use MigratorTestTrait;
+    protected $dropDatabase = null;
 
     public function setUp(): void
     {
@@ -29,57 +29,60 @@ class MigratorTest extends TestCase
 
         $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
         unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
-        $this->setDummyConnections();
+        $this->dropDatabase = TMP . 'migrate_drop' . (int)microtime(true) . '.sqlite';
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-
         $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
+
+        ConnectionManager::drop('test_migrator');
+        if (file_exists($this->dropDatabase)) {
+            unlink($this->dropDatabase);
+        }
     }
 
-    private function fetchMigrationsInDB(string $dbTable): array
+    public function testMigrateDropTruncate(): void
     {
-        return ConnectionManager::get('test')
-            ->newQuery()
-            ->select('migration_name')
-            ->from($dbTable)
-            ->execute()
-            ->fetch();
-    }
+        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
+        ConnectionManager::setConfig('test_migrator', [
+            'className' => Connection::class,
+            'driver' => Sqlite::class,
+            'database' => $this->dropDatabase,
+        ]);
 
-    public function testMigrate(): void
-    {
-        $this->markTestSkipped('This test drops all tables resulting in other tests failing.');
-        (new Migrator())->run();
-
-        $appMigrations = $this->fetchMigrationsInDB('phinxlog');
-        $fooPluginMigrations = $this->fetchMigrationsInDB('foo_plugin_phinxlog');
-        $barPluginMigrations = $this->fetchMigrationsInDB('bar_plugin_phinxlog');
-
-        $this->assertSame(['MarkMigratedTest'], $appMigrations);
-        $this->assertSame(['FooMigration'], $fooPluginMigrations);
-        $this->assertSame(['BarMigration'], $barPluginMigrations);
-
-        $letters = TableRegistry::getTableLocator()->get('Letters');
-        $this->assertSame('test', $letters->getConnection()->configName());
-    }
-
-    public function testDropTablesForMissingMigrations(): void
-    {
-        $this->markTestSkipped('This test drops all tables resulting in other tests failing.');
         $migrator = new Migrator();
-        $migrator->run();
+        $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator']);
 
-        $connection = ConnectionManager::get('test');
-        $connection->insert('phinxlog', ['version' => 1, 'migration_name' => 'foo',]);
+        $connection = ConnectionManager::get('test_migrator');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
 
-        $count = $connection->newQuery()->select('version')->from('phinxlog')->execute()->count();
-        $this->assertSame(2, $count);
+        $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator']);
 
-        $migrator->run();
-        $count = $connection->newQuery()->select('version')->from('phinxlog')->execute()->count();
-        $this->assertSame(1, $count);
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+
+        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    public function testMigrateDropNoTruncate(): void
+    {
+        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
+        ConnectionManager::setConfig('test_migrator', [
+            'className' => Connection::class,
+            'driver' => Sqlite::class,
+            'database' => $this->dropDatabase,
+        ]);
+
+        $migrator = new Migrator();
+        $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator'], false);
+
+        $connection = ConnectionManager::get('test_migrator');
+        $tables = $connection->getSchemaCollection()->listTables();
+
+        $this->assertContains('migrator', $tables);
+        $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
     }
 }
