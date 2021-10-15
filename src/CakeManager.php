@@ -189,10 +189,10 @@ class CakeManager extends Manager
     /**
      * Checks if the migration with version number $version as already been mark migrated
      *
-     * @param int|string $version Version number of the migration to check
+     * @param int $version Version number of the migration to check
      * @return bool
      */
-    public function isMigrated($version)
+    public function isMigrated(int $version): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
         $versions = array_flip($adapter->getVersions());
@@ -203,11 +203,11 @@ class CakeManager extends Manager
     /**
      * Marks migration with version number $version migrated
      *
-     * @param int|string $version Version number of the migration to check
+     * @param int $version Version number of the migration to check
      * @param string $path Path where the migration file is located
      * @return bool True if success
      */
-    public function markMigrated($version, $path)
+    public function markMigrated(int $version, string $path): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
@@ -220,6 +220,7 @@ class CakeManager extends Manager
         }
 
         $migrationFile = $migrationFile[0];
+        /** @var class-string<\Phinx\Migration\MigrationInterface> $className */
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
         $Migration = new $className('default', $version);
@@ -279,7 +280,7 @@ class CakeManager extends Manager
      * It will start a transaction and rollback in case one of the operation raises an exception
      *
      * @param string $path Path where to look for migrations
-     * @param array $versions Versions which should be marked
+     * @param array<int> $versions Versions which should be marked
      * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
      * the command output
      * @return void
