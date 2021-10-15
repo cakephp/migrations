@@ -6,7 +6,7 @@ class CreateLettersTable extends AbstractMigration
 {
     public $autoId = false;
 
-    public function change()
+    public function change(): void
     {
         $table = $this->table('letters');
         $table

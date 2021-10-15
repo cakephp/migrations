@@ -120,7 +120,7 @@ Migrations
     bin/cake migrations migrate
 
 以下の ``migrations`` コマンドは、 ``rollback`` を実行するとあなたのデータベースから
-テーブルが削除されます。 
+テーブルが削除されます。
 
 .. code-block:: bash
 
@@ -759,7 +759,7 @@ JSON 形式の文字列として結果を出力できます。 :
 
     class DatabaseSeed extends AbstractSeed
     {
-        public function run()
+        public function run(): void
         {
             $this->call('AnotherSeed');
             $this->call('YetAnotherSeed');

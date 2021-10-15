@@ -815,7 +815,7 @@ votre propre séquence d'exécution de *seeders*::
 
     class DatabaseSeed extends AbstractSeed
     {
-        public function run()
+        public function run(): void
         {
             $this->call('AnotherSeed');
             $this->call('YetAnotherSeed');

@@ -33,7 +33,7 @@ class {{ name }}Seed extends AbstractSeed
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
 {% if records %}
         $data = {{ records | raw }};
