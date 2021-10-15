@@ -32,7 +32,7 @@ class Status extends StatusCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('status')
             ->setDescription('Show migration status')
@@ -55,7 +55,7 @@ class Status extends StatusCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->beforeExecute($input, $output);
         $this->bootstrap($input, $output);

@@ -33,7 +33,7 @@ class Seed extends SeedRun
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('seed')
             ->setDescription('Seed the database with data')
@@ -57,7 +57,7 @@ class Seed extends SeedRun
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $event = $this->dispatchEvent('Migration.beforeSeed');
         if ($event->isStopped()) {
@@ -76,6 +76,6 @@ class Seed extends SeedRun
         $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterSeed');
 
-        return $result ?? BaseCommand::CODE_SUCCESS;
+        return $result;
     }
 }

@@ -16,6 +16,7 @@ namespace Migrations;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
+use Phinx\Config\ConfigInterface;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
@@ -66,9 +67,9 @@ trait ConfigurationTrait
      * Config object containing the connection details for the database.
      *
      * @param bool $forceRefresh Refresh config.
-     * @return \Phinx\Config\Config
+     * @return \Phinx\Config\ConfigInterface
      */
-    public function getConfig($forceRefresh = false)
+    public function getConfig($forceRefresh = false): ConfigInterface
     {
         if ($this->configuration && $forceRefresh === false) {
             return $this->configuration;

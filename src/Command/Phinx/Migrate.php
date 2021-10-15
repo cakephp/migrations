@@ -33,7 +33,7 @@ class Migrate extends MigrateCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('migrate')
             ->setDescription('Migrate the database')
@@ -76,7 +76,7 @@ class Migrate extends MigrateCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $event = $this->dispatchEvent('Migration.beforeMigrate');
         if ($event->isStopped()) {
@@ -85,6 +85,6 @@ class Migrate extends MigrateCommand
         $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterMigrate');
 
-        return $result ?? BaseCommand::CODE_SUCCESS;
+        return $result;
     }
 }

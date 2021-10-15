@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use Phinx\Db\Table;
 use Phinx\Migration\AbstractMigration as BaseAbstractMigration;
 
 class AbstractMigration extends BaseAbstractMigration
@@ -38,12 +39,15 @@ class AbstractMigration extends BaseAbstractMigration
      * @param array $options Options
      * @return \Migrations\Table
      */
-    public function table($tableName, $options = [])
+    public function table(string $tableName, array $options = [])
     {
         if ($this->autoId === false) {
             $options['id'] = false;
         }
 
-        return new Table($tableName, $options, $this->getAdapter());
+        /** @var \Migrations\Table $table */
+        $table = new Table($tableName, $options, $this->getAdapter());
+
+        return $table;
     }
 }

@@ -15,6 +15,7 @@ namespace Migrations;
 
 use Cake\Database\Connection;
 use Cake\Database\Driver\Postgres;
+use Cake\Database\Query;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\AdapterWrapper;
@@ -77,7 +78,7 @@ class CakeAdapter extends AdapterWrapper
      *
      * @return \Cake\Database\Query
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): Query
     {
         return $this->getCakeConnection()->newQuery();
     }
@@ -87,7 +88,7 @@ class CakeAdapter extends AdapterWrapper
      *
      * @return string
      */
-    public function getAdapterType()
+    public function getAdapterType(): string
     {
         return $this->getAdapter()->getAdapterType();
     }

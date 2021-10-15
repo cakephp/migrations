@@ -34,7 +34,7 @@ class Create extends CreateCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('create')
             ->setDescription('Create a new migration')
@@ -70,7 +70,7 @@ class Create extends CreateCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $result = $this->parentExecute($input, $output);
 
@@ -99,6 +99,6 @@ class Create extends CreateCommand
             }
         }
 
-        return $result ?? BaseCommand::CODE_SUCCESS;
+        return $result;
     }
 }

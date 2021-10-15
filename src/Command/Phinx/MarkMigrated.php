@@ -54,7 +54,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('mark_migrated')
             ->setDescription('Mark a migration as migrated')
@@ -106,7 +106,7 @@ class MarkMigrated extends AbstractCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->setInput($input);
         $this->bootstrap($input, $output);

@@ -4,9 +4,6 @@
     <ArgumentTypeCoercion occurrences="1">
       <code>$Migration</code>
     </ArgumentTypeCoercion>
-    <ImplementedReturnTypeMismatch occurrences="1">
-      <code>array|string</code>
-    </ImplementedReturnTypeMismatch>
   </file>
   <file src="src/Command/BakeSeedCommand.php">
     <RedundantCondition occurrences="1">
@@ -49,30 +46,5 @@
     <PossiblyNullArgument occurrences="1">
       <code>$fieldType</code>
     </PossiblyNullArgument>
-  </file>
-  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Create.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Migrate.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Rollback.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/SeedRun.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Status.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
   </file>
 </files>

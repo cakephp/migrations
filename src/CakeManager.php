@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use DateTime;
 use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -59,9 +60,9 @@ class CakeManager extends Manager
      *
      * @param string $environment Environment name.
      * @param null|string $format Format (`json` or `array`).
-     * @return array|string Array of migrations or json string.
+     * @return array Array of migrations or JSON array.
      */
-    public function printStatus($environment, $format = null)
+    public function printStatus(string $environment, ?string $format = null): array
     {
         $migrations = [];
         $isJson = $format === 'json';
@@ -111,9 +112,11 @@ class CakeManager extends Manager
         ksort($migrations);
         $migrations = array_values($migrations);
 
+        /* needs to be moved to actual printing part
         if ($isJson) {
             $migrations = json_encode($migrations);
         }
+        */
 
         return $migrations;
     }
@@ -121,7 +124,7 @@ class CakeManager extends Manager
     /**
      * @inheritDoc
      */
-    public function migrateToDateTime($environment, \DateTime $dateTime, $fake = false)
+    public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
     {
         $versions = array_keys($this->getMigrations('default'));
         $dateString = $dateTime->format('Ymdhis');
@@ -357,13 +360,13 @@ class CakeManager extends Manager
      * Gets an array of database seeders.
      *
      * Overload the basic behavior to add an instance of the InputInterface the shell call is
-     * using in order to gives the ability to the AbstractSeed::call() method to propagate options
+     * using in order to give the ability to the AbstractSeed::call() method to propagate options
      * to the other MigrationsDispatcher it is generating.
      *
      * @throws \InvalidArgumentException
-     * @return \Phinx\Seed\AbstractSeed[]
+     * @return \Phinx\Seed\SeedInterface[]
      */
-    public function getSeeds()
+    public function getSeeds(): array
     {
         parent::getSeeds();
         if (empty($this->seeds)) {
