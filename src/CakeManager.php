@@ -122,7 +122,11 @@ class CakeManager extends Manager
     }
 
     /**
-     * @inheritDoc
+     * @param string $environment Environment
+     * @param \DateTime $dateTime Date to migrate to
+     * @param bool $fake flag that if true, we just record running the migration, but not actually do the
+     *   migration
+     * @return void
      */
     public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
     {

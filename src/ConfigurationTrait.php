@@ -169,6 +169,7 @@ trait ConfigurationTrait
      * @return string Name of the adapter.
      * @throws \InvalidArgumentException when it was not possible to infer the information
      * out of the provided database configuration
+     * @phpstan-param class-string $driver
      */
     public function getAdapterName($driver)
     {

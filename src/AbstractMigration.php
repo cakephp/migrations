@@ -37,15 +37,14 @@ class AbstractMigration extends BaseAbstractMigration
      *
      * @param string $tableName Table Name
      * @param array $options Options
-     * @return \Migrations\Table
+     * @return \Phinx\Db\Table
      */
-    public function table(string $tableName, array $options = [])
+    public function table(string $tableName, array $options = []): Table
     {
         if ($this->autoId === false) {
             $options['id'] = false;
         }
 
-        /** @var \Migrations\Table $table */
         $table = new Table($tableName, $options, $this->getAdapter());
 
         return $table;
