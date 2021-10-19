@@ -36,19 +36,20 @@ class Plugin extends BasePlugin
     protected $routesEnabled = false;
 
     /**
-     * @var array
+     * @var array<string>
+     * @psalm-var array<class-string<\Phinx\Console\Command\AbstractCommand>>
      */
     protected $migrationCommandsList = [
-        Command\MigrationsCommand::class,
-        Command\MigrationsCreateCommand::class,
-        Command\MigrationsDumpCommand::class,
-        Command\MigrationsMarkMigratedCommand::class,
-        Command\MigrationsMigrateCommand::class,
-        Command\MigrationsCacheBuildCommand::class,
-        Command\MigrationsCacheClearCommand::class,
-        Command\MigrationsRollbackCommand::class,
-        Command\MigrationsSeedCommand::class,
-        Command\MigrationsStatusCommand::class,
+        \Migrations\Command\MigrationsCommand::class,
+        \Migrations\Command\MigrationsCreateCommand::class,
+        \Migrations\Command\MigrationsDumpCommand::class,
+        \Migrations\Command\MigrationsMarkMigratedCommand::class,
+        \Migrations\Command\MigrationsMigrateCommand::class,
+        \Migrations\Command\MigrationsCacheBuildCommand::class,
+        \Migrations\Command\MigrationsCacheClearCommand::class,
+        \Migrations\Command\MigrationsRollbackCommand::class,
+        \Migrations\Command\MigrationsSeedCommand::class,
+        \Migrations\Command\MigrationsStatusCommand::class,
     ];
 
     /**
