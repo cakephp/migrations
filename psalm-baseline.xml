@@ -40,8 +40,9 @@
     <InternalClass occurrences="1">
       <code>new ConnectionHelper()</code>
     </InternalClass>
-    <InternalMethod occurrences="2">
+    <InternalMethod occurrences="3">
       <code>dropTables</code>
+      <code>truncateTables</code>
       <code>truncateTables</code>
     </InternalMethod>
   </file>
@@ -49,6 +50,11 @@
     <PossiblyNullArgument occurrences="1">
       <code>$fieldType</code>
     </PossiblyNullArgument>
+  </file>
+  <file src="src/Util/UtilTrait.php">
+    <InvalidReturnType occurrences="1">
+      <code>string|null</code>
+    </InvalidReturnType>
   </file>
   <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Create.php">
     <NonInvariantDocblockPropertyType occurrences="1">
