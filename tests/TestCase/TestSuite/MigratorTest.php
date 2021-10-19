@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
+use Cake\Cache\Cache;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Sqlite;
 use Cake\Datasource\ConnectionManager;
@@ -29,7 +30,9 @@ class MigratorTest extends TestCase
 
         $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
         unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
-        $this->dropDatabase = TMP . 'migrate_drop' . (int)microtime(true) . '.sqlite';
+
+        $this->dropDatabase = tempnam(TMP, 'migrator_test_');
+        Cache::clear('_cake_model_');
     }
 
     public function tearDown(): void

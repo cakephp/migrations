@@ -42,11 +42,16 @@ define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS
 define('ROOT', $root . DS . 'tests' . DS . 'test_app');
 define('APP_DIR', 'App');
 define('APP', ROOT . DS . 'App' . DS);
-define('TMP', sys_get_temp_dir() . DS . 'cake-migrations');
+define('TMP', sys_get_temp_dir() . DS . 'cake-migrations' . DS);
 define('CACHE', TMP . DS . 'cache' . DS);
 if (!defined('CONFIG')) {
     define('CONFIG', ROOT . DS . 'config' . DS);
 }
+
+// phpcs:disable
+@mkdir(CACHE);
+// phpcs:enable
+
 Configure::write('debug', true);
 Configure::write('App', [
     'namespace' => 'TestApp',

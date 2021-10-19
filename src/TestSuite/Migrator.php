@@ -56,7 +56,14 @@ class Migrator
         $migrations = new Migrations();
 
         if ($this->shouldDropTables($migrations, $options)) {
-            $this->helper->dropTables($options['connection']);
+            $dropTables = $this->getNonPhinxTables($options['connection']);
+            if (count($dropTables)) {
+                $this->helper->dropTables($options['connection'], $dropTables);
+            }
+            $phinxTables = $this->getPhinxTables($options['connection']);
+            if (count($phinxTables)) {
+                $this->helper->truncateTables($options['connection'], $phinxTables);
+            }
         }
 
         if (!$migrations->migrate($options)) {
@@ -64,11 +71,10 @@ class Migrator
         }
 
         if ($truncateTables) {
-            $tables = ConnectionManager::get($options['connection'])->getSchemaCollection()->listTables();
-            $tables = array_filter($tables, function ($table) {
-                return strpos($table, 'phinxlog') === false;
-            });
-            $this->helper->truncateTables($options['connection'], $tables);
+            $tables = $this->getNonPhinxTables($options['connection']);
+            if (count($tables)) {
+                $this->helper->truncateTables($options['connection'], $tables);
+            }
         }
     }
 
@@ -98,5 +104,35 @@ class Migrator
         Log::write('debug', 'No migration changes detected');
 
         return false;
+    }
+
+    /**
+     * Get the list of tables that are phinxlog
+     *
+     * @param string $connection The connection name to operate on.
+     * @return string[] The list of tables that are not related to phinx in the provided connection.
+     */
+    protected function getPhinxTables(string $connection): array
+    {
+        $tables = ConnectionManager::get($connection)->getSchemaCollection()->listTables();
+
+        return array_filter($tables, function ($table) {
+            return strpos($table, 'phinxlog') !== false;
+        });
+    }
+
+    /**
+     * Get the list of tables that are not phinxlog related.
+     *
+     * @param string $connection The connection name to operate on.
+     * @return string[] The list of tables that are not related to phinx in the provided connection.
+     */
+    protected function getNonPhinxTables(string $connection): array
+    {
+        $tables = ConnectionManager::get($connection)->getSchemaCollection()->listTables();
+
+        return array_filter($tables, function ($table) {
+            return strpos($table, 'phinxlog') === false;
+        });
     }
 }
