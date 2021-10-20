@@ -90,8 +90,13 @@ class Migrator
         Log::write('debug', "Reading migrations status for {$options['connection']}...");
 
         foreach ($migrations->status($options) as $migration) {
-            if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
-                Log::write('debug', 'Missing migration(s) detected.');
+            if ($migration['status'] === 'up') {
+                Log::write('debug', 'One or more additional migrations detected.');
+
+                return true;
+            }
+            if ($migration['missing'] ?? false) {
+                Log::write('debug', 'One or more missing migrations detected.');
 
                 return true;
             }
