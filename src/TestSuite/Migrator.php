@@ -71,7 +71,7 @@ class Migrator
         }
 
         if ($truncateTables) {
-            $this->truncate($options);
+            $this->truncate($options['connection']);
         }
     }
 
@@ -80,20 +80,19 @@ class Migrator
      *
      * For options, {@see \Migrations\Migrations::migrate()}.
      *
-     * @param array $options Migrate options
+     * @param string $connection Connection name to truncate all non-phinx tables
      * @return void
      */
-    public function truncate(array $options): void
+    public function truncate(string $connection): void
     {
         // Don't recreate schema if we are in a phpunit separate process test.
         if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
             return;
         }
 
-        $options += ['connection' => 'test'];
-        $tables = $this->getNonPhinxTables($options['connection']);
-        if (count($tables)) {
-            $this->helper->truncateTables($options['connection'], $tables);
+        $tables = $this->getNonPhinxTables($connection);
+        if ($tables) {
+            $this->helper->truncateTables($connection, $tables);
         }
     }
 
