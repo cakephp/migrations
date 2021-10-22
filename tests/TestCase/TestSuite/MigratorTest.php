@@ -88,4 +88,39 @@ class MigratorTest extends TestCase
         $this->assertContains('migrator', $tables);
         $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
     }
+
+    /**
+     * @depends testMigrateDropNoTruncate
+     */
+    public function testTruncateAfterMigrations(): void
+    {
+        $this->testMigrateDropNoTruncate();
+
+        $migrator = new Migrator();
+        $migrator->truncate('test_migrator');
+
+        $connection = ConnectionManager::get('test_migrator');
+        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    public function testTruncateExternalTables(): void
+    {
+        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
+        ConnectionManager::setConfig('test_migrator', [
+            'className' => Connection::class,
+            'driver' => Sqlite::class,
+            'database' => $this->dropDatabase,
+        ]);
+        $connection = ConnectionManager::get('test_migrator');
+        $connection->execute('CREATE TABLE external_table (colname TEXT NOT NULL);');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('external_table', $tables);
+        $connection->execute('INSERT INTO external_table (colname) VALUES ("test");');
+        $this->assertCount(1, $connection->query('SELECT * FROM external_table')->fetchAll());
+
+        $migrator = new Migrator();
+        $migrator->truncate('test_migrator');
+
+        $this->assertCount(0, $connection->query('SELECT * FROM external_table')->fetchAll());
+    }
 }
