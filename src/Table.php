@@ -121,14 +121,12 @@ class Table extends BaseTable
 
         if ($this->getAdapter()->getAdapterType() === 'mysql' && empty($options['collation'])) {
             $encodingRequest = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
-                FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "%s"';
+                FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname';
 
             $cakeConnection = $this->getAdapter()->getCakeConnection();
             $connectionConfig = $cakeConnection->config();
-            $encodingRequest = sprintf($encodingRequest, $connectionConfig['database']);
 
-            /** @var \Cake\Database\StatementInterface $statement */
-            $statement = $cakeConnection->execute($encodingRequest);
+            $statement = $cakeConnection->execute($encodingRequest, ['dbname' => $connectionConfig['database']]);
             $defaultEncoding = $statement->fetch('assoc');
             if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
                 $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];

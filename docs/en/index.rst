@@ -831,6 +831,41 @@ Dump files are created in the same directory as your migrations files.
 You can also use the ``--source``, ``--connection`` and ``--plugin`` options
 just like for the ``migrate`` command.
 
+
+Using Migrations for Tests
+==========================
+
+If you are using migrations for your application schema you can also use those
+same migrations to build schema in your tests. In your application's
+``tests/bootstrap.php`` file you can use the ``Migrator`` class to build schema
+when tests are run. The ``Migrator`` will use existing schema if it is current,
+and if the migration history that is in the database differs from what is in the
+filesystem, all tables will be dropped and migrations will be rerun from the
+beginning::
+
+    // in tests/bootstrap.php
+    use Migrations\TestSuite\Migrator;
+
+    $migrator = new Migrator();
+
+    // Simple setup for with no plugins
+    $migrator->run();
+
+    // Run a non 'test' database
+    $migrator->run(['connection' => 'test_other']);
+
+    // Run migrations for plugins
+    $migrator->run(['plugin' => 'Contacts']);
+
+    // Run the Documents migrations on the test_docs connection.
+    $migrator->run(['plugin' => 'Documents', 'connection' => 'test_docs']);
+
+If you need to see additional debugging output from migrations are being run,
+you can enable a ``debug`` level logger.
+
+.. versionadded: 3.2.0
+    Migrator was added to complement the new fixtures in CakePHP 4.3.0.
+
 Using Migrations In Plugins
 ===========================
 

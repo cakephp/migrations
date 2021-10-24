@@ -54,29 +54,29 @@ class Plugin extends BasePlugin
     /**
      * Add migrations commands.
      *
-     * @param \Cake\Console\CommandCollection $collection The command collection to update
+     * @param \Cake\Console\CommandCollection $commands The command collection to update
      * @return \Cake\Console\CommandCollection
      */
-    public function console(CommandCollection $collection): CommandCollection
+    public function console(CommandCollection $commands): CommandCollection
     {
         if (class_exists('Bake\Command\SimpleBakeCommand')) {
-            $commands = $collection->discoverPlugin($this->getName());
+            $found = $commands->discoverPlugin($this->getName());
 
-            return $collection->addMany($commands);
+            return $commands->addMany($found);
         }
-        $commands = [];
+        $found = [];
         foreach ($this->migrationCommandsList as $class) {
             $name = $class::defaultName();
             // If the short name has been used, use the full name.
             // This allows app commands to have name preference.
             // and app commands to overwrite migration commands.
-            if (!$collection->has($name)) {
-                $commands[$name] = $class;
+            if (!$commands->has($name)) {
+                $found[$name] = $class;
             }
             // full name
-            $commands['migrations.' . $name] = $class;
+            $found['migrations.' . $name] = $class;
         }
 
-        return $collection->addMany($commands);
+        return $commands->addMany($found);
     }
 }

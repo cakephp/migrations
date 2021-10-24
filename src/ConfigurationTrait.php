@@ -147,28 +147,15 @@ trait ConfigurationTrait
                  */
                 $config['environments']['default']['mysql_attr_ssl_ca'] = $connectionConfig['ssl_ca'];
             }
-
-            /** @psalm-suppress PossiblyNullReference */
-            if (!empty($connectionConfig['flags'])) {
-                /**
-                 * @psalm-suppress PossiblyNullArrayAccess
-                 * @psalm-suppress PossiblyNullArgument
-                 */
-                $config['environments']['default'] +=
-                    $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
-            }
         }
 
-        if ($adapterName === 'sqlsrv') {
-            /** @psalm-suppress PossiblyNullReference */
-            if (!empty($connectionConfig['flags'])) {
-                /**
-                 * @psalm-suppress PossiblyNullArrayAccess
-                 * @psalm-suppress PossiblyNullArgument
-                 */
-                $config['environments']['default'] +=
-                    $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
-            }
+        if (!empty($connectionConfig['flags'])) {
+            /**
+             * @psalm-suppress PossiblyNullArrayAccess
+             * @psalm-suppress PossiblyNullArgument
+             */
+            $config['environments']['default'] +=
+                $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
         }
 
         return $this->configuration = new Config($config);
@@ -219,8 +206,12 @@ trait ConfigurationTrait
      * Translates driver specific connection flags (PDO attributes) to
      * Phinx compatible adapter options.
      *
-     * Currently Phinx supports the `PDO::MYSQL_ATTR_*` and
-     * `PDO::SQLSRV_ATTR_*` attributes.
+     * Currently Phinx supports of the following flags:
+     *
+     * - *Most* of `PDO::ATTR_*`
+     * - `PDO::MYSQL_ATTR_*`
+     * - `PDO::PGSQL_ATTR_*`
+     * - `PDO::SQLSRV_ATTR_*`
      *
      * ### Example:
      *
@@ -254,7 +245,7 @@ trait ConfigurationTrait
         $attributes = [];
         foreach ($constants as $name => $value) {
             $name = strtolower($name);
-            if (strpos($name, "{$adapterName}_attr_") === 0) {
+            if (strpos($name, "{$adapterName}_attr_") === 0 || strpos($name, 'attr_') === 0) {
                 $attributes[$value] = $name;
             }
         }

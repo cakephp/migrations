@@ -20,24 +20,4 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class PartsFixture extends TestFixture
 {
-    /**
-     * @inheritDoc
-     */
-    public $table = 'parts';
-
-    /**
-     * fields property
-     *
-     * @var array
-     */
-    public $fields = [
-        'id' => ['type' => 'integer'],
-        'name' => ['type' => 'string', 'length' => 255],
-        'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true],
-        '_constraints' => [
-            'primary' => [
-                'type' => 'primary', 'columns' => ['id'],
-            ],
-        ],
-    ];
 }

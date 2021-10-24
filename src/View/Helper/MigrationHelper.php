@@ -404,7 +404,7 @@ class MigrationHelper extends Helper
     /**
      * Returns a string-like representation of a value
      *
-     * @param string|bool|null $value A value to represent as a string
+     * @param string|int|bool|null $value A value to represent as a string
      * @param bool $numbersAsString Set tu true to return as string.
      * @return mixed
      */
@@ -466,7 +466,7 @@ class MigrationHelper extends Helper
                     break;
                 case 'unsigned':
                     $option = 'signed';
-                    $value = (bool)!$value;
+                    $value = !$value;
                     break;
                 case 'unique':
                     $value = (bool)$value;
@@ -636,7 +636,7 @@ class MigrationHelper extends Helper
         $indexes = array_filter($indexes, function ($index) use ($foreignKeys) {
             return !in_array($index['columns'], $foreignKeys, true);
         });
-        $result = compact('constraints', 'constraints', 'indexes', 'foreignKeys');
+        $result = compact('constraints', 'indexes', 'foreignKeys');
 
         return $result;
     }

@@ -82,7 +82,6 @@ class DumpTest extends TestCase
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
 
-        $this->fixtureManager->shutDown();
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         $this->connection->execute('DROP TABLE IF EXISTS letters');
@@ -97,35 +96,14 @@ class DumpTest extends TestCase
      */
     public function tearDown(): void
     {
-        $this->fixtureManager->shutDown();
         parent::tearDown();
+
         $this->connection->getDriver()->setConnection($this->pdo);
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         $this->connection->execute('DROP TABLE IF EXISTS letters');
         $this->connection->execute('DROP TABLE IF EXISTS parts');
         unset($this->connection, $this->command, $this->streamOutput);
-    }
-
-    /**
-     * Test executing "dump" with no tables in the database
-     *
-     * @return void
-     */
-    public function testExecuteNoTables()
-    {
-        $params = [
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ];
-        $commandTester = $this->getCommandTester($params);
-
-        $commandTester->execute([
-            'command' => $this->command->getName(),
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
-        $this->assertSame(serialize([]), file_get_contents($this->dumpfile));
     }
 
     /**
@@ -152,7 +130,6 @@ class DumpTest extends TestCase
         $this->assertFileExists($this->dumpfile);
         $generatedDump = unserialize(file_get_contents($this->dumpfile));
 
-        $this->assertCount(2, array_keys($generatedDump));
         $this->assertArrayHasKey('letters', $generatedDump);
         $this->assertArrayHasKey('numbers', $generatedDump);
         $this->assertInstanceOf(TableSchema::class, $generatedDump['numbers']);

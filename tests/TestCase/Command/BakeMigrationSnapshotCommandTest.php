@@ -52,6 +52,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
         $this->migrationPath = ROOT . DS . 'config' . DS . 'Migrations' . DS;
 
@@ -70,6 +71,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
+        ConnectionManager::drop('alternative');
 
         foreach ($this->generatedFiles as $file) {
             if (file_exists($file)) {

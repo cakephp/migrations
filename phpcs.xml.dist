@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <ruleset name="CakePHP Core">
+    <exclude-pattern>*/tests/comparisons/*</exclude-pattern>
+    <exclude-pattern>*/test_app/config/*</exclude-pattern>
+    <exclude-pattern>*/TestBlog/config/*</exclude-pattern>
+    <exclude-pattern>*/BarPlugin/config/*</exclude-pattern>
+    <exclude-pattern>*/FooPlugin/config/*</exclude-pattern>
+
     <rule ref="./vendor/cakephp/cakephp-codesniffer/CakePHP/ruleset.xml"/>
     <exclude-pattern>*/tests/comparisons/*</exclude-pattern>
     <exclude-pattern>*/test_app/config/*</exclude-pattern>

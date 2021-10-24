@@ -216,7 +216,7 @@ class BakeSeedCommand extends SimpleBakeCommand
 
             if (!$inString) {
                 if ($line === '),') {
-                    //Check for closing bracket
+                    // Check for closing bracket
                     $line = '],';
                     $tabCount--;
                 } elseif (preg_match("/^\d+\s\=\>\s$/", $line)) {
@@ -232,15 +232,15 @@ class BakeSeedCommand extends SimpleBakeCommand
             $length = strlen($line);
             for ($j = 0; $j < $length; $j++) {
                 if ($line[$j] === '\\') {
-                    //skip character right after an escape \
+                    // skip character right after an escape \
                     $j++;
                 } elseif ($line[$j] === '\'') {
-                    //check string open/end
+                    // check string open/end
                     $inString = !$inString;
                 }
             }
 
-            //check for opening bracket
+            // check for opening bracket
             if (!$inString && trim($line) === 'array (') {
                 $line = str_replace('array (', '[', $line);
                 $tabCount++;

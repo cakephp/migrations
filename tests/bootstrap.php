@@ -16,6 +16,7 @@ use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
+use Cake\TestSuite\Fixture\SchemaLoader;
 
 $findRoot = function ($root) {
     do {
@@ -41,11 +42,16 @@ define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS
 define('ROOT', $root . DS . 'tests' . DS . 'test_app');
 define('APP_DIR', 'App');
 define('APP', ROOT . DS . 'App' . DS);
-define('TMP', sys_get_temp_dir() . DS . 'cake-migrations');
+define('TMP', sys_get_temp_dir() . DS . 'cake-migrations' . DS);
 define('CACHE', TMP . DS . 'cache' . DS);
 if (!defined('CONFIG')) {
     define('CONFIG', ROOT . DS . 'config' . DS);
 }
+
+// phpcs:disable
+@mkdir(CACHE);
+// phpcs:enable
+
 Configure::write('debug', true);
 Configure::write('App', [
     'namespace' => 'TestApp',
@@ -99,4 +105,10 @@ Plugin::getCollection()->add(new \TestBlog\Plugin());
 
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? 'UNKNOWN' : '@PHINX_VERSION@');
+}
+
+// Create test database schema
+if (env('FIXTURE_SCHEMA_METADATA')) {
+    $loader = new SchemaLoader();
+    $loader->loadInternalFile(env('FIXTURE_SCHEMA_METADATA'), 'test');
 }

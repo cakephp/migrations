@@ -68,11 +68,6 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'product_id',
-                ]
-            )
-            ->addIndex(
-                [
                     'category_id',
                 ]
             )
@@ -136,6 +131,31 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
                 'null' => false,
             ])
             ->addPrimaryKey(['id', 'name'])
+            ->create();
+
+        $this->table('events')
+            ->addColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->addPrimaryKey(['id'])
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
+            ->addColumn('description', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('published', 'string', [
+                'default' => 'N',
+                'limit' => 1,
+                'null' => true,
+            ])
             ->create();
 
         $this->table('orders')
@@ -343,15 +363,6 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
 
         $this->table('articles')
             ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
-            ->addForeignKey(
                 'category_id',
                 'categories',
                 'id',
@@ -404,9 +415,6 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
     {
         $this->table('articles')
             ->dropForeignKey(
-                'product_id'
-            )
-            ->dropForeignKey(
                 'category_id'
             )->save();
 
@@ -426,6 +434,7 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
         $this->table('articles')->drop()->save();
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
+        $this->table('events')->drop()->save();
         $this->table('orders')->drop()->save();
         $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();

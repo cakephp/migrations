@@ -12,16 +12,6 @@ use Symfony\Component\Console\Output\NullOutput;
 class MigrationCommandTest extends TestCase
 {
     /**
-     * setup method
-     *
-     * @return void
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
-
-    /**
      * tearDown method
      *
      * @return void

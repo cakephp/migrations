@@ -67,11 +67,6 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
             )
             ->addIndex(
                 [
-                    'product_id',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ]
             )
@@ -125,6 +120,24 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                 'default' => '',
                 'limit' => 10,
                 'null' => false,
+            ])
+            ->create();
+
+        $this->table('events')
+            ->addColumn('title', 'string', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('description', 'text', [
+                'default' => null,
+                'limit' => null,
+                'null' => true,
+            ])
+            ->addColumn('published', 'string', [
+                'default' => 'N',
+                'limit' => 1,
+                'null' => true,
             ])
             ->create();
 
@@ -314,15 +327,6 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
                     'delete' => 'NO_ACTION',
                 ]
             )
-            ->addForeignKey(
-                'product_id',
-                'products',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE',
-                ]
-            )
             ->update();
 
         $this->table('orders')
@@ -368,9 +372,6 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->table('articles')
             ->dropForeignKey(
                 'category_id'
-            )
-            ->dropForeignKey(
-                'product_id'
             )->save();
 
         $this->table('orders')
@@ -389,6 +390,7 @@ class TestNotEmptySnapshotPgsql extends AbstractMigration
         $this->table('articles')->drop()->save();
         $this->table('categories')->drop()->save();
         $this->table('composite_pks')->drop()->save();
+        $this->table('events')->drop()->save();
         $this->table('orders')->drop()->save();
         $this->table('parts')->drop()->save();
         $this->table('products')->drop()->save();

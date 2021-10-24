@@ -25,8 +25,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~8.5.0",
-        "cakephp/cakephp": "^4.0.5",
-        "cakephp/bake": "^2.1.0",
+        "cakephp/cakephp": "dev-4.next as 4.3.0",
+        "cakephp/bake": "dev-2.next as 2.2.0",
         "cakephp/cakephp-codesniffer": "~4.1"
     },
     "autoload": {
@@ -56,7 +56,7 @@
         "cs-check": "phpcs --colors -p -s src/ tests/",
         "cs-fix": "phpcbf --colors -p src/ tests/",
         "stan": "phpstan analyse src/ && psalm.phar --show-info=false",
-        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:^0.12 psalm/phar:~3.11.2 && mv composer.backup composer.json",
+        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:0.12.88 psalm/phar:~4.7.0 && mv composer.backup composer.json",
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-clover=clover.xml"
     }
