@@ -854,6 +854,50 @@ migrations.
 Vous pouvez aussi utiliser les options ``--source``, ``--connection`` et
 ``--plugin`` comme pour la commande ``migrate``.
 
+
+Utiliser Migrations dans les Tests
+==========================
+
+Si votre application fait usage des migrations, vous pouvez ré-utiliser
+celles-ci afin de maintenir le schéma de votre base de données de test. Dans
+le fichier ``tests/bootstrap.php``, vous pouvez utiliser la
+classe ``Migrator`` pour construire le schéma avant que vos tests ne soient lancés.
+La classe ``Migrator`` réutilisera le schéma existant si il correspond à vos migrations.
+Si vos migrations ont évolué depuis le dernier lancement de vos tests, toutes les
+tables des connections de test concernées seront effacées et les migrations seront relancées
+afin d'actualiser le schéma::
+
+    // dans tests/bootstrap.php
+    use Migrations\TestSuite\Migrator;
+
+    $migrator = new Migrator();
+
+    // Simple setup sans plugins
+    $migrator->run();
+
+    // Setup sur une base de données autre que 'test'
+    $migrator->run(['connection' => 'test_other']);
+
+    // Setup pour un plugin
+    $migrator->run(['plugin' => 'Contacts']);
+
+    // Lancer les migrations du plugin Documents sur la connection test_docs.
+    $migrator->run(['plugin' => 'Documents', 'connection' => 'test_docs']);
+
+
+Si vos migrations se trouvent à différents endroits, celles-ci doivent être executées ainsi::
+
+    // Migrations du plugin Contacts sur la connection ``test``, et du plugin Documents sur la connection ``test_docs``
+    $migrator->runMany([
+        ['plugin' => 'Contacts'],
+        ['plugin' => 'Documents', 'connection' => 'test_docs']
+    ]);
+
+Les informations relatives au status des migrations de test sont rapportées dans les logs de l'application.
+
+.. versionadded: 3.2.0
+Migrator was added to complement the new fixtures in CakePHP 4.3.0.
+
 Utiliser Migrations dans les Plugins
 ====================================
 

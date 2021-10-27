@@ -860,6 +860,15 @@ beginning::
     // Run the Documents migrations on the test_docs connection.
     $migrator->run(['plugin' => 'Documents', 'connection' => 'test_docs']);
 
+
+If you need to run multiple sets of migrations, those can be run as follows::
+
+    // Run migrations for plugin Contacts on the ``test`` connection, and Documents on the ``test_docs`` connection
+    $migrator->runMany([
+        ['plugin' => 'Contacts'],
+        ['plugin' => 'Documents', 'connection' => 'test_docs']
+    ]);
+
 If you need to see additional debugging output from migrations are being run,
 you can enable a ``debug`` level logger.
 

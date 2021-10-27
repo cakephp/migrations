@@ -26,12 +26,18 @@ class MigratorTest extends TestCase
 
     public function setUp(): void
     {
+        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
         parent::setUp();
 
         $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
         unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
 
         $this->dropDatabase = tempnam(TMP, 'migrator_test_');
+        ConnectionManager::setConfig('test_migrator', [
+            'className' => Connection::class,
+            'driver' => Sqlite::class,
+            'database' => $this->dropDatabase,
+        ]);
         Cache::clear('_cake_model_');
     }
 
@@ -48,13 +54,6 @@ class MigratorTest extends TestCase
 
     public function testMigrateDropTruncate(): void
     {
-        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
-        ConnectionManager::setConfig('test_migrator', [
-            'className' => Connection::class,
-            'driver' => Sqlite::class,
-            'database' => $this->dropDatabase,
-        ]);
-
         $migrator = new Migrator();
         $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator']);
 
@@ -72,13 +71,6 @@ class MigratorTest extends TestCase
 
     public function testMigrateDropNoTruncate(): void
     {
-        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
-        ConnectionManager::setConfig('test_migrator', [
-            'className' => Connection::class,
-            'driver' => Sqlite::class,
-            'database' => $this->dropDatabase,
-        ]);
-
         $migrator = new Migrator();
         $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator'], false);
 
@@ -87,6 +79,36 @@ class MigratorTest extends TestCase
 
         $this->assertContains('migrator', $tables);
         $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    public function testRunManyDropTruncate(): void
+    {
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['connection' => 'test_migrator', 'source' => 'Migrator'],
+            ['connection' => 'test_migrator', 'source' => 'Migrator2'],
+        ]);
+
+        $connection = ConnectionManager::get('test_migrator');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(2, $connection->query('SELECT * FROM phinxlog')->fetchAll());
+    }
+
+    public function testRunManyDropNoTruncate(): void
+    {
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['connection' => 'test_migrator', 'source' => 'Migrator'],
+            ['connection' => 'test_migrator', 'source' => 'Migrator2'],
+        ], false);
+
+        $connection = ConnectionManager::get('test_migrator');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+        $this->assertCount(2, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(2, $connection->query('SELECT * FROM phinxlog')->fetchAll());
     }
 
     /**
@@ -105,12 +127,6 @@ class MigratorTest extends TestCase
 
     public function testTruncateExternalTables(): void
     {
-        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
-        ConnectionManager::setConfig('test_migrator', [
-            'className' => Connection::class,
-            'driver' => Sqlite::class,
-            'database' => $this->dropDatabase,
-        ]);
         $connection = ConnectionManager::get('test_migrator');
         $connection->execute('CREATE TABLE external_table (colname TEXT NOT NULL);');
         $tables = $connection->getSchemaCollection()->listTables();
