@@ -856,7 +856,7 @@ Vous pouvez aussi utiliser les options ``--source``, ``--connection`` et
 
 
 Utiliser Migrations dans les Tests
-==========================
+==================================
 
 Si votre application fait usage des migrations, vous pouvez ré-utiliser
 celles-ci afin de maintenir le schéma de votre base de données de test. Dans
