@@ -41,7 +41,7 @@ class Migrator
      *
      * For options, {@see \Migrations\Migrations::migrate()}.
      *
-     * @param string[] $options Migrate options. Connection defaults to `test`.
+     * @param array<string, mixed> $options Migrate options. Connection defaults to `test`.
      * @param bool $truncateTables Truncate all tables after running migrations. Defaults to true.
      * @return void
      */
