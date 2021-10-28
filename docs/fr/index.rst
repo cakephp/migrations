@@ -896,7 +896,7 @@ Si vos migrations se trouvent à différents endroits, celles-ci doivent être e
 Les informations relatives au status des migrations de test sont rapportées dans les logs de l'application.
 
 .. versionadded: 3.2.0
-Migrator was added to complement the new fixtures in CakePHP 4.3.0.
+    Migrator was added to complement the new fixtures in CakePHP 4.3.0.
 
 Utiliser Migrations dans les Plugins
 ====================================
