@@ -7,6 +7,10 @@
     <testsuites>
         <testsuite name="migrations">
             <directory>tests/TestCase</directory>
+            <exclude>tests/TestCase/TestSuite</exclude>
+        </testsuite>
+        <testsuite name="migrator">
+            <directory>tests/TestCase/TestSuite</directory>
         </testsuite>
     </testsuites>
 

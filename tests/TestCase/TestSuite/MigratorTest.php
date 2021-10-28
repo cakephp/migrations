@@ -13,10 +13,8 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
-use Cake\Cache\Cache;
-use Cake\Database\Connection;
-use Cake\Database\Driver\Sqlite;
 use Cake\Datasource\ConnectionManager;
+use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
 use Migrations\TestSuite\Migrator;
 
@@ -26,42 +24,30 @@ class MigratorTest extends TestCase
 
     public function setUp(): void
     {
-        $this->skipIf(!extension_loaded('pdo_sqlite'), 'Skipping as SQLite extension is missing');
         parent::setUp();
 
         $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
         unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
 
-        $this->dropDatabase = tempnam(TMP, 'migrator_test_');
-        ConnectionManager::setConfig('test_migrator', [
-            'className' => Connection::class,
-            'driver' => Sqlite::class,
-            'database' => $this->dropDatabase,
-        ]);
-        Cache::clear('_cake_model_');
+        (new ConnectionHelper())->dropTables('default');
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
         $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
-
-        ConnectionManager::drop('test_migrator');
-        if (file_exists($this->dropDatabase)) {
-            unlink($this->dropDatabase);
-        }
     }
 
     public function testMigrateDropTruncate(): void
     {
         $migrator = new Migrator();
-        $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator']);
+        $migrator->run(['plugin' => 'Migrator']);
 
-        $connection = ConnectionManager::get('test_migrator');
+        $connection = ConnectionManager::get('default');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
 
-        $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator']);
+        $migrator->run(['plugin' => 'Migrator',]);
 
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
@@ -72,9 +58,9 @@ class MigratorTest extends TestCase
     public function testMigrateDropNoTruncate(): void
     {
         $migrator = new Migrator();
-        $migrator->run(['connection' => 'test_migrator', 'source' => 'Migrator'], false);
+        $migrator->run(['plugin' => 'Migrator'], false);
 
-        $connection = ConnectionManager::get('test_migrator');
+        $connection = ConnectionManager::get('default');
         $tables = $connection->getSchemaCollection()->listTables();
 
         $this->assertContains('migrator', $tables);
@@ -85,30 +71,30 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
         $migrator->runMany([
-            ['connection' => 'test_migrator', 'source' => 'Migrator'],
-            ['connection' => 'test_migrator', 'source' => 'Migrator2'],
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
         ]);
 
-        $connection = ConnectionManager::get('test_migrator');
+        $connection = ConnectionManager::get('default');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
-        $this->assertCount(2, $connection->query('SELECT * FROM phinxlog')->fetchAll());
+        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
     }
 
     public function testRunManyDropNoTruncate(): void
     {
         $migrator = new Migrator();
         $migrator->runMany([
-            ['connection' => 'test_migrator', 'source' => 'Migrator'],
-            ['connection' => 'test_migrator', 'source' => 'Migrator2'],
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
         ], false);
 
-        $connection = ConnectionManager::get('test_migrator');
+        $connection = ConnectionManager::get('default');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertCount(2, $connection->query('SELECT * FROM migrator')->fetchAll());
-        $this->assertCount(2, $connection->query('SELECT * FROM phinxlog')->fetchAll());
+        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
     }
 
     /**
@@ -119,24 +105,9 @@ class MigratorTest extends TestCase
         $this->testMigrateDropNoTruncate();
 
         $migrator = new Migrator();
-        $migrator->truncate('test_migrator');
+        $migrator->truncate('default');
 
-        $connection = ConnectionManager::get('test_migrator');
+        $connection = ConnectionManager::get('default');
         $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
-    }
-
-    public function testTruncateExternalTables(): void
-    {
-        $connection = ConnectionManager::get('test_migrator');
-        $connection->execute('CREATE TABLE external_table (colname TEXT NOT NULL);');
-        $tables = $connection->getSchemaCollection()->listTables();
-        $this->assertContains('external_table', $tables);
-        $connection->execute('INSERT INTO external_table (colname) VALUES ("test");');
-        $this->assertCount(1, $connection->query('SELECT * FROM external_table')->fetchAll());
-
-        $migrator = new Migrator();
-        $migrator->truncate('test_migrator');
-
-        $this->assertCount(0, $connection->query('SELECT * FROM external_table')->fetchAll());
     }
 }
