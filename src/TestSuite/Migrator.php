@@ -65,7 +65,7 @@ class Migrator
      *  ['plugin' => 'PluginA']
      * ]);
      *
-     * @param string[][] $options Array of multiple arrays of options
+     * @param array<array<string>> $options Array of option arrays.
      * @param bool $truncateTables Truncate all tables after running migrations. Defaults to true.
      * @return void
      */
