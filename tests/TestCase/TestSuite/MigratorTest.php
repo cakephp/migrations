@@ -29,7 +29,7 @@ class MigratorTest extends TestCase
         $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
         unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
 
-        (new ConnectionHelper())->dropTables('default');
+        (new ConnectionHelper())->dropTables('test');
     }
 
     public function tearDown(): void
@@ -43,7 +43,7 @@ class MigratorTest extends TestCase
         $migrator = new Migrator();
         $migrator->run(['plugin' => 'Migrator']);
 
-        $connection = ConnectionManager::get('default');
+        $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
 
@@ -60,7 +60,7 @@ class MigratorTest extends TestCase
         $migrator = new Migrator();
         $migrator->run(['plugin' => 'Migrator'], false);
 
-        $connection = ConnectionManager::get('default');
+        $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
 
         $this->assertContains('migrator', $tables);
@@ -75,7 +75,7 @@ class MigratorTest extends TestCase
             ['plugin' => 'Migrator', 'source' => 'Migrations2',],
         ]);
 
-        $connection = ConnectionManager::get('default');
+        $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
@@ -90,7 +90,7 @@ class MigratorTest extends TestCase
             ['plugin' => 'Migrator', 'source' => 'Migrations2',],
         ], false);
 
-        $connection = ConnectionManager::get('default');
+        $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertCount(2, $connection->query('SELECT * FROM migrator')->fetchAll());
@@ -105,9 +105,9 @@ class MigratorTest extends TestCase
         $this->testMigrateDropNoTruncate();
 
         $migrator = new Migrator();
-        $migrator->truncate('default');
+        $migrator->truncate('test');
 
-        $connection = ConnectionManager::get('default');
+        $connection = ConnectionManager::get('test');
         $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
     }
 }
