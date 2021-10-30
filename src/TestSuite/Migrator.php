@@ -35,15 +35,41 @@ class Migrator
     }
 
     /**
-     * Runs migrations.
+     * Runs one set of migrations.
+     * This is useful if all your migrations are located in config/Migrations,
+     * or in a single directory, or in a single plugin.
      *
      * For options, {@see \Migrations\Migrations::migrate()}.
      *
-     * @param array $options Migrate options
+     * @param array<string, mixed> $options Migrate options. Connection defaults to `test`.
      * @param bool $truncateTables Truncate all tables after running migrations. Defaults to true.
      * @return void
      */
     public function run(
+        array $options = [],
+        bool $truncateTables = true
+    ): void {
+        $this->runMany([$options], $truncateTables);
+    }
+
+    /**
+     * Runs multiple sets of migrations.
+     * This is useful if your migrations are located in multiple sources, plugins or connections.
+     *
+     * For options, {@see \Migrations\Migrations::migrate()}.
+     *
+     * Example:
+     *
+     * $this->runMany([
+     *  ['connection' => 'some-connection', 'source' => 'some/directory'],
+     *  ['plugin' => 'PluginA']
+     * ]);
+     *
+     * @param array<array<string, mixed>> $options Array of option arrays.
+     * @param bool $truncateTables Truncate all tables after running migrations. Defaults to true.
+     * @return void
+     */
+    public function runMany(
         array $options = [],
         bool $truncateTables = true
     ): void {
@@ -52,26 +78,43 @@ class Migrator
             return;
         }
 
-        $options += ['connection' => 'test'];
-        $migrations = new Migrations();
-
-        if ($this->shouldDropTables($migrations, $options)) {
-            $dropTables = $this->getNonPhinxTables($options['connection']);
-            if (count($dropTables)) {
-                $this->helper->dropTables($options['connection'], $dropTables);
+        // Detect all connections involved, and mark those with changed status.
+        $connectionsToDrop = [];
+        $connectionsList = [];
+        foreach ($options as $i => $migrationSet) {
+            $migrationSet += ['connection' => 'test'];
+            $options[$i] = $migrationSet;
+            $connectionName = $migrationSet['connection'];
+            if (!in_array($connectionName, $connectionsList)) {
+                $connectionsList[] = $connectionName;
             }
-            $phinxTables = $this->getPhinxTables($options['connection']);
-            if (count($phinxTables)) {
-                $this->helper->truncateTables($options['connection'], $phinxTables);
+
+            $migrations = new Migrations();
+            if (!in_array($connectionName, $connectionsToDrop) && $this->shouldDropTables($migrations, $migrationSet)) {
+                $connectionsToDrop[] = $connectionName;
             }
         }
 
-        if (!$migrations->migrate($options)) {
-            throw new RuntimeException(sprintf('Unable to migrate fixtures for `%s`.', $options['connection']));
+        foreach ($connectionsToDrop as $connectionName) {
+            $this->dropTables($connectionName);
         }
 
+        // Run all sets of migrations
+        foreach ($options as $migrationSet) {
+            $migrations = new Migrations();
+
+            if (!$migrations->migrate($migrationSet)) {
+                throw new RuntimeException(
+                    sprintf('Unable to migrate fixtures for `%s`.', $migrationSet['connection'])
+                );
+            }
+        }
+
+        // Truncate all connections if required in parameters
         if ($truncateTables) {
-            $this->truncate($options['connection']);
+            foreach ($connectionsList as $connectionName) {
+                $this->truncate($connectionName);
+            }
         }
     }
 
@@ -127,6 +170,25 @@ class Migrator
         Log::write('debug', 'No migration changes detected');
 
         return false;
+    }
+
+    /**
+     * Drops the regular tables of the provided connection
+     * and truncates the phinx tables.
+     *
+     * @param string $connection Connection on which tables are dropped.
+     * @return void
+     */
+    protected function dropTables(string $connection): void
+    {
+        $dropTables = $this->getNonPhinxTables($connection);
+        if (count($dropTables)) {
+            $this->helper->dropTables($connection, $dropTables);
+        }
+        $phinxTables = $this->getPhinxTables($connection);
+        if (count($phinxTables)) {
+            $this->helper->truncateTables($connection, $phinxTables);
+        }
     }
 
     /**
