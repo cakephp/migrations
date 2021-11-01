@@ -61,6 +61,18 @@ trait ConfigurationTrait
 
         return $this->input;
     }
+    
+    /**
+     * Overrides the original method from phinx to just always return true to
+     * avoid calling loadConfig method which will throw an exception as we rely on
+     * the overridden getConfig method.
+     *
+     * @return bool
+     */
+    public function hasConfig(): bool
+    {
+        return true;
+    }
 
     /**
      * Overrides the original method from phinx in order to return a tailored
