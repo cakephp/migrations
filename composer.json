@@ -19,7 +19,7 @@
     },
     "require": {
         "php": ">=7.2.0",
-        "robmorgan/phinx": "dev-0.next-assoc as 0.13",
+        "robmorgan/phinx": "dev-0.next as 0.13",
         "cakephp/orm": "^4.0.5",
         "cakephp/cache": "^4.0.5"
     },
