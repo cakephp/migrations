@@ -24,5 +24,3 @@ RUN cp -R /data/website/html/* /usr/share/nginx/html \
   && rm -rf /data/website/
 
 RUN ln -s /usr/share/nginx/html /usr/share/nginx/html/2.x
-
-CMD ["/data/run.sh"]
