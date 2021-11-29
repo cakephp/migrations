@@ -67,6 +67,25 @@ class MigratorTest extends TestCase
         $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
     }
 
+    public function testMigrateSkipTables(): void
+    {
+        $connection = ConnectionManager::get('test');
+
+        // Create a table
+        $connection->execute('CREATE TABLE skipme (name TEXT)');
+
+        // Insert a record so that we can ensure the table was skipped.
+        $connection->execute('INSERT INTO skipme (name) VALUES (:name)', ['name' => 'Ron']);
+
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator', 'skip' => ['skip*']]);
+
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+        $this->assertContains('skipme', $tables);
+        $this->assertCount(1, $connection->query('SELECT * FROM skipme')->fetchAll());
+    }
+
     public function testRunManyDropTruncate(): void
     {
         $migrator = new Migrator();

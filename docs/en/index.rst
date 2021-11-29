@@ -869,6 +869,15 @@ If you need to run multiple sets of migrations, those can be run as follows::
         ['plugin' => 'Documents', 'connection' => 'test_docs']
     ]);
 
+If your database also contains tables that are not managed by your application
+like those created by PostGIS, then you can exclude those tables from the drop
+& truncate behavior using the ``skip`` option::
+
+    $migrator->run(['connection' => 'test', 'skip' => 'postgis*']);
+
+The ``skip`` option accepts a ``fnmatch()`` compatible pattern to exclude tables
+from drop & truncate operations.
+
 If you need to see additional debugging output from migrations are being run,
 you can enable a ``debug`` level logger.
 
