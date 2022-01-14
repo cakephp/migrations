@@ -2,7 +2,10 @@
     "name": "cakephp/migrations",
     "description": "Database Migration plugin for CakePHP based on Phinx",
     "type": "cakephp-plugin",
-    "keywords": ["cakephp", "migrations"],
+    "keywords": [
+        "cakephp",
+        "migrations"
+    ],
     "homepage": "https://github.com/cakephp/migrations",
     "license": "MIT",
     "authors": [
@@ -59,5 +62,10 @@
         "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:0.12.88 psalm/phar:~4.7.0 && mv composer.backup composer.json",
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-clover=clover.xml"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
