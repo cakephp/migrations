@@ -117,19 +117,23 @@ class BakeSeedCommand extends SimpleBakeCommand
             if ($fields !== '*') {
                 $fields = explode(',', $fields);
             }
+            $model = $this->getTableLocator()->get('BakeSeed', [
+                'table' => $table,
+                'connection' => ConnectionManager::get($this->connection),
+            ]);
 
-            $connection = ConnectionManager::get($this->connection);
-
-            $query = $connection->newQuery()
-                ->from($table)
-                ->select($fields);
+            $query = $model->find('all')
+                ->enableHydration(false);
 
             if ($limit) {
                 $query->limit($limit);
             }
+            if ($fields !== '*') {
+                $query->select($fields);
+            }
 
             /** @var array $records */
-            $records = $connection->execute($query->sql())->fetchAll('assoc');
+            $records = $query->toArray();
             $records = $this->prettifyArray($records);
         }
 

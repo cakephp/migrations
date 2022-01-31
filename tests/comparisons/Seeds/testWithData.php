@@ -22,19 +22,19 @@ class EventsSeed extends AbstractSeed
     {
         $data = [
             [
-                'id' => '1',
+                'id' => 1,
                 'title' => 'Lorem ipsum dolor sit amet',
                 'description' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
                 'published' => 'Y',
             ],
             [
-                'id' => '2',
+                'id' => 2,
                 'title' => 'Second event',
                 'description' => 'Second event description.',
                 'published' => 'Y',
             ],
             [
-                'id' => '3',
+                'id' => 3,
                 'title' => 'Lorem ipsum dolor sit amet',
                 'description' => 'Lorem ipsum dolor sit amet, aliquet feugiat.
 Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget \'sollicitudin\' venenatis cum
