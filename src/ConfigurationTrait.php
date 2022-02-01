@@ -173,17 +173,17 @@ trait ConfigurationTrait
     public function getAdapterName($driver)
     {
         switch ($driver) {
-            case 'Cake\Database\Driver\Mysql':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Mysql'):
+            case \Cake\Database\Driver\Mysql::class:
+            case is_subclass_of($driver, \Cake\Database\Driver\Mysql::class):
                 return 'mysql';
-            case 'Cake\Database\Driver\Postgres':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Postgres'):
+            case \Cake\Database\Driver\Postgres::class:
+            case is_subclass_of($driver, \Cake\Database\Driver\Postgres::class):
                 return 'pgsql';
-            case 'Cake\Database\Driver\Sqlite':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Sqlite'):
+            case \Cake\Database\Driver\Sqlite::class:
+            case is_subclass_of($driver, \Cake\Database\Driver\Sqlite::class):
                 return 'sqlite';
-            case 'Cake\Database\Driver\Sqlserver':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Sqlserver'):
+            case \Cake\Database\Driver\Sqlserver::class:
+            case is_subclass_of($driver, \Cake\Database\Driver\Sqlserver::class):
                 return 'sqlsrv';
         }
 
