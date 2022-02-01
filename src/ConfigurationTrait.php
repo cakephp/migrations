@@ -14,6 +14,10 @@ declare(strict_types=1);
 namespace Migrations;
 
 use Cake\Core\Configure;
+use Cake\Database\Driver\Mysql;
+use Cake\Database\Driver\Postgres;
+use Cake\Database\Driver\Sqlite;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
@@ -173,17 +177,17 @@ trait ConfigurationTrait
     public function getAdapterName($driver)
     {
         switch ($driver) {
-            case 'Cake\Database\Driver\Mysql':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Mysql'):
+            case Mysql::class:
+            case is_subclass_of($driver, Mysql::class):
                 return 'mysql';
-            case 'Cake\Database\Driver\Postgres':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Postgres'):
+            case Postgres::class:
+            case is_subclass_of($driver, Postgres::class):
                 return 'pgsql';
-            case 'Cake\Database\Driver\Sqlite':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Sqlite'):
+            case Sqlite::class:
+            case is_subclass_of($driver, Sqlite::class):
                 return 'sqlite';
-            case 'Cake\Database\Driver\Sqlserver':
-            case is_subclass_of($driver, 'Cake\Database\Driver\Sqlserver'):
+            case Sqlserver::class:
+            case is_subclass_of($driver, Sqlserver::class):
                 return 'sqlsrv';
         }
 
