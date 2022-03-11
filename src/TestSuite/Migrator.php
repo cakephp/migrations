@@ -112,7 +112,7 @@ class Migrator
 
             if (!$migrations->migrate($migrationSet)) {
                 throw new RuntimeException(
-                    sprintf('Unable to migrate fixtures for `%s`.', $migrationSet['connection'])
+                    "Unable to migrate fixtures for `{$migrationSet['connection']}`."
                 );
             }
         }
@@ -160,7 +160,11 @@ class Migrator
 
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up') {
-                Log::write('debug', 'One or more additional migrations detected.');
+                Log::write(
+                    'debug',
+                    'One or more migrations need to be applied. ' .
+                    "Migration with source={$migration['name']} id={$migration['id']} needs to be applied."
+                );
 
                 return true;
             }
@@ -170,7 +174,11 @@ class Migrator
                 return true;
             }
             if ($migration['status'] === 'down') {
-                Log::write('debug', 'New migration(s) found.');
+                Log::write(
+                    'debug',
+                    'One or more migrations needs to be reversed.' .
+                    "Migration with source={$migration['name']} id={$migration['id']} needs to be reversed."
+                );
 
                 return true;
             }
