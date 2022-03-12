@@ -13,7 +13,6 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\View\Helper;
 
-use Cake\Cache\Cache;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;

@@ -161,14 +161,15 @@ class Migrator
         $messages = [
             'up' => [],
             'down' => [],
-            'missing' => []
+            'missing' => [],
         ];
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up') {
                 $messages['up'][] = "Unapplied migration source={$migration['name']} id={$migration['id']}";
             }
             if ($migration['missing'] ?? false) {
-                $messages['missing'][] = "Applied but, missing Migration source={$migration['name']} id={$migration['id']}";
+                $messages['missing'][] = 'Applied but, missing Migration ' .
+                    "source={$migration['name']} id={$migration['id']}";
             }
             if ($migration['status'] === 'down') {
                 $messages['down'][] = "Migration to reverse. source={$migration['name']} id={$migration['id']}";
@@ -181,23 +182,23 @@ class Migrator
         };
         if (!empty($messages['up'])) {
             $hasProblems = true;
-            $output []= 'Unapplied migrations:';
+            $output[] = 'Unapplied migrations:';
             $output = array_merge($output, array_map($itemize, $messages['up']));
-            $output []= '';
+            $output[] = '';
         }
         if (!empty($messages['down'])) {
             $hasProblems = true;
-            $output [] = 'Migrations needing to be reversed:';
+            $output[] = 'Migrations needing to be reversed:';
             $output = array_merge($output, array_map($itemize, $messages['down']));
-            $output []= '';
+            $output[] = '';
         }
         if (!empty($messages['missing'])) {
             $hasProblems = true;
-            $output [] = 'Applied but missing migrations:';
+            $output[] = 'Applied but missing migrations:';
             $output = array_merge($output, array_map($itemize, $messages['down']));
-            $output []= '';
+            $output[] = '';
         }
-        if ($output) { 
+        if ($output) {
             $output = array_merge(
                 ['Your migration status some differences with the expected state.', ''],
                 $output,
