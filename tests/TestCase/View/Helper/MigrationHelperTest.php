@@ -78,8 +78,6 @@ class MigrationHelperTest extends TestCase
         $this->helper = new MigrationHelper($this->view, [
             'collection' => $this->collection,
         ]);
-        Cache::clear('_cake_model_');
-        Cache::enable();
 
         $this->types = [
             'timestamp' => 'timestamp',

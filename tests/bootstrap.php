@@ -93,10 +93,16 @@ if (!getenv('DB')) {
     }
     putenv('DB=' . $db);
 }
-ConnectionManager::setConfig('test', ['url' => getenv('DB_URL')]);
+ConnectionManager::setConfig('test', [
+    'cacheMetadata' => false,
+    'url' => getenv('DB_URL'),
+]);
 
 if (getenv('DB_URL_COMPARE') !== false) {
-    ConnectionManager::setConfig('test_comparisons', ['url' => getenv('DB_URL_COMPARE')]);
+    ConnectionManager::setConfig('test_comparisons', [
+        'cacheMetadata' => false,
+        'url' => getenv('DB_URL_COMPARE'),
+    ]);
 }
 
 Plugin::getCollection()->add(new \Migrations\Plugin());

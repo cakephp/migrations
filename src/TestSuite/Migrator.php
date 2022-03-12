@@ -158,34 +158,55 @@ class Migrator
     {
         Log::write('debug', "Reading migrations status for {$options['connection']}...");
 
+        $messages = [
+            'up' => [],
+            'down' => [],
+            'missing' => []
+        ];
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up') {
-                Log::write(
-                    'debug',
-                    'One or more migrations need to be applied. ' .
-                    "Migration with source={$migration['name']} id={$migration['id']} needs to be applied."
-                );
-
-                return true;
+                $messages['up'][] = "Unapplied migration source={$migration['name']} id={$migration['id']}";
             }
             if ($migration['missing'] ?? false) {
-                Log::write('debug', 'One or more missing migrations detected.');
-
-                return true;
+                $messages['missing'][] = "Applied but, missing Migration source={$migration['name']} id={$migration['id']}";
             }
             if ($migration['status'] === 'down') {
-                Log::write(
-                    'debug',
-                    'One or more migrations needs to be reversed.' .
-                    "Migration with source={$migration['name']} id={$migration['id']} needs to be reversed."
-                );
-
-                return true;
+                $messages['down'][] = "Migration to reverse. source={$migration['name']} id={$migration['id']}";
             }
         }
-        Log::write('debug', 'No migration changes detected');
+        $output = [];
+        $hasProblems = false;
+        $itemize = function ($item) {
+            return '- ' . $item;
+        };
+        if (!empty($messages['up'])) {
+            $hasProblems = true;
+            $output []= 'Unapplied migrations:';
+            $output = array_merge($output, array_map($itemize, $messages['up']));
+            $output []= '';
+        }
+        if (!empty($messages['down'])) {
+            $hasProblems = true;
+            $output [] = 'Migrations needing to be reversed:';
+            $output = array_merge($output, array_map($itemize, $messages['down']));
+            $output []= '';
+        }
+        if (!empty($messages['missing'])) {
+            $hasProblems = true;
+            $output [] = 'Applied but missing migrations:';
+            $output = array_merge($output, array_map($itemize, $messages['down']));
+            $output []= '';
+        }
+        if ($output) { 
+            $output = array_merge(
+                ['Your migration status some differences with the expected state.', ''],
+                $output,
+                ['Going to drop all tables in this source, and re-apply migrations.']
+            );
+            Log::write('debug', implode("\n", $output));
+        }
 
-        return false;
+        return $hasProblems;
     }
 
     /**
