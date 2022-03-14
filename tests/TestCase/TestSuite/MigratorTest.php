@@ -20,8 +20,6 @@ use Migrations\TestSuite\Migrator;
 
 class MigratorTest extends TestCase
 {
-    protected $dropDatabase = null;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -36,6 +34,8 @@ class MigratorTest extends TestCase
     {
         parent::tearDown();
         $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
+
+        (new ConnectionHelper())->dropTables('test');
     }
 
     public function testMigrateDropTruncate(): void
