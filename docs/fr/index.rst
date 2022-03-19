@@ -31,7 +31,8 @@ localisé):
 
 Pour utiliser le plugin, vous devrez le charger dans le fichier
 **config/bootstrap.php** de votre application.
-Vous pouvez utiliser :ref:`le shell de Plugin de CakePHP <https://book.cakephp.org/3.0/fr/console-and-shells/plugin-shell.html>` pour
+Vous pouvez utiliser `le shell de Plugin de CakePHP
+<https://book.cakephp.org/3.0/fr/console-and-shells/plugin-shell.html>`__ pour
 charger et décharger les plugins de votre **config/bootstrap.php**:
 
 .. code-block:: bash
@@ -45,7 +46,8 @@ Ou vous pouvez charger le plugin en modifiant votre fichier
 
 De plus, vous devrez configurer la base de données par défaut pour votre
 application dans le fichier **config/app.php** comme expliqué dans la section
-sur la :ref:`configuration des bases de données <https://book.cakephp.org/3.0/fr/orm/database-basics.html#database-configuration>`.
+sur la `configuration des bases de données
+<https://book.cakephp.org/3.0/fr/orm/database-basics.html#database-configuration>`__.
 
 Vue d'ensemble
 ==============
@@ -142,7 +144,7 @@ Voici quelques exemples de noms de fichiers de migration:
 * 20160210133047_AddRatingToProducts.php
 
 La meilleure façon de créer un fichier de migration est d'utiliser la ligne de
-commande :doc:`/bake/usage`.
+commande ``bin/cake bake migration``.
 
 Assurez-vous de bien lire la `documentation officielle de Phinx <https://book.cakephp.org/phinx/0/en/migrations.html>`_ afin de connaître la liste
 complète des méthodes que vous pouvez utiliser dans l'écriture des fichiers de
@@ -722,6 +724,7 @@ En ce qui concerne migrations, une interface ``bake`` est fournie pour les
 fichiers de seed:
 
 .. code-block:: bash
+
     # Ceci va créer un fichier ArticlesSeed.php dans le répertoire config/Seeds
     # de votre application
     # Par défaut, la table que le seed va essayer de modifier est la version
@@ -1128,8 +1131,8 @@ vider le cache de l'ORM pour qu'il renouvelle les _metadata_ des colonnes de vos
 tables.
 Autrement, vous pourrez rencontrer des erreurs de colonnes inexistantes quand
 vous effectuerez des opérations sur vos nouvelles colonnes.
-Le Core de CakePHP inclut un
-:doc:`Shell de Cache du Schéma <https://book.cakephp.org/3.0/fr/console-and-shells/schema-cache.html>` que vous pouvez
+Le Core de CakePHP inclut un `Shell de Cache du Schéma
+<https://book.cakephp.org/3.0/fr/console-and-shells/schema-cache.html>`__ que vous pouvez
 utilisez pour vider le cache:
 
 .. code-block:: bash
@@ -1137,8 +1140,8 @@ utilisez pour vider le cache:
     // Avant 3.6, utilisez orm_cache
     bin/cake schema_cache clear
 
-Veuillez vous référer à la section du cookbook à propos du
-:doc:`Shell du Cache du Schéma <https://book.cakephp.org/3.0/fr/console-and-shells/schema-cache.html>` si vous voulez
+Veuillez vous référer à la section du cookbook à propos du `Shell du Cache du Schéma
+<https://book.cakephp.org/3.0/fr/console-and-shells/schema-cache.html>`__ si vous voulez
 plus de détails à propos de ce shell.
 
 Renommer une table
