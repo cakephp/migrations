@@ -174,12 +174,7 @@ All sections other than name are optional.
   key with `unique` or a primary key with `primary`
 TEXT;
 
-        $parser
-            ->setDescription($text)
-            ->addArgument('name', [
-                'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
-                'required' => true,
-            ]);
+        $parser->setDescription($text);
 
         return $parser;
     }
