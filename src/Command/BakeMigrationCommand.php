@@ -149,14 +149,14 @@ with a 'string' type to the users table. Migrations that operate
 on columns can use the <info>Column Grammar</info> to describe
 the column in detail.
 
-<warning>bin/cake bake migration AlterFieldOnUsers role avatar_img</warning>
-These commands will generate a migration that will alter the listed fields
-on the users table.
+<warning>bin/cake bake migration AlterFieldOnUsers role</warning>
+These commands will generate a migration that will alter the 'role'
+field on the users table.
 
-<warning>bin/cake bake migration RemoveFieldsFromUsers role avatar_img</warning>
+<warning>bin/cake bake migration RemoveFieldsFromUsers role</warning>
 <warning>bin/cake bake migration RemoveRoleFromUsers</warning>
-These commands will generate a migration that will remove the listed fields
-on the users table.
+These commands will generate a migration that will remove the 'role'
+field on the users table.
 
 <info>Column Grammar</info>
 
@@ -168,10 +168,10 @@ All sections other than name are optional.
 
 * The types are the abstract database column types in CakePHP.
 * The <warning>?</warning> value indicates if a column is nullable.
-  e.x. `role:string?`
+  e.x. `role:string?`.
 * Length option must be enclosed in `[]` e.x. `name:string[100]`
 * The `index` attribute can define the column as having a unique
-  key with `unique` or a primary key with `primary`
+  key with `unique` or a primary key with `primary`.
 TEXT;
 
         $parser->setDescription($text);
