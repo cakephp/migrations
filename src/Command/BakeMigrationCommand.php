@@ -17,6 +17,7 @@ namespace Migrations\Command;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
@@ -117,11 +118,73 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     }
 
     /**
+     * Gets the option parser instance and configures it.
+     *
+     * @return \Cake\Console\ConsoleOptionParser
+     */
+    public function getOptionParser(): ConsoleOptionParser
+    {
+        $parser = parent::getOptionParser();
+        $text = <<<'TEXT'
+Create a blank or generated migration. Using the name of the migration 
+Operations and table names will be inferred.
+
+<info>Examples</info>
+
+<warning>bin/cake bake migration CreateUsers</warning>
+
+This command will generate a migration that creates
+a table named users.
+
+<warning>bin/cake bake migration DropGroups</warning>
+This command will generate a migration that drops
+the groups table.
+
+<warning>bin/cake bake migration AlterUsers</warning>
+This command will generate a migration that alters the users table.
+
+<warning>bin/cake bake migration AddFieldToUsers role:string</warning>
+This command will generate a migration that adds a 'role' field
+with a 'string' type to the users table. Migrations that operate
+on columns can use the <info>Column Grammar</info> to describe
+the column in detail.
+
+<warning>bin/cake bake migration AlterFieldOnUsers role avatar_img</warning>
+These commands will generate a migration that will alter the listed fields
+on the users table.
+
+<warning>bin/cake bake migration RemoveFieldsFromUsers role avatar_img</warning>
+<warning>bin/cake bake migration RemoveRoleFromUsers</warning>
+These commands will generate a migration that will remove the listed fields
+on the users table.
+
+<info>Column Grammar</info>
+
+When describing columns you can use the following syntax:
+
+<warning>{name}:{primary}{type}{nullable}[{length}]:{index}</warning>
+
+All sections other than name are optional.
+
+* The types are the abstract database column types in CakePHP.
+* The <warning>?</warning> value indicates if a column is nullable.
+  e.x. `role:string?`
+* Length option must be enclosed in `[]` e.x. `name:string[100]`
+* The `index` attribute can define the column as having a unique
+  key with `unique` or a primary key with `primary`
+TEXT;
+
+        $parser->setDescription($text);
+
+        return $parser;
+    }
+
+    /**
      * Detects the action and table from the name of a migration
      *
      * @param string $name Name of migration
      * @return array
-     **/
+     */
     public function detectAction($name)
     {
         if (preg_match('/^(Create|Drop)(.*)/', $name, $matches)) {
