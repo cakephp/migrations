@@ -364,7 +364,10 @@ will generate::
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string')
+                  ->addColumn('email', 'string')
                   ->addIndex(['name'])
+                  // add a unique index:
+                  ->addIndex('email', ['unique' => true])
                   ->update();
         }
     }
