@@ -23,7 +23,8 @@ project = 'CakePHP Migrations'
 
 # Other versions that display in the version picker menu.
 version_list = [
-    {'name': '2.x', 'number': '/migrations/2.x', 'title': '2.x', 'current': True},
+    {'name': '2.x', 'number': 'migrations/2', 'title': '2.x', 'current': True},
+    {'name': '3.x', 'number': 'migrations/3', 'title': '3.x'},
 ]
 
 # Languages available.
