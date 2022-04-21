@@ -32,7 +32,7 @@ languages = ['en', 'fr', 'ja', 'pt', 'ru']
 
 # The GitHub branch name for this version of the docs
 # for edit links to point at.
-branch = 'master'
+branch = '3.x'
 
 # Current version being built
 version = '3.x'
