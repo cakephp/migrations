@@ -134,7 +134,7 @@ class MigratorTest extends TestCase
 
     private function setMigrationEndDateToYesterday()
     {
-        ConnectionManager::get('test') ->newQuery()
+        ConnectionManager::get('test')->newQuery()
             ->update('migrator_phinxlog')
             ->set('end_time', FrozenDate::yesterday(), 'timestamp')
             ->execute();
