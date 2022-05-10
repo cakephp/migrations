@@ -13,7 +13,9 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
+use Cake\Chronos\ChronosInterface;
 use Cake\Datasource\ConnectionManager;
+use Cake\I18n\FrozenDate;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
 use Migrations\TestSuite\Migrator;
@@ -128,5 +130,105 @@ class MigratorTest extends TestCase
 
         $connection = ConnectionManager::get('test');
         $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    private function setMigrationEndDateToYesterday()
+    {
+        ConnectionManager::get('test')->newQuery()
+            ->update('migrator_phinxlog')
+            ->set('end_time', FrozenDate::yesterday(), 'timestamp')
+            ->execute();
+    }
+
+    private function fetchMigrationEndDate(): ChronosInterface
+    {
+        $endTime = ConnectionManager::get('test')->newQuery()
+            ->select('end_time')
+            ->from('migrator_phinxlog')
+            ->execute()->fetchColumn(0);
+
+        return FrozenDate::parse($endTime);
+    }
+
+    public function testSkipMigrationDroppingIfOnlyUpMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator']);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator
+        $migrator->run(['plugin' => 'Migrator']);
+
+        // Ensure that the end time is unchanged, meaning that the phinx table was not dropped
+        // and the migrations were not re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isYesterday());
+    }
+
+    public function testSkipMigrationDroppingIfOnlyUpMigrationsWithTwoSetsOfMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['source' => '../../Plugin/Migrator/config/Migrations2',],
+        ], false);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['source' => '../../Plugin/Migrator/config/Migrations2',],
+        ], false);
+
+        // Ensure that the end time is unchanged, meaning that the phinx table was not dropped
+        // and the migrations were not re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isYesterday());
+    }
+
+    public function testDropMigrationsIfDownMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator']);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator with additional down migrations
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
+        ], false);
+
+        // Ensure that the end time is today, meaning that the phinx table was truncated
+        // and the migration were re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isToday());
+    }
+
+    public function testDropMigrationsIfMissingMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
+        ]);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator with missing migrations
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+        ], false);
+
+        // Ensure that the end time is today, meaning that the phinx table was truncated
+        // and the migration were re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isToday());
     }
 }

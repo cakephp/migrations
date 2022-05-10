@@ -159,15 +159,11 @@ class Migrator
         Log::write('debug', "Reading migrations status for {$options['connection']}...");
 
         $messages = [
-            'up' => [],
             'down' => [],
             'missing' => [],
         ];
         foreach ($migrations->status($options) as $migration) {
-            if ($migration['status'] === 'up') {
-                $messages['up'][] = "Unapplied migration source={$migration['name']} id={$migration['id']}";
-            }
-            if ($migration['missing'] ?? false) {
+            if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
                 $messages['missing'][] = 'Applied but, missing Migration ' .
                     "source={$migration['name']} id={$migration['id']}";
             }
@@ -180,12 +176,6 @@ class Migrator
         $itemize = function ($item) {
             return '- ' . $item;
         };
-        if (!empty($messages['up'])) {
-            $hasProblems = true;
-            $output[] = 'Unapplied migrations:';
-            $output = array_merge($output, array_map($itemize, $messages['up']));
-            $output[] = '';
-        }
         if (!empty($messages['down'])) {
             $hasProblems = true;
             $output[] = 'Migrations needing to be reversed:';
