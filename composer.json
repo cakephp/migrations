@@ -59,7 +59,7 @@
         "cs-check": "phpcs --colors -p -s src/ tests/",
         "cs-fix": "phpcbf --colors -p src/ tests/",
         "stan": "phpstan analyse src/ && psalm.phar --show-info=false",
-        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:~1.4.0 psalm/phar:~4.19.0 && mv composer.backup composer.json",
+        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:~1.7.0 psalm/phar:~4.23.0 && mv composer.backup composer.json",
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-clover=clover.xml"
     },
