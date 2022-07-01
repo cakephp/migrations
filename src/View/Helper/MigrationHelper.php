@@ -477,6 +477,10 @@ class MigrationHelper extends Helper
                 continue;
             }
 
+            if ($option === 'default' && is_string($value)) {
+                $value = trim($value, "'");
+            }
+
             $attributes[$option] = $value;
         }
 
