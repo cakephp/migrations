@@ -66,7 +66,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     public function getPath(Arguments $args): string
     {
         $path = ROOT . DS . $this->pathFragment;
-        if (isset($this->plugin)) {
+        if ($this->plugin) {
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
 
