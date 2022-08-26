@@ -20,6 +20,8 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
+use Cake\Database\Type\StringType;
+use Cake\Database\TypeFactory;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 
@@ -41,6 +43,22 @@ class BakeSeedCommand extends SimpleBakeCommand
      * @var string
      */
     protected $_name;
+
+    /**
+     * @inheritDoc
+     */
+    public function initialize(): void
+    {
+        parent::initialize();
+        // Mapping date/time types to String to avoid creating seeds
+        // with FrozenDate/FrozenTime objects. refs #558
+        TypeFactory::map('datetime', StringType::class);
+        TypeFactory::map('date', StringType::class);
+        TypeFactory::map('datetimefractional', StringType::class);
+        TypeFactory::map('timestamp', StringType::class);
+        TypeFactory::map('timestampfractional', StringType::class);
+        TypeFactory::map('timestamptimezone', StringType::class);
+    }
 
     /**
      * @inheritDoc
@@ -134,6 +152,7 @@ class BakeSeedCommand extends SimpleBakeCommand
 
             /** @var array $records */
             $records = $query->toArray();
+
             $records = $this->prettifyArray($records);
         }
 
