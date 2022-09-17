@@ -80,6 +80,8 @@ class BakeSeedCommandTest extends TestCase
         $path = __FUNCTION__ . '.php';
         if (getenv('DB') === 'pgsql') {
             $path = getenv('DB') . DS . $path;
+        } elseif (PHP_VERSION_ID >= 80100) {
+            $path = 'php81' . DS . $path;
         }
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
@@ -115,6 +117,8 @@ class BakeSeedCommandTest extends TestCase
         $path = __FUNCTION__ . '.php';
         if (getenv('DB') === 'pgsql') {
             $path = getenv('DB') . DS . $path;
+        } elseif (PHP_VERSION_ID >= 80100) {
+            $path = 'php81' . DS . $path;
         }
 
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);

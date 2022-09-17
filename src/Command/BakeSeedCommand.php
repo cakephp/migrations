@@ -72,7 +72,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     public function getPath(Arguments $args): string
     {
         $path = ROOT . DS . $this->pathFragment;
-        if (isset($this->plugin)) {
+        if ($this->plugin) {
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
 
@@ -133,7 +133,8 @@ class BakeSeedCommand extends SimpleBakeCommand
             }
 
             /** @var array $records */
-            $records = $query->toArray();
+            $records = $query->disableResultsCasting()->toArray();
+
             $records = $this->prettifyArray($records);
         }
 
