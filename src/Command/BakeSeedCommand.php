@@ -133,7 +133,8 @@ class BakeSeedCommand extends SimpleBakeCommand
             }
 
             /** @var array $records */
-            $records = $query->toArray();
+            $records = $query->disableResultsCasting()->toArray();
+
             $records = $this->prettifyArray($records);
         }
 
