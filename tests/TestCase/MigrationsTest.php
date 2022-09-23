@@ -225,7 +225,7 @@ class MigrationsTest extends TestCase
         // Tests that if a collation is defined, it is used
         $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $options = $numbersTable->getSchema()->getOptions();
-        $this->assertSame('utf8_bin', $options['collation']);
+        $this->assertSame('utf8mb3_bin', $options['collation']);
 
         // Tests that if a collation is not defined, it will use the database default one
         $lettersTable = $this->getTableLocator()->get('Letters', ['connection' => $this->Connection]);
