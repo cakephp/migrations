@@ -153,7 +153,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
         $migratedItems = [];
         if ($tableExists) {
-            $query = $connection->newQuery();
+            $query = $connection->selectQuery();
             /** @var array $migratedItems */
             $migratedItems = $query
                 ->select(['version'])
