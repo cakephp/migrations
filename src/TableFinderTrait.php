@@ -139,7 +139,7 @@ trait TableFinderTrait
             return [];
         }
 
-        return glob($path . '*.php') ?: [];
+        return array_map('basename', glob($path . '*.php'));
     }
 
     /**
