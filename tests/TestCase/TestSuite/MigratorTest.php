@@ -16,7 +16,6 @@ namespace Migrations\Test\TestCase\TestSuite;
 use Cake\Chronos\ChronosInterface;
 use Cake\Chronos\Date;
 use Cake\Datasource\ConnectionManager;
-use Cake\I18n\FrozenDate;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
 use Migrations\TestSuite\Migrator;

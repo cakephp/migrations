@@ -18,7 +18,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeAdapter;
 use Migrations\Migrations;
-use Phinx\Db\Adapter\WrapperInterface;
 
 /**
  * Tests the Migrations class

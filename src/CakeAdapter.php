@@ -76,6 +76,8 @@ class CakeAdapter extends AdapterWrapper
     /**
      * Returns a new Query object
      *
+     * @param string $type The type of query to generate (one of the
+     *  `\Cake\Database\Query::TYPE_*` constants).
      * @return \Cake\Database\Query
      */
     public function getQueryBuilder(string $type)

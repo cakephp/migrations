@@ -18,7 +18,6 @@ use Cake\Core\Plugin as CorePlugin;
 use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
-use FilesystemIterator;
 use ReflectionClass;
 
 trait TableFinderTrait
