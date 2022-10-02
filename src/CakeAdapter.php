@@ -16,7 +16,7 @@ namespace Migrations;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Postgres;
 use Cake\Database\Query;
-use http\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\AdapterWrapper;
@@ -43,7 +43,7 @@ class CakeAdapter extends AdapterWrapper
     public function __construct(AdapterInterface $adapter, ?Connection $connection = null)
     {
         if ($connection === null) {
-            throw new \InvalidArgumentException('The cake connection cannot be null');
+            throw new InvalidArgumentException('The cake connection cannot be null');
         }
 
         parent::__construct($adapter);
