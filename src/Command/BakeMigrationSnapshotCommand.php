@@ -19,6 +19,8 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
+use Cake\Database\Connection;
+use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
@@ -115,11 +117,12 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
      * Get a collection from a database
      *
      * @param string $connection Database connection name.
-     * @return \Cake\Database\Schema\Collection
+     * @return \Cake\Database\Schema\CollectionInterface
      */
-    public function getCollection($connection)
+    public function getCollection($connection): CollectionInterface
     {
         $connection = ConnectionManager::get($connection);
+        assert($connection instanceof Connection);
 
         return $connection->getSchemaCollection();
     }

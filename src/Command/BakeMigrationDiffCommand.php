@@ -18,6 +18,8 @@ namespace Migrations\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Database\Connection;
+use Cake\Database\Schema\CollectionInterface;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
@@ -145,6 +147,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $this->phinxTable = $this->getPhinxTable($this->plugin);
 
         $connection = ConnectionManager::get($this->connection);
+        assert($connection instanceof Connection);
         $this->tables = $connection->getSchemaCollection()->listTables();
         $tableExists = in_array($this->phinxTable, $this->tables, true);
 
@@ -166,11 +169,12 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * Get a collection from a database.
      *
      * @param string $connection Database connection name.
-     * @return \Cake\Database\Schema\Collection
+     * @return CollectionInterface
      */
-    public function getCollection($connection)
+    public function getCollection($connection): CollectionInterface
     {
         $connection = ConnectionManager::get($connection);
+        assert($connection instanceof Connection);
 
         return $connection->getSchemaCollection();
     }
@@ -542,9 +546,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         }
 
         $connection = ConnectionManager::get($this->connection);
-        if (method_exists($connection, 'cacheMetadata')) {
-            $connection->cacheMetadata(false);
-        }
+        assert($connection instanceof Connection);
+        $connection->cacheMetadata(false);
         $collection = $connection->getSchemaCollection();
         foreach ($this->tables as $table) {
             if (preg_match('/^.*phinxlog$/', $table) === 1) {

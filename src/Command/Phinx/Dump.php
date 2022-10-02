@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Command\Phinx;
 
+use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use Migrations\ConfigurationTrait;
 use Migrations\TableFinderTrait;
@@ -88,6 +89,7 @@ class Dump extends AbstractCommand
         /** @var string $connectionName */
         $connectionName = $input->getOption('connection') ?: 'default';
         $connection = ConnectionManager::get($connectionName);
+        assert($connection instanceof Connection);
         $collection = $connection->getSchemaCollection();
 
         $options = [
