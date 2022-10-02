@@ -169,7 +169,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * Get a collection from a database.
      *
      * @param string $connection Database connection name.
-     * @return CollectionInterface
+     * @return \Cake\Database\Schema\CollectionInterface
      */
     public function getCollection($connection): CollectionInterface
     {
