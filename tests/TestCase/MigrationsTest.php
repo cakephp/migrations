@@ -65,20 +65,9 @@ class MigrationsTest extends TestCase
         $migrations->setInput($input);
         $migrations->getManager($migrations->getConfig());
         $this->Connection = ConnectionManager::get('test');
-        $connection = $migrations->getManager()->getEnvironment('default')->getAdapter()->getConnection();
-        $this->Connection->getDriver()->setConnection($connection);
 
         // Get an instance of the Migrations object on which we will run the tests
         $this->migrations = new Migrations($params);
-        $adapter = $this->migrations
-                        ->getManager($migrations->getConfig())
-                        ->getEnvironment('default')
-                        ->getAdapter();
-
-        while ($adapter instanceof WrapperInterface) {
-            $adapter = $adapter->getAdapter();
-        }
-        $adapter->setConnection($connection);
 
         // List of tables managed by migrations this test runs.
         // We can't wipe all tables as we'l break other tests.
@@ -687,7 +676,7 @@ class MigrationsTest extends TestCase
         $seed = $this->migrations->seed(['source' => 'Seeds']);
         $this->assertTrue($seed);
 
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->execute()->fetchAll('assoc');
@@ -702,7 +691,7 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'Seeds']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->execute()->fetchAll('assoc');
@@ -722,7 +711,7 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->execute()->fetchAll('assoc');
@@ -763,7 +752,7 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'AnotherNumbersSeed']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->execute()->fetchAll('assoc');
@@ -779,7 +768,7 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'NumbersAltSeed']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->execute()->fetchAll('assoc');
@@ -812,7 +801,7 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'CallSeeds', 'seed' => 'DatabaseSeed']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->execute()->fetchAll('assoc');
@@ -826,7 +815,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $result = $this->Connection->newQuery()
+        $result = $this->Connection->selectQuery()
             ->select(['*'])
             ->from('letters')
             ->execute()->fetchAll('assoc');

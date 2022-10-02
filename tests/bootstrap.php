@@ -106,7 +106,7 @@ if (getenv('DB_URL_COMPARE') !== false) {
 }
 
 Plugin::getCollection()->add(new \Migrations\Plugin());
-Plugin::getCollection()->add(new \Bake\Plugin());
+Plugin::getCollection()->add(new \Bake\BakePlugin());
 Plugin::getCollection()->add(new \TestBlog\Plugin());
 
 if (!defined('PHINX_VERSION')) {

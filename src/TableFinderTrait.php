@@ -17,7 +17,6 @@ use Cake\Core\App;
 use Cake\Core\Plugin as CorePlugin;
 use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
-use Cake\Filesystem\Filesystem;
 use Cake\ORM\TableRegistry;
 use FilesystemIterator;
 use ReflectionClass;
@@ -140,10 +139,7 @@ trait TableFinderTrait
             return [];
         }
 
-        $files = (new Filesystem())->find($path, '/\.php$/i', FilesystemIterator::KEY_AS_FILENAME
-            | FilesystemIterator::UNIX_PATHS);
-
-        return array_keys(iterator_to_array($files));
+        return glob($path . '*.php') ?: [];
     }
 
     /**

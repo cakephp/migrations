@@ -40,7 +40,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      *
      * @var string
      */
-    public $pathFragment = 'config/Migrations/';
+    public string $pathFragment = 'config/Migrations/';
 
     /**
      * @inheritDoc

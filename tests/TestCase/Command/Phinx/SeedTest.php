@@ -50,11 +50,6 @@ class SeedTest extends TestCase
     protected $streamOutput;
 
     /**
-     * @var \PDO|object
-     */
-    protected $pdo;
-
-    /**
      * setup method
      *
      * @return void
@@ -64,8 +59,6 @@ class SeedTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
-        $this->connection->connect();
-        $this->pdo = $this->connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('seed');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -79,7 +72,6 @@ class SeedTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $this->connection->getDriver()->setConnection($this->pdo);
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->connection, $this->command, $this->streamOutput);
@@ -108,7 +100,7 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('== NumbersSeed: seeded', $display);
 
-        $result = $this->connection->newQuery()
+        $result = $this->connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->order('id DESC')
@@ -150,7 +142,7 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('== NumbersAltSeed: seeded', $display);
 
-        $result = $this->connection->newQuery()
+        $result = $this->connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
             ->order('id DESC')
@@ -242,7 +234,6 @@ class SeedTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->pdo);
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 
@@ -270,7 +261,6 @@ class SeedTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->pdo);
 
         return $migrations;
     }

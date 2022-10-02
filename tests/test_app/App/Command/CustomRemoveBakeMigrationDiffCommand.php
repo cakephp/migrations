@@ -9,7 +9,7 @@ use Migrations\Command\BakeMigrationDiffCommand;
 
 class CustomRemoveBakeMigrationDiffCommand extends BakeMigrationDiffCommand
 {
-    public $pathFragment = 'config/MigrationsDiffAddRemove/';
+    public string $pathFragment = 'config/MigrationsDiffAddRemove/';
 
     /**
      * @inheritDoc

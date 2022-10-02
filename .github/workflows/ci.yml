@@ -11,15 +11,15 @@ on:
 
 jobs:
   testsuite-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['7.4', '8.0', '8.1']
+        php-version: ['8.1', '8.2']
         db-type: [mysql, pgsql, sqlite]
         prefer-lowest: ['']
         include:
-          - php-version: '7.4'
+          - php-version: '8.1'
             db-type: 'sqlite'
             prefer-lowest: 'prefer-lowest'
 
@@ -65,8 +65,8 @@ jobs:
 
     - name: Composer install
       run: |
-        if [[ ${{ matrix.php-version }} == '8.1' ]]; then
-          composer install --ignore-platform-reqs
+        if [[ ${{ matrix.php-version }} == '8.2' ]]; then
+          composer install --ignore-platform-req=php
         elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
           composer update --prefer-lowest --prefer-stable
         else
@@ -87,19 +87,19 @@ jobs:
           export DB='pgsql'
           export DB_URL='postgres://postgres:pg-password@127.0.0.1/cakephp_test'
         fi
-        if [[ ${{ matrix.php-version }} == '7.4' && ${{ matrix.db-type }} == 'mysql' ]]; then
+        if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.db-type }} == 'mysql' ]]; then
           vendor/bin/phpunit --coverage-clover=coverage.xml
         else
           vendor/bin/phpunit
         fi
 
     - name: Code Coverage Report
-      if: success() && matrix.php-version == '7.4' && matrix.db-type == 'mysql'
+      if: success() && matrix.php-version == '8.1' && matrix.db-type == 'mysql'
       uses: codecov/codecov-action@v3
 
   cs-stan:
     name: Coding Standard & Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
@@ -107,7 +107,7 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: '8.1'
         extensions: mbstring, intl
         coverage: none
         tools: cs2pr

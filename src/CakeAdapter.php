@@ -15,6 +15,8 @@ namespace Migrations;
 
 use Cake\Database\Connection;
 use Cake\Database\Driver\Postgres;
+use Cake\Database\Query;
+use http\Exception\InvalidArgumentException;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\AdapterWrapper;
@@ -59,7 +61,6 @@ class CakeAdapter extends AdapterWrapper
             $schema = empty($config['schema']) ? 'public' : $config['schema'];
             $pdo->exec('SET search_path TO ' . $schema);
         }
-        $connection->getDriver()->setConnection($pdo);
     }
 
     /**
@@ -77,9 +78,17 @@ class CakeAdapter extends AdapterWrapper
      *
      * @return \Cake\Database\Query
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(string $type)
     {
-        return $this->getCakeConnection()->newQuery();
+        return match ($type) {
+            Query::TYPE_SELECT => $this->getCakeConnection()->selectQuery(),
+            Query::TYPE_INSERT => $this->getCakeConnection()->insertQuery(),
+            Query::TYPE_UPDATE => $this->getCakeConnection()->updateQuery(),
+            Query::TYPE_DELETE => $this->getCakeConnection()->deleteQuery(),
+            default => throw new InvalidArgumentException(
+                'Query type must be one of: `select`, `insert`, `update`, `delete`.'
+            )
+        };
     }
 
     /**

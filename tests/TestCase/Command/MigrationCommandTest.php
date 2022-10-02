@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\ConsoleIo;
-use Cake\TestSuite\Stub\ConsoleOutput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Output\NullOutput;
@@ -106,7 +106,7 @@ class MigrationCommandTest extends TestCase
 
     protected function getMockIo()
     {
-        $output = new ConsoleOutput();
+        $output = new StubConsoleOutput();
         $io = $this->getMockBuilder(ConsoleIo::class)
             ->setConstructorArgs([$output, $output, null, null])
             ->setMethods(['in'])

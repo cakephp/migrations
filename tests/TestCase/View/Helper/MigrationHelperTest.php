@@ -27,7 +27,7 @@ class MigrationHelperTest extends TestCase
     /**
      * @var string[]
      */
-    protected $fixtures = [
+    protected array $fixtures = [
         'plugin.Migrations.Users',
         'plugin.Migrations.SpecialTags',
     ];

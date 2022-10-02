@@ -35,7 +35,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      *
      * @var string
      */
-    public $pathFragment = 'config/Seeds/';
+    public string $pathFragment = 'config/Seeds/';
 
     /**
      * @var string

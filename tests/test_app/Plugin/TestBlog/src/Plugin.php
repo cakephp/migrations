@@ -9,8 +9,6 @@ class Plugin extends BasePlugin
 {
     /**
      * Plugin name.
-     *
-     * @var string
      */
-    protected $name = 'TestBlog';
+    protected ?string $name = 'TestBlog';
 }

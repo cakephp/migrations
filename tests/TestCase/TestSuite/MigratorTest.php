@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Chronos\ChronosInterface;
+use Cake\Chronos\Date;
 use Cake\Datasource\ConnectionManager;
 use Cake\I18n\FrozenDate;
 use Cake\TestSuite\ConnectionHelper;
@@ -54,7 +55,7 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
 
-        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
     }
 
     public function testMigrateDropNoTruncate(): void
@@ -66,7 +67,7 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
 
         $this->assertContains('migrator', $tables);
-        $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(1, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
     }
 
     public function testMigrateSkipTables(): void
@@ -85,7 +86,7 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertContains('skipme', $tables);
-        $this->assertCount(1, $connection->query('SELECT * FROM skipme')->fetchAll());
+        $this->assertCount(1, $connection->selectQuery()->select(['*'])->from('skipme')->execute()->fetchAll());
     }
 
     public function testRunManyDropTruncate(): void
@@ -99,8 +100,8 @@ class MigratorTest extends TestCase
         $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
-        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
-        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
+        $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
+        $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator_phinxlog')->execute()->fetchAll());
     }
 
     public function testRunManyDropNoTruncate(): void
@@ -114,8 +115,8 @@ class MigratorTest extends TestCase
         $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
-        $this->assertCount(2, $connection->query('SELECT * FROM migrator')->fetchAll());
-        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
+        $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
+        $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator_phinxlog')->execute()->fetchAll());
     }
 
     /**
@@ -129,25 +130,25 @@ class MigratorTest extends TestCase
         $migrator->truncate('test');
 
         $connection = ConnectionManager::get('test');
-        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
     }
 
     private function setMigrationEndDateToYesterday()
     {
-        ConnectionManager::get('test')->newQuery()
+        ConnectionManager::get('test')->updateQuery()
             ->update('migrator_phinxlog')
-            ->set('end_time', FrozenDate::yesterday(), 'timestamp')
+            ->set('end_time', Date::yesterday(), 'timestamp')
             ->execute();
     }
 
     private function fetchMigrationEndDate(): ChronosInterface
     {
-        $endTime = ConnectionManager::get('test')->newQuery()
+        $endTime = ConnectionManager::get('test')->selectQuery()
             ->select('end_time')
             ->from('migrator_phinxlog')
             ->execute()->fetchColumn(0);
 
-        return FrozenDate::parse($endTime);
+        return Date::parse($endTime);
     }
 
     public function testSkipMigrationDroppingIfOnlyUpMigrations(): void

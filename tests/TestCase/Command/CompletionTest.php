@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
@@ -22,17 +22,6 @@ use Cake\TestSuite\TestCase;
 class CompletionTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
-
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->useCommandRunner();
-    }
 
     /**
      * tearDown
