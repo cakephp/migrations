@@ -40,7 +40,7 @@ trait TableFinderTrait
      * Gets a list of table to baked based on the Collection instance passed and the options passed to
      * the shell call.
      *
-     * @param \Cake\Database\Schema\Collection $collection Instance of the collection of a specific database
+     * @param \Cake\Database\Schema\CollectionInterface $collection Instance of the collection of a specific database
      * connection.
      * @param array $options Array of options passed to a shell call.
      * @return array
