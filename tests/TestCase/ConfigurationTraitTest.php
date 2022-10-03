@@ -170,15 +170,15 @@ class ConfigurationTraitTest extends TestCase
         $input = $this->getMockBuilder(InputInterface::class)->getMock();
         $this->command->setInput($input);
 
-        $input->expects($this->at(1))
+        $input->expects($this->atLeast(2))
             ->method('getOption')
-            ->with('plugin')
-            ->will($this->returnValue('MyPlugin'));
+            ->willReturnCallback(function (string $name) {
+                if ($name === 'plugin') {
+                    return 'MyPlugin';
+                }
 
-        $input->expects($this->at(4))
-            ->method('getOption')
-            ->with('plugin')
-            ->will($this->returnValue('MyPlugin'));
+                return null;
+            });
 
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
@@ -210,10 +210,15 @@ class ConfigurationTraitTest extends TestCase
         $input = $this->getMockBuilder(InputInterface::class)->getMock();
         $this->command->setInput($input);
 
-        $input->expects($this->at(5))
+        $input->expects($this->atLeastOnce())
             ->method('getOption')
-            ->with('connection')
-            ->will($this->returnValue('custom'));
+            ->willReturnCallback(function (string $name) {
+                if ($name === 'connection') {
+                    return 'custom';
+                }
+
+                return null;
+            });
 
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
