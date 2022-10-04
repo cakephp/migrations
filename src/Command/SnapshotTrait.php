@@ -49,7 +49,7 @@ trait SnapshotTrait
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return void
      */
-    protected function markSnapshotApplied($path, Arguments $args, ConsoleIo $io)
+    protected function markSnapshotApplied(string $path, Arguments $args, ConsoleIo $io): void
     {
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         [$version, ] = explode('_', $fileName, 2);
@@ -81,7 +81,7 @@ trait SnapshotTrait
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return void
      */
-    protected function refreshDump(Arguments $args, ConsoleIo $io)
+    protected function refreshDump(Arguments $args, ConsoleIo $io): void
     {
         $newArgs = [];
 

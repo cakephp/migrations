@@ -27,14 +27,14 @@ trait TableFinderTrait
      *
      * @var string[]
      */
-    public $skipTables = ['phinxlog'];
+    public array $skipTables = ['phinxlog'];
 
     /**
      * Regex of Table name to skip
      *
      * @var string
      */
-    public $skipTablesRegex = '_phinxlog';
+    public string $skipTablesRegex = '_phinxlog';
 
     /**
      * Gets a list of table to baked based on the Collection instance passed and the options passed to
@@ -45,7 +45,7 @@ trait TableFinderTrait
      * @param array $options Array of options passed to a shell call.
      * @return array
      */
-    protected function getTablesToBake(CollectionInterface $collection, array $options = [])
+    protected function getTablesToBake(CollectionInterface $collection, array $options = []): array
     {
         $options += [
             'require-table' => false,
@@ -99,7 +99,7 @@ trait TableFinderTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return string[]
      */
-    protected function getTableNames($pluginName = null)
+    protected function getTableNames(?string $pluginName = null): array
     {
         if ($pluginName !== null && !CorePlugin::getCollection()->has($pluginName)) {
             return [];
@@ -121,10 +121,10 @@ trait TableFinderTrait
     /**
      * Find Table Class
      *
-     * @param string $pluginName Plugin name if exists.
+     * @param string|null $pluginName Plugin name if exists.
      * @return array
      */
-    protected function findTables($pluginName = null)
+    protected function findTables(?string $pluginName = null): array
     {
         $path = 'Model' . DS . 'Table' . DS;
         if ($pluginName) {
@@ -138,7 +138,7 @@ trait TableFinderTrait
             return [];
         }
 
-        return array_map('basename', glob($path . '*.php'));
+        return array_map('basename', glob($path . '*.php') ?: []);
     }
 
     /**
@@ -148,7 +148,7 @@ trait TableFinderTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return string[]
      */
-    protected function fetchTableName($className, $pluginName = null)
+    protected function fetchTableName(string $className, ?string $pluginName = null): array
     {
         $tables = [];
         $className = str_replace('Table.php', '', $className);

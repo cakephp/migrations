@@ -15,6 +15,7 @@ namespace Migrations;
 
 use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Overrides Phinx Manager class in order to provide an interface
@@ -25,7 +26,7 @@ class CakeManager extends Manager
     /**
      * @var int
      */
-    public $maxNameLength = 0;
+    public int $maxNameLength = 0;
 
     /**
      * Instance of InputInterface the Manager is dealing with for the current shell call
@@ -39,7 +40,7 @@ class CakeManager extends Manager
      *
      * @return void
      */
-    public function resetMigrations()
+    public function resetMigrations(): void
     {
         $this->migrations = null;
     }
@@ -49,7 +50,7 @@ class CakeManager extends Manager
      *
      * @return void
      */
-    public function resetSeeds()
+    public function resetSeeds(): void
     {
         $this->seeds = null;
     }
@@ -189,7 +190,7 @@ class CakeManager extends Manager
      * @param int|string $version Version number of the migration to check
      * @return bool
      */
-    public function isMigrated($version)
+    public function isMigrated(int|string $version): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
         $versions = array_flip($adapter->getVersions());
@@ -204,7 +205,7 @@ class CakeManager extends Manager
      * @param string $path Path where the migration file is located
      * @return bool True if success
      */
-    public function markMigrated($version, $path)
+    public function markMigrated(int|string $version, string $path): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
@@ -233,11 +234,11 @@ class CakeManager extends Manager
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input interface from which argument and options
      * will be extracted to determine which versions to be marked as migrated
-     * @return array Array of versions that should be marked as migrated
+     * @return array<int|string> Array of versions that should be marked as migrated
      * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
      * or version not found
      */
-    public function getVersionsToMark($input)
+    public function getVersionsToMark(InputInterface $input): array
     {
         $migrations = $this->getMigrations('default');
         $versions = array_keys($migrations);
@@ -276,12 +277,12 @@ class CakeManager extends Manager
      * It will start a transaction and rollback in case one of the operation raises an exception
      *
      * @param string $path Path where to look for migrations
-     * @param array $versions Versions which should be marked
+     * @param array<int|string> $versions Versions which should be marked
      * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
      * the command output
      * @return void
      */
-    public function markVersionsAsMigrated($path, array $versions, $output)
+    public function markVersionsAsMigrated(string $path, array $versions, OutputInterface $output): void
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
@@ -326,7 +327,7 @@ class CakeManager extends Manager
      * @param string $path Path to the migration file of which we want the class name
      * @return string Migration class name
      */
-    protected function getMigrationClassName($path)
+    protected function getMigrationClassName(string $path): string
     {
         $class = preg_replace('/^[0-9]+_/', '', basename($path));
         $class = str_replace('_', ' ', $class);

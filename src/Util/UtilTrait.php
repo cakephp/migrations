@@ -38,10 +38,10 @@ trait UtilTrait
     /**
      * Get the phinx table name used to store migrations data
      *
-     * @param string $plugin Plugin name
+     * @param string|null $plugin Plugin name
      * @return string
      */
-    protected function getPhinxTable($plugin = null)
+    protected function getPhinxTable(?string $plugin = null): string
     {
         $table = 'phinxlog';
 
@@ -62,7 +62,7 @@ trait UtilTrait
      * @param string $default Default folder to set if no source option is found in the $input param
      * @return string
      */
-    protected function getOperationsPath(InputInterface $input, $default = 'Migrations')
+    protected function getOperationsPath(InputInterface $input, string $default = 'Migrations'): string
     {
         $folder = $input->getOption('source') ?: $default;
 

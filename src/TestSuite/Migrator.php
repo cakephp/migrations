@@ -25,7 +25,7 @@ class Migrator
     /**
      * @var \Cake\TestSuite\ConnectionHelper
      */
-    protected $helper;
+    protected ConnectionHelper $helper;
 
     /**
      * Constructor.

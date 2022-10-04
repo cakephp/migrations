@@ -34,13 +34,13 @@ class MarkMigrated extends AbstractCommand
      *
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
-    protected $output;
+    protected ?OutputInterface $output = null;
 
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output The output object.
-     * @return mixed
+     * @return \Symfony\Component\Console\Output\OutputInterface|null
      */
-    public function output(?OutputInterface $output = null)
+    public function output(?OutputInterface $output = null): ?OutputInterface
     {
         if ($output !== null) {
             $this->output = $output;
@@ -149,7 +149,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @return bool Returns true if it is using the deprecated `all` otherwise false
      */
-    protected function isUsingDeprecatedAll()
+    protected function isUsingDeprecatedAll(): bool
     {
         $version = $this->input()->getArgument('version');
 
@@ -161,7 +161,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @return bool Returns true if `--exclude` option gets passed in otherwise false
      */
-    protected function hasExclude()
+    protected function hasExclude(): bool
     {
         return (bool)$this->input()->getOption('exclude');
     }
@@ -171,7 +171,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @return bool Returns true if `--only` option gets passed in otherwise false
      */
-    protected function hasOnly()
+    protected function hasOnly(): bool
     {
         return (bool)$this->input()->getOption('only');
     }
@@ -181,7 +181,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @return bool True if it is using VERSION argument otherwise false
      */
-    protected function isUsingDeprecatedVersion()
+    protected function isUsingDeprecatedVersion(): bool
     {
         $version = $this->input()->getArgument('version');
 
@@ -193,7 +193,7 @@ class MarkMigrated extends AbstractCommand
      *
      * @return bool Returns true when it is an invalid use of `--exclude` or `--only` otherwise false
      */
-    protected function invalidOnlyOrExclude()
+    protected function invalidOnlyOrExclude(): bool
     {
         return ($this->hasExclude() && $this->hasOnly()) ||
             ($this->hasExclude() || $this->hasOnly()) &&
@@ -205,10 +205,11 @@ class MarkMigrated extends AbstractCommand
      *
      * @return void Just outputs the message
      */
-    protected function outputDeprecatedAllMessage()
+    protected function outputDeprecatedAllMessage(): void
     {
         $msg = 'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead';
         $output = $this->output();
+        /** @psalm-suppress PossiblyNullReference */
         $output->writeln(sprintf('<comment>%s</comment>', $msg));
     }
 
@@ -217,11 +218,12 @@ class MarkMigrated extends AbstractCommand
      *
      * @return void Just outputs the message
      */
-    protected function outputDeprecatedVersionMessage()
+    protected function outputDeprecatedVersionMessage(): void
     {
         $msg = 'DEPRECATED: VERSION as argument is deprecated. Use: ' .
             '`bin/cake migrations mark_migrated --target=VERSION --only`';
         $output = $this->output();
+        /** @psalm-suppress PossiblyNullReference */
         $output->writeln(sprintf('<comment>%s</comment>', $msg));
     }
 }

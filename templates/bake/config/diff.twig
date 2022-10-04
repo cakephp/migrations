@@ -81,7 +81,7 @@ not empty %}
 {%                    endif %}
 {%                endfor %}
 {%            endif -%}
-{%            if Migration.getTableStatement(tableName) != null %}
+{%            if Migration.wasTableStatementGeneratedFor(tableName) %}
             ->update();
 {%            endif %}
 {%        endif %}
@@ -100,7 +100,7 @@ not empty %}
 {%            if tableDiff['indexes']['add'] is not empty %}
 {{                Migration.element('Migrations.add-indexes', {'indexes': tableDiff['indexes']['add']}) | raw -}}
 {%            endif -%}
-{%            if Migration.getTableStatement(tableName) != null %}
+{%            if Migration.wasTableStatementGeneratedFor(tableName) %}
             ->update();
 {%            endif -%}
 {%        endif -%}
@@ -158,7 +158,7 @@ not empty %}
         }) |  raw -}}
 {%  endif -%}
 {%  for tableName, tableDiff in data -%}
-{%  set _unused = Migration.removeTableStatement(tableName) %}
+{%  Migration.resetTableStatementGenerationFor(tableName) %}
 {%      if tableDiff['indexes']['add'] is not empty %}
 
         $this->table('{{ tableName }}')
@@ -199,7 +199,7 @@ not empty %}
 {%      if tableDiff['indexes']['remove'] is not empty -%}
 {{         Migration.element('Migrations.add-indexes', {'indexes': tableDiff['indexes']['remove']}) | raw -}}
 {%      endif -%}
-{%      if Migration.getTableStatement(tableName) != null %}
+{%      if Migration.wasTableStatementGeneratedFor(tableName) %}
             ->update();
 {%      endif %}
 {%  endfor %}

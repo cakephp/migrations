@@ -38,7 +38,7 @@ class Dump extends AbstractCommand
      *
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
-    protected $output;
+    protected ?OutputInterface $output = null;
 
     /**
      * Configures the current command.
@@ -61,9 +61,9 @@ class Dump extends AbstractCommand
 
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output The output object.
-     * @return mixed
+     * @return \Symfony\Component\Console\Output\OutputInterface|null
      */
-    public function output(?OutputInterface $output = null)
+    public function output(?OutputInterface $output = null): ?OutputInterface
     {
         if ($output !== null) {
             $this->output = $output;

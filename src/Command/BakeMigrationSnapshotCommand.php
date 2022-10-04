@@ -39,7 +39,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @var string
      */
-    protected $_name;
+    protected string $_name;
 
     /**
      * @inheritDoc
@@ -119,7 +119,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
      * @param string $connection Database connection name.
      * @return \Cake\Database\Schema\CollectionInterface
      */
-    public function getCollection($connection): CollectionInterface
+    public function getCollection(string $connection): CollectionInterface
     {
         $connection = ConnectionManager::get($connection);
         assert($connection instanceof Connection);
@@ -135,7 +135,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
      * @deprecated Will be removed in the next version
      * @return bool True if the model is to be added.
      */
-    public function tableToAdd($tableName, $pluginName = null)
+    public function tableToAdd(string $tableName, ?string $pluginName = null): bool
     {
         return true;
     }

@@ -32,7 +32,7 @@ class CakeAdapter extends AdapterWrapper
      *
      * @var \Cake\Database\Connection
      */
-    protected $connection;
+    protected Connection $connection;
 
     /**
      * Constructor
@@ -68,7 +68,7 @@ class CakeAdapter extends AdapterWrapper
      *
      * @return \Cake\Database\Connection
      */
-    public function getCakeConnection()
+    public function getCakeConnection(): Connection
     {
         return $this->connection;
     }

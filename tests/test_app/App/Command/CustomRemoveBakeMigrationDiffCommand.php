@@ -19,7 +19,7 @@ class CustomRemoveBakeMigrationDiffCommand extends BakeMigrationDiffCommand
         return 'customRemove bake migration_diff';
     }
 
-    protected function getDumpSchema(Arguments $args)
+    protected function getDumpSchema(Arguments $args): array
     {
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
