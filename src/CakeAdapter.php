@@ -20,6 +20,7 @@ use InvalidArgumentException;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\AdapterWrapper;
+use ReflectionProperty;
 
 /**
  * Decorates an AdapterInterface in order to proxy some method to the actual
@@ -61,6 +62,10 @@ class CakeAdapter extends AdapterWrapper
             $schema = empty($config['schema']) ? 'public' : $config['schema'];
             $pdo->exec('SET search_path TO ' . $schema);
         }
+
+        $driver = $connection->getDriver();
+        $prop = new ReflectionProperty($driver, 'pdo');
+        $prop->setValue($driver, $pdo);
     }
 
     /**
