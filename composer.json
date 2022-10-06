@@ -22,7 +22,7 @@
     },
     "require": {
         "php": ">=8.1",
-        "robmorgan/phinx": "dev-cake5-updates",
+        "robmorgan/phinx": "dev-cake5",
         "cakephp/orm": "5.x-dev",
         "cakephp/cache": "5.x-dev"
     },
