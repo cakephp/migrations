@@ -20,18 +20,12 @@ use Cake\Console\ConsoleOptionParser;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A wrapper command for phinx migrations, used to inject our own
  * console actions so that database configuration already defined
  * for the application can be reused.
- *
- * @property \Migrations\Shell\Task\CreateTask $Create
- * @property \Migrations\Shell\Task\DumpTask $Dump
- * @property \Migrations\Shell\Task\MarkMigratedTask $MarkMigrated
- * @property \Migrations\Shell\Task\MigrateTask $Migrate
- * @property \Migrations\Shell\Task\RollbackTask $Rollback
- * @property \Migrations\Shell\Task\StatusTask $Status
  */
 class MigrationsCommand extends Command
 {
@@ -59,9 +53,9 @@ class MigrationsCommand extends Command
     /**
      * Array of arguments to run the shell with.
      *
-     * @var array
+     * @var array<string>
      */
-    public $argv = [];
+    public array $argv = [];
 
     /**
      * Defines what options can be passed to the shell.
@@ -164,7 +158,7 @@ class MigrationsCommand extends Command
      *
      * @return \Migrations\MigrationsDispatcher
      */
-    protected function getApp()
+    protected function getApp(): MigrationsDispatcher
     {
         return new MigrationsDispatcher(PHINX_VERSION);
     }
@@ -172,9 +166,9 @@ class MigrationsCommand extends Command
     /**
      * Returns the instance of OutputInterface the MigrationsDispatcher will have to use.
      *
-     * @return \Symfony\Component\Console\Output\ConsoleOutput
+     * @return \Symfony\Component\Console\Output\OutputInterface
      */
-    protected function getOutput()
+    protected function getOutput(): OutputInterface
     {
         return new ConsoleOutput();
     }

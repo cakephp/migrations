@@ -26,7 +26,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 {
     use StringCompareTrait;
 
-    protected $fixtures = [
+    protected array $fixtures = [
         'plugin.Migrations.Users',
         'plugin.Migrations.SpecialTags',
         'plugin.Migrations.SpecialPk',
@@ -60,7 +60,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
             'Migrations' => ['boostrap' => true],
         ]);
         $this->generatedFiles = [];
-        $this->useCommandRunner();
     }
 
     /**

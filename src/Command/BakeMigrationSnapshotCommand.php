@@ -19,6 +19,8 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
+use Cake\Database\Connection;
+use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
@@ -37,7 +39,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @var string
      */
-    protected $_name;
+    protected string $_name;
 
     /**
      * @inheritDoc
@@ -115,11 +117,12 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
      * Get a collection from a database
      *
      * @param string $connection Database connection name.
-     * @return \Cake\Database\Schema\Collection
+     * @return \Cake\Database\Schema\CollectionInterface
      */
-    public function getCollection($connection)
+    public function getCollection(string $connection): CollectionInterface
     {
         $connection = ConnectionManager::get($connection);
+        assert($connection instanceof Connection);
 
         return $connection->getSchemaCollection();
     }
@@ -132,7 +135,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
      * @deprecated Will be removed in the next version
      * @return bool True if the model is to be added.
      */
-    public function tableToAdd($tableName, $pluginName = null)
+    public function tableToAdd(string $tableName, ?string $pluginName = null): bool
     {
         return true;
     }

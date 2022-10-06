@@ -33,6 +33,6 @@
             )
 {%     endif %}
 {% endfor %}
-{% if Migration.getTableStatement(table) != null and hasProcessedConstraint %}
+{% if Migration.wasTableStatementGeneratedFor(table) and hasProcessedConstraint %}
             ->update();
 {% endif -%}

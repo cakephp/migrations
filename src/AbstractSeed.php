@@ -40,7 +40,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
      * @param string $seeder Name of the seeder to call from the current seed
      * @return void
      */
-    public function call($seeder)
+    public function call(string $seeder): void
     {
         $this->getOutput()->writeln('');
         $this->getOutput()->writeln(
@@ -69,7 +69,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
      * @param string $seeder Name of the seeder to call from the current seed
      * @return void
      */
-    protected function runCall($seeder)
+    protected function runCall(string $seeder): void
     {
         [$pluginName, $seeder] = pluginSplit($seeder);
 

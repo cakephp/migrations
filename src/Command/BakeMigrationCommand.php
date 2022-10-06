@@ -32,7 +32,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     /**
      * @var string
      */
-    protected $_name;
+    protected string $_name;
 
     /**
      * @inheritDoc
@@ -97,6 +97,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
         $primaryKey = $columnParser->parsePrimaryKey($arguments);
 
         if (in_array($action[0], ['alter_table', 'add_field'], true) && !empty($primaryKey)) {
+            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort('Adding a primary key to an already existing table is not supported.');
         }
 
@@ -126,7 +127,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     {
         $parser = parent::getOptionParser();
         $text = <<<'TEXT'
-Create a blank or generated migration. Using the name of the migration 
+Create a blank or generated migration. Using the name of the migration
 Operations and table names will be inferred.
 
 <info>Examples</info>
@@ -188,7 +189,7 @@ Create a migration that adds (<warning>name VARCHAR(128)</warning>) to the <warn
 table.
 
 <warning>bin/cake bake migration AddSlugToProjects name:string[128]:unique</warning>
-Create a migration that adds (<warning>name VARCHAR(128)</warning> and a <warning>UNIQUE<.warning index) 
+Create a migration that adds (<warning>name VARCHAR(128)</warning> and a <warning>UNIQUE<.warning index)
 to the <warning>projects</warning> table.
 
 TEXT;
@@ -202,9 +203,9 @@ TEXT;
      * Detects the action and table from the name of a migration
      *
      * @param string $name Name of migration
-     * @return array
+     * @return array<string>
      */
-    public function detectAction($name)
+    public function detectAction(string $name): array
     {
         if (preg_match('/^(Create|Drop)(.*)/', $name, $matches)) {
             $action = strtolower($matches[1]) . '_table';

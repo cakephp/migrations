@@ -40,7 +40,7 @@ class Table extends BaseTable
      * @param string|string[] $columns Table Column(s)
      * @return $this
      */
-    public function addPrimaryKey($columns)
+    public function addPrimaryKey(string|array $columns)
     {
         $this->primaryKey = $columns;
 
@@ -92,7 +92,7 @@ class Table extends BaseTable
      * @param array $options Options
      * @return array Converted options
      */
-    protected function convertedAutoIncrement(array $options)
+    protected function convertedAutoIncrement(array $options): array
     {
         if (isset($options['autoIncrement']) && $options['autoIncrement'] === true) {
             $options['identity'] = true;
@@ -182,7 +182,7 @@ class Table extends BaseTable
      *
      * @return void
      */
-    protected function filterPrimaryKey()
+    protected function filterPrimaryKey(): void
     {
         $options = $this->getTable()->getOptions();
         if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($options['primary_key'])) {

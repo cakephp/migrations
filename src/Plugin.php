@@ -23,22 +23,15 @@ class Plugin extends BasePlugin
 {
     /**
      * Plugin name.
-     *
-     * @var string
      */
-    protected $name = 'Migrations';
+    protected ?string $name = 'Migrations';
 
     /**
      * Don't try to load routes.
-     *
-     * @var bool
      */
-    protected $routesEnabled = false;
+    protected bool $routesEnabled = false;
 
-    /**
-     * @var array
-     */
-    protected $migrationCommandsList = [
+    protected array $migrationCommandsList = [
         Command\MigrationsCommand::class,
         Command\MigrationsCreateCommand::class,
         Command\MigrationsDumpCommand::class,

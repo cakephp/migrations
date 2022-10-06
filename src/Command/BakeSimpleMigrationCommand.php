@@ -31,16 +31,16 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * Console IO
      *
-     * @var \Cake\Console\ConsoleIo
+     * @var \Cake\Console\ConsoleIo|null
      */
-    protected $io;
+    protected ?ConsoleIo $io = null;
 
     /**
      * path to Migration directory
      *
      * @var string
      */
-    public $pathFragment = 'config/Migrations/';
+    public string $pathFragment = 'config/Migrations/';
 
     /**
      * @inheritDoc
@@ -83,8 +83,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         if (empty($name)) {
             $io->err('You must provide a name to bake a ' . $this->name());
             $this->abort();
-
-            return null;
         }
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
@@ -154,9 +152,10 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      * @param string|null $name Name for the generated migration
      * @return string Name of the migration file
      */
-    protected function getMigrationName($name = null)
+    protected function getMigrationName(?string $name = null): string
     {
         if (empty($name)) {
+            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort('Choose a migration name to bake in CamelCase format');
         }
 
@@ -165,6 +164,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
+            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort('The className is not correct. The className can only contain "A-Z" and "0-9".');
         }
 

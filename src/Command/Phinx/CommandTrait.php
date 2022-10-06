@@ -45,7 +45,7 @@ trait CommandTrait
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return void
      */
-    protected function beforeExecute(InputInterface $input, OutputInterface $output)
+    protected function beforeExecute(InputInterface $input, OutputInterface $output): void
     {
         $this->setInput($input);
         $this->addOption('--environment', '-e', InputArgument::OPTIONAL);
@@ -91,7 +91,7 @@ trait CommandTrait
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @return void
      */
-    public function setInput(InputInterface $input)
+    public function setInput(InputInterface $input): void
     {
         $this->input = $input;
     }

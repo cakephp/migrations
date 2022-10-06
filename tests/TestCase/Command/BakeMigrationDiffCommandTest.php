@@ -47,7 +47,6 @@ class BakeMigrationDiffCommandTest extends TestCase
             'Migrations' => ['boostrap' => true],
         ]);
         $this->generatedFiles = [];
-        $this->useCommandRunner();
     }
 
     public function tearDown(): void

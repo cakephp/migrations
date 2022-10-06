@@ -10,10 +10,8 @@ class TextsFixture extends TestFixture
 {
     /**
      * Records
-     *
-     * @var array
      */
-    public $records = [
+    public array $records = [
         [
             'title' => 'Simple text',
             'description' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',

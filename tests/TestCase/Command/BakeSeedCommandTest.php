@@ -28,7 +28,7 @@ class BakeSeedCommandTest extends TestCase
     /**
      * @var string[]
      */
-    protected $fixtures = [
+    protected array $fixtures = [
         'plugin.Migrations.Events',
         'plugin.Migrations.Texts',
     ];
@@ -49,7 +49,6 @@ class BakeSeedCommandTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Seeds' . DS;
-        $this->useCommandRunner();
     }
 
     /**

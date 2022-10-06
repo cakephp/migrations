@@ -9,7 +9,7 @@ use Migrations\Command\BakeMigrationDiffCommand;
 
 class CustomSimpleBakeMigrationDiffCommand extends BakeMigrationDiffCommand
 {
-    public $pathFragment = 'config/MigrationsDiffSimple/';
+    public string $pathFragment = 'config/MigrationsDiffSimple/';
 
     /**
      * @inheritDoc
@@ -19,7 +19,7 @@ class CustomSimpleBakeMigrationDiffCommand extends BakeMigrationDiffCommand
         return 'customSimple bake migration_diff';
     }
 
-    protected function getDumpSchema(Arguments $args)
+    protected function getDumpSchema(Arguments $args): array
     {
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';

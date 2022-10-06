@@ -35,12 +35,12 @@ class BakeSeedCommand extends SimpleBakeCommand
      *
      * @var string
      */
-    public $pathFragment = 'config/Seeds/';
+    public string $pathFragment = 'config/Seeds/';
 
     /**
      * @var string
      */
-    protected $_name;
+    protected string $_name;
 
     /**
      * @inheritDoc
@@ -196,7 +196,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      * @param string $indentCharacter   Desired indent for the code.
      * @return string
      */
-    protected function prettifyArray(array $array, $tabCount = 3, $indentCharacter = '    ')
+    protected function prettifyArray(array $array, int $tabCount = 3, string $indentCharacter = '    '): string
     {
         $content = var_export($array, true);
 

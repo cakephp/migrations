@@ -22,10 +22,8 @@ class UsersFixture extends TestFixture
 {
     /**
      * records property
-     *
-     * @var array
      */
-    public $records = [
+    public array $records = [
         [
             'username' => 'mariano',
             'password' => '$2a$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',

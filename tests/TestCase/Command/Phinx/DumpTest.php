@@ -61,11 +61,6 @@ class DumpTest extends TestCase
     protected $dumpfile = '';
 
     /**
-     * @var \PDO|object
-     */
-    protected $pdo;
-
-    /**
      * setup method
      *
      * @return void
@@ -75,8 +70,6 @@ class DumpTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
-        $this->connection->connect();
-        $this->pdo = $this->connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -98,7 +91,6 @@ class DumpTest extends TestCase
     {
         parent::tearDown();
 
-        $this->connection->getDriver()->setConnection($this->pdo);
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         $this->connection->execute('DROP TABLE IF EXISTS letters');
@@ -162,7 +154,6 @@ class DumpTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->pdo);
 
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
@@ -191,8 +182,6 @@ class DumpTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-
-        $adapter->setConnection($this->pdo);
 
         $tables = (new Collection($this->connection))->listTables();
         if (in_array('phinxlog', $tables)) {

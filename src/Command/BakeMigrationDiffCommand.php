@@ -18,6 +18,8 @@ namespace Migrations\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Database\Connection;
+use Cake\Database\Schema\CollectionInterface;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
@@ -41,62 +43,62 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      *
      * @var array
      */
-    protected $migratedItems = [];
+    protected array $migratedItems = [];
 
     /**
      * Path to the migration files
      *
      * @var string
      */
-    protected $migrationsPath;
+    protected string $migrationsPath;
 
     /**
      * Migration files that are stored in the self::migrationsPath
      *
      * @var array
      */
-    protected $migrationsFiles = [];
+    protected array $migrationsFiles = [];
 
     /**
      * Name of the phinx log table
      *
      * @var string
      */
-    protected $phinxTable;
+    protected string $phinxTable;
 
     /**
      * List the tables the connection currently holds
      *
-     * @var array
+     * @var array<string>
      */
-    protected $tables = [];
+    protected array $tables = [];
 
     /**
-     * Array of \Cake\Database\Schema\TableSchema objects from the dump file which
+     * Array of \Cake\Database\Schema\TableSchemaInterface objects from the dump file which
      * represents the state of the database after the last migrate / rollback command
      *
-     * @var array
+     * @var array<string, \Cake\Database\Schema\TableSchemaInterface>
      */
-    protected $dumpSchema;
+    protected array $dumpSchema;
 
     /**
-     * Array of \Cake\Database\Schema\TableSchema objects from the current state of the database
+     * Array of \Cake\Database\Schema\TableSchemaInterface objects from the current state of the database
      *
-     * @var array
+     * @var array<string, \Cake\Database\Schema\TableSchemaInterface>
      */
-    protected $currentSchema;
+    protected array $currentSchema;
 
     /**
      * List of the tables that are commonly found in the dump schema and the current schema
      *
-     * @var array
+     * @var array<string, \Cake\Database\Schema\TableSchemaInterface>
      */
-    protected $commonTables;
+    protected array $commonTables;
 
     /**
-     * @var array
+     * @var array<string, array>
      */
-    protected $templateData = [];
+    protected array $templateData = [];
 
     /**
      * @inheritDoc
@@ -138,19 +140,20 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * @param \Cake\Console\Arguments $args The command arguments.
      * @return void
      */
-    protected function setup(Arguments $args)
+    protected function setup(Arguments $args): void
     {
         $this->migrationsPath = $this->getPath($args);
         $this->migrationsFiles = glob($this->migrationsPath . '*.php');
         $this->phinxTable = $this->getPhinxTable($this->plugin);
 
         $connection = ConnectionManager::get($this->connection);
+        assert($connection instanceof Connection);
         $this->tables = $connection->getSchemaCollection()->listTables();
         $tableExists = in_array($this->phinxTable, $this->tables, true);
 
         $migratedItems = [];
         if ($tableExists) {
-            $query = $connection->newQuery();
+            $query = $connection->selectQuery();
             /** @var array $migratedItems */
             $migratedItems = $query
                 ->select(['version'])
@@ -166,11 +169,12 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * Get a collection from a database.
      *
      * @param string $connection Database connection name.
-     * @return \Cake\Database\Schema\Collection
+     * @return \Cake\Database\Schema\CollectionInterface
      */
-    public function getCollection($connection)
+    public function getCollection(string $connection): CollectionInterface
     {
         $connection = ConnectionManager::get($connection);
+        assert($connection instanceof Connection);
 
         return $connection->getSchemaCollection();
     }
@@ -199,7 +203,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      *
      * @return void
      */
-    protected function calculateDiff()
+    protected function calculateDiff(): void
     {
         $this->getConstraints();
         $this->getIndexes();
@@ -209,14 +213,14 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
     /**
      * Calculate the diff between the current state of the database and the schema dump
-     * by returning an array containing the full \Cake\Database\Schema\TableSchema definitions
+     * by returning an array containing the full \Cake\Database\Schema\TableSchemaInterface definitions
      * of tables to be created and removed in the diff file.
      *
      * The method directly sets the diff in a property of the class.
      *
      * @return void
      */
-    protected function getTables()
+    protected function getTables(): void
     {
         $this->templateData['fullTables'] = [
             'add' => array_diff_key($this->currentSchema, $this->dumpSchema),
@@ -234,7 +238,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      *
      * @return void
      */
-    protected function getColumns()
+    protected function getColumns(): void
     {
         foreach ($this->commonTables as $table => $currentSchema) {
             $currentColumns = $currentSchema->columns();
@@ -260,15 +264,19 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             foreach ($currentColumns as $columnName) {
                 $column = $currentSchema->getColumn($columnName);
                 $oldColumn = $this->dumpSchema[$table]->getColumn($columnName);
-                unset($column['collate']);
-                unset($column['fixed']);
-                unset($oldColumn['collate']);
-                unset($oldColumn['fixed']);
+                /** @psalm-suppress PossiblyNullArrayAccess */
+                unset(
+                    $column['collate'],
+                    $column['fixed'],
+                    $oldColumn['collate'],
+                    $oldColumn['fixed']
+                );
 
                 if (
                     in_array($columnName, $oldColumns, true) &&
                     $column !== $oldColumn
                 ) {
+                    /** @psalm-suppress PossiblyNullArgument */
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
 
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
@@ -277,6 +285,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                             $phinxAttributeName = 'limit';
                         }
                         if (!isset($changedAttributes[$phinxAttributeName])) {
+                            /** @psalm-suppress PossiblyNullArrayAccess */
                             $changedAttributes[$phinxAttributeName] = $column[$attribute];
                         }
                     }
@@ -331,7 +340,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      *
      * @return void
      */
-    protected function getConstraints()
+    protected function getConstraints(): void
     {
         foreach ($this->commonTables as $table => $currentSchema) {
             $currentConstraints = $currentSchema->constraints();
@@ -343,6 +352,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 $this->templateData[$table]['constraints']['add'][$constraintName] =
                     $currentSchema->getConstraint($constraintName);
                 $constraint = $currentSchema->getConstraint($constraintName);
+                /** @psalm-suppress PossiblyNullArrayAccess */
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
                 } else {
@@ -370,6 +380,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $removedConstraints = array_diff($oldConstraints, $currentConstraints);
             foreach ($removedConstraints as $constraintName) {
                 $constraint = $this->dumpSchema[$table]->getConstraint($constraintName);
+                /** @psalm-suppress PossiblyNullArrayAccess */
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] = $constraint;
                 } else {
@@ -388,7 +399,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      *
      * @return void
      */
-    protected function getIndexes()
+    protected function getIndexes(): void
     {
         foreach ($this->commonTables as $table => $currentSchema) {
             $currentIndexes = $currentSchema->indexes();
@@ -441,7 +452,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      *
      * @return bool Whether migrations history is sync or not
      */
-    protected function checkSync()
+    protected function checkSync(): bool
     {
         if (empty($this->migrationsFiles) && empty($this->migratedItems)) {
             return true;
@@ -466,7 +477,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null Value of the snapshot baking dispatch process
      */
-    protected function bakeSnapshot($name, Arguments $args, ConsoleIo $io)
+    protected function bakeSnapshot(string $name, Arguments $args, ConsoleIo $io): ?int
     {
         $io->out('Your migrations history is empty and you do not have any migrations files.');
         $io->out('Falling back to baking a snapshot...');
@@ -497,10 +508,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * and returns it as an array
      *
      * @param \Cake\Console\Arguments $args The command arguments.
-     * @return array Full database schema : the key is the name of the table and the value is
-     * an instance of \Cake\Database\Schema\Table.
+     * @return array<string, \Cake\Database\Schema\TableSchemaInterface> Full database schema.
      */
-    protected function getDumpSchema(Arguments $args)
+    protected function getDumpSchema(Arguments $args): array
     {
         $inputArgs = [];
 
@@ -521,6 +531,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
                 'the `cake migrations dump` command';
+            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort($msg);
         }
 
@@ -530,10 +541,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * Reflects the current database schema.
      *
-     * @return array Full database schema : the key is the name of the table and the value is
-     * an instance of \Cake\Database\Schema\Table.
+     * @return array<string, \Cake\Database\Schema\TableSchemaInterface> Full database schema.
      */
-    protected function getCurrentSchema()
+    protected function getCurrentSchema(): array
     {
         $schema = [];
 
@@ -542,9 +552,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         }
 
         $connection = ConnectionManager::get($this->connection);
-        if (method_exists($connection, 'cacheMetadata')) {
-            $connection->cacheMetadata(false);
-        }
+        assert($connection instanceof Connection);
+        $connection->cacheMetadata(false);
         $collection = $connection->getSchemaCollection();
         foreach ($this->tables as $table) {
             if (preg_match('/^.*phinxlog$/', $table) === 1) {

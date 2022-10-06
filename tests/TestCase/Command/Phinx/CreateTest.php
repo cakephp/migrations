@@ -129,7 +129,7 @@ class CreateTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->connection->getDriver()->getConnection());
+        //$adapter->setConnection($this->connection->getDriver()->getConnection());
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 

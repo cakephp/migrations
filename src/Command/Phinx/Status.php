@@ -94,10 +94,10 @@ class Status extends StatusCommand
     /**
      * Will output the status of the migrations
      *
-     * @param array $migrations Migrations array.
+     * @param array<array<string, mixed>> $migrations Migrations array.
      * @return void
      */
-    protected function display(array $migrations)
+    protected function display(array $migrations): void
     {
         $output = $this->getManager()->getOutput();
 

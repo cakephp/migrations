@@ -57,11 +57,6 @@ class StatusTest extends TestCase
     protected $streamOutput;
 
     /**
-     * @var \PDO|object
-     */
-    protected $pdo;
-
-    /**
      * setup method
      *
      * @return void
@@ -71,8 +66,6 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
-        $this->Connection->connect();
-        $this->pdo = $this->Connection->getDriver()->getConnection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
@@ -89,7 +82,6 @@ class StatusTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $this->Connection->getDriver()->setConnection($this->pdo);
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         unset($this->Connection, $this->command, $this->streamOutput);
@@ -227,7 +219,6 @@ class StatusTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->pdo);
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 
@@ -255,7 +246,6 @@ class StatusTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        $adapter->setConnection($this->pdo);
 
         return $migrations;
     }
