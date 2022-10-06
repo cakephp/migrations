@@ -103,7 +103,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiff()
     {
-        $this->skipIf(env('DB_URL_COMPARE') !== false);
+        $this->skipIf(getenv('DB_URL_COMPARE') === false);
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . env('DB') . '.php';
@@ -180,7 +180,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffSimple()
     {
-        $this->skipIf(env('DB_URL_COMPARE') !== false);
+        $this->skipIf(getenv('DB_URL_COMPARE') === false);
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
@@ -244,7 +244,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffAddRemove()
     {
-        $this->skipIf(env('DB_URL_COMPARE') !== false);
+        $this->skipIf(getenv('DB_URL_COMPARE') === false);
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';
