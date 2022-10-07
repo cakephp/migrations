@@ -382,20 +382,26 @@ class MigrationHelper extends Helper
         if (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
             unset($columnOptions['signed']);
         }
-        if (($options['type'] ?? null) === 'decimal') {
-            // due to Phinx using different naming for the precision and scale to CakePHP
-            $columnOptions['scale'] = $columnOptions['precision'];
-
-            if (isset($columnOptions['limit'])) {
-                $columnOptions['precision'] = $columnOptions['limit'];
-                unset($columnOptions['limit']);
-            }
-            if (isset($columnOptions['length'])) {
-                $columnOptions['precision'] = $columnOptions['length'];
-                unset($columnOptions['length']);
-            }
-        } else {
+        if (array_key_exists('precision', $columnOptions) && $columnOptions['precision'] === null) {
             unset($columnOptions['precision']);
+        } else {
+            // due to Phinx using different naming for the precision and scale to CakePHP
+            $type = $options['type'] ?? null;
+
+            if ($type === 'decimal') {
+                $columnOptions['scale'] = $columnOptions['precision'];
+            }
+
+            if (in_array($type, ['decimal', 'time', 'timestamp'], true)) {
+                if (isset($columnOptions['limit'])) {
+                    $columnOptions['precision'] = $columnOptions['limit'];
+                    unset($columnOptions['limit']);
+                }
+                if (isset($columnOptions['length'])) {
+                    $columnOptions['precision'] = $columnOptions['length'];
+                    unset($columnOptions['length']);
+                }
+            }
         }
 
         return $columnOptions;

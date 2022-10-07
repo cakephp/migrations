@@ -60,14 +60,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -109,14 +107,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -239,14 +235,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -320,7 +314,6 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addIndex(
                 [
@@ -366,14 +359,12 @@ class TestAutoIdDisabledSnapshotPgsql extends AbstractMigration
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->addColumn('updated', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
-                'scale' => 6,
             ])
             ->create();
 
