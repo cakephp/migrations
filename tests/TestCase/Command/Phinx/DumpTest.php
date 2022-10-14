@@ -22,6 +22,8 @@ use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
 use Migrations\MigrationsDispatcher;
+use Migrations\Test\TestCase\DriverConnectionTrait;
+use PDO;
 use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -31,6 +33,7 @@ use Symfony\Component\Console\Output\StreamOutput;
  */
 class DumpTest extends TestCase
 {
+    use DriverConnectionTrait;
     use StringCompareTrait;
 
     /**
@@ -61,6 +64,11 @@ class DumpTest extends TestCase
     protected $dumpfile = '';
 
     /**
+     * @var \PDO|null
+     */
+    protected ?PDO $pdo = null;
+
+    /**
      * setup method
      *
      * @return void
@@ -70,6 +78,9 @@ class DumpTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
+        $this->connection->getDriver()->connect();
+        $this->pdo = $this->getDriverConnection($this->connection->getDriver());
+
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('dump');
         $this->streamOutput = new StreamOutput(fopen('php://memory', 'w', false));
@@ -152,6 +163,7 @@ class DumpTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
+        $adapter->setConnection($this->pdo);
 
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
@@ -180,6 +192,8 @@ class DumpTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
+
+        $adapter->setConnection($this->pdo);
 
         $tables = (new Collection($this->connection))->listTables();
         if (in_array('phinxlog', $tables)) {

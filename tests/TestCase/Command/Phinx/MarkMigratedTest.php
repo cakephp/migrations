@@ -17,6 +17,8 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
+use Migrations\Test\TestCase\DriverConnectionTrait;
+use PDO;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -26,6 +28,8 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class MarkMigratedTest extends TestCase
 {
+    use DriverConnectionTrait;
+
     /**
      * Instance of a Symfony Command object
      *
@@ -48,6 +52,11 @@ class MarkMigratedTest extends TestCase
     protected $commandTester;
 
     /**
+     * @var \PDO|null
+     */
+    protected ?PDO $pdo = null;
+
+    /**
      * setup method
      *
      * @return void
@@ -57,6 +66,9 @@ class MarkMigratedTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
+        $this->connection->getDriver()->connect();
+        $this->pdo = $this->getDriverConnection($this->connection->getDriver());
+
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
 

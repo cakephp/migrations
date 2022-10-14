@@ -18,6 +18,8 @@ use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
 use Migrations\MigrationsDispatcher;
+use Migrations\Test\TestCase\DriverConnectionTrait;
+use PDO;
 use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -27,6 +29,8 @@ use Symfony\Component\Console\Output\StreamOutput;
  */
 class StatusTest extends TestCase
 {
+    use DriverConnectionTrait;
+
     /**
      * Instance of a Symfony Command object
      *
@@ -57,6 +61,11 @@ class StatusTest extends TestCase
     protected $streamOutput;
 
     /**
+     * @var \PDO|null
+     */
+    protected ?PDO $pdo = null;
+
+    /**
      * setup method
      *
      * @return void
@@ -66,6 +75,9 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
+        $this->Connection->getDriver()->connect();
+        $this->pdo = $this->getDriverConnection($this->Connection->getDriver());
+
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
 
@@ -84,7 +96,6 @@ class StatusTest extends TestCase
         parent::tearDown();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
-        unset($this->Connection, $this->command, $this->streamOutput);
     }
 
     /**
@@ -219,6 +230,7 @@ class StatusTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
+        $adapter->setConnection($this->pdo);
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 
@@ -246,6 +258,7 @@ class StatusTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
+        $adapter->setConnection($this->pdo);
 
         return $migrations;
     }

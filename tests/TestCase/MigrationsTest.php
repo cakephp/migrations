@@ -18,12 +18,15 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeAdapter;
 use Migrations\Migrations;
+use Phinx\Db\Adapter\WrapperInterface;
 
 /**
  * Tests the Migrations class
  */
 class MigrationsTest extends TestCase
 {
+    use DriverConnectionTrait;
+
     /**
      * Instance of a Migrations object
      *
@@ -64,9 +67,20 @@ class MigrationsTest extends TestCase
         $migrations->setInput($input);
         $migrations->getManager($migrations->getConfig());
         $this->Connection = ConnectionManager::get('test');
+        $connection = $migrations->getManager()->getEnvironment('default')->getAdapter()->getConnection();
+        $this->setDriverConnection($this->Connection->getDriver(), $connection);
 
         // Get an instance of the Migrations object on which we will run the tests
         $this->migrations = new Migrations($params);
+        $adapter = $this->migrations
+            ->getManager($migrations->getConfig())
+            ->getEnvironment('default')
+            ->getAdapter();
+
+        while ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+        $adapter->setConnection($connection);
 
         // List of tables managed by migrations this test runs.
         // We can't wipe all tables as we'l break other tests.

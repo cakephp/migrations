@@ -9,12 +9,14 @@ use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
+use Migrations\Test\TestCase\DriverConnectionTrait;
 use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
 class CreateTest extends TestCase
 {
+    use DriverConnectionTrait;
     use StringCompareTrait;
 
     /**
@@ -127,7 +129,7 @@ class CreateTest extends TestCase
         while ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        //$adapter->setConnection($this->connection->getDriver()->getConnection());
+        $adapter->setConnection($this->getDriverConnection($this->connection->getDriver()));
         $this->command->setManager($manager);
         $commandTester = new \Migrations\Test\CommandTester($this->command);
 
