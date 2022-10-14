@@ -170,16 +170,6 @@ class ConfigurationTraitTest extends TestCase
         $input = $this->getMockBuilder(InputInterface::class)->getMock();
         $this->command->setInput($input);
 
-        $input->expects($this->at(1))
-            ->method('getOption')
-            ->with('plugin')
-            ->will($this->returnValue('MyPlugin'));
-
-        $input->expects($this->at(4))
-            ->method('getOption')
-            ->with('plugin')
-            ->will($this->returnValue('MyPlugin'));
-
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
 
