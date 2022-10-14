@@ -167,18 +167,10 @@ class ConfigurationTraitTest extends TestCase
             'name' => 'MyPlugin',
             'path' => $tmpPath,
         ]));
-        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $input = new ArrayInput([], $this->command->getDefinition());
         $this->command->setInput($input);
 
-        $input->expects($this->atLeast(2))
-            ->method('getOption')
-            ->willReturnCallback(function (string $name) {
-                if ($name === 'plugin') {
-                    return 'MyPlugin';
-                }
-
-                return null;
-            });
+        $input->setOption('plugin', 'MyPlugin');
 
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
@@ -207,18 +199,10 @@ class ConfigurationTraitTest extends TestCase
             'encoding' => 'utf-8',
         ]);
 
-        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $input = new ArrayInput([], $this->command->getDefinition());
         $this->command->setInput($input);
 
-        $input->expects($this->atLeastOnce())
-            ->method('getOption')
-            ->willReturnCallback(function (string $name) {
-                if ($name === 'connection') {
-                    return 'custom';
-                }
-
-                return null;
-            });
+        $input->setOption('connection', 'custom');
 
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
