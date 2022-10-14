@@ -153,6 +153,15 @@ trait ConfigurationTrait
             }
         }
 
+        if ($adapterName === 'sqlite') {
+            if (!empty($connectionConfig['cache'])) {
+                $config['environments']['default']['cache'] = $connectionConfig['cache'];
+            }
+            if (!empty($connectionConfig['mode'])) {
+                $config['environments']['default']['mode'] = $connectionConfig['mode'];
+            }
+        }
+
         if (!empty($connectionConfig['flags'])) {
             /**
              * @psalm-suppress PossiblyNullArrayAccess
