@@ -79,10 +79,8 @@ class SeedTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $this->connection->getDriver()->setConnection($this->pdo);
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
-        unset($this->connection, $this->command, $this->streamOutput);
     }
 
     /**
