@@ -69,8 +69,6 @@ class CreateTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        unset($this->connection, $this->command, $this->streamOutput);
-
         foreach ($this->generatedFiles as $file) {
             if (file_exists($file)) {
                 unlink($file);

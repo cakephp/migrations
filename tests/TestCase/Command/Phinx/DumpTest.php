@@ -90,12 +90,10 @@ class DumpTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         $this->connection->execute('DROP TABLE IF EXISTS letters');
         $this->connection->execute('DROP TABLE IF EXISTS parts');
-        unset($this->connection, $this->command, $this->streamOutput);
     }
 
     /**

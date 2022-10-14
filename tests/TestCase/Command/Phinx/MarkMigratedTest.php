@@ -75,7 +75,6 @@ class MarkMigratedTest extends TestCase
         parent::tearDown();
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
-        unset($this->connection, $this->commandTester, $this->command);
     }
 
     /**
