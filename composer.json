@@ -28,7 +28,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.19",
-        "cakephp/cakephp": "5.x-dev",
+        "cakephp/cakephp": "^5.0",
         "cakephp/bake": "dev-cake5",
         "cakephp/cakephp-codesniffer": "^4.1"
     },
