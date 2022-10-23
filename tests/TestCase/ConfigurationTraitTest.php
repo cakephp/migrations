@@ -47,6 +47,7 @@ class ConfigurationTraitTest extends TestCase
     {
         parent::tearDown();
         ConnectionManager::drop('custom');
+        ConnectionManager::drop('default');
     }
 
     /**
@@ -133,6 +134,43 @@ class ConfigurationTraitTest extends TestCase
         $this->assertSame('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
         $this->assertFalse($environment['mysql_attr_ssl_verify_server_cert']);
         $this->assertTrue($environment['attr_emulate_prepares']);
+        $this->assertSame([], $environment['dsn_options']);
+    }
+
+    public function testGetConfigWithDsnOptions()
+    {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Sqlserver',
+            'database' => 'the_database',
+            // DSN options
+            'connectionPooling' => true,
+            'failoverPartner' => 'Partner',
+            'loginTimeout' => 123,
+            'multiSubnetFailover' => true,
+            'encrypt' => true,
+            'trustServerCertificate' => true,
+        ]);
+
+        /** @var \Symfony\Component\Console\Input\InputInterface|\PHPUnit\Framework\MockObject\MockObject $input */
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $this->command->setInput($input);
+        $config = $this->command->getConfig();
+        $this->assertInstanceOf('Phinx\Config\Config', $config);
+
+        $environment = $config['environments']['default'];
+        $this->assertSame('sqlsrv', $environment['adapter']);
+        $this->assertSame(
+            [
+                'ConnectionPooling' => true,
+                'Failover_Partner' => 'Partner',
+                'LoginTimeout' => 123,
+                'MultiSubnetFailover' => true,
+                'Encrypt' => true,
+                'TrustServerCertificate' => true,
+            ],
+            $environment['dsn_options']
+        );
     }
 
     /**
@@ -162,6 +200,12 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfigWithPlugin()
     {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'database' => 'the_database',
+        ]);
+
         $tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
         Plugin::getCollection()->add(new BasePlugin([
             'name' => 'MyPlugin',
