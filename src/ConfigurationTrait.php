@@ -102,6 +102,9 @@ trait ConfigurationTrait
          */
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
 
+        /** @psalm-suppress PossiblyNullArgument */
+        $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
+
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
         /** @psalm-suppress PossiblyNullArrayAccess */
         $config = [
@@ -126,6 +129,7 @@ trait ConfigurationTrait
                     'charset' => $connectionConfig['encoding'] ?? null,
                     'unix_socket' => $connectionConfig['unix_socket'] ?? null,
                     'suffix' => '',
+                    'dsn_options' => $dsnOptions,
                 ],
             ],
         ];
@@ -271,5 +275,38 @@ trait ConfigurationTrait
         }
 
         return $options;
+    }
+
+    /**
+     * Extracts DSN options from the connection configuration.
+     *
+     * @param string $adapterName The adapter name.
+     * @param array $config The connection configuration.
+     * @return array
+     */
+    protected function extractDsnOptions(string $adapterName, array $config): array
+    {
+        $dsnOptionsMap = [];
+
+        // SQLServer is currently the only Phinx adapter that supports DSN options
+        if ($adapterName === 'sqlsrv') {
+            $dsnOptionsMap = [
+                'connectionPooling' => 'ConnectionPooling',
+                'failoverPartner' => 'Failover_Partner',
+                'loginTimeout' => 'LoginTimeout',
+                'multiSubnetFailover' => 'MultiSubnetFailover',
+                'encrypt' => 'Encrypt',
+                'trustServerCertificate' => 'TrustServerCertificate',
+            ];
+        }
+
+        $suppliedDsnOptions = array_intersect_key($dsnOptionsMap, $config);
+
+        $dsnOptions = [];
+        foreach ($suppliedDsnOptions as $alias => $option) {
+            $dsnOptions[$option] = $config[$alias];
+        }
+
+        return $dsnOptions;
     }
 }
