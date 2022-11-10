@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase;
 
 use Cake\Core\BasePlugin;
-use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -269,103 +268,5 @@ class ConfigurationTraitTest extends TestCase
         $this->assertSame('the_password2', $environment['pass']);
         $this->assertSame('the_database2', $environment['name']);
         $this->assertSame('utf-8', $environment['charset']);
-    }
-
-    /**
-     * Generates Command mock to override getOperationsPath return value
-     *
-     * @param string $migrationsPath
-     * @param string $seedsPath
-     * @return ExampleCommand
-     */
-    protected function _getCommandMock(string $migrationsPath, string $seedsPath): ExampleCommand
-    {
-        $command = $this
-            ->getMockBuilder(ExampleCommand::class)
-            ->onlyMethods(['getOperationsPath'])
-            ->getMock();
-        /** @var \Symfony\Component\Console\Input\InputInterface|\PHPUnit\Framework\MockObject\MockObject $input */
-        $input = $this->getMockBuilder(InputInterface::class)->getMock();
-        $command->setInput($input);
-        $command->expects($this->any())
-            ->method('getOperationsPath')
-            ->will(
-                $this->returnValueMap([
-                    [$input, 'Migrations', $migrationsPath],
-                    [$input, 'Seeds', $seedsPath],
-                ])
-            );
-
-        return $command;
-    }
-
-    /**
-     * Test getConfig, migrations path does not exist, debug is disabled
-     *
-     * @return void
-     */
-    public function testGetConfigNoMigrationsFolderDebugDisabled()
-    {
-        Configure::write('debug', false);
-
-        $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
-        $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
-
-        $command = $this->_getCommandMock($migrationsPath, $seedsPath);
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(sprintf(
-            'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
-            $migrationsPath
-        ));
-        $config = $command->getConfig();
-    }
-
-    /**
-     * Test getConfig, migrations path does exist but seeds path does not, debug is disabled
-     *
-     * @return void
-     */
-    public function testGetConfigNoSeedsFolderDebugDisabled()
-    {
-        Configure::write('debug', false);
-
-        $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
-        mkdir($migrationsPath, 0777, true);
-        $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
-
-        $command = $this->_getCommandMock($migrationsPath, $seedsPath);
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(sprintf(
-            'Seeds path `%s` does not exist and cannot be created because `debug` is disabled.',
-            $seedsPath
-        ));
-        try {
-            $config = $command->getConfig();
-        } finally {
-            rmdir($migrationsPath);
-        }
-    }
-
-    /**
-     * Test getConfig, migrations and seeds paths do not exist, debug is enabled
-     *
-     * @return void
-     */
-    public function testGetConfigNoMigrationsOrSeedsFolderDebugEnabled()
-    {
-        $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
-        $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
-        mkdir($migrationsPath, 0777, true);
-        mkdir($seedsPath, 0777, true);
-
-        $command = $this->_getCommandMock($migrationsPath, $seedsPath);
-
-        $config = $command->getConfig();
-
-        $this->assertTrue(is_dir($migrationsPath));
-        $this->assertTrue(is_dir($seedsPath));
-
-        rmdir($migrationsPath);
-        rmdir($seedsPath);
     }
 }

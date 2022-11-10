@@ -83,23 +83,11 @@ trait ConfigurationTrait
         $seedsPath = $this->getOperationsPath($this->input(), 'Seeds');
         $plugin = $this->getPlugin($this->input());
 
-        if (!is_dir($migrationsPath)) {
-            if (!Configure::read('debug')) {
-                throw new \RuntimeException(sprintf(
-                    'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
-                    $migrationsPath
-                ));
-            }
+        if (Configure::read('debug') && !is_dir($migrationsPath)) {
             mkdir($migrationsPath, 0777, true);
         }
 
-        if (!is_dir($seedsPath)) {
-            if (!Configure::read('debug')) {
-                throw new \RuntimeException(sprintf(
-                    'Seeds path `%s` does not exist and cannot be created because `debug` is disabled.',
-                    $seedsPath
-                ));
-            }
+        if (Configure::read('debug') && !is_dir($seedsPath)) {
             mkdir($seedsPath, 0777, true);
         }
 
