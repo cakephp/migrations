@@ -13,7 +13,7 @@ This branch is for use with CakePHP **4.x**. See [version map](https://github.co
 
 ## Installation
 
-You can install this plugin into your CakePHP application using [Composer](http://getcomposer.org).
+You can install this plugin into your CakePHP application using [Composer](https://getcomposer.org).
 
 Run the following command
 ```sh
