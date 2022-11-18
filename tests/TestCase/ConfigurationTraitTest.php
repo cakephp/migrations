@@ -306,8 +306,16 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfigNoMigrationsFolderDebugDisabled()
     {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'host' => 'foo.bar',
+            'username' => 'root',
+            'password' => 'the_password',
+            'database' => 'the_database',
+            'encoding' => 'utf-8',
+        ]);
         Configure::write('debug', false);
-
         $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
         $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
 
@@ -353,6 +361,15 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfigNoMigrationsOrSeedsFolderDebugEnabled()
     {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'host' => 'foo.bar',
+            'username' => 'root',
+            'password' => 'the_password',
+            'database' => 'the_database',
+            'encoding' => 'utf-8',
+        ]);
         $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
         $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
         mkdir($migrationsPath, 0777, true);
