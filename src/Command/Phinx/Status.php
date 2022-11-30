@@ -79,7 +79,7 @@ class Status extends StatusCommand
 
         switch ($format) {
             case 'json':
-                $flags = null;
+                $flags = 0;
                 if ($input->getOption('verbose')) {
                     $flags = JSON_PRETTY_PRINT;
                 }
