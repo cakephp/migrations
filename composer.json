@@ -22,7 +22,7 @@
     },
     "require": {
         "php": ">=7.4.0",
-        "robmorgan/phinx": "^0.13",
+        "robmorgan/phinx": "^0.13.2",
         "cakephp/orm": "^4.3.0",
         "cakephp/cache": "^4.3.0"
     },

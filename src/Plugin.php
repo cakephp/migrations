@@ -37,7 +37,7 @@ class Plugin extends BasePlugin
 
     /**
      * @var array<string>
-     * @psalm-var array<class-string<\Phinx\Console\Command\AbstractCommand>>
+     * @psalm-var array<class-string<\Cake\Console\BaseCommand>>
      */
     protected $migrationCommandsList = [
         \Migrations\Command\MigrationsCommand::class,

@@ -199,6 +199,7 @@ class CakeManager extends Manager
     public function isMigrated(string $version): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
+        /** @var array<string, mixed> $versions */
         $versions = array_flip($adapter->getVersions());
 
         return isset($versions[$version]);
@@ -284,7 +285,7 @@ class CakeManager extends Manager
      * It will start a transaction and rollback in case one of the operation raises an exception
      *
      * @param string $path Path where to look for migrations
-     * @param array<int> $versions Versions which should be marked
+     * @param array<string> $versions Versions which should be marked
      * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
      * the command output
      * @return void
@@ -293,7 +294,7 @@ class CakeManager extends Manager
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
-        if (empty($versions)) {
+        if (!$versions) {
             $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
 
             return;
@@ -374,7 +375,7 @@ class CakeManager extends Manager
      */
     public function getSeeds(string $environment): array
     {
-        parent::getSeeds();
+        parent::getSeeds($environment);
         if (empty($this->seeds)) {
             return [];
         }
