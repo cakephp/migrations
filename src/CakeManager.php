@@ -193,10 +193,10 @@ class CakeManager extends Manager
     /**
      * Checks if the migration with version number $version as already been mark migrated
      *
-     * @param int $version Version number of the migration to check
+     * @param string $version Version number of the migration to check
      * @return bool
      */
-    public function isMigrated(int $version): bool
+    public function isMigrated(string $version): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
         $versions = array_flip($adapter->getVersions());
@@ -207,11 +207,11 @@ class CakeManager extends Manager
     /**
      * Marks migration with version number $version migrated
      *
-     * @param int $version Version number of the migration to check
+     * @param string $version Version number of the migration to check
      * @param string $path Path where the migration file is located
      * @return bool True if success
      */
-    public function markMigrated(int $version, string $path): bool
+    public function markMigrated(string $version, string $path): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
