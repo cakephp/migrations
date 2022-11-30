@@ -2,18 +2,19 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Migrations\Test\TestCase;
 
 use Cake\Core\BasePlugin;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -47,6 +48,7 @@ class ConfigurationTraitTest extends TestCase
     {
         parent::tearDown();
         ConnectionManager::drop('custom');
+        ConnectionManager::drop('default');
     }
 
     /**
@@ -133,6 +135,43 @@ class ConfigurationTraitTest extends TestCase
         $this->assertSame('ssl_cert_value', $environment['mysql_attr_ssl_cert']);
         $this->assertFalse($environment['mysql_attr_ssl_verify_server_cert']);
         $this->assertTrue($environment['attr_emulate_prepares']);
+        $this->assertSame([], $environment['dsn_options']);
+    }
+
+    public function testGetConfigWithDsnOptions()
+    {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Sqlserver',
+            'database' => 'the_database',
+            // DSN options
+            'connectionPooling' => true,
+            'failoverPartner' => 'Partner',
+            'loginTimeout' => 123,
+            'multiSubnetFailover' => true,
+            'encrypt' => true,
+            'trustServerCertificate' => true,
+        ]);
+
+        /** @var \Symfony\Component\Console\Input\InputInterface|\PHPUnit\Framework\MockObject\MockObject $input */
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $this->command->setInput($input);
+        $config = $this->command->getConfig();
+        $this->assertInstanceOf('Phinx\Config\Config', $config);
+
+        $environment = $config['environments']['default'];
+        $this->assertSame('sqlsrv', $environment['adapter']);
+        $this->assertSame(
+            [
+                'ConnectionPooling' => true,
+                'Failover_Partner' => 'Partner',
+                'LoginTimeout' => 123,
+                'MultiSubnetFailover' => true,
+                'Encrypt' => true,
+                'TrustServerCertificate' => true,
+            ],
+            $environment['dsn_options']
+        );
     }
 
     /**
@@ -162,23 +201,21 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfigWithPlugin()
     {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'database' => 'the_database',
+        ]);
+
         $tmpPath = rtrim(sys_get_temp_dir(), DS) . DS;
         Plugin::getCollection()->add(new BasePlugin([
             'name' => 'MyPlugin',
             'path' => $tmpPath,
         ]));
-        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $input = new ArrayInput([], $this->command->getDefinition());
         $this->command->setInput($input);
 
-        $input->expects($this->at(1))
-            ->method('getOption')
-            ->with('plugin')
-            ->will($this->returnValue('MyPlugin'));
-
-        $input->expects($this->at(4))
-            ->method('getOption')
-            ->with('plugin')
-            ->will($this->returnValue('MyPlugin'));
+        $input->setOption('plugin', 'MyPlugin');
 
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
@@ -207,13 +244,10 @@ class ConfigurationTraitTest extends TestCase
             'encoding' => 'utf-8',
         ]);
 
-        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $input = new ArrayInput([], $this->command->getDefinition());
         $this->command->setInput($input);
 
-        $input->expects($this->at(5))
-            ->method('getOption')
-            ->with('connection')
-            ->will($this->returnValue('custom'));
+        $input->setOption('connection', 'custom');
 
         $config = $this->command->getConfig();
         $this->assertInstanceOf('Phinx\Config\Config', $config);
@@ -235,5 +269,120 @@ class ConfigurationTraitTest extends TestCase
         $this->assertSame('the_password2', $environment['pass']);
         $this->assertSame('the_database2', $environment['name']);
         $this->assertSame('utf-8', $environment['charset']);
+    }
+
+    /**
+     * Generates Command mock to override getOperationsPath return value
+     *
+     * @param string $migrationsPath
+     * @param string $seedsPath
+     * @return ExampleCommand
+     */
+    protected function _getCommandMock(string $migrationsPath, string $seedsPath): ExampleCommand
+    {
+        $command = $this
+            ->getMockBuilder(ExampleCommand::class)
+            ->onlyMethods(['getOperationsPath'])
+            ->getMock();
+        /** @var \Symfony\Component\Console\Input\InputInterface|\PHPUnit\Framework\MockObject\MockObject $input */
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $command->setInput($input);
+        $command->expects($this->any())
+            ->method('getOperationsPath')
+            ->will(
+                $this->returnValueMap([
+                    [$input, 'Migrations', $migrationsPath],
+                    [$input, 'Seeds', $seedsPath],
+                ])
+            );
+
+        return $command;
+    }
+
+    /**
+     * Test getConfig, migrations path does not exist, debug is disabled
+     *
+     * @return void
+     */
+    public function testGetConfigNoMigrationsFolderDebugDisabled()
+    {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'host' => 'foo.bar',
+            'username' => 'root',
+            'password' => 'the_password',
+            'database' => 'the_database',
+            'encoding' => 'utf-8',
+        ]);
+        Configure::write('debug', false);
+        $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
+        $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
+
+        $command = $this->_getCommandMock($migrationsPath, $seedsPath);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(sprintf(
+            'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
+            $migrationsPath
+        ));
+        $config = $command->getConfig();
+    }
+
+    /**
+     * Test getConfig, migrations path does exist but seeds path does not, debug is disabled
+     *
+     * @return void
+     */
+    public function testGetConfigNoSeedsFolderDebugDisabled()
+    {
+        Configure::write('debug', false);
+
+        $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
+        mkdir($migrationsPath, 0777, true);
+        $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
+
+        $command = $this->_getCommandMock($migrationsPath, $seedsPath);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(sprintf(
+            'Seeds path `%s` does not exist and cannot be created because `debug` is disabled.',
+            $seedsPath
+        ));
+        try {
+            $config = $command->getConfig();
+        } finally {
+            rmdir($migrationsPath);
+        }
+    }
+
+    /**
+     * Test getConfig, migrations and seeds paths do not exist, debug is enabled
+     *
+     * @return void
+     */
+    public function testGetConfigNoMigrationsOrSeedsFolderDebugEnabled()
+    {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'host' => 'foo.bar',
+            'username' => 'root',
+            'password' => 'the_password',
+            'database' => 'the_database',
+            'encoding' => 'utf-8',
+        ]);
+        $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
+        $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
+        mkdir($migrationsPath, 0777, true);
+        mkdir($seedsPath, 0777, true);
+
+        $command = $this->_getCommandMock($migrationsPath, $seedsPath);
+
+        $config = $command->getConfig();
+
+        $this->assertTrue(is_dir($migrationsPath));
+        $this->assertTrue(is_dir($seedsPath));
+
+        rmdir($migrationsPath);
+        rmdir($seedsPath);
     }
 }

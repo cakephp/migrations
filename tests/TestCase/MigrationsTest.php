@@ -2,14 +2,14 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Migrations\Test\TestCase;
 
@@ -225,7 +225,7 @@ class MigrationsTest extends TestCase
         // Tests that if a collation is defined, it is used
         $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $options = $numbersTable->getSchema()->getOptions();
-        $this->assertSame('utf8_bin', $options['collation']);
+        $this->assertSame('utf8mb3_bin', $options['collation']);
 
         // Tests that if a collation is not defined, it will use the database default one
         $lettersTable = $this->getTableLocator()->get('Letters', ['connection' => $this->Connection]);

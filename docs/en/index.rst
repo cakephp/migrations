@@ -1127,8 +1127,16 @@ method. In your migration file, you can do the following::
     {
         $this->table('old_table_name')
             ->rename('new_table_name')
-            ->save();
+            ->update();
     }
+
+    public function down()
+    {
+        $this->table('new_table_name')
+            ->rename('old_table_name')
+            ->update();
+    }
+
 
 Skipping the ``schema.lock`` file generation
 --------------------------------------------

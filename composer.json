@@ -21,13 +21,13 @@
         "source": "https://github.com/cakephp/migrations"
     },
     "require": {
-        "php": ">=7.2.0",
+        "php": ">=7.4.0",
         "robmorgan/phinx": "^0.13",
         "cakephp/orm": "^4.3.0",
         "cakephp/cache": "^4.3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.5.0 || ^9.5.0",
+        "phpunit/phpunit": "^9.5.0",
         "cakephp/cakephp": "^4.3.0",
         "cakephp/bake": "^2.6.0",
         "cakephp/cakephp-codesniffer": "^4.1"

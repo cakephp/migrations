@@ -2,14 +2,14 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Migrations;
 
@@ -96,11 +96,23 @@ trait ConfigurationTrait
         $seedsPath = $this->getOperationsPath($this->input(), 'Seeds');
         $plugin = $this->getPlugin($this->input());
 
-        if (Configure::read('debug') && !is_dir($migrationsPath)) {
+        if (!is_dir($migrationsPath)) {
+            if (!Configure::read('debug')) {
+                throw new \RuntimeException(sprintf(
+                    'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
+                    $migrationsPath
+                ));
+            }
             mkdir($migrationsPath, 0777, true);
         }
 
-        if (Configure::read('debug') && !is_dir($seedsPath)) {
+        if (!is_dir($seedsPath)) {
+            if (!Configure::read('debug')) {
+                throw new \RuntimeException(sprintf(
+                    'Seeds path `%s` does not exist and cannot be created because `debug` is disabled.',
+                    $seedsPath
+                ));
+            }
             mkdir($seedsPath, 0777, true);
         }
 
@@ -114,6 +126,9 @@ trait ConfigurationTrait
          * @psalm-suppress PossiblyNullArrayAccess
          */
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
+
+        /** @psalm-suppress PossiblyNullArgument */
+        $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
 
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
         /** @psalm-suppress PossiblyNullArrayAccess */
@@ -139,6 +154,7 @@ trait ConfigurationTrait
                     'charset' => $connectionConfig['encoding'] ?? null,
                     'unix_socket' => $connectionConfig['unix_socket'] ?? null,
                     'suffix' => '',
+                    'dsn_options' => $dsnOptions,
                 ],
             ],
         ];
@@ -163,6 +179,15 @@ trait ConfigurationTrait
                  * @psalm-suppress PossiblyNullArrayAccess
                  */
                 $config['environments']['default']['mysql_attr_ssl_ca'] = $connectionConfig['ssl_ca'];
+            }
+        }
+
+        if ($adapterName === 'sqlite') {
+            if (!empty($connectionConfig['cache'])) {
+                $config['environments']['default']['cache'] = $connectionConfig['cache'];
+            }
+            if (!empty($connectionConfig['mode'])) {
+                $config['environments']['default']['mode'] = $connectionConfig['mode'];
             }
         }
 
@@ -276,5 +301,38 @@ trait ConfigurationTrait
         }
 
         return $options;
+    }
+
+    /**
+     * Extracts DSN options from the connection configuration.
+     *
+     * @param string $adapterName The adapter name.
+     * @param array $config The connection configuration.
+     * @return array
+     */
+    protected function extractDsnOptions(string $adapterName, array $config): array
+    {
+        $dsnOptionsMap = [];
+
+        // SQLServer is currently the only Phinx adapter that supports DSN options
+        if ($adapterName === 'sqlsrv') {
+            $dsnOptionsMap = [
+                'connectionPooling' => 'ConnectionPooling',
+                'failoverPartner' => 'Failover_Partner',
+                'loginTimeout' => 'LoginTimeout',
+                'multiSubnetFailover' => 'MultiSubnetFailover',
+                'encrypt' => 'Encrypt',
+                'trustServerCertificate' => 'TrustServerCertificate',
+            ];
+        }
+
+        $suppliedDsnOptions = array_intersect_key($dsnOptionsMap, $config);
+
+        $dsnOptions = [];
+        foreach ($suppliedDsnOptions as $alias => $option) {
+            $dsnOptions[$option] = $config[$alias];
+        }
+
+        return $dsnOptions;
     }
 }

@@ -68,7 +68,6 @@ class CacheBuildTest extends TestCase
         Cache::disable();
         $this->connection->cacheMetadata(false);
         $this->connection->execute('DROP TABLE IF EXISTS blog');
-        unset($this->connection, $this->command, $this->streamOutput);
     }
 
     /**
