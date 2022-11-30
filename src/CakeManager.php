@@ -60,7 +60,7 @@ class CakeManager extends Manager
      *
      * @param string $environment Environment name.
      * @param null|string $format Format (`json` or `array`).
-     * @return array Array of migrations or JSON array.
+     * @return array Array of migrations.
      */
     public function printStatus(string $environment, ?string $format = null): array
     {
@@ -112,12 +112,6 @@ class CakeManager extends Manager
 
         ksort($migrations);
         $migrations = array_values($migrations);
-
-        /* needs to be moved to actual printing part
-        if ($isJson) {
-            $migrations = json_encode($migrations);
-        }
-        */
 
         return $migrations;
     }

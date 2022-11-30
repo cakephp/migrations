@@ -75,12 +75,11 @@ class Status extends StatusCommand
             $output->writeln('<info>using format</info> ' . $format);
         }
 
-        // print the status
-        /** @var array $migrations */
         $migrations = $this->getManager()->printStatus($environment, $format);
 
         switch ($format) {
             case 'json':
+                $migrations = json_encode($migrations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 $this->getManager()->getOutput()->writeln($migrations);
                 break;
             default:
