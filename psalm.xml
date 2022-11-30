@@ -22,5 +22,6 @@
         <MissingClosureReturnType errorLevel="suppress"/>
         <PropertyNotSetInConstructor errorLevel="suppress"/>
         <UnresolvableInclude errorLevel="suppress"/>
+        <UnsafeInstantiation errorLevel="suppress"/>
     </issueHandlers>
 </psalm>

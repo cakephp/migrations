@@ -66,14 +66,15 @@ class CakeManager extends Manager
     {
         $migrations = [];
         $isJson = $format === 'json';
-        if (count($this->getMigrations('default'))) {
+        $migrations = $this->getMigrations('default');
+        if (count($migrations)) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $this->maxNameLength = $versions ? max(array_map(function ($version) {
                 return strlen((string)$version['migration_name']);
             }, $versions)) : 0;
 
-            foreach ($this->getMigrations('default') as $migration) {
+            foreach ($migrations as $migration) {
                 if (array_key_exists($migration->getVersion(), $versions)) {
                     $status = 'up';
                     unset($versions[$migration->getVersion()]);
@@ -193,13 +194,13 @@ class CakeManager extends Manager
     /**
      * Checks if the migration with version number $version as already been mark migrated
      *
-     * @param string $version Version number of the migration to check
+     * @param int $version Version number of the migration to check
      * @return bool
      */
-    public function isMigrated(string $version): bool
+    public function isMigrated(int $version): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
-        /** @var array<string, mixed> $versions */
+        /** @var array<int, mixed> $versions */
         $versions = array_flip($adapter->getVersions());
 
         return isset($versions[$version]);
@@ -208,11 +209,11 @@ class CakeManager extends Manager
     /**
      * Marks migration with version number $version migrated
      *
-     * @param string $version Version number of the migration to check
+     * @param int $version Version number of the migration to check
      * @param string $path Path where the migration file is located
      * @return bool True if success
      */
-    public function markMigrated(string $version, string $path): bool
+    public function markMigrated(int $version, string $path): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
@@ -242,11 +243,11 @@ class CakeManager extends Manager
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input interface from which argument and options
      * will be extracted to determine which versions to be marked as migrated
-     * @return array Array of versions that should be marked as migrated
+     * @return array<int> Array of versions that should be marked as migrated
      * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
      * or version not found
      */
-    public function getVersionsToMark($input)
+    public function getVersionsToMark($input): array
     {
         $migrations = $this->getMigrations('default');
         $versions = array_keys($migrations);
@@ -258,8 +259,7 @@ class CakeManager extends Manager
             return $versions;
         }
 
-        /** @var string $version */
-        $version = $targetArg ?: $versionArg;
+        $version = (int)$targetArg ?: (int)$versionArg;
 
         if ($input->getOption('only') || !empty($versionArg)) {
             if (!in_array($version, $versions)) {
@@ -285,7 +285,7 @@ class CakeManager extends Manager
      * It will start a transaction and rollback in case one of the operation raises an exception
      *
      * @param string $path Path where to look for migrations
-     * @param array<string> $versions Versions which should be marked
+     * @param array<int> $versions Versions which should be marked
      * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
      * the command output
      * @return void
