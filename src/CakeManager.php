@@ -369,9 +369,10 @@ class CakeManager extends Manager
      * to the other MigrationsDispatcher it is generating.
      *
      * @throws \InvalidArgumentException
+     * @param string $environment Environment.
      * @return \Phinx\Seed\SeedInterface[]
      */
-    public function getSeeds(): array
+    public function getSeeds(string $environment): array
     {
         parent::getSeeds();
         if (empty($this->seeds)) {
