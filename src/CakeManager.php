@@ -66,15 +66,15 @@ class CakeManager extends Manager
     {
         $migrations = [];
         $isJson = $format === 'json';
-        $migrations = $this->getMigrations('default');
-        if (count($migrations)) {
+        $defaultMigrations = $this->getMigrations('default');
+        if (count($defaultMigrations)) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $this->maxNameLength = $versions ? max(array_map(function ($version) {
                 return strlen((string)$version['migration_name']);
             }, $versions)) : 0;
 
-            foreach ($migrations as $migration) {
+            foreach ($defaultMigrations as $migration) {
                 if (array_key_exists($migration->getVersion(), $versions)) {
                     $status = 'up';
                     unset($versions[$migration->getVersion()]);
