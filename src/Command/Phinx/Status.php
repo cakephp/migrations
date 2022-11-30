@@ -79,7 +79,11 @@ class Status extends StatusCommand
 
         switch ($format) {
             case 'json':
-                $migrationString = json_encode($migrations);
+                $flags = null;
+                if ($input->getOption('verbose')) {
+                    $flags = JSON_PRETTY_PRINT;
+                }
+                $migrationString = json_encode($migrations, $flags);
                 $this->getManager()->getOutput()->writeln($migrationString);
                 break;
             default:
