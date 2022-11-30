@@ -29,7 +29,8 @@ Migrations
 
 このプラグインを使用するためには、あなたは、アプリケーションの **config/bootstrap.php**
 ファイルでロードする必要があります。あなたの **config/bootstrap.php** からプラグインを
-ロード・アンロードするために :ref:`CakePHP の Plugin シェル <https://book.cakephp.org/3.0/ja/console-and-shells/plugin-shell.html>`
+ロード・アンロードするために `CakePHP の Plugin シェル
+<https://book.cakephp.org/3.0/ja/console-and-shells/plugin-shell.html>`__
 が利用できます。 :
 
 .. code-block:: bash
@@ -43,7 +44,8 @@ Migrations
 
     // 3.6.0 より前は Plugin::load() を使用する必要があります
 
-また、 :ref:`データベース設定 <https://book.cakephp.org/3.0/en/orm/database-basics.html#database-configuration>` の項で説明したように、
+また、 `データベース設定
+<https://book.cakephp.org/3.0/en/orm/database-basics.html#database-configuration>`__ の項で説明したように、
 あなたの **config/app.php** ファイル内のデフォルトのデータベース構成を設定する必要が
 あります。
 
@@ -1005,8 +1007,8 @@ Table オブジェクトのレジストリーは、 ``update()`` が呼ばれた
 もし、アプリケーションをデプロイする時にプラグインを使用する場合、
 テーブルのカラムメタデータを更新するように、必ず ORM キャッシュをクリアしてください。
 そうしなければ、それらの新しいカラムの操作を実行する時に、カラムが存在しないエラーになります。
-CakePHP コアは、この操作を行うために使用できる :doc:`スキーマキャッシュシェル
-<https://book.cakephp.org/3.0/ja/console-and-shells/schema-cache.html>` を含みます。 :
+CakePHP コアは、この操作を行うために使用できる `スキーマキャッシュシェル
+<https://book.cakephp.org/3.0/ja/console-and-shells/schema-cache.html>`__ を含みます。 :
 
 .. code-block:: bash
 
@@ -1014,7 +1016,7 @@ CakePHP コアは、この操作を行うために使用できる :doc:`スキ�
     bin/cake schema_cache clear
 
 このシェルについてもっと知りたい場合、クックブックの
-:doc:`スキーマキャッシュシェル <https://book.cakephp.org/3.0/ja/console-and-shells/schema-cache.html>`
+`スキーマキャッシュシェル <https://book.cakephp.org/3.0/ja/console-and-shells/schema-cache.html>`__
 セクションをご覧ください。
 
 テーブルのリネーム

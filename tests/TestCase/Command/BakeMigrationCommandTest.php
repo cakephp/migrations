@@ -42,7 +42,7 @@ class BakeMigrationCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $createUsers = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $createUsers = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Users.php');
         if ($createUsers) {
             foreach ($createUsers as $file) {
                 unlink($file);
@@ -110,6 +110,21 @@ class BakeMigrationCommandTest extends TestCase
         $this->exec('bake migration CreateUsers --connection test');
         $this->assertExitCode(BaseCommand::CODE_ERROR);
         $this->assertErrorContains('A migration with the name `CreateUsers` already exists. Please use a different name.');
+    }
+
+    /**
+     * Tests that baking a migration with the "drop" string inside the name generates a valid drop migration.
+     */
+    public function testCreateDropMigration()
+    {
+        $this->exec('bake migration DropUsers --connection test');
+
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_DropUsers.php');
+        $filePath = current($file);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
     /**

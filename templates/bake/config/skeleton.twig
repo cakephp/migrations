@@ -69,7 +69,7 @@ class {{ name }} extends AbstractMigration
 {% endif %}
 {% endif %}
 {% endif %}
-        $table->{{ tableMethod }}();
+        $table->{{ tableMethod }}(){% if tableMethod == 'drop' %}->save(){% endif %};
 {% endfor %}
     }
 }

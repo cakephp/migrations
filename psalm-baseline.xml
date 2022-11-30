@@ -1,46 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.x-dev@">
-  <file src="../../robmorgan/phinx/src/Phinx/Console/Command/Create.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="../../robmorgan/phinx/src/Phinx/Console/Command/Migrate.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="../../robmorgan/phinx/src/Phinx/Console/Command/Rollback.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="../../robmorgan/phinx/src/Phinx/Console/Command/SeedRun.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="../../robmorgan/phinx/src/Phinx/Console/Command/Status.php">
-    <NonInvariantDocblockPropertyType occurrences="1">
-      <code>$defaultName</code>
-    </NonInvariantDocblockPropertyType>
-  </file>
-  <file src="src/AbstractMigration.php">
-    <MethodSignatureMismatch occurrences="2">
-      <code>$options</code>
-      <code>$tableName</code>
-    </MethodSignatureMismatch>
-  </file>
   <file src="src/CakeManager.php">
-    <LessSpecificImplementedReturnType occurrences="1">
-      <code>\Phinx\Seed\SeedInterface[]</code>
-    </LessSpecificImplementedReturnType>
-    <MethodSignatureMismatch occurrences="4">
-      <code>$environment</code>
-      <code>$environment</code>
-      <code>$fake</code>
-      <code>$format</code>
-    </MethodSignatureMismatch>
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$Migration</code>
+    </ArgumentTypeCoercion>
+    <ImplementedReturnTypeMismatch occurrences="1">
+      <code>array|string</code>
+    </ImplementedReturnTypeMismatch>
   </file>
   <file src="src/Command/BakeSeedCommand.php">
     <RedundantCondition occurrences="1">
@@ -51,14 +17,6 @@
     <PossiblyNullReference occurrences="1">
       <code>setInput</code>
     </PossiblyNullReference>
-  </file>
-  <file src="src/ConfigurationTrait.php">
-    <ArgumentTypeCoercion occurrences="4">
-      <code>'Cake\Database\Driver\Mysql'</code>
-      <code>'Cake\Database\Driver\Postgres'</code>
-      <code>'Cake\Database\Driver\Sqlite'</code>
-      <code>'Cake\Database\Driver\Sqlserver'</code>
-    </ArgumentTypeCoercion>
   </file>
   <file src="src/MigrationsDispatcher.php">
     <ArgumentTypeCoercion occurrences="1">
@@ -82,8 +40,9 @@
     <InternalClass occurrences="1">
       <code>new ConnectionHelper()</code>
     </InternalClass>
-    <InternalMethod occurrences="2">
+    <InternalMethod occurrences="3">
       <code>dropTables</code>
+      <code>truncateTables</code>
       <code>truncateTables</code>
     </InternalMethod>
   </file>
@@ -91,5 +50,35 @@
     <PossiblyNullArgument occurrences="1">
       <code>$fieldType</code>
     </PossiblyNullArgument>
+  </file>
+  <file src="src/Util/UtilTrait.php">
+    <InvalidReturnType occurrences="1">
+      <code>string|null</code>
+    </InvalidReturnType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Create.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Migrate.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Rollback.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/SeedRun.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
+  <file src="vendor/robmorgan/phinx/src/Phinx/Console/Command/Status.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
   </file>
 </files>

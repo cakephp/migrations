@@ -364,7 +364,10 @@ will generate::
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string')
+                  ->addColumn('email', 'string')
                   ->addIndex(['name'])
+                  // add a unique index:
+                  ->addIndex('email', ['unique' => true])
                   ->update();
         }
     }
@@ -837,7 +840,7 @@ Using Migrations for Tests
 
 If you are using migrations for your application schema you can also use those
 same migrations to build schema in your tests. In your application's
-``tests/bootstrap.php`` file you can use the ``Migator`` class to build schema
+``tests/bootstrap.php`` file you can use the ``Migrator`` class to build schema
 when tests are run. The ``Migrator`` will use existing schema if it is current,
 and if the migration history that is in the database differs from what is in the
 filesystem, all tables will be dropped and migrations will be rerun from the
@@ -851,36 +854,38 @@ beginning::
     // Simple setup for with no plugins
     $migrator->run();
 
-    // Run migrations for multiple plugins
-    $migrator->run([
+    // Run a non 'test' database
+    $migrator->run(['connection' => 'test_other']);
+
+    // Run migrations for plugins
+    $migrator->run(['plugin' => 'Contacts']);
+
+    // Run the Documents migrations on the test_docs connection.
+    $migrator->run(['plugin' => 'Documents', 'connection' => 'test_docs']);
+
+
+If you need to run multiple sets of migrations, those can be run as follows::
+
+    // Run migrations for plugin Contacts on the ``test`` connection, and Documents on the ``test_docs`` connection
+    $migrator->runMany([
         ['plugin' => 'Contacts'],
-        // Run the Documents migrations on the test_docs connection.
-        ['plugin' => 'Documents', 'connection' => 'test_docs'],
+        ['plugin' => 'Documents', 'connection' => 'test_docs']
     ]);
 
-You can also configure how migrations should be run in tests from your
-``Datasources`` configuration. Datasources can use the ``migrations`` key
-to define whether it should be included or which plugins should have migrations
-run on that connection::
+If your database also contains tables that are not managed by your application
+like those created by PostGIS, then you can exclude those tables from the drop
+& truncate behavior using the ``skip`` option::
 
-    // in config/app_local.php
-    <?php
-    return {
-        'Datasources' => {
-            'test' => {
-                // ...
-                // Will have migrations run.
-                'migrations' => true,
-            },
-            'test_plugin' => {
-                // ...
-                // Will have migrations for Cms and Vendor/Blog run.
-                'migrations' => ['Cms', 'Vendor/Blog'],
-            },
-        },
-    };
+    $migrator->run(['connection' => 'test', 'skip' => ['postgis*']]);
+
+The ``skip`` option accepts a ``fnmatch()`` compatible pattern to exclude tables
+from drop & truncate operations.
+
+If you need to see additional debugging output from migrations are being run,
+you can enable a ``debug`` level logger.
 
 .. versionadded: 3.2.0
+    Migrator was added to complement the new fixtures in CakePHP 4.3.0.
 
 Using Migrations In Plugins
 ===========================

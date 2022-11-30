@@ -57,7 +57,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
     public function getPath(): string
     {
         $path = ROOT . DS . $this->pathFragment;
-        if (isset($this->plugin)) {
+        if ($this->plugin !== null) {
             $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
         }
 

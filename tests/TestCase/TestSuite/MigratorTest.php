@@ -13,73 +13,222 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
+use Cake\Chronos\ChronosInterface;
 use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
+use Cake\I18n\FrozenDate;
+use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
-use Migrations\Test\MigratorTestTrait;
 use Migrations\TestSuite\Migrator;
 
 class MigratorTest extends TestCase
 {
-    use MigratorTestTrait;
-
     public function setUp(): void
     {
         parent::setUp();
 
         $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
         unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
-        $this->setDummyConnections();
+
+        (new ConnectionHelper())->dropTables('test');
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-
         $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
+
+        (new ConnectionHelper())->dropTables('test');
     }
 
-    private function fetchMigrationsInDB(string $dbTable): array
+    public function testMigrateDropTruncate(): void
     {
-        return ConnectionManager::get('test')
-            ->newQuery()
-            ->select('migration_name')
-            ->from($dbTable)
-            ->execute()
-            ->fetch();
-    }
-
-    public function testMigrate(): void
-    {
-        $this->markTestSkipped('This test drops all tables resulting in other tests failing.');
-        (new Migrator())->run();
-
-        $appMigrations = $this->fetchMigrationsInDB('phinxlog');
-        $fooPluginMigrations = $this->fetchMigrationsInDB('foo_plugin_phinxlog');
-        $barPluginMigrations = $this->fetchMigrationsInDB('bar_plugin_phinxlog');
-
-        $this->assertSame(['MarkMigratedTest'], $appMigrations);
-        $this->assertSame(['FooMigration'], $fooPluginMigrations);
-        $this->assertSame(['BarMigration'], $barPluginMigrations);
-
-        $letters = TableRegistry::getTableLocator()->get('Letters');
-        $this->assertSame('test', $letters->getConnection()->configName());
-    }
-
-    public function testDropTablesForMissingMigrations(): void
-    {
-        $this->markTestSkipped('This test drops all tables resulting in other tests failing.');
         $migrator = new Migrator();
-        $migrator->run();
+        $migrator->run(['plugin' => 'Migrator']);
 
         $connection = ConnectionManager::get('test');
-        $connection->insert('phinxlog', ['version' => 1, 'migration_name' => 'foo',]);
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
 
-        $count = $connection->newQuery()->select('version')->from('phinxlog')->execute()->count();
-        $this->assertSame(2, $count);
+        $migrator->run(['plugin' => 'Migrator',]);
 
-        $migrator->run();
-        $count = $connection->newQuery()->select('version')->from('phinxlog')->execute()->count();
-        $this->assertSame(1, $count);
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+
+        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    public function testMigrateDropNoTruncate(): void
+    {
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator'], false);
+
+        $connection = ConnectionManager::get('test');
+        $tables = $connection->getSchemaCollection()->listTables();
+
+        $this->assertContains('migrator', $tables);
+        $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    public function testMigrateSkipTables(): void
+    {
+        $connection = ConnectionManager::get('test');
+
+        // Create a table
+        $connection->execute('CREATE TABLE skipme (name TEXT)');
+
+        // Insert a record so that we can ensure the table was skipped.
+        $connection->execute('INSERT INTO skipme (name) VALUES (:name)', ['name' => 'Ron']);
+
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator', 'skip' => ['skip*']]);
+
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+        $this->assertContains('skipme', $tables);
+        $this->assertCount(1, $connection->query('SELECT * FROM skipme')->fetchAll());
+    }
+
+    public function testRunManyDropTruncate(): void
+    {
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
+        ]);
+
+        $connection = ConnectionManager::get('test');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
+    }
+
+    public function testRunManyDropNoTruncate(): void
+    {
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
+        ], false);
+
+        $connection = ConnectionManager::get('test');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator', $tables);
+        $this->assertCount(2, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
+    }
+
+    /**
+     * @depends testMigrateDropNoTruncate
+     */
+    public function testTruncateAfterMigrations(): void
+    {
+        $this->testMigrateDropNoTruncate();
+
+        $migrator = new Migrator();
+        $migrator->truncate('test');
+
+        $connection = ConnectionManager::get('test');
+        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+    }
+
+    private function setMigrationEndDateToYesterday()
+    {
+        ConnectionManager::get('test')->newQuery()
+            ->update('migrator_phinxlog')
+            ->set('end_time', FrozenDate::yesterday(), 'timestamp')
+            ->execute();
+    }
+
+    private function fetchMigrationEndDate(): ChronosInterface
+    {
+        $endTime = ConnectionManager::get('test')->newQuery()
+            ->select('end_time')
+            ->from('migrator_phinxlog')
+            ->execute()->fetchColumn(0);
+
+        return FrozenDate::parse($endTime);
+    }
+
+    public function testSkipMigrationDroppingIfOnlyUpMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator']);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator
+        $migrator->run(['plugin' => 'Migrator']);
+
+        // Ensure that the end time is unchanged, meaning that the phinx table was not dropped
+        // and the migrations were not re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isYesterday());
+    }
+
+    public function testSkipMigrationDroppingIfOnlyUpMigrationsWithTwoSetsOfMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['source' => '../../Plugin/Migrator/config/Migrations2',],
+        ], false);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['source' => '../../Plugin/Migrator/config/Migrations2',],
+        ], false);
+
+        // Ensure that the end time is unchanged, meaning that the phinx table was not dropped
+        // and the migrations were not re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isYesterday());
+    }
+
+    public function testDropMigrationsIfDownMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->run(['plugin' => 'Migrator']);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator with additional down migrations
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
+        ], false);
+
+        // Ensure that the end time is today, meaning that the phinx table was truncated
+        // and the migration were re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isToday());
+    }
+
+    public function testDropMigrationsIfMissingMigrations(): void
+    {
+        // Run the migrator
+        $migrator = new Migrator();
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
+        ]);
+
+        // Update the end time in the migrator_phinxlog table
+        $this->setMigrationEndDateToYesterday();
+
+        // Re-run the migrator with missing migrations
+        $migrator->runMany([
+            ['plugin' => 'Migrator',],
+        ], false);
+
+        // Ensure that the end time is today, meaning that the phinx table was truncated
+        // and the migration were re-run
+        $this->assertTrue($this->fetchMigrationEndDate()->isToday());
     }
 }

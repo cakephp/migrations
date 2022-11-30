@@ -42,11 +42,16 @@ define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS
 define('ROOT', $root . DS . 'tests' . DS . 'test_app');
 define('APP_DIR', 'App');
 define('APP', ROOT . DS . 'App' . DS);
-define('TMP', sys_get_temp_dir() . DS . 'cake-migrations');
+define('TMP', sys_get_temp_dir() . DS . 'cake-migrations' . DS);
 define('CACHE', TMP . DS . 'cache' . DS);
 if (!defined('CONFIG')) {
     define('CONFIG', ROOT . DS . 'config' . DS);
 }
+
+// phpcs:disable
+@mkdir(CACHE);
+// phpcs:enable
+
 Configure::write('debug', true);
 Configure::write('App', [
     'namespace' => 'TestApp',
@@ -88,10 +93,16 @@ if (!getenv('DB')) {
     }
     putenv('DB=' . $db);
 }
-ConnectionManager::setConfig('test', ['url' => getenv('DB_URL')]);
+ConnectionManager::setConfig('test', [
+    'cacheMetadata' => false,
+    'url' => getenv('DB_URL'),
+]);
 
 if (getenv('DB_URL_COMPARE') !== false) {
-    ConnectionManager::setConfig('test_comparisons', ['url' => getenv('DB_URL_COMPARE')]);
+    ConnectionManager::setConfig('test_comparisons', [
+        'cacheMetadata' => false,
+        'url' => getenv('DB_URL_COMPARE'),
+    ]);
 }
 
 Plugin::getCollection()->add(new \Migrations\Plugin());

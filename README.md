@@ -41,4 +41,4 @@ Additionally, you will need to configure the ``default`` database configuration 
 
 ## Documentation
 
-Full documentation of the plugin can be found on the [CakePHP Cookbook](https://book.cakephp.org/migrations/2/).
+Full documentation of the plugin can be found on the [CakePHP Cookbook](https://book.cakephp.org/migrations/3/).
