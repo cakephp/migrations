@@ -79,7 +79,7 @@ class Status extends StatusCommand
 
         switch ($format) {
             case 'json':
-                $migrations = json_encode($migrations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $migrations = json_encode($migrations);
                 $this->getManager()->getOutput()->writeln($migrations);
                 break;
             default:
