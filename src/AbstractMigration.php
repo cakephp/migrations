@@ -13,7 +13,6 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
-use Phinx\Db\Table;
 use Phinx\Migration\AbstractMigration as BaseAbstractMigration;
 
 class AbstractMigration extends BaseAbstractMigration
@@ -37,7 +36,7 @@ class AbstractMigration extends BaseAbstractMigration
      *
      * @param string $tableName Table Name
      * @param array $options Options
-     * @return \Phinx\Db\Table
+     * @return \Migrations\Table
      */
     public function table(string $tableName, array $options = []): Table
     {

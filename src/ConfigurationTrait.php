@@ -66,7 +66,7 @@ trait ConfigurationTrait
 
         return $this->input;
     }
-    
+
     /**
      * Overrides the original method from phinx to just always return true to
      * avoid calling loadConfig method which will throw an exception as we rely on
