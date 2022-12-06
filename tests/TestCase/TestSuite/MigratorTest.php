@@ -13,9 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
-use Cake\Chronos\Chronos;
 use Cake\Chronos\ChronosDate;
-use Cake\Chronos\ChronosInterface;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
