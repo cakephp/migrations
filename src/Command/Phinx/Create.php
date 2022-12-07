@@ -26,6 +26,7 @@ class Create extends CreateCommand
 {
     use CommandTrait {
         execute as parentExecute;
+        beforeExecute as parentBeforeExecute;
     }
     use ConfigurationTrait;
 
@@ -60,6 +61,23 @@ class Create extends CreateCommand
                 InputOption::VALUE_REQUIRED,
                 'Specify the path in which to create this migration'
             );
+    }
+
+    /**
+     * Configures Phinx Create command CLI options that are unused by this extended
+     * command.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
+     * @return void
+     */
+    protected function beforeExecute(InputInterface $input, OutputInterface $output)
+    {
+        // Set up as a dummy, its value is not going to be used, as a custom
+        // template will always be set.
+        $this->addOption('style', null, InputOption::VALUE_OPTIONAL);
+
+        $this->parentBeforeExecute($input, $output);
     }
 
     /**
