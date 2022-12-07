@@ -24,7 +24,7 @@ class MigrationsDispatcher extends Application
 {
     /**
      * @var array<string, string>
-     * @psalm-var array<string, class-string<\Phinx\Console\Command\AbstractCommand>>
+     * @psalm-var array<string, class-string<\Phinx\Console\Command\AbstractCommand|\Migrations\Command\Phinx\BaseCommand>>
      */
     public static $phinxCommands = [
         'Create' => Phinx\Create::class,
