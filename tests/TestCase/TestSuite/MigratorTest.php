@@ -13,8 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\TestSuite;
 
-use Cake\Chronos\ChronosInterface;
-use Cake\Chronos\Date;
+use Cake\Chronos\ChronosDate;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
@@ -136,18 +135,18 @@ class MigratorTest extends TestCase
     {
         ConnectionManager::get('test')->updateQuery()
             ->update('migrator_phinxlog')
-            ->set('end_time', Date::yesterday(), 'timestamp')
+            ->set('end_time', ChronosDate::yesterday(), 'timestamp')
             ->execute();
     }
 
-    private function fetchMigrationEndDate(): ChronosInterface
+    private function fetchMigrationEndDate(): ChronosDate
     {
         $endTime = ConnectionManager::get('test')->selectQuery()
             ->select('end_time')
             ->from('migrator_phinxlog')
             ->execute()->fetchColumn(0);
 
-        return Date::parse($endTime);
+        return ChronosDate::parse($endTime);
     }
 
     public function testSkipMigrationDroppingIfOnlyUpMigrations(): void

@@ -158,7 +158,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $migratedItems = $query
                 ->select(['version'])
                 ->from($this->phinxTable)
-                ->order(['version DESC'])
+                ->orderBy(['version DESC'])
                 ->execute()->fetchAll('assoc');
         }
 
