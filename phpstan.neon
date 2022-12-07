@@ -6,5 +6,3 @@ parameters:
     checkGenericClassInNonGenericObjectType: false
     bootstrapFiles:
         - tests/bootstrap.php
-    ignoreErrors:
-        - '#Static property .+MigrationsDispatcher::\$phinxCommands \(.+\) does not accept default value of type array\<string, string\>.#'
