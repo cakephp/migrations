@@ -44,7 +44,7 @@ class Dump extends AbstractCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('dump')
             ->setDescription('Dumps the current schema of the database to be used while baking a diff')
@@ -78,7 +78,7 @@ class Dump extends AbstractCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->setInput($input);
         $this->bootstrap($input, $output);

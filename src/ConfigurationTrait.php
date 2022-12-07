@@ -21,6 +21,7 @@ use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Util\UtilTrait;
 use Phinx\Config\Config;
+use Phinx\Config\ConfigInterface;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
@@ -67,13 +68,25 @@ trait ConfigurationTrait
     }
 
     /**
+     * Overrides the original method from phinx to just always return true to
+     * avoid calling loadConfig method which will throw an exception as we rely on
+     * the overridden getConfig method.
+     *
+     * @return bool
+     */
+    public function hasConfig(): bool
+    {
+        return true;
+    }
+
+    /**
      * Overrides the original method from phinx in order to return a tailored
      * Config object containing the connection details for the database.
      *
      * @param bool $forceRefresh Refresh config.
-     * @return \Phinx\Config\Config
+     * @return \Phinx\Config\ConfigInterface
      */
-    public function getConfig($forceRefresh = false)
+    public function getConfig($forceRefresh = false): ConfigInterface
     {
         if ($this->configuration && $forceRefresh === false) {
             return $this->configuration;
@@ -198,6 +211,7 @@ trait ConfigurationTrait
      * @return string Name of the adapter.
      * @throws \InvalidArgumentException when it was not possible to infer the information
      * out of the provided database configuration
+     * @phpstan-param class-string $driver
      */
     public function getAdapterName($driver)
     {

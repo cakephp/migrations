@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use DateTime;
 use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -59,20 +60,21 @@ class CakeManager extends Manager
      *
      * @param string $environment Environment name.
      * @param null|string $format Format (`json` or `array`).
-     * @return array|string Array of migrations or json string.
+     * @return array Array of migrations.
      */
-    public function printStatus($environment, $format = null)
+    public function printStatus(string $environment, ?string $format = null): array
     {
         $migrations = [];
         $isJson = $format === 'json';
-        if (count($this->getMigrations('default'))) {
+        $defaultMigrations = $this->getMigrations('default');
+        if (count($defaultMigrations)) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $this->maxNameLength = $versions ? max(array_map(function ($version) {
                 return strlen((string)$version['migration_name']);
             }, $versions)) : 0;
 
-            foreach ($this->getMigrations('default') as $migration) {
+            foreach ($defaultMigrations as $migration) {
                 if (array_key_exists($migration->getVersion(), $versions)) {
                     $status = 'up';
                     unset($versions[$migration->getVersion()]);
@@ -111,17 +113,17 @@ class CakeManager extends Manager
         ksort($migrations);
         $migrations = array_values($migrations);
 
-        if ($isJson) {
-            $migrations = json_encode($migrations);
-        }
-
         return $migrations;
     }
 
     /**
-     * @inheritDoc
+     * @param string $environment Environment
+     * @param \DateTime $dateTime Date to migrate to
+     * @param bool $fake flag that if true, we just record running the migration, but not actually do the
+     *   migration
+     * @return void
      */
-    public function migrateToDateTime($environment, \DateTime $dateTime, $fake = false)
+    public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
     {
         $versions = array_keys($this->getMigrations('default'));
         $dateString = $dateTime->format('Ymdhis');
@@ -186,12 +188,13 @@ class CakeManager extends Manager
     /**
      * Checks if the migration with version number $version as already been mark migrated
      *
-     * @param int|string $version Version number of the migration to check
+     * @param int $version Version number of the migration to check
      * @return bool
      */
-    public function isMigrated($version)
+    public function isMigrated(int $version): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
+        /** @var array<int, mixed> $versions */
         $versions = array_flip($adapter->getVersions());
 
         return isset($versions[$version]);
@@ -200,11 +203,11 @@ class CakeManager extends Manager
     /**
      * Marks migration with version number $version migrated
      *
-     * @param int|string $version Version number of the migration to check
+     * @param int $version Version number of the migration to check
      * @param string $path Path where the migration file is located
      * @return bool True if success
      */
-    public function markMigrated($version, $path)
+    public function markMigrated(int $version, string $path): bool
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
@@ -217,6 +220,7 @@ class CakeManager extends Manager
         }
 
         $migrationFile = $migrationFile[0];
+        /** @var class-string<\Phinx\Migration\MigrationInterface> $className */
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
         $Migration = new $className('default', $version);
@@ -233,11 +237,11 @@ class CakeManager extends Manager
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input Input interface from which argument and options
      * will be extracted to determine which versions to be marked as migrated
-     * @return array Array of versions that should be marked as migrated
+     * @return array<int> Array of versions that should be marked as migrated
      * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
      * or version not found
      */
-    public function getVersionsToMark($input)
+    public function getVersionsToMark($input): array
     {
         $migrations = $this->getMigrations('default');
         $versions = array_keys($migrations);
@@ -249,8 +253,7 @@ class CakeManager extends Manager
             return $versions;
         }
 
-        /** @var string $version */
-        $version = $targetArg ?: $versionArg;
+        $version = (int)$targetArg ?: (int)$versionArg;
 
         if ($input->getOption('only') || !empty($versionArg)) {
             if (!in_array($version, $versions)) {
@@ -276,7 +279,7 @@ class CakeManager extends Manager
      * It will start a transaction and rollback in case one of the operation raises an exception
      *
      * @param string $path Path where to look for migrations
-     * @param array $versions Versions which should be marked
+     * @param array<int> $versions Versions which should be marked
      * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
      * the command output
      * @return void
@@ -285,7 +288,7 @@ class CakeManager extends Manager
     {
         $adapter = $this->getEnvironment('default')->getAdapter();
 
-        if (empty($versions)) {
+        if (!$versions) {
             $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
 
             return;
@@ -357,15 +360,16 @@ class CakeManager extends Manager
      * Gets an array of database seeders.
      *
      * Overload the basic behavior to add an instance of the InputInterface the shell call is
-     * using in order to gives the ability to the AbstractSeed::call() method to propagate options
+     * using in order to give the ability to the AbstractSeed::call() method to propagate options
      * to the other MigrationsDispatcher it is generating.
      *
      * @throws \InvalidArgumentException
-     * @return \Phinx\Seed\AbstractSeed[]
+     * @param string $environment Environment.
+     * @return \Phinx\Seed\SeedInterface[]
      */
-    public function getSeeds()
+    public function getSeeds(string $environment): array
     {
-        parent::getSeeds();
+        parent::getSeeds($environment);
         if (empty($this->seeds)) {
             return [];
         }
