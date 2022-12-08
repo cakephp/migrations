@@ -113,6 +113,7 @@ class MarkMigrated extends AbstractCommand
         $this->output($output);
 
         $migrationPaths = $this->getConfig()->getMigrationPaths();
+        /** @var string $path */
         $path = array_pop($migrationPaths);
 
         if ($this->invalidOnlyOrExclude()) {

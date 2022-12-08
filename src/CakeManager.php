@@ -125,6 +125,7 @@ class CakeManager extends Manager
      */
     public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
     {
+        /** @var array<int> $versions */
         $versions = array_keys($this->getMigrations('default'));
         $dateString = $dateTime->format('Ymdhis');
         $versionToMigrate = null;
@@ -331,7 +332,7 @@ class CakeManager extends Manager
      */
     protected function getMigrationClassName($path)
     {
-        $class = preg_replace('/^[0-9]+_/', '', basename($path));
+        $class = (string)preg_replace('/^[0-9]+_/', '', basename($path));
         $class = str_replace('_', ' ', $class);
         $class = ucwords($class);
         $class = str_replace(' ', '', $class);

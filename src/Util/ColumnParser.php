@@ -201,6 +201,7 @@ class ColumnParser
             return [$matches[1], $matches[2]];
         }
 
+        /** @var string $fieldType */
         $fieldType = $this->getType($field, $type);
         $length = $this->getLength($fieldType);
 
@@ -241,7 +242,7 @@ class ColumnParser
     }
 
     /**
-     * Returns the default length to be used for a given fie
+     * Returns the default length to be used for a given type.
      *
      * @param string $type User-specified type
      * @return int|int[]

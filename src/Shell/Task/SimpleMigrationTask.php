@@ -103,7 +103,7 @@ abstract class SimpleMigrationTask extends SimpleBakeTask
      * If the name is invalid, the task will exit
      *
      * @param string|null $name Name for the generated migration
-     * @return string|null Name of the migration file or null if empty
+     * @return string Name of the migration file or null if empty
      */
     protected function getMigrationName($name = null)
     {
