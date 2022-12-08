@@ -83,7 +83,7 @@ class Status extends StatusCommand
                 if ($input->getOption('verbose')) {
                     $flags = JSON_PRETTY_PRINT;
                 }
-                $migrationString = json_encode($migrations, $flags);
+                $migrationString = (string)json_encode($migrations, $flags);
                 $this->getManager()->getOutput()->writeln($migrationString);
                 break;
             default:

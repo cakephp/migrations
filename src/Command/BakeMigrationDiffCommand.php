@@ -141,7 +141,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     protected function setup(Arguments $args)
     {
         $this->migrationsPath = $this->getPath($args);
-        $this->migrationsFiles = glob($this->migrationsPath . '*.php');
+        $this->migrationsFiles = glob($this->migrationsPath . '*.php') ?: [];
         $this->phinxTable = $this->getPhinxTable($this->plugin);
 
         $connection = ConnectionManager::get($this->connection);
@@ -524,7 +524,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $this->io->abort($msg);
         }
 
-        return unserialize(file_get_contents($path));
+        return unserialize((string)file_get_contents($path));
     }
 
     /**

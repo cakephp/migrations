@@ -325,7 +325,10 @@ class Migrations
             $manager->resetSeeds();
         }
 
-        return call_user_func_array([$manager, $method], $params);
+        /** @var callable $callable */
+        $callable = [$manager, $method];
+
+        return call_user_func_array($callable, $params);
     }
 
     /**

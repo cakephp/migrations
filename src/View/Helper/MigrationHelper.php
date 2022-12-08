@@ -145,7 +145,7 @@ class MigrationHelper extends Helper
      */
     protected function schema($table)
     {
-        if (isset($this->schemas[$table])) {
+        if (is_string($table) && isset($this->schemas[$table])) {
             return $this->schemas[$table];
         }
 
