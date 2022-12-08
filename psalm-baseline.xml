@@ -10,11 +10,6 @@
       <code>setInput</code>
     </PossiblyNullReference>
   </file>
-  <file src="src/Shell/Task/SimpleMigrationTask.php">
-    <PossiblyNullArgument occurrences="1">
-      <code>$name</code>
-    </PossiblyNullArgument>
-  </file>
   <file src="src/TableFinderTrait.php">
     <InternalClass occurrences="1">
       <code>new Filesystem()</code>
@@ -32,10 +27,5 @@
       <code>truncateTables</code>
       <code>truncateTables</code>
     </InternalMethod>
-  </file>
-  <file src="src/Util/ColumnParser.php">
-    <PossiblyNullArgument occurrences="1">
-      <code>$fieldType</code>
-    </PossiblyNullArgument>
   </file>
 </files>
