@@ -26,6 +26,7 @@ class Create extends CreateCommand
 {
     use CommandTrait {
         execute as parentExecute;
+        beforeExecute as parentBeforeExecute;
     }
     use ConfigurationTrait;
 
@@ -34,7 +35,7 @@ class Create extends CreateCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('create')
             ->setDescription('Create a new migration')
@@ -63,6 +64,23 @@ class Create extends CreateCommand
     }
 
     /**
+     * Configures Phinx Create command CLI options that are unused by this extended
+     * command.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
+     * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
+     * @return void
+     */
+    protected function beforeExecute(InputInterface $input, OutputInterface $output)
+    {
+        // Set up as a dummy, its value is not going to be used, as a custom
+        // template will always be set.
+        $this->addOption('style', null, InputOption::VALUE_OPTIONAL);
+
+        $this->parentBeforeExecute($input, $output);
+    }
+
+    /**
      * Overrides the action execute method in order to vanish the idea of environments
      * from phinx. CakePHP does not believe in the idea of having in-app environments
      *
@@ -70,7 +88,7 @@ class Create extends CreateCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $result = $this->parentExecute($input, $output);
 
@@ -99,6 +117,6 @@ class Create extends CreateCommand
             }
         }
 
-        return $result ?? BaseCommand::CODE_SUCCESS;
+        return $result;
     }
 }

@@ -211,7 +211,7 @@ class Migrations
     /**
      * Marks a migration as migrated
      *
-     * @param int $version The version number of the migration to mark as migrated
+     * @param string|null $version The version number of the migration to mark as migrated
      * @param array $options Options to pass to the command
      * Available options are :
      *
@@ -325,7 +325,10 @@ class Migrations
             $manager->resetSeeds();
         }
 
-        return call_user_func_array([$manager, $method], $params);
+        /** @var callable $callable */
+        $callable = [$manager, $method];
+
+        return call_user_func_array($callable, $params);
     }
 
     /**

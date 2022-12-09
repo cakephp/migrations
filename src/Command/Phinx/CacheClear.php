@@ -18,7 +18,7 @@ class CacheClear extends BaseCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('orm-cache-clear')
@@ -43,7 +43,7 @@ class CacheClear extends BaseCommand
     /**
      * @inheritDoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $schema = $this->_getSchema($input, $output);
         /** @var string $name */

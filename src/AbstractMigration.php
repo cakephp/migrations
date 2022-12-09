@@ -38,12 +38,14 @@ class AbstractMigration extends BaseAbstractMigration
      * @param array $options Options
      * @return \Migrations\Table
      */
-    public function table($tableName, $options = [])
+    public function table(string $tableName, array $options = []): Table
     {
         if ($this->autoId === false) {
             $options['id'] = false;
         }
 
-        return new Table($tableName, $options, $this->getAdapter());
+        $table = new Table($tableName, $options, $this->getAdapter());
+
+        return $table;
     }
 }

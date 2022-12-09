@@ -18,7 +18,7 @@ class CacheBuild extends BaseCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('orm-cache-build')
@@ -43,7 +43,7 @@ class CacheBuild extends BaseCommand
     /**
      * @inheritDoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         /** @var string $name */
         $name = $input->getArgument('name');

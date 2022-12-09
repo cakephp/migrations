@@ -30,7 +30,7 @@ class StatusTest extends TestCase
     /**
      * Instance of a Symfony Command object
      *
-     * @var \Symfony\Component\Console\Command\Command|\Phinx\Console\Command\AbstractCommand
+     * @var \Phinx\Console\Command\AbstractCommand
      */
     protected $command;
 
@@ -44,7 +44,7 @@ class StatusTest extends TestCase
     /**
      * Instance of a CommandTester object
      *
-     * @var \Symfony\Component\Console\Tester\CommandTester
+     * @var \Migrations\Test\CommandTester
      */
     protected $commandTester;
 
@@ -57,7 +57,7 @@ class StatusTest extends TestCase
     protected $streamOutput;
 
     /**
-     * @var \PDO|object
+     * @var \PDO
      */
     protected $pdo;
 
@@ -131,9 +131,7 @@ class StatusTest extends TestCase
         $commandTester->execute(['command' => $this->command->getName()] + $params);
         $display = $this->getDisplayFromOutput();
 
-        $expected = '{"status":"down","id":"20150704160200","name":"CreateNumbersTable"},' .
-            '{"status":"down","id":"20150724233100","name":"UpdateNumbersTable"},' .
-            '{"status":"down","id":"20150826191400","name":"CreateLettersTable"}';
+        $expected = '[{"status":"down","id":20150704160200,"name":"CreateNumbersTable"},{"status":"down","id":20150724233100,"name":"UpdateNumbersTable"},{"status":"down","id":20150826191400,"name":"CreateLettersTable"}]';
 
         $this->assertTextContains($expected, $display);
     }
