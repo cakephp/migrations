@@ -335,6 +335,15 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfigNoSeedsFolderDebugDisabled()
     {
+        ConnectionManager::setConfig('default', [
+            'className' => 'Cake\Database\Connection',
+            'driver' => 'Cake\Database\Driver\Mysql',
+            'host' => 'foo.bar',
+            'username' => 'root',
+            'password' => 'the_password',
+            'database' => 'the_database',
+            'encoding' => 'utf-8',
+        ]);
         Configure::write('debug', false);
 
         $migrationsPath = ROOT . DS . 'config' . DS . 'TestGetConfigMigrations';
@@ -342,11 +351,7 @@ class ConfigurationTraitTest extends TestCase
         $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
 
         $command = $this->_getCommandMock($migrationsPath, $seedsPath);
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(sprintf(
-            'Seeds path `%s` does not exist and cannot be created because `debug` is disabled.',
-            $seedsPath
-        ));
+        $this->assertFalse(is_dir($seedsPath));
         try {
             $config = $command->getConfig();
         } finally {

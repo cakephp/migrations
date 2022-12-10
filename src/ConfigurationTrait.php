@@ -106,13 +106,7 @@ trait ConfigurationTrait
             mkdir($migrationsPath, 0777, true);
         }
 
-        if (!is_dir($seedsPath)) {
-            if (!Configure::read('debug')) {
-                throw new \RuntimeException(sprintf(
-                    'Seeds path `%s` does not exist and cannot be created because `debug` is disabled.',
-                    $seedsPath
-                ));
-            }
+        if (Configure::read('debug') && !is_dir($seedsPath)) {
             mkdir($seedsPath, 0777, true);
         }
 
