@@ -28,9 +28,9 @@ trait CommandTrait
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
-     * @return int|null
+     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->beforeExecute($input, $output);
 
@@ -61,7 +61,7 @@ trait CommandTrait
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return void
      */
-    public function bootstrap(InputInterface $input, OutputInterface $output)
+    public function bootstrap(InputInterface $input, OutputInterface $output): void
     {
         parent::bootstrap($input, $output);
         $name = $this->getConnectionName($input);

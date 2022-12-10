@@ -2,14 +2,14 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
 
 namespace Migrations\Test;
@@ -39,7 +39,7 @@ class CommandTester
     private $output;
 
     /**
-     * @var array
+     * @var array<string>
      */
     private $inputs = [];
 
@@ -67,8 +67,8 @@ class CommandTester
      *  * decorated:   Sets the output decorated flag
      *  * verbosity:   Sets the output verbosity flag
      *
-     * @param array $input   An array of command arguments and options
-     * @param array $options An array of execution options
+     * @param array<string, mixed> $input   An array of command arguments and options
+     * @param array<string, mixed> $options An array of execution options
      * @return int The command exit code
      */
     public function execute(array $input, array $options = [])
@@ -81,7 +81,7 @@ class CommandTester
             && ($application !== null)
             && $application->getDefinition()->hasArgument('command')
         ) {
-            $input = array_merge(['command' => $this->command->getName()], $input);
+            $input += ['command' => $this->command->getName()];
         }
 
         $this->input = new ArrayInput($input);
@@ -155,7 +155,7 @@ class CommandTester
     /**
      * Sets the user inputs.
      *
-     * @param array $inputs An array of strings representing each input
+     * @param array<string> $inputs An array of strings representing each input
      *   passed to the command input stream.
      * @return $this
      */
@@ -167,7 +167,7 @@ class CommandTester
     }
 
     /**
-     * @param array $inputs
+     * @param array<string> $inputs
      * @return resource|false
      */
     private static function createStream(array $inputs)

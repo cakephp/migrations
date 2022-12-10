@@ -33,7 +33,7 @@ class Rollback extends RollbackCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('rollback')
             ->setDescription('Rollback the last or to a specific migration')
@@ -72,7 +72,7 @@ class Rollback extends RollbackCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $event = $this->dispatchEvent('Migration.beforeRollback');
         if ($event->isStopped()) {
@@ -81,6 +81,6 @@ class Rollback extends RollbackCommand
         $result = $this->parentExecute($input, $output);
         $this->dispatchEvent('Migration.afterRollback');
 
-        return $result ?? BaseCommand::CODE_SUCCESS;
+        return $result;
     }
 }

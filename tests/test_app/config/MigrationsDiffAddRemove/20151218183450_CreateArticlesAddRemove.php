@@ -4,7 +4,7 @@ use Migrations\AbstractMigration;
 
 class CreateArticlesAddRemove extends AbstractMigration
 {
-    public function change()
+    public function change(): void
     {
         $table = $this->table('articles');
         $table

@@ -798,7 +798,7 @@ method to define your own sequence of seeders execution::
 
     class DatabaseSeed extends AbstractSeed
     {
-        public function run()
+        public function run(): void
         {
             $this->call('AnotherSeed');
             $this->call('YetAnotherSeed');

@@ -85,7 +85,7 @@ class CakeAdapter extends AdapterWrapper
      *  `\Cake\Database\Query::TYPE_*` constants).
      * @return \Cake\Database\Query
      */
-    public function getQueryBuilder(string $type)
+    public function getQueryBuilder(string $type): Query
     {
         return match ($type) {
             Query::TYPE_SELECT => $this->getCakeConnection()->selectQuery(),
@@ -103,7 +103,7 @@ class CakeAdapter extends AdapterWrapper
      *
      * @return string
      */
-    public function getAdapterType()
+    public function getAdapterType(): string
     {
         return $this->getAdapter()->getAdapterType();
     }

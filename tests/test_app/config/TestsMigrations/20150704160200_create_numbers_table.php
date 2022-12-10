@@ -4,7 +4,7 @@ use Migrations\AbstractMigration;
 
 class CreateNumbersTable extends AbstractMigration
 {
-    public function change()
+    public function change(): void
     {
         $table = $this->table('numbers', ['collation' => 'utf8_bin']);
         $table

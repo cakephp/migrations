@@ -12,7 +12,7 @@ class TestPluginBlog extends AbstractMigration
      * https://book.cakephp.org/phinx/0/en/migrations.html#the-up-method
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         $this->table('articles')
             ->addColumn('title', 'string', [
@@ -137,7 +137,7 @@ class TestPluginBlog extends AbstractMigration
      * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         $this->table('articles')
             ->dropForeignKey(

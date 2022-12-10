@@ -23,7 +23,8 @@ use Symfony\Component\Console\Application;
 class MigrationsDispatcher extends Application
 {
     /**
-     * @var array<string, class-string>
+     * @var array<string, string>
+     * @psalm-var array<string, class-string<\Phinx\Console\Command\AbstractCommand>|class-string<\Migrations\Command\Phinx\BaseCommand>>
      */
     public static array $phinxCommands = [
         'Create' => Phinx\Create::class,
@@ -38,8 +39,6 @@ class MigrationsDispatcher extends Application
     ];
 
     /**
-     * Class Constructor.
-     *
      * Initialize the Phinx console application.
      *
      * @param string $version The Application Version
@@ -47,7 +46,7 @@ class MigrationsDispatcher extends Application
     public function __construct(string $version)
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
-        foreach (static::$phinxCommands as $key => $value) {
+        foreach (static::$phinxCommands as $value) {
             $this->add(new $value());
         }
         $this->setCatchExceptions(false);

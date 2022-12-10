@@ -32,7 +32,7 @@ class Status extends StatusCommand
      *
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('status')
             ->setDescription('Show migration status')
@@ -55,7 +55,7 @@ class Status extends StatusCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->beforeExecute($input, $output);
         $this->bootstrap($input, $output);
@@ -75,13 +75,16 @@ class Status extends StatusCommand
             $output->writeln('<info>using format</info> ' . $format);
         }
 
-        // print the status
-        /** @var array $migrations */
         $migrations = $this->getManager()->printStatus($environment, $format);
 
         switch ($format) {
             case 'json':
-                $this->getManager()->getOutput()->writeln($migrations);
+                $flags = 0;
+                if ($input->getOption('verbose')) {
+                    $flags = JSON_PRETTY_PRINT;
+                }
+                $migrationString = (string)json_encode($migrations, $flags);
+                $this->getManager()->getOutput()->writeln($migrationString);
                 break;
             default:
                 $this->display($migrations);

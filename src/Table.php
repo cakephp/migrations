@@ -111,7 +111,7 @@ class Table extends BaseTable
      *
      * @return void
      */
-    public function create()
+    public function create(): void
     {
         $options = $this->getTable()->getOptions();
         if ((!isset($options['id']) || $options['id'] === false) && !empty($this->primaryKey)) {
@@ -147,7 +147,7 @@ class Table extends BaseTable
      *
      * @return void
      */
-    public function update()
+    public function update(): void
     {
         parent::update();
         $this->getTableLocator()->clear();

@@ -2,14 +2,14 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Migrations\Test\TestCase\Command\Phinx;
 
@@ -34,7 +34,7 @@ class StatusTest extends TestCase
     /**
      * Instance of a Symfony Command object
      *
-     * @var \Symfony\Component\Console\Command\Command|\Phinx\Console\Command\AbstractCommand
+     * @var \Phinx\Console\Command\AbstractCommand
      */
     protected $command;
 
@@ -48,7 +48,7 @@ class StatusTest extends TestCase
     /**
      * Instance of a CommandTester object
      *
-     * @var \Symfony\Component\Console\Tester\CommandTester
+     * @var \Migrations\Test\CommandTester
      */
     protected $commandTester;
 
@@ -134,9 +134,7 @@ class StatusTest extends TestCase
         $commandTester->execute(['command' => $this->command->getName()] + $params);
         $display = $this->getDisplayFromOutput();
 
-        $expected = '{"status":"down","id":"20150704160200","name":"CreateNumbersTable"},' .
-            '{"status":"down","id":"20150724233100","name":"UpdateNumbersTable"},' .
-            '{"status":"down","id":"20150826191400","name":"CreateLettersTable"}';
+        $expected = '[{"status":"down","id":20150704160200,"name":"CreateNumbersTable"},{"status":"down","id":20150724233100,"name":"UpdateNumbersTable"},{"status":"down","id":20150826191400,"name":"CreateLettersTable"}]';
 
         $this->assertTextContains($expected, $display);
     }

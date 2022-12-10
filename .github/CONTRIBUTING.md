@@ -38,7 +38,7 @@ Help us keep CakePHP open and inclusive. Please read and follow our [Code of Con
 * Core test cases should continue to pass. You can run tests locally or enable
   [travis-ci](https://travis-ci.org/) for your fork, so all tests and codesniffs
   will be executed.
-* Your work should apply the [CakePHP coding standards](http://book.cakephp.org/3.0/en/contributing/cakephp-coding-conventions.html).
+* Your work should apply the [CakePHP coding standards](https://book.cakephp.org/3.0/en/contributing/cakephp-coding-conventions.html).
 
 ## Submitting Changes
 
@@ -48,7 +48,7 @@ Help us keep CakePHP open and inclusive. Please read and follow our [Code of Con
 
 ## Test cases and codesniffer
 
-CakePHP tests requires [PHPUnit](http://www.phpunit.de/manual/current/en/installation.html).
+CakePHP tests requires [PHPUnit](https://www.phpunit.de/manual/current/en/installation.html).
 To install PHPUnit use composer:
 
     php composer.phar require "phpunit/phpunit:*"
@@ -74,7 +74,7 @@ for the sniff and phpcs.
 
 # Additional Resources
 
-* [CakePHP coding standards](http://book.cakephp.org/3.0/en/contributing/cakephp-coding-conventions.html)
+* [CakePHP coding standards](https://book.cakephp.org/3.0/en/contributing/cakephp-coding-conventions.html)
 * [Existing issues](https://github.com/cakephp/migrations/issues)
 * [General GitHub documentation](https://help.github.com/)
 * [GitHub pull request documentation](https://help.github.com/send-pull-requests/)
