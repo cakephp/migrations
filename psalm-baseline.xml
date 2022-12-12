@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="4.x-dev@">
+<files psalm-version="dev-master@">
   <file src="src/Command/BakeSeedCommand.php">
     <RedundantCondition occurrences="1">
       <code>return $line !== false;</code>
@@ -9,23 +9,5 @@
     <PossiblyNullReference occurrences="1">
       <code>setInput</code>
     </PossiblyNullReference>
-  </file>
-  <file src="src/TableFinderTrait.php">
-    <InternalClass occurrences="1">
-      <code>new Filesystem()</code>
-    </InternalClass>
-    <InternalMethod occurrences="1">
-      <code>find</code>
-    </InternalMethod>
-  </file>
-  <file src="src/TestSuite/Migrator.php">
-    <InternalClass occurrences="1">
-      <code>new ConnectionHelper()</code>
-    </InternalClass>
-    <InternalMethod occurrences="3">
-      <code>dropTables</code>
-      <code>truncateTables</code>
-      <code>truncateTables</code>
-    </InternalMethod>
   </file>
 </files>

@@ -32,6 +32,7 @@ class Migrator
      */
     public function __construct()
     {
+        /** @psalm-suppress InternalClass */
         $this->helper = new ConnectionHelper();
     }
 
@@ -144,6 +145,7 @@ class Migrator
 
         $tables = $this->getNonPhinxTables($connection, $skip);
         if ($tables) {
+            /** @psalm-suppress InternalMethod */
             $this->helper->truncateTables($connection, $tables);
         }
     }
@@ -213,10 +215,12 @@ class Migrator
     {
         $dropTables = $this->getNonPhinxTables($connection, $skip);
         if (count($dropTables)) {
+            /** @psalm-suppress InternalMethod */
             $this->helper->dropTables($connection, $dropTables);
         }
         $phinxTables = $this->getPhinxTables($connection);
         if (count($phinxTables)) {
+            /** @psalm-suppress InternalMethod */
             $this->helper->truncateTables($connection, $phinxTables);
         }
     }
