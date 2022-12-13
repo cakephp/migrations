@@ -2,6 +2,8 @@
 <phpunit
     colors="true"
     bootstrap="tests/bootstrap.php"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     >
 
     <testsuites>
@@ -15,15 +17,15 @@
     </testsuites>
 
     <extensions>
-        <extension class="Cake\TestSuite\Fixture\PHPUnitExtension" />
+        <extension class="Cake\TestSuite\Fixture\PHPUnitExtension"/>
     </extensions>
 
     <!-- Prevent coverage reports from looking in tests, vendors, config folders -->
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
+        </include>
+    </coverage>
 
     <php>
         <env name="FIXTURE_SCHEMA_METADATA" value="./tests/schema.php"/>

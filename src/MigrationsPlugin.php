@@ -13,13 +13,14 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
+use Bake\Command\SimpleBakeCommand;
 use Cake\Console\CommandCollection;
 use Cake\Core\BasePlugin;
 
 /**
  * Plugin class for migrations
  */
-class Plugin extends BasePlugin
+class MigrationsPlugin extends BasePlugin
 {
     /**
      * Plugin name.
@@ -56,7 +57,7 @@ class Plugin extends BasePlugin
      */
     public function console(CommandCollection $commands): CommandCollection
     {
-        if (class_exists('Bake\Command\SimpleBakeCommand')) {
+        if (class_exists(SimpleBakeCommand::class)) {
             $found = $commands->discoverPlugin($this->getName());
 
             return $commands->addMany($found);
