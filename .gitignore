@@ -5,7 +5,6 @@ dist/
 tags/
 composer.lock
 phpunit.xml
-phpcs.xml
 vendor/
 *.mo
 debug.log
