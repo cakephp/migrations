@@ -11,11 +11,11 @@ on:
 
 jobs:
   testsuite-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['7.4', '8.0', '8.1']
+        php-version: ['7.4', '8.2']
         db-type: [mysql, pgsql, sqlite]
         prefer-lowest: ['']
         include:
@@ -65,12 +65,10 @@ jobs:
 
     - name: Composer install
       run: |
-        if [[ ${{ matrix.php-version }} == '8.1' ]]; then
-          composer install --ignore-platform-reqs
-        elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
+        if ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
           composer update --prefer-lowest --prefer-stable
         else
-          composer update
+          composer install
         fi
 
     - name: Run PHPUnit
@@ -99,7 +97,7 @@ jobs:
 
   cs-stan:
     name: Coding Standard & Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
@@ -130,7 +128,7 @@ jobs:
       run: composer stan-setup
 
     - name: Run phpcs
-      run: vendor/bin/phpcs --report=checkstyle src/ tests/ | cs2pr
+      run: vendor/bin/phpcs --report=checkstyle | cs2pr
 
     - name: Run psalm
       if: success() || failure()
@@ -138,4 +136,4 @@ jobs:
 
     - name: Run phpstan
       if: success() || failure()
-      run: vendor/bin/phpstan analyse src/
+      run: vendor/bin/phpstan analyse
