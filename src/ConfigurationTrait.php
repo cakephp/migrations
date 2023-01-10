@@ -114,18 +114,12 @@ trait ConfigurationTrait
 
         $connection = $this->getConnectionName($this->input());
 
-        $connectionConfig = ConnectionManager::getConfig($connection);
-        /**
-         * @psalm-suppress PossiblyNullArgument
-         * @psalm-suppress PossiblyNullArrayAccess
-         */
-        $adapterName = $this->getAdapterName($connectionConfig['driver']);
+        $connectionConfig = (array)ConnectionManager::getConfig($connection);
 
-        /** @psalm-suppress PossiblyNullArgument */
+        $adapterName = $this->getAdapterName($connectionConfig['driver']);
         $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
 
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
-        /** @psalm-suppress PossiblyNullArrayAccess */
         $config = [
             'paths' => [
                 'migrations' => $migrationsPath,
@@ -151,11 +145,11 @@ trait ConfigurationTrait
                     'dsn_options' => $dsnOptions,
                 ],
             ],
+            'feature_flags' => $this->featureFlags(),
         ];
 
         if ($adapterName === 'pgsql') {
             if (!empty($connectionConfig['schema'])) {
-                /** @psalm-suppress PossiblyNullArrayAccess */
                 $config['environments']['default']['schema'] = $connectionConfig['schema'];
             }
         }
@@ -166,12 +160,7 @@ trait ConfigurationTrait
                 $config['environments']['default']['mysql_attr_ssl_cert'] = $connectionConfig['ssl_cert'];
             }
 
-            /** @psalm-suppress PossiblyNullReference */
             if (!empty($connectionConfig['ssl_ca'])) {
-                /**
-                 * @psalm-suppress PossiblyNullReference
-                 * @psalm-suppress PossiblyNullArrayAccess
-                 */
                 $config['environments']['default']['mysql_attr_ssl_ca'] = $connectionConfig['ssl_ca'];
             }
         }
@@ -186,15 +175,27 @@ trait ConfigurationTrait
         }
 
         if (!empty($connectionConfig['flags'])) {
-            /**
-             * @psalm-suppress PossiblyNullArrayAccess
-             * @psalm-suppress PossiblyNullArgument
-             */
             $config['environments']['default'] +=
                 $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
         }
 
         return $this->configuration = new Config($config);
+    }
+
+    /**
+     * The following feature flags are disabled by default to keep BC.
+     * The next major will turn them on. You can do so on your own before already.
+     *
+     * @return array<string, bool>
+     */
+    protected function featureFlags(): array
+    {
+        $defaults = [
+            'unsigned_primary_keys' => false,
+            'column_null_default' => false,
+        ];
+
+        return (array)Configure::read('Migrations') + $defaults;
     }
 
     /**
