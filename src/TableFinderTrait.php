@@ -68,13 +68,12 @@ trait TableFinderTrait
 
             foreach ($tableNamesInModel as $num => $table) {
                 if (strpos($table, '.') !== false) {
-                    $splitted = array_reverse(explode('.', $table, 2));
+                    $split = array_reverse(explode('.', $table, 2));
 
-                    $config = ConnectionManager::getConfig($this->connection);
+                    $config = (array)ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
-                    /** @psalm-suppress PossiblyNullArrayAccess */
-                    if ($config[$key] === $splitted[1]) {
-                        $table = $splitted[0];
+                    if ($config[$key] === $split[1]) {
+                        $table = $split[0];
                     }
                 }
 
