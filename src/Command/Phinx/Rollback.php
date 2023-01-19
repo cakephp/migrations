@@ -26,6 +26,9 @@ class Rollback extends RollbackCommand
         execute as parentExecute;
     }
     use ConfigurationTrait;
+    /**
+     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\Phinx\Rollback>
+     */
     use EventDispatcherTrait;
 
     /**

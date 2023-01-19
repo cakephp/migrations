@@ -6,6 +6,7 @@ tags/
 composer.lock
 phpunit.xml
 phpcs.xml
+/tools
 vendor/
 *.mo
 debug.log

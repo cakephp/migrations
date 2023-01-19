@@ -26,6 +26,9 @@ class Seed extends SeedRun
         execute as parentExecute;
     }
     use ConfigurationTrait;
+    /**
+     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\Phinx\Seed>
+     */
     use EventDispatcherTrait;
 
     /**
