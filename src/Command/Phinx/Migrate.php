@@ -26,6 +26,9 @@ class Migrate extends MigrateCommand
         execute as parentExecute;
     }
     use ConfigurationTrait;
+    /**
+     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\Phinx\Migrate>
+     */
     use EventDispatcherTrait;
 
     /**
