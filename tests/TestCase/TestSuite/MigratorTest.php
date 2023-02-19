@@ -19,6 +19,7 @@ use Cake\I18n\FrozenDate;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
 use Migrations\TestSuite\Migrator;
+use RuntimeException;
 
 class MigratorTest extends TestCase
 {
@@ -103,19 +104,22 @@ class MigratorTest extends TestCase
         $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
     }
 
-    public function testRunManyDropNoTruncate(): void
+    public function testRunManyMultipleSkip(): void
     {
         $migrator = new Migrator();
+        // Run migrations the first time.
         $migrator->runMany([
-            ['plugin' => 'Migrator',],
-            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
-        ], false);
+            ['plugin' => 'Migrator'],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2'],
+        ]);
 
-        $connection = ConnectionManager::get('test');
-        $tables = $connection->getSchemaCollection()->listTables();
-        $this->assertContains('migrator', $tables);
-        $this->assertCount(2, $connection->query('SELECT * FROM migrator')->fetchAll());
-        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
+        // Run migrations the second time. Skip clauses will cause problems.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Could not apply migrations');
+        $migrator->runMany([
+            ['plugin' => 'Migrator', 'skip' => ['migrator']],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
+        ]);
     }
 
     /**
