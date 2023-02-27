@@ -159,7 +159,7 @@ The ``bake`` command syntax follows the form below:
 
 .. code-block:: bash
 
-    bin/cake bake migration CreateProducts name:string description:text created modified
+    bin/cake bake migrations CreateProducts name:string description:text created modified
 
 When using ``bake`` to create tables, add columns and so on, to your
 database, you will usually provide two things:
@@ -322,7 +322,7 @@ the code for creating the columns will be generated:
 
 .. code-block:: bash
 
-    bin/cake bake migration AddPriceToProducts price:decimal[5,2]
+    bin/cake bake migrations AddPriceToProducts price:decimal[5,2]
 
 Executing the command line above will generate::
 
@@ -351,7 +351,7 @@ It is also possible to add indexes to columns:
 
 .. code-block:: bash
 
-    bin/cake bake migration AddNameIndexToProducts name:string:index
+    bin/cake bake migrations AddNameIndexToProducts name:string:index
 
 will generate::
 
@@ -382,7 +382,7 @@ field type, ie:
 
 .. code-block:: bash
 
-    bin/cake bake migration AddFullDescriptionToProducts full_description:string[60]
+    bin/cake bake migrations AddFullDescriptionToProducts full_description:string[60]
 
 Executing the command line above will generate::
 
@@ -417,7 +417,7 @@ command line, if the migration name is of the form "AlterXXXOnYYY":
 
 .. code-block:: bash
 
-    bin/cake bake migration AlterPriceOnProducts name:float
+    bin/cake bake migrations AlterPriceOnProducts name:float
 
 will generate::
 
@@ -442,7 +442,7 @@ command line, if the migration name is of the form "RemoveXXXFromYYY":
 
 .. code-block:: bash
 
-    bin/cake bake migration RemovePriceFromProducts price
+    bin/cake bake migrations RemovePriceFromProducts price
 
 creates the file::
 
@@ -1035,7 +1035,7 @@ The above will create a ``CHAR(36)`` ``id`` column that is also the primary key.
 
     .. code-block:: bash
 
-        bin/cake bake migration CreateProducts id:uuid:primary name:string description:text created modified
+        bin/cake bake migrations CreateProducts id:uuid:primary name:string description:text created modified
 
 Additionally, since Migrations 1.3, a new way to deal with primary key was
 introduced. To do so, your migration class should extend the new
