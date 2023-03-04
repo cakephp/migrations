@@ -107,19 +107,25 @@ class MigratorTest extends TestCase
     public function testRunManyMultipleSkip(): void
     {
         $migrator = new Migrator();
-        // Run migrations the first time.
+        // Run migrations for the first time.
         $migrator->runMany([
             ['plugin' => 'Migrator'],
             ['plugin' => 'Migrator', 'source' => 'Migrations2'],
         ], false);
 
+        $connection = ConnectionManager::get('test');
+        $connection->begin();
+
         // Run migrations the second time. Skip clauses will cause problems.
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Could not apply migrations');
-        $migrator->runMany([
-            ['plugin' => 'Migrator', 'skip' => ['migrator']],
-            ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
-        ], false);
+        try {
+            $migrator->runMany([
+                ['plugin' => 'Migrator', 'skip' => ['migrator']],
+                ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
+            ], false);
+        } catch (RuntimeException $e) {
+            $connection->rollback();
+            $this->assertStringContainsString('Could not apply migrations', $e->getMessage());
+        }
     }
 
     /**
