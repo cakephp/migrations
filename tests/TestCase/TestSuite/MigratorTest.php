@@ -111,7 +111,7 @@ class MigratorTest extends TestCase
         $migrator->runMany([
             ['plugin' => 'Migrator'],
             ['plugin' => 'Migrator', 'source' => 'Migrations2'],
-        ]);
+        ], false);
 
         // Run migrations the second time. Skip clauses will cause problems.
         $this->expectException(RuntimeException::class);
@@ -119,7 +119,7 @@ class MigratorTest extends TestCase
         $migrator->runMany([
             ['plugin' => 'Migrator', 'skip' => ['migrator']],
             ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
-        ]);
+        ], false);
     }
 
     /**
