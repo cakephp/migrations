@@ -106,6 +106,8 @@ class MigratorTest extends TestCase
 
     public function testRunManyMultipleSkip(): void
     {
+        $connection = ConnectionManager::get('test');
+
         $migrator = new Migrator();
         // Run migrations for the first time.
         $migrator->runMany([
@@ -113,9 +115,7 @@ class MigratorTest extends TestCase
             ['plugin' => 'Migrator', 'source' => 'Migrations2'],
         ], false);
 
-        $connection = ConnectionManager::get('test');
         $connection->begin();
-
         // Run migrations the second time. Skip clauses will cause problems.
         try {
             $migrator->runMany([
@@ -124,6 +124,7 @@ class MigratorTest extends TestCase
             ], false);
         } catch (RuntimeException $e) {
             $connection->rollback();
+            $connection->getDriver()->disconnect();
             $this->assertStringContainsString('Could not apply migrations', $e->getMessage());
         }
     }
