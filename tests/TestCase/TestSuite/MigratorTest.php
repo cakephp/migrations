@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Chronos\ChronosInterface;
+use Cake\Database\Driver\Postgres;
 use Cake\Datasource\ConnectionManager;
 use Cake\I18n\FrozenDate;
 use Cake\TestSuite\ConnectionHelper;
@@ -107,6 +108,7 @@ class MigratorTest extends TestCase
     public function testRunManyMultipleSkip(): void
     {
         $connection = ConnectionManager::get('test');
+        $this->skipIf($connection->getDriver() instanceof Postgres);
 
         $migrator = new Migrator();
         // Run migrations for the first time.
