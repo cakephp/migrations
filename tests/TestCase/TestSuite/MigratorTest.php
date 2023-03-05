@@ -115,7 +115,6 @@ class MigratorTest extends TestCase
             ['plugin' => 'Migrator', 'source' => 'Migrations2'],
         ], false);
 
-        $connection->begin();
         // Run migrations the second time. Skip clauses will cause problems.
         try {
             $migrator->runMany([
@@ -123,7 +122,6 @@ class MigratorTest extends TestCase
                 ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
             ], false);
         } catch (RuntimeException $e) {
-            $connection->rollback();
             $connection->getDriver()->disconnect();
             $this->assertStringContainsString('Could not apply migrations', $e->getMessage());
         }
