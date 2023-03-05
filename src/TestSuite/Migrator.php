@@ -110,9 +110,21 @@ class Migrator
         foreach ($options as $migrationSet) {
             $migrations = new Migrations();
 
-            if (!$migrations->migrate($migrationSet)) {
+            try {
+                if (!$migrations->migrate($migrationSet)) {
+                    throw new RuntimeException(
+                        "Unable to migrate fixtures for `{$migrationSet['connection']}`."
+                    );
+                }
+            } catch (\Exception $e) {
                 throw new RuntimeException(
-                    "Unable to migrate fixtures for `{$migrationSet['connection']}`."
+                    'Could not apply migrations for ' . json_encode($migrationSet) . "\n\n" .
+                    "Migrations failed to apply with message:\n\n" .
+                    $e->getMessage() . "\n\n" .
+                    'If you are using the `skip` option and running multiple sets of migrations ' .
+                    'on the same connection try calling `truncate()` before `runMany()` to avoid this.',
+                    0,
+                    $e
                 );
             }
         }
