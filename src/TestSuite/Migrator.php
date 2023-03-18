@@ -92,13 +92,13 @@ class Migrator
 
             $options[$i] = $migrationSet;
             $connectionName = $migrationSet['connection'];
-            if (!in_array($connectionName, $connectionsList)) {
-                $connectionsList[] = ['name' => $connectionName, 'skip' => $skip];
+            if (!isset($connectionsList[$connectionName])) {
+                $connectionsList[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
             }
 
             $migrations = new Migrations();
-            if (!in_array($connectionName, $connectionsToDrop) && $this->shouldDropTables($migrations, $migrationSet)) {
-                $connectionsToDrop[] = ['name' => $connectionName, 'skip' => $skip];
+            if (!isset($connectionsToDrop[$connectionName]) && $this->shouldDropTables($migrations, $migrationSet)) {
+                $connectionsToDrop[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
             }
         }
 

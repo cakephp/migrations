@@ -115,14 +115,15 @@ class MigratorTest extends TestCase
         $migrator->runMany([
             ['plugin' => 'Migrator'],
             ['plugin' => 'Migrator', 'source' => 'Migrations2'],
-        ], false);
+        ]);
 
         // Run migrations the second time. Skip clauses will cause problems.
         try {
             $migrator->runMany([
                 ['plugin' => 'Migrator', 'skip' => ['migrator']],
                 ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
-            ], false);
+            ]);
+            $this->fail('Should fail because of table drops');
         } catch (RuntimeException $e) {
             $connection->getDriver()->disconnect();
             $this->assertStringContainsString('Could not apply migrations', $e->getMessage());
