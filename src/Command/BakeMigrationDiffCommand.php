@@ -451,7 +451,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $lastVersion = $this->migratedItems[0]['version'];
             $lastFile = end($this->migrationsFiles);
 
-            return (bool)strpos($lastFile, (string)$lastVersion);
+            return $lastFile && (bool)strpos($lastFile, (string)$lastVersion);
         }
 
         return false;
