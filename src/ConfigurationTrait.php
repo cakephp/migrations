@@ -125,7 +125,6 @@ trait ConfigurationTrait
         $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
 
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
-        /** @psalm-suppress PossiblyNullArrayAccess */
         $config = [
             'paths' => [
                 'migrations' => $migrationsPath,
@@ -155,7 +154,6 @@ trait ConfigurationTrait
 
         if ($adapterName === 'pgsql') {
             if (!empty($connectionConfig['schema'])) {
-                /** @psalm-suppress PossiblyNullArrayAccess */
                 $config['environments']['default']['schema'] = $connectionConfig['schema'];
             }
         }
@@ -166,12 +164,7 @@ trait ConfigurationTrait
                 $config['environments']['default']['mysql_attr_ssl_cert'] = $connectionConfig['ssl_cert'];
             }
 
-            /** @psalm-suppress PossiblyNullReference */
             if (!empty($connectionConfig['ssl_ca'])) {
-                /**
-                 * @psalm-suppress PossiblyNullReference
-                 * @psalm-suppress PossiblyNullArrayAccess
-                 */
                 $config['environments']['default']['mysql_attr_ssl_ca'] = $connectionConfig['ssl_ca'];
             }
         }
@@ -186,10 +179,6 @@ trait ConfigurationTrait
         }
 
         if (!empty($connectionConfig['flags'])) {
-            /**
-             * @psalm-suppress PossiblyNullArrayAccess
-             * @psalm-suppress PossiblyNullArgument
-             */
             $config['environments']['default'] +=
                 $this->translateConnectionFlags($connectionConfig['flags'], $adapterName);
         }
@@ -232,7 +221,6 @@ trait ConfigurationTrait
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @return string
-     * @psalm-suppress InvalidReturnType
      */
     protected function getConnectionName(InputInterface $input)
     {

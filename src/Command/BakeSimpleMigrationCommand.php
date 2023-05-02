@@ -159,7 +159,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             $this->io->abort('Choose a migration name to bake in CamelCase format');
         }
 
-        /** @psalm-suppress PossiblyNullArgument */
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
 

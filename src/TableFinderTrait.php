@@ -70,7 +70,6 @@ trait TableFinderTrait
 
                     $config = ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
-                    /** @psalm-suppress PossiblyNullArrayAccess */
                     if ($config[$key] === $splitted[1]) {
                         $table = $splitted[0];
                     }

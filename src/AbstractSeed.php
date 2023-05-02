@@ -17,6 +17,7 @@ use Migrations\Command\Phinx\Seed;
 use Phinx\Seed\AbstractSeed as BaseAbstractSeed;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
+use function Cake\Core\pluginSplit;
 
 /**
  * Class AbstractSeed
