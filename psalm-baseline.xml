@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="dev-master@">
-  <file src="src/Command/BakeSeedCommand.php">
-    <RedundantCondition occurrences="1">
-      <code>return $line !== false;</code>
-    </RedundantCondition>
+<files psalm-version="5.10.0@a5effd2d2dddd1a7ea7a0f6a051ce63ff979e356">
+  <file src="src/Command/Phinx/Create.php">
+    <PossiblyUndefinedArrayOffset>
+      <code>$phinxName</code>
+    </PossiblyUndefinedArrayOffset>
   </file>
   <file src="src/Command/Phinx/Seed.php">
-    <PossiblyNullReference occurrences="1">
+    <PossiblyNullReference>
       <code>setInput</code>
     </PossiblyNullReference>
+  </file>
+  <file src="src/TableFinderTrait.php">
+    <PossiblyNullArrayAccess>
+      <code>$config[$key]</code>
+    </PossiblyNullArrayAccess>
+    <PossiblyUndefinedArrayOffset>
+      <code>$splitted[0]</code>
+      <code>$splitted[0]</code>
+    </PossiblyUndefinedArrayOffset>
   </file>
 </files>

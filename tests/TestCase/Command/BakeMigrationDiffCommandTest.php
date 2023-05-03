@@ -21,6 +21,7 @@ use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Migrations\Migrations;
 use Migrations\Test\TestCase\TestCase;
+use function Cake\Core\env;
 
 /**
  * MigrationSnapshotTaskTest class

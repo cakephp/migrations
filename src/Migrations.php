@@ -168,7 +168,6 @@ class Migrations
 
         if ($input->getOption('date')) {
             $method = 'migrateToDateTime';
-            /** @psalm-suppress PossiblyInvalidArgument */
             $params[1] = new \DateTime($input->getOption('date'));
         }
 
@@ -200,7 +199,6 @@ class Migrations
 
         if ($input->getOption('date')) {
             $method = 'rollbackToDateTime';
-            /** @psalm-suppress PossiblyInvalidArgument */
             $params[1] = new \DateTime($input->getOption('date'));
         }
 
