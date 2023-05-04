@@ -369,6 +369,7 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
+                    'constraint' => 'category_article_idx'
                 ]
             )
             ->update();
@@ -387,6 +388,7 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
+                    'constraint' => 'product_id_fk'
                 ]
             )
             ->update();
@@ -399,6 +401,7 @@ class TestAutoIdDisabledSnapshot extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
+                    'constraint' => 'category_idx'
                 ]
             )
             ->update();

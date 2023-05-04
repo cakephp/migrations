@@ -125,6 +125,7 @@ class TestPluginBlog extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
+                    'constraint' => 'category_article_idx'
                 ]
             )
             ->update();

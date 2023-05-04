@@ -308,6 +308,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
+                    'constraint' => 'category_id_fk'
                 ]
             )
             ->update();
@@ -326,6 +327,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
+                    'constraint' => 'product_category_fk'
                 ]
             )
             ->update();
@@ -338,6 +340,7 @@ class TestNotEmptySnapshotSqlite extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
+                    'constraint' => 'category_id_fk'
                 ]
             )
             ->update();
