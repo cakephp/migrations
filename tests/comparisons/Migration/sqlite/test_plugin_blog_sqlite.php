@@ -124,6 +124,7 @@ class TestPluginBlogSqlite extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
+                    'constraint' => 'category_id_fk'
                 ]
             )
             ->update();
