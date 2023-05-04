@@ -308,8 +308,8 @@ class TestNotEmptySnapshot extends AbstractMigration
                 'id',
                 [
                     'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION',                    
-                    'constraint' => 'category_id_fk'
+                    'delete' => 'NO_ACTION',
+                    'constraint' => 'category_article_idx'
                 ]
             )
             ->update();
@@ -328,7 +328,7 @@ class TestNotEmptySnapshot extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
-                    'constraint' => 'product_category_fk'
+                    'constraint' => 'product_id_fk'
                 ]
             )
             ->update();
@@ -341,7 +341,7 @@ class TestNotEmptySnapshot extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
-                    'constraint' => 'category_id_fk'
+                    'constraint' => 'category_idx'
                 ]
             )
             ->update();
