@@ -1,6 +1,6 @@
 {% set statement = Migration.tableStatement(table, true) %}
 {% set hasProcessedConstraint = false %}
-{% for constraint in constraints %}
+{% for constraintName, constraint in constraints[table] %}
 {%     set constraintColumns = constraint['columns']|sort %}
 {%     if constraint['type'] != 'unique' %}
 {%         set hasProcessedConstraint = true %}
@@ -29,6 +29,7 @@
                 [
                     'update' => '{{ Migration.formatConstraintAction(constraint['update']) | raw }}',
                     'delete' => '{{ Migration.formatConstraintAction(constraint['delete']) | raw }}',
+                    'constraint' => '{{ constraintName }}'
                 ]
             )
 {%     endif %}

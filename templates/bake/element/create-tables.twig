@@ -62,8 +62,8 @@
 {% if createData.constraints %}
 {%   for table, tableConstraints in createData.constraints %}
 {{-     element('Migrations.add-foreign-keys', {
-         constraints: tableConstraints,
-         table: table
+         constraints: createData.constraints,
+         table: table,
        })
 -}}
 {%   endfor -%}
