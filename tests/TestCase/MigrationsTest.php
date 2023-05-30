@@ -953,7 +953,7 @@ class MigrationsTest extends TestCase
      *
      * @return array
      */
-    public function migrationsProvider()
+    public static function migrationsProvider()
     {
         $db = getenv('DB');
         $dbv = getenv('DBV');

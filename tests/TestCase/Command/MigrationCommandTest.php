@@ -109,7 +109,7 @@ class MigrationCommandTest extends TestCase
         $output = new StubConsoleOutput();
         $io = $this->getMockBuilder(ConsoleIo::class)
             ->setConstructorArgs([$output, $output, null, null])
-            ->setMethods(['in'])
+            ->addMethods(['in'])
             ->getMock();
 
         return $io;
@@ -124,7 +124,7 @@ class MigrationCommandTest extends TestCase
         ];
 
         $mock = $this->getMockBuilder('Migrations\Command\\' . $command)
-        ->setMethods($mockedMethods)
+        ->onlyMethods($mockedMethods)
         ->getMock();
 
         $mock->expects($this->any())

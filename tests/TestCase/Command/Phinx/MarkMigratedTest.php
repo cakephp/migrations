@@ -147,7 +147,7 @@ class MarkMigratedTest extends TestCase
         $migrations = $this->command->getManager()->getMigrations('default');
 
         $manager = $this->getMockBuilder(CakeManager::class)
-            ->setMethods(['getEnvironment', 'markMigrated', 'getMigrations'])
+            ->onlyMethods(['getEnvironment', 'markMigrated', 'getMigrations'])
             ->setConstructorArgs([$config, new ArgvInput([]), new StreamOutput(fopen('php://memory', 'a', false))])
             ->getMock();
 
