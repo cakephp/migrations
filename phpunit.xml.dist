@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-    colors="true"
-    bootstrap="tests/bootstrap.php"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    >
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         bootstrap="tests/bootstrap.php"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+>
 
     <testsuites>
         <testsuite name="migrations">
@@ -17,15 +17,15 @@
     </testsuites>
 
     <extensions>
-        <extension class="Cake\TestSuite\Fixture\PHPUnitExtension"/>
+        <bootstrap class="Cake\TestSuite\Fixture\Extension\PHPUnitExtension"/>
     </extensions>
 
     <!-- Prevent coverage reports from looking in tests, vendors, config folders -->
-    <coverage>
+    <source>
         <include>
             <directory suffix=".php">src/</directory>
         </include>
-    </coverage>
+    </source>
 
     <php>
         <env name="FIXTURE_SCHEMA_METADATA" value="./tests/schema.php"/>

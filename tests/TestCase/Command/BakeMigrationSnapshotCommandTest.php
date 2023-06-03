@@ -89,7 +89,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     {
         /** @var \Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait|\PHPUnit\Framework\MockObject\MockObject $class */
         $class = $this->getMockBuilder(TestClassWithSnapshotTrait::class)
-            ->setMethods(['findTables', 'fetchTableName'])
+            ->onlyMethods(['findTables', 'fetchTableName'])
             ->getMock();
 
         $class->expects($this->any())

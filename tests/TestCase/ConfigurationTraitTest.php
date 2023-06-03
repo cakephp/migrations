@@ -52,33 +52,20 @@ class ConfigurationTraitTest extends TestCase
     }
 
     /**
-     * Returns the combination of the phinx driver name with
-     * the associated cakephp driver instance that should be mapped to it
-     *
-     * @return array
-     */
-    public function driversProvider()
-    {
-        return [
-            ['mysql', $this->getMockBuilder('\Cake\Database\Driver\Mysql')->getMock()],
-            ['pgsql', $this->getMockBuilder('\Cake\Database\Driver\Postgres')->getMock()],
-            ['sqlite', $this->getMockBuilder('\Cake\Database\Driver\Sqlite')->getMock()],
-        ];
-    }
-
-    /**
      * Tests that the correct driver name is inferred from the driver
      * instance that is passed to getAdapterName()
      *
-     * @dataProvider driversProvider
      * @return void
      */
-    public function testGetAdapterName($expected, $cakeDriver)
+    public function testGetAdapterName()
     {
-        $this->assertEquals(
-            $expected,
-            $this->command->getAdapterName($cakeDriver)
-        );
+        $mysql = $this->getMockBuilder('\Cake\Database\Driver\Mysql')->getMock();
+        $pgsql = $this->getMockBuilder('\Cake\Database\Driver\Postgres')->getMock();
+        $sqlite = $this->getMockBuilder('\Cake\Database\Driver\Sqlite')->getMock();
+
+        $this->assertEquals('mysql', $this->command->getAdapterName($mysql));
+        $this->assertEquals('pgsql', $this->command->getAdapterName($pgsql));
+        $this->assertEquals('sqlite', $this->command->getAdapterName($sqlite));
     }
 
     /**
