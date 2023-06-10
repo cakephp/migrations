@@ -60,11 +60,17 @@ class TestNotEmptySnapshot extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                ],
+                [
+                    'name' => 'category_article_idx',
                 ]
             )
             ->addIndex(
                 [
                     'title',
+                ],
+                [
+                    'name' => 'title_idx',
                 ]
             )
             ->create();
@@ -99,7 +105,10 @@ class TestNotEmptySnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'categories_unique_slug',
+                    'unique' => true,
+                ]
             )
             ->create();
 
@@ -149,6 +158,9 @@ class TestNotEmptySnapshot extends AbstractMigration
                 [
                     'product_category',
                     'product_id',
+                ],
+                [
+                    'name' => 'product_id_fk',
                 ]
             )
             ->create();
@@ -197,23 +209,35 @@ class TestNotEmptySnapshot extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'products_unique_slug',
+                    'unique' => true,
+                ]
             )
             ->addIndex(
                 [
                     'category_id',
                     'id',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'products_category_unique',
+                    'unique' => true,
+                ]
             )
             ->addIndex(
                 [
                     'category_id',
+                ],
+                [
+                    'name' => 'category_idx',
                 ]
             )
             ->addIndex(
                 [
                     'title',
+                ],
+                [
+                    'name' => 'title_idx_ft',
                 ]
             )
             ->create();
@@ -261,7 +285,10 @@ class TestNotEmptySnapshot extends AbstractMigration
                 [
                     'article_id',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'UNIQUE_TAG2',
+                    'unique' => true,
+                ]
             )
             ->create();
 

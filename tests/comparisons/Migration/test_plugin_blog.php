@@ -60,11 +60,17 @@ class TestPluginBlog extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                ],
+                [
+                    'name' => 'category_article_idx',
                 ]
             )
             ->addIndex(
                 [
                     'title',
+                ],
+                [
+                    'name' => 'title_idx',
                 ]
             )
             ->create();
@@ -99,7 +105,10 @@ class TestPluginBlog extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'categories_unique_slug',
+                    'unique' => true,
+                ]
             )
             ->create();
 
