@@ -63,11 +63,17 @@ class TestPluginBlogPgsql extends AbstractMigration
             ->addIndex(
                 [
                     'category_id',
+                ],
+                [
+                    'name' => 'category_article_idx',
                 ]
             )
             ->addIndex(
                 [
                     'title',
+                ],
+                [
+                    'name' => 'title_idx',
                 ]
             )
             ->create();
@@ -106,7 +112,10 @@ class TestPluginBlogPgsql extends AbstractMigration
                 [
                     'slug',
                 ],
-                ['unique' => true]
+                [
+                    'name' => 'categories_unique_slug',
+                    'unique' => true,
+                ]
             )
             ->create();
 
