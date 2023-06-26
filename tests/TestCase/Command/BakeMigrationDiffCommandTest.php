@@ -97,6 +97,28 @@ class BakeMigrationDiffCommandTest extends TestCase
     }
 
     /**
+     * Tests baking a diff in a custom folder source
+     *
+     * @return void
+     */
+    public function testBakeMigrationDiffInCustomFolder()
+    {
+        $customFolderName = 'CustomMigrationsFolder';
+        $this->exec('bake migration_diff MigrationDiffForCustomFolder -c test -s ' . $customFolderName);
+
+        $path = ROOT . DS . 'config' . DS . $customFolderName . DS;
+        $this->generatedFiles = glob($path . '*_MigrationDiffForCustomFolder.php');
+
+        $this->assertEquals(1, count($this->generatedFiles));
+        $this->assertFileExists($path . 'schema-dump-test.lock', 'Cannot test contents, file does not exist.');
+        $this->generatedFiles[] = $path . 'schema-dump-test.lock';
+
+        $fileName = pathinfo($this->generatedFiles[0], PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
+    }
+
+    /**
      * Tests baking a diff
      *
      * @return void
