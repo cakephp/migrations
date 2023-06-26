@@ -483,6 +483,11 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $newArgs[] = $args->getOption('plugin');
         }
 
+        if ($args->getOption('source')) {
+            $newArgs[] = '-s';
+            $newArgs[] = $args->getOption('source');
+        }
+
         $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs, $io);
 
         if ($exitCode === 1) {

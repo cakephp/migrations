@@ -69,6 +69,11 @@ trait SnapshotTrait
             $newArgs[] = $args->getOption('plugin');
         }
 
+        if ($args->getOption('source')) {
+            $newArgs[] = '-s';
+            $newArgs[] = $args->getOption('source');
+        }
+
         $io->out('Marking the migration ' . $fileName . ' as migrated...');
         $this->executeCommand(MigrationsMarkMigratedCommand::class, $newArgs, $io);
     }
@@ -93,6 +98,11 @@ trait SnapshotTrait
         if ($args->getOption('plugin')) {
             $newArgs[] = '-p';
             $newArgs[] = $args->getOption('plugin');
+        }
+
+        if ($args->getOption('source')) {
+            $newArgs[] = '-s';
+            $newArgs[] = $args->getOption('source');
         }
 
         $io->out('Creating a dump of the new database state...');

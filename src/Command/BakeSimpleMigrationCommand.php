@@ -40,7 +40,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      *
      * @var string
      */
-    public $pathFragment = 'config/Migrations/';
+    public $pathFragment = 'config';
 
     /**
      * @inheritDoc
@@ -65,9 +65,9 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     public function getPath(Arguments $args): string
     {
-        $path = ROOT . DS . $this->pathFragment;
+        $path = ROOT . DS . $this->pathFragment . DS . $args->getOption('source') . DS;
         if ($this->plugin) {
-            $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
+            $path = $this->_pluginPath($this->plugin) . $this->pathFragment . DS . $args->getOption('source') . DS;
         }
 
         return str_replace('/', DS, $path);
@@ -188,6 +188,10 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             'short' => 'f',
             'boolean' => true,
             'help' => 'Force overwriting existing file if a migration already exists with the same name.',
+        ])->addOption('source', [
+            'short' => 's',
+            'default' => 'Migrations',
+            'help' => 'Name of the Folder in which the migration should be saved',
         ]);
 
         return $parser;
