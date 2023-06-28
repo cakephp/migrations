@@ -140,7 +140,7 @@ class MarkMigratedTest extends TestCase
         );
 
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(3, $result->fetchColumn(0));
+        $this->assertSame(4, $result->fetchColumn(0));
 
         $config = $this->command->getConfig();
         $env = $this->command->getManager()->getEnvironment('default');

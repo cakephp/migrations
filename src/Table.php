@@ -227,4 +227,15 @@ class Table extends BaseTable
 
         $this->getTable()->setOptions($options);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function addTimestamps($createdAt = '', $updatedAt = '', bool $withTimezone = false)
+    {
+        $createdAt = $createdAt ?: 'created';
+        $updatedAt = $updatedAt ?: 'modified';
+
+        return parent::addTimestamps($createdAt, $updatedAt, $withTimezone);
+    }
 }
