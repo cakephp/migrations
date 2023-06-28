@@ -191,7 +191,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         ])->addOption('source', [
             'short' => 's',
             'default' => 'Migrations',
-            'help' => 'Name of the folder in which the migration should be saved',
+            'help' => 'Name of the folder in which the migration should be saved.',
         ]);
 
         return $parser;
