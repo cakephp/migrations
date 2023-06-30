@@ -42,6 +42,8 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     public $pathFragment = 'config';
 
+    public const DEFAULT_MIGRATION_FOLDER = 'Migrations';
+
     /**
      * @inheritDoc
      */
@@ -190,7 +192,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             'help' => 'Force overwriting existing file if a migration already exists with the same name.',
         ])->addOption('source', [
             'short' => 's',
-            'default' => 'Migrations',
+            'default' => self::DEFAULT_MIGRATION_FOLDER,
             'help' => 'Name of the folder in which the migration should be saved.',
         ]);
 
