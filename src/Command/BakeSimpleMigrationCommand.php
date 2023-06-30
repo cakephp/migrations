@@ -67,9 +67,10 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     public function getPath(Arguments $args): string
     {
-        $path = ROOT . DS . $this->pathFragment . DS . $args->getOption('source') . DS;
+        $migrationFolder = $this->pathFragment . DS . $args->getOption('source') . DS;
+        $path = ROOT . DS . $migrationFolder;
         if ($this->plugin) {
-            $path = $this->_pluginPath($this->plugin) . $this->pathFragment . DS . $args->getOption('source') . DS;
+            $path = $this->_pluginPath($this->plugin) . $migrationFolder;
         }
 
         return str_replace('/', DS, $path);
