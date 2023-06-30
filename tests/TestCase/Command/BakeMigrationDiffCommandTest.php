@@ -109,7 +109,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         $path = ROOT . DS . 'config' . DS . $customFolderName . DS;
         $this->generatedFiles = glob($path . '*_MigrationDiffForCustomFolder.php');
 
-        $this->assertEquals(1, count($this->generatedFiles));
+        $this->assertCount(1, $this->generatedFiles);
         $this->assertFileExists($path . 'schema-dump-test.lock', 'Cannot test contents, file does not exist.');
         $this->generatedFiles[] = $path . 'schema-dump-test.lock';
 
