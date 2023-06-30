@@ -81,14 +81,14 @@ trait SnapshotTrait
         $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
     }
 
-
     /**
      * Will parse 'connection', 'plugin' and 'source' options into a new Array
      *
-     * @param Arguments $args The command arguments.
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @return array Array containing the short for the option followed by its value
      */
-    protected function parseOptions(Arguments $args): array {
+    protected function parseOptions(Arguments $args): array
+    {
         $newArgs = [];
         if ($args->getOption('connection')) {
             $newArgs[] = '-c';
