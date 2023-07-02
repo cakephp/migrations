@@ -102,7 +102,7 @@ class Create extends CreateCommand
         $migrationFilename = glob($migrationPath . '*' . $phinxName);
 
         if (empty($migrationFilename)) {
-            $output->writeln(sprintf('<info>An error occurred while renaming file</info>'));
+            $output->writeln('<info>An error occurred while renaming file</info>');
         } else {
             $migrationFilename = $migrationFilename[0];
             $path = dirname($migrationFilename) . DS;
