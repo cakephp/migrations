@@ -134,7 +134,7 @@ class StatusTest extends TestCase
         $commandTester->execute(['command' => $this->command->getName()] + $params);
         $display = $this->getDisplayFromOutput();
 
-        $expected = '[{"status":"down","id":20150704160200,"name":"CreateNumbersTable"},{"status":"down","id":20150724233100,"name":"UpdateNumbersTable"},{"status":"down","id":20150826191400,"name":"CreateLettersTable"}]';
+        $expected = '[{"status":"down","id":20150704160200,"name":"CreateNumbersTable"},{"status":"down","id":20150724233100,"name":"UpdateNumbersTable"},{"status":"down","id":20150826191400,"name":"CreateLettersTable"},{"status":"down","id":20230628181900,"name":"CreateStoresTable"}]';
 
         $this->assertTextContains($expected, $display);
     }
