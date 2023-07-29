@@ -66,12 +66,12 @@ trait TableFinderTrait
 
             foreach ($tableNamesInModel as $num => $table) {
                 if (strpos($table, '.') !== false) {
-                    $splitted = array_reverse(explode('.', $table, 2));
+                    $split = array_reverse(explode('.', $table, 2));
 
-                    $config = ConnectionManager::getConfig($this->connection);
+                    $config = (array)ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
-                    if ($config[$key] === $splitted[1]) {
-                        $table = $splitted[0];
+                    if ($config[$key] === $split[1]) {
+                        $table = $split[0];
                     }
                 }
 
@@ -151,6 +151,10 @@ trait TableFinderTrait
     {
         $tables = [];
         $className = str_replace('Table.php', '', $className);
+        if (!$className) {
+            return $tables;
+        }
+
         if ($pluginName !== null) {
             $className = $pluginName . '.' . $className;
         }

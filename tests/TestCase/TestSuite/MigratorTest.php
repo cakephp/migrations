@@ -14,10 +14,12 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Chronos\ChronosDate;
+use Cake\Database\Driver\Postgres;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
 use Migrations\TestSuite\Migrator;
+use RuntimeException;
 
 class MigratorTest extends TestCase
 {
@@ -102,19 +104,29 @@ class MigratorTest extends TestCase
         $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator_phinxlog')->execute()->fetchAll());
     }
 
-    public function testRunManyDropNoTruncate(): void
+    public function testRunManyMultipleSkip(): void
     {
-        $migrator = new Migrator();
-        $migrator->runMany([
-            ['plugin' => 'Migrator',],
-            ['plugin' => 'Migrator', 'source' => 'Migrations2',],
-        ], false);
-
         $connection = ConnectionManager::get('test');
-        $tables = $connection->getSchemaCollection()->listTables();
-        $this->assertContains('migrator', $tables);
-        $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
-        $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator_phinxlog')->execute()->fetchAll());
+        $this->skipIf($connection->getDriver() instanceof Postgres);
+
+        $migrator = new Migrator();
+        // Run migrations for the first time.
+        $migrator->runMany([
+            ['plugin' => 'Migrator'],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2'],
+        ]);
+
+        // Run migrations the second time. Skip clauses will cause problems.
+        try {
+            $migrator->runMany([
+                ['plugin' => 'Migrator', 'skip' => ['migrator']],
+                ['plugin' => 'Migrator', 'source' => 'Migrations2', 'skip' => ['m*']],
+            ]);
+            $this->fail('Should fail because of table drops');
+        } catch (RuntimeException $e) {
+            $connection->getDriver()->disconnect();
+            $this->assertStringContainsString('Could not apply migrations', $e->getMessage());
+        }
     }
 
     /**
