@@ -65,7 +65,7 @@ trait TableFinderTrait
             }
 
             foreach ($tableNamesInModel as $num => $table) {
-                if (strpos($table, '.') !== false) {
+                if (str_contains($table, '.')) {
                     $split = array_reverse(explode('.', $table, 2));
 
                     $config = (array)ConnectionManager::getConfig($this->connection);
