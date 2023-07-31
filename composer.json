@@ -57,8 +57,8 @@
             "@stan",
             "@test"
         ],
-        "cs-check": "phpcs --colors -p -s src/ tests/",
-        "cs-fix": "phpcbf --colors -p src/ tests/",
+        "cs-check": "phpcs -p",
+        "cs-fix": "phpcbf -p",
         "phpstan": "tools/phpstan analyse",
         "psalm": "tools/psalm --show-info=false",
         "stan": [

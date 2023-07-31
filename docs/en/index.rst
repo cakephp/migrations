@@ -424,7 +424,7 @@ will generate::
     <?php
     use Migrations\AbstractMigration;
 
-    class AlterPriceFromProducts extends AbstractMigration
+    class AlterPriceOnProducts extends AbstractMigration
     {
         public function change()
         {
@@ -980,6 +980,24 @@ pass them to the method::
     $status = $migrations->status();
     // This one with the "default" connection
     $migrate = $migrations->migrate(['connection' => 'default']);
+
+Feature Flags
+=============
+
+Migrations uses Phinx, which has some feature flags that are disabled by default for now, but
+can enabled if you want them to:
+
+* ``unsigned_primary_keys``: Should Phinx create primary keys as unsigned integers? (default: ``false``)
+* ``column_null_default``: Should Phinx create columns as null by default? (default: ``false``)
+
+Set them via Configure to enable (e.g. in ``config/app.php``)::
+
+    'Migrations' => [
+        'unsigned_primary_keys' => true,
+        'column_null_default' => true,
+    ],
+
+For details see `Phinx docs<https://book.cakephp.org/phinx/0/en/configuration.html#feature-flags>`__.
 
 Tips and tricks
 ===============

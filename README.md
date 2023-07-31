@@ -1,7 +1,7 @@
 # Migrations plugin for CakePHP
 
 [![CI](https://github.com/cakephp/migrations/actions/workflows/ci.yml/badge.svg)](https://github.com/cakephp/migrations/actions/workflows/ci.yml)
-[![Coverage Status](https://img.shields.io/codecov/c/github/cakephp/migrations/master.svg?style=flat-square)](https://codecov.io/github/cakephp/migrations?branch=master)
+[![Coverage Status](https://img.shields.io/codecov/c/github/cakephp/migrations/3.x.svg?style=flat-square)](https://app.codecov.io/github/cakephp/migrations/tree/3.x)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.txt)
 [![Total Downloads](https://img.shields.io/packagist/dt/cakephp/migrations.svg?style=flat-square)](https://packagist.org/packages/cakephp/migrations)
 

@@ -114,14 +114,9 @@ trait ConfigurationTrait
 
         $connection = $this->getConnectionName($this->input());
 
-        $connectionConfig = ConnectionManager::getConfig($connection);
-        /**
-         * @psalm-suppress PossiblyNullArgument
-         * @psalm-suppress PossiblyNullArrayAccess
-         */
-        $adapterName = $this->getAdapterName($connectionConfig['driver']);
+        $connectionConfig = (array)ConnectionManager::getConfig($connection);
 
-        /** @psalm-suppress PossiblyNullArgument */
+        $adapterName = $this->getAdapterName($connectionConfig['driver']);
         $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
 
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
@@ -150,6 +145,7 @@ trait ConfigurationTrait
                     'dsn_options' => $dsnOptions,
                 ],
             ],
+            'feature_flags' => $this->featureFlags(),
         ];
 
         if ($adapterName === 'pgsql') {
@@ -184,6 +180,22 @@ trait ConfigurationTrait
         }
 
         return $this->configuration = new Config($config);
+    }
+
+    /**
+     * The following feature flags are disabled by default to keep BC.
+     * The next major will turn them on. You can do so on your own before already.
+     *
+     * @return array<string, bool>
+     */
+    protected function featureFlags(): array
+    {
+        $defaults = [
+            'unsigned_primary_keys' => false,
+            'column_null_default' => false,
+        ];
+
+        return (array)Configure::read('Migrations') + $defaults;
     }
 
     /**
