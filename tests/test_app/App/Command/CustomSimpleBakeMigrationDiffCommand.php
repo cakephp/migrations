@@ -6,6 +6,7 @@ namespace TestApp\Command;
 use Cake\Console\Arguments;
 use Cake\Core\Plugin;
 use Migrations\Command\BakeMigrationDiffCommand;
+use function Cake\Core\env;
 
 class CustomSimpleBakeMigrationDiffCommand extends BakeMigrationDiffCommand
 {

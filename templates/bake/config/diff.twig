@@ -158,7 +158,7 @@ not empty %}
         }) |  raw -}}
 {%  endif -%}
 {%  for tableName, tableDiff in data -%}
-{%  Migration.resetTableStatementGenerationFor(tableName) %}
+{%  do Migration.resetTableStatementGenerationFor(tableName) %}
 {%      if tableDiff['indexes']['add'] is not empty %}
 
         $this->table('{{ tableName }}')

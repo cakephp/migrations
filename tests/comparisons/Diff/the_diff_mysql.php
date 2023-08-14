@@ -76,11 +76,17 @@ class TheDiffMysql extends AbstractMigration
             ->addIndex(
                 [
                     'user_id',
+                ],
+                [
+                    'name' => 'categories_ibfk_1',
                 ]
             )
             ->addIndex(
                 [
                     'name',
+                ],
+                [
+                    'name' => 'name',
                 ]
             )
             ->create();
@@ -93,6 +99,7 @@ class TheDiffMysql extends AbstractMigration
                 [
                     'update' => 'RESTRICT',
                     'delete' => 'RESTRICT',
+                    'constraint' => 'categories_ibfk_1'
                 ]
             )
             ->update();
@@ -145,6 +152,7 @@ class TheDiffMysql extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
+                    'constraint' => 'articles_ibfk_1'
                 ]
             )
             ->update();
@@ -263,6 +271,7 @@ class TheDiffMysql extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
+                    'constraint' => 'articles_ibfk_1'
                 ]
             )
             ->update();

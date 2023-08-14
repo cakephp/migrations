@@ -67,6 +67,7 @@ class TheDiffSimpleMysql extends AbstractMigration
                 [
                     'update' => 'RESTRICT',
                     'delete' => 'RESTRICT',
+                    'constraint' => 'articles_ibfk_1'
                 ]
             )
             ->update();

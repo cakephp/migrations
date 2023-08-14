@@ -14,6 +14,7 @@ class TheDiffAddRemoveMysql extends AbstractMigration
      */
     public function up(): void
     {
+
         $this->table('articles')
             ->removeColumn('excerpt')
             ->changeColumn('id', 'integer', [
@@ -43,6 +44,7 @@ class TheDiffAddRemoveMysql extends AbstractMigration
      */
     public function down(): void
     {
+
         $this->table('articles')
             ->addColumn('excerpt', 'text', [
                 'after' => 'title',

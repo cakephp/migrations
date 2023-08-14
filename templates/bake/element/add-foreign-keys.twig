@@ -1,6 +1,6 @@
 {% set statement = Migration.tableStatement(table, true) %}
 {% set hasProcessedConstraint = false %}
-{% for constraintName, constraint in constraints[table] %}
+{% for constraintName, constraint in constraints %}
 {%     set constraintColumns = constraint['columns']|sort %}
 {%     if constraint['type'] != 'unique' %}
 {%         set hasProcessedConstraint = true %}
