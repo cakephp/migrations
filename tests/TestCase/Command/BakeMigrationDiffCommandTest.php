@@ -103,7 +103,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiff()
     {
-        $this->skipIf(env('DB_URL_COMPARE') !== false);
+        $this->skipIf(!env('DB_URL_COMPARE'));
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . env('DB') . '.php';
@@ -125,8 +125,9 @@ class BakeMigrationDiffCommandTest extends TestCase
         unlink($destination);
         copy($diffDumpPath, $destinationDumpPath);
 
+        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test_comparisons');
-        $connection->newQuery()
+        $connection->deleteQuery()
             ->delete('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
@@ -137,7 +138,7 @@ class BakeMigrationDiffCommandTest extends TestCase
             'length' => 255,
         ]);
         foreach ($table->createSql($connection) as $stmt) {
-            $connection->query($stmt);
+            $connection->execute($stmt);
         }
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
@@ -155,7 +156,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
-        $connection->newQuery()
+        $connection->insertQuery()
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
             ->into('phinxlog')
             ->values([
@@ -165,10 +166,11 @@ class BakeMigrationDiffCommandTest extends TestCase
                 'end_time' => '2016-05-22 16:51:46',
             ])
             ->execute();
+
         $this->getMigrations()->rollback(['target' => 'all']);
 
         foreach ($table->dropSql($connection) as $stmt) {
-            $connection->query($stmt);
+            $connection->execute($stmt);
         }
     }
 
@@ -180,7 +182,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffSimple()
     {
-        $this->skipIf(env('DB_URL_COMPARE') !== false);
+        $this->skipIf(!env('DB_URL_COMPARE'));
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
@@ -201,8 +203,9 @@ class BakeMigrationDiffCommandTest extends TestCase
         unlink($destination);
         copy($diffDumpPath, $destinationDumpPath);
 
+        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test_comparisons');
-        $connection->newQuery()
+        $connection->deleteQuery()
             ->delete('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
@@ -223,7 +226,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
-        $connection->newQuery()
+        $connection->insertQuery()
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
             ->into('phinxlog')
             ->values([
@@ -244,7 +247,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffAddRemove()
     {
-        $this->skipIf(env('DB_URL_COMPARE') !== false);
+        $this->skipIf(!env('DB_URL_COMPARE'));
 
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';
@@ -265,8 +268,9 @@ class BakeMigrationDiffCommandTest extends TestCase
         unlink($destination);
         copy($diffDumpPath, $destinationDumpPath);
 
+        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test_comparisons');
-        $connection->newQuery()
+        $connection->deleteQuery()
             ->delete('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
@@ -288,7 +292,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
-        $connection->newQuery()
+        $connection->insertQuery()
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
             ->into('phinxlog')
             ->values([
