@@ -183,19 +183,18 @@ trait ConfigurationTrait
     }
 
     /**
-     * The following feature flags are disabled by default to keep BC.
-     * The next major will turn them on. You can do so on your own before already.
+     * Returns the Migrations feature flags configuration.
      *
      * @return array<string, bool>
      */
     protected function featureFlags(): array
     {
-        $defaults = [
-            'unsigned_primary_keys' => false,
-            'column_null_default' => false,
+        $options = [
+            'unsigned_primary_keys',
+            'column_null_default',
         ];
 
-        return (array)Configure::read('Migrations') + $defaults;
+        return array_intersect_key(Configure::read('Migrations', []), array_flip($options));
     }
 
     /**

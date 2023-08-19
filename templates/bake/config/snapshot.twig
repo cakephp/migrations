@@ -16,8 +16,7 @@
 {% set constraints = [] %}
 {% set foreignKeys = [] %}
 {% set dropForeignKeys = [] %}
-{% set hasUnsignedPk = Migration.hasUnsignedPrimaryKey(tables) %}
-{% if autoId and hasUnsignedPk %}
+{% if autoId and Migration.hasAutoIdIncompatiblePrimaryKey(tables) %}
 {%     set autoId = false %}
 {% endif %}
 <?php

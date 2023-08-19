@@ -21,6 +21,7 @@ class TheDiffSimpleMysql extends AbstractMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
+                'signed' => true,
             ])
             ->changeColumn('rating', 'integer', [
                 'default' => null,
@@ -48,6 +49,7 @@ class TheDiffSimpleMysql extends AbstractMigration
                 'default' => null,
                 'length' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->addIndex(
                 [

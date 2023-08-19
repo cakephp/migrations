@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\View\Helper;
 
+use Cake\Database\Driver\Mysql;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -76,6 +77,7 @@ class MigrationHelperTest extends TestCase
         $this->view = new View();
         $this->helper = new MigrationHelper($this->view, [
             'collection' => $this->collection,
+            'connection' => $this->connection,
         ]);
 
         $this->types = [
@@ -207,18 +209,22 @@ class MigrationHelperTest extends TestCase
     {
         $tableSchema = $this->collection->describe('users');
 
+        $options = [
+            'null' => false,
+            'default' => $this->values['integerNull'],
+            'precision' => null,
+            'comment' => $this->values['comment'],
+            'autoIncrement' => true,
+        ];
+        if ($this->connection->getDriver() instanceof Mysql) {
+            $options['signed'] = false;
+        }
+
         $result = $this->helper->column($tableSchema, 'id');
         unset($result['options']['limit']);
         $this->assertEquals([
             'columnType' => 'integer',
-            'options' => [
-                'null' => false,
-                'default' => $this->values['integerNull'],
-                'precision' => null,
-                'comment' => $this->values['comment'],
-                'signed' => true,
-                'autoIncrement' => true,
-            ],
+            'options' => $options,
         ], $result);
 
         $this->assertEquals([
@@ -294,17 +300,21 @@ class MigrationHelperTest extends TestCase
      */
     public function testAttributes()
     {
-        $result = $this->helper->attributes('users', 'id');
-        unset($result['limit']);
-
-        $this->assertEquals([
+        $attributes = [
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,
             'comment' => $this->values['comment'],
-            'signed' => true,
             'autoIncrement' => true,
-        ], $result);
+        ];
+        if ($this->connection->getDriver() instanceof Mysql) {
+            $attributes['signed'] = false;
+        }
+
+        $result = $this->helper->attributes('users', 'id');
+        unset($result['limit']);
+
+        $this->assertEquals($attributes, $result);
 
         $this->assertEquals([
             'limit' => 256,
@@ -338,18 +348,22 @@ class MigrationHelperTest extends TestCase
             'comment' => null,
         ], $this->helper->attributes('users', 'updated'));
 
-        $result = $this->helper->attributes('special_tags', 'article_id');
-        // Remove as it is inconsistent between dbs and CI/local.
-        unset($result['limit']);
-
-        $this->assertEquals([
+        $attributes = [
             'null' => false,
             'default' => $this->values['integerNull'],
             'precision' => null,
             'comment' => $this->values['comment'],
-            'signed' => true,
             'autoIncrement' => null,
-        ], $result);
+        ];
+        if ($this->connection->getDriver() instanceof Mysql) {
+            $attributes['signed'] = false;
+        }
+
+        $result = $this->helper->attributes('special_tags', 'article_id');
+        // Remove as it is inconsistent between dbs and CI/local.
+        unset($result['limit']);
+
+        $this->assertEquals($attributes, $result);
     }
 
     /**
