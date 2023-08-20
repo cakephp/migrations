@@ -14,12 +14,16 @@ declare(strict_types=1);
 namespace Migrations\View\Helper;
 
 use ArrayAccess;
+use Cake\Core\Configure;
+use Cake\Database\Connection;
+use Cake\Database\Driver\Mysql;
 use Cake\Database\Schema\Collection;
 use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
+use Phinx\Config\FeatureFlags;
 
 /**
  * Migration Helper class for output of field data in migration files.
@@ -76,6 +80,7 @@ class MigrationHelper extends Helper
      * ### Settings
      *
      * - `collection` \Cake\Database\Schema\Collection
+     * - `connection` \Cake\Database\Connection
      *
      * @param \Cake\View\View $View The View this helper is being attached to.
      * @param array $config Configuration settings for the helper.
@@ -286,24 +291,37 @@ class MigrationHelper extends Helper
     }
 
     /**
-     * Returns whether the $tables list given as arguments contains primary keys
-     * unsigned.
+     * Returns whether any of the given tables/schemas contains a primary key
+     * that is incompatible with automatically generated primary keys for the
+     * current driver.
      *
-     * @param array<\Cake\Database\Schema\TableSchemaInterface|string> $tables List of tables to check
+     * @param array<\Cake\Database\Schema\TableSchemaInterface|string> $tables List of schemas/tables to check
      * @return bool
      */
-    public function hasUnsignedPrimaryKey(array $tables): bool
+    public function hasAutoIdIncompatiblePrimaryKey(array $tables): bool
     {
-        foreach ($tables as $table) {
-            $tableSchema = $table;
-            if (!($tableSchema instanceof TableSchemaInterface)) {
-                $tableSchema = $this->schema($tableSchema);
-            }
-            $tablePrimaryKeys = $tableSchema->getPrimaryKey();
+        $connection = $this->getConfig('connection');
+        assert($connection instanceof Connection);
 
-            foreach ($tablePrimaryKeys as $primaryKey) {
-                $column = $tableSchema->getColumn($primaryKey);
-                if (isset($column['unsigned']) && $column['unsigned'] === true) {
+        // currently only MySQL supports unsigned primary keys
+        if (!($connection->getDriver() instanceof Mysql)) {
+            return false;
+        }
+
+        $useUnsignedPrimaryKes = Configure::read(
+            'Migrations.unsigned_primary_keys',
+            FeatureFlags::$unsignedPrimaryKeys
+        );
+
+        foreach ($tables as $table) {
+            $schema = $table;
+            if (!($schema instanceof TableSchemaInterface)) {
+                $schema = $this->schema($schema);
+            }
+
+            foreach ($schema->getPrimaryKey() as $column) {
+                $data = $schema->getColumn($column);
+                if (isset($data['unsigned']) && $data['unsigned'] === !$useUnsignedPrimaryKes) {
                     return true;
                 }
             }
@@ -359,6 +377,9 @@ class MigrationHelper extends Helper
      */
     public function getColumnOption(array $options): array
     {
+        $connection = $this->getConfig('connection');
+        assert($connection instanceof Connection);
+
         $wantedOptions = array_flip([
             'length',
             'limit',
@@ -377,9 +398,13 @@ class MigrationHelper extends Helper
         if (empty($columnOptions['autoIncrement'])) {
             unset($columnOptions['autoIncrement']);
         }
-        if (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
+
+        // currently only MySQL supports the signed option
+        $isMysql = $connection->getDriver() instanceof Mysql;
+        if (!$isMysql) {
             unset($columnOptions['signed']);
         }
+
         if ($columnOptions['precision'] === null) {
             unset($columnOptions['precision']);
         } else {
@@ -436,6 +461,9 @@ class MigrationHelper extends Helper
      */
     public function attributes(TableSchemaInterface|string $table, string $column): array
     {
+        $connection = $this->getConfig('connection');
+        assert($connection instanceof Connection);
+
         $tableSchema = $table;
         if (!($tableSchema instanceof TableSchemaInterface)) {
             $tableSchema = $this->schema($tableSchema);
@@ -480,6 +508,12 @@ class MigrationHelper extends Helper
             }
 
             $attributes[$option] = $value;
+        }
+
+        // currently only MySQL supports the signed option
+        $isMysql = $connection->getDriver() instanceof Mysql;
+        if (!$isMysql) {
+            unset($attributes['signed']);
         }
 
         ksort($attributes);

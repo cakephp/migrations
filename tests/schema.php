@@ -9,8 +9,8 @@ return [
     [
         'table' => 'categories',
         'columns' => [
-            'id' => ['type' => 'integer'],
-            'parent_id' => ['type' => 'integer', 'length' => 11],
+            'id' => ['type' => 'integer', 'unsigned' => true],
+            'parent_id' => ['type' => 'integer', 'unsigned' => true, 'length' => 11],
             'title' => ['type' => 'string', 'null' => true, 'length' => 255],
             'slug' => ['type' => 'string', 'null' => true, 'length' => 100],
             'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
@@ -24,10 +24,10 @@ return [
     [
         'table' => 'products',
         'columns' => [
-            'id' => ['type' => 'integer'],
+            'id' => ['type' => 'integer', 'unsigned' => true],
             'title' => ['type' => 'string', 'null' => true, 'length' => 255],
             'slug' => ['type' => 'string', 'null' => true, 'length' => 100],
-            'category_id' => ['type' => 'integer', 'length' => 11],
+            'category_id' => ['type' => 'integer', 'unsigned' => true, 'length' => 11],
             'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
             'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         ],
@@ -53,9 +53,9 @@ return [
     [
         'table' => 'orders',
         'columns' => [
-            'id' => ['type' => 'integer'],
-            'product_category' => ['type' => 'integer', 'null' => false, 'length' => 11],
-            'product_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
+            'id' => ['type' => 'integer', 'unsigned' => true],
+            'product_category' => ['type' => 'integer', 'unsigned' => true, 'null' => false, 'length' => 11],
+            'product_id' => ['type' => 'integer', 'unsigned' => true, 'null' => false, 'length' => 11],
         ],
         'indexes' => [
             'product_category' => [
@@ -79,10 +79,10 @@ return [
     [
         'table' => 'articles',
         'columns' => [
-            'id' => ['type' => 'integer'],
+            'id' => ['type' => 'integer', 'unsigned' => true],
             'title' => ['type' => 'string', 'null' => true, 'length' => 255, 'comment' => 'Article title'],
-            'category_id' => ['type' => 'integer', 'length' => 11],
-            'product_id' => ['type' => 'integer', 'length' => 11],
+            'category_id' => ['type' => 'integer', 'unsigned' => true, 'length' => 11],
+            'product_id' => ['type' => 'integer', 'unsigned' => true, 'length' => 11],
             'note' => ['type' => 'string', 'default' => '7.4', 'length' => 255],
             'counter' => ['type' => 'integer', 'length' => 11, 'unsigned' => true],
             'active' => ['type' => 'boolean', 'default' => 0],
@@ -117,7 +117,7 @@ return [
     [
         'table' => 'events',
         'columns' => [
-            'id' => ['type' => 'integer'],
+            'id' => ['type' => 'integer', 'unsigned' => true],
             'title' => ['type' => 'string', 'null' => true],
             'description' => 'text',
             'published' => ['type' => 'string', 'length' => 1, 'default' => 'N'],
@@ -127,7 +127,7 @@ return [
     [
         'table' => 'parts',
         'columns' => [
-            'id' => ['type' => 'integer'],
+            'id' => ['type' => 'integer', 'unsigned' => true],
             'name' => ['type' => 'string', 'length' => 255],
             'number' => ['type' => 'integer', 'null' => true, 'length' => 10, 'unsigned' => true],
         ],
@@ -148,10 +148,10 @@ return [
     [
         'table' => 'special_tags',
         'columns' => [
-            'id' => ['type' => 'integer'],
-            'article_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
-            'author_id' => ['type' => 'integer', 'null' => true, 'length' => 11],
-            'tag_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
+            'id' => ['type' => 'integer', 'unsigned' => true],
+            'article_id' => ['type' => 'integer', 'unsigned' => true, 'null' => false, 'length' => 11],
+            'author_id' => ['type' => 'integer', 'unsigned' => true, 'null' => true, 'length' => 11],
+            'tag_id' => ['type' => 'integer', 'unsigned' => true, 'null' => false, 'length' => 11],
             'highlighted' => ['type' => 'boolean', 'null' => true],
             'highlighted_time' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         ],
@@ -170,7 +170,7 @@ return [
     [
         'table' => 'users',
         'columns' => [
-            'id' => ['type' => 'integer'],
+            'id' => ['type' => 'integer', 'unsigned' => true],
             'username' => ['type' => 'string', 'null' => true, 'length' => 256],
             'password' => ['type' => 'string', 'null' => true, 'length' => 256],
             'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],

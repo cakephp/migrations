@@ -14,13 +14,14 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\BaseCommand;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
-use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Migrations\Migrations;
 use Migrations\Test\TestCase\TestCase;
+use Phinx\Config\FeatureFlags;
 use function Cake\Core\env;
 
 /**
@@ -58,6 +59,9 @@ class BakeMigrationDiffCommandTest extends TestCase
                 unlink($file);
             }
         }
+
+        Configure::write('Migrations', []);
+        FeatureFlags::$unsignedPrimaryKeys = true;
     }
 
     /**
@@ -105,73 +109,7 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
-        $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . env('DB') . '.php';
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-
-        $destinationConfigDir = ROOT . DS . 'config' . DS . 'MigrationsDiff' . DS;
-        $destination = $destinationConfigDir . '20160415220805_TheDiff' . ucfirst(env('DB')) . '.php';
-        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-
-        copy($diffMigrationsPath, $destination);
-
-        $this->generatedFiles = [
-            $destination,
-            $destinationDumpPath,
-        ];
-
-        $this->getMigrations()->migrate();
-
-        unlink($destination);
-        copy($diffDumpPath, $destinationDumpPath);
-
-        /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get('test_comparisons');
-        $connection->deleteQuery()
-            ->delete('phinxlog')
-            ->where(['version' => 20160415220805])
-            ->execute();
-
-        // Create a _phinxlog table to make sure it's not included in the dump
-        $table = (new TableSchema('articles_phinxlog'))->addColumn('title', [
-            'type' => 'string',
-            'length' => 255,
-        ]);
-        foreach ($table->createSql($connection) as $stmt) {
-            $connection->execute($stmt);
-        }
-
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS;
-        $bakeName = $this->getBakeName('TheDiff');
-        $this->exec("custom bake migration_diff {$bakeName} -c test_comparisons");
-
-        $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
-
-        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
-        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
-        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
-        $this->assertOutputContains('Creating a dump of the new database state...');
-        $this->assertCorrectSnapshot($bakeName, file_get_contents($destinationConfigDir . $generatedMigration));
-
-        rename($destinationConfigDir . $generatedMigration, $destination);
-        $versionParts = explode('_', $generatedMigration);
-
-        $connection->insertQuery()
-            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
-            ->values([
-                'version' => 20160415220805,
-                'migration_name' => $versionParts[1],
-                'start_time' => '2016-05-22 16:51:46',
-                'end_time' => '2016-05-22 16:51:46',
-            ])
-            ->execute();
-
-        $this->getMigrations()->rollback(['target' => 'all']);
-
-        foreach ($table->dropSql($connection) as $stmt) {
-            $connection->execute($stmt);
-        }
+        $this->runDiffBakingTest('Default');
     }
 
     /**
@@ -184,59 +122,7 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
-        $diffMigrationsPath = $diffConfigFolder . 'the_diff_simple_' . env('DB') . '.php';
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-
-        $destinationConfigDir = ROOT . DS . 'config' . DS . 'MigrationsDiffSimple' . DS;
-        $destination = $destinationConfigDir . '20160415220805_TheDiffSimple' . ucfirst(env('DB')) . '.php';
-        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
-        copy($diffMigrationsPath, $destination);
-
-        $this->generatedFiles = [
-            $destination,
-            $destinationDumpPath,
-        ];
-
-        $this->getMigrations('MigrationsDiffSimple')->migrate();
-
-        unlink($destination);
-        copy($diffDumpPath, $destinationDumpPath);
-
-        /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get('test_comparisons');
-        $connection->deleteQuery()
-            ->delete('phinxlog')
-            ->where(['version' => 20160415220805])
-            ->execute();
-
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'simple' . DS;
-
-        $bakeName = $this->getBakeName('TheDiffSimple');
-        $this->exec("customSimple bake migration_diff {$bakeName} -c test_comparisons");
-
-        $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
-
-        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiffSimple*');
-        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
-        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
-        $this->assertOutputContains('Creating a dump of the new database state...');
-        $this->assertCorrectSnapshot($bakeName, file_get_contents($destinationConfigDir . $generatedMigration));
-
-        rename($destinationConfigDir . $generatedMigration, $destination);
-        $versionParts = explode('_', $generatedMigration);
-
-        $connection->insertQuery()
-            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
-            ->values([
-                'version' => 20160415220805,
-                'migration_name' => $versionParts[1],
-                'start_time' => '2016-05-22 16:51:46',
-                'end_time' => '2016-05-22 16:51:46',
-            ])
-            ->execute();
-        $this->getMigrations('MigrationsDiffSimple')->rollback(['target' => 'all']);
+        $this->runDiffBakingTest('Simple');
     }
 
     /**
@@ -249,12 +135,54 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
-        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
-        $diffMigrationsPath = $diffConfigFolder . 'the_diff_add_remove_' . env('DB') . '.php';
+        $this->runDiffBakingTest('AddRemove');
+    }
+
+    /**
+     * Tests that baking a diff with signed primary keys is auto-id compatible
+     * when `Migrations.unsigned_primary_keys` is disabled.
+     */
+    public function testBakingDiffWithAutoIdCompatibleSignedPrimaryKeys(): void
+    {
+        $this->skipIf(getenv('DB_URL_COMPARE') === false);
+
+        Configure::write('Migrations.unsigned_primary_keys', false);
+
+        $this->runDiffBakingTest('WithAutoIdCompatibleSignedPrimaryKeys');
+    }
+
+    /**
+     * Tests that baking a diff with signed primary keys is not auto-id compatible
+     * when using the default settings.
+     */
+    public function testBakingDiffWithAutoIdIncompatibleSignedPrimaryKeys(): void
+    {
+        $this->skipIf(getenv('DB_URL_COMPARE') === false);
+
+        $this->runDiffBakingTest('WithAutoIdIncompatibleSignedPrimaryKeys');
+    }
+
+    /**
+     * Tests that baking a diff with unsigned primary keys is not auto-id compatible
+     * when `Migrations.unsigned_primary_keys` is disabled.
+     */
+    public function testBakingDiffWithAutoIdIncompatibleUnsignedPrimaryKeys(): void
+    {
+        $this->skipIf(getenv('DB_URL_COMPARE') === false);
+
+        Configure::write('Migrations.unsigned_primary_keys', false);
+
+        $this->runDiffBakingTest('WithAutoIdIncompatibleUnsignedPrimaryKeys');
+    }
+
+    protected function runDiffBakingTest(string $scenario): void
+    {
+        $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
+        $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . Inflector::underscore($scenario) . '_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
-        $destinationConfigDir = ROOT . DS . 'config' . DS . 'MigrationsDiffAddRemove' . DS;
-        $destination = $destinationConfigDir . '20160415220805_TheDiffAddRemove' . ucfirst(env('DB')) . '.php';
+        $destinationConfigDir = ROOT . DS . 'config' . DS . "MigrationsDiff{$scenario}" . DS;
+        $destination = $destinationConfigDir . "20160415220805_TheDiff{$scenario}" . ucfirst(env('DB')) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -263,27 +191,27 @@ class BakeMigrationDiffCommandTest extends TestCase
             $destinationDumpPath,
         ];
 
-        $this->getMigrations('MigrationsDiffAddRemove')->migrate();
+        $this->getMigrations("MigrationsDiff$scenario")->migrate();
 
         unlink($destination);
         copy($diffDumpPath, $destinationDumpPath);
 
-        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test_comparisons');
         $connection->deleteQuery()
             ->delete('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
 
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . 'addremove' . DS;
+        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
-        $bakeName = $this->getBakeName('TheDiffAddRemove');
-
-        $this->exec("customRemove bake migration_diff {$bakeName} -c test_comparisons");
+        $bakeName = $this->getBakeName("TheDiff{$scenario}");
+        $pathFragment = "MigrationsDiff{$scenario}";
+        $comparison = lcfirst($scenario);
+        $this->exec("custom bake migration_diff {$bakeName} -c test_comparisons --path-fragment {$pathFragment} --comparison {$comparison}");
 
         $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
 
-        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, '*TheDiff*');
+        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, "*TheDiff$scenario*");
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
         $this->assertOutputContains('Creating a dump of the new database state...');
@@ -302,7 +230,7 @@ class BakeMigrationDiffCommandTest extends TestCase
                 'end_time' => '2016-05-22 16:51:46',
             ])
             ->execute();
-        $this->getMigrations('MigrationsDiffAddRemove')->rollback(['target' => 'all']);
+        $this->getMigrations("MigrationsDiff{$scenario}")->rollback(['target' => 'all']);
     }
 
     /**

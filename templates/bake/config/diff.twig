@@ -16,11 +16,7 @@
 {% set tables = data['fullTables'] %}
 {# unset($data['fullTables']) #}
 {% set constraints = [] %}
-{% set hasUnsignedPk = Migration.hasUnsignedPrimaryKey(tables['add']) %}
-{% set autoId = true %}
-{% if hasUnsignedPk %}
-{% set autoId = false %}
-{% endif %}
+{% set autoId = not Migration.hasAutoIdIncompatiblePrimaryKey(tables['add'] + tables['remove']) %}
 <?php
 declare(strict_types=1);
 

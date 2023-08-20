@@ -13,11 +13,15 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\Command;
 
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Migrations\Test\TestCase\TestCase;
+use Phinx\Config\FeatureFlags;
+use function Cake\Core\env;
 
 /**
  * BakeMigrationSnapshotCommandTest class
@@ -77,6 +81,9 @@ class BakeMigrationSnapshotCommandTest extends TestCase
                 unlink($file);
             }
         }
+
+        Configure::write('Migrations', []);
+        FeatureFlags::$unsignedPrimaryKeys = true;
     }
 
     /**
@@ -112,18 +119,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testNotEmptySnapshot()
     {
-        $bakeName = $this->getBakeName('TestNotEmptySnapshot');
-        $this->exec("bake migration_snapshot {$bakeName} -c test");
-
-        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*.php');
-        $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
-        $generatedMigration = basename($generatedMigration[0]);
-        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
-        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
-        $this->assertOutputContains('Creating a dump of the new database state...');
-        $this->assertNotEmpty($this->generatedFiles);
-        $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
+        $this->runSnapshotTest('NotEmpty');
     }
 
     /**
@@ -133,10 +129,10 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testNotEmptySnapshotNoLock()
     {
-        $bakeName = $this->getBakeName('TestNotEmptySnapshotNoLock');
+        $bakeName = $this->getBakeName('TestNotEmptySnapshot');
         $this->exec("bake migration_snapshot {$bakeName} -c test --no-lock");
 
-        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshotNoLock*.php');
+        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*.php');
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
@@ -153,18 +149,62 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testAutoIdDisabledSnapshot()
     {
-        $bakeName = $this->getBakeName('TestAutoIdDisabledSnapshot');
-        $this->exec("bake migration_snapshot {$bakeName} -c test --disable-autoid");
+        $this->runSnapshotTest('AutoIdDisabled', '--disable-autoid');
+    }
 
-        $generatedMigration = glob($this->migrationPath . '*_TestAutoIdDisabledSnapshot*.php');
-        $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
-        $generatedMigration = basename($generatedMigration[0]);
-        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
-        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
-        $this->assertOutputContains('Creating a dump of the new database state...');
-        $this->assertNotEmpty($this->generatedFiles);
-        $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
+    /**
+     * Tests that baking a diff with signed primary keys is auto-id compatible
+     * when `Migrations.unsigned_primary_keys` is disabled.
+     */
+    public function testSnapshotWithAutoIdCompatibleSignedPrimaryKeys(): void
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+
+        Configure::write('Migrations.unsigned_primary_keys', false);
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $connection = ConnectionManager::get('test');
+        assert($connection instanceof Connection);
+
+        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT AUTO_INCREMENT');
+
+        $this->runSnapshotTest('WithAutoIdCompatibleSignedPrimaryKeys', '-p Snapshot');
+
+        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT UNSIGNED AUTO_INCREMENT');
+    }
+
+    /**
+     * Tests that baking a diff with signed primary keys is not auto-id compatible
+     * when using the default settings.
+     */
+    public function testSnapshotWithAutoIdIncompatibleSignedPrimaryKeys(): void
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $connection = ConnectionManager::get('test');
+        assert($connection instanceof Connection);
+
+        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT AUTO_INCREMENT');
+
+        $this->runSnapshotTest('WithAutoIdIncompatibleSignedPrimaryKeys', '-p Snapshot');
+
+        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT UNSIGNED AUTO_INCREMENT');
+    }
+
+    /**
+     * Tests that baking a diff with unsigned primary keys is not auto-id compatible
+     * when `Migrations.unsigned_primary_keys` is disabled.
+     */
+    public function testSnapshotDiffWithAutoIdIncompatibleUnsignedPrimaryKeys(): void
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+
+        Configure::write('Migrations.unsigned_primary_keys', false);
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $this->runSnapshotTest('WithAutoIdIncompatibleUnsignedPrimaryKeys', '-p Snapshot');
     }
 
     /**
@@ -174,14 +214,23 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testPluginBlog()
     {
-        $bakeName = $this->getBakeName('TestPluginBlog');
-        $this->exec("bake migration_snapshot {$bakeName} -c test -p TestBlog");
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
 
-        $path = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
+        $this->runSnapshotTest('PluginBlog', '-p TestBlog');
+    }
 
-        $generatedMigration = glob($path . '*_TestPluginBlog*.php');
+    protected function runSnapshotTest(string $scenario, string $arguments = ''): void
+    {
+        if ($arguments) {
+            $arguments = " $arguments";
+        }
+
+        $bakeName = $this->getBakeName("TestSnapshot{$scenario}");
+        $this->exec("bake migration_snapshot {$bakeName} -c test{$arguments}");
+
+        $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*.php");
         $this->generatedFiles = $generatedMigration;
-        $this->generatedFiles[] = $path . 'schema-dump-test.lock';
+        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
