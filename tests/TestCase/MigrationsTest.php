@@ -1038,7 +1038,6 @@ class MigrationsTest extends TestCase
     public static function migrationsProvider()
     {
         $db = getenv('DB');
-        $dbv = getenv('DBV');
 
         if ($db === 'mysql') {
             $return = [
@@ -1047,19 +1046,11 @@ class MigrationsTest extends TestCase
                     [
                         ['test_not_empty_snapshot', 20150912015601],
                         ['test_auto_id_disabled_snapshot', 20150912015602],
-                        ['test_not_empty_snapshot56', 20150912015611],
-                        ['test_auto_id_disabled_snapshot56', 20150912015612],
                         ['testCreatePrimaryKey', 20150912015603],
                         ['testCreatePrimaryKeyUuid', 20150912015604],
                     ],
                 ],
             ];
-            if (empty($dbv)) {
-                unset(
-                    $return[0][1]['test_not_empty_snapshot56'],
-                    $return[0][1]['test_auto_id_disabled_snapshot56']
-                );
-            }
 
             return $return;
         }

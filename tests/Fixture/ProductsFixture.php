@@ -13,8 +13,6 @@
  */
 namespace Migrations\Test\Fixture;
 
-use Cake\Database\Driver\Mysql;
-use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
@@ -22,21 +20,4 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class ProductsFixture extends TestFixture
 {
-    /**
-     * @inheritDoc
-     */
-    public function init(): void
-    {
-        $connection = ConnectionManager::get($this->connection());
-        $driver = $connection->getDriver();
-
-        if ($driver instanceof Mysql) {
-            $dbv = getenv('DBV');
-            if ($dbv === '56') {
-                $this->fields['_indexes']['title_idx_ft']['type'] = 'fulltext';
-            }
-        }
-
-        parent::init();
-    }
 }

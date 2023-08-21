@@ -70,11 +70,7 @@ not empty %}
 {%                    set columnAttributes = Migration.getColumnOption(columnAttributes) %}
 {%                    set columnAttributes = Migration.stringifyList(columnAttributes, {'indent': 4, 'remove':
     ['type']}) %}
-{%                    if columnAttributes is not empty %}
             ->changeColumn('{{ columnName }}', '{{ type }}', [{{ columnAttributes | raw }}])
-{%                    else %}
-            ->changeColumn('{{ columnName }}', '{{ type }}')
-{%                    endif %}
 {%                endfor %}
 {%            endif -%}
 {%            if Migration.wasTableStatementGeneratedFor(tableName) %}
@@ -179,12 +175,8 @@ not empty %}
 {%              set columnAttributes = oldTableDef.getColumn(columnName) -%}
 {%              set type = columnAttributes['type'] -%}
 {%              set columnAttributes = Migration.getColumnOption(columnAttributes) -%}
-{%              set columnAttributes = Migration.stringifyList(columnAttributes, {'indent': 4, 'remove': ['type']}) -%}
-{%              if columnAttributes is not empty %}
+{%              set columnAttributes = Migration.stringifyList(columnAttributes, {'indent': 4, 'remove': ['type']}) %}
             ->changeColumn('{{ columnName }}', '{{ type }}', [{{ columnAttributes | raw }}])
-{%              else %}
-            ->changeColumn('{{ columnName }}', '{{ type }}'])
-{%              endif -%}
 {%          endfor -%}
 {%      endif -%}
 {%      if tableDiff['columns']['add'] is not empty %}
