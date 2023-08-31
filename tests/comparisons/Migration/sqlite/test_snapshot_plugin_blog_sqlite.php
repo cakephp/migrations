@@ -96,7 +96,7 @@ class TestSnapshotPluginBlogSqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'categories_unique_slug',
+                    'name' => 'categories_slug_unique',
                     'unique' => true,
                 ]
             )

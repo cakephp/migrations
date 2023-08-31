@@ -96,7 +96,7 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'categories_unique_slug',
+                    'name' => 'categories_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -150,7 +150,7 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_category',
+                    'name' => 'orders_product_category_idx',
                 ]
             )
             ->create();
@@ -209,7 +209,7 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'products_unique_slug',
+                    'name' => 'products_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -267,7 +267,7 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
                     'article_id',
                 ],
                 [
-                    'name' => 'UNIQUE_TAG2',
+                    'name' => 'special_tags_article_unique',
                     'unique' => true,
                 ]
             )

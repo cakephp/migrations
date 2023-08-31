@@ -200,7 +200,7 @@ class TestSnapshotAutoIdDisabled extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_category',
+                    'name' => 'orders_product_category_idx',
                 ]
             )
             ->create();
