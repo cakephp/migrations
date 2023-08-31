@@ -12,8 +12,6 @@ use function Cake\Core\env;
 
 class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
 {
-    public string $pathFragment = '';
-
     /**
      * @inheritDoc
      */
@@ -28,18 +26,33 @@ class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         return parent::buildOptionParser($parser)
-            ->addOption('path-fragment')
+            ->addOption('test-target-folder')
             ->addOption('comparison');
     }
 
     public function execute(Arguments $args, ConsoleIo $io): ?int
     {
-        $pathFragment = $args->getOption('path-fragment');
-        assert($pathFragment !== null);
+        $testTargetFolder = $args->getOption('test-target-folder');
+        assert($testTargetFolder !== null);
 
-        $this->pathFragment = 'config' . DS . $pathFragment . DS;
+        $this->pathFragment = 'config' . DS . $testTargetFolder . DS;
 
         return parent::execute($args, $io);
+    }
+
+    public function getPath(Arguments $args): string
+    {
+        // Avoids having to use the `source` option, as it would be passed down to
+        // other commands, causing a migration files lookup in the folder where
+        // the new migration has been baked, causing an error as a class with the
+        // same name will already exist from loading/applying the comparison diff.
+
+        $path = ROOT . DS . $this->pathFragment;
+        if ($this->plugin) {
+            $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
+        }
+
+        return str_replace('/', DS, $path);
     }
 
     protected function getDumpSchema(Arguments $args): array
