@@ -57,14 +57,6 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_id_0_fk',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ],
                 [
@@ -158,7 +150,7 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_category_product_id_0_fk',
+                    'name' => 'product_category',
                 ]
             )
             ->create();
@@ -219,14 +211,6 @@ class TestSnapshotNotEmptySqlite extends AbstractMigration
                 [
                     'name' => 'products_unique_slug',
                     'unique' => true,
-                ]
-            )
-            ->addIndex(
-                [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_id_0_fk',
                 ]
             )
             ->addIndex(

@@ -62,14 +62,6 @@ class TestSnapshotPluginBlogPgsql extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_article_idx',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ],
                 [

@@ -57,14 +57,6 @@ class TestSnapshotPluginBlogSqlite extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_id_0_fk',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ],
                 [

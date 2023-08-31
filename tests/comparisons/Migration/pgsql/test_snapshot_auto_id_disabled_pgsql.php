@@ -71,14 +71,6 @@ class TestSnapshotAutoIdDisabledPgsql extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_article_idx',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ],
                 [
@@ -198,7 +190,7 @@ class TestSnapshotAutoIdDisabledPgsql extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_id_fk',
+                    'name' => 'product_category',
                 ]
             )
             ->create();
@@ -277,14 +269,6 @@ class TestSnapshotAutoIdDisabledPgsql extends AbstractMigration
                 [
                     'name' => 'products_unique_slug',
                     'unique' => true,
-                ]
-            )
-            ->addIndex(
-                [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_idx',
                 ]
             )
             ->addIndex(

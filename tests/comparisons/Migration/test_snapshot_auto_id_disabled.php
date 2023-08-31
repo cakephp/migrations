@@ -200,7 +200,7 @@ class TestSnapshotAutoIdDisabled extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_id_fk',
+                    'name' => 'product_category',
                 ]
             )
             ->create();
@@ -279,14 +279,6 @@ class TestSnapshotAutoIdDisabled extends AbstractMigration
                 [
                     'name' => 'products_category_unique',
                     'unique' => true,
-                ]
-            )
-            ->addIndex(
-                [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_idx',
                 ]
             )
             ->addIndex(
