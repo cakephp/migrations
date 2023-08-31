@@ -64,7 +64,7 @@ class TestSnapshotPluginBlog extends AbstractMigration
                     'category_id',
                 ],
                 [
-                    'name' => 'category_article_idx',
+                    'name' => 'articles_category_fk',
                 ]
             )
             ->addIndex(
@@ -72,7 +72,7 @@ class TestSnapshotPluginBlog extends AbstractMigration
                     'title',
                 ],
                 [
-                    'name' => 'title_idx',
+                    'name' => 'articles_title_idx',
                 ]
             )
             ->create();
@@ -109,7 +109,7 @@ class TestSnapshotPluginBlog extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'categories_unique_slug',
+                    'name' => 'categories_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -137,7 +137,7 @@ class TestSnapshotPluginBlog extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
-                    'constraint' => 'category_article_idx'
+                    'constraint' => 'articles_category_fk'
                 ]
             )
             ->update();

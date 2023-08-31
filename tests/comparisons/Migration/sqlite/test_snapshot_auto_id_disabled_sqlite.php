@@ -69,7 +69,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'title',
                 ],
                 [
-                    'name' => 'title_idx',
+                    'name' => 'articles_title_idx',
                 ]
             )
             ->create();
@@ -112,7 +112,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'categories_unique_slug',
+                    'name' => 'categories_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -181,7 +181,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_category',
+                    'name' => 'orders_product_category_idx',
                 ]
             )
             ->create();
@@ -254,7 +254,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'products_unique_slug',
+                    'name' => 'products_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -263,7 +263,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'title',
                 ],
                 [
-                    'name' => 'title_idx_ft',
+                    'name' => 'products_title_idx',
                 ]
             )
             ->create();
@@ -320,7 +320,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'article_id',
                 ],
                 [
-                    'name' => 'UNIQUE_TAG2',
+                    'name' => 'special_tags_article_unique',
                     'unique' => true,
                 ]
             )

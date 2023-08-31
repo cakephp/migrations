@@ -65,7 +65,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                     'title',
                 ],
                 [
-                    'name' => 'title_idx',
+                    'name' => 'articles_title_idx',
                 ]
             )
             ->create();
@@ -105,7 +105,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'categories_unique_slug',
+                    'name' => 'categories_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -159,7 +159,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_category',
+                    'name' => 'orders_product_category_idx',
                 ]
             )
             ->create();
@@ -222,7 +222,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'products_unique_slug',
+                    'name' => 'products_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -231,7 +231,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                     'title',
                 ],
                 [
-                    'name' => 'title_idx_ft',
+                    'name' => 'products_title_idx',
                 ]
             )
             ->create();
@@ -282,7 +282,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                     'article_id',
                 ],
                 [
-                    'name' => 'UNIQUE_TAG2',
+                    'name' => 'special_tags_article_unique',
                     'unique' => true,
                 ]
             )
@@ -336,7 +336,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
-                    'constraint' => 'category_article_idx'
+                    'constraint' => 'articles_category_fk'
                 ]
             )
             ->update();
@@ -355,7 +355,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
-                    'constraint' => 'product_id_fk'
+                    'constraint' => 'orders_product_fk'
                 ]
             )
             ->update();
@@ -368,7 +368,7 @@ class TestSnapshotNotEmptyPgsql extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
-                    'constraint' => 'category_idx'
+                    'constraint' => 'products_category_fk'
                 ]
             )
             ->update();

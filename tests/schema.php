@@ -18,7 +18,7 @@ return [
         ],
         'constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'categories_unique_slug' => ['type' => 'unique', 'columns' => ['slug']],
+            'categories_slug_unique' => ['type' => 'unique', 'columns' => ['slug']],
         ],
     ],
     [
@@ -32,16 +32,16 @@ return [
             'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         ],
         'indexes' => [
-            'title_idx_ft' => [
+            'products_title_idx' => [
                 'type' => 'index',
                 'columns' => ['title'],
             ],
         ],
         'constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'products_unique_slug' => ['type' => 'unique', 'columns' => ['slug']],
+            'products_slug_unique' => ['type' => 'unique', 'columns' => ['slug']],
             'products_category_unique' => ['type' => 'unique', 'columns' => ['category_id', 'id']],
-            'category_idx' => [
+            'products_category_fk' => [
                 'type' => 'foreign',
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],
@@ -58,7 +58,7 @@ return [
             'product_id' => ['type' => 'integer', 'unsigned' => true, 'null' => false, 'length' => 11],
         ],
         'indexes' => [
-            'product_category' => [
+            'orders_product_category_idx' => [
                 'type' => 'index',
                 'columns' => ['product_category', 'product_id'],
             ],
@@ -67,7 +67,7 @@ return [
             'primary' => [
                 'type' => 'primary', 'columns' => ['id'],
             ],
-            'product_id_fk' => [
+            'orders_product_fk' => [
                 'type' => 'foreign',
                 'columns' => ['product_category', 'product_id'],
                 'references' => ['products', ['category_id', 'id']],
@@ -90,14 +90,14 @@ return [
             'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         ],
         'indexes' => [
-            'title_idx' => [
+            'articles_title_idx' => [
                 'type' => 'index',
                 'columns' => ['title'],
             ],
         ],
         'constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'category_article_idx' => [
+            'articles_category_fk' => [
                 'type' => 'foreign',
                 'columns' => ['category_id'],
                 'references' => ['categories', 'id'],
@@ -112,7 +112,7 @@ return [
             'id' => ['type' => 'uuid', 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7', 'null' => false ],
             'name' => ['type' => 'string', 'length' => 10, 'default' => '', 'null' => false],
         ],
-        'constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id', 'name']]],
+        'constraints' => ['primary' => ['type' => 'primary', 'columns' => ['name', 'id']]],
     ],
     [
         'table' => 'events',
@@ -157,7 +157,7 @@ return [
         ],
         'constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
-            'UNIQUE_TAG2' => ['type' => 'unique', 'columns' => ['article_id']],
+            'special_tags_article_unique' => ['type' => 'unique', 'columns' => ['article_id']],
         ],
     ],
     [

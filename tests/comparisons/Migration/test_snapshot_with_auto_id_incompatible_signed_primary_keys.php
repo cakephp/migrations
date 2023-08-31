@@ -74,7 +74,7 @@ class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends AbstractMigrat
                     'category_id',
                 ],
                 [
-                    'name' => 'category_article_idx',
+                    'name' => 'articles_category_fk',
                 ]
             )
             ->addIndex(
@@ -82,7 +82,7 @@ class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends AbstractMigrat
                     'title',
                 ],
                 [
-                    'name' => 'title_idx',
+                    'name' => 'articles_title_idx',
                 ]
             )
             ->create();
@@ -95,7 +95,7 @@ class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends AbstractMigrat
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
-                    'constraint' => 'category_article_idx'
+                    'constraint' => 'articles_category_fk'
                 ]
             )
             ->update();
