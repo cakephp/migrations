@@ -165,7 +165,7 @@ class TestSnapshotNotEmpty extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'orders_product_category_idx',
+                    'name' => 'product_category',
                 ]
             )
             ->create();
