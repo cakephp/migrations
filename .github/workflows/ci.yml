@@ -45,6 +45,13 @@ jobs:
           sudo service mysql start
           mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_test DEFAULT COLLATE=utf8mb4_general_ci;'
           mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
+          mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_snapshot;'
+
+      - name: Setup Postgres
+        if: matrix.db-type == 'pgsql'
+        run: |
+          export PGPASSWORD='pg-password'
+          psql -h 127.0.0.1 -U postgres -c 'CREATE DATABASE "cakephp_snapshot";'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -86,10 +93,12 @@ jobs:
             export DB='mysql'
             export DB_URL='mysql://root:root@127.0.0.1/cakephp_test'
             export DB_URL_COMPARE='mysql://root:root@127.0.0.1/cakephp_comparisons'
+            export DB_URL_SNAPSHOT='mysql://root:root@127.0.0.1/cakephp_snapshot'
           fi
           if [[ ${{ matrix.db-type }} == 'pgsql' ]]; then
             export DB='pgsql'
             export DB_URL='postgres://postgres:pg-password@127.0.0.1/cakephp_test'
+            export DB_URL_SNAPSHOT='postgres://postgres:pg-password@127.0.0.1/cakephp_snapshot'
           fi
           if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.db-type }} == 'mysql' ]]; then
             vendor/bin/phpunit --coverage-clover=coverage.xml

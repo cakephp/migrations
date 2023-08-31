@@ -969,7 +969,12 @@ class MigrationsTest extends TestCase
      */
     public function testMigrateSnapshots($basePath, $files)
     {
-        $this->markTestSkipped('This test is failing and seems low value.');
+        $params = [
+            'connection' => 'test_snapshot',
+            'source' => 'SnapshotTests',
+        ];
+        $migrations = new Migrations($params);
+
         $destination = ROOT . DS . 'config' . DS . 'SnapshotTests' . DS;
 
         if (!file_exists($destination)) {
@@ -995,10 +1000,10 @@ class MigrationsTest extends TestCase
                 file_put_contents($destination . $copiedFileName, $content);
             }
 
-            $result = $this->migrations->migrate(['source' => 'SnapshotTests']);
+            $result = $migrations->migrate();
             $this->assertTrue($result);
 
-            $this->migrations->rollback(['target' => 'all', 'source' => 'SnapshotTests']);
+            $migrations->rollback(['target' => 'all', 'source' => 'SnapshotTests']);
         }
     }
 
@@ -1041,20 +1046,22 @@ class MigrationsTest extends TestCase
     {
         $db = getenv('DB');
 
+        $version = 20150912015600;
+
         if ($db === 'mysql') {
-            $return = [
+            return [
                 [
                     Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
                     [
-                        ['test_not_empty_snapshot', 20150912015601],
-                        ['test_auto_id_disabled_snapshot', 20150912015602],
-                        ['testCreatePrimaryKey', 20150912015603],
-                        ['testCreatePrimaryKeyUuid', 20150912015604],
+                        ['test_snapshot_not_empty', $version++],
+                        ['test_snapshot_auto_id_disabled', $version++],
+                        ['test_snapshot_plugin_blog', $version++],
+                        ['test_snapshot_with_auto_id_compatible_signed_primary_keys', $version++],
+                        ['test_snapshot_with_auto_id_incompatible_signed_primary_keys', $version++],
+                        ['test_snapshot_with_auto_id_incompatible_unsigned_primary_keys', $version++],
                     ],
                 ],
             ];
-
-            return $return;
         }
 
         if ($db === 'pgsql') {
@@ -1062,8 +1069,9 @@ class MigrationsTest extends TestCase
                 [
                     Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
                     [
-                        ['test_not_empty_snapshot_pgsql', 20150912015606],
-                        ['test_auto_id_disabled_snapshot_pgsql', 20150912015607],
+                        ['test_snapshot_not_empty_pgsql', $version++],
+                        ['test_snapshot_auto_id_disabled_pgsql', $version++],
+                        ['test_snapshot_plugin_blog_pgsql', $version++],
                     ],
                 ],
             ];
@@ -1073,8 +1081,9 @@ class MigrationsTest extends TestCase
             [
                 Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
                 [
-                    ['test_not_empty_snapshot_sqlite', 20150912015609],
-                    ['test_auto_id_disabled_snapshot_sqlite', 20150912015610],
+                    ['test_snapshot_not_empty_sqlite', $version++],
+                    ['test_snapshot_auto_id_disabled_sqlite', $version++],
+                    ['test_snapshot_plugin_blog_sqlite', $version++],
                 ],
             ],
         ];
