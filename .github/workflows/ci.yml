@@ -34,7 +34,7 @@ jobs:
           POSTGRES_DB: cakephp_test
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup MySQL
       if: matrix.db-type == 'mysql'
@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
