@@ -37,6 +37,11 @@ class CacheBuildTest extends TestCase
     protected $streamOutput;
 
     /**
+     * @var string
+     */
+    protected $_compareBasePath;
+
+    /**
      * setup method
      *
      * @return void

@@ -12,6 +12,11 @@ use Symfony\Component\Console\Output\NullOutput;
 class MigrationCommandTest extends TestCase
 {
     /**
+     * @var \Migrations\MigrationsMigrateCommand
+     */
+    protected $command;
+
+    /**
      * tearDown method
      *
      * @return void
