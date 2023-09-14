@@ -60,7 +60,7 @@ class CakeAdapter extends AdapterWrapper
         if ($connection->getDriver() instanceof Postgres) {
             $config = $connection->config();
             $schema = empty($config['schema']) ? 'public' : $config['schema'];
-            $pdo->exec('SET search_path TO ' . $schema);
+            $pdo->exec('SET search_path TO ' . $pdo->quote($schema));
         }
 
         $driver = $connection->getDriver();
