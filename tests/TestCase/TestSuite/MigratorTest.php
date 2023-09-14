@@ -24,6 +24,11 @@ use RuntimeException;
 
 class MigratorTest extends TestCase
 {
+    /**
+     * @var string
+     */
+    protected $restore;
+
     public function setUp(): void
     {
         parent::setUp();
