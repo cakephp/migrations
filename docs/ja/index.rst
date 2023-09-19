@@ -934,7 +934,7 @@ migrations プラグインのバージョン 1.2 から、非シェル環境で�
     class CreateProductsTable extends AbstractMigration
     {
 
-        public $autoId = false;
+        public bool $autoId = false;
 
         public function up()
         {

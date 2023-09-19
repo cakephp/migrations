@@ -5,7 +5,7 @@ use Migrations\AbstractMigration;
 
 class CreateUsers extends AbstractMigration
 {
-    public $autoId = false;
+    public bool $autoId = false;
 
     /**
      * Change Method.

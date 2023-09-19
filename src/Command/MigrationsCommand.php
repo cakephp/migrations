@@ -41,7 +41,7 @@ class MigrationsCommand extends Command
      *
      * @var string
      */
-    protected static $commandName = '';
+    protected static string $commandName = '';
 
     /**
      * @inheritDoc
@@ -80,7 +80,7 @@ class MigrationsCommand extends Command
         $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
         $parser->setDescription($command->getDescription());
         $definition = $command->getDefinition();
-        foreach ($definition->getOptions() as $key => $option) {
+        foreach ($definition->getOptions() as $option) {
             if (!empty($option->getShortcut())) {
                 $parser->addOption($option->getName(), [
                     'short' => $option->getShortcut(),

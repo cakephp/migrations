@@ -25,5 +25,5 @@ class MigrationsCreateCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'Create';
+    protected static string $commandName = 'Create';
 }

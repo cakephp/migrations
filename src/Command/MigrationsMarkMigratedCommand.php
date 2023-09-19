@@ -25,5 +25,5 @@ class MigrationsMarkMigratedCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'MarkMigrated';
+    protected static string $commandName = 'MarkMigrated';
 }

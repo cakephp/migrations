@@ -19,9 +19,13 @@ use Cake\Database\Driver\Postgres;
 use Cake\Database\Driver\Sqlite;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
+use InvalidArgumentException;
 use Migrations\Util\UtilTrait;
+use PDO;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
+use ReflectionClass;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
@@ -39,21 +43,21 @@ trait ConfigurationTrait
      *
      * @var \Phinx\Config\Config|null
      */
-    protected $configuration;
+    protected ?Config $configuration = null;
 
     /**
      * Connection name to be used for this request
      *
      * @var string
      */
-    protected $connection;
+    protected string $connection;
 
     /**
      * The console input instance
      *
      * @var \Symfony\Component\Console\Input\InputInterface|null
      */
-    protected $input;
+    protected ?InputInterface $input = null;
 
     /**
      * @return \Symfony\Component\Console\Input\InputInterface
@@ -61,7 +65,7 @@ trait ConfigurationTrait
     protected function input(): InputInterface
     {
         if ($this->input === null) {
-            throw new \RuntimeException('Input not set');
+            throw new RuntimeException('Input not set');
         }
 
         return $this->input;
@@ -86,7 +90,7 @@ trait ConfigurationTrait
      * @param bool $forceRefresh Refresh config.
      * @return \Phinx\Config\ConfigInterface
      */
-    public function getConfig($forceRefresh = false): ConfigInterface
+    public function getConfig(bool $forceRefresh = false): ConfigInterface
     {
         if ($this->configuration && $forceRefresh === false) {
             return $this->configuration;
@@ -98,7 +102,7 @@ trait ConfigurationTrait
 
         if (!is_dir($migrationsPath)) {
             if (!Configure::read('debug')) {
-                throw new \RuntimeException(sprintf(
+                throw new RuntimeException(sprintf(
                     'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
                     $migrationsPath
                 ));
@@ -207,24 +211,24 @@ trait ConfigurationTrait
      * out of the provided database configuration
      * @phpstan-param class-string $driver
      */
-    public function getAdapterName($driver)
+    public function getAdapterName(string $driver): string
     {
         switch ($driver) {
             case Mysql::class:
-            case is_subclass_of($driver, Mysql::class):
+            case is_a($driver, Mysql::class, true):
                 return 'mysql';
             case Postgres::class:
-            case is_subclass_of($driver, Postgres::class):
+            case is_a($driver, Postgres::class, true):
                 return 'pgsql';
             case Sqlite::class:
-            case is_subclass_of($driver, Sqlite::class):
+            case is_a($driver, Sqlite::class, true):
                 return 'sqlite';
             case Sqlserver::class:
-            case is_subclass_of($driver, Sqlserver::class):
+            case is_a($driver, Sqlserver::class, true):
                 return 'sqlsrv';
         }
 
-        throw new \InvalidArgumentException('Could not infer database type from driver');
+        throw new InvalidArgumentException('Could not infer database type from driver');
     }
 
     /**
@@ -233,7 +237,7 @@ trait ConfigurationTrait
      * @param \Symfony\Component\Console\Input\InputInterface $input the input object
      * @return string
      */
-    protected function getConnectionName(InputInterface $input)
+    protected function getConnectionName(InputInterface $input): string
     {
         return $input->getOption('connection') ?: 'default';
     }
@@ -273,9 +277,9 @@ trait ConfigurationTrait
      * @param string $adapterName The adapter name, eg `mysql` or `sqlsrv`.
      * @return array An array of Phinx compatible connection attribute options.
      */
-    protected function translateConnectionFlags(array $flags, $adapterName)
+    protected function translateConnectionFlags(array $flags, string $adapterName): array
     {
-        $pdo = new \ReflectionClass(\PDO::class);
+        $pdo = new ReflectionClass(PDO::class);
         $constants = $pdo->getConstants();
 
         $attributes = [];

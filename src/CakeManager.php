@@ -14,7 +14,10 @@ declare(strict_types=1);
 namespace Migrations;
 
 use DateTime;
+use Exception;
+use InvalidArgumentException;
 use Phinx\Migration\Manager;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -153,7 +156,7 @@ class CakeManager extends Manager
     /**
      * @inheritDoc
      */
-    public function rollbackToDateTime(string $environment, \DateTime $dateTime, bool $force = false): void
+    public function rollbackToDateTime(string $environment, DateTime $dateTime, bool $force = false): void
     {
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
@@ -216,7 +219,7 @@ class CakeManager extends Manager
         $migrationFile = glob($path . DS . $version . '*');
 
         if (empty($migrationFile)) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf('A migration file matching version number `%s` could not be found', $version)
             );
         }
@@ -259,7 +262,7 @@ class CakeManager extends Manager
 
         if ($input->getOption('only') || !empty($versionArg)) {
             if (!in_array($version, $versions)) {
-                throw new \InvalidArgumentException("Migration `$version` was not found !");
+                throw new InvalidArgumentException("Migration `$version` was not found !");
             }
 
             return [$version];
@@ -269,7 +272,7 @@ class CakeManager extends Manager
         $index = array_search($version, $versions);
 
         if ($index === false) {
-            throw new \InvalidArgumentException("Migration `$version` was not found !");
+            throw new InvalidArgumentException("Migration `$version` was not found !");
         }
 
         return array_slice($versions, 0, $index + $lengthIncrease);
@@ -308,7 +311,7 @@ class CakeManager extends Manager
                 $output->writeln(
                     sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
                 );
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $adapter->rollbackTransaction();
                 $output->writeln(
                     sprintf(
@@ -376,7 +379,7 @@ class CakeManager extends Manager
             return [];
         }
 
-        foreach ($this->seeds as $class => $instance) {
+        foreach ($this->seeds as $instance) {
             if ($instance instanceof AbstractSeed) {
                 $instance->setInput($this->input);
             }

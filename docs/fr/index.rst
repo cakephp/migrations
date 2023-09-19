@@ -1051,7 +1051,7 @@ primaire et devrez l'ajouter à la déclaration de la table::
     class CreateProductsTable extends AbstractMigration
     {
 
-        public $autoId = false;
+        public bool $autoId = false;
 
         public function up()
         {

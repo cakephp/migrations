@@ -25,5 +25,5 @@ class MigrationsStatusCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'Status';
+    protected static string $commandName = 'Status';
 }

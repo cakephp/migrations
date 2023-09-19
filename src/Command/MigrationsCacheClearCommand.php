@@ -25,5 +25,5 @@ class MigrationsCacheClearCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'CacheClear';
+    protected static string $commandName = 'CacheClear';
 }

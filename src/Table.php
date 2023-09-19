@@ -15,6 +15,7 @@ namespace Migrations;
 
 use Cake\Collection\Collection;
 use Cake\ORM\Locator\LocatorAwareTrait;
+use Phinx\Db\Action\AddColumn;
 use Phinx\Db\Table as BaseTable;
 use Phinx\Db\Table\Column;
 
@@ -32,7 +33,7 @@ class Table extends BaseTable
      *
      * @var string|string[]
      */
-    protected $primaryKey;
+    protected string|array $primaryKey;
 
     /**
      * Add a primary key to a database table.
@@ -55,12 +56,12 @@ class Table extends BaseTable
      * auto increment attribute
      *
      * @param string|\Phinx\Db\Table\Column $columnName Column Name
-     * @param string|\Phinx\Util\Literal|null $type Column Type
+     * @param string|\Phinx\Util\Literal $type Column Type
      * @param array $options Column Options
      * @throws \InvalidArgumentException
      * @return $this
      */
-    public function addColumn($columnName, $type = null, $options = [])
+    public function addColumn(Column|string $columnName, $type, $options = [])
     {
         $options = $this->convertedAutoIncrement($options);
 
@@ -197,7 +198,7 @@ class Table extends BaseTable
 
         $columnsCollection = (new Collection($this->actions->getActions()))
             ->filter(function ($action) {
-                return $action instanceof \Phinx\Db\Action\AddColumn;
+                return $action instanceof AddColumn;
             })
             ->map(function ($action) {
                 /** @var \Phinx\Db\Action\ChangeColumn|\Phinx\Db\Action\RenameColumn|\Phinx\Db\Action\RemoveColumn|\Phinx\Db\Action\AddColumn $action */

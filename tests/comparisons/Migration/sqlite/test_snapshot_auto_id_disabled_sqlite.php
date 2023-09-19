@@ -5,7 +5,7 @@ use Migrations\AbstractMigration;
 
 class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
 {
-    public $autoId = false;
+    public bool $autoId = false;
 
     /**
      * Up Method.

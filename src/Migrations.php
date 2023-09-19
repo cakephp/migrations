@@ -14,10 +14,13 @@ declare(strict_types=1);
 namespace Migrations;
 
 use Cake\Datasource\ConnectionManager;
+use DateTime;
+use InvalidArgumentException;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Phinx\Db\Adapter\WrapperInterface;
 use Phinx\Migration\Manager;
+use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
@@ -168,7 +171,7 @@ class Migrations
 
         if ($input->getOption('date')) {
             $method = 'migrateToDateTime';
-            $params[1] = new \DateTime($input->getOption('date'));
+            $params[1] = new DateTime($input->getOption('date'));
         }
 
         $this->run($method, $params, $input);
@@ -199,7 +202,7 @@ class Migrations
 
         if ($input->getOption('date')) {
             $method = 'rollbackToDateTime';
-            $params[1] = new \DateTime($input->getOption('date'));
+            $params[1] = new DateTime($input->getOption('date'));
         }
 
         $this->run($method, $params, $input);
@@ -229,7 +232,7 @@ class Migrations
             isset($options['only'])
         ) {
             $exceptionMessage = 'You should use `exclude` OR `only` (not both) along with a `target` argument';
-            throw new \InvalidArgumentException($exceptionMessage);
+            throw new InvalidArgumentException($exceptionMessage);
         }
 
         $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
@@ -342,7 +345,7 @@ class Migrations
     {
         if (!($this->manager instanceof CakeManager)) {
             if (!($config instanceof ConfigInterface)) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     'You need to pass a ConfigInterface object for your first getManager() call'
                 );
             }
@@ -360,7 +363,7 @@ class Migrations
                         ->getAdapter()
                         ->getConnection();
                 }
-            } catch (\InvalidArgumentException $e) {
+            } catch (InvalidArgumentException $e) {
             }
             $config['environments'] = ['default' => $defaultEnvironment];
             $this->manager->setEnvironments([]);

@@ -16,6 +16,16 @@ namespace Migrations;
 use Bake\Command\SimpleBakeCommand;
 use Cake\Console\CommandCollection;
 use Cake\Core\BasePlugin;
+use Migrations\Command\MigrationsCacheBuildCommand;
+use Migrations\Command\MigrationsCacheClearCommand;
+use Migrations\Command\MigrationsCommand;
+use Migrations\Command\MigrationsCreateCommand;
+use Migrations\Command\MigrationsDumpCommand;
+use Migrations\Command\MigrationsMarkMigratedCommand;
+use Migrations\Command\MigrationsMigrateCommand;
+use Migrations\Command\MigrationsRollbackCommand;
+use Migrations\Command\MigrationsSeedCommand;
+use Migrations\Command\MigrationsStatusCommand;
 
 /**
  * Plugin class for migrations
@@ -37,16 +47,16 @@ class MigrationsPlugin extends BasePlugin
      * @psalm-var array<class-string<\Cake\Console\BaseCommand>>
      */
     protected array $migrationCommandsList = [
-        \Migrations\Command\MigrationsCommand::class,
-        \Migrations\Command\MigrationsCreateCommand::class,
-        \Migrations\Command\MigrationsDumpCommand::class,
-        \Migrations\Command\MigrationsMarkMigratedCommand::class,
-        \Migrations\Command\MigrationsMigrateCommand::class,
-        \Migrations\Command\MigrationsCacheBuildCommand::class,
-        \Migrations\Command\MigrationsCacheClearCommand::class,
-        \Migrations\Command\MigrationsRollbackCommand::class,
-        \Migrations\Command\MigrationsSeedCommand::class,
-        \Migrations\Command\MigrationsStatusCommand::class,
+        MigrationsCommand::class,
+        MigrationsCreateCommand::class,
+        MigrationsDumpCommand::class,
+        MigrationsMarkMigratedCommand::class,
+        MigrationsMigrateCommand::class,
+        MigrationsCacheBuildCommand::class,
+        MigrationsCacheClearCommand::class,
+        MigrationsRollbackCommand::class,
+        MigrationsSeedCommand::class,
+        MigrationsStatusCommand::class,
     ];
 
     /**

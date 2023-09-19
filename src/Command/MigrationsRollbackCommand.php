@@ -25,5 +25,5 @@ class MigrationsRollbackCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'Rollback';
+    protected static string $commandName = 'Rollback';
 }

@@ -22,6 +22,7 @@ use Cake\TestSuite\TestCase;
 use Migrations\CakeManager;
 use Migrations\Migrations;
 use Migrations\MigrationsDispatcher;
+use Migrations\Test\CommandTester;
 use Migrations\Test\TestCase\DriverConnectionTrait;
 use PDO;
 use Phinx\Db\Adapter\WrapperInterface;
@@ -166,7 +167,7 @@ class DumpTest extends TestCase
         $adapter->setConnection($this->pdo);
 
         $this->command->setManager($manager);
-        $commandTester = new \Migrations\Test\CommandTester($this->command);
+        $commandTester = new CommandTester($this->command);
 
         return $commandTester;
     }

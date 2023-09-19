@@ -12,11 +12,16 @@ declare(strict_types=1);
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
 
+use Bake\BakePlugin;
+use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
+use Migrations\MigrationsPlugin;
+use Snapshot\Plugin as SnapshotPlugin;
+use TestBlog\Plugin as TestBlogPlugin;
 use function Cake\Core\env;
 
 $findRoot = function ($root) {
@@ -62,7 +67,7 @@ Configure::write('App', [
     ],
 ]);
 
-Cake\Cache\Cache::setConfig([
+Cache::setConfig([
     '_cake_core_' => [
         'engine' => 'File',
         'prefix' => 'cake_core_',
@@ -105,10 +110,10 @@ if (getenv('DB_URL_COMPARE') !== false) {
     ]);
 }
 
-Plugin::getCollection()->add(new \Migrations\MigrationsPlugin());
-Plugin::getCollection()->add(new \Bake\BakePlugin());
-Plugin::getCollection()->add(new \Snapshot\Plugin());
-Plugin::getCollection()->add(new \TestBlog\Plugin());
+Plugin::getCollection()->add(new MigrationsPlugin());
+Plugin::getCollection()->add(new BakePlugin());
+Plugin::getCollection()->add(new SnapshotPlugin());
+Plugin::getCollection()->add(new TestBlogPlugin());
 
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? 'UNKNOWN' : '@PHINX_VERSION@');

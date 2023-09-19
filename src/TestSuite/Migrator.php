@@ -17,6 +17,7 @@ use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use Cake\Log\Log;
 use Cake\TestSuite\ConnectionHelper;
+use Exception;
 use Migrations\Migrations;
 use RuntimeException;
 
@@ -118,7 +119,7 @@ class Migrator
                         "Unable to migrate fixtures for `{$migrationSet['connection']}`."
                     );
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw new RuntimeException(
                     'Could not apply migrations for ' . json_encode($migrationSet) . "\n\n" .
                     "Migrations failed to apply with message:\n\n" .
