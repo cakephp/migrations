@@ -69,7 +69,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'category_id',
                 ],
                 [
-                    'name' => 'category_id_fk',
+                    'name' => 'category_id_0_fk',
                 ]
             )
             ->addIndex(
@@ -120,7 +120,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'sqlite_autoindex_categories_1',
+                    'name' => 'categories_unique_slug',
                     'unique' => true,
                 ]
             )
@@ -189,7 +189,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'product_id',
                 ],
                 [
-                    'name' => 'product_category_fk',
+                    'name' => 'product_category_product_id_0_fk',
                 ]
             )
             ->create();
@@ -253,7 +253,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'id',
                 ],
                 [
-                    'name' => 'sqlite_autoindex_products_2',
+                    'name' => 'products_category_unique',
                     'unique' => true,
                 ]
             )
@@ -262,7 +262,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'sqlite_autoindex_products_1',
+                    'name' => 'products_unique_slug',
                     'unique' => true,
                 ]
             )
@@ -271,7 +271,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'category_id',
                 ],
                 [
-                    'name' => 'category_id_fk',
+                    'name' => 'category_id_0_fk',
                 ]
             )
             ->addIndex(
@@ -336,7 +336,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                     'article_id',
                 ],
                 [
-                    'name' => 'sqlite_autoindex_special_tags_1',
+                    'name' => 'UNIQUE_TAG2',
                     'unique' => true,
                 ]
             )
@@ -393,7 +393,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
-                    'constraint' => 'category_id_fk'
+                    'constraint' => 'category_id_0_fk'
                 ]
             )
             ->update();
@@ -412,7 +412,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
-                    'constraint' => 'product_category_fk'
+                    'constraint' => 'product_category_product_id_0_fk'
                 ]
             )
             ->update();
@@ -425,7 +425,7 @@ class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
                 [
                     'update' => 'CASCADE',
                     'delete' => 'CASCADE',
-                    'constraint' => 'category_id_fk'
+                    'constraint' => 'category_id_0_fk'
                 ]
             )
             ->update();

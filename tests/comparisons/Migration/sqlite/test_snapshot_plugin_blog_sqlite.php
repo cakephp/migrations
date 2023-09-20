@@ -60,7 +60,7 @@ class TestSnapshotPluginBlogSqlite extends AbstractMigration
                     'category_id',
                 ],
                 [
-                    'name' => 'category_id_fk',
+                    'name' => 'category_id_0_fk',
                 ]
             )
             ->addIndex(
@@ -104,7 +104,7 @@ class TestSnapshotPluginBlogSqlite extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'sqlite_autoindex_categories_1',
+                    'name' => 'categories_unique_slug',
                     'unique' => true,
                 ]
             )
@@ -131,7 +131,7 @@ class TestSnapshotPluginBlogSqlite extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
-                    'constraint' => 'category_id_fk'
+                    'constraint' => 'category_id_0_fk'
                 ]
             )
             ->update();
