@@ -17,7 +17,7 @@ use ArrayAccess;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
-use Cake\Database\Schema\Collection;
+use Cake\Database\Schema\CollectionInterface;
 use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
@@ -156,7 +156,7 @@ class MigrationHelper extends Helper
         }
 
         $collection = $this->getConfig('collection');
-        assert($collection instanceof Collection);
+        assert($collection instanceof CollectionInterface);
         $schema = $collection->describe($table);
         $this->schemas[$table] = $schema;
 
