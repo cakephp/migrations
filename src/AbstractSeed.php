@@ -31,7 +31,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
      *
      * @var \Symfony\Component\Console\Input\InputInterface
      */
-    protected $input;
+    protected InputInterface $input;
 
     /**
      * Gives the ability to a seeder to call another seeder.
