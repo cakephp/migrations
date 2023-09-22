@@ -668,13 +668,8 @@ class MigrationHelper extends Helper
                 $foreignKeys[] = $constraint['columns'];
             }
         }
-        $indexes = array_filter($indexes, function ($index) use ($foreignKeys) {
-            /** @psalm-suppress PossiblyNullArrayAccess */
-            return !in_array($index['columns'], $foreignKeys, true);
-        });
-        $result = compact('constraints', 'indexes', 'foreignKeys');
 
-        return $result;
+        return compact('constraints', 'indexes', 'foreignKeys');
     }
 
     /**

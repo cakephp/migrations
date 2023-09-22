@@ -86,6 +86,7 @@ Router::reload();
 
 if (!getenv('DB_URL')) {
     putenv('DB_URL=sqlite://127.0.0.1/cakephp_test');
+    putenv('DB_URL_SNAPSHOT=sqlite://127.0.0.1/cakephp_snapshot');
 }
 if (!getenv('DB')) {
     $dsn = getenv('DB_URL');
@@ -101,6 +102,10 @@ if (!getenv('DB')) {
 ConnectionManager::setConfig('test', [
     'cacheMetadata' => false,
     'url' => getenv('DB_URL'),
+]);
+ConnectionManager::setConfig('test_snapshot', [
+    'cacheMetadata' => false,
+    'url' => getenv('DB_URL_SNAPSHOT'),
 ]);
 
 if (getenv('DB_URL_COMPARE') !== false) {

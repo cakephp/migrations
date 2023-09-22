@@ -38,13 +38,10 @@
 {%     endfor %}
 {%     if createData.tables[table].constraints is not empty %}
 {%         for name, constraint in createData.tables[table].constraints %}
-{%             if constraint['columns'] != primaryKeysColumns %}
+{%             if constraint['type'] == 'unique' %}
             ->addIndex(
                 [{{ Migration.stringifyList(constraint['columns'], {'indent': 5}) | raw }}],
-{%                 set params = {'name': name} %}
-{%                 if constraint['type'] == 'unique' %}
-{%                     set params = params|merge({'unique': true}) %}
-{%                 endif %}
+{%                 set params = {'name': name, 'unique': true} %}
                 [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
             )
 {%             endif %}

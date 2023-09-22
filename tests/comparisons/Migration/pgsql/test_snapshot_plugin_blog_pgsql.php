@@ -62,18 +62,10 @@ class TestSnapshotPluginBlogPgsql extends AbstractMigration
             ])
             ->addIndex(
                 [
-                    'category_id',
-                ],
-                [
-                    'name' => 'category_article_idx',
-                ]
-            )
-            ->addIndex(
-                [
                     'title',
                 ],
                 [
-                    'name' => 'title_idx',
+                    'name' => 'articles_title_idx',
                 ]
             )
             ->create();
@@ -113,7 +105,7 @@ class TestSnapshotPluginBlogPgsql extends AbstractMigration
                     'slug',
                 ],
                 [
-                    'name' => 'categories_unique_slug',
+                    'name' => 'categories_slug_unique',
                     'unique' => true,
                 ]
             )
@@ -140,7 +132,7 @@ class TestSnapshotPluginBlogPgsql extends AbstractMigration
                 [
                     'update' => 'NO_ACTION',
                     'delete' => 'NO_ACTION',
-                    'constraint' => 'category_article_idx'
+                    'constraint' => 'articles_category_fk'
                 ]
             )
             ->update();
