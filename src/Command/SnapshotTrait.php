@@ -59,15 +59,7 @@ trait SnapshotTrait
         $newArgs[] = $version;
         $newArgs[] = '-o';
 
-        if ($args->getOption('connection')) {
-            $newArgs[] = '-c';
-            $newArgs[] = $args->getOption('connection');
-        }
-
-        if ($args->getOption('plugin')) {
-            $newArgs[] = '-p';
-            $newArgs[] = $args->getOption('plugin');
-        }
+        $newArgs = array_merge($newArgs, $this->parseOptions($args));
 
         $io->out('Marking the migration ' . $fileName . ' as migrated...');
         $this->executeCommand(MigrationsMarkMigratedCommand::class, $newArgs, $io);
@@ -83,8 +75,21 @@ trait SnapshotTrait
      */
     protected function refreshDump(Arguments $args, ConsoleIo $io)
     {
-        $newArgs = [];
+        $newArgs = $this->parseOptions($args);
 
+        $io->out('Creating a dump of the new database state...');
+        $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
+    }
+
+    /**
+     * Will parse 'connection', 'plugin' and 'source' options into a new Array
+     *
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @return array Array containing the short for the option followed by its value
+     */
+    protected function parseOptions(Arguments $args): array
+    {
+        $newArgs = [];
         if ($args->getOption('connection')) {
             $newArgs[] = '-c';
             $newArgs[] = $args->getOption('connection');
@@ -95,7 +100,11 @@ trait SnapshotTrait
             $newArgs[] = $args->getOption('plugin');
         }
 
-        $io->out('Creating a dump of the new database state...');
-        $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
+        if ($args->getOption('source')) {
+            $newArgs[] = '-s';
+            $newArgs[] = $args->getOption('source');
+        }
+
+        return $newArgs;
     }
 }
