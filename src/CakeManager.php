@@ -34,7 +34,7 @@ class CakeManager extends Manager
      *
      * @var \Symfony\Component\Console\Input\InputInterface
      */
-    protected $input;
+    protected InputInterface $input;
 
     /**
      * Reset the migrations stored in the object
