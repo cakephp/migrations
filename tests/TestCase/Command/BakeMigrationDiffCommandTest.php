@@ -107,8 +107,10 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakeMigrationDiffInCustomFolder()
     {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
         $customFolderName = 'CustomMigrationsFolder';
-        $this->exec('bake migration_diff MigrationDiffForCustomFolder -c test -s ' . $customFolderName);
+        $this->exec('bake migration_diff MigrationDiffForCustomFolder -c test_comparisons -s ' . $customFolderName);
 
         $path = ROOT . DS . 'config' . DS . $customFolderName . DS;
         $this->generatedFiles = glob($path . '*_MigrationDiffForCustomFolder.php');
@@ -213,7 +215,7 @@ class BakeMigrationDiffCommandTest extends TestCase
             $destinationDumpPath,
         ];
 
-        $this->getMigrations("MigrationsDiff$scenario")->migrate();
+        $this->getMigrations("MigrationsDiff{$scenario}")->migrate();
 
         unlink($destination);
         copy($diffDumpPath, $destinationDumpPath);
