@@ -59,7 +59,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
         $connection = ConnectionManager::get($this->connection);
         assert($connection instanceof Connection);
 
-        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection, $connection) {
+        EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection, $connection): void {
             $event->getSubject()->loadHelper('Migrations.Migration', [
                 'collection' => $collection,
                 'connection' => $connection,

@@ -5,7 +5,7 @@ use Migrations\AbstractMigration;
 
 class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends AbstractMigration
 {
-    public $autoId = false;
+    public bool $autoId = false;
 
     /**
      * Up Method.

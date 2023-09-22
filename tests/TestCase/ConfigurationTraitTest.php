@@ -19,6 +19,8 @@ use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\Test\ExampleCommand;
+use PDO;
+use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -59,13 +61,9 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetAdapterName()
     {
-        $mysql = $this->getMockBuilder('\Cake\Database\Driver\Mysql')->getMock();
-        $pgsql = $this->getMockBuilder('\Cake\Database\Driver\Postgres')->getMock();
-        $sqlite = $this->getMockBuilder('\Cake\Database\Driver\Sqlite')->getMock();
-
-        $this->assertEquals('mysql', $this->command->getAdapterName($mysql));
-        $this->assertEquals('pgsql', $this->command->getAdapterName($pgsql));
-        $this->assertEquals('sqlite', $this->command->getAdapterName($sqlite));
+        $this->assertEquals('mysql', $this->command->getAdapterName('\Cake\Database\Driver\Mysql'));
+        $this->assertEquals('pgsql', $this->command->getAdapterName('\Cake\Database\Driver\Postgres'));
+        $this->assertEquals('sqlite', $this->command->getAdapterName('\Cake\Database\Driver\Sqlite'));
     }
 
     /**
@@ -88,9 +86,9 @@ class ConfigurationTraitTest extends TestCase
             'ssl_key' => 'ssl_key_value',
             'ssl_cert' => 'ssl_cert_value',
             'flags' => [
-                \PDO::ATTR_EMULATE_PREPARES => true,
-                \PDO::MYSQL_ATTR_SSL_CA => 'flags do not overwrite config',
-                \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+                PDO::ATTR_EMULATE_PREPARES => true,
+                PDO::MYSQL_ATTR_SSL_CA => 'flags do not overwrite config',
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
             ],
         ]);
 
@@ -307,12 +305,12 @@ class ConfigurationTraitTest extends TestCase
         $seedsPath = ROOT . DS . 'config' . DS . 'TestGetConfigSeeds';
 
         $command = $this->_getCommandMock($migrationsPath, $seedsPath);
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(sprintf(
             'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
             $migrationsPath
         ));
-        $config = $command->getConfig();
+        $command->getConfig();
     }
 
     /**
@@ -340,7 +338,7 @@ class ConfigurationTraitTest extends TestCase
         $command = $this->_getCommandMock($migrationsPath, $seedsPath);
         $this->assertFalse(is_dir($seedsPath));
         try {
-            $config = $command->getConfig();
+            $command->getConfig();
         } finally {
             rmdir($migrationsPath);
         }
@@ -369,7 +367,7 @@ class ConfigurationTraitTest extends TestCase
 
         $command = $this->_getCommandMock($migrationsPath, $seedsPath);
 
-        $config = $command->getConfig();
+        $command->getConfig();
 
         $this->assertTrue(is_dir($migrationsPath));
         $this->assertTrue(is_dir($seedsPath));

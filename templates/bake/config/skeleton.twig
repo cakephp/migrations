@@ -25,7 +25,7 @@ use Migrations\AbstractMigration;
 class {{ name }} extends AbstractMigration
 {
 {% if tableMethod == 'create' and columns['primaryKey'] %}
-    public $autoId = false;
+    public bool $autoId = false;
 
 {% endif %}
     /**

@@ -4,7 +4,7 @@ use Migrations\AbstractMigration;
 
 class CreateArticlesWithAutoIdIncompatibleSignedPrimaryKeys extends AbstractMigration
 {
-    public $autoId = false;
+    public bool $autoId = false;
 
     public function change(): void
     {

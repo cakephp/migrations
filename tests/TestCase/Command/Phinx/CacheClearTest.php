@@ -7,7 +7,6 @@ use Cake\Cache\Cache;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\MigrationsDispatcher;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -104,7 +103,7 @@ class CacheClearTest extends TestCase
             $this->connection->getDriver()->connect();
         }
 
-        $input = new ArrayInput($params, $this->command->getDefinition());
+        //$input = new ArrayInput($params, $this->command->getDefinition());
         $commandTester = new CommandTester($this->command);
 
         return $commandTester;

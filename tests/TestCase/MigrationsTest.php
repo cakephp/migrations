@@ -16,6 +16,8 @@ namespace Migrations\Test\TestCase;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
+use Exception;
+use InvalidArgumentException;
 use Migrations\CakeAdapter;
 use Migrations\Migrations;
 use Phinx\Db\Adapter\WrapperInterface;
@@ -378,7 +380,7 @@ class MigrationsTest extends TestCase
      */
     public function testMarkMigratedTargetError()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Migration `20150704160610` was not found !');
         $this->migrations->markMigrated(null, ['target' => '20150704160610']);
     }
@@ -475,7 +477,7 @@ class MigrationsTest extends TestCase
      */
     public function testMarkMigratedTargetExcludeOnly()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('You should use `exclude` OR `only` (not both) along with a `target` argument');
         $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true, 'exclude' => true]);
     }
@@ -954,7 +956,7 @@ class MigrationsTest extends TestCase
      */
     public function testSeedWrongSeed()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed class "DerpSeed" does not exist');
         $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'DerpSeed']);
     }
@@ -1005,7 +1007,7 @@ class MigrationsTest extends TestCase
      */
     public function testMigrateErrors()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->migrations->markMigrated(20150704160200);
         $this->migrations->migrate();
     }
@@ -1015,7 +1017,7 @@ class MigrationsTest extends TestCase
      */
     public function testRollbackErrors()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->migrations->markMigrated('all');
         $this->migrations->rollback();
     }
@@ -1026,7 +1028,7 @@ class MigrationsTest extends TestCase
      */
     public function testMarkMigratedErrors()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->migrations->markMigrated(20150704000000);
     }
 

@@ -25,5 +25,5 @@ class MigrationsCacheBuildCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'CacheBuild';
+    protected static string $commandName = 'CacheBuild';
 }

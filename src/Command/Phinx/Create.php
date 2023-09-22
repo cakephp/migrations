@@ -71,7 +71,7 @@ class Create extends CreateCommand
      * @param \Symfony\Component\Console\Output\OutputInterface $output the output object
      * @return void
      */
-    protected function beforeExecute(InputInterface $input, OutputInterface $output)
+    protected function beforeExecute(InputInterface $input, OutputInterface $output): void
     {
         // Set up as a dummy, its value is not going to be used, as a custom
         // template will always be set.
@@ -98,6 +98,7 @@ class Create extends CreateCommand
         $migrationPath = array_pop($migrationPaths) . DS;
         /** @var string $name */
         $name = $input->getArgument('name');
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable
         [$phinxTimestamp, $phinxName] = explode('_', Util::mapClassNameToFileName($name), 2);
         $migrationFilename = glob($migrationPath . '*' . $phinxName);
 

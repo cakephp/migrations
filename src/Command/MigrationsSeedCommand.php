@@ -25,5 +25,5 @@ class MigrationsSeedCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'Seed';
+    protected static string $commandName = 'Seed';
 }

@@ -25,5 +25,5 @@ class MigrationsDumpCommand extends MigrationsCommand
      *
      * @var string
      */
-    protected static $commandName = 'Dump';
+    protected static string $commandName = 'Dump';
 }

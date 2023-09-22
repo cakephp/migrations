@@ -1051,7 +1051,7 @@ it to the table declaration::
     class CreateProductsTable extends AbstractMigration
     {
 
-        public $autoId = false;
+        public bool $autoId = false;
 
         public function up()
         {

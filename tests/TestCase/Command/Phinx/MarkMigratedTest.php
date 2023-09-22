@@ -15,8 +15,10 @@ namespace Migrations\Test\TestCase\Command\Phinx;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
+use Exception;
 use Migrations\CakeManager;
 use Migrations\MigrationsDispatcher;
+use Migrations\Test\CommandTester as TestCommandTester;
 use Migrations\Test\TestCase\DriverConnectionTrait;
 use PDO;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -156,14 +158,14 @@ class MarkMigratedTest extends TestCase
         $manager->expects($this->any())
             ->method('getMigrations')->will($this->returnValue($migrations));
         $manager
-            ->method('markMigrated')->will($this->throwException(new \Exception('Error during marking process')));
+            ->method('markMigrated')->will($this->throwException(new Exception('Error during marking process')));
 
         $this->connection->execute('DELETE FROM phinxlog');
 
         $application = new MigrationsDispatcher('testing');
         $buggyCommand = $application->find('mark_migrated');
         $buggyCommand->setManager($manager);
-        $buggyCommandTester = new \Migrations\Test\CommandTester($buggyCommand);
+        $buggyCommandTester = new TestCommandTester($buggyCommand);
         $buggyCommandTester->execute([
             'command' => $this->command->getName(),
             '--connection' => 'test',

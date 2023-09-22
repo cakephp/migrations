@@ -27,7 +27,7 @@ class AbstractMigration extends BaseAbstractMigration
      *
      * @var bool
      */
-    public $autoId = true;
+    public bool $autoId = true;
 
     /**
      * Returns an instance of the Table class.

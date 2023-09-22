@@ -110,7 +110,7 @@ trait TableFinderTrait
             return [];
         }
 
-        foreach ($tables as $num => $table) {
+        foreach ($tables as $table) {
             $list = array_merge($list, $this->fetchTableName($table, $pluginName));
         }
 
