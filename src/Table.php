@@ -18,6 +18,7 @@ use Cake\ORM\Locator\LocatorAwareTrait;
 use Phinx\Db\Action\AddColumn;
 use Phinx\Db\Table as BaseTable;
 use Phinx\Db\Table\Column;
+use Phinx\Util\Literal;
 
 /**
  * @method \Migrations\CakeAdapter getAdapter()
@@ -56,12 +57,12 @@ class Table extends BaseTable
      * auto increment attribute
      *
      * @param string|\Phinx\Db\Table\Column $columnName Column Name
-     * @param string|\Phinx\Util\Literal $type Column Type
+     * @param string|\Phinx\Util\Literal|null $type Column Type
      * @param array $options Column Options
      * @throws \InvalidArgumentException
      * @return $this
      */
-    public function addColumn(Column|string $columnName, $type, $options = [])
+    public function addColumn(Column|string $columnName, string|Literal|null $type, $options = [])
     {
         $options = $this->convertedAutoIncrement($options);
 
@@ -80,7 +81,7 @@ class Table extends BaseTable
      * @param array $options Options
      * @return $this
      */
-    public function changeColumn($columnName, $newColumnType, array $options = [])
+    public function changeColumn(string $columnName, string|Column|Literal $newColumnType, array $options = [])
     {
         $options = $this->convertedAutoIncrement($options);
 
