@@ -489,15 +489,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $newArgs = [];
         $newArgs[] = $name;
 
-        if ($args->getOption('connection')) {
-            $newArgs[] = '-c';
-            $newArgs[] = $args->getOption('connection');
-        }
-
-        if ($args->getOption('plugin')) {
-            $newArgs[] = '-p';
-            $newArgs[] = $args->getOption('plugin');
-        }
+        $newArgs = array_merge($newArgs, $this->parseOptions($args));
 
         $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs, $io);
 

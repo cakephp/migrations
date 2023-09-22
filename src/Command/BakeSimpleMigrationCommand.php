@@ -28,19 +28,21 @@ use Phinx\Util\Util;
  */
 abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
 {
-    /**
-     * Console IO
-     *
-     * @var \Cake\Console\ConsoleIo|null
-     */
-    protected ?ConsoleIo $io = null;
+    public const DEFAULT_MIGRATION_FOLDER = 'Migrations';
 
     /**
      * path to Migration directory
      *
      * @var string
      */
-    public string $pathFragment = 'config/Migrations/';
+    public string $pathFragment = 'config';
+
+    /**
+     * Console IO
+     *
+     * @var \Cake\Console\ConsoleIo|null
+     */
+    protected ?ConsoleIo $io = null;
 
     /**
      * @inheritDoc
@@ -65,9 +67,10 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     public function getPath(Arguments $args): string
     {
-        $path = ROOT . DS . $this->pathFragment;
+        $migrationFolder = $this->pathFragment . DS . $args->getOption('source') . DS;
+        $path = ROOT . DS . $migrationFolder;
         if ($this->plugin) {
-            $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
+            $path = $this->_pluginPath($this->plugin) . $migrationFolder;
         }
 
         return str_replace('/', DS, $path);
@@ -189,6 +192,10 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             'short' => 'f',
             'boolean' => true,
             'help' => 'Force overwriting existing file if a migration already exists with the same name.',
+        ])->addOption('source', [
+            'short' => 's',
+            'default' => self::DEFAULT_MIGRATION_FOLDER,
+            'help' => 'Name of the folder in which the migration should be saved.',
         ]);
 
         return $parser;
