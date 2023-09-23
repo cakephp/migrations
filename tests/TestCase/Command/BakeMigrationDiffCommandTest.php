@@ -227,9 +227,9 @@ class BakeMigrationDiffCommandTest extends TestCase
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
         $bakeName = $this->getBakeName("TheDiff{$scenario}");
-        $pathFragment = "MigrationsDiff{$scenario}";
+        $targetFolder = "MigrationsDiff{$scenario}";
         $comparison = lcfirst($scenario);
-        $this->exec("custom bake migration_diff {$bakeName} -c test_comparisons --path-fragment {$pathFragment} --comparison {$comparison}");
+        $this->exec("custom bake migration_diff {$bakeName} -c test_comparisons --test-target-folder {$targetFolder} --comparison {$comparison}");
 
         $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
 
