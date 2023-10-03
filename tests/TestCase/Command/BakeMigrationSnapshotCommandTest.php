@@ -307,4 +307,23 @@ class BakeMigrationSnapshotCommandTest extends TestCase
             $this->assertSameAsFile($bakeName . '.php', $result);
         }
     }
+
+    /**
+     * Tests that non default collation is used in the initial snapshot.
+     */
+    public function testSnapshotWithNonDefaultCollation(): void
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+
+        $connection = ConnectionManager::get('test');
+        assert($connection instanceof Connection);
+
+        $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_hungarian_ci');
+
+        $this->exec("bake migration_snapshot Initial -c test --no-lock");
+        $generatedMigration = glob($this->migrationPath . '*_Initial.php')[0];
+        $file_contents = file_get_contents($generatedMigration);
+        $this->assertStringContainsString("->addColumn('title', 'string', [", $file_contents);
+        $this->assertStringContainsString("'collation' => 'utf8_hungarian_ci'", $file_contents);
+    }
 }
