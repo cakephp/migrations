@@ -327,6 +327,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->exec("bake migration_snapshot Initial -c test --no-lock");
         $generatedMigration = glob($this->migrationPath . '*_Initial.php')[0];
         $file_contents = file_get_contents($generatedMigration);
+        unlink($generatedMigration);
         $this->assertStringContainsString("->addColumn('title', 'string', [", $file_contents);
         $this->assertStringContainsString("'collation' => 'utf8_hungarian_ci'", $file_contents);
     }
