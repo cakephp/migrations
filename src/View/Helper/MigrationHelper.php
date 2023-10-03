@@ -390,6 +390,7 @@ class MigrationHelper extends Helper
             'autoIncrement',
             'precision',
             'after',
+            'collate'
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -403,6 +404,11 @@ class MigrationHelper extends Helper
         $isMysql = $connection->getDriver() instanceof Mysql;
         if (!$isMysql) {
             unset($columnOptions['signed']);
+        }
+        if ($isMysql) {
+            // due to Phinx using different naming for the collation
+            $columnOptions['collation'] = $columnOptions['collate'];
+            unset($columnOptions['collate']);
         }
 
         if ($columnOptions['precision'] === null) {
@@ -476,6 +482,7 @@ class MigrationHelper extends Helper
             'comment', 'unsigned',
             'signed', 'properties',
             'autoIncrement', 'unique',
+            'collate'
         ];
 
         $attributes = [];
