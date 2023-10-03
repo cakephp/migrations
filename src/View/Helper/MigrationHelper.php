@@ -405,7 +405,11 @@ class MigrationHelper extends Helper
         if (!$isMysql) {
             unset($columnOptions['signed']);
         }
-        if ($isMysql) {
+
+        if (empty($columnOptions['collate'])) {
+            unset($columnOptions['collate']);
+        }
+        if ($isMysql && !empty($columnOptions['collate'])) {
             // due to Phinx using different naming for the collation
             $columnOptions['collation'] = $columnOptions['collate'];
             unset($columnOptions['collate']);
