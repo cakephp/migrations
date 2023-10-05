@@ -406,10 +406,6 @@ class MigrationHelper extends Helper
             unset($columnOptions['signed']);
         }
 
-        //$defaultCollation = 'utf8mb4_general_ci';    // TODO query default collation from Table.php (create method)
-        //if (empty($columnOptions['collate']) || $columnOptions['collate'] == $defaultCollation) {
-        //    unset($columnOptions['collate']);
-        //}
         if ($isMysql && !empty($columnOptions['collate'])) {
             // due to Phinx using different naming for the collation
             $columnOptions['collation'] = $columnOptions['collate'];
@@ -528,7 +524,7 @@ class MigrationHelper extends Helper
             unset($attributes['signed']);
         }
 
-        $defaultCollation = 'utf8mb4_general_ci';    // TODO query default collation from Table.php (create method)
+        $defaultCollation = $tableSchema->getOptions()['collation'];
         if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
             unset($attributes['collate']);
         }
