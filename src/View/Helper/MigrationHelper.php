@@ -406,7 +406,8 @@ class MigrationHelper extends Helper
             unset($columnOptions['signed']);
         }
 
-        if (empty($columnOptions['collate'])) {
+        $defaultCollation = 'utf8mb4_general_ci';    // TODO query default collation from Table.php (create method)
+        if (empty($columnOptions['collate']) || $columnOptions['collate'] == $defaultCollation) {
             unset($columnOptions['collate']);
         }
         if ($isMysql && !empty($columnOptions['collate'])) {
