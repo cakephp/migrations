@@ -997,7 +997,7 @@ Set them via Configure to enable (e.g. in ``config/app.php``)::
         'column_null_default' => true,
     ],
 
-For details see `Phinx docs<https://book.cakephp.org/phinx/0/en/configuration.html#feature-flags>`__.
+For details see `Phinx documentation <https://book.cakephp.org/phinx/0/en/configuration.html#feature-flags>`_.
 
 Tips and tricks
 ===============
