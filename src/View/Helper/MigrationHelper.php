@@ -406,10 +406,10 @@ class MigrationHelper extends Helper
             unset($columnOptions['signed']);
         }
 
-        $defaultCollation = 'utf8mb4_general_ci';    // TODO query default collation from Table.php (create method)
-        if (empty($columnOptions['collate']) || $columnOptions['collate'] == $defaultCollation) {
-            unset($columnOptions['collate']);
-        }
+        //$defaultCollation = 'utf8mb4_general_ci';    // TODO query default collation from Table.php (create method)
+        //if (empty($columnOptions['collate']) || $columnOptions['collate'] == $defaultCollation) {
+        //    unset($columnOptions['collate']);
+        //}
         if ($isMysql && !empty($columnOptions['collate'])) {
             // due to Phinx using different naming for the collation
             $columnOptions['collation'] = $columnOptions['collate'];
@@ -526,6 +526,11 @@ class MigrationHelper extends Helper
         $isMysql = $connection->getDriver() instanceof Mysql;
         if (!$isMysql) {
             unset($attributes['signed']);
+        }
+
+        $defaultCollation = 'utf8mb4_general_ci';    // TODO query default collation from Table.php (create method)
+        if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
+            unset($attributes['collate']);
         }
 
         ksort($attributes);
