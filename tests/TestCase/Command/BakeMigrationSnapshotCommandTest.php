@@ -320,7 +320,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_hungarian_ci');
 
-        $this->exec("bake migration_snapshot Initial -c test --no-lock");
+        $this->exec('bake migration_snapshot Initial -c test --no-lock');
         $generatedMigration = glob($this->migrationPath . '*_Initial.php')[0];
         $file_contents = file_get_contents($generatedMigration);
         unlink($generatedMigration);
