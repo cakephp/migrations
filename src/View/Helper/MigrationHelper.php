@@ -390,7 +390,7 @@ class MigrationHelper extends Helper
             'autoIncrement',
             'precision',
             'after',
-            'collate'
+            'collate',
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -483,7 +483,7 @@ class MigrationHelper extends Helper
             'comment', 'unsigned',
             'signed', 'properties',
             'autoIncrement', 'unique',
-            'collate'
+            'collate',
         ];
 
         $attributes = [];
