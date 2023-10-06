@@ -319,19 +319,12 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     {
         $this->skipIf(env('DB') !== 'mysql');
 
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
         $connection = ConnectionManager::get('test');
         assert($connection instanceof Connection);
 
-        $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_hungarian_ci');
-
-        $this->exec('bake migration_snapshot Initial -c test --no-lock');
-        $generatedMigration = glob($this->migrationPath . '*_Initial.php')[0];
-        $file_contents = file_get_contents($generatedMigration);
-        unlink($generatedMigration);
-
-        $this->assertStringContainsString("->addColumn('title', 'string', [", $file_contents);
-        $this->assertStringContainsString("'collation' => 'utf8mb3_hungarian_ci'", $file_contents);
-
-        // TODO change back the collation so other tests are not affected
+        $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8mb3_hungarian_ci');
+        $this->runSnapshotTest('WithNonDefaultCollation', '-p Snapshot');
     }
 }
