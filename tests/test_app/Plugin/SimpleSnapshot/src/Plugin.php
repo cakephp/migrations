@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Snapshot;
+namespace SimpleSnapshot;
 
 use Cake\Core\BasePlugin;
 
@@ -10,5 +10,5 @@ class Plugin extends BasePlugin
     /**
      * Plugin name.
      */
-    protected ?string $name = 'Snapshot';
+    protected ?string $name = 'SimpleSnapshot';
 }

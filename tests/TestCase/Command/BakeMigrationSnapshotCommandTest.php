@@ -20,7 +20,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Migrations\Test\TestCase\TestCase;
-use Phinx\Config\FeatureFlags;
 use function Cake\Core\env;
 
 /**
@@ -81,9 +80,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
                 unlink($file);
             }
         }
-
-        Configure::write('Migrations', []);
-        FeatureFlags::$unsignedPrimaryKeys = true;
     }
 
     /**
@@ -161,16 +157,16 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->skipIf(env('DB') !== 'mysql');
 
         Configure::write('Migrations.unsigned_primary_keys', false);
-        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 
         $connection = ConnectionManager::get('test');
         assert($connection instanceof Connection);
 
-        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT AUTO_INCREMENT');
+        $connection->execute('ALTER TABLE events CHANGE COLUMN id id INT AUTO_INCREMENT');
 
-        $this->runSnapshotTest('WithAutoIdCompatibleSignedPrimaryKeys', '-p Snapshot');
+        $this->runSnapshotTest('WithAutoIdCompatibleSignedPrimaryKeys', '-p SimpleSnapshot');
 
-        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT UNSIGNED AUTO_INCREMENT');
+        $connection->execute('ALTER TABLE events CHANGE COLUMN id id INT UNSIGNED AUTO_INCREMENT');
     }
 
     /**
@@ -181,16 +177,16 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     {
         $this->skipIf(env('DB') !== 'mysql');
 
-        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 
         $connection = ConnectionManager::get('test');
         assert($connection instanceof Connection);
 
-        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT AUTO_INCREMENT');
+        $connection->execute('ALTER TABLE events CHANGE COLUMN id id INT AUTO_INCREMENT');
 
-        $this->runSnapshotTest('WithAutoIdIncompatibleSignedPrimaryKeys', '-p Snapshot');
+        $this->runSnapshotTest('WithAutoIdIncompatibleSignedPrimaryKeys', '-p SimpleSnapshot');
 
-        $connection->execute('ALTER TABLE articles CHANGE COLUMN id id INT UNSIGNED AUTO_INCREMENT');
+        $connection->execute('ALTER TABLE events CHANGE COLUMN id id INT UNSIGNED AUTO_INCREMENT');
     }
 
     /**
@@ -202,9 +198,9 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->skipIf(env('DB') !== 'mysql');
 
         Configure::write('Migrations.unsigned_primary_keys', false);
-        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 
-        $this->runSnapshotTest('WithAutoIdIncompatibleUnsignedPrimaryKeys', '-p Snapshot');
+        $this->runSnapshotTest('WithAutoIdIncompatibleUnsignedPrimaryKeys', '-p SimpleSnapshot');
     }
 
     /**

@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase;
 
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -20,6 +21,7 @@ use Exception;
 use InvalidArgumentException;
 use Migrations\CakeAdapter;
 use Migrations\Migrations;
+use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\WrapperInterface;
 use function Cake\Core\env;
 
@@ -115,6 +117,8 @@ class MigrationsTest extends TestCase
                 unlink($file);
             }
         }
+
+        FeatureFlags::setFlagsFromConfig(Configure::read('Migrations'));
     }
 
     /**
@@ -964,16 +968,17 @@ class MigrationsTest extends TestCase
     /**
      * Tests migrating the baked snapshots
      *
-     * @dataProvider migrationsProvider
+     * @dataProvider snapshotMigrationsProvider
+     * @param string $basePath Snapshot file path
+     * @param string $filename Snapshot file name
+     * @param array $flags Feature flags
      * @return void
      */
-    public function testMigrateSnapshots($basePath, $files)
+    public function testMigrateSnapshots(string $basePath, string $filename, array $flags = []): void
     {
-        $params = [
-            'connection' => 'test_snapshot',
-            'source' => 'SnapshotTests',
-        ];
-        $migrations = new Migrations($params);
+        if ($flags) {
+            Configure::write('Migrations', $flags + Configure::read('Migrations', []));
+        }
 
         $destination = ROOT . DS . 'config' . DS . 'SnapshotTests' . DS;
 
@@ -981,30 +986,30 @@ class MigrationsTest extends TestCase
             mkdir($destination);
         }
 
-        foreach ($files as $file) {
-            [$filename, $timestamp] = $file;
-            $copiedFileName = $timestamp . '_' . $filename . 'NewSuffix' . '.php';
+        $copiedFileName = '20150912015600_' . $filename . 'NewSuffix' . '.php';
 
-            if (!file_exists($destination . $copiedFileName)) {
-                copy(
-                    $basePath . $filename . '.php',
-                    $destination . $copiedFileName
-                );
-                $this->generatedFiles[] = $destination . $copiedFileName;
+        copy(
+            $basePath . $filename . '.php',
+            $destination . $copiedFileName
+        );
+        $this->generatedFiles[] = $destination . $copiedFileName;
 
-                //change class name to avoid conflict with other classes
-                //to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
-                $content = file_get_contents($destination . $copiedFileName);
-                $pattern = ' extends AbstractMigration';
-                $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
-                file_put_contents($destination . $copiedFileName, $content);
-            }
+        //change class name to avoid conflict with other classes
+        //to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
+        $content = file_get_contents($destination . $copiedFileName);
+        $pattern = ' extends AbstractMigration';
+        $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
+        file_put_contents($destination . $copiedFileName, $content);
 
-            $result = $migrations->migrate();
-            $this->assertTrue($result);
+        $migrations = new Migrations([
+            'connection' => 'test_snapshot',
+            'source' => 'SnapshotTests',
+        ]);
+        $result = $migrations->migrate();
+        $this->assertTrue($result);
 
-            $migrations->rollback(['target' => 'all', 'source' => 'SnapshotTests']);
-        }
+        $result = $migrations->rollback(['target' => 'all']);
+        $this->assertTrue($result);
     }
 
     /**
@@ -1038,54 +1043,43 @@ class MigrationsTest extends TestCase
     }
 
     /**
-     * provides the path to the baked migrations
+     * Provides the path to the baked snapshot migrations
      *
      * @return array
      */
-    public static function migrationsProvider()
+    public static function snapshotMigrationsProvider(): array
     {
         $db = getenv('DB');
 
-        $version = 20150912015600;
-
         if ($db === 'mysql') {
+            $path = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
+
             return [
-                [
-                    Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS,
-                    [
-                        ['test_snapshot_not_empty', $version++],
-                        ['test_snapshot_auto_id_disabled', $version++],
-                        ['test_snapshot_plugin_blog', $version++],
-                        ['test_snapshot_with_auto_id_compatible_signed_primary_keys', $version++],
-                        ['test_snapshot_with_auto_id_incompatible_signed_primary_keys', $version++],
-                        ['test_snapshot_with_auto_id_incompatible_unsigned_primary_keys', $version++],
-                    ],
-                ],
+                [$path, 'test_snapshot_not_empty'],
+                [$path, 'test_snapshot_auto_id_disabled'],
+                [$path, 'test_snapshot_plugin_blog'],
+                [$path, 'test_snapshot_with_auto_id_compatible_signed_primary_keys', ['unsigned_primary_keys' => false]],
+                [$path, 'test_snapshot_with_auto_id_incompatible_signed_primary_keys'],
+                [$path, 'test_snapshot_with_auto_id_incompatible_unsigned_primary_keys', ['unsigned_primary_keys' => false]],
             ];
         }
 
         if ($db === 'pgsql') {
+            $path = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS;
+
             return [
-                [
-                    Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'pgsql' . DS,
-                    [
-                        ['test_snapshot_not_empty_pgsql', $version++],
-                        ['test_snapshot_auto_id_disabled_pgsql', $version++],
-                        ['test_snapshot_plugin_blog_pgsql', $version++],
-                    ],
-                ],
+                [$path, 'test_snapshot_not_empty_pgsql'],
+                [$path, 'test_snapshot_auto_id_disabled_pgsql'],
+                [$path, 'test_snapshot_plugin_blog_pgsql'],
             ];
         }
 
+        $path = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS;
+
         return [
-            [
-                Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlite' . DS,
-                [
-                    ['test_snapshot_not_empty_sqlite', $version++],
-                    ['test_snapshot_auto_id_disabled_sqlite', $version++],
-                    ['test_snapshot_plugin_blog_sqlite', $version++],
-                ],
-            ],
+            [$path, 'test_snapshot_not_empty_sqlite'],
+            [$path, 'test_snapshot_auto_id_disabled_sqlite'],
+            [$path, 'test_snapshot_plugin_blog_sqlite'],
         ];
     }
 }

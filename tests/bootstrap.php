@@ -20,7 +20,8 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\MigrationsPlugin;
-use Snapshot\Plugin as SnapshotPlugin;
+use Phinx\Config\FeatureFlags;
+use SimpleSnapshot\Plugin as SimpleSnapshotPlugin;
 use TestBlog\Plugin as TestBlogPlugin;
 use function Cake\Core\env;
 
@@ -65,6 +66,11 @@ Configure::write('App', [
         'plugins' => [ROOT . DS . 'Plugin' . DS],
         'templates' => [ROOT . DS . 'App' . DS . 'Template' . DS],
     ],
+]);
+
+Configure::write('Migrations', [
+    'unsigned_primary_keys' => FeatureFlags::$unsignedPrimaryKeys,
+    'column_null_default' => FeatureFlags::$columnNullDefault,
 ]);
 
 Cache::setConfig([
@@ -117,7 +123,7 @@ if (getenv('DB_URL_COMPARE') !== false) {
 
 Plugin::getCollection()->add(new MigrationsPlugin());
 Plugin::getCollection()->add(new BakePlugin());
-Plugin::getCollection()->add(new SnapshotPlugin());
+Plugin::getCollection()->add(new SimpleSnapshotPlugin());
 Plugin::getCollection()->add(new TestBlogPlugin());
 
 if (!defined('PHINX_VERSION')) {
