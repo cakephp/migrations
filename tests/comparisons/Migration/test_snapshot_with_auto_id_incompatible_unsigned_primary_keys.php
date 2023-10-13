@@ -16,7 +16,7 @@ class TestSnapshotWithAutoIdIncompatibleUnsignedPrimaryKeys extends AbstractMigr
      */
     public function up(): void
     {
-        $this->table('articles')
+        $this->table('events')
             ->addColumn('id', 'integer', [
                 'autoIncrement' => true,
                 'default' => null,
@@ -26,79 +26,21 @@ class TestSnapshotWithAutoIdIncompatibleUnsignedPrimaryKeys extends AbstractMigr
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
-                'comment' => 'Article title',
                 'default' => null,
                 'limit' => 255,
                 'null' => true,
             ])
-            ->addColumn('category_id', 'integer', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-                'signed' => false,
-            ])
-            ->addColumn('product_id', 'integer', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-                'signed' => false,
-            ])
-            ->addColumn('note', 'string', [
-                'default' => '7.4',
-                'limit' => 255,
-                'null' => true,
-            ])
-            ->addColumn('counter', 'integer', [
-                'default' => null,
-                'limit' => null,
-                'null' => true,
-                'signed' => false,
-            ])
-            ->addColumn('active', 'boolean', [
-                'default' => false,
-                'limit' => null,
-                'null' => true,
-            ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('description', 'text', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('modified', 'timestamp', [
-                'default' => null,
-                'limit' => null,
+            ->addColumn('published', 'string', [
+                'default' => 'N',
+                'limit' => 1,
                 'null' => true,
             ])
-            ->addIndex(
-                [
-                    'category_id',
-                ],
-                [
-                    'name' => 'articles_category_fk',
-                ]
-            )
-            ->addIndex(
-                [
-                    'title',
-                ],
-                [
-                    'name' => 'articles_title_idx',
-                ]
-            )
             ->create();
-
-        $this->table('articles')
-            ->addForeignKey(
-                'category_id',
-                'categories',
-                'id',
-                [
-                    'update' => 'NO_ACTION',
-                    'delete' => 'NO_ACTION',
-                    'constraint' => 'articles_category_fk'
-                ]
-            )
-            ->update();
     }
 
     /**
@@ -110,11 +52,6 @@ class TestSnapshotWithAutoIdIncompatibleUnsignedPrimaryKeys extends AbstractMigr
      */
     public function down(): void
     {
-        $this->table('articles')
-            ->dropForeignKey(
-                'category_id'
-            )->save();
-
-        $this->table('articles')->drop()->save();
+        $this->table('events')->drop()->save();
     }
 }

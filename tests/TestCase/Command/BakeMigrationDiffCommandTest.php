@@ -21,7 +21,6 @@ use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Migrations\Migrations;
 use Migrations\Test\TestCase\TestCase;
-use Phinx\Config\FeatureFlags;
 use function Cake\Core\env;
 
 /**
@@ -59,9 +58,6 @@ class BakeMigrationDiffCommandTest extends TestCase
                 unlink($file);
             }
         }
-
-        Configure::write('Migrations', []);
-        FeatureFlags::$unsignedPrimaryKeys = true;
     }
 
     /**
