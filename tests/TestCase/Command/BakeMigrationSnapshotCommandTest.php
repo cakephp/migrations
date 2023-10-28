@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -11,6 +12,7 @@ declare(strict_types=1);
  * @link          https://cakephp.org CakePHP(tm) Project
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
+
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Core\Configure;
@@ -326,5 +328,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8mb3_hungarian_ci');
         $this->runSnapshotTest('WithNonDefaultCollation', '-p Snapshot');
+        // reset collation to default so other tests will not affected
+        $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) COMMENT "Article title"');
     }
 }
