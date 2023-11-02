@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Migrations\AbstractMigration;
@@ -50,7 +51,6 @@ class TheDiffAddRemoveMysql extends AbstractMigration
         $this->table('articles')
             ->addColumn('excerpt', 'text', [
                 'after' => 'title',
-                'collation' => 'utf8_general_ci',
                 'default' => null,
                 'length' => null,
                 'null' => false,
