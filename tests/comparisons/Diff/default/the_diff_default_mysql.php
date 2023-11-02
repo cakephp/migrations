@@ -202,6 +202,7 @@ class TheDiffDefaultMysql extends AbstractMigration
         $this->table('articles')
             ->addColumn('content', 'text', [
                 'after' => 'rating',
+                'collation' => 'utf8_general_ci',
                 'default' => null,
                 'length' => null,
                 'null' => false,
@@ -213,6 +214,7 @@ class TheDiffDefaultMysql extends AbstractMigration
                 'null' => false,
             ])
             ->changeColumn('title', 'string', [
+                'collation' => 'utf8_general_ci',
                 'default' => null,
                 'length' => 255,
                 'null' => false,
@@ -223,6 +225,7 @@ class TheDiffDefaultMysql extends AbstractMigration
                 'null' => false,
             ])
             ->changeColumn('name', 'string', [
+                'collation' => 'utf8_general_ci',
                 'default' => null,
                 'length' => 255,
                 'null' => false,
