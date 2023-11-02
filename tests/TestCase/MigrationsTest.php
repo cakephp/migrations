@@ -11,6 +11,7 @@ declare(strict_types=1);
  * @link          https://cakephp.org CakePHP(tm) Project
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
+
 namespace Migrations\Test\TestCase;
 
 use Cake\Core\Configure;
@@ -1061,6 +1062,7 @@ class MigrationsTest extends TestCase
                 [$path, 'test_snapshot_with_auto_id_compatible_signed_primary_keys', ['unsigned_primary_keys' => false]],
                 [$path, 'test_snapshot_with_auto_id_incompatible_signed_primary_keys'],
                 [$path, 'test_snapshot_with_auto_id_incompatible_unsigned_primary_keys', ['unsigned_primary_keys' => false]],
+                [$path, 'test_snapshot_with_non_default_collation'],
             ];
         }
 
