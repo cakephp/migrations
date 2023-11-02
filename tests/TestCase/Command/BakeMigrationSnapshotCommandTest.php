@@ -317,14 +317,13 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     {
         $this->skipIf(env('DB') !== 'mysql');
 
-        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'Snapshot' . DS . 'config' . DS . 'Migrations' . DS;
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 
         $connection = ConnectionManager::get('test');
         assert($connection instanceof Connection);
 
-        $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8mb3_hungarian_ci');
-        $this->runSnapshotTest('WithNonDefaultCollation', '-p Snapshot');
-        // reset collation to default so other tests will not affected
-        $connection->execute('ALTER TABLE articles MODIFY title VARCHAR(255) COMMENT "Article title"');
+        $connection->execute('ALTER TABLE events MODIFY title VARCHAR(255) CHARACTER SET utf8 COLLATE utf8mb3_hungarian_ci');
+        $this->runSnapshotTest('WithNonDefaultCollation', '-p SimpleSnapshot');
+        $connection->execute('ALTER TABLE events MODIFY title VARCHAR(255)');
     }
 }
