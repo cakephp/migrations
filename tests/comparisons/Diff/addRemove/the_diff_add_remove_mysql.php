@@ -29,6 +29,7 @@ class TheDiffAddRemoveMysql extends AbstractMigration
         $this->table('articles')
             ->addColumn('the_text', 'text', [
                 'after' => 'title',
+                'collation' => 'utf8mb4_0900_ai_ci',
                 'default' => null,
                 'length' => null,
                 'null' => false,
