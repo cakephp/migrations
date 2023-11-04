@@ -76,7 +76,19 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
             $pluginPath = $this->plugin . '.';
         }
 
+
+        $arguments = $arguments->getArguments();
+        unset($arguments[0]);
+        $columnParser = new ColumnParser();
+        $fields = $columnParser->parseFields($arguments);
+        $indexes = $columnParser->parseIndexes($arguments);
+        $primaryKey = $columnParser->parsePrimaryKey($arguments);
+
         $action = $this->detectAction($className);
+
+        if (empty($action) && count($fields)) {
+            $this->io->abort('Migration name should start with one of the following prefixes: Create, Drop, Add, Remove, Alter. See: https://book.cakephp.org/migrations/4/en/index.html#migrations-file-name');
+        }
 
         if (empty($action)) {
             return [
@@ -88,13 +100,6 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
                 'name' => $className,
             ];
         }
-
-        $arguments = $arguments->getArguments();
-        unset($arguments[0]);
-        $columnParser = new ColumnParser();
-        $fields = $columnParser->parseFields($arguments);
-        $indexes = $columnParser->parseIndexes($arguments);
-        $primaryKey = $columnParser->parsePrimaryKey($arguments);
 
         if (in_array($action[0], ['alter_table', 'add_field'], true) && !empty($primaryKey)) {
             /** @psalm-suppress PossiblyNullReference */
