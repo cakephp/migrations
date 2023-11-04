@@ -33,7 +33,7 @@ return [
         ],
         'indexes' => [
             'products_title_idx' => [
-                'type' => 'index',
+                'type' => 'fulltext',
                 'columns' => ['title'],
             ],
         ],
