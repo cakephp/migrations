@@ -53,7 +53,7 @@
                 [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}],
 {%         set params = {'name': indexName} %}
 {%         if index['type'] == 'fulltext' %}
-{%             set params = params|merge({'fulltext': true}) %}
+{%             set params = params|merge({'type': 'fulltext'}) %}
 {%         endif %}
                 [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
             )

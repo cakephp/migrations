@@ -236,6 +236,7 @@ class TestSnapshotNotEmpty extends AbstractMigration
                 ],
                 [
                     'name' => 'products_title_idx',
+                    'type' => 'fulltext',
                 ]
             )
             ->create();
