@@ -328,4 +328,17 @@ class BakeMigrationCommandTest extends TestCase
             $command->detectAction('AlterFieldOnArticlesI18n')
         );
     }
+
+    /**
+     * Test migration without Create, Drop, Add, Remove, Alter prefix
+     *
+     * @return void
+     */
+    public function testActionWithoutValidPrefix()
+    {
+        $this->exec('bake migration SleepUsers name:string --connection test');
+
+        $this->assertExitCode(BaseCommand::CODE_ERROR);
+        $this->assertErrorContains('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`.');
+    }
 }
