@@ -76,7 +76,6 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
             $pluginPath = $this->plugin . '.';
         }
 
-
         $arguments = $arguments->getArguments();
         unset($arguments[0]);
         $columnParser = new ColumnParser();
