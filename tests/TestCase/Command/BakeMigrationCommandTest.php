@@ -339,6 +339,6 @@ class BakeMigrationCommandTest extends TestCase
         $this->exec('bake migration SleepUsers name:string --connection test');
 
         $this->assertExitCode(BaseCommand::CODE_ERROR);
-        $this->assertErrorContains('Migration name should start with one of the following prefixes: Create, Drop, Add, Remove, Alter.');
+        $this->assertErrorContains('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`.');
     }
 }
