@@ -62,7 +62,7 @@ class Table extends BaseTable
      * @throws \InvalidArgumentException
      * @return $this
      */
-    public function addColumn(Column|string $columnName, string|Literal|null $type, $options = [])
+    public function addColumn(Column|string $columnName, string|Literal|null $type = null, $options = [])
     {
         $options = $this->convertedAutoIncrement($options);
 
