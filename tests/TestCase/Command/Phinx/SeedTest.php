@@ -64,7 +64,7 @@ class SeedTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
-        $this->connection->connect();
+        $this->connection->getDriver()->connect();
         $this->pdo = $this->connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('seed');
@@ -106,9 +106,8 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('== NumbersSeed: seeded', $display);
 
-        $result = $this->connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
+        $result = $this->connection
+            ->selectQuery(['*'], 'numbers')
             ->order('id DESC')
             ->limit(1)
             ->execute()->fetchAll('assoc');
@@ -148,9 +147,8 @@ class SeedTest extends TestCase
         $display = $this->getDisplayFromOutput();
         $this->assertTextContains('== NumbersAltSeed: seeded', $display);
 
-        $result = $this->connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
+        $result = $this->connection
+            ->selectQuery(['*'], 'numbers')
             ->order('id DESC')
             ->limit(1)
             ->execute()->fetchAll('assoc');

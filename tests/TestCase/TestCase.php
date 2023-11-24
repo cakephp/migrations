@@ -16,8 +16,8 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase;
 
+use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Routing\Router;
-use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase as BaseTestCase;
 

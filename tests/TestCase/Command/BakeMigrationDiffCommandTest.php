@@ -148,8 +148,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
-        $connection->newQuery()
-            ->delete('phinxlog')
+        $connection->deleteQuery('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
 
@@ -177,9 +176,8 @@ class BakeMigrationDiffCommandTest extends TestCase
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
-        $connection->newQuery()
+        $connection->insertQuery('phinxlog')
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
             ->values([
                 'version' => 20160415220805,
                 'migration_name' => $versionParts[1],
@@ -224,8 +222,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
-        $connection->newQuery()
-            ->delete('phinxlog')
+        $connection->deleteQuery('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
 
@@ -245,9 +242,8 @@ class BakeMigrationDiffCommandTest extends TestCase
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
-        $connection->newQuery()
+        $connection->insertQuery('phinxlog')
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
             ->values([
                 'version' => 20160415220805,
                 'migration_name' => $versionParts[1],
@@ -288,8 +284,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
-        $connection->newQuery()
-            ->delete('phinxlog')
+        $connection->deleteQuery('phinxlog')
             ->where(['version' => 20160415220805])
             ->execute();
 
@@ -310,9 +305,8 @@ class BakeMigrationDiffCommandTest extends TestCase
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
-        $connection->newQuery()
+        $connection->insertQuery('phinxlog')
             ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
             ->values([
                 'version' => 20160415220805,
                 'migration_name' => $versionParts[1],

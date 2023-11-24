@@ -75,7 +75,7 @@ class DumpTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
-        $this->connection->connect();
+        $this->connection->getDriver()->connect();
         $this->pdo = $this->connection->getDriver()->getConnection();
         $application = new MigrationsDispatcher('testing');
         $this->command = $application->find('dump');
