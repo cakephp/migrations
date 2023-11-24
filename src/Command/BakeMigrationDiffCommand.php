@@ -144,6 +144,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $this->migrationsFiles = glob($this->migrationsPath . '*.php') ?: [];
         $this->phinxTable = $this->getPhinxTable($this->plugin);
 
+        /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get($this->connection);
         $this->tables = $connection->getSchemaCollection()->listTables();
         $tableExists = in_array($this->phinxTable, $this->tables, true);
