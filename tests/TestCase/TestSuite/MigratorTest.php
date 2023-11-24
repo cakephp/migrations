@@ -61,7 +61,7 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
 
-        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(0, $connection->selectQuery(['*'], 'migrator')->execute()->fetchAll());
     }
 
     public function testMigrateDropNoTruncate(): void
@@ -73,7 +73,7 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
 
         $this->assertContains('migrator', $tables);
-        $this->assertCount(1, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(1, $connection->selectQuery(['*'], 'migrator')->execute()->fetchAll());
     }
 
     public function testMigrateSkipTables(): void
@@ -92,7 +92,7 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertContains('skipme', $tables);
-        $this->assertCount(1, $connection->query('SELECT * FROM skipme')->fetchAll());
+        $this->assertCount(1, $connection->selectQuery(['*'], 'skipme')->execute()->fetchAll());
     }
 
     public function testRunManyDropTruncate(): void
@@ -106,8 +106,8 @@ class MigratorTest extends TestCase
         $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
-        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
-        $this->assertCount(2, $connection->query('SELECT * FROM migrator_phinxlog')->fetchAll());
+        $this->assertCount(0, $connection->selectQuery(['*'], 'migrator')->execute()->fetchAll());
+        $this->assertCount(2, $connection->selectQuery(['*'], 'migrator_phinxlog')->execute()->fetchAll());
     }
 
     public function testRunManyMultipleSkip(): void
@@ -146,23 +146,21 @@ class MigratorTest extends TestCase
         $migrator->truncate('test');
 
         $connection = ConnectionManager::get('test');
-        $this->assertCount(0, $connection->query('SELECT * FROM migrator')->fetchAll());
+        $this->assertCount(0, $connection->selectQuery(['*'], 'migrator')->execute()->fetchAll());
     }
 
     private function setMigrationEndDateToYesterday()
     {
-        ConnectionManager::get('test')->newQuery()
-            ->update('migrator_phinxlog')
+        ConnectionManager::get('test')->updateQuery('migrator_phinxlog')
             ->set('end_time', FrozenDate::yesterday(), 'timestamp')
             ->execute();
     }
 
     private function fetchMigrationEndDate(): ChronosInterface
     {
-        $endTime = ConnectionManager::get('test')->newQuery()
-            ->select('end_time')
-            ->from('migrator_phinxlog')
-            ->execute()->fetchColumn(0);
+        $endTime = ConnectionManager::get('test')->selectQuery(['end_time'], 'migrator_phinxlog')
+            ->execute()
+            ->fetchColumn(0);
 
         return FrozenDate::parse($endTime);
     }

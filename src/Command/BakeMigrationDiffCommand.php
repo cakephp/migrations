@@ -150,11 +150,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
         $migratedItems = [];
         if ($tableExists) {
-            $query = $connection->newQuery();
             /** @var array $migratedItems */
-            $migratedItems = $query
-                ->select(['version'])
-                ->from($this->phinxTable)
+            $migratedItems = $connection
+                ->selectQuery(['version'], $this->phinxTable)
                 ->order(['version DESC'])
                 ->execute()->fetchAll('assoc');
         }

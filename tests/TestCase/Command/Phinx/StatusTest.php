@@ -71,7 +71,7 @@ class StatusTest extends TestCase
         parent::setUp();
 
         $this->Connection = ConnectionManager::get('test');
-        $this->Connection->connect();
+        $this->Connection->getDriver()->connect();
         $this->pdo = $this->Connection->getDriver()->getConnection();
         $this->Connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');

@@ -687,10 +687,10 @@ class MigrationsTest extends TestCase
         $seed = $this->migrations->seed(['source' => 'Seeds']);
         $this->assertTrue($seed);
 
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'numbers')
+            ->execute()
+            ->fetchAll('assoc');
         $expected = [
             [
                 'id' => '1',
@@ -702,10 +702,10 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'Seeds']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'numbers')
+            ->execute()
+            ->fetchAll('assoc');
         $expected = [
             [
                 'id' => '1',
@@ -722,10 +722,10 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'numbers')
+            ->execute()
+            ->fetchAll('assoc');
         $expected = [
             [
                 'id' => '1',
@@ -763,10 +763,10 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'AnotherNumbersSeed']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'numbers')
+            ->execute()
+            ->fetchAll('assoc');
 
         $expected = [
             [
@@ -779,10 +779,10 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'NumbersAltSeed']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'numbers')
+            ->execute()
+            ->fetchAll('assoc');
 
         $expected = [
             [
@@ -812,10 +812,10 @@ class MigrationsTest extends TestCase
 
         $seed = $this->migrations->seed(['source' => 'CallSeeds', 'seed' => 'DatabaseSeed']);
         $this->assertTrue($seed);
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('numbers')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'numbers')
+            ->execute()
+            ->fetchAll('assoc');
 
         $expected = [
             [
@@ -826,10 +826,10 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $result = $this->Connection->newQuery()
-            ->select(['*'])
-            ->from('letters')
-            ->execute()->fetchAll('assoc');
+        $result = $this->Connection
+            ->selectQuery(['*'], 'letters')
+            ->execute()
+            ->fetchAll('assoc');
 
         $expected = [
             [
