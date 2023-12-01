@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Phinx\Db\Table;
 
-use Migrations\Db\Table\ForeignKey;
 use InvalidArgumentException;
+use Migrations\Db\Table\ForeignKey;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
