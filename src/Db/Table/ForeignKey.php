@@ -21,37 +21,37 @@ class ForeignKey
     /**
      * @var array<string>
      */
-    protected static $validOptions = ['delete', 'update', 'constraint'];
+    protected static array $validOptions = ['delete', 'update', 'constraint'];
 
     /**
      * @var string[]
      */
-    protected $columns = [];
+    protected array $columns = [];
 
     /**
-     * @var \Phinx\Db\Table\Table
+     * @var \Migrations\Db\Table\Table
      */
-    protected $referencedTable;
+    protected Table $referencedTable;
 
     /**
      * @var string[]
      */
-    protected $referencedColumns = [];
+    protected array $referencedColumns = [];
 
     /**
      * @var string|null
      */
-    protected $onDelete;
+    protected ?string $onDelete = null;
 
     /**
      * @var string|null
      */
-    protected $onUpdate;
+    protected ?string $onUpdate = null;
 
     /**
      * @var string|null
      */
-    protected $constraint;
+    protected ?string $constraint = null;
 
     /**
      * Sets the foreign key columns.
@@ -59,7 +59,7 @@ class ForeignKey
      * @param string[]|string $columns Columns
      * @return $this
      */
-    public function setColumns($columns)
+    public function setColumns(array|string $columns)
     {
         $this->columns = is_string($columns) ? [$columns] : $columns;
 
@@ -79,7 +79,7 @@ class ForeignKey
     /**
      * Sets the foreign key referenced table.
      *
-     * @param \Phinx\Db\Table\Table $table The table this KEY is pointing to
+     * @param \Migrations\Db\Table\Table $table The table this KEY is pointing to
      * @return $this
      */
     public function setReferencedTable(Table $table)
@@ -92,7 +92,7 @@ class ForeignKey
     /**
      * Gets the foreign key referenced table.
      *
-     * @return \Phinx\Db\Table\Table
+     * @return \Migrations\Db\Table\Table
      */
     public function getReferencedTable(): Table
     {
