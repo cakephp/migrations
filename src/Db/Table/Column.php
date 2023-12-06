@@ -8,10 +8,10 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Table;
 
+use Migrations\Db\Literal;
 use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\PostgresAdapter;
-use Phinx\Util\Literal;
 use RuntimeException;
 
 /**
@@ -65,7 +65,7 @@ class Column
     protected string $name;
 
     /**
-     * @var string|\Phinx\Util\Literal
+     * @var string|\Migrations\Db\Literal
      */
     protected string|Literal $type;
 
@@ -195,7 +195,7 @@ class Column
     /**
      * Sets the column type.
      *
-     * @param string|\Phinx\Util\Literal $type Column type
+     * @param string|\Migrations\Db\Literal $type Column type
      * @return $this
      */
     public function setType(string|Literal $type)
@@ -208,7 +208,7 @@ class Column
     /**
      * Gets the column type.
      *
-     * @return string|\Phinx\Util\Literal
+     * @return string|\Migrations\Db\Literal
      */
     public function getType(): string|Literal
     {
