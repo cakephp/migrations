@@ -48,14 +48,14 @@ class RenameColumn extends Action
      * @param \Migrations\Db\Table\Table $table The table where the column is
      * @param string $columnName The name of the column to be changed
      * @param string $newName The new name for the column
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string $columnName, string $newName): static
+    public static function build(Table $table, string $columnName, string $newName): self
     {
         $column = new Column();
         $column->setName($columnName);
 
-        return new static($table, $column, $newName);
+        return new RenameColumn($table, $column, $newName);
     }
 
     /**

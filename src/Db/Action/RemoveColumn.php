@@ -38,14 +38,14 @@ class RemoveColumn extends Action
      *
      * @param \Migrations\Db\Table\Table $table The table where the column is
      * @param string $columnName The name of the column to drop
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string $columnName): static
+    public static function build(Table $table, string $columnName): self
     {
         $column = new Column();
         $column->setName($columnName);
 
-        return new static($table, $column);
+        return new RemoveColumn($table, $column);
     }
 
     /**
