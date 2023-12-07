@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Action;
 
+use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
-use Migrations\Db\Literal;
 
 class ChangeColumn extends Action
 {
@@ -42,7 +42,7 @@ class ChangeColumn extends Action
         $this->column = $column;
 
         // if the name was omitted use the existing column name
-        if ($column->getName() === null || strlen($column->getName()) === 0) {
+        if ($column->getName() === null || strlen((string)$column->getName()) === 0) {
             $column->setName($columnName);
         }
     }
@@ -55,16 +55,16 @@ class ChangeColumn extends Action
      * @param string $columnName The name of the column to change
      * @param string|\Migrations\Db\Literal $type The type of the column
      * @param array<string, mixed> $options Additional options for the column
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string $columnName, string|Literal $type, array $options = []): static
+    public static function build(Table $table, string $columnName, string|Literal $type, array $options = []): self
     {
         $column = new Column();
         $column->setName($columnName);
         $column->setType($type);
         $column->setOptions($options); // map options to column methods
 
-        return new static($table, $columnName, $column);
+        return new ChangeColumn($table, $columnName, $column);
     }
 
     /**

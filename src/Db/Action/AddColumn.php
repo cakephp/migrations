@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Action;
 
+use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
-use Migrations\Db\Literal;
 
 class AddColumn extends Action
 {
@@ -40,16 +40,16 @@ class AddColumn extends Action
      * @param string $columnName The column name
      * @param string|\Migrations\Db\Literal $type The column type
      * @param array<string, mixed> $options The column options
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string $columnName, string|Literal $type, array $options = []): static
+    public static function build(Table $table, string $columnName, string|Literal $type, array $options = []): self
     {
         $column = new Column();
         $column->setName($columnName);
         $column->setType($type);
         $column->setOptions($options); // map options to column methods
 
-        return new static($table, $column);
+        return new AddColumn($table, $column);
     }
 
     /**

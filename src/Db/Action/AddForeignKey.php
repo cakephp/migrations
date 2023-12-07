@@ -42,9 +42,9 @@ class AddForeignKey extends Action
      * @param string|string[] $referencedColumns The columns in the referenced table
      * @param array<string, mixed> $options Extra options for the foreign key
      * @param string|null $name The name of the foreign key
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string|array $columns, Table|string $referencedTable, string|array $referencedColumns = ['id'], array $options = [], ?string $name = null): static
+    public static function build(Table $table, string|array $columns, Table|string $referencedTable, string|array $referencedColumns = ['id'], array $options = [], ?string $name = null): self
     {
         if (is_string($referencedColumns)) {
             $referencedColumns = [$referencedColumns]; // str to array
@@ -64,7 +64,7 @@ class AddForeignKey extends Action
             $fk->setConstraint($name);
         }
 
-        return new static($table, $fk);
+        return new AddForeignKey($table, $fk);
     }
 
     /**

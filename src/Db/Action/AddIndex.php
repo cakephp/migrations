@@ -39,21 +39,21 @@ class AddIndex extends Action
      * @param \Migrations\Db\Table\Table $table The table to add the index to
      * @param string|string[]|\Migrations\Db\Table\Index $columns The columns to index
      * @param array<string, mixed> $options Additional options for the index creation
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string|array|Index $columns, array $options = []): static
+    public static function build(Table $table, string|array|Index $columns, array $options = []): self
     {
         // create a new index object if strings or an array of strings were supplied
-        $index = $columns;
-
-        if (!$columns instanceof Index) {
+        if (!($columns instanceof Index)) {
             $index = new Index();
 
             $index->setColumns($columns);
             $index->setOptions($options);
+        } else {
+            $index = $columns;
         }
 
-        return new static($table, $index);
+        return new AddIndex($table, $index);
     }
 
     /**

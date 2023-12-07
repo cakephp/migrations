@@ -39,9 +39,9 @@ class DropForeignKey extends Action
      * @param \Migrations\Db\Table\Table $table The table to delete the foreign key from
      * @param string|string[] $columns The columns participating in the foreign key
      * @param string|null $constraint The constraint name
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, string|array $columns, ?string $constraint = null): static
+    public static function build(Table $table, string|array $columns, ?string $constraint = null): self
     {
         if (is_string($columns)) {
             $columns = [$columns];
@@ -54,7 +54,7 @@ class DropForeignKey extends Action
             $foreignKey->setConstraint($constraint);
         }
 
-        return new static($table, $foreignKey);
+        return new DropForeignKey($table, $foreignKey);
     }
 
     /**

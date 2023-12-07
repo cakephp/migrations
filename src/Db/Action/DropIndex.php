@@ -38,14 +38,14 @@ class DropIndex extends Action
      *
      * @param \Migrations\Db\Table\Table $table The table where the index is
      * @param string[] $columns the indexed columns
-     * @return static
+     * @return self
      */
-    public static function build(Table $table, array $columns = []): static
+    public static function build(Table $table, array $columns = []): self
     {
         $index = new Index();
         $index->setColumns($columns);
 
-        return new static($table, $index);
+        return new DropIndex($table, $index);
     }
 
     /**
@@ -54,14 +54,14 @@ class DropIndex extends Action
      *
      * @param \Migrations\Db\Table\Table $table The table where the index is
      * @param string $name The name of the index
-     * @return static
+     * @return self
      */
-    public static function buildFromName(Table $table, string $name): static
+    public static function buildFromName(Table $table, string $name): self
     {
         $index = new Index();
         $index->setName($name);
 
-        return new static($table, $index);
+        return new DropIndex($table, $index);
     }
 
     /**
