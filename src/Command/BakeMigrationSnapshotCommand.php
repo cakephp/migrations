@@ -105,6 +105,10 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
         if ($arguments->hasOption('disable-autoid')) {
             $autoId = !$arguments->getOption('disable-autoid');
         }
+        $forceAutoId = false;
+        if ($arguments->hasOption('force-autoid')) {
+            $forceAutoId = !$arguments->getOption('force-autoid');
+        }
 
         return [
             'plugin' => $this->plugin,
@@ -115,6 +119,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             'action' => 'create_table',
             'name' => $this->_name,
             'autoId' => $autoId,
+            'forceAutoId' => $forceAutoId,
         ];
     }
 
@@ -171,6 +176,10 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             'boolean' => true,
             'default' => false,
             'help' => 'Disable phinx behavior of automatically adding an id field.',
+        ])->addOption('force-autoid', [
+            'boolean' => true,
+            'default' => false,
+            'help' => 'Force automatically adding an id field. This will overwrite the disable-autoid option and ignore signed integers.',
         ])
         ->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after baking',
