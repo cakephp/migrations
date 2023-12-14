@@ -16,6 +16,31 @@ parameters:
 			path: src/Command/BakeMigrationSnapshotCommand.php
 
 		-
+			message: "#^Parameter \\#1 \\$table of method Phinx\\\\Db\\\\Adapter\\\\AdapterInterface\\:\\:createTable\\(\\) expects Phinx\\\\Db\\\\Table\\\\Table, Migrations\\\\Db\\\\Table\\\\Table given\\.$#"
+			count: 2
+			path: src/Db/Plan/Plan.php
+
+		-
+			message: "#^Parameter \\#1 \\$table of method Phinx\\\\Db\\\\Adapter\\\\AdapterInterface\\:\\:executeActions\\(\\) expects Phinx\\\\Db\\\\Table\\\\Table, Migrations\\\\Db\\\\Table\\\\Table given\\.$#"
+			count: 2
+			path: src/Db/Plan/Plan.php
+
+		-
+			message: "#^Parameter \\#2 \\$actions of method Phinx\\\\Db\\\\Adapter\\\\AdapterInterface\\:\\:executeActions\\(\\) expects array\\<Phinx\\\\Db\\\\Action\\\\Action\\>, array\\<Migrations\\\\Db\\\\Action\\\\Action\\> given\\.$#"
+			count: 2
+			path: src/Db/Plan/Plan.php
+
+		-
+			message: "#^Parameter \\#2 \\$columns of method Phinx\\\\Db\\\\Adapter\\\\AdapterInterface\\:\\:createTable\\(\\) expects array\\<Phinx\\\\Db\\\\Table\\\\Column\\>, array\\<Migrations\\\\Db\\\\Table\\\\Column\\> given\\.$#"
+			count: 2
+			path: src/Db/Plan/Plan.php
+
+		-
+			message: "#^Parameter \\#3 \\$indexes of method Phinx\\\\Db\\\\Adapter\\\\AdapterInterface\\:\\:createTable\\(\\) expects array\\<Phinx\\\\Db\\\\Table\\\\Index\\>, array\\<Migrations\\\\Db\\\\Table\\\\Index\\> given\\.$#"
+			count: 2
+			path: src/Db/Plan/Plan.php
+
+		-
 			message: "#^Possibly invalid array key type Cake\\\\Database\\\\Schema\\\\TableSchemaInterface\\|string\\.$#"
 			count: 2
 			path: src/View/Helper/MigrationHelper.php
