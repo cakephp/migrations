@@ -10,6 +10,20 @@
       <code>setInput</code>
     </PossiblyNullReference>
   </file>
+  <file src="src/Db/Plan/Plan.php">
+    <InvalidArgument>
+      <code><![CDATA[$newTable->getColumns()]]></code>
+      <code><![CDATA[$newTable->getColumns()]]></code>
+      <code><![CDATA[$newTable->getIndexes()]]></code>
+      <code><![CDATA[$newTable->getIndexes()]]></code>
+      <code><![CDATA[$newTable->getTable()]]></code>
+      <code><![CDATA[$newTable->getTable()]]></code>
+      <code><![CDATA[$update->getActions()]]></code>
+      <code><![CDATA[$update->getActions()]]></code>
+      <code><![CDATA[$update->getTable()]]></code>
+      <code><![CDATA[$update->getTable()]]></code>
+    </InvalidArgument>
+  </file>
   <file src="src/TableFinderTrait.php">
     <PossiblyUndefinedArrayOffset>
       <code>$split[0]</code>
