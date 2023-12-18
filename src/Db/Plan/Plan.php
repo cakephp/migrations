@@ -22,9 +22,9 @@ use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
-use Phinx\Db\Adapter\AdapterInterface;
 use Migrations\Db\Plan\Solver\ActionSplitter;
 use Migrations\Db\Table\Table;
+use Phinx\Db\Adapter\AdapterInterface;
 
 /**
  * A Plan takes an Intent and transforms int into a sequence of
