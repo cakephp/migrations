@@ -14,7 +14,6 @@
 */
 #}
 {% set tables = data['fullTables'] %}
-{# unset($data['fullTables']) #}
 {% set constraints = [] %}
 {% set autoId = not Migration.hasAutoIdIncompatiblePrimaryKey(tables['add'] + tables['remove']) %}
 <?php
