@@ -16,7 +16,7 @@
 {% set constraints = [] %}
 {% set foreignKeys = [] %}
 {% set dropForeignKeys = [] %}
-{% if autoId and Migration.hasAutoIdIncompatiblePrimaryKey(tables) %}
+{% if not forceAutoId and autoId and Migration.hasAutoIdIncompatiblePrimaryKey(tables) %}
 {%     set autoId = false %}
 {% endif %}
 <?php

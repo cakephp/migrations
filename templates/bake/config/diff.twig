@@ -15,7 +15,7 @@
 #}
 {% set tables = data['fullTables'] %}
 {% set constraints = [] %}
-{% set autoId = forceAutoId OR not Migration.hasAutoIdIncompatiblePrimaryKey(tables['add'] + tables['remove']) %}
+{% set autoId = not Migration.hasAutoIdIncompatiblePrimaryKey(tables['add'] + tables['remove']) %}
 <?php
 declare(strict_types=1);
 
