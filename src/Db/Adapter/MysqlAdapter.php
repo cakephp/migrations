@@ -11,14 +11,14 @@ namespace Migrations\Db\Adapter;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql as MysqlDriver;
 use InvalidArgumentException;
-use PDO;
-use Phinx\Config\FeatureFlags;
+use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Migrations\Db\AlterInstructions;
+use PDO;
+use Phinx\Config\FeatureFlags;
 use RuntimeException;
 use UnexpectedValueException;
 
