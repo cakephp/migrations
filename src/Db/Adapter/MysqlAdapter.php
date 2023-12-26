@@ -11,14 +11,14 @@ namespace Migrations\Db\Adapter;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql as MysqlDriver;
 use InvalidArgumentException;
-use PDO;
-use Phinx\Config\FeatureFlags;
+use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Migrations\Db\AlterInstructions;
+use PDO;
+use Phinx\Config\FeatureFlags;
 use RuntimeException;
 use UnexpectedValueException;
 
@@ -329,17 +329,19 @@ class MysqlAdapter extends PdoAdapter
         $sql = 'CREATE TABLE ';
         $sql .= $this->quoteTableName($table->getName()) . ' (';
         foreach ($columns as $column) {
-            $sql .= $this->quoteColumnName($column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
+            $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
         }
 
         // set the primary key(s)
         if (isset($options['primary_key'])) {
+            /** @var string|array $primaryKey */
+            $primaryKey = $options['primary_key'];
             $sql = rtrim($sql);
             $sql .= ' PRIMARY KEY (';
-            if (is_string($options['primary_key'])) { // handle primary_key => 'id'
-                $sql .= $this->quoteColumnName($options['primary_key']);
-            } elseif (is_array($options['primary_key'])) { // handle primary_key => array('tag_id', 'resource_id')
-                $sql .= implode(',', array_map([$this, 'quoteColumnName'], (array)$options['primary_key']));
+            if (is_string($primaryKey)) { // handle primary_key => 'id'
+                $sql .= $this->quoteColumnName($primaryKey);
+            } elseif (is_array($primaryKey)) { // handle primary_key => array('tag_id', 'resource_id')
+                $sql .= implode(',', array_map([$this, 'quoteColumnName'], $primaryKey));
             }
             $sql .= ')';
         } else {
@@ -523,7 +525,7 @@ class MysqlAdapter extends PdoAdapter
     {
         $alter = sprintf(
             'ADD %s %s',
-            $this->quoteColumnName($column->getName()),
+            $this->quoteColumnName((string)$column->getName()),
             $this->getColumnSqlDefinition($column)
         );
 
@@ -583,7 +585,7 @@ class MysqlAdapter extends PdoAdapter
         }
 
         throw new InvalidArgumentException(sprintf(
-            "The specified column doesn't exist: " .
+            "The specified column doesn't exist: %s",
             $columnName
         ));
     }
@@ -596,7 +598,7 @@ class MysqlAdapter extends PdoAdapter
         $alter = sprintf(
             'CHANGE %s %s %s%s',
             $this->quoteColumnName($columnName),
-            $this->quoteColumnName($newColumn->getName()),
+            $this->quoteColumnName((string)$newColumn->getName()),
             $this->getColumnSqlDefinition($newColumn),
             $this->afterClause($newColumn)
         );
@@ -1349,7 +1351,7 @@ class MysqlAdapter extends PdoAdapter
         }
 
         $values = $column->getValues();
-        if ($values && is_array($values)) {
+        if ($values) {
             $def .= '(' . implode(', ', array_map(function ($value) {
                 // we special case NULL as it's not actually allowed an enum value,
                 // and we want MySQL to issue an error on the create statement, but
@@ -1388,10 +1390,10 @@ class MysqlAdapter extends PdoAdapter
         ) {
             $default = Literal::from('(' . $this->getConnection()->quote($column->getDefault()) . ')');
         }
-        $def .= $this->getDefaultValueDefinition($default, $column->getType());
+        $def .= $this->getDefaultValueDefinition($default, (string)$column->getType());
 
         if ($column->getComment()) {
-            $def .= ' COMMENT ' . $this->getConnection()->quote($column->getComment());
+            $def .= ' COMMENT ' . $this->getConnection()->quote((string)$column->getComment());
         }
 
         if ($column->getUpdate()) {
@@ -1426,7 +1428,7 @@ class MysqlAdapter extends PdoAdapter
             $def .= ' `' . $index->getName() . '`';
         }
 
-        $columnNames = $index->getColumns();
+        $columnNames = (array)$index->getColumns();
         $order = $index->getOrder() ?? [];
         $columnNames = array_map(function ($columnName) use ($order) {
             $ret = '`' . $columnName . '`';
@@ -1443,7 +1445,7 @@ class MysqlAdapter extends PdoAdapter
             }
             $def .= ' (' . implode(',', $columnNames) . $limit . ')';
         } else {
-            $columns = $index->getColumns();
+            $columns = (array)$index->getColumns();
             $limits = $index->getLimit();
             $def .= ' (';
             foreach ($columns as $column) {
@@ -1468,7 +1470,7 @@ class MysqlAdapter extends PdoAdapter
     {
         $def = '';
         if ($foreignKey->getConstraint()) {
-            $def .= ' CONSTRAINT ' . $this->quoteColumnName($foreignKey->getConstraint());
+            $def .= ' CONSTRAINT ' . $this->quoteColumnName((string)$foreignKey->getConstraint());
         }
         $columnNames = [];
         foreach ($foreignKey->getColumns() as $column) {

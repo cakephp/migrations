@@ -157,7 +157,7 @@ class Plan
     /**
      * Executes the inverse plan (rollback the actions) with the given AdapterInterface:w
      *
-     * @param \Phinx\Db\Adapter\AdapterInterface $executor The executor object for the plan
+     * @param \Migrations\Db\Adapter\AdapterInterface $executor The executor object for the plan
      * @return void
      */
     public function executeInverse(AdapterInterface $executor): void

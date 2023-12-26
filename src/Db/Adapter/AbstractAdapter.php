@@ -10,9 +10,9 @@ namespace Migrations\Db\Adapter;
 
 use Exception;
 use InvalidArgumentException;
+use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
-use Migrations\Util\Literal;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;

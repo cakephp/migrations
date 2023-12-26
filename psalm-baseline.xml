@@ -10,19 +10,16 @@
       <code>setInput</code>
     </PossiblyNullReference>
   </file>
-  <file src="src/Db/Plan/Plan.php">
-    <InvalidArgument>
-      <code><![CDATA[$newTable->getColumns()]]></code>
-      <code><![CDATA[$newTable->getColumns()]]></code>
-      <code><![CDATA[$newTable->getIndexes()]]></code>
-      <code><![CDATA[$newTable->getIndexes()]]></code>
-      <code><![CDATA[$newTable->getTable()]]></code>
-      <code><![CDATA[$newTable->getTable()]]></code>
-      <code><![CDATA[$update->getActions()]]></code>
-      <code><![CDATA[$update->getActions()]]></code>
-      <code><![CDATA[$update->getTable()]]></code>
-      <code><![CDATA[$update->getTable()]]></code>
-    </InvalidArgument>
+  <file src="src/Db/Adapter/AbstractAdapter.php">
+    <RedundantPropertyInitializationCheck>
+      <code><![CDATA[isset($this->output)]]></code>
+    </RedundantPropertyInitializationCheck>
+  </file>
+  <file src="src/Db/Adapter/MysqlAdapter.php">
+    <RedundantCondition>
+      <code>$opened</code>
+      <code>is_array($newColumns)</code>
+    </RedundantCondition>
   </file>
   <file src="src/TableFinderTrait.php">
     <PossiblyUndefinedArrayOffset>
