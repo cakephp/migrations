@@ -22,9 +22,9 @@ use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
+use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Plan\Solver\ActionSplitter;
 use Migrations\Db\Table\Table;
-use Phinx\Db\Adapter\AdapterInterface;
 
 /**
  * A Plan takes an Intent and transforms int into a sequence of
@@ -138,7 +138,7 @@ class Plan
     /**
      * Executes this plan using the given AdapterInterface
      *
-     * @param \Phinx\Db\Adapter\AdapterInterface $executor The executor object for the plan
+     * @param \Migrations\Db\Adapter\AdapterInterface $executor The executor object for the plan
      * @return void
      */
     public function execute(AdapterInterface $executor): void

@@ -9,10 +9,10 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Query;
+use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
 use Phinx\Migration\MigrationInterface;
-use Phinx\Util\Literal;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -447,7 +447,7 @@ interface AdapterInterface
     /**
      * Converts the Phinx logical type to the adapter's SQL type.
      *
-     * @param \Phinx\Util\Literal|string $type Type
+     * @param \Migrations\Db\Literal|string $type Type
      * @param int|null $limit Limit
      * @return array
      */
