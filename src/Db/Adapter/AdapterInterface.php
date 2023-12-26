@@ -154,7 +154,7 @@ interface AdapterInterface
     public function getOutput(): OutputInterface;
 
     /**
-     * Returns a new Phinx\Db\Table\Column using the existent data domain.
+     * Returns a new Migrations\Db\Table\Column using the existent data domain.
      *
      * @param string $columnName The desired column name
      * @param string $type The type for the column. Can be a data domain type.
@@ -360,8 +360,8 @@ interface AdapterInterface
      * Creates the specified database table.
      *
      * @param \Migrations\Db\Table\Table $table Table
-     * @param \Phinx\Db\Table\Column[] $columns List of columns in the table
-     * @param \Phinx\Db\Table\Index[] $indexes List of indexes for the table
+     * @param \Migrations\Db\Table\Column[] $columns List of columns in the table
+     * @param \Migrations\Db\Table\Index[] $indexes List of indexes for the table
      * @return void
      */
     public function createTable(Table $table, array $columns = [], array $indexes = []): void;
@@ -378,7 +378,7 @@ interface AdapterInterface
      * Returns table columns
      *
      * @param string $tableName Table name
-     * @return \Phinx\Db\Table\Column[]
+     * @return \Migrations\Db\Table\Column[]
      */
     public function getColumns(string $tableName): array;
 

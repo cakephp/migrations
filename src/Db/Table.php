@@ -39,17 +39,17 @@ use RuntimeException;
 class Table
 {
     /**
-     * @var \Phinx\Db\Table\Table
+     * @var \Migrations\Db\Table\Table
      */
     protected TableValue $table;
 
     /**
-     * @var \Phinx\Db\Adapter\AdapterInterface|null
+     * @var \Migrations\Db\Adapter\AdapterInterface|null
      */
     protected ?AdapterInterface $adapter = null;
 
     /**
-     * @var \Phinx\Db\Plan\Intent
+     * @var \Migrations\Db\Plan\Intent
      */
     protected Intent $actions;
 
@@ -61,7 +61,7 @@ class Table
     /**
      * @param string $name Table Name
      * @param array<string, mixed> $options Options
-     * @param \Phinx\Db\Adapter\AdapterInterface|null $adapter Database Adapter
+     * @param \Migrations\Db\Adapter\AdapterInterface|null $adapter Database Adapter
      */
     public function __construct(string $name, array $options = [], ?AdapterInterface $adapter = null)
     {
@@ -96,7 +96,7 @@ class Table
     /**
      * Gets the table name and options as an object
      *
-     * @return \Phinx\Db\Table\Table
+     * @return \Migrations\Db\Table\Table
      */
     public function getTable(): TableValue
     {
@@ -106,7 +106,7 @@ class Table
     /**
      * Sets the database adapter.
      *
-     * @param \Phinx\Db\Adapter\AdapterInterface $adapter Database Adapter
+     * @param \Migrations\Db\Adapter\AdapterInterface $adapter Database Adapter
      * @return $this
      */
     public function setAdapter(AdapterInterface $adapter)
@@ -120,7 +120,7 @@ class Table
      * Gets the database adapter.
      *
      * @throws \RuntimeException
-     * @return \Phinx\Db\Adapter\AdapterInterface
+     * @return \Migrations\Db\Adapter\AdapterInterface
      */
     public function getAdapter(): AdapterInterface
     {
@@ -217,7 +217,7 @@ class Table
     /**
      * Gets an array of the table columns.
      *
-     * @return \Phinx\Db\Table\Column[]
+     * @return \Migrations\Db\Table\Column[]
      */
     public function getColumns(): array
     {
@@ -228,7 +228,7 @@ class Table
      * Gets a table column if it exists.
      *
      * @param string $name Column name
-     * @return \Phinx\Db\Table\Column|null
+     * @return \Migrations\Db\Table\Column|null
      */
     public function getColumn(string $name): ?Column
     {
@@ -294,8 +294,8 @@ class Table
      *
      * Valid options can be: limit, default, null, precision or scale.
      *
-     * @param string|\Phinx\Db\Table\Column $columnName Column Name
-     * @param string|\Phinx\Util\Literal|null $type Column Type
+     * @param string|\Migrations\Db\Table\Column $columnName Column Name
+     * @param string|\Migrations\Db\Literal|null $type Column Type
      * @param array<string, mixed> $options Column Options
      * @throws \InvalidArgumentException
      * @return $this
@@ -358,7 +358,7 @@ class Table
      * Change a table column type.
      *
      * @param string $columnName Column Name
-     * @param string|\Phinx\Db\Table\Column|\Phinx\Util\Literal $newColumnType New Column Type
+     * @param string|\Migrations\Db\Table\Column|\Migrations\Db\Literal $newColumnType New Column Type
      * @param array<string, mixed> $options Options
      * @return $this
      */
@@ -390,7 +390,7 @@ class Table
      *
      * In $options you can specify unique = true/false, and name (index name).
      *
-     * @param string|array|\Phinx\Db\Table\Index $columns Table Column(s)
+     * @param string|array|\Migrations\Db\Table\Index $columns Table Column(s)
      * @param array<string, mixed> $options Index Options
      * @return $this
      */
@@ -459,7 +459,7 @@ class Table
      * on_update, constraint = constraint name.
      *
      * @param string|string[] $columns Columns
-     * @param string|\Phinx\Db\Table\Table $referencedTable Referenced Table
+     * @param string|\Migrations\Db\Table\Table $referencedTable Referenced Table
      * @param string|string[] $referencedColumns Referenced Columns
      * @param array<string, mixed> $options Options
      * @return $this
@@ -480,7 +480,7 @@ class Table
      *
      * @param string $name The constraint name
      * @param string|string[] $columns Columns
-     * @param string|\Phinx\Db\Table\Table $referencedTable Referenced Table
+     * @param string|\Migrations\Db\Table\Table $referencedTable Referenced Table
      * @param string|string[] $referencedColumns Referenced Columns
      * @param array<string, mixed> $options Options
      * @return $this

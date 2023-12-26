@@ -561,7 +561,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      * @throws \BadMethodCallException
      * @return void
      */
-    public function dropSchema(string $name): void
+    public function dropSchema(string $schemaName): void
     {
         throw new BadMethodCallException('Dropping a schema is not supported');
     }
@@ -647,7 +647,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      * Executes all the ALTER TABLE instructions passed for the given table
      *
      * @param string $tableName The table name to use in the ALTER statement
-     * @param \Migrations\Db\Util\AlterInstructions $instructions The object containing the alter sequence
+     * @param \Migrations\Db\AlterInstructions $instructions The object containing the alter sequence
      * @return void
      */
     protected function executeAlterSteps(string $tableName, AlterInstructions $instructions): void
@@ -670,7 +670,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param \Migrations\Db\Table\Table $table Table
      * @param \Migrations\Db\Table\Column $column Column
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions;
 
@@ -689,7 +689,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      * @param string $tableName Table name
      * @param string $columnName Column Name
      * @param string $newColumnName New Column Name
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getRenameColumnInstructions(string $tableName, string $columnName, string $newColumnName): AlterInstructions;
 
@@ -708,7 +708,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      * @param string $tableName Table name
      * @param string $columnName Column Name
      * @param \Migrations\Db\Table\Column $newColumn New Column
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getChangeColumnInstructions(string $tableName, string $columnName, Column $newColumn): AlterInstructions;
 
@@ -726,7 +726,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param string $tableName Table name
      * @param string $columnName Column Name
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropColumnInstructions(string $tableName, string $columnName): AlterInstructions;
 
@@ -744,7 +744,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param \Migrations\Db\Table\Table $table Table
      * @param \Migrations\Db\Table\Index $index Index
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions;
 
@@ -762,7 +762,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param string $tableName The name of of the table where the index is
      * @param string|string[] $columns Column(s)
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropIndexByColumnsInstructions(string $tableName, string|array $columns): AlterInstructions;
 
@@ -780,7 +780,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param string $tableName The table name whe the index is
      * @param string $indexName The name of the index
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropIndexByNameInstructions(string $tableName, string $indexName): AlterInstructions;
 
@@ -798,7 +798,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param \Migrations\Db\Table\Table $table The table to add the constraint to
      * @param \Migrations\Db\Table\ForeignKey $foreignKey The foreign key to add
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey): AlterInstructions;
 
@@ -821,7 +821,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param string $tableName The table where the foreign key constraint is
      * @param string $constraint Constraint name
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropForeignKeyInstructions(string $tableName, string $constraint): AlterInstructions;
 
@@ -830,7 +830,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param string $tableName The table where the foreign key constraint is
      * @param string[] $columns The list of column names
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropForeignKeyByColumnsInstructions(string $tableName, array $columns): AlterInstructions;
 
@@ -847,16 +847,16 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      * Returns the instructions to drop the specified database table.
      *
      * @param string $tableName Table name
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropTableInstructions(string $tableName): AlterInstructions;
 
     /**
      * @inheritdoc
      */
-    public function renameTable(string $tableName, string $newTableName): void
+    public function renameTable(string $tableName, string $newName): void
     {
-        $instructions = $this->getRenameTableInstructions($tableName, $newTableName);
+        $instructions = $this->getRenameTableInstructions($tableName, $newName);
         $this->executeAlterSteps($tableName, $instructions);
     }
 
@@ -865,7 +865,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      *
      * @param string $tableName Table name
      * @param string $newTableName New Name
-     * @return \Migrations\Db\Util\AlterInstructions
+     * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getRenameTableInstructions(string $tableName, string $newTableName): AlterInstructions;
 
