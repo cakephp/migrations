@@ -196,7 +196,9 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         }
 
         if (empty($params)) {
-            return $this->getConnection()->exec($sql);
+            $result = $this->getConnection()->exec($sql);
+
+            return is_int($result) ? $result : 0;
         }
 
         $stmt = $this->getConnection()->prepare($sql);
@@ -347,7 +349,9 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         );
         $current = current($rows);
         $keys = array_keys($current);
-        $sql .= '(' . implode(', ', array_map([$this, 'quoteColumnName'], $keys)) . ') VALUES ';
+
+        $callback = fn ($key) => $this->quoteColumnName($key);
+        $sql .= '(' . implode(', ', array_map($callback, $keys)) . ') VALUES ';
 
         if ($this->isDryRunEnabled()) {
             $values = array_map(function ($row) {
