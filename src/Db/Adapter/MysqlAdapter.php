@@ -1362,7 +1362,7 @@ class MysqlAdapter extends PdoAdapter
 
         $def .= $column->getEncoding() ? ' CHARACTER SET ' . $column->getEncoding() : '';
         $def .= $column->getCollation() ? ' COLLATE ' . $column->getCollation() : '';
-        $def .= !$column->isSigned() && isset($this->signedColumnTypes[$column->getType()]) ? ' unsigned' : '';
+        $def .= !$column->isSigned() && isset($this->signedColumnTypes[(string)$column->getType()]) ? ' unsigned' : '';
         $def .= $column->isNull() ? ' NULL' : ' NOT NULL';
 
         if (
@@ -1450,7 +1450,7 @@ class MysqlAdapter extends PdoAdapter
             $def .= ' (';
             foreach ($columns as $column) {
                 $limit = !isset($limits[$column]) || $limits[$column] <= 0 ? '' : '(' . $limits[$column] . ')';
-                $columnSort = isset($order[$column]) ?? '';
+                $columnSort = $order[$column] ?? '';
                 $def .= '`' . $column . '`' . $limit . ' ' . $columnSort . ', ';
             }
             $def = rtrim($def, ', ');
