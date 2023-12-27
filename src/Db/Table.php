@@ -315,8 +315,8 @@ class Table
         if (!$this->getAdapter()->isValidColumnType($action->getColumn())) {
             throw new InvalidArgumentException(sprintf(
                 'An invalid column type "%s" was specified for column "%s".',
-                $action->getColumn()->getType(),
-                $action->getColumn()->getName()
+                (string)$action->getColumn()->getType(),
+                (string)$action->getColumn()->getName()
             ));
         }
 

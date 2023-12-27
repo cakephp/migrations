@@ -169,6 +169,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             $this->connect();
         }
 
+        /** @var \PDO $this->connection */
         return $this->connection;
     }
 
@@ -201,7 +202,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         $stmt = $this->getConnection()->prepare($sql);
         $result = $stmt->execute($params);
 
-        return $result ? $stmt->rowCount() : $result;
+        return $result ? $stmt->rowCount() : 0;
     }
 
     /**
@@ -617,7 +618,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function getAttribute(int $attribute): mixed
     {
-        return $this->connection->getAttribute($attribute);
+        return $this->getConnection()->getAttribute($attribute);
     }
 
     /**
@@ -953,7 +954,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                     /** @var \Migrations\Db\Action\DropForeignKey $action */
                     $instructions->merge($this->getDropForeignKeyInstructions(
                         $table->getName(),
-                        $action->getForeignKey()->getConstraint()
+                        (string)$action->getForeignKey()->getConstraint()
                     ));
                     break;
 
@@ -961,7 +962,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                     /** @var \Migrations\Db\Action\DropIndex $action */
                     $instructions->merge($this->getDropIndexByNameInstructions(
                         $table->getName(),
-                        $action->getIndex()->getName()
+                        (string)$action->getIndex()->getName()
                     ));
                     break;
 
@@ -969,7 +970,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                     /** @var \Migrations\Db\Action\DropIndex $action */
                     $instructions->merge($this->getDropIndexByColumnsInstructions(
                         $table->getName(),
-                        $action->getIndex()->getColumns()
+                        (array)$action->getIndex()->getColumns()
                     ));
                     break;
 
@@ -984,7 +985,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                     /** @var \Migrations\Db\Action\RemoveColumn $action */
                     $instructions->merge($this->getDropColumnInstructions(
                         $table->getName(),
-                        $action->getColumn()->getName()
+                        (string)$action->getColumn()->getName()
                     ));
                     break;
 
@@ -992,7 +993,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                     /** @var \Migrations\Db\Action\RenameColumn $action */
                     $instructions->merge($this->getRenameColumnInstructions(
                         $table->getName(),
-                        $action->getColumn()->getName(),
+                        (string)$action->getColumn()->getName(),
                         $action->getNewName()
                     ));
                     break;
