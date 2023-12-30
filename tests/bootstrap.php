@@ -121,10 +121,11 @@ if (getenv('DB_URL_COMPARE') !== false) {
     ]);
 }
 
-Plugin::getCollection()->add(new MigrationsPlugin());
-Plugin::getCollection()->add(new BakePlugin());
-Plugin::getCollection()->add(new SimpleSnapshotPlugin());
-Plugin::getCollection()->add(new TestBlogPlugin());
+Plugin::getCollection()
+    ->add(new MigrationsPlugin())
+    ->add(new BakePlugin())
+    ->add(new SimpleSnapshotPlugin())
+    ->add(new TestBlogPlugin());
 
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? 'UNKNOWN' : '@PHINX_VERSION@');
