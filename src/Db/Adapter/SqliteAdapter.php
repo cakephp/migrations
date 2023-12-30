@@ -425,7 +425,7 @@ class SqliteAdapter extends PdoAdapter
         $sql = 'CREATE TABLE ';
         $sql .= $this->quoteTableName($table->getName()) . ' (';
         foreach ($columns as $column) {
-            $sql .= $this->quoteColumnName($column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
+            $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
 
             if (isset($options['primary_key']) && $column->getIdentity()) {
                 //remove column from the primary key array as it is already defined as an autoincrement
@@ -745,11 +745,11 @@ PCRE_PATTERN;
             $sql = preg_replace(
                 sprintf(
                     "/(%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+)([,)])/",
-                    $this->quoteColumnName($finalColumnName)
+                    $this->quoteColumnName((string)$finalColumnName)
                 ),
                 sprintf(
                     '$1, %s %s$2',
-                    $this->quoteColumnName($column->getName()),
+                    $this->quoteColumnName((string)$column->getName()),
                     $this->getColumnSqlDefinition($column)
                 ),
                 $state['createSQL'],
@@ -1120,7 +1120,9 @@ PCRE_PATTERN;
     protected function calculateNewTableColumns(string $tableName, string|false $columnName, string|false $newColumnName): array
     {
         $columns = $this->fetchAll(sprintf('pragma table_info(%s)', $this->quoteTableName($tableName)));
+        /** @var array<string> $selectColumns */
         $selectColumns = [];
+        /** @var array<string> $writeColumns */
         $writeColumns = [];
         $columnType = null;
         $found = false;
@@ -1136,8 +1138,12 @@ PCRE_PATTERN;
                 $selectName = $newColumnName === false ? $newColumnName : $selectName;
             }
 
-            $selectColumns[] = $selectName;
-            $writeColumns[] = $writeName;
+            if ($selectName) {
+                $selectColumns[] = $selectName;
+            }
+            if ($writeName) {
+                $writeColumns[] = $writeName;
+            }
         }
 
         $selectColumns = array_filter($selectColumns, 'strlen');
@@ -1147,7 +1153,7 @@ PCRE_PATTERN;
 
         if ($columnName && !$found) {
             throw new InvalidArgumentException(sprintf(
-                'The specified column doesn\'t exist: ' . $columnName
+                'The specified column doesn\'t exist: %s', $columnName
             ));
         }
 
@@ -1219,7 +1225,8 @@ PCRE_PATTERN;
             }
         }
 
-        $foreignKeysEnabled = (bool)$this->fetchRow('PRAGMA foreign_keys')['foreign_keys'];
+        $result = $this->fetchRow('PRAGMA foreign_keys');
+        $foreignKeysEnabled = $result ? (bool)$result['foreign_keys'] : false;
 
         if ($foreignKeysEnabled) {
             $instructions->addPostStep('PRAGMA foreign_keys = OFF');
@@ -1276,11 +1283,11 @@ PCRE_PATTERN;
     {
         $instructions = $this->beginAlterByCopyTable($tableName);
 
-        $newColumnName = $newColumn->getName();
-        $instructions->addPostStep(function ($state) use ($columnName, $newColumn) {
+        $newColumnName = (string)$newColumn->getName();
+        $instructions->addPostStep(function ($state) use ($columnName, $newColumn, $newColumnName) {
             $sql = preg_replace(
                 sprintf("/%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+([,)])/", $this->quoteColumnName($columnName)),
-                sprintf('%s %s$1', $this->quoteColumnName($newColumn->getName()), $this->getColumnSqlDefinition($newColumn)),
+                sprintf('%s %s$1', $this->quoteColumnName($newColumnName), $this->getColumnSqlDefinition($newColumn)),
                 $state['createSQL'],
                 1
             );
@@ -1408,7 +1415,7 @@ PCRE_PATTERN;
     protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
     {
         $indexColumnArray = [];
-        foreach ($index->getColumns() as $column) {
+        foreach ((array)$index->getColumns() as $column) {
             $indexColumnArray[] = sprintf('`%s` ASC', $column);
         }
         $indexColumns = implode(',', $indexColumnArray);
@@ -1774,32 +1781,34 @@ PCRE_PATTERN;
         if ($sqlTypeDef === null) {
             // in SQLite columns can legitimately have null as a type, which is distinct from the empty string
             $name = null;
-        } elseif (!preg_match('/^([a-z]+)(_(?:integer|float|text|blob))?(?:\((\d+)(?:,(\d+))?\))?$/i', $sqlTypeDef, $match)) {
-            // doesn't match the pattern of a type we'd know about
-            $name = Literal::from($sqlTypeDef);
         } else {
-            // possibly a known type
-            $type = $match[1];
-            $typeLC = strtolower($type);
-            $affinity = $match[2] ?? '';
-            $limit = isset($match[3]) && strlen($match[3]) ? (int)$match[3] : null;
-            $scale = isset($match[4]) && strlen($match[4]) ? (int)$match[4] : null;
-            if (in_array($typeLC, ['tinyint', 'tinyinteger'], true) && $limit === 1) {
-                // the type is a MySQL-style boolean
-                $name = static::PHINX_TYPE_BOOLEAN;
-                $limit = null;
-            } elseif (isset(static::$supportedColumnTypes[$typeLC])) {
-                // the type is an explicitly supported type
-                $name = $typeLC;
-            } elseif (isset(static::$supportedColumnTypeAliases[$typeLC])) {
-                // the type is an alias for a supported type
-                $name = static::$supportedColumnTypeAliases[$typeLC];
-            } elseif (in_array($typeLC, static::$unsupportedColumnTypes, true)) {
-                // unsupported but known types are passed through lowercased, and without appended affinity
-                $name = Literal::from($typeLC);
+            if (!preg_match('/^([a-z]+)(_(?:integer|float|text|blob))?(?:\((\d+)(?:,(\d+))?\))?$/i', $sqlTypeDef, $match)) {
+                // doesn't match the pattern of a type we'd know about
+                $name = Literal::from($sqlTypeDef);
             } else {
-                // unknown types are passed through as-is
-                $name = Literal::from($type . $affinity);
+                // possibly a known type
+                $type = $match[1];
+                $typeLC = strtolower($type);
+                $affinity = $match[2] ?? '';
+                $limit = isset($match[3]) && strlen($match[3]) ? (int)$match[3] : null;
+                $scale = isset($match[4]) && strlen($match[4]) ? (int)$match[4] : null;
+                if (in_array($typeLC, ['tinyint', 'tinyinteger'], true) && $limit === 1) {
+                    // the type is a MySQL-style boolean
+                    $name = static::PHINX_TYPE_BOOLEAN;
+                    $limit = null;
+                } elseif (isset(static::$supportedColumnTypes[$typeLC])) {
+                    // the type is an explicitly supported type
+                    $name = $typeLC;
+                } elseif (isset(static::$supportedColumnTypeAliases[$typeLC])) {
+                    // the type is an alias for a supported type
+                    $name = static::$supportedColumnTypeAliases[$typeLC];
+                } elseif (in_array($typeLC, static::$unsupportedColumnTypes, true)) {
+                    // unsupported but known types are passed through lowercased, and without appended affinity
+                    $name = Literal::from($typeLC);
+                } else {
+                    // unknown types are passed through as-is
+                    $name = Literal::from($type . $affinity);
+                }
             }
         }
 
@@ -1868,7 +1877,7 @@ PCRE_PATTERN;
         $default = $column->getDefault();
 
         $def .= $column->isNull() ? ' NULL' : ' NOT NULL';
-        $def .= $this->getDefaultValueDefinition($default, $column->getType());
+        $def .= $this->getDefaultValueDefinition($default, (string)$column->getType());
         $def .= $column->isIdentity() ? ' PRIMARY KEY AUTOINCREMENT' : '';
 
         $def .= $this->getCommentDefinition($column);
@@ -1909,7 +1918,7 @@ PCRE_PATTERN;
             $indexName = $index->getName();
         } else {
             $indexName = $table->getName() . '_';
-            foreach ($index->getColumns() as $column) {
+            foreach ((array)$index->getColumns() as $column) {
                 $indexName .= $column . '_';
             }
             $indexName .= 'index';
@@ -1937,7 +1946,7 @@ PCRE_PATTERN;
     {
         $def = '';
         if ($foreignKey->getConstraint()) {
-            $def .= ' CONSTRAINT ' . $this->quoteColumnName($foreignKey->getConstraint());
+            $def .= ' CONSTRAINT ' . $this->quoteColumnName((string)$foreignKey->getConstraint());
         }
         $columnNames = [];
         foreach ($foreignKey->getColumns() as $column) {
