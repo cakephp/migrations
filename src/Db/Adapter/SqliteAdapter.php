@@ -1153,7 +1153,8 @@ PCRE_PATTERN;
 
         if ($columnName && !$found) {
             throw new InvalidArgumentException(sprintf(
-                'The specified column doesn\'t exist: %s', $columnName
+                'The specified column doesn\'t exist: %s',
+                $columnName
             ));
         }
 
