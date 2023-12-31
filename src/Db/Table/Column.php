@@ -82,7 +82,7 @@ class Column
     /**
      * @var mixed
      */
-    protected mixed $default;
+    protected mixed $default = null;
 
     /**
      * @var bool

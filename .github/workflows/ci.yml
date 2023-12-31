@@ -50,7 +50,7 @@ jobs:
         if: matrix.db-type == 'mysql'
         run: |
           sudo service mysql start
-          mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_test DEFAULT COLLATE=utf8mb4_general_ci;'
+          mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_test CHARACTER SET = utf8mb4 DEFAULT COLLATE=utf8mb4_general_ci;'
           mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
           mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_snapshot;'
 

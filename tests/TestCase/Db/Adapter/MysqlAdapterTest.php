@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use Cake\Database\Query;
+use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
@@ -29,17 +30,31 @@ class MysqlAdapterTest extends TestCase
      */
     private $adapter;
 
+    /**
+     * @var array
+     */
+    private $config;
+
     protected function setUp(): void
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
+        $config = ConnectionManager::getConfig('test');
+        // Emulate the results of Util::parseDsn()
+        $this->config = [
+            'adapter' => $config['scheme'],
+            'user' => $config['username'],
+            'pass' => $config['password'],
+            'host' => $config['host'],
+            'name' => $config['database'],
+        ];
+        if ($this->config['adapter'] !== 'mysql') {
             $this->markTestSkipped('Mysql tests disabled.');
         }
 
-        $this->adapter = new MysqlAdapter(MYSQL_DB_CONFIG, new ArrayInput([]), new NullOutput());
+        $this->adapter = new MysqlAdapter($this->config, new ArrayInput([]), new NullOutput());
 
         // ensure the database is empty for each test
-        $this->adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $this->adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $this->adapter->dropDatabase($this->config['name']);
+        $this->adapter->createDatabase($this->config['name'], ['charset' => 'utf8mb4']);
 
         // leave the adapter in a disconnected state for each test
         $this->adapter->disconnect();
@@ -80,7 +95,7 @@ class MysqlAdapterTest extends TestCase
 
     public function testConnectionWithInvalidCredentials()
     {
-        $options = ['user' => 'invalid', 'pass' => 'invalid'] + MYSQL_DB_CONFIG;
+        $options = ['user' => 'invalid', 'pass' => 'invalid'] + $this->config;
 
         try {
             $adapter = new MysqlAdapter($options, new ArrayInput([]), new NullOutput());
@@ -102,7 +117,7 @@ class MysqlAdapterTest extends TestCase
             $this->markTestSkipped('MySQL socket connection skipped.');
         }
 
-        $options = ['unix_socket' => getenv('MYSQL_UNIX_SOCKET')] + MYSQL_DB_CONFIG;
+        $options = ['unix_socket' => getenv('MYSQL_UNIX_SOCKET')] + $this->config;
         $adapter = new MysqlAdapter($options, new ArrayInput([]), new NullOutput());
         $adapter->connect();
 
@@ -184,7 +199,7 @@ class MysqlAdapterTest extends TestCase
 
         $rows = $this->adapter->fetchAll(sprintf(
             "SELECT TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='ntable'",
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ));
         $comment = $rows[0];
 
@@ -212,7 +227,7 @@ class MysqlAdapterTest extends TestCase
             "SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
              FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
              WHERE TABLE_SCHEMA='%s' AND REFERENCED_TABLE_NAME='ntable_tag'",
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ));
         $foreignKey = $rows[0];
 
@@ -405,7 +420,7 @@ class MysqlAdapterTest extends TestCase
 
     public function testCreateTableAndInheritDefaultCollation()
     {
-        $options = MYSQL_DB_CONFIG + [
+        $options = $this->config + [
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
         ];
@@ -521,7 +536,7 @@ class MysqlAdapterTest extends TestCase
 
     public function testCreateTableWithSchema()
     {
-        $table = new Table(MYSQL_DB_CONFIG['name'] . '.ntable', [], $this->adapter);
+        $table = new Table($this->config['name'] . '.ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
             ->addColumn('email', 'integer')
             ->save();
@@ -588,7 +603,7 @@ class MysqlAdapterTest extends TestCase
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
-                MYSQL_DB_CONFIG['name'],
+                $this->config['name'],
                 'table1'
             )
         );
@@ -610,7 +625,7 @@ class MysqlAdapterTest extends TestCase
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
-                MYSQL_DB_CONFIG['name'],
+                $this->config['name'],
                 'table1'
             )
         );
@@ -632,7 +647,7 @@ class MysqlAdapterTest extends TestCase
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
-                MYSQL_DB_CONFIG['name'],
+                $this->config['name'],
                 'table1'
             )
         );
@@ -947,6 +962,7 @@ class MysqlAdapterTest extends TestCase
               ->save();
         $newColumn1 = new Column();
         $newColumn1->setDefault('test1')
+                   ->setName('column1')
                    ->setType('string');
         $table->changeColumn('column1', $newColumn1)->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
@@ -961,6 +977,7 @@ class MysqlAdapterTest extends TestCase
               ->save();
         $newColumn1 = new Column();
         $newColumn1->setDefault(0)
+                   ->setName('column1')
                    ->setType('integer');
         $table->changeColumn('column1', $newColumn1)->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
@@ -975,6 +992,7 @@ class MysqlAdapterTest extends TestCase
               ->save();
         $newColumn1 = new Column();
         $newColumn1->setDefault(null)
+                   ->setName('column1')
                    ->setType('string');
         $table->changeColumn('column1', $newColumn1)->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
@@ -1372,7 +1390,7 @@ class MysqlAdapterTest extends TestCase
 
         $this->assertContains($described['TABLE_TYPE'], ['VIEW', 'BASE TABLE']);
         $this->assertEquals($described['TABLE_NAME'], 't');
-        $this->assertEquals($described['TABLE_SCHEMA'], MYSQL_DB_CONFIG['name']);
+        $this->assertEquals($described['TABLE_SCHEMA'], $this->config['name']);
         $this->assertEquals($described['TABLE_ROWS'], 0);
     }
 
@@ -1450,7 +1468,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email"',
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 50);
@@ -1468,13 +1486,13 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex(['email', 'username']));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "email"',
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 3);
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "username"',
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 2);
@@ -1492,7 +1510,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "email"',
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 3);
@@ -1919,14 +1937,14 @@ class MysqlAdapterTest extends TestCase
             ->addForeignKey(['ref_table_id'], 'ref_table', ['id'])
             ->save();
 
-        $this->assertTrue($this->adapter->hasForeignKey(MYSQL_DB_CONFIG['name'] . '.' . $table->getName(), ['ref_table_id']));
-        $this->assertFalse($this->adapter->hasForeignKey(MYSQL_DB_CONFIG['name'] . '.' . $table->getName(), ['ref_table_id2']));
+        $this->assertTrue($this->adapter->hasForeignKey($this->config['name'] . '.' . $table->getName(), ['ref_table_id']));
+        $this->assertFalse($this->adapter->hasForeignKey($this->config['name'] . '.' . $table->getName(), ['ref_table_id2']));
     }
 
     public function testHasDatabase()
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
-        $this->assertTrue($this->adapter->hasDatabase(MYSQL_DB_CONFIG['name']));
+        $this->assertTrue($this->adapter->hasDatabase($this->config['name']));
     }
 
     public function testDropDatabase()
@@ -1948,7 +1966,7 @@ class MysqlAdapterTest extends TestCase
             FROM information_schema.columns
             WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='table1'
             ORDER BY ORDINAL_POSITION",
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ));
         $columnWithComment = $rows[1];
 
@@ -2482,7 +2500,7 @@ INPUT;
 
         $rows = $this->adapter->fetchAll(sprintf(
             "SELECT COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='exampleCurrentTimestamp3'",
-            MYSQL_DB_CONFIG['name']
+            $this->config['name']
         ));
         $colDef = $rows[0];
         $this->assertEqualsIgnoringCase('CURRENT_TIMESTAMP(3)', $colDef['COLUMN_DEFAULT']);
@@ -2501,7 +2519,7 @@ INPUT;
      */
     public function testInvalidPdoAttribute($attribute)
     {
-        $adapter = new MysqlAdapter(MYSQL_DB_CONFIG + [$attribute => true]);
+        $adapter = new MysqlAdapter($this->config + [$attribute => true]);
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('Invalid PDO attribute: ' . $attribute . ' (\PDO::' . strtoupper($attribute) . ')');
         $adapter->connect();
@@ -2548,13 +2566,13 @@ INPUT;
 
     public function testPdoPersistentConnection()
     {
-        $adapter = new MysqlAdapter(MYSQL_DB_CONFIG + ['attr_persistent' => true]);
+        $adapter = new MysqlAdapter($this->config + ['attr_persistent' => true]);
         $this->assertTrue($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
     }
 
     public function testPdoNotPersistentConnection()
     {
-        $adapter = new MysqlAdapter(MYSQL_DB_CONFIG);
+        $adapter = new MysqlAdapter($this->config);
         $this->assertFalse($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
     }
 }
