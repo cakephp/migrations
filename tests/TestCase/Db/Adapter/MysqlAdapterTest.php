@@ -54,7 +54,7 @@ class MysqlAdapterTest extends TestCase
 
         // ensure the database is empty for each test
         $this->adapter->dropDatabase($this->config['name']);
-        $this->adapter->createDatabase($this->config['name']);
+        $this->adapter->createDatabase($this->config['name'], ['charset' => 'utf8mb4']);
 
         // leave the adapter in a disconnected state for each test
         $this->adapter->disconnect();
