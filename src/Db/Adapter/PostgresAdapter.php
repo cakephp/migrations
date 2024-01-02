@@ -220,6 +220,9 @@ class PostgresAdapter extends PdoAdapter
                 $this->getConnection()->quote($parts['table'])
             )
         );
+        if (!$result) {
+            return false;
+        }
 
         return $result->rowCount() === 1;
     }
@@ -1658,7 +1661,8 @@ class PostgresAdapter extends PdoAdapter
             $override = self::OVERRIDE_SYSTEM_VALUE . ' ';
         }
 
-        $sql .= '(' . implode(', ', array_map([$this, 'quoteColumnName'], $keys)) . ') ' . $override . 'VALUES ';
+        $callback = fn ($key) => $this->quoteColumnName($key);
+        $sql .= '(' . implode(', ', array_map($callback, $keys)) . ') ' . $override . 'VALUES ';
 
         if ($this->isDryRunEnabled()) {
             $values = array_map(function ($row) {
