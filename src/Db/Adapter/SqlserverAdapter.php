@@ -18,9 +18,9 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Phinx\Migration\MigrationInterface;
 use PDO;
 use PDOException;
+use Phinx\Migration\MigrationInterface;
 use RuntimeException;
 use UnexpectedValueException;
 
@@ -260,7 +260,7 @@ class SqlserverAdapter extends PdoAdapter
         $sqlBuffer = [];
         $columnsWithComments = [];
         foreach ($columns as $column) {
-            $sqlBuffer[] = $this->quoteColumnName($column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
+            $sqlBuffer[] = $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
 
             // set column comments, if needed
             if ($column->getComment()) {
@@ -271,10 +271,13 @@ class SqlserverAdapter extends PdoAdapter
         // set the primary key(s)
         if (isset($options['primary_key'])) {
             $pkSql = sprintf('CONSTRAINT PK_%s PRIMARY KEY (', $table->getName());
-            if (is_string($options['primary_key'])) { // handle primary_key => 'id'
-                $pkSql .= $this->quoteColumnName($options['primary_key']);
-            } elseif (is_array($options['primary_key'])) { // handle primary_key => array('tag_id', 'resource_id')
-                $pkSql .= implode(',', array_map([$this, 'quoteColumnName'], $options['primary_key']));
+            /** @var string|array $primaryKey */
+            $primaryKey = $options['primary_key'];
+
+            if (is_string($primaryKey)) { // handle primary_key => 'id'
+                $pkSql .= $this->quoteColumnName($primaryKey);
+            } elseif (is_array($primaryKey)) { // handle primary_key => array('tag_id', 'resource_id')
+                $pkSql .= implode(',', array_map([$this, 'quoteColumnName'], $primaryKey));
             }
             $pkSql .= ')';
             $sqlBuffer[] = $pkSql;
@@ -329,11 +332,6 @@ class SqlserverAdapter extends PdoAdapter
                 $sql .= $this->quoteColumnName($newColumns);
             } elseif (is_array($newColumns)) { // handle primary_key => array('tag_id', 'resource_id')
                 $sql .= implode(',', array_map([$this, 'quoteColumnName'], $newColumns));
-            } else {
-                throw new InvalidArgumentException(sprintf(
-                    'Invalid value for primary key: %s',
-                    json_encode($newColumns)
-                ));
             }
             $sql .= ')';
             $instructions->addPostStep($sql);
@@ -357,15 +355,15 @@ class SqlserverAdapter extends PdoAdapter
      * Gets the SqlServer Column Comment Defininition for a column object.
      *
      * @param \Migrations\Db\Table\Column $column Column
-     * @param string $tableName Table name
+     * @param ?string $tableName Table name
      * @return string
      */
-    protected function getColumnCommentSqlDefinition(Column $column, string $tableName): string
+    protected function getColumnCommentSqlDefinition(Column $column, ?string $tableName): string
     {
         // passing 'null' is to remove column comment
-        $currentComment = $this->getColumnComment($tableName, $column->getName());
+        $currentComment = $this->getColumnComment((string)$tableName, $column->getName());
 
-        $comment = strcasecmp($column->getComment(), 'NULL') !== 0 ? $this->getConnection()->quote($column->getComment()) : '\'\'';
+        $comment = strcasecmp((string)$column->getComment(), 'NULL') !== 0 ? $this->getConnection()->quote((string)$column->getComment()) : '\'\'';
         $command = $currentComment === null ? 'sp_addextendedproperty' : 'sp_updateextendedproperty';
 
         return sprintf(
@@ -373,8 +371,8 @@ class SqlserverAdapter extends PdoAdapter
             $command,
             $comment,
             $this->schema,
-            $tableName,
-            $column->getName()
+            (string)$tableName,
+            (string)$column->getName()
         );
     }
 
@@ -419,10 +417,10 @@ class SqlserverAdapter extends PdoAdapter
 
     /**
      * @param string $tableName Table name
-     * @param string $columnName Column name
+     * @param ?string $columnName Column name
      * @return string|null
      */
-    public function getColumnComment(string $tableName, string $columnName): ?string
+    public function getColumnComment(string $tableName, ?string $columnName): ?string
     {
         $sql = sprintf("SELECT cast(extended_properties.[value] as nvarchar(4000)) comment
   FROM sys.schemas
@@ -434,7 +432,7 @@ class SqlserverAdapter extends PdoAdapter
     ON tables.object_id = extended_properties.major_id
    AND columns.column_id = extended_properties.minor_id
    AND extended_properties.name = 'MS_Description'
-   WHERE schemas.[name] = '%s' AND tables.[name] = '%s' AND columns.[name] = '%s'", $this->schema, $tableName, $columnName);
+   WHERE schemas.[name] = '%s' AND tables.[name] = '%s' AND columns.[name] = '%s'", $this->schema, $tableName, (string)$columnName);
         $row = $this->fetchRow($sql);
 
         if ($row) {
@@ -538,7 +536,7 @@ class SqlserverAdapter extends PdoAdapter
         $alter = sprintf(
             'ALTER TABLE %s ADD %s %s',
             $table->getName(),
-            $this->quoteColumnName($column->getName()),
+            $this->quoteColumnName((string)$column->getName()),
             $this->getColumnSqlDefinition($column)
         );
 
@@ -610,7 +608,7 @@ SQL;
             $this->quoteTableName($tableName),
             $constraintName,
             $default,
-            $this->quoteColumnName($newColumn->getName())
+            $this->quoteColumnName((string)$newColumn->getName())
         ));
 
         return $instructions;
@@ -630,18 +628,18 @@ SQL;
 
         if ($columnName !== $newColumn->getName()) {
             $instructions->merge(
-                $this->getRenameColumnInstructions($tableName, $columnName, $newColumn->getName())
+                $this->getRenameColumnInstructions($tableName, $columnName, (string)$newColumn->getName())
             );
         }
 
         if ($changeDefault) {
-            $instructions->merge($this->getDropDefaultConstraint($tableName, $newColumn->getName()));
+            $instructions->merge($this->getDropDefaultConstraint($tableName, (string)$newColumn->getName()));
         }
 
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s ALTER COLUMN %s %s',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName($newColumn->getName()),
+            $this->quoteColumnName((string)$newColumn->getName()),
             $this->getColumnSqlDefinition($newColumn, false)
         ));
         // change column comment if needed
@@ -679,7 +677,7 @@ SQL;
      */
     protected function getDropDefaultConstraint(string $tableName, ?string $columnName): AlterInstructions
     {
-        $defaultConstraint = $this->getDefaultConstraint($tableName, $columnName);
+        $defaultConstraint = $this->getDefaultConstraint($tableName, (string)$columnName);
 
         if (!$defaultConstraint) {
             return new AlterInstructions();
@@ -1057,7 +1055,7 @@ ORDER BY T.[name], I.[index_id];";
     /**
      * {@inheritDoc}
      *
-     * @throws \Migrationms\Db\Adapter\UnsupportedColumnTypeException
+     * @throws \Migrations\Db\Adapter\UnsupportedColumnTypeException
      */
     public function getSqlType(Literal|string $type, ?int $limit = null): array
     {
@@ -1273,16 +1271,15 @@ SQL;
      * Gets the SqlServer Index Definition for an Index object.
      *
      * @param \Migrations\Db\Table\Index $index Index
-     * @param string $tableName Table name
+     * @param ?string $tableName Table name
      * @return string
      */
-    protected function getIndexSqlDefinition(Index $index, string $tableName): string
+    protected function getIndexSqlDefinition(Index $index, ?string $tableName): string
     {
-        $columnNames = $index->getColumns();
-        if (is_string($index->getName())) {
-            $indexName = $index->getName();
-        } else {
-            $indexName = sprintf('%s_%s', $tableName, implode('_', $columnNames));
+        $columnNames = (array)$index->getColumns();
+        $indexName = $index->getName();
+        if (!is_string($indexName)) {
+            $indexName = sprintf('%s_%s', (string)$tableName, implode('_', $columnNames));
         }
         $order = $index->getOrder() ?? [];
         $columnNames = array_map(function ($columnName) use ($order) {
@@ -1294,13 +1291,14 @@ SQL;
             return $ret;
         }, $columnNames);
 
-        $includedColumns = $index->getInclude() ? sprintf('INCLUDE ([%s])', implode('],[', $index->getInclude())) : '';
+        $include = $index->getInclude();
+        $includedColumns = $include ? sprintf('INCLUDE ([%s])', implode('],[', $include)) : '';
 
         return sprintf(
             'CREATE %s INDEX %s ON %s (%s) %s;',
             ($index->getType() === Index::UNIQUE ? 'UNIQUE' : ''),
             $indexName,
-            $this->quoteTableName($tableName),
+            $this->quoteTableName((string)$tableName),
             implode(',', $columnNames),
             $includedColumns
         );
@@ -1340,11 +1338,11 @@ SQL;
     /**
      * Records a migration being run.
      *
-     * @param \Migrations\Migration\MigrationInterface $migration Migration
+     * @param \Phinx\Migration\MigrationInterface $migration Migration
      * @param string $direction Direction
      * @param string $startTime Start Time
      * @param string $endTime End Time
-     * @return \Migrations\Db\Adapter\AdapterInterface
+     * @return \Phinx\Db\Adapter\AdapterInterface
      */
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
