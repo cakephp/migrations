@@ -184,7 +184,7 @@ jobs:
         DB_URL_SNAPSHOT: 'sqlsrv://(localdb)\MSSQLLocalDB/cakephp_snapshot'
         CODECOVERAGE: 1
       run: |
-          vendor/bin/phpunit --verbose --coverage-clover=coverage.xml
+          vendor/bin/phpunit --coverage-clover=coverage.xml
 
     - name: Submit code coverage
       uses: codecov/codecov-action@v3
