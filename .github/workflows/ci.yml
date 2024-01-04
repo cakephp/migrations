@@ -180,8 +180,8 @@ jobs:
 
     - name: Run PHPUnit
       env:
-        DB_URL: 'sqlsrv://(localdb)\MSSQLLocalDB/cakephp_test'
-        DB_URL_SNAPSHOT: 'sqlsrv://(localdb)\MSSQLLocalDB/cakephp_snapshot'
+        DB_URL: 'sqlserver://(localdb)\MSSQLLocalDB/cakephp_test'
+        DB_URL_SNAPSHOT: 'sqlserver://(localdb)\MSSQLLocalDB/cakephp_snapshot'
         CODECOVERAGE: 1
       run: |
           vendor/bin/phpunit --coverage-clover=coverage.xml
