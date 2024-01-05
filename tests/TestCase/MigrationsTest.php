@@ -15,6 +15,7 @@ namespace Migrations\Test\TestCase;
 
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Exception;
@@ -91,6 +92,7 @@ class MigrationsTest extends TestCase
         // We can't wipe all tables as we'l break other tests.
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
+        $this->Connection->execute('DROP TABLE IF EXISTS stores');
 
         $allTables = $this->Connection->getSchemaCollection()->listTables();
         if (in_array('phinxlog', $allTables)) {
@@ -197,7 +199,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expectedStatus, $status);
 
-        $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
+        $numbersTable = $this->getTableLocator()->get('numbers', ['connection' => $this->Connection]);
         $columns = $numbersTable->getSchema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
@@ -218,7 +220,11 @@ class MigrationsTest extends TestCase
         $expected = ['id', 'name', 'created', 'modified'];
         $this->assertEquals($expected, $columns);
         $createdColumn = $storesTable->getSchema()->getColumn('created');
-        $this->assertEquals('CURRENT_TIMESTAMP', $createdColumn['default']);
+        $expected = 'CURRENT_TIMESTAMP';
+        if ($this->Connection->getDriver() instanceof Sqlserver) {
+            $expected = 'getdate()';
+        }
+        $this->assertEquals($expected, $createdColumn['default']);
 
         // Rollback last
         $rollback = $this->migrations->rollback();
@@ -243,7 +249,7 @@ class MigrationsTest extends TestCase
      */
     public function testCreateWithEncoding()
     {
-        $this->skipIf(env('DB') !== 'mysql');
+        $this->skipIf(env('DB') !== 'mysql', 'Requires MySQL');
 
         $migrate = $this->migrations->migrate();
         $this->assertTrue($migrate);
@@ -994,8 +1000,8 @@ class MigrationsTest extends TestCase
         );
         $this->generatedFiles[] = $destination . $copiedFileName;
 
-        //change class name to avoid conflict with other classes
-        //to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
+        // change class name to avoid conflict with other classes
+        // to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
         $content = file_get_contents($destination . $copiedFileName);
         $pattern = ' extends AbstractMigration';
         $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
@@ -1072,6 +1078,16 @@ class MigrationsTest extends TestCase
                 [$path, 'test_snapshot_not_empty_pgsql'],
                 [$path, 'test_snapshot_auto_id_disabled_pgsql'],
                 [$path, 'test_snapshot_plugin_blog_pgsql'],
+            ];
+        }
+
+        if ($db === 'sqlserver') {
+            $path = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlserver' . DS;
+
+            return [
+                [$path, 'test_snapshot_not_empty_sqlserver'],
+                [$path, 'test_snapshot_auto_id_disabled_sqlserver'],
+                [$path, 'test_snapshot_plugin_blog_sqlserver'],
             ];
         }
 
