@@ -357,8 +357,9 @@ class MigrationHelper extends Helper
     public function column(TableSchemaInterface $tableSchema, string $column): array
     {
         $columnType = $tableSchema->getColumnType($column);
-        // Phinx doesn't understand timestampfractional.
-        if ($columnType === 'timestampfractional') {
+
+        // Phinx doesn't understand timestampfractional or datetimefractional types
+        if ($columnType === 'timestampfractional' || $columnType === 'datetimefractional') {
             $columnType = 'timestamp';
         }
 
@@ -531,6 +532,14 @@ class MigrationHelper extends Helper
         $defaultCollation = $tableSchema->getOptions()['collation'] ?? null;
         if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
             unset($attributes['collate']);
+        }
+        // TODO remove this once migrations supports fractional timestamp/datetime columns
+        $columnType = $tableSchema->getColumnType($column);
+        if ($columnType === 'datetimefractional' || $columnType === 'timestampfractional') {
+            // Remove precision/scale from timestamp columns.
+            // These options come back from schema reflection but migration internals
+            // don't currently accept the fractional types.
+            $attributes['precision'] = null;
         }
 
         ksort($attributes);

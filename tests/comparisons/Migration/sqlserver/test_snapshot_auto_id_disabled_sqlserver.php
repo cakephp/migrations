@@ -56,19 +56,15 @@ class TestSnapshotAutoIdDisabledSqlserver extends AbstractMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('created', 'datetimefractional', [
+            ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
-            ->addColumn('modified', 'datetimefractional', [
+            ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -105,19 +101,15 @@ class TestSnapshotAutoIdDisabledSqlserver extends AbstractMigration
                 'limit' => 100,
                 'null' => true,
             ])
-            ->addColumn('created', 'datetimefractional', [
+            ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
-            ->addColumn('modified', 'datetimefractional', [
+            ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -248,19 +240,15 @@ class TestSnapshotAutoIdDisabledSqlserver extends AbstractMigration
                 'limit' => 10,
                 'null' => true,
             ])
-            ->addColumn('created', 'datetimefractional', [
+            ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
-            ->addColumn('modified', 'datetimefractional', [
+            ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -334,12 +322,10 @@ class TestSnapshotAutoIdDisabledSqlserver extends AbstractMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('highlighted_time', 'datetimefractional', [
+            ->addColumn('highlighted_time', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -387,19 +373,15 @@ class TestSnapshotAutoIdDisabledSqlserver extends AbstractMigration
                 'limit' => 256,
                 'null' => true,
             ])
-            ->addColumn('created', 'datetimefractional', [
+            ->addColumn('created', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
-            ->addColumn('updated', 'datetimefractional', [
+            ->addColumn('updated', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
-                'precision' => 7,
-                'scale' => 7,
             ])
             ->create();
 

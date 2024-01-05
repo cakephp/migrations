@@ -113,15 +113,12 @@ class MigrationHelperTest extends TestCase
         }
 
         if (getenv('DB') === 'sqlserver') {
-            $this->types = [
-                'timestamp' => 'datetimefractional',
-            ];
             $this->values = [
                 'null' => null,
                 'integerLimit' => null,
                 'integerNull' => null,
                 'comment' => null,
-                'precision' => 7,
+                'precision' => null,
             ];
         }
     }
