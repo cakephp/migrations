@@ -142,7 +142,7 @@ class MarkMigratedTest extends TestCase
         );
 
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(4, $result->fetchColumn(0));
+        $this->assertEquals(4, $result->fetchColumn(0));
 
         $config = $this->command->getConfig();
         $env = $this->command->getManager()->getEnvironment('default');
@@ -281,7 +281,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals('20150724233100', $result[1]['version']);
         $this->assertEquals('20150826191400', $result[2]['version']);
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(3, $result->fetchColumn(0));
+        $this->assertEquals(3, $result->fetchColumn(0));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
@@ -335,7 +335,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals('20150704160200', $result[0]['version']);
         $this->assertEquals('20150724233100', $result[1]['version']);
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(2, $result->fetchColumn(0));
+        $this->assertEquals(2, $result->fetchColumn(0));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
@@ -386,7 +386,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals('20150826191400', $result[1]['version']);
         $this->assertEquals('20150724233100', $result[0]['version']);
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(2, $result->fetchColumn(0));
+        $this->assertEquals(2, $result->fetchColumn(0));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
@@ -436,7 +436,7 @@ class MarkMigratedTest extends TestCase
         ]);
 
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(0, $result->fetchColumn(0));
+        $this->assertEquals(0, $result->fetchColumn(0));
         $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
             $this->commandTester->getDisplay()
@@ -450,7 +450,7 @@ class MarkMigratedTest extends TestCase
         ]);
 
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(0, $result->fetchColumn(0));
+        $this->assertEquals(0, $result->fetchColumn(0));
         $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
             $this->commandTester->getDisplay()
@@ -466,7 +466,7 @@ class MarkMigratedTest extends TestCase
         ]);
 
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertSame(0, $result->fetchColumn(0));
+        $this->assertEquals(0, $result->fetchColumn(0));
         $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
             $this->commandTester->getDisplay()
