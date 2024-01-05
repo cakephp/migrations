@@ -74,6 +74,9 @@ class ConfigurationTraitTest extends TestCase
      */
     public function testGetConfig()
     {
+        if (!extension_loaded('pdo_mysql')) {
+            $this->markTestSkipped('Cannot run without pdo_mysql');
+        }
         ConnectionManager::setConfig('default', [
             'className' => 'Cake\Database\Connection',
             'driver' => 'Cake\Database\Driver\Mysql',

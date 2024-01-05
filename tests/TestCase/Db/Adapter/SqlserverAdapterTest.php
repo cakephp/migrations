@@ -1085,7 +1085,7 @@ WHERE t.name='ntable'");
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
-    public function provideForeignKeysToCheck()
+    public static function provideForeignKeysToCheck()
     {
         return [
             ['create table t(a int)', 'a', false],
