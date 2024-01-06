@@ -38,6 +38,9 @@ class MysqlAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
+        if ($config['scheme'] !== 'mysql') {
+            $this->markTestSkipped('Mysql tests disabled.');
+        }
         // Emulate the results of Util::parseDsn()
         $this->config = [
             'adapter' => $config['scheme'],
@@ -46,9 +49,6 @@ class MysqlAdapterTest extends TestCase
             'host' => $config['host'],
             'name' => $config['database'],
         ];
-        if ($this->config['adapter'] !== 'mysql') {
-            $this->markTestSkipped('Mysql tests disabled.');
-        }
 
         $this->adapter = new MysqlAdapter($this->config, new ArrayInput([]), new NullOutput());
 

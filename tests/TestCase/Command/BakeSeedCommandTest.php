@@ -77,7 +77,7 @@ class BakeSeedCommandTest extends TestCase
         $this->exec('bake seed Events --connection test --data');
 
         $path = __FUNCTION__ . '.php';
-        if (getenv('DB') === 'pgsql') {
+        if (in_array(getenv('DB'), ['pgsql', 'sqlserver'])) {
             $path = getenv('DB') . DS . $path;
         } elseif (PHP_VERSION_ID >= 80100) {
             $path = 'php81' . DS . $path;
@@ -114,7 +114,7 @@ class BakeSeedCommandTest extends TestCase
         $this->exec('bake seed Events --connection test --data --limit 2');
 
         $path = __FUNCTION__ . '.php';
-        if (getenv('DB') === 'pgsql') {
+        if (in_array(getenv('DB'), ['pgsql', 'sqlserver'])) {
             $path = getenv('DB') . DS . $path;
         } elseif (PHP_VERSION_ID >= 80100) {
             $path = 'php81' . DS . $path;

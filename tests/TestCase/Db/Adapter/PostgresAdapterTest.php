@@ -53,6 +53,10 @@ class PostgresAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
+        if ($config['scheme'] !== 'postgres') {
+            $this->markTestSkipped('Postgres tests disabled.');
+        }
+
         // Emulate the results of Util::parseDsn()
         $this->config = [
             'adapter' => $config['scheme'],
@@ -61,10 +65,6 @@ class PostgresAdapterTest extends TestCase
             'host' => $config['host'],
             'name' => $config['database'],
         ];
-
-        if ($this->config['adapter'] !== 'postgres') {
-            $this->markTestSkipped('Postgres tests disabled.');
-        }
 
         if (!self::isPostgresAvailable()) {
             $this->markTestSkipped('Postgres is not available.  Please install php-pdo-pgsql or equivalent package.');

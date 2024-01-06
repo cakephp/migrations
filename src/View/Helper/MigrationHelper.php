@@ -17,6 +17,7 @@ use ArrayAccess;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\CollectionInterface;
 use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Utility\Hash;
@@ -356,8 +357,9 @@ class MigrationHelper extends Helper
     public function column(TableSchemaInterface $tableSchema, string $column): array
     {
         $columnType = $tableSchema->getColumnType($column);
-        // Phinx doesn't understand timestampfractional.
-        if ($columnType === 'timestampfractional') {
+
+        // Phinx doesn't understand timestampfractional or datetimefractional types
+        if ($columnType === 'timestampfractional' || $columnType === 'datetimefractional') {
             $columnType = 'timestamp';
         }
 
@@ -401,12 +403,15 @@ class MigrationHelper extends Helper
         }
 
         // currently only MySQL supports the signed option
-        $isMysql = $connection->getDriver() instanceof Mysql;
+        $driver = $connection->getDriver();
+        $isMysql = $driver instanceof Mysql;
+        $isSqlserver = $driver instanceof Sqlserver;
+
         if (!$isMysql) {
             unset($columnOptions['signed']);
         }
 
-        if ($isMysql && !empty($columnOptions['collate'])) {
+        if (($isMysql || $isSqlserver) && !empty($columnOptions['collate'])) {
             // due to Phinx using different naming for the collation
             $columnOptions['collation'] = $columnOptions['collate'];
             unset($columnOptions['collate']);
@@ -524,7 +529,7 @@ class MigrationHelper extends Helper
             unset($attributes['signed']);
         }
 
-        $defaultCollation = $tableSchema->getOptions()['collation'];
+        $defaultCollation = $tableSchema->getOptions()['collation'] ?? null;
         if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
             unset($attributes['collate']);
         }

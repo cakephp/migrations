@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\View\Helper;
 
 use Cake\Database\Driver\Mysql;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\Collection;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -110,6 +111,16 @@ class MigrationHelperTest extends TestCase
                 'precision' => 6,
             ];
         }
+
+        if (getenv('DB') === 'sqlserver') {
+            $this->values = [
+                'null' => null,
+                'integerLimit' => null,
+                'integerNull' => null,
+                'comment' => null,
+                'precision' => 7,
+            ];
+        }
     }
 
     /**
@@ -158,6 +169,10 @@ class MigrationHelperTest extends TestCase
      */
     public function testColumns()
     {
+        $extra = [];
+        if ($this->connection->getDriver() instanceof Sqlserver) {
+            $extra = ['collate' => 'SQL_Latin1_General_CP1_CI_AS'];
+        }
         $this->assertEquals([
             'username' => [
                 'columnType' => 'string',
@@ -167,7 +182,7 @@ class MigrationHelperTest extends TestCase
                     'default' => $this->values['null'],
                     'precision' => null,
                     'comment' => $this->values['comment'],
-                ],
+                ] + $extra,
             ],
             'password' => [
                 'columnType' => 'string',
@@ -177,7 +192,7 @@ class MigrationHelperTest extends TestCase
                     'default' => $this->values['null'],
                     'precision' => null,
                     'comment' => $this->values['comment'],
-                ],
+                ] + $extra,
             ],
             'created' => [
                 'columnType' => $this->types['timestamp'],
@@ -227,6 +242,10 @@ class MigrationHelperTest extends TestCase
             'options' => $options,
         ], $result);
 
+        $extra = [];
+        if ($this->connection->getDriver() instanceof Sqlserver) {
+            $extra = ['collate' => 'SQL_Latin1_General_CP1_CI_AS'];
+        }
         $this->assertEquals([
             'columnType' => 'string',
             'options' => [
@@ -235,7 +254,7 @@ class MigrationHelperTest extends TestCase
                 'default' => $this->values['null'],
                 'precision' => null,
                 'comment' => $this->values['comment'],
-            ],
+            ] + $extra,
         ], $this->helper->column($tableSchema, 'username'));
 
         $this->assertEquals([
@@ -246,7 +265,7 @@ class MigrationHelperTest extends TestCase
                 'default' => $this->values['null'],
                 'precision' => null,
                 'comment' => $this->values['comment'],
-            ],
+            ] + $extra,
         ], $this->helper->column($tableSchema, 'password'));
 
         $this->assertEquals([
@@ -313,16 +332,12 @@ class MigrationHelperTest extends TestCase
 
         $result = $this->helper->attributes('users', 'id');
         unset($result['limit']);
-
         $this->assertEquals($attributes, $result);
 
-        $this->assertEquals([
-            'limit' => 256,
-            'null' => true,
-            'default' => $this->values['null'],
-            'precision' => null,
-            'comment' => $this->values['comment'],
-        ], $this->helper->attributes('users', 'username'));
+        $extra = [];
+        if ($this->connection->getDriver() instanceof Sqlserver) {
+            $extra = ['collate' => 'SQL_Latin1_General_CP1_CI_AS'];
+        }
 
         $this->assertEquals([
             'limit' => 256,
@@ -330,7 +345,15 @@ class MigrationHelperTest extends TestCase
             'default' => $this->values['null'],
             'precision' => null,
             'comment' => $this->values['comment'],
-        ], $this->helper->attributes('users', 'password'));
+        ] + $extra, $this->helper->attributes('users', 'username'));
+
+        $this->assertEquals([
+            'limit' => 256,
+            'null' => true,
+            'default' => $this->values['null'],
+            'precision' => null,
+            'comment' => $this->values['comment'],
+        ] + $extra, $this->helper->attributes('users', 'password'));
 
         $this->assertEquals([
             'limit' => null,
