@@ -533,14 +533,6 @@ class MigrationHelper extends Helper
         if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
             unset($attributes['collate']);
         }
-        // TODO remove this once migrations supports fractional timestamp/datetime columns
-        $columnType = $tableSchema->getColumnType($column);
-        if ($columnType === 'datetimefractional' || $columnType === 'timestampfractional') {
-            // Remove precision/scale from timestamp columns.
-            // These options come back from schema reflection but migration internals
-            // don't currently accept the fractional types.
-            $attributes['precision'] = null;
-        }
 
         ksort($attributes);
 

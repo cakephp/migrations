@@ -118,7 +118,7 @@ class MigrationHelperTest extends TestCase
                 'integerLimit' => null,
                 'integerNull' => null,
                 'comment' => null,
-                'precision' => null,
+                'precision' => 7,
             ];
         }
     }

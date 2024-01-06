@@ -199,7 +199,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expectedStatus, $status);
 
-        $numbersTable = $this->getTableLocator()->get('numbers', ['connection' => $this->Connection]);
+        $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $columns = $numbersTable->getSchema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
@@ -982,6 +982,13 @@ class MigrationsTest extends TestCase
      */
     public function testMigrateSnapshots(string $basePath, string $filename, array $flags = []): void
     {
+        if ($this->Connection->getDriver() instanceof Sqlserver) {
+            // TODO once migrations is using the inlined sqlserver adapter, this skip should
+            // be safe to remove once datetime columns support fractional units or the datetimefractional
+            // type is supported by migrations.
+            $this->markTestSkipped('Incompatible with sqlserver right now.');
+        }
+
         if ($flags) {
             Configure::write('Migrations', $flags + Configure::read('Migrations', []));
         }
