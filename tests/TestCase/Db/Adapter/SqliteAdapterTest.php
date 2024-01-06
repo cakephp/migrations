@@ -1620,7 +1620,7 @@ class SqliteAdapterTest extends TestCase
 
     public function testHasDatabase()
     {
-        if ($this->config['database'] === ':memory:') {
+        if ($this->config['name'] === ':memory:') {
             $this->markTestSkipped('Skipping hasDatabase() when testing in-memory db.');
         }
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
