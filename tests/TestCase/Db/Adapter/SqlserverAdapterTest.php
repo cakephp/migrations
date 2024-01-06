@@ -37,6 +37,9 @@ class SqlserverAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
+        if ($config['scheme'] !== 'sqlserver') {
+            $this->markTestSkipped('Sqlserver tests disabled.');
+        }
         // Emulate the results of Util::parseDsn()
         $this->config = [
             'adapter' => $config['scheme'],
@@ -45,9 +48,6 @@ class SqlserverAdapterTest extends TestCase
             'host' => $config['host'],
             'name' => $config['database'],
         ];
-        if ($this->config['adapter'] !== 'sqlserver') {
-            $this->markTestSkipped('Sqlserver tests disabled.');
-        }
 
         $this->adapter = new SqlserverAdapter($this->config, new ArrayInput([]), new NullOutput());
 
