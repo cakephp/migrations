@@ -51,11 +51,15 @@ class TestSnapshotNotEmptySqlserver extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -89,11 +93,15 @@ class TestSnapshotNotEmptySqlserver extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -199,11 +207,15 @@ class TestSnapshotNotEmptySqlserver extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addColumn('modified', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -273,6 +285,8 @@ class TestSnapshotNotEmptySqlserver extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addIndex(
                 [
@@ -317,11 +331,15 @@ class TestSnapshotNotEmptySqlserver extends AbstractMigration
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->addColumn('updated', 'timestamp', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'precision' => 7,
+                'scale' => 7,
             ])
             ->create();
 
