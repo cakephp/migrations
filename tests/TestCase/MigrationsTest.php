@@ -199,7 +199,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expectedStatus, $status);
 
-        $numbersTable = $this->getTableLocator()->get('numbers', ['connection' => $this->Connection]);
+        $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $columns = $numbersTable->getSchema()->columns();
         $expected = ['id', 'number', 'radix'];
         $this->assertEquals($columns, $expected);
