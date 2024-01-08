@@ -3,17 +3,18 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Migration;
 
+use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
+use Migrations\Migration\Manager;
+use Migrations\Test\RawBufferedOutput;
 use Phinx\Config\Config;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterInterface;
-use Phinx\Migration\Manager;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
-use Test\Phinx\Console\Output\RawBufferedOutput;
-use Test\Phinx\TestCase;
 
 class ManagerTest extends TestCase
 {
@@ -44,6 +45,16 @@ class ManagerTest extends TestCase
         $this->output = new StreamOutput(fopen('php://memory', 'a', false));
         $this->output->setDecorated(false);
         $this->manager = new Manager($this->config, $this->input, $this->output);
+    }
+
+    protected static function getDriverType(): string
+    {
+        $config = ConnectionManager::getConfig('test');
+        if (!$config) {
+            throw new RuntimeException('Cannot read configuration for test connection');
+        }
+
+        return $config['scheme'];
     }
 
     protected function getConfigWithNamespace($paths = [])
@@ -91,7 +102,7 @@ class ManagerTest extends TestCase
         $this->manager = null;
     }
 
-    private function getCorrectedPath($path)
+    private static function getCorrectedPath($path)
     {
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
@@ -101,17 +112,29 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function getConfigArray()
+    public static function getConfigArray()
     {
+        $config = [];
+        if (static::getDriverType() === 'mysql') {
+            $dbConfig = ConnectionManager::getConfig('test');
+            $config = [
+                'adapter' => $dbConfig['scheme'],
+                'user' => $dbConfig['username'],
+                'pass' => $dbConfig['password'],
+                'host' => $dbConfig['host'],
+                'name' => $dbConfig['database'],
+            ];
+        }
+
         return [
             'paths' => [
-                'migrations' => $this->getCorrectedPath(__DIR__ . '/_files/migrations'),
-                'seeds' => $this->getCorrectedPath(__DIR__ . '/_files/seeds'),
+                'migrations' => ROOT . '/config/ManagerMigrations',
+                'seeds' => ROOT . '/config/ManagerSeeds',
             ],
             'environments' => [
                 'default_migration_table' => 'phinxlog',
                 'default_environment' => 'production',
-                'production' => defined('MYSQL_DB_CONFIG') ? MYSQL_DB_CONFIG : [],
+                'production' => $config,
             ],
             'data_domain' => [
                 'phone_number' => [
@@ -121,6 +144,18 @@ class ManagerTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    protected function getConfigWithPlugin($paths = [])
+    {
+        $paths = [
+            'migrations' => ROOT . 'Plugin/Manager/config/Migrations',
+            'seeds' => ROOT . 'Plugin/Manager/config/Seeds',
+        ];
+        $config = clone $this->config;
+        $config['paths'] = $paths;
+
+        return $config;
     }
 
     /**
@@ -137,18 +172,28 @@ class ManagerTest extends TestCase
         if ($paths) {
             $configArray['paths'] = $paths + $configArray['paths'];
         }
-        $configArray['environments']['production'] = DB_CONFIG;
+        // Emulate the results of Util::parseDsn()
+        $connectionConfig = ConnectionManager::getConfig('test');
+        $adapterConfig = [
+            'adapter' => $connectionConfig['scheme'],
+            'user' => $connectionConfig['username'],
+            'pass' => $connectionConfig['password'],
+            'host' => $connectionConfig['host'],
+            'name' => $connectionConfig['database'],
+        ];
+
+        $configArray['environments']['production'] = $adapterConfig;
         $this->manager->setConfig(new Config($configArray));
 
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
 
         // ensure the database is empty
-        if (DB_CONFIG['adapter'] === 'pgsql') {
+        if ($adapterConfig['adapter'] === 'pgsql') {
             $adapter->dropSchema('public');
             $adapter->createSchema('public');
-        } elseif (DB_CONFIG['name'] !== ':memory:') {
-            $adapter->dropDatabase(DB_CONFIG['name']);
-            $adapter->createDatabase(DB_CONFIG['name']);
+        } elseif ($adapterConfig['name'] !== ':memory:') {
+            $adapter->dropDatabase($adapterConfig['name']);
+            $adapter->createDatabase($adapterConfig['name']);
         }
         $adapter->disconnect();
 
@@ -250,6 +295,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -291,6 +337,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -474,6 +521,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMissingMigrationsWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -519,6 +567,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMissingMigrationsWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -619,6 +668,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMissingLastMigrationWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -671,6 +721,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMissingLastMigrationWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -831,6 +882,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithDownMigrationsWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -860,6 +912,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithDownMigrationsWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -968,6 +1021,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMissingAndDownMigrationsWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1010,6 +1064,7 @@ class ManagerTest extends TestCase
 
     public function testPrintStatusMethodWithMissingAndDownMigrationsWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1099,10 +1154,10 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString($expectedStatusHeader, $outputStr);
     }
 
-    public function statusVersionOrderProvider()
+    public static function statusVersionOrderProvider(): array
     {
         // create the necessary configuration objects
-        $configArray = $this->getConfigArray();
+        $configArray = static::getConfigArray();
 
         $configWithNoVersionOrder = new Config($configArray);
 
@@ -1162,6 +1217,7 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithDuplicateMigrationVersionsWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         $config = new Config(['paths' => ['migrations' => ['Foo\Bar' => $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/duplicateversions')]]]);
         $manager = new Manager($config, $this->input, $this->output);
 
@@ -1173,6 +1229,7 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithDuplicateMigrationVersionsWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         $config = new Config(['paths' => [
             'migrations' => [
                 $this->getCorrectedPath(__DIR__ . '/_files/duplicateversions_mix_ns'),
@@ -1200,6 +1257,7 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithDuplicateMigrationNamesWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         $config = new Config(['paths' => ['migrations' => ['Foo\Bar' => $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/duplicatenames')]]]);
         $manager = new Manager($config, $this->input, $this->output);
 
@@ -1222,6 +1280,7 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithInvalidMigrationClassNameWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         $config = new Config(['paths' => ['migrations' => ['Foo\Bar' => $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/invalidclassname')]]]);
         $manager = new Manager($config, $this->input, $this->output);
 
@@ -1244,6 +1303,7 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithClassThatDoesntExtendAbstractMigrationWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         $config = new Config(['paths' => ['migrations' => ['Foo\Bar' => $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/invalidsuperclass')]]]);
         $manager = new Manager($config, $this->input, $this->output);
 
@@ -1337,6 +1397,8 @@ class ManagerTest extends TestCase
      */
     public function testRollbackToVersionWithNamespace($availableRollbacks, $version, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
+
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1371,6 +1433,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackToVersionWithMixedNamespace($availableRollbacks, $version, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1438,6 +1501,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackToDateWithNamespace($availableRollbacks, $version, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1472,6 +1536,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackToDateWithMixedNamespace($availableRollbacks, $version, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1592,6 +1657,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackToVersionByExecutionTimeWithNamespace($availableRollbacks, $version, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1677,6 +1743,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackToDateByExecutionTimeWithNamespace($availableRollbacks, $date, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1772,6 +1839,7 @@ class ManagerTest extends TestCase
 
     public function testRollbackToVersionWithTwoMigrationsDoesNotRollbackBothMigrationsWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1807,6 +1875,7 @@ class ManagerTest extends TestCase
 
     public function testRollbackToVersionWithTwoMigrationsDoesNotRollbackBothMigrationsWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1888,6 +1957,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackLastWithNamespace($availableRolbacks, $versionOrder, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1927,6 +1997,7 @@ class ManagerTest extends TestCase
      */
     public function testRollbackLastWithMixedNamespace($availableRolbacks, $versionOrder, $expectedOutput)
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -1964,7 +2035,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function migrateDateDataProvider()
+    public static function migrateDateDataProvider()
     {
         return [
             [['20120111235330', '20120116183504'], '20120118', '20120116183504', 'Failed to migrate all migrations when migrate to date is later than all the migrations'],
@@ -1979,7 +2050,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToDateDataProvider()
+    public static function rollbackToDateDataProvider()
     {
         return [
 
@@ -2182,7 +2253,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToDateDataProviderWithNamespace()
+    public static function rollbackToDateDataProviderWithNamespace()
     {
         return [
 
@@ -2385,7 +2456,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToDateDataProviderWithMixedNamespace()
+    public static function rollbackToDateDataProviderWithMixedNamespace()
     {
         return [
 
@@ -2675,7 +2746,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToDateByExecutionTimeDataProvider()
+    public static function rollbackToDateByExecutionTimeDataProvider()
     {
         return [
 
@@ -2911,7 +2982,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToDateByExecutionTimeDataProviderWithNamespace()
+    public static function rollbackToDateByExecutionTimeDataProviderWithNamespace()
     {
         return [
 
@@ -3147,7 +3218,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToVersionDataProvider()
+    public static function rollbackToVersionDataProvider()
     {
         return [
 
@@ -3390,7 +3461,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToVersionDataProviderWithNamespace()
+    public static function rollbackToVersionDataProviderWithNamespace()
     {
         return [
 
@@ -3633,7 +3704,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackToVersionDataProviderWithMixedNamespace()
+    public static function rollbackToVersionDataProviderWithMixedNamespace()
     {
         return [
 
@@ -3994,7 +4065,7 @@ class ManagerTest extends TestCase
         ];
     }
 
-    public function rollbackToVersionByExecutionTimeDataProvider()
+    public static function rollbackToVersionByExecutionTimeDataProvider()
     {
         return [
 
@@ -4394,7 +4465,7 @@ class ManagerTest extends TestCase
         ];
     }
 
-    public function rollbackToVersionByExecutionTimeDataProviderWithNamespace()
+    public static function rollbackToVersionByExecutionTimeDataProviderWithNamespace()
     {
         return [
 
@@ -4799,7 +4870,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackLastDataProvider()
+    public static function rollbackLastDataProvider()
     {
         return [
 
@@ -4964,7 +5035,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackLastDataProviderWithNamespace()
+    public static function rollbackLastDataProviderWithNamespace()
     {
         return [
 
@@ -5129,7 +5200,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public function rollbackLastDataProviderWithMixedNamespace()
+    public static function rollbackLastDataProviderWithMixedNamespace()
     {
         return [
 
@@ -5362,6 +5433,7 @@ class ManagerTest extends TestCase
 
     public function testExecuteSeedWorksAsExpectedWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -5378,6 +5450,7 @@ class ManagerTest extends TestCase
 
     public function testExecuteSeedWorksAsExpectedWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -5413,6 +5486,7 @@ class ManagerTest extends TestCase
 
     public function testExecuteASingleSeedWorksAsExpectedWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -5427,6 +5501,7 @@ class ManagerTest extends TestCase
 
     public function testExecuteASingleSeedWorksAsExpectedWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -5455,6 +5530,7 @@ class ManagerTest extends TestCase
 
     public function testExecuteANonExistentSeedWorksAsExpectedWithNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -5470,6 +5546,7 @@ class ManagerTest extends TestCase
 
     public function testExecuteANonExistentSeedWorksAsExpectedWithMixedNamespace()
     {
+        $this->markTestSkipped('namespace support is not required in migrations');
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
             ->setConstructorArgs(['mockenv', []])
@@ -5587,8 +5664,8 @@ class ManagerTest extends TestCase
 
     public function testReversibleMigrationWithIndexConflict()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('Test requires mysql connection');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -5598,8 +5675,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // migrate to the latest version
@@ -5625,8 +5704,8 @@ class ManagerTest extends TestCase
 
     public function testReversibleMigrationWithFKConflictOnTableDrop()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -5636,8 +5715,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // migrate to the latest version
@@ -5668,8 +5749,9 @@ class ManagerTest extends TestCase
 
     public function testReversibleMigrationsWorkAsExpectedWithNamespace()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        $this->markTestSkipped('namespace support is not required in migrations');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -5679,8 +5761,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // migrate to the latest version
@@ -5708,8 +5792,9 @@ class ManagerTest extends TestCase
 
     public function testReversibleMigrationsWorkAsExpectedWithMixedNamespace()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        $this->markTestSkipped('namespace support is not required in migrations');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -5722,9 +5807,11 @@ class ManagerTest extends TestCase
         ];
         $config = new Config($configArray);
 
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // migrate to the latest version
@@ -5778,7 +5865,7 @@ class ManagerTest extends TestCase
 
     public function testBreakpointsTogglingOperateAsExpected()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
+        if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Mysql tests disabled.');
         }
         $configArray = $this->getConfigArray();
@@ -5787,8 +5874,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // migrate to the latest version
@@ -5945,8 +6034,8 @@ class ManagerTest extends TestCase
 
     public function testBreakpointWithInvalidVersion()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -5954,8 +6043,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // migrate to the latest version
@@ -5974,8 +6065,8 @@ class ManagerTest extends TestCase
 
     public function testPostgresFullMigration()
     {
-        if (!defined('PGSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Postgres tests disabled.');
+        if ($this->getDriverType() !== 'postgres') {
+            $this->markTestSkipped('Test requires postgres');
         }
 
         $configArray = $this->getConfigArray();
@@ -6020,8 +6111,8 @@ class ManagerTest extends TestCase
 
     public function testMigrationWithDropColumnAndForeignKeyAndIndex()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -6031,8 +6122,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         $this->manager->setConfig($config);
@@ -6108,8 +6201,8 @@ class ManagerTest extends TestCase
 
     public function testMigrationWillNotBeExecuted()
     {
-        if (!defined('MYSQL_DB_CONFIG')) {
-            $this->markTestSkipped('Mysql tests disabled.');
+        if ($this->getDriverType() !== 'mysql') {
+            $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -6119,8 +6212,10 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         // ensure the database is empty
-        $adapter->dropDatabase(MYSQL_DB_CONFIG['name']);
-        $adapter->createDatabase(MYSQL_DB_CONFIG['name']);
+        $dbName = ConnectionManager::getConfig('test')['database'] ?? null;
+        $this->assertNotEmpty($dbName);
+        $adapter->dropDatabase($dbName);
+        $adapter->createDatabase($dbName);
         $adapter->disconnect();
 
         // Run the migration with shouldExecute returning false: the table should not be created
