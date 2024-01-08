@@ -64,7 +64,7 @@ class Manager
     /**
      * @var \Psr\Container\ContainerInterface|null
      */
-    protected ?ContainerInterface $container;
+    protected ContainerInterface $container;
 
     /**
      * @var int
@@ -955,7 +955,7 @@ class Manager
 
                     // instantiate it
                     /** @var \Phinx\Seed\AbstractSeed $seed */
-                    if ($this->container) {
+                    if (isset($this->container)) {
                         $seed = $this->container->get($class);
                     } else {
                         $seed = new $class();
