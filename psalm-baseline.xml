@@ -46,6 +46,17 @@
       <code>is_array($newColumns)</code>
     </RedundantCondition>
   </file>
+  <file src="src/Migration/Manager.php">
+    <ArgumentTypeCoercion>
+      <code>array_merge($versions, array_keys($migrations))</code>
+    </ArgumentTypeCoercion>
+    <RedundantCondition>
+      <code>$migrations</code>
+    </RedundantCondition>
+    <ReferenceReusedFromConfusingScope>
+      <code>$executedVersion</code>
+    </ReferenceReusedFromConfusingScope>
+  </file>
   <file src="src/TableFinderTrait.php">
     <PossiblyUndefinedArrayOffset>
       <code>$split[0]</code>
