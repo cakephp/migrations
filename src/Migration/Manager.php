@@ -62,9 +62,9 @@ class Manager
     protected ?array $seeds = null;
 
     /**
-     * @var \Psr\Container\ContainerInterface
+     * @var \Psr\Container\ContainerInterface|null
      */
-    protected ContainerInterface $container;
+    protected ?ContainerInterface $container;
 
     /**
      * @var int
@@ -159,7 +159,7 @@ class Manager
 
             // any migration left in the migrations (ie. not unset when sorting the migrations by the version order) is
             // a migration that is down, so we add them to the end of the sorted migrations list
-            if (!empty($migrations)) {
+            if ($migrations) {
                 $sortedMigrations = array_merge($sortedMigrations, $migrations);
             }
 
@@ -236,7 +236,7 @@ class Manager
             switch ($format) {
                 case AbstractCommand::FORMAT_JSON:
                     $output->setVerbosity($verbosity);
-                    $output->writeln(json_encode(
+                    $output->writeln((string)json_encode(
                         [
                             'pending_count' => $pendingMigrationCount,
                             'missing_count' => $missingCount,
@@ -847,7 +847,7 @@ class Manager
             $this->setMigrations($versions);
         }
 
-        return $this->migrations;
+        return (array)$this->migrations;
     }
 
     /**
@@ -883,7 +883,7 @@ class Manager
     {
         $dependenciesInstances = [];
         $dependencies = $seed->getDependencies();
-        if (!empty($dependencies)) {
+        if (!empty($dependencies) && !empty($this->seeds)) {
             foreach ($dependencies as $dependency) {
                 foreach ($this->seeds as $seed) {
                     if (get_class($seed) === $dependency) {
@@ -955,20 +955,17 @@ class Manager
 
                     // instantiate it
                     /** @var \Phinx\Seed\AbstractSeed $seed */
-                    if (isset($this->container)) {
+                    if ($this->container) {
                         $seed = $this->container->get($class);
                     } else {
                         $seed = new $class();
                     }
                     $seed->setEnvironment($environment);
                     $input = $this->getInput();
-                    if ($input !== null) {
-                        $seed->setInput($input);
-                    }
+                    $seed->setInput($input);
+
                     $output = $this->getOutput();
-                    if ($output !== null) {
-                        $seed->setOutput($output);
-                    }
+                    $seed->setOutput($output);
 
                     if (!($seed instanceof AbstractSeed)) {
                         throw new InvalidArgumentException(sprintf(
@@ -986,6 +983,7 @@ class Manager
             $this->setSeeds($seeds);
         }
 
+        assert(!empty($this->seeds), 'seeds must be set');
         $this->seeds = $this->orderSeedsByDependencies($this->seeds);
 
         return $this->seeds;
