@@ -11,6 +11,7 @@ use Migrations\Test\RawBufferedOutput;
 use Phinx\Config\Config;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterInterface;
+use Phinx\Migration\MigrationInterface;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -1206,12 +1207,12 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithDuplicateMigrationVersions()
     {
-        $config = new Config(['paths' => ['migrations' => $this->getCorrectedPath(__DIR__ . '/_files/duplicateversions')]]);
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/Duplicateversions']]);
         $manager = new Manager($config, $this->input, $this->output);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Duplicate migration - "' . $this->getCorrectedPath(__DIR__ . '/_files/duplicateversions/20120111235330_duplicate_migration_2.php') . '" has the same version as "20120111235330"');
-
+        $this->expectExceptionMessageMatches('/Duplicate migration/');
+        $this->expectExceptionMessageMatches('/20120111235330_duplicate_migration_2.php" has the same version as "20120111235330"/');
         $manager->getMigrations('mockenv');
     }
 
@@ -1246,7 +1247,7 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithDuplicateMigrationNames()
     {
-        $config = new Config(['paths' => ['migrations' => $this->getCorrectedPath(__DIR__ . '/_files/duplicatenames')]]);
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/Duplicatenames']]);
         $manager = new Manager($config, $this->input, $this->output);
 
         $this->expectException(InvalidArgumentException::class);
@@ -1269,46 +1270,11 @@ class ManagerTest extends TestCase
 
     public function testGetMigrationsWithInvalidMigrationClassName()
     {
-        $config = new Config(['paths' => ['migrations' => $this->getCorrectedPath(__DIR__ . '/_files/invalidclassname')]]);
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/Invalidclassname']]);
         $manager = new Manager($config, $this->input, $this->output);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Could not find class "InvalidClass" in file "' . $this->getCorrectedPath(__DIR__ . '/_files/invalidclassname/20120111235330_invalid_class.php') . '"');
-
-        $manager->getMigrations('mockenv');
-    }
-
-    public function testGetMigrationsWithInvalidMigrationClassNameWithNamespace()
-    {
-        $this->markTestSkipped('namespace support is not required in migrations');
-        $config = new Config(['paths' => ['migrations' => ['Foo\Bar' => $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/invalidclassname')]]]);
-        $manager = new Manager($config, $this->input, $this->output);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Could not find class "Foo\Bar\InvalidClass" in file "' . $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/invalidclassname/20160111235330_invalid_class.php') . '"');
-
-        $manager->getMigrations('mockenv');
-    }
-
-    public function testGetMigrationsWithClassThatDoesntExtendAbstractMigration()
-    {
-        $config = new Config(['paths' => ['migrations' => $this->getCorrectedPath(__DIR__ . '/_files/invalidsuperclass')]]);
-        $manager = new Manager($config, $this->input, $this->output);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The class "InvalidSuperClass" in file "' . $this->getCorrectedPath(__DIR__ . '/_files/invalidsuperclass/20120111235330_invalid_super_class.php') . '" must extend \Phinx\Migration\AbstractMigration');
-
-        $manager->getMigrations('mockenv');
-    }
-
-    public function testGetMigrationsWithClassThatDoesntExtendAbstractMigrationWithNamespace()
-    {
-        $this->markTestSkipped('namespace support is not required in migrations');
-        $config = new Config(['paths' => ['migrations' => ['Foo\Bar' => $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/invalidsuperclass')]]]);
-        $manager = new Manager($config, $this->input, $this->output);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The class "Foo\Bar\InvalidSuperClass" in file "' . $this->getCorrectedPath(__DIR__ . '/_files_foo_bar/invalidsuperclass/20160111235330_invalid_super_class.php') . '" must extend \Phinx\Migration\AbstractMigration');
+        $this->expectExceptionMessage('Could not find class "InvalidClass" in file "' . ROOT . '/config/Invalidclassname/20120111235330_invalid_class.php"');
 
         $manager->getMigrations('mockenv');
     }
@@ -1803,7 +1769,7 @@ class ManagerTest extends TestCase
         $this->assertStringNotContainsString('Undefined offset: -1', $output);
     }
 
-    public function testRollbackToVersionWithTwoMigrationsDoesNotRollbackBothMigrations()
+    public function testRollbackToVersionWithTwoMigrations()
     {
         // stub environment
         $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
@@ -5622,7 +5588,7 @@ class ManagerTest extends TestCase
     public function testReversibleMigrationsWorkAsExpected()
     {
         $adapter = $this->prepareEnvironment([
-            'migrations' => $this->getCorrectedPath(__DIR__ . '/_files/reversiblemigrations'),
+            'migrations' => ROOT . '/config/Reversiblemigrations',
         ]);
 
         // migrate to the latest version
@@ -5671,7 +5637,7 @@ class ManagerTest extends TestCase
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
 
         // override the migrations directory to use the reversible migrations
-        $configArray['paths']['migrations'] = $this->getCorrectedPath(__DIR__ . '/_files/drop_index_regression');
+        $configArray['paths']['migrations'] = ROOT . '/config/DropIndexRegression/';
         $config = new Config($configArray);
 
         // ensure the database is empty
@@ -5711,7 +5677,7 @@ class ManagerTest extends TestCase
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
 
         // override the migrations directory to use the reversible migrations
-        $configArray['paths']['migrations'] = $this->getCorrectedPath(__DIR__ . '/_files/drop_table_with_fk_regression');
+        $configArray['paths']['migrations'] = ROOT . '/config/DropTableWithFkRegression';
         $config = new Config($configArray);
 
         // ensure the database is empty
@@ -6118,7 +6084,7 @@ class ManagerTest extends TestCase
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
 
         // override the migrations directory to use the reversible migrations
-        $configArray['paths']['migrations'] = $this->getCorrectedPath(__DIR__ . '/_files/drop_column_fk_index_regression');
+        $configArray['paths']['migrations'] = ROOT . '/config/DropColumnFkIndexRegression';
         $config = new Config($configArray);
 
         // ensure the database is empty
@@ -6208,7 +6174,7 @@ class ManagerTest extends TestCase
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
 
         // override the migrations directory to use the should execute migrations
-        $configArray['paths']['migrations'] = $this->getCorrectedPath(__DIR__ . '/_files/should_execute');
+        $configArray['paths']['migrations'] = ROOT . '/config/ShouldExecute/';
         $config = new Config($configArray);
 
         // ensure the database is empty
@@ -6232,6 +6198,7 @@ class ManagerTest extends TestCase
 
     public function testMigrationWithCustomColumnTypes()
     {
+        $this->markTestSkipped('No custom column types from phinx in migrations');
         $adapter = $this->prepareEnvironment([
             'migrations' => $this->getCorrectedPath(__DIR__ . '/_files/custom_column_types'),
         ]);

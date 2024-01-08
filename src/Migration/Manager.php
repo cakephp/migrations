@@ -16,6 +16,7 @@ use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\Manager\Environment;
+use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Seed\SeedInterface;
 use Phinx\Util\Util;
