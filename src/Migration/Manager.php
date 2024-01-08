@@ -14,6 +14,7 @@ use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Console\Command\AbstractCommand;
+use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\Manager\Environment;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Seed\SeedInterface;
