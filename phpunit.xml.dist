@@ -5,14 +5,18 @@
          bootstrap="tests/bootstrap.php"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
 >
-
     <testsuites>
         <testsuite name="migrations">
             <directory>tests/TestCase</directory>
             <exclude>tests/TestCase/TestSuite</exclude>
+            <exclude>tests/TestCase/Migration/ManagerTest.php</exclude>
         </testsuite>
         <testsuite name="migrator">
             <directory>tests/TestCase/TestSuite</directory>
+        </testsuite>
+        <!-- Has to run last individually as these tests drop the database -->
+        <testsuite name="manager">
+            <file>tests/TestCase/Migration/ManagerTest.php</file>
         </testsuite>
     </testsuites>
 
