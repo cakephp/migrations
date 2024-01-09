@@ -134,8 +134,15 @@ class ManagerTest extends TestCase
         }
         // Emulate the results of Util::parseDsn()
         $connectionConfig = ConnectionManager::getConfig('test');
+        $adapter = $connectionConfig['scheme'] ?? null;
+        if ($adapter === 'postgres') {
+            $adapter = 'pgsql';
+        }
+        if ($adapter === 'sqlserver') {
+            $adapter = 'sqlsrv';
+        }
         $adapterConfig = [
-            'adapter' => $connectionConfig['scheme'],
+            'adapter' => $adapter,
             'user' => $connectionConfig['username'],
             'pass' => $connectionConfig['password'],
             'host' => $connectionConfig['host'],
@@ -301,7 +308,7 @@ class ManagerTest extends TestCase
 
         // override the migrations directory to an empty one
         $configArray = $this->getConfigArray();
-        $configArray['paths']['migrations'] = $this->getCorrectedPath(__DIR__ . '/_files/nomigrations');
+        $configArray['paths']['migrations'] = ROOT . '/config/Nomigrations';
         $config = new Config($configArray);
 
         $this->manager->setConfig($config);
@@ -2470,7 +2477,7 @@ class ManagerTest extends TestCase
     public function testBreakpointsTogglingOperateAsExpected()
     {
         if ($this->getDriverType() !== 'mysql') {
-            $this->markTestSkipped('Mysql tests disabled.');
+            $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -2673,22 +2680,9 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('Test requires postgres');
         }
 
-        $configArray = $this->getConfigArray();
-        // override the migrations directory to use the reversible migrations
-        $configArray['paths']['migrations'] = [
-            $this->getCorrectedPath(__DIR__ . '/_files/postgres'),
-        ];
-        $configArray['environments']['production'] = PGSQL_DB_CONFIG;
-        $config = new Config($configArray);
-        $this->manager->setConfig($config);
-
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
-
-        // ensure the database is empty
-        $adapter->dropSchema('public');
-        $adapter->createSchema('public');
-        $adapter->disconnect();
-
+        $adapter = $this->prepareEnvironment([
+            'migrations' => ROOT . '/config/Postgres',
+        ]);
         // migrate to the latest version
         $this->manager->migrate('production');
 
