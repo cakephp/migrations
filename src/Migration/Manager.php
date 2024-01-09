@@ -62,7 +62,7 @@ class Manager
     protected ?array $seeds = null;
 
     /**
-     * @var \Psr\Container\ContainerInterface|null
+     * @var \Psr\Container\ContainerInterface
      */
     protected ContainerInterface $container;
 

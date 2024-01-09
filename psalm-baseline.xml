@@ -53,6 +53,9 @@
     <RedundantCondition>
       <code>$migrations</code>
     </RedundantCondition>
+    <RedundantPropertyInitializationCheck>
+      <code><![CDATA[isset($this->container)]]></code>
+    </RedundantPropertyInitializationCheck>
     <ReferenceReusedFromConfusingScope>
       <code>$executedVersion</code>
     </ReferenceReusedFromConfusingScope>
