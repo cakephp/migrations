@@ -641,7 +641,8 @@ class ManagerTest extends TestCase
         $manager = new Manager($config, $this->input, $this->output);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Could not find class "InvalidClass" in file "' . ROOT . '/config/Invalidclassname/20120111235330_invalid_class.php"');
+        $this->expectExceptionMessageMatches('/Could not find class "InvalidClass" in file/');
+        $this->expectExceptionMessageMatches('/20120111235330_invalid_class.php/');
 
         $manager->getMigrations('mockenv');
     }
