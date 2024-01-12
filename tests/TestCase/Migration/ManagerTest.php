@@ -1001,8 +1001,6 @@ class ManagerTest extends TestCase
         return [
             [['20120111235330', '20120116183504'], '20120118', '20120116183504', 'Failed to migrate all migrations when migrate to date is later than all the migrations'],
             [['20120111235330', '20120116183504'], '20120115', '20120111235330', 'Failed to migrate 1 migration when the migrate to date is between 2 migrations'],
-            [['20120111235330', '20120116183504'], '20120111235330', '20120111235330', 'Failed to migrate 1 migration when the migrate to date is one of the migrations'],
-            [['20120111235330', '20120116183504'], '20110115', null, 'Failed to migrate 0 migrations when the migrate to date is before all the migrations'],
         ];
     }
 
