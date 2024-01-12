@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Migration;
 
 use DateTime;
+use Exception;
 use InvalidArgumentException;
 use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
