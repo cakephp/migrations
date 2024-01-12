@@ -7,7 +7,6 @@ use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
 use Migrations\Migration\Manager;
-use Migrations\Test\RawBufferedOutput;
 use Phinx\Config\Config;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterInterface;
