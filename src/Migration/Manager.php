@@ -93,167 +93,53 @@ class Manager
      */
     public function printStatus(string $environment, ?string $format = null): array
     {
-        $output = $this->getOutput();
-        $hasDownMigration = false;
-        $hasMissingMigration = false;
-        $migrations = $this->getMigrations($environment);
-        $migrationCount = 0;
-        $missingCount = 0;
-        $pendingMigrationCount = 0;
-        $finalMigrations = [];
-        $verbosity = $output->getVerbosity();
-        if ($format === 'json') {
-            $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
-        }
-        if (count($migrations)) {
-            // rewrite using Symfony Table Helper as we already have this library
-            // included and it will fix formatting issues (e.g drawing the lines)
-            $output->writeln('', $this->verbosityLevel);
-
-            switch ($this->getConfig()->getVersionOrder()) {
-                case Config::VERSION_ORDER_CREATION_TIME:
-                    $migrationIdAndStartedHeader = '<info>[Migration ID]</info>  Started            ';
-                    break;
-                case Config::VERSION_ORDER_EXECUTION_TIME:
-                    $migrationIdAndStartedHeader = 'Migration ID    <info>[Started          ]</info>';
-                    break;
-                default:
-                    throw new RuntimeException('Invalid version_order configuration option');
-            }
-
-            $output->writeln(" Status  $migrationIdAndStartedHeader  Finished             Migration Name ", $this->verbosityLevel);
-            $output->writeln('----------------------------------------------------------------------------------', $this->verbosityLevel);
-
+        $migrations = [];
+        $isJson = $format === 'json';
+        $defaultMigrations = $this->getMigrations('default');
+        if (count($defaultMigrations)) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
 
-            $maxNameLength = $versions ? max(array_map(function ($version) {
-                return strlen($version['migration_name']);
-            }, $versions)) : 0;
-
-            $missingVersions = array_diff_key($versions, $migrations);
-            $missingCount = count($missingVersions);
-
-            $hasMissingMigration = !empty($missingVersions);
-
-            // get the migrations sorted in the same way as the versions
-            /** @var \Phinx\Migration\AbstractMigration[] $sortedMigrations */
-            $sortedMigrations = [];
-
-            foreach ($versions as $versionCreationTime => $version) {
-                if (isset($migrations[$versionCreationTime])) {
-                    array_push($sortedMigrations, $migrations[$versionCreationTime]);
-                    unset($migrations[$versionCreationTime]);
-                }
-            }
-
-            if (empty($sortedMigrations) && !empty($missingVersions)) {
-                // this means we have no up migrations, so we write all the missing versions already so they show up
-                // before any possible down migration
-                foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
-                    $this->printMissingVersion($missingVersion, $maxNameLength);
-
-                    unset($missingVersions[$missingVersionCreationTime]);
-                }
-            }
-
-            // any migration left in the migrations (ie. not unset when sorting the migrations by the version order) is
-            // a migration that is down, so we add them to the end of the sorted migrations list
-            if ($migrations) {
-                $sortedMigrations = array_merge($sortedMigrations, $migrations);
-            }
-
-            $migrationCount = count($sortedMigrations);
-            foreach ($sortedMigrations as $migration) {
-                $version = array_key_exists($migration->getVersion(), $versions) ? $versions[$migration->getVersion()] : false;
-                if ($version) {
-                    // check if there are missing versions before this version
-                    foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
-                        if ($this->getConfig()->isVersionOrderCreationTime()) {
-                            if ($missingVersion['version'] > $version['version']) {
-                                break;
-                            }
-                        } else {
-                            if ($missingVersion['start_time'] > $version['start_time']) {
-                                break;
-                            } elseif (
-                                $missingVersion['start_time'] == $version['start_time'] &&
-                                $missingVersion['version'] > $version['version']
-                            ) {
-                                break;
-                            }
-                        }
-
-                        $this->printMissingVersion($missingVersion, $maxNameLength);
-
-                        unset($missingVersions[$missingVersionCreationTime]);
-                    }
-
-                    $status = '     <info>up</info> ';
+            foreach ($defaultMigrations as $migration) {
+                if (array_key_exists($migration->getVersion(), $versions)) {
+                    $status = 'up';
+                    unset($versions[$migration->getVersion()]);
                 } else {
-                    $pendingMigrationCount++;
-                    $hasDownMigration = true;
-                    $status = '   <error>down</error> ';
-                }
-                $maxNameLength = max($maxNameLength, strlen($migration->getName()));
-
-                $output->writeln(
-                    sprintf(
-                        '%s %14.0f  %19s  %19s  <comment>%s</comment>',
-                        $status,
-                        $migration->getVersion(),
-                        ($version ? $version['start_time'] : ''),
-                        ($version ? $version['end_time'] : ''),
-                        $migration->getName()
-                    ),
-                    $this->verbosityLevel
-                );
-
-                if ($version && $version['breakpoint']) {
-                    $output->writeln('         <error>BREAKPOINT SET</error>', $this->verbosityLevel);
+                    $status = 'down';
                 }
 
-                $finalMigrations[] = ['migration_status' => trim(strip_tags($status)), 'migration_id' => sprintf('%14.0f', $migration->getVersion()), 'migration_name' => $migration->getName()];
-                unset($versions[$migration->getVersion()]);
+                $version = $migration->getVersion();
+                $migrationParams = [
+                    'status' => $status,
+                    'id' => $migration->getVersion(),
+                    'name' => $migration->getName(),
+                ];
+
+                $migrations[$version] = $migrationParams;
             }
 
-            // and finally add any possibly-remaining missing migrations
-            foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
-                $this->printMissingVersion($missingVersion, $maxNameLength);
+            foreach ($versions as $missing) {
+                $version = $missing['version'];
+                $migrationParams = [
+                    'status' => 'up',
+                    'id' => $version,
+                    'name' => $missing['migration_name'],
+                ];
 
-                unset($missingVersions[$missingVersionCreationTime]);
-            }
-        } else {
-            // there are no migrations
-            $output->writeln('', $this->verbosityLevel);
-            $output->writeln('There are no available migrations. Try creating one using the <info>create</info> command.', $this->verbosityLevel);
-        }
+                if (!$isJson) {
+                    $migrationParams = [
+                        'missing' => true,
+                    ] + $migrationParams;
+                }
 
-        // write an empty line
-        $output->writeln('', $this->verbosityLevel);
-
-        if ($format !== null) {
-            switch ($format) {
-                case AbstractCommand::FORMAT_JSON:
-                    $output->setVerbosity($verbosity);
-                    $output->writeln((string)json_encode(
-                        [
-                            'pending_count' => $pendingMigrationCount,
-                            'missing_count' => $missingCount,
-                            'total_count' => $migrationCount + $missingCount,
-                            'migrations' => $finalMigrations,
-                        ]
-                    ));
-                    break;
-                default:
-                    $output->writeln('<info>Unsupported format: ' . $format . '</info>');
+                $migrations[$version] = $migrationParams;
             }
         }
 
-        return [
-            'hasMissingMigration' => $hasMissingMigration,
-            'hasDownMigration' => $hasDownMigration,
-        ];
+        ksort($migrations);
+        $migrations = array_values($migrations);
+
+        return $migrations;
     }
 
     /**
@@ -1139,4 +1025,25 @@ class Manager
 
         return $this;
     }
+
+    /**
+     * Reset the migrations stored in the object
+     *
+     * @return void
+     */
+    public function resetMigrations(): void
+    {
+        $this->migrations = null;
+    }
+
+    /**
+     * Reset the seeds stored in the object
+     *
+     * @return void
+     */
+    public function resetSeeds(): void
+    {
+        $this->seeds = null;
+    }
+
 }
