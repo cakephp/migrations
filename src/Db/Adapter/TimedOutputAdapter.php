@@ -157,15 +157,15 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      * @throws \BadMethodCallException
      * @return void
      */
-    public function renameTable(string $tableName, string $newTableName): void
+    public function renameTable(string $tableName, string $newName): void
     {
         $adapter = $this->getAdapter();
         if (!$adapter instanceof DirectActionInterface) {
             throw new BadMethodCallException('The adapter needs to implement DirectActionInterface');
         }
         $end = $this->startCommandTimer();
-        $this->writeCommand('renameTable', [$tableName, $newTableName]);
-        $adapter->renameTable($tableName, $newTableName);
+        $this->writeCommand('renameTable', [$tableName, $newName]);
+        $adapter->renameTable($tableName, $newName);
         $end();
     }
 
@@ -392,22 +392,22 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     /**
      * @inheritDoc
      */
-    public function createSchema(string $name = 'public'): void
+    public function createSchema(string $schemaName = 'public'): void
     {
         $end = $this->startCommandTimer();
-        $this->writeCommand('createSchema', [$name]);
-        parent::createSchema($name);
+        $this->writeCommand('createSchema', [$schemaName]);
+        parent::createSchema($schemaName);
         $end();
     }
 
     /**
      * @inheritDoc
      */
-    public function dropSchema(string $name): void
+    public function dropSchema(string $schemaName): void
     {
         $end = $this->startCommandTimer();
-        $this->writeCommand('dropSchema', [$name]);
-        parent::dropSchema($name);
+        $this->writeCommand('dropSchema', [$schemaName]);
+        parent::dropSchema($schemaName);
         $end();
     }
 
