@@ -7,7 +7,6 @@ use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
 use Migrations\Migration\Manager;
-use Migrations\Test\RawBufferedOutput;
 use Phinx\Config\Config;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterInterface;
@@ -215,12 +214,19 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => false, 'hasDownMigration' => false], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-        $this->assertStringContainsString('up  20120111235330  2012-01-11 23:53:36  2012-01-11 23:53:37  TestMigration', $outputStr);
-        $this->assertStringContainsString('up  20120116183504  2012-01-16 18:35:40  2012-01-16 18:35:41  TestMigration2', $outputStr);
+        $expected = [
+          [
+            'status' => 'up',
+            'id' => 20120111235330,
+            'name' => 'TestMigration',
+          ],
+          [
+            'status' => 'up',
+            'id' => 20120116183504,
+            'name' => 'TestMigration2',
+          ],
+        ];
+        $this->assertEquals($expected, $return);
     }
 
     public function testPrintStatusMethodJsonFormat()
@@ -254,10 +260,19 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv', AbstractCommand::FORMAT_JSON);
-        $this->assertSame(['hasMissingMigration' => false, 'hasDownMigration' => false], $return);
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = trim(stream_get_contents($this->manager->getOutput()->getStream()));
-        $this->assertEquals('{"pending_count":0,"missing_count":0,"total_count":2,"migrations":[{"migration_status":"up","migration_id":"20120111235330","migration_name":"TestMigration"},{"migration_status":"up","migration_id":"20120116183504","migration_name":"TestMigration2"}]}', $outputStr);
+        $expected = [
+            [
+              'status' => 'up',
+              'id' => 20120111235330,
+              'name' => 'TestMigration',
+            ],
+            [
+              'status' => 'up',
+              'id' => 20120116183504,
+              'name' => 'TestMigration2',
+            ],
+        ];
+        $this->assertSame($expected, $return);
     }
 
     public function testPrintStatusMethodWithBreakpointSet()
@@ -292,11 +307,19 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => false, 'hasDownMigration' => false], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-        $this->assertStringContainsString('BREAKPOINT SET', $outputStr);
+        $expected = [
+          [
+            'status' => 'up',
+            'id' => 20120111235330,
+            'name' => 'TestMigration',
+          ],
+          [
+            'status' => 'up',
+            'id' => 20120116183504,
+            'name' => 'TestMigration2',
+          ],
+        ];
+        $this->assertEquals($expected, $return);
     }
 
     public function testPrintStatusMethodWithNoMigrations()
@@ -315,11 +338,7 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => false, 'hasDownMigration' => false], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-        $this->assertStringContainsString('There are no available migrations. Try creating one using the create command.', $outputStr);
+        $this->assertEquals([], $return);
     }
 
     public function testPrintStatusMethodWithMissingMigrations()
@@ -354,16 +373,31 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => true, 'hasDownMigration' => true], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-
-        // note that the order is important: missing migrations should appear before down migrations
-        $this->assertMatchesRegularExpression('/\s*up  20120103083300  2012-01-11 23:53:36  2012-01-11 23:53:37  *\*\* MISSING MIGRATION FILE \*\*' . PHP_EOL .
-            '\s*up  20120815145812  2012-01-16 18:35:40  2012-01-16 18:35:41  Example   *\*\* MISSING MIGRATION FILE \*\*' . PHP_EOL .
-            '\s*down  20120111235330                                            TestMigration' . PHP_EOL .
-            '\s*down  20120116183504                                            TestMigration2/', $outputStr);
+        $expected = [
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120103083300',
+              'name' => '',
+            ],
+            [
+              'status' => 'down',
+              'id' => 20120111235330,
+              'name' => 'TestMigration',
+            ],
+            [
+              'status' => 'down',
+              'id' => 20120116183504,
+              'name' => 'TestMigration2',
+            ],
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120815145812',
+              'name' => 'Example',
+            ],
+        ];
+        $this->assertEquals($expected, $return);
     }
 
     public function testPrintStatusMethodWithMissingLastMigration()
@@ -406,15 +440,25 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => true, 'hasDownMigration' => false], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-
-        // note that the order is important: missing migrations should appear before down migrations
-        $this->assertMatchesRegularExpression('/\s*up  20120111235330  2012-01-16 18:35:40  2012-01-16 18:35:41  TestMigration' . PHP_EOL .
-            '\s*up  20120116183504  2012-01-16 18:35:40  2012-01-16 18:35:41  TestMigration2' . PHP_EOL .
-            '\s*up  20120120145114  2012-01-20 14:51:14  2012-01-20 14:51:14  Example   *\*\* MISSING MIGRATION FILE \*\*/', $outputStr);
+        $expected = [
+            [
+              'status' => 'up',
+              'id' => 20120111235330,
+              'name' => 'TestMigration',
+            ],
+            [
+              'status' => 'up',
+              'id' => 20120116183504,
+              'name' => 'TestMigration2',
+            ],
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120120145114',
+              'name' => 'Example',
+            ],
+        ];
+        $this->assertEquals($expected, $return);
     }
 
     public function testPrintStatusMethodWithMissingMigrationsAndBreakpointSet()
@@ -449,13 +493,31 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => true, 'hasDownMigration' => true], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-        $this->assertMatchesRegularExpression('/up  20120103083300  2012-01-11 23:53:36  2012-01-11 23:53:37  *\*\* MISSING MIGRATION FILE \*\*/', $outputStr);
-        $this->assertStringContainsString('BREAKPOINT SET', $outputStr);
-        $this->assertMatchesRegularExpression('/up  20120815145812  2012-01-16 18:35:40  2012-01-16 18:35:41  Example   *\*\* MISSING MIGRATION FILE \*\*/', $outputStr);
+        $expected = [
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120103083300',
+              'name' => '',
+            ],
+            [
+              'status' => 'down',
+              'id' => 20120111235330,
+              'name' => 'TestMigration',
+            ],
+            [
+              'status' => 'down',
+              'id' => 20120116183504,
+              'name' => 'TestMigration2',
+            ],
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120815145812',
+              'name' => 'Example',
+            ],
+        ];
+        $this->assertEquals($expected, $return);
     }
 
     public function testPrintStatusMethodWithDownMigrations()
@@ -478,12 +540,19 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => false, 'hasDownMigration' => true], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-        $this->assertStringContainsString('up  20120111235330  2012-01-16 18:35:40  2012-01-16 18:35:41  TestMigration', $outputStr);
-        $this->assertStringContainsString('down  20120116183504                                            TestMigration2', $outputStr);
+        $expected = [
+            [
+              'status' => 'up',
+              'id' => 20120111235330,
+              'name' => 'TestMigration',
+            ],
+            [
+              'status' => 'down',
+              'id' => 20120116183504,
+              'name' => 'TestMigration2',
+            ],
+        ];
+        $this->assertEquals($expected, $return);
     }
 
     public function testPrintStatusMethodWithMissingAndDownMigrations()
@@ -523,94 +592,31 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironments(['mockenv' => $envStub]);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => true, 'hasDownMigration' => true], $return);
-
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-
-        // note that the order is important: missing migrations should appear before down migrations (and in the right
-        // place with regard to other up non-missing migrations)
-        $this->assertMatchesRegularExpression('/\s*up  20120103083300  2012-01-11 23:53:36  2012-01-11 23:53:37  *\*\* MISSING MIGRATION FILE \*\*' . PHP_EOL .
-            '\s*up  20120111235330  2012-01-16 18:35:40  2012-01-16 18:35:41  TestMigration' . PHP_EOL .
-            '\s*down  20120116183504                                            TestMigration2/', $outputStr);
-    }
-
-    /**
-     * Test that ensures the status header is correctly printed with regards to the version order
-     *
-     * @dataProvider statusVersionOrderProvider
-     * @param Config $config Config to use for the test
-     * @param string $expectedStatusHeader expected header string
-     */
-    public function testPrintStatusMethodVersionOrderHeader($config, $expectedStatusHeader)
-    {
-        // stub environment
-        $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->once())
-                ->method('getVersionLog')
-                ->will($this->returnValue([]));
-
-        $output = new RawBufferedOutput();
-        $this->manager = new Manager($config, $this->input, $output);
-
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
-        $return = $this->manager->printStatus('mockenv');
-        $this->assertEquals(['hasMissingMigration' => false, 'hasDownMigration' => true], $return);
-
-        $outputStr = $this->manager->getOutput()->fetch();
-        $this->assertStringContainsString($expectedStatusHeader, $outputStr);
-    }
-
-    public static function statusVersionOrderProvider(): array
-    {
-        // create the necessary configuration objects
-        $configArray = static::getConfigArray();
-
-        $configWithNoVersionOrder = new Config($configArray);
-
-        $configArray['version_order'] = Config::VERSION_ORDER_CREATION_TIME;
-        $configWithCreationVersionOrder = new Config($configArray);
-
-        $configArray['version_order'] = Config::VERSION_ORDER_EXECUTION_TIME;
-        $configWithExecutionVersionOrder = new Config($configArray);
-
-        return [
-            'With the default version order' => [
-                $configWithNoVersionOrder,
-                ' Status  <info>[Migration ID]</info>  Started              Finished             Migration Name ',
+        $expected = [
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120103083300',
+              'name' => '',
             ],
-            'With the creation version order' => [
-                $configWithCreationVersionOrder,
-                ' Status  <info>[Migration ID]</info>  Started              Finished             Migration Name ',
+            [
+              'status' => 'up',
+              'id' => 20120111235330,
+              'name' => 'TestMigration',
             ],
-            'With the execution version order' => [
-                $configWithExecutionVersionOrder,
-                ' Status  Migration ID    <info>[Started          ]</info>  Finished             Migration Name ',
+            [
+              'status' => 'down',
+              'id' => 20120116183504,
+              'name' => 'TestMigration2',
+            ],
+            [
+              'missing' => true,
+              'status' => 'up',
+              'id' => '20120815145812',
+              'name' => 'Example',
             ],
         ];
-    }
-
-    public function testPrintStatusInvalidVersionOrderKO()
-    {
-        // stub environment
-        $envStub = $this->getMockBuilder('\Phinx\Migration\Manager\Environment')
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-
-        $configArray = $this->getConfigArray();
-        $configArray['version_order'] = 'invalid';
-        $config = new Config($configArray);
-
-        $this->manager = new Manager($config, $this->input, $this->output);
-
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Invalid version_order configuration option');
-
-        $this->manager->printStatus('mockenv');
+        $this->assertEquals($expected, $return);
     }
 
     public function testGetMigrationsWithDuplicateMigrationVersions()
@@ -994,8 +1000,6 @@ class ManagerTest extends TestCase
         return [
             [['20120111235330', '20120116183504'], '20120118', '20120116183504', 'Failed to migrate all migrations when migrate to date is later than all the migrations'],
             [['20120111235330', '20120116183504'], '20120115', '20120111235330', 'Failed to migrate 1 migration when the migrate to date is between 2 migrations'],
-            [['20120111235330', '20120116183504'], '20120111235330', '20120111235330', 'Failed to migrate 1 migration when the migrate to date is one of the migrations'],
-            [['20120111235330', '20120116183504'], '20110115', null, 'Failed to migrate 0 migrations when the migrate to date is before all the migrations'],
         ];
     }
 

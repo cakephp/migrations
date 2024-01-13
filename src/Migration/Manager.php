@@ -9,11 +9,10 @@ declare(strict_types=1);
 namespace Migrations\Migration;
 
 use DateTime;
+use Exception;
 use InvalidArgumentException;
-use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
-use Phinx\Console\Command\AbstractCommand;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\Manager\Environment;
 use Phinx\Migration\MigrationInterface;
@@ -93,167 +92,53 @@ class Manager
      */
     public function printStatus(string $environment, ?string $format = null): array
     {
-        $output = $this->getOutput();
-        $hasDownMigration = false;
-        $hasMissingMigration = false;
-        $migrations = $this->getMigrations($environment);
-        $migrationCount = 0;
-        $missingCount = 0;
-        $pendingMigrationCount = 0;
-        $finalMigrations = [];
-        $verbosity = $output->getVerbosity();
-        if ($format === 'json') {
-            $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
-        }
-        if (count($migrations)) {
-            // rewrite using Symfony Table Helper as we already have this library
-            // included and it will fix formatting issues (e.g drawing the lines)
-            $output->writeln('', $this->verbosityLevel);
-
-            switch ($this->getConfig()->getVersionOrder()) {
-                case Config::VERSION_ORDER_CREATION_TIME:
-                    $migrationIdAndStartedHeader = '<info>[Migration ID]</info>  Started            ';
-                    break;
-                case Config::VERSION_ORDER_EXECUTION_TIME:
-                    $migrationIdAndStartedHeader = 'Migration ID    <info>[Started          ]</info>';
-                    break;
-                default:
-                    throw new RuntimeException('Invalid version_order configuration option');
-            }
-
-            $output->writeln(" Status  $migrationIdAndStartedHeader  Finished             Migration Name ", $this->verbosityLevel);
-            $output->writeln('----------------------------------------------------------------------------------', $this->verbosityLevel);
-
+        $migrations = [];
+        $isJson = $format === 'json';
+        $defaultMigrations = $this->getMigrations('default');
+        if (count($defaultMigrations)) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
 
-            $maxNameLength = $versions ? max(array_map(function ($version) {
-                return strlen($version['migration_name']);
-            }, $versions)) : 0;
-
-            $missingVersions = array_diff_key($versions, $migrations);
-            $missingCount = count($missingVersions);
-
-            $hasMissingMigration = !empty($missingVersions);
-
-            // get the migrations sorted in the same way as the versions
-            /** @var \Phinx\Migration\AbstractMigration[] $sortedMigrations */
-            $sortedMigrations = [];
-
-            foreach ($versions as $versionCreationTime => $version) {
-                if (isset($migrations[$versionCreationTime])) {
-                    array_push($sortedMigrations, $migrations[$versionCreationTime]);
-                    unset($migrations[$versionCreationTime]);
-                }
-            }
-
-            if (empty($sortedMigrations) && !empty($missingVersions)) {
-                // this means we have no up migrations, so we write all the missing versions already so they show up
-                // before any possible down migration
-                foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
-                    $this->printMissingVersion($missingVersion, $maxNameLength);
-
-                    unset($missingVersions[$missingVersionCreationTime]);
-                }
-            }
-
-            // any migration left in the migrations (ie. not unset when sorting the migrations by the version order) is
-            // a migration that is down, so we add them to the end of the sorted migrations list
-            if ($migrations) {
-                $sortedMigrations = array_merge($sortedMigrations, $migrations);
-            }
-
-            $migrationCount = count($sortedMigrations);
-            foreach ($sortedMigrations as $migration) {
-                $version = array_key_exists($migration->getVersion(), $versions) ? $versions[$migration->getVersion()] : false;
-                if ($version) {
-                    // check if there are missing versions before this version
-                    foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
-                        if ($this->getConfig()->isVersionOrderCreationTime()) {
-                            if ($missingVersion['version'] > $version['version']) {
-                                break;
-                            }
-                        } else {
-                            if ($missingVersion['start_time'] > $version['start_time']) {
-                                break;
-                            } elseif (
-                                $missingVersion['start_time'] == $version['start_time'] &&
-                                $missingVersion['version'] > $version['version']
-                            ) {
-                                break;
-                            }
-                        }
-
-                        $this->printMissingVersion($missingVersion, $maxNameLength);
-
-                        unset($missingVersions[$missingVersionCreationTime]);
-                    }
-
-                    $status = '     <info>up</info> ';
+            foreach ($defaultMigrations as $migration) {
+                if (array_key_exists($migration->getVersion(), $versions)) {
+                    $status = 'up';
+                    unset($versions[$migration->getVersion()]);
                 } else {
-                    $pendingMigrationCount++;
-                    $hasDownMigration = true;
-                    $status = '   <error>down</error> ';
-                }
-                $maxNameLength = max($maxNameLength, strlen($migration->getName()));
-
-                $output->writeln(
-                    sprintf(
-                        '%s %14.0f  %19s  %19s  <comment>%s</comment>',
-                        $status,
-                        $migration->getVersion(),
-                        ($version ? $version['start_time'] : ''),
-                        ($version ? $version['end_time'] : ''),
-                        $migration->getName()
-                    ),
-                    $this->verbosityLevel
-                );
-
-                if ($version && $version['breakpoint']) {
-                    $output->writeln('         <error>BREAKPOINT SET</error>', $this->verbosityLevel);
+                    $status = 'down';
                 }
 
-                $finalMigrations[] = ['migration_status' => trim(strip_tags($status)), 'migration_id' => sprintf('%14.0f', $migration->getVersion()), 'migration_name' => $migration->getName()];
-                unset($versions[$migration->getVersion()]);
+                $version = $migration->getVersion();
+                $migrationParams = [
+                    'status' => $status,
+                    'id' => $migration->getVersion(),
+                    'name' => $migration->getName(),
+                ];
+
+                $migrations[$version] = $migrationParams;
             }
 
-            // and finally add any possibly-remaining missing migrations
-            foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
-                $this->printMissingVersion($missingVersion, $maxNameLength);
+            foreach ($versions as $missing) {
+                $version = $missing['version'];
+                $migrationParams = [
+                    'status' => 'up',
+                    'id' => $version,
+                    'name' => $missing['migration_name'],
+                ];
 
-                unset($missingVersions[$missingVersionCreationTime]);
-            }
-        } else {
-            // there are no migrations
-            $output->writeln('', $this->verbosityLevel);
-            $output->writeln('There are no available migrations. Try creating one using the <info>create</info> command.', $this->verbosityLevel);
-        }
+                if (!$isJson) {
+                    $migrationParams = [
+                        'missing' => true,
+                    ] + $migrationParams;
+                }
 
-        // write an empty line
-        $output->writeln('', $this->verbosityLevel);
-
-        if ($format !== null) {
-            switch ($format) {
-                case AbstractCommand::FORMAT_JSON:
-                    $output->setVerbosity($verbosity);
-                    $output->writeln((string)json_encode(
-                        [
-                            'pending_count' => $pendingMigrationCount,
-                            'missing_count' => $missingCount,
-                            'total_count' => $migrationCount + $missingCount,
-                            'migrations' => $finalMigrations,
-                        ]
-                    ));
-                    break;
-                default:
-                    $output->writeln('<info>Unsupported format: ' . $format . '</info>');
+                $migrations[$version] = $migrationParams;
             }
         }
 
-        return [
-            'hasMissingMigration' => $hasMissingMigration,
-            'hasDownMigration' => $hasDownMigration,
-        ];
+        ksort($migrations);
+        $migrations = array_values($migrations);
+
+        return $migrations;
     }
 
     /**
@@ -289,18 +174,223 @@ class Manager
      */
     public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
     {
-        $versions = array_keys($this->getMigrations($environment));
-        $dateString = $dateTime->format('YmdHis');
-
-        $outstandingMigrations = array_filter($versions, function ($version) use ($dateString) {
-            return $version <= $dateString;
-        });
-
-        if (count($outstandingMigrations) > 0) {
-            $migration = max($outstandingMigrations);
-            $this->getOutput()->writeln('Migrating to version ' . $migration, $this->verbosityLevel);
-            $this->migrate($environment, $migration, $fake);
+        /** @var array<int> $versions */
+        $versions = array_keys($this->getMigrations('default'));
+        $dateString = $dateTime->format('Ymdhis');
+        $versionToMigrate = null;
+        foreach ($versions as $version) {
+            if ($dateString > $version) {
+                $versionToMigrate = $version;
+            }
         }
+
+        if ($versionToMigrate === null) {
+            $this->getOutput()->writeln(
+                'No migrations to run'
+            );
+
+            return;
+        }
+
+        $this->getOutput()->writeln(
+            'Migrating to version ' . $versionToMigrate
+        );
+        $this->migrate($environment, $versionToMigrate, $fake);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function rollbackToDateTime(string $environment, DateTime $dateTime, bool $force = false): void
+    {
+        $env = $this->getEnvironment($environment);
+        $versions = $env->getVersions();
+        $dateString = $dateTime->format('Ymdhis');
+        sort($versions);
+        $versions = array_reverse($versions);
+
+        if (empty($versions) || $dateString > $versions[0]) {
+            $this->getOutput()->writeln('No migrations to rollback');
+
+            return;
+        }
+
+        if ($dateString < end($versions)) {
+            $this->getOutput()->writeln('Rolling back all migrations');
+            $this->rollback($environment, 0);
+
+            return;
+        }
+
+        $index = 0;
+        foreach ($versions as $index => $version) {
+            if ($dateString > $version) {
+                break;
+            }
+        }
+
+        $versionToRollback = $versions[$index];
+
+        $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
+        $this->rollback($environment, $versionToRollback, $force);
+    }
+
+    /**
+     * Checks if the migration with version number $version as already been mark migrated
+     *
+     * @param int $version Version number of the migration to check
+     * @return bool
+     */
+    public function isMigrated(int $version): bool
+    {
+        $adapter = $this->getEnvironment('default')->getAdapter();
+        /** @var array<int, mixed> $versions */
+        $versions = array_flip($adapter->getVersions());
+
+        return isset($versions[$version]);
+    }
+
+    /**
+     * Marks migration with version number $version migrated
+     *
+     * @param int $version Version number of the migration to check
+     * @param string $path Path where the migration file is located
+     * @return bool True if success
+     */
+    public function markMigrated(int $version, string $path): bool
+    {
+        $adapter = $this->getEnvironment('default')->getAdapter();
+
+        $migrationFile = glob($path . DS . $version . '*');
+
+        if (empty($migrationFile)) {
+            throw new RuntimeException(
+                sprintf('A migration file matching version number `%s` could not be found', $version)
+            );
+        }
+
+        $migrationFile = $migrationFile[0];
+        /** @var class-string<\Phinx\Migration\MigrationInterface> $className */
+        $className = $this->getMigrationClassName($migrationFile);
+        require_once $migrationFile;
+        $Migration = new $className('default', $version);
+
+        $time = date('Y-m-d H:i:s', time());
+
+        $adapter->migrated($Migration, 'up', $time, $time);
+
+        return true;
+    }
+
+    /**
+     * Resolves a migration class name based on $path
+     *
+     * @param string $path Path to the migration file of which we want the class name
+     * @return string Migration class name
+     */
+    protected function getMigrationClassName(string $path): string
+    {
+        $class = (string)preg_replace('/^[0-9]+_/', '', basename($path));
+        $class = str_replace('_', ' ', $class);
+        $class = ucwords($class);
+        $class = str_replace(' ', '', $class);
+        if (strpos($class, '.') !== false) {
+            /** @psalm-suppress PossiblyFalseArgument */
+            $class = substr($class, 0, strpos($class, '.'));
+        }
+
+        return $class;
+    }
+
+    /**
+     * Decides which versions it should mark as migrated
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input Input interface from which argument and options
+     * will be extracted to determine which versions to be marked as migrated
+     * @return array<int> Array of versions that should be marked as migrated
+     * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
+     * or version not found
+     */
+    public function getVersionsToMark(InputInterface $input): array
+    {
+        $migrations = $this->getMigrations('default');
+        $versions = array_keys($migrations);
+
+        $versionArg = $input->getArgument('version');
+        $targetArg = $input->getOption('target');
+        $hasAllVersion = in_array($versionArg, ['all', '*'], true);
+        if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
+            return $versions;
+        }
+
+        $version = (int)$targetArg ?: (int)$versionArg;
+
+        if ($input->getOption('only') || !empty($versionArg)) {
+            if (!in_array($version, $versions)) {
+                throw new InvalidArgumentException("Migration `$version` was not found !");
+            }
+
+            return [$version];
+        }
+
+        $lengthIncrease = $input->getOption('exclude') ? 0 : 1;
+        $index = array_search($version, $versions);
+
+        if ($index === false) {
+            throw new InvalidArgumentException("Migration `$version` was not found !");
+        }
+
+        return array_slice($versions, 0, $index + $lengthIncrease);
+    }
+
+    /**
+     * Mark all migrations in $versions array found in $path as migrated
+     *
+     * It will start a transaction and rollback in case one of the operation raises an exception
+     *
+     * @param string $path Path where to look for migrations
+     * @param array<int> $versions Versions which should be marked
+     * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
+     * the command output
+     * @return void
+     */
+    public function markVersionsAsMigrated(string $path, array $versions, OutputInterface $output): void
+    {
+        $adapter = $this->getEnvironment('default')->getAdapter();
+
+        if (!$versions) {
+            $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
+
+            return;
+        }
+
+        $adapter->beginTransaction();
+        foreach ($versions as $version) {
+            if ($this->isMigrated($version)) {
+                $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
+                continue;
+            }
+
+            try {
+                $this->markMigrated($version, $path);
+                $output->writeln(
+                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
+                );
+            } catch (Exception $e) {
+                $adapter->rollbackTransaction();
+                $output->writeln(
+                    sprintf(
+                        '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
+                        $version,
+                        $e->getMessage()
+                    )
+                );
+                $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
+
+                return;
+            }
+        }
+        $adapter->commitTransaction();
     }
 
     /**
@@ -986,6 +1076,16 @@ class Manager
         assert(!empty($this->seeds), 'seeds must be set');
         $this->seeds = $this->orderSeedsByDependencies($this->seeds);
 
+        if (empty($this->seeds)) {
+            return [];
+        }
+
+        foreach ($this->seeds as $instance) {
+            if ($instance instanceof AbstractSeed) {
+                $instance->setInput($this->input);
+            }
+        }
+
         return $this->seeds;
     }
 
@@ -1138,5 +1238,25 @@ class Manager
         $this->verbosityLevel = $verbosityLevel;
 
         return $this;
+    }
+
+    /**
+     * Reset the migrations stored in the object
+     *
+     * @return void
+     */
+    public function resetMigrations(): void
+    {
+        $this->migrations = null;
+    }
+
+    /**
+     * Reset the seeds stored in the object
+     *
+     * @return void
+     */
+    public function resetSeeds(): void
+    {
+        $this->seeds = null;
     }
 }

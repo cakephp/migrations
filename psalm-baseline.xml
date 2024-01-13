@@ -50,9 +50,6 @@
     <ArgumentTypeCoercion>
       <code>array_merge($versions, array_keys($migrations))</code>
     </ArgumentTypeCoercion>
-    <RedundantCondition>
-      <code>$migrations</code>
-    </RedundantCondition>
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->container)]]></code>
     </RedundantPropertyInitializationCheck>
