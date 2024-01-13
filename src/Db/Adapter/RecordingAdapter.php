@@ -31,7 +31,7 @@ use Migrations\Migration\IrreversibleMigrationException;
 class RecordingAdapter extends AdapterWrapper
 {
     /**
-     * @var \Phinx\Db\Action\Action[]
+     * @var \Migrations\Db\Action\Action[]
      */
     protected array $commands = [];
 
@@ -62,8 +62,8 @@ class RecordingAdapter extends AdapterWrapper
     /**
      * Gets an array of the recorded commands in reverse.
      *
-     * @throws \Phinx\Migration\IrreversibleMigrationException if a command cannot be reversed.
-     * @return \Phinx\Db\Plan\Intent
+     * @throws \Migrations\Migration\IrreversibleMigrationException if a command cannot be reversed.
+     * @return \Migrations\Db\Plan\Intent
      */
     public function getInvertedCommands(): Intent
     {
@@ -89,7 +89,7 @@ class RecordingAdapter extends AdapterWrapper
                 case $command instanceof RenameColumn:
                     /** @var \Migrations\Db\Action\RenameColumn $command */
                     $column = clone $command->getColumn();
-                    $name = $column->getName();
+                    $name = (string)$column->getName();
                     $column->setName($command->getNewName());
                     $inverted->addAction(new RenameColumn($command->getTable(), $column, $name));
                     break;

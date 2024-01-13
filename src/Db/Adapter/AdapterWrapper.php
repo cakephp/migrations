@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Proxy commands through to another adapter, allowing modification of
  * parameters during calls.
  */
-abstract class AdapterWrapper implements AdapterInterface, WrapperInterface
+abstract class AdapterWrapper implements WrapperInterface
 {
     /**
      * @var \Migrations\Db\Adapter\AdapterInterface

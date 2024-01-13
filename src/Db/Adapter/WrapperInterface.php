@@ -11,7 +11,7 @@ namespace Migrations\Db\Adapter;
 /**
  * Wrapper Interface.
  */
-interface WrapperInterface
+interface WrapperInterface extends AdapterInterface
 {
     /**
      * Class constructor, must always wrap another adapter.

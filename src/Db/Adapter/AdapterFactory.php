@@ -39,40 +39,42 @@ class AdapterFactory
     /**
      * Class map of database adapters, indexed by PDO::ATTR_DRIVER_NAME.
      *
-     * @var array<string, \Phinx\Db\Adapter\AdapterInterface|string>
-     * @phpstan-var array<string, \Phinx\Db\Adapter\AdapterInterface|class-string<\Phinx\Db\Adapter\AdapterInterface>>
+     * @var array<string, \Migrations\Db\Adapter\AdapterInterface|string>
+     * @phpstan-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>>
+     * @psalm-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>>
      */
     protected array $adapters = [
-        'mysql' => 'Migrations\Db\Adapter\MysqlAdapter',
-        'postgres' => 'Migrations\Db\Adapter\PostgresAdapter',
-        'sqlite' => 'Migrations\Db\Adapter\SqliteAdapter',
-        'sqlserver' => 'Migrations\Db\Adapter\SqlserverAdapter',
+        'mysql' => MysqlAdapter::class,
+        'postgres' => PostgresAdapter::class,
+        'sqlite' => SqliteAdapter::class,
+        'sqlserver' => SqlserverAdapter::class,
     ];
 
     /**
      * Class map of adapters wrappers, indexed by name.
      *
-     * @var array<string, \Phinx\Db\Adapter\WrapperInterface|string>
+     * @var array<string, string>
+     * @psalm-var array<string, class-string<\Migrations\Db\Adapter\WrapperInterface>>
      */
     protected array $wrappers = [
-        'record' => 'Migrations\Db\Adapter\RecordingAdapter',
-        'timed' => 'Migrations\Db\Adapter\TimedOutputAdapter',
+        'record' => RecordingAdapter::class,
+        'timed' => TimedOutputAdapter::class,
     ];
 
     /**
      * Register an adapter class with a given name.
      *
      * @param string $name Name
-     * @param object|string $class Class
+     * @param string $class Class
      * @throws \RuntimeException
      * @return $this
      */
-    public function registerAdapter(string $name, object|string $class)
+    public function registerAdapter(string $name, string $class)
     {
-        if (!is_subclass_of($class, 'Migrations\Db\Adapter\AdapterInterface')) {
+        if (!is_subclass_of($class, AdapterInterface::class)) {
             throw new RuntimeException(sprintf(
                 'Adapter class "%s" must implement Migrations\\Db\\Adapter\\AdapterInterface',
-                is_string($class) ? $class : get_class($class)
+                $class
             ));
         }
         $this->adapters[$name] = $class;
@@ -85,8 +87,8 @@ class AdapterFactory
      *
      * @param string $name Name
      * @throws \RuntimeException
-     * @return object|string
-     * @phpstan-return object|class-string<\Migrations\Db\Adapter\AdapterInterface>
+     * @return string
+     * @phpstan-return class-string<\Migrations\Db\Adapter\AdapterInterface>
      */
     protected function getClass(string $name): object|string
     {
@@ -118,16 +120,16 @@ class AdapterFactory
      * Add or replace a wrapper with a fully qualified class name.
      *
      * @param string $name Name
-     * @param object|string $class Class
+     * @param string $class Class
      * @throws \RuntimeException
      * @return $this
      */
-    public function registerWrapper(string $name, object|string $class)
+    public function registerWrapper(string $name, string $class)
     {
-        if (!is_subclass_of($class, 'Migrations\Db\Adapter\WrapperInterface')) {
+        if (!is_subclass_of($class, WrapperInterface::class)) {
             throw new RuntimeException(sprintf(
                 'Wrapper class "%s" must implement Migrations\\Db\\Adapter\\WrapperInterface',
-                is_string($class) ? $class : get_class($class)
+                $class
             ));
         }
         $this->wrappers[$name] = $class;
@@ -140,9 +142,9 @@ class AdapterFactory
      *
      * @param string $name Name
      * @throws \RuntimeException
-     * @return \Migrations\Db\Adapter\WrapperInterface|string
+     * @return class-string<\Migrations\Db\Adapter\WrapperInterface>
      */
-    protected function getWrapperClass(string $name): WrapperInterface|string
+    protected function getWrapperClass(string $name): string
     {
         if (empty($this->wrappers[$name])) {
             throw new RuntimeException(sprintf(
@@ -159,9 +161,9 @@ class AdapterFactory
      *
      * @param string $name Name
      * @param \Migrations\Db\Adapter\AdapterInterface $adapter Adapter
-     * @return \Migrations\Db\Adapter\AdapterWrapper
+     * @return \Migrations\Db\Adapter\WrapperInterface
      */
-    public function getWrapper(string $name, AdapterInterface $adapter): AdapterWrapper
+    public function getWrapper(string $name, AdapterInterface $adapter): WrapperInterface
     {
         $class = $this->getWrapperClass($name);
 
