@@ -357,13 +357,13 @@ class Environment
         /** @var \Symfony\Component\Console\Input\InputInterface|null $input */
         $input = $this->getInput();
         if ($input) {
-            $adapter->setInput($this->getInput());
+            $adapter->setInput($input);
         }
 
         /** @var \Symfony\Component\Console\Output\OutputInterface|null $output */
         $output = $this->getOutput();
         if ($output) {
-            $adapter->setOutput($this->getOutput());
+            $adapter->setOutput($output);
         }
 
         // Use the TablePrefixAdapter if table prefix/suffixes are in use

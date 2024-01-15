@@ -59,12 +59,25 @@
     <RedundantCondition>
       <code>is_array($newColumns)</code>
     </RedundantCondition>
+    <UndefinedConstant>
+      <code>PDO::SQLSRV_ATTR_ENCODING</code>
+    </UndefinedConstant>
   </file>
   <file src="src/Db/Adapter/TimedOutputAdapter.php">
     <MissingParamType>
       <code>$columns</code>
       <code>$newColumns</code>
     </MissingParamType>
+  </file>
+  <file src="src/Migration/Environment.php">
+    <InvalidArgument>
+      <code><![CDATA[$this->getAdapter()]]></code>
+      <code><![CDATA[$this->getAdapter()]]></code>
+      <code><![CDATA[$this->getAdapter()]]></code>
+    </InvalidArgument>
+    <RedundantPropertyInitializationCheck>
+      <code><![CDATA[isset($this->adapter)]]></code>
+    </RedundantPropertyInitializationCheck>
   </file>
   <file src="src/Migration/Manager.php">
     <ArgumentTypeCoercion>
