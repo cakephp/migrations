@@ -55,6 +55,7 @@ use Phinx\Db\Table\Index as PhinxIndex;
 use Phinx\Db\Table\Table as PhinxTable;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Util\Literal as PhinxLiteral;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -98,19 +99,34 @@ class PhinxAdapter implements PhinxAdapterInterface
     {
         $column = new Column();
         $attrs = [
-            'name', 'type', 'null', 'default', 'identity',
+            'name', 'null', 'default', 'identity',
             'generated', 'seed', 'increment', 'scale',
             'after', 'update', 'comment', 'signed',
             'timezone', 'properties', 'collation',
-            'encoding', 'srid', 'values',
+            'encoding', 'srid', 'values', 'limit',
         ];
         foreach ($attrs as $attr) {
             $get = 'get' . ucfirst($attr);
             $set = 'set' . ucfirst($attr);
-            $value = $phinxColumn->{$get}();
+            try {
+                $value = $phinxColumn->{$get}();
+            } catch (RuntimeException $e) {
+                $value = null;
+            }
             if ($value !== null) {
                 $column->{$set}($value);
             }
+        }
+        try {
+            $type = $phinxColumn->getType();
+        } catch (RuntimeException $e) {
+            $type = null;
+        }
+        if ($type instanceof PhinxLiteral) {
+            $type = Literal::from((string)$type);
+        }
+        if ($type) {
+            $column->setType($type);
         }
 
         return $column;
@@ -130,11 +146,12 @@ class PhinxAdapter implements PhinxAdapterInterface
             'generated', 'seed', 'increment', 'scale',
             'after', 'update', 'comment', 'signed',
             'timezone', 'properties', 'collation',
-            'encoding', 'srid', 'values',
+            'encoding', 'srid', 'values', 'limit',
         ];
         foreach ($attrs as $attr) {
             $get = 'get' . ucfirst($attr);
             $set = 'set' . ucfirst($attr);
+            $value = $column->{$get}();
             $value = $column->{$get}();
             if ($value !== null) {
                 $phinx->{$set}($value);
@@ -160,7 +177,11 @@ class PhinxAdapter implements PhinxAdapterInterface
         foreach ($attrs as $attr) {
             $get = 'get' . ucfirst($attr);
             $set = 'set' . ucfirst($attr);
-            $value = $phinxIndex->{$get}();
+            try {
+                $value = $phinxIndex->{$get}();
+            } catch (RuntimeException $e) {
+                $value = null;
+            }
             if ($value !== null) {
                 $index->{$set}($value);
             }
@@ -178,21 +199,30 @@ class PhinxAdapter implements PhinxAdapterInterface
     protected function convertForeignKey(PhinxForeignKey $phinxKey): ForeignKey
     {
         $foreignkey = new ForeignKey();
-        $foreignkey->setReferencedTable(
-            $this->convertTable($phinxKey->getReferencedTable())
-        );
         $attrs = [
-            'columns', 'referencedColumns', 'onDelete', 'onUpdate',
-            'constraint',
+            'columns', 'referencedColumns', 'onDelete', 'onUpdate', 'constraint',
         ];
 
         foreach ($attrs as $attr) {
             $get = 'get' . ucfirst($attr);
             $set = 'set' . ucfirst($attr);
-            $value = $phinxKey->{$get}();
+            try {
+                $value = $phinxKey->{$get}();
+            } catch (RuntimeException $e) {
+                $value = null;
+            }
             if ($value !== null) {
                 $foreignkey->{$set}($value);
             }
+        }
+
+        try {
+            $referenced = $phinxKey->getReferencedTable();
+        } catch (RuntimeException $e) {
+            $referenced = null;
+        }
+        if ($referenced) {
+            $foreignkey->setReferencedTable($this->convertTable($referenced));
         }
 
         return $foreignkey;
@@ -607,7 +637,11 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     public function getColumns(string $tableName): array
     {
-        return $this->adapter->getColumns($tableName);
+        $columns = $this->adapter->getColumns($tableName);
+
+        return array_map(function ($col) {
+            return $this->convertColumnToPhinx($col);
+        }, $columns);
     }
 
     /**

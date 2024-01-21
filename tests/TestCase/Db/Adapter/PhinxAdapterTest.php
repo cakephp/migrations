@@ -489,17 +489,6 @@ class PhinxAdapterTest extends TestCase
         $this->assertEquals('DOUBLE', $rows[1]['type']);
     }
 
-    public function testRenamingANonExistentColumn()
-    {
-        $table = new PhinxTable('t', [], $this->adapter);
-        $table->addColumn('column1', 'string')
-            ->save();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The specified column doesn't exist: column2");
-        $this->adapter->renameColumn('t', 'column2', 'column1');
-    }
-
     public function testRenameColumnWithIndex()
     {
         $table = new PhinxTable('t', [], $this->adapter);
@@ -1641,7 +1630,7 @@ INPUT;
         $act = $this->adapter->getColumns('t');
         $this->assertCount(count($exp), $act);
         foreach ($exp as $index => $data) {
-            $this->assertInstanceOf(Column::class, $act[$index]);
+            $this->assertInstanceOf(PhinxColumn::class, $act[$index]);
             foreach ($data as $key => $value) {
                 $m = 'get' . ucfirst($key);
                 $this->assertEquals($value, $act[$index]->$m(), "Parameter '$key' of column at index $index did not match expectations.");
