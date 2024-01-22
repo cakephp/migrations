@@ -163,6 +163,9 @@ class MigratorTest extends TestCase
             ->from('migrator_phinxlog')
             ->execute()->fetchColumn(0);
 
+        if (!$endTime) {
+            $endTime = 'now';
+        }
         return ChronosDate::parse($endTime);
     }
 
