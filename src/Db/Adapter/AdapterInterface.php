@@ -9,6 +9,10 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Query;
+use Cake\Database\Query\DeleteQuery;
+use Cake\Database\Query\InsertQuery;
+use Cake\Database\Query\SelectQuery;
+use Cake\Database\Query\UpdateQuery;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
@@ -283,9 +287,38 @@ interface AdapterInterface
     /**
      * Returns a new Query object
      *
+     * @deprecated 4.x Use getSelectBuilder, getInsertBuilder, getUpdateBuilder, getDeleteBuilder instead.
      * @return \Cake\Database\Query
      */
     public function getQueryBuilder(string $type): Query;
+
+    /**
+     * Return a new SelectQuery object
+     *
+     * @return \Cake\Database\Query\SelectQuery
+     */
+    public function getSelectBuilder(): SelectQuery;
+
+    /**
+     * Return a new InsertQuery object
+     *
+     * @return \Cake\Database\Query\InsertQuery
+     */
+    public function getInsertBuilder(): InsertQuery;
+
+    /**
+     * Return a new UpdateQuery object
+     *
+     * @return \Cake\Database\Query\UpdateQuery
+     */
+    public function getUpdateBuilder(): UpdateQuery;
+
+    /**
+     * Return a new DeleteQuery object
+     *
+     * @return \Cake\Database\Query\DeleteQuery
+     */
+    public function getDeleteBuilder(): DeleteQuery;
 
     /**
      * Executes a SQL statement.
