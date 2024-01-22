@@ -161,9 +161,10 @@ class MigratorTest extends TestCase
         $endTime = ConnectionManager::get('test')->selectQuery()
             ->select('end_time')
             ->from('migrator_phinxlog')
-            ->execute()->fetchColumn(0);
+            ->execute()
+            ->fetchColumn(0);
 
-        if (!$endTime) {
+        if (!$endTime || is_bool($endTime)) {
             $this->markTestSkipped('Cannot read end_time, bailing.');
         }
 
