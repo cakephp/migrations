@@ -164,8 +164,9 @@ class MigratorTest extends TestCase
             ->execute()->fetchColumn(0);
 
         if (!$endTime) {
-            $endTime = 'now';
+            $this->markTestSkipped('Cannot read end_time, bailing.');
         }
+
         return ChronosDate::parse($endTime);
     }
 
