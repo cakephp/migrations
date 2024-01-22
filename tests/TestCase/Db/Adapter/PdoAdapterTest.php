@@ -200,4 +200,19 @@ class PdoAdapterTest extends TestCase
         $this->adapter->setConnection($pdo);
         $this->adapter->execute('SELECT 1;;');
     }
+
+    public function testQueryBuilderMethods()
+    {
+        $result = $this->adapter->getSelectBuilder();
+        $this->assertNotEmpty($result);
+
+        $result = $this->adapter->getUpdateBuilder();
+        $this->assertNotEmpty($result);
+
+        $result = $this->adapter->getDeleteBuilder();
+        $this->assertNotEmpty($result);
+
+        $result = $this->adapter->getInsertBuilder();
+        $this->assertNotEmpty($result);
+    }
 }

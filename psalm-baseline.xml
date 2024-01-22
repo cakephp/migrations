@@ -16,24 +16,26 @@
     </RedundantPropertyInitializationCheck>
   </file>
   <file src="src/Db/Adapter/AdapterWrapper.php">
+    <DeprecatedMethod>
+      <code>getQueryBuilder</code>
+    </DeprecatedMethod>
     <InvalidNullableReturnType>
       <code>InputInterface</code>
     </InvalidNullableReturnType>
     <NullableReturnStatement>
       <code><![CDATA[$this->adapter->getInput()]]></code>
     </NullableReturnStatement>
-    <UndefinedInterfaceMethod>
-      <code>getDeleteBuilder</code>
-      <code>getInsertBuilder</code>
-      <code>getSelectBuilder</code>
-      <code>getUpdateBuilder</code>
-    </UndefinedInterfaceMethod>
   </file>
   <file src="src/Db/Adapter/MysqlAdapter.php">
     <RedundantCondition>
       <code>$opened</code>
       <code>is_array($newColumns)</code>
     </RedundantCondition>
+  </file>
+  <file src="src/Db/Adapter/PhinxAdapter.php">
+    <DeprecatedMethod>
+      <code>getQueryBuilder</code>
+    </DeprecatedMethod>
   </file>
   <file src="src/Db/Adapter/PostgresAdapter.php">
     <NoValue>
@@ -59,6 +61,9 @@
     <RedundantCondition>
       <code>is_array($newColumns)</code>
     </RedundantCondition>
+    <UndefinedConstant>
+      <code>PDO::SQLSRV_ATTR_ENCODING</code>
+    </UndefinedConstant>
   </file>
   <file src="src/Db/Adapter/TimedOutputAdapter.php">
     <MissingParamType>

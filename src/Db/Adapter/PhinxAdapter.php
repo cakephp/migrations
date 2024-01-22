@@ -13,7 +13,6 @@ use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
-use Error;
 use Migrations\Db\Action\Action;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
@@ -92,7 +91,7 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * Convert a phinx column into a migrations object
      *
-     * @param \Phinx\Db\Column $phinxIndex The column to convert.
+     * @param \Phinx\Db\Table\Column $phinxColumn The column to convert.
      * @return \Migrations\Db\Table\Column
      */
     protected function convertColumn(PhinxColumn $phinxColumn): Column
@@ -135,7 +134,7 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * Convert a migrations column into a phinx object
      *
-     * @param \Migrations\Db\Column $column The column to convert.
+     * @param \Migrations\Db\Table\Column $column The column to convert.
      * @return \Phinx\Db\Table\Column
      */
     protected function convertColumnToPhinx(Column $column): PhinxColumn
@@ -193,7 +192,7 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * Convert a phinx ForeignKey into a migrations object
      *
-     * @param \Phinx\Db\Table\ForeignKey $index The index to convert.
+     * @param \Phinx\Db\Table\ForeignKey $phinxKey The index to convert.
      * @return \Migrations\Db\Table\ForeignKey
      */
     protected function convertForeignKey(PhinxForeignKey $phinxKey): ForeignKey
@@ -231,11 +230,12 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * Convert a phinx Action into a migrations object
      *
-     * @param \Phinx\Db\Table\Action $action The index to convert.
-     * @return \Migrations\Db\Adapter\Action
+     * @param \Phinx\Db\Action\Action $phinxAction The index to convert.
+     * @return \Migrations\Db\Action\Action
      */
     protected function convertAction(PhinxAction $phinxAction): Action
     {
+        $action = null;
         if ($phinxAction instanceof PhinxAddColumn) {
             $action = new AddColumn(
                 $this->convertTable($phinxAction->getTable()),
@@ -302,15 +302,17 @@ class PhinxAdapter implements PhinxAdapterInterface
                 $phinxAction->getNewName()
             );
         }
+        if (!$action) {
+            throw new RuntimeException('Unable to map action of type ' . get_class($phinxAction));
+        }
 
         return $action;
     }
 
-
     /**
      * Convert a phinx Literal into a migrations object
      *
-     * @param \Phinx\Util\Literal|string $literal The literal to convert.
+     * @param \Phinx\Util\Literal|string $phinxLiteral The literal to convert.
      * @return \Migrations\Db\Literal|string
      */
     protected function convertLiteral(PhinxLiteral|string $phinxLiteral): Literal|string
@@ -379,7 +381,12 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     public function getInput(): InputInterface
     {
-        return $this->adapter->getInput();
+        $input = $this->adapter->getInput();
+        if (!$input) {
+            throw new RuntimeException('Cannot getInput it has not been set.');
+        }
+
+        return $input;
     }
 
     /**
