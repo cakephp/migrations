@@ -65,7 +65,7 @@ trait TableFinderTrait
             }
 
             foreach ($tableNamesInModel as $num => $table) {
-                if (str_contains($table, '.')) {
+                if ($table && str_contains($table, '.')) {
                     $split = array_reverse(explode('.', $table, 2));
 
                     $config = (array)ConnectionManager::getConfig($this->connection);
@@ -96,7 +96,7 @@ trait TableFinderTrait
      * Gets list Tables Names
      *
      * @param string|null $pluginName Plugin name if exists.
-     * @return string[]
+     * @return array<int, string|null>
      */
     protected function getTableNames(?string $pluginName = null): array
     {
@@ -145,7 +145,7 @@ trait TableFinderTrait
      *
      * @param string $className Name of Table Class.
      * @param string|null $pluginName Plugin name if exists.
-     * @return string[]
+     * @return list<null|string>
      */
     protected function fetchTableName(string $className, ?string $pluginName = null): array
     {

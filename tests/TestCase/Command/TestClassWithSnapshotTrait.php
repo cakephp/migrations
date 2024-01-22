@@ -43,7 +43,7 @@ class TestClassWithSnapshotTrait
 
     /**
      * @param string|null $pluginName
-     * @return string[]
+     * @return array<int<0, max>, null|string>
      */
     public function getTableNames($pluginName = null)
     {
