@@ -61,9 +61,6 @@
     <RedundantCondition>
       <code>is_array($newColumns)</code>
     </RedundantCondition>
-    <UndefinedConstant>
-      <code>PDO::SQLSRV_ATTR_ENCODING</code>
-    </UndefinedConstant>
   </file>
   <file src="src/Db/Adapter/TimedOutputAdapter.php">
     <MissingParamType>
