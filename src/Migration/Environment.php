@@ -10,6 +10,7 @@ namespace Migrations\Migration;
 
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\Db\Adapter\PhinxAdapter;
 use PDO;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\SeedInterface;
@@ -78,10 +79,11 @@ class Environment
         $migration->setMigratingUp($direction === MigrationInterface::UP);
 
         $startTime = time();
-        // Need to get a phinx interface adapter here. We will need to have a shim
-        // to bridge the interfaces. Changing the MigrationInterface is tricky
-        // because of the method names.
-        $migration->setAdapter($this->getAdapter());
+        // Use an adapter shim to bridge between the new migrations
+        // engine and the Phinx compatible interface
+        $adapter = $this->getAdapter();
+        $phinxShim = new PhinxAdapter($adapter);
+        $migration->setAdapter($phinxShim);
 
         $migration->preFlightCheck();
 
@@ -90,24 +92,29 @@ class Environment
         }
 
         // begin the transaction if the adapter supports it
-        if ($this->getAdapter()->hasTransactions()) {
-            $this->getAdapter()->beginTransaction();
+        if ($adapter->hasTransactions()) {
+            $adapter->beginTransaction();
         }
 
         if (!$fake) {
             // Run the migration
             if (method_exists($migration, MigrationInterface::CHANGE)) {
                 if ($direction === MigrationInterface::DOWN) {
-                    // Create an instance of the ProxyAdapter so we can record all
+                    // Create an instance of the RecordingAdapter so we can record all
                     // of the migration commands for reverse playback
 
-                    /** @var \Phinx\Db\Adapter\ProxyAdapter $proxyAdapter */
-                    $proxyAdapter = AdapterFactory::instance()
-                        ->getWrapper('proxy', $this->getAdapter());
-                    $migration->setAdapter($proxyAdapter);
+                    /** @var \Migrations\Db\Adapter\RecordingAdapter $recordAdapter */
+                    $recordAdapter = AdapterFactory::instance()
+                        ->getWrapper('record', $adapter);
+
+                    // Wrap the adapter with a phinx shim to maintain contain
+                    $phinxAdapter = new PhinxAdapter($recordAdapter);
+                    $migration->setAdapter($phinxAdapter);
+
                     $migration->{MigrationInterface::CHANGE}();
-                    $proxyAdapter->executeInvertedCommands();
-                    $migration->setAdapter($this->getAdapter());
+                    $recordAdapter->executeInvertedCommands();
+
+                    $migration->setAdapter(new PhinxAdapter($this->getAdapter()));
                 } else {
                     $migration->{MigrationInterface::CHANGE}();
                 }
@@ -117,11 +124,11 @@ class Environment
         }
 
         // Record it in the database
-        $this->getAdapter()->migrated($migration, $direction, date('Y-m-d H:i:s', $startTime), date('Y-m-d H:i:s', time()));
+        $adapter->migrated($migration, $direction, date('Y-m-d H:i:s', $startTime), date('Y-m-d H:i:s', time()));
 
         // commit the transaction if the adapter supports it
-        if ($this->getAdapter()->hasTransactions()) {
-            $this->getAdapter()->commitTransaction();
+        if ($adapter->hasTransactions()) {
+            $adapter->commitTransaction();
         }
 
         $migration->postFlightCheck();
@@ -135,14 +142,17 @@ class Environment
      */
     public function executeSeed(SeedInterface $seed): void
     {
-        $seed->setAdapter($this->getAdapter());
+        $adapter = $this->getAdapter();
+        $phinxAdapter = new PhinxAdapter($adapter);
+
+        $seed->setAdapter($phinxAdapter);
         if (method_exists($seed, SeedInterface::INIT)) {
             $seed->{SeedInterface::INIT}();
         }
 
         // begin the transaction if the adapter supports it
-        if ($this->getAdapter()->hasTransactions()) {
-            $this->getAdapter()->beginTransaction();
+        if ($adapter->hasTransactions()) {
+            $adapter->beginTransaction();
         }
 
         // Run the seeder
@@ -151,8 +161,8 @@ class Environment
         }
 
         // commit the transaction if the adapter supports it
-        if ($this->getAdapter()->hasTransactions()) {
-            $this->getAdapter()->commitTransaction();
+        if ($adapter->hasTransactions()) {
+            $adapter->commitTransaction();
         }
     }
 

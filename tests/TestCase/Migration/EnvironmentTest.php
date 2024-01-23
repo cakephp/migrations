@@ -4,9 +4,14 @@ declare(strict_types=1);
 namespace Test\Phinx\Migration;
 
 use Migrations\Db\Adapter\AdapterFactory;
+use Migrations\Db\Adapter\PdoAdapter;
+use Migrations\Db\Adapter\PhinxAdapter;
 use Migrations\Migration\Environment;
 use PDO;
+use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
+use Phinx\Seed\AbstractSeed;
+use Phinx\Seed\SeedInterface;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;
@@ -59,42 +64,6 @@ class EnvironmentTest extends TestCase
         $this->environment->getAdapter();
     }
 
-    private function getPdoMock()
-    {
-        $pdoMock = $this->getMockBuilder(PDO::class)->disableOriginalConstructor()->getMock();
-        $attributes = [];
-        $pdoMock->method('setAttribute')->will($this->returnCallback(function ($attribute, $value) use (&$attributes) {
-            $attributes[$attribute] = $value;
-
-            return true;
-        }));
-        $pdoMock->method('getAttribute')->will($this->returnCallback(function ($attribute) use (&$attributes) {
-            return $attributes[$attribute] ?? 'pdomock';
-        }));
-
-        return $pdoMock;
-    }
-
-    public function testGetAdapterWithExistingPdoInstance()
-    {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
-        $adapter = $this->getMockForAbstractClass('\Migrations\Db\Adapter\PdoAdapter', [['foo' => 'bar']]);
-        AdapterFactory::instance()->registerAdapter('pdomock', $adapter);
-        $this->environment->setOptions(['connection' => $this->getPdoMock()]);
-        $options = $this->environment->getAdapter()->getOptions();
-        $this->assertEquals('pdomock', $options['adapter']);
-    }
-
-    public function testSetPdoAttributeToErrmodeException()
-    {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
-        $adapter = $this->getMockForAbstractClass('\Migrations\Db\Adapter\PdoAdapter', [['foo' => 'bar']]);
-        AdapterFactory::instance()->registerAdapter('pdomock', $adapter);
-        $this->environment->setOptions(['connection' => $this->getPdoMock()]);
-        $options = $this->environment->getAdapter()->getOptions();
-        $this->assertEquals(PDO::ERRMODE_EXCEPTION, $options['connection']->getAttribute(PDO::ATTR_ERRMODE));
-    }
-
     public function testGetAdapterWithBadExistingPdoInstance()
     {
         $this->environment->setOptions(['connection' => new stdClass()]);
@@ -115,7 +84,7 @@ class EnvironmentTest extends TestCase
 
     public function testCurrentVersion()
     {
-        $stub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $stub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $stub->expects($this->any())
@@ -130,7 +99,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAMigrationUp()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -140,21 +109,20 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $upMigration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20110301080000'])
             ->addMethods(['up'])
             ->getMock();
         $upMigration->expects($this->once())
                     ->method('up');
 
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         $this->environment->executeMigration($upMigration, MigrationInterface::UP);
     }
 
     public function testExecutingAMigrationDown()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -164,22 +132,20 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // down
-        $downMigration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $downMigration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20110301080000'])
             ->addMethods(['down'])
             ->getMock();
         $downMigration->expects($this->once())
                       ->method('down');
 
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         $this->environment->executeMigration($downMigration, MigrationInterface::DOWN);
     }
 
     public function testExecutingAMigrationWithTransactions()
     {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -195,7 +161,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migrate
-        $migration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $migration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20110301080000'])
             ->addMethods(['up'])
             ->getMock();
@@ -207,9 +173,8 @@ class EnvironmentTest extends TestCase
 
     public function testExecutingAChangeMigrationUp()
     {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -219,7 +184,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $migration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20130301080000'])
             ->addMethods(['change'])
             ->getMock();
@@ -231,9 +196,8 @@ class EnvironmentTest extends TestCase
 
     public function testExecutingAChangeMigrationDown()
     {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -243,7 +207,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $migration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20130301080000'])
             ->addMethods(['change'])
             ->getMock();
@@ -255,9 +219,8 @@ class EnvironmentTest extends TestCase
 
     public function testExecutingAFakeMigration()
     {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -267,7 +230,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $migration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20130301080000'])
             ->addMethods(['change'])
             ->getMock();
@@ -288,9 +251,8 @@ class EnvironmentTest extends TestCase
 
     public function testExecuteMigrationCallsInit()
     {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -300,7 +262,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = $this->getMockBuilder('\Phinx\Migration\AbstractMigration')
+        $upMigration = $this->getMockBuilder(AbstractMigration::class)
             ->setConstructorArgs(['mockenv', '20110301080000'])
             ->addMethods(['up', 'init'])
             ->getMock();
@@ -314,17 +276,17 @@ class EnvironmentTest extends TestCase
 
     public function testExecuteSeedInit()
     {
-        $this->markTestIncomplete('Requires a shim adapter to pass.');
         // stub adapter
-        $adapterStub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
 
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $seed = $this->getMockBuilder('\Migrations\AbstractSeed')
-            ->onlyMethods(['run', 'init'])
+        $seed = $this->getMockBuilder(AbstractSeed::class)
+            ->addMethods(['init'])
+            ->onlyMethods(['run'])
             ->getMock();
 
         $seed->expects($this->once())
