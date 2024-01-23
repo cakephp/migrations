@@ -3,15 +3,11 @@ declare(strict_types=1);
 
 namespace Test\Phinx\Migration;
 
-use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\PdoAdapter;
-use Migrations\Db\Adapter\PhinxAdapter;
 use Migrations\Migration\Environment;
-use PDO;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
-use Phinx\Seed\SeedInterface;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;
