@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Closure;
 use RuntimeException;
 
 /**
@@ -39,9 +40,9 @@ class AdapterFactory
     /**
      * Class map of database adapters, indexed by PDO::ATTR_DRIVER_NAME.
      *
-     * @var array<string, \Migrations\Db\Adapter\AdapterInterface|string>
-     * @phpstan-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>>
-     * @psalm-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>>
+     * @var array<string, string|\Closure>
+     * @phpstan-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>|\Closure>
+     * @psalm-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>|\Closure>
      */
     protected array $adapters = [
         'mysql' => MysqlAdapter::class,
@@ -65,13 +66,15 @@ class AdapterFactory
      * Register an adapter class with a given name.
      *
      * @param string $name Name
-     * @param string $class Class
+     * @param \Closure|string $class Class or factory method for the adapter.
      * @throws \RuntimeException
      * @return $this
      */
-    public function registerAdapter(string $name, string $class)
+    public function registerAdapter(string $name, Closure|string $class)
     {
-        if (!is_subclass_of($class, AdapterInterface::class)) {
+        if (
+            !($class instanceof Closure || is_subclass_of($class, AdapterInterface::class))
+        ) {
             throw new RuntimeException(sprintf(
                 'Adapter class "%s" must implement Migrations\\Db\\Adapter\\AdapterInterface',
                 $class
@@ -83,26 +86,6 @@ class AdapterFactory
     }
 
     /**
-     * Get an adapter class by name.
-     *
-     * @param string $name Name
-     * @throws \RuntimeException
-     * @return string
-     * @phpstan-return class-string<\Migrations\Db\Adapter\AdapterInterface>
-     */
-    protected function getClass(string $name): object|string
-    {
-        if (empty($this->adapters[$name])) {
-            throw new RuntimeException(sprintf(
-                'Adapter "%s" has not been registered',
-                $name
-            ));
-        }
-
-        return $this->adapters[$name];
-    }
-
-    /**
      * Get an adapter instance by name.
      *
      * @param string $name Name
@@ -111,9 +94,18 @@ class AdapterFactory
      */
     public function getAdapter(string $name, array $options): AdapterInterface
     {
-        $class = $this->getClass($name);
+        if (empty($this->adapters[$name])) {
+            throw new RuntimeException(sprintf(
+                'Adapter "%s" has not been registered',
+                $name
+            ));
+        }
+        $classOrFactory = $this->adapters[$name];
+        if ($classOrFactory instanceof Closure) {
+            return $classOrFactory($options);
+        }
 
-        return new $class($options);
+        return new $classOrFactory($options);
     }
 
     /**

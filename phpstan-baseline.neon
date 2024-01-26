@@ -16,11 +16,6 @@ parameters:
 			path: src/Command/BakeMigrationSnapshotCommand.php
 
 		-
-			message: "#^Method Migrations\\\\Db\\\\Adapter\\\\AdapterFactory\\:\\:getAdapter\\(\\) should return Migrations\\\\Db\\\\Adapter\\\\AdapterInterface but returns object\\.$#"
-			count: 1
-			path: src/Db/Adapter/AdapterFactory.php
-
-		-
 			message: "#^Unsafe usage of new static\\(\\)\\.$#"
 			count: 1
 			path: src/Db/Adapter/AdapterFactory.php
@@ -74,16 +69,6 @@ parameters:
 			message: "#^Ternary operator condition is always true\\.$#"
 			count: 2
 			path: src/Db/Adapter/SqlserverAdapter.php
-
-		-
-			message: "#^Parameter \\#1 \\$adapter of method Phinx\\\\Migration\\\\MigrationInterface\\:\\:setAdapter\\(\\) expects Phinx\\\\Db\\\\Adapter\\\\AdapterInterface, Migrations\\\\Db\\\\Adapter\\\\AdapterInterface given\\.$#"
-			count: 2
-			path: src/Migration/Environment.php
-
-		-
-			message: "#^Parameter \\#1 \\$adapter of method Phinx\\\\Seed\\\\SeedInterface\\:\\:setAdapter\\(\\) expects Phinx\\\\Db\\\\Adapter\\\\AdapterInterface, Migrations\\\\Db\\\\Adapter\\\\AdapterInterface given\\.$#"
-			count: 1
-			path: src/Migration/Environment.php
 
 		-
 			message: "#^Possibly invalid array key type Cake\\\\Database\\\\Schema\\\\TableSchemaInterface\\|string\\.$#"

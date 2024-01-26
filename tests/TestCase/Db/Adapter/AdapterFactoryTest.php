@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use Migrations\Db\Adapter\AdapterFactory;
+use Migrations\Db\Adapter\PdoAdapter;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;
@@ -27,20 +28,19 @@ class AdapterFactoryTest extends TestCase
 
     public function testInstanceIsFactory()
     {
-        $this->assertInstanceOf('Migrations\Db\Adapter\AdapterFactory', $this->factory);
+        $this->assertInstanceOf(AdapterFactory::class, $this->factory);
     }
 
     public function testRegisterAdapter()
     {
-        // AdapterFactory::getClass is protected, work around it to avoid
-        // creating unnecessary instances and making the test more complex.
-        $method = new ReflectionMethod(get_class($this->factory), 'getClass');
-        $method->setAccessible(true);
+        $mock = $this->getMockForAbstractClass(PdoAdapter::class, [['foo' => 'bar']]);
+        $this->factory->registerAdapter('test', function (array $options) use ($mock) {
+            $this->assertEquals('value', $options['key']);
 
-        $adapter = $method->invoke($this->factory, 'mysql');
-        $this->factory->registerAdapter('test', $adapter);
+            return $mock;
+        });
 
-        $this->assertEquals($adapter, $method->invoke($this->factory, 'test'));
+        $this->assertEquals($mock, $this->factory->getAdapter('test', ['key' => 'value']));
     }
 
     public function testRegisterAdapterFailure()

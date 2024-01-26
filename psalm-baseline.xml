@@ -15,6 +15,11 @@
       <code><![CDATA[isset($this->output)]]></code>
     </RedundantPropertyInitializationCheck>
   </file>
+  <file src="src/Db/Adapter/AdapterFactory.php">
+    <PropertyTypeCoercion>
+      <code><![CDATA[$this->adapters]]></code>
+    </PropertyTypeCoercion>
+  </file>
   <file src="src/Db/Adapter/AdapterWrapper.php">
     <DeprecatedMethod>
       <code>getQueryBuilder</code>
@@ -69,11 +74,6 @@
     </MissingParamType>
   </file>
   <file src="src/Migration/Environment.php">
-    <InvalidArgument>
-      <code><![CDATA[$this->getAdapter()]]></code>
-      <code><![CDATA[$this->getAdapter()]]></code>
-      <code><![CDATA[$this->getAdapter()]]></code>
-    </InvalidArgument>
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->adapter)]]></code>
     </RedundantPropertyInitializationCheck>
