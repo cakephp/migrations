@@ -33,7 +33,6 @@ class AdapterFactoryTest extends TestCase
 
     public function testRegisterAdapter()
     {
-
         $mock = $this->getMockForAbstractClass(PdoAdapter::class, [['foo' => 'bar']]);
         $this->factory->registerAdapter('test', function (array $options) use ($mock) {
             $this->assertEquals('value', $options['key']);
