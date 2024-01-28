@@ -11,7 +11,6 @@ namespace Migrations\Migration;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
-use Migrations\Migration\Environment;
 use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Migration\AbstractMigration;
@@ -718,7 +717,7 @@ class Manager
     /**
      * Sets the environments.
      *
-     * @param \Phinx\Migration\Manager\Environment[] $environments Environments
+     * @param \Migrations\Migration\Environment[] $environments Environments
      * @return $this
      */
     public function setEnvironments(array $environments = [])
@@ -733,7 +732,7 @@ class Manager
      *
      * @param string $name Environment Name
      * @throws \InvalidArgumentException
-     * @return \Phinx\Migration\Manager\Environment
+     * @return \Migrations\Migration\Environment
      */
     public function getEnvironment(string $name): Environment
     {
