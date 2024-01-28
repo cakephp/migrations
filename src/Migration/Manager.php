@@ -11,10 +11,10 @@ namespace Migrations\Migration;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use Migrations\Migration\Environment;
 use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Migration\AbstractMigration;
-use Phinx\Migration\Manager\Environment;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Seed\SeedInterface;
@@ -46,7 +46,7 @@ class Manager
     protected OutputInterface $output;
 
     /**
-     * @var \Phinx\Migration\Manager\Environment[]
+     * @var \Migrations\Migration\Environment[]
      */
     protected array $environments = [];
 
