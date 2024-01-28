@@ -135,12 +135,6 @@ class ManagerTest extends TestCase
         // Emulate the results of Util::parseDsn()
         $connectionConfig = ConnectionManager::getConfig('test');
         $adapter = $connectionConfig['scheme'] ?? null;
-        if ($adapter === 'postgres') {
-            $adapter = 'pgsql';
-        }
-        if ($adapter === 'sqlserver') {
-            $adapter = 'sqlsrv';
-        }
         $adapterConfig = [
             'adapter' => $adapter,
             'user' => $connectionConfig['username'],
@@ -155,7 +149,7 @@ class ManagerTest extends TestCase
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
 
         // ensure the database is empty
-        if ($adapterConfig['adapter'] === 'pgsql') {
+        if ($adapterConfig['adapter'] === 'postgres') {
             $adapter->dropSchema('public');
             $adapter->createSchema('public');
         } elseif ($adapterConfig['name'] !== ':memory:') {
