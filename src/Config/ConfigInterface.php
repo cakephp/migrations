@@ -17,15 +17,6 @@ use Psr\Container\ContainerInterface;
 interface ConfigInterface extends ArrayAccess
 {
     /**
-     * Returns the configuration for each environment.
-     *
-     * This method returns <code>null</code> if no environments exist.
-     *
-     * @return array|null
-     */
-    public function getEnvironments(): ?array;
-
-    /**
      * Returns the configuration for a given environment.
      *
      * This method returns <code>null</code> if the specified environment
@@ -35,37 +26,6 @@ interface ConfigInterface extends ArrayAccess
      * @return array|null
      */
     public function getEnvironment(string $name): ?array;
-
-    /**
-     * Does the specified environment exist in the configuration file?
-     *
-     * @param string $name Environment Name
-     * @return bool
-     */
-    public function hasEnvironment(string $name): bool;
-
-    /**
-     * Gets the default environment name.
-     *
-     * @throws \RuntimeException
-     * @return string
-     */
-    public function getDefaultEnvironment(): string;
-
-    /**
-     * Get the aliased value from a supplied alias.
-     *
-     * @param string $alias Alias
-     * @return string|null
-     */
-    public function getAlias(string $alias): ?string;
-
-    /**
-     * Get all the aliased values.
-     *
-     * @return string[]
-     */
-    public function getAliases(): array;
 
     /**
      * Gets the config file path.
@@ -117,13 +77,6 @@ interface ConfigInterface extends ArrayAccess
     public function getContainer(): ?ContainerInterface;
 
     /**
-     * Get the data domain array.
-     *
-     * @return array
-     */
-    public function getDataDomain(): array;
-
-    /**
      * Get the version order.
      *
      * @return string
@@ -136,13 +89,6 @@ interface ConfigInterface extends ArrayAccess
      * @return bool
      */
     public function isVersionOrderCreationTime(): bool;
-
-    /**
-     * Get the bootstrap file path
-     *
-     * @return string|false
-     */
-    public function getBootstrapFile(): string|false;
 
     /**
      * Gets the base class name for migrations.
@@ -166,20 +112,4 @@ interface ConfigInterface extends ArrayAccess
      * @return string|null
      */
     public function getSeedTemplateFile(): ?string;
-
-    /**
-     * Get Migration Namespace associated with path.
-     *
-     * @param string $path Path
-     * @return string|null
-     */
-    public function getMigrationNamespaceByPath(string $path): ?string;
-
-    /**
-     * Get Seed Namespace associated with path.
-     *
-     * @param string $path Path
-     * @return string|null
-     */
-    public function getSeedNamespaceByPath(string $path): ?string;
 }

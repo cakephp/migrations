@@ -10,6 +10,7 @@ namespace Migrations\Config;
 
 use Closure;
 use InvalidArgumentException;
+use Phinx\Config\ConfigInterface as PhinxConfigInterface;
 use Phinx\Db\Adapter\SQLiteAdapter;
 use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
@@ -21,7 +22,7 @@ use UnexpectedValueException;
 /**
  * Phinx configuration class.
  */
-class Config implements ConfigInterface
+class Config implements ConfigInterface, PhinxConfigInterface
 {
     /**
      * The value that identifies a version order by creation time.
@@ -66,6 +67,7 @@ class Config implements ConfigInterface
      * @param string $configFilePath Path to the Yaml File
      * @throws \RuntimeException
      * @return \Phinx\Config\ConfigInterface
+     * @deprecated 4.2 To be removed in 5.x
      */
     public static function fromYaml(string $configFilePath): ConfigInterface
     {
@@ -94,6 +96,7 @@ class Config implements ConfigInterface
      * @param string $configFilePath Path to the JSON File
      * @throws \RuntimeException
      * @return \Phinx\Config\ConfigInterface
+     * @deprecated 4.2 To be removed in 5.x
      */
     public static function fromJson(string $configFilePath): ConfigInterface
     {
@@ -120,6 +123,7 @@ class Config implements ConfigInterface
      * @param string $configFilePath Path to the PHP File
      * @throws \RuntimeException
      * @return \Phinx\Config\ConfigInterface
+     * @deprecated 4.2 To be removed in 5.x
      */
     public static function fromPhp(string $configFilePath): ConfigInterface
     {
@@ -142,6 +146,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritDoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getEnvironments(): ?array
     {
@@ -191,6 +196,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritDoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function hasEnvironment(string $name): bool
     {
@@ -199,6 +205,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritDoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getDefaultEnvironment(): string
     {
@@ -246,6 +253,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritDoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getAlias($alias): ?string
     {
@@ -254,6 +262,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritDoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getAliases(): array
     {
@@ -360,6 +369,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritdoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getDataDomain(): array
     {
@@ -406,6 +416,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritdoc
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getBootstrapFile(): string|false
     {
@@ -554,6 +565,7 @@ class Config implements ConfigInterface
      * @param string $needle Needle
      * @param string[] $haystack Haystack
      * @return string|null
+     * @deprecated 4.2 To be removed in 5.x
      */
     protected function searchNamespace(string $needle, array $haystack): ?string
     {
@@ -570,6 +582,7 @@ class Config implements ConfigInterface
      *
      * @param string $path Path
      * @return string|null
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getMigrationNamespaceByPath(string $path): ?string
     {
@@ -583,6 +596,7 @@ class Config implements ConfigInterface
      *
      * @param string $path Path
      * @return string|null
+     * @deprecated 4.2 To be removed in 5.x
      */
     public function getSeedNamespaceByPath(string $path): ?string
     {
