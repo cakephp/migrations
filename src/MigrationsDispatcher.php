@@ -23,6 +23,8 @@ use Symfony\Component\Console\Application;
 class MigrationsDispatcher extends Application
 {
     /**
+     * TODO convert this to a method so that config can be used.
+     *
      * @var array<string, string>
      * @psalm-var array<string, class-string<\Phinx\Console\Command\AbstractCommand>|class-string<\Migrations\Command\Phinx\BaseCommand>>
      */
@@ -46,6 +48,7 @@ class MigrationsDispatcher extends Application
     public function __construct(string $version)
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
+        // Update this to use the methods
         foreach (static::$phinxCommands as $value) {
             $this->add(new $value());
         }

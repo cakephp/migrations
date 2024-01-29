@@ -120,6 +120,8 @@ trait ConfigurationTrait
 
         $connectionConfig = (array)ConnectionManager::getConfig($connection);
 
+        // TODO(mark) Replace this with cakephp connection
+        // instead of array parameter passing
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
         $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
 

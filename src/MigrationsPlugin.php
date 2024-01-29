@@ -73,6 +73,7 @@ class MigrationsPlugin extends BasePlugin
             return $commands->addMany($found);
         }
         $found = [];
+        // Convert to a method and use config to toggle command names.
         foreach ($this->migrationCommandsList as $class) {
             $name = $class::defaultName();
             // If the short name has been used, use the full name.

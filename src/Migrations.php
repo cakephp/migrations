@@ -238,6 +238,7 @@ class Migrations
         $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
         $this->setInput($input);
 
+        // This will need to vary based on the config option.
         $migrationPaths = $this->getConfig()->getMigrationPaths();
         $config = $this->getConfig(true);
         $params = [
@@ -290,6 +291,7 @@ class Migrations
      */
     protected function run(string $method, array $params, InputInterface $input): mixed
     {
+        // This will need to vary based on the backend configuration
         if ($this->configuration instanceof Config) {
             $migrationPaths = $this->getConfig()->getMigrationPaths();
             $migrationPath = array_pop($migrationPaths);
@@ -309,6 +311,7 @@ class Migrations
         $manager = $this->getManager($newConfig);
         $manager->setInput($input);
 
+        // Why is this being done? Is this something we can eliminate in the new code path?
         if ($pdo !== null) {
             /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
             /** @psalm-suppress PossiblyNullReference */
