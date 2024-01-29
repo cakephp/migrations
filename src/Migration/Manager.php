@@ -14,7 +14,6 @@ use InvalidArgumentException;
 use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Migration\AbstractMigration;
-use Phinx\Migration\Manager\Environment;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Seed\SeedInterface;
@@ -46,7 +45,7 @@ class Manager
     protected OutputInterface $output;
 
     /**
-     * @var \Phinx\Migration\Manager\Environment[]
+     * @var \Migrations\Migration\Environment[]
      */
     protected array $environments = [];
 
@@ -718,7 +717,7 @@ class Manager
     /**
      * Sets the environments.
      *
-     * @param \Phinx\Migration\Manager\Environment[] $environments Environments
+     * @param \Migrations\Migration\Environment[] $environments Environments
      * @return $this
      */
     public function setEnvironments(array $environments = [])
@@ -733,7 +732,7 @@ class Manager
      *
      * @param string $name Environment Name
      * @throws \InvalidArgumentException
-     * @return \Phinx\Migration\Manager\Environment
+     * @return \Migrations\Migration\Environment
      */
     public function getEnvironment(string $name): Environment
     {
