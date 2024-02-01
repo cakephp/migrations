@@ -222,12 +222,6 @@ class Config implements ConfigInterface, PhinxConfigInterface
             ));
         }
 
-        // deprecated: to be removed 0.13
-        if (isset($this->values['environments']['default_database'])) {
-            trigger_error('default_database in the config has been deprecated since 0.12, use default_environment instead.', E_USER_DEPRECATED);
-            $this->values['environments']['default_environment'] = $this->values['environments']['default_database'];
-        }
-
         // if the user has configured a default environment then use it,
         // providing it actually exists!
         if (isset($this->values['environments']['default_environment'])) {
@@ -318,7 +312,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
     {
         $className = !isset($this->values['migration_base_class']) ? 'Phinx\Migration\AbstractMigration' : $this->values['migration_base_class'];
 
-        return $dropNamespace ? (substr(strrchr($className, '\\'), 1) ?: $className) : $className;
+        return $dropNamespace ? (substr((string)strrchr($className, '\\'), 1) ?: $className) : $className;
     }
 
     /**
