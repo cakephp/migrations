@@ -66,7 +66,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
      *
      * @param string $configFilePath Path to the Yaml File
      * @throws \RuntimeException
-     * @return \Phinx\Config\ConfigInterface
+     * @return \Migrations\Config\ConfigInterface
      * @deprecated 4.2 To be removed in 5.x
      */
     public static function fromYaml(string $configFilePath): ConfigInterface
@@ -95,7 +95,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
      *
      * @param string $configFilePath Path to the JSON File
      * @throws \RuntimeException
-     * @return \Phinx\Config\ConfigInterface
+     * @return \Migrations\Config\ConfigInterface
      * @deprecated 4.2 To be removed in 5.x
      */
     public static function fromJson(string $configFilePath): ConfigInterface
@@ -106,7 +106,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
             // @codeCoverageIgnoreEnd
         }
 
-        $configArray = json_decode(file_get_contents($configFilePath), true);
+        $configArray = json_decode((string)file_get_contents($configFilePath), true);
         if (!is_array($configArray)) {
             throw new RuntimeException(sprintf(
                 'File \'%s\' must be valid JSON',
@@ -122,7 +122,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
      *
      * @param string $configFilePath Path to the PHP File
      * @throws \RuntimeException
-     * @return \Phinx\Config\ConfigInterface
+     * @return \Migrations\Config\ConfigInterface
      * @deprecated 4.2 To be removed in 5.x
      */
     public static function fromPhp(string $configFilePath): ConfigInterface
@@ -231,13 +231,14 @@ class Config implements ConfigInterface, PhinxConfigInterface
 
             throw new RuntimeException(sprintf(
                 'The environment configuration for \'%s\' is missing',
-                $this->values['environments']['default_environment']
+                (string)$this->values['environments']['default_environment']
             ));
         }
 
         // else default to the first available one
-        if (is_array($this->getEnvironments()) && count($this->getEnvironments()) > 0) {
-            $names = array_keys($this->getEnvironments());
+        $environments = $this->getEnvironments();
+        if (is_array($environments) && count($environments) > 0) {
+            $names = array_keys($environments);
 
             return $names[0];
         }
@@ -433,6 +434,8 @@ class Config implements ConfigInterface, PhinxConfigInterface
         // Depending on configuration of server / OS and variables_order directive,
         // environment variables either end up in $_SERVER (most likely) or $_ENV,
         // so we search through both
+
+        /** @var array<string, string> $tokens */
         $tokens = [];
         foreach (array_merge($_ENV, $_SERVER) as $varname => $varvalue) {
             if (strpos($varname, 'PHINX_') === 0) {
@@ -442,7 +445,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
 
         // Phinx defined tokens (override env tokens)
         $tokens['%%PHINX_CONFIG_PATH%%'] = $this->getConfigFilePath();
-        $tokens['%%PHINX_CONFIG_DIR%%'] = $this->getConfigFilePath() !== null ? dirname($this->getConfigFilePath()) : '';
+        $tokens['%%PHINX_CONFIG_DIR%%'] = $this->getConfigFilePath() !== null ? dirname((string)$this->getConfigFilePath()) : '';
 
         // Recurse the array and replace tokens
         return $this->recurseArrayForTokens($arr, $tokens);
@@ -452,7 +455,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
      * Recurse an array for the specified tokens and replace them.
      *
      * @param array $arr Array to recurse
-     * @param string[] $tokens Array of tokens to search for
+     * @param string|null[] $tokens Array of tokens to search for
      * @return array
      */
     protected function recurseArrayForTokens(array $arr, array $tokens): array

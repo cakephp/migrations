@@ -114,6 +114,7 @@ trait ConfigurationTrait
             mkdir($seedsPath, 0777, true);
         }
 
+        // TODO this should use Migrations\Config
         $phinxTable = $this->getPhinxTable($plugin);
 
         $connection = $this->getConnectionName($this->input());

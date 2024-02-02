@@ -11,8 +11,8 @@ namespace Migrations\Migration;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
-use Phinx\Config\ConfigInterface;
-use Phinx\Config\NamespaceAwareInterface;
+use Migrations\Config\Config;
+use Migrations\Config\ConfigInterface;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
@@ -30,7 +30,7 @@ class Manager
     public const BREAKPOINT_UNSET = 3;
 
     /**
-     * @var \Phinx\Config\ConfigInterface
+     * @var \Migrations\Config\ConfigInterface
      */
     protected ConfigInterface $config;
 
@@ -70,7 +70,7 @@ class Manager
     private int $verbosityLevel = OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL;
 
     /**
-     * @param \Phinx\Config\ConfigInterface $config Configuration Object
+     * @param \Migrations\Config\ConfigInterface $config Configuration Object
      * @param \Symfony\Component\Console\Input\InputInterface $input Console Input
      * @param \Symfony\Component\Console\Output\OutputInterface $output Console Output
      */
@@ -740,8 +740,9 @@ class Manager
             return $this->environments[$name];
         }
 
+        $config = $this->getConfig();
         // check the environment exists
-        if (!$this->getConfig()->hasEnvironment($name)) {
+        if ($config instanceof Config && !$config->hasEnvironment($name)) {
             throw new InvalidArgumentException(sprintf(
                 'The environment "%s" does not exist',
                 $name
@@ -749,9 +750,11 @@ class Manager
         }
 
         // create an environment instance and cache it
-        $envOptions = $this->getConfig()->getEnvironment($name);
-        $envOptions['version_order'] = $this->getConfig()->getVersionOrder();
-        $envOptions['data_domain'] = $this->getConfig()->getDataDomain();
+        $envOptions = $config->getEnvironment($name);
+        $envOptions['version_order'] = $config->getVersionOrder();
+        if ($config instanceof Config) {
+            $envOptions['data_domain'] = $config->getDataDomain();
+        }
 
         $environment = new Environment($name, $envOptions);
         $this->environments[$name] = $environment;
@@ -876,7 +879,10 @@ class Manager
                     }
 
                     $config = $this->getConfig();
-                    $namespace = $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath(dirname($filePath)) : null;
+                    $namespace = null;
+                    if ($config instanceof Config) {
+                        $namespace = $config->getMigrationNamespaceByPath(dirname($filePath));
+                    }
 
                     // convert the filename to a class name
                     $class = ($namespace === null ? '' : $namespace . '\\') . Util::mapFileNameToClassName(basename($filePath));
@@ -1025,7 +1031,10 @@ class Manager
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidSeedFileName(basename($filePath))) {
                     $config = $this->getConfig();
-                    $namespace = $config instanceof NamespaceAwareInterface ? $config->getSeedNamespaceByPath(dirname($filePath)) : null;
+                    $namespace = null;
+                    if ($config instanceof Config) {
+                        $namespace = $config->getSeedNamespaceByPath(dirname($filePath));
+                    }
 
                     // convert the filename to a class name
                     $class = ($namespace === null ? '' : $namespace . '\\') . pathinfo($filePath, PATHINFO_FILENAME);
@@ -1101,7 +1110,7 @@ class Manager
     /**
      * Sets the config.
      *
-     * @param \Phinx\Config\ConfigInterface $config Configuration Object
+     * @param \Migrations\Config\ConfigInterface $config Configuration Object
      * @return $this
      */
     public function setConfig(ConfigInterface $config)
@@ -1114,7 +1123,7 @@ class Manager
     /**
      * Gets the config.
      *
-     * @return \Phinx\Config\ConfigInterface
+     * @return \Migrations\Config\ConfigInterface
      */
     public function getConfig(): ConfigInterface
     {
