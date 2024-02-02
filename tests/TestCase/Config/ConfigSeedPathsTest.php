@@ -8,7 +8,7 @@ use UnexpectedValueException;
 /**
  * Class ConfigSeedPathsTest
  */
-class ConfigSeedPathsTest extends AbstractConfigTest
+class ConfigSeedPathsTest extends AbstractConfigTestCase
 {
     public function testGetSeedPathsThrowsExceptionForNoPath()
     {

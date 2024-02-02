@@ -12,7 +12,7 @@ use UnexpectedValueException;
  * @package Test\Phinx\Config
  * @group config
  */
-class ConfigTest extends AbstractConfigTest
+class ConfigTest extends AbstractConfigTestCase
 {
     /**
      * @covers \Phinx\Config\Config::getEnvironments

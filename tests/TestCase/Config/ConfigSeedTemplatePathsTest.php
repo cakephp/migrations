@@ -7,7 +7,7 @@ use Migrations\Config\Config;
 /**
  * Class ConfigSeedTemplatePathsTest
  */
-class ConfigSeedTemplatePathsTest extends AbstractConfigTest
+class ConfigSeedTemplatePathsTest extends AbstractConfigTestCase
 {
     public function testTemplateAndPathAreSet()
     {

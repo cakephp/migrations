@@ -8,7 +8,7 @@ use UnexpectedValueException;
 /**
  * Class ConfigMigrationPathsTest
  */
-class ConfigMigrationPathsTest extends AbstractConfigTest
+class ConfigMigrationPathsTest extends AbstractConfigTestCase
 {
     public function testGetMigrationPathsThrowsExceptionForNoPath()
     {
