@@ -55,10 +55,6 @@ class Config implements ConfigInterface, PhinxConfigInterface
     {
         $this->configFilePath = $configFilePath;
         $this->values = $this->replaceTokens($configArray);
-
-        if (isset($this->values['feature_flags'])) {
-            FeatureFlags::setFlagsFromConfig($this->values['feature_flags']);
-        }
     }
 
     /**
@@ -87,7 +83,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
             ));
         }
 
-        return new static($configArray, $configFilePath);
+        return new Config($configArray, $configFilePath);
     }
 
     /**
@@ -114,7 +110,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
             ));
         }
 
-        return new static($configArray, $configFilePath);
+        return new Config($configArray, $configFilePath);
     }
 
     /**
@@ -141,7 +137,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
             ));
         }
 
-        return new static($configArray, $configFilePath);
+        return new Config($configArray, $configFilePath);
     }
 
     /**
@@ -323,7 +319,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
     {
         $className = !isset($this->values['seed_base_class']) ? 'Phinx\Seed\AbstractSeed' : $this->values['seed_base_class'];
 
-        return $dropNamespace ? substr(strrchr($className, '\\'), 1) : $className;
+        return $dropNamespace ? substr((string)strrchr($className, '\\'), 1) : $className;
     }
 
     /**
@@ -425,8 +421,8 @@ class Config implements ConfigInterface, PhinxConfigInterface
     /**
      * Replace tokens in the specified array.
      *
-     * @param array $arr Array to replace
-     * @return array
+     * @param array<string, mixed> $arr Array to replace
+     * @return array<string, mixed>
      */
     protected function replaceTokens(array $arr): array
     {
@@ -435,7 +431,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
         // environment variables either end up in $_SERVER (most likely) or $_ENV,
         // so we search through both
 
-        /** @var array<string, string> $tokens */
+        /** @var array<string, string|null> $tokens */
         $tokens = [];
         foreach (array_merge($_ENV, $_SERVER) as $varname => $varvalue) {
             if (strpos($varname, 'PHINX_') === 0) {
@@ -455,11 +451,12 @@ class Config implements ConfigInterface, PhinxConfigInterface
      * Recurse an array for the specified tokens and replace them.
      *
      * @param array $arr Array to recurse
-     * @param string|null[] $tokens Array of tokens to search for
-     * @return array
+     * @param array<string, string|null> $tokens Array of tokens to search for
+     * @return array<string, mixed>
      */
     protected function recurseArrayForTokens(array $arr, array $tokens): array
     {
+        /** @var array<string, mixed> $out */
         $out = [];
         foreach ($arr as $name => $value) {
             if (is_array($value)) {

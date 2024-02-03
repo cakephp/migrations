@@ -13,6 +13,8 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Phinx configuration interface.
+ *
+ * @template-implemements ArrayAccess<string>
  */
 interface ConfigInterface extends ArrayAccess
 {
