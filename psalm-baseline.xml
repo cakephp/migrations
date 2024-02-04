@@ -10,6 +10,27 @@
       <code>setInput</code>
     </PossiblyNullReference>
   </file>
+  <file src="src/Config/Config.php">
+    <DeprecatedMethod>
+      <code>getEnvironments</code>
+      <code>getEnvironments</code>
+      <code>hasEnvironment</code>
+      <code>hasEnvironment</code>
+      <code>searchNamespace</code>
+      <code>searchNamespace</code>
+    </DeprecatedMethod>
+    <LessSpecificImplementedReturnType>
+      <code>array</code>
+      <code>array</code>
+      <code>array</code>
+      <code>array</code>
+    </LessSpecificImplementedReturnType>
+  </file>
+  <file src="src/Config/ConfigInterface.php">
+    <MissingTemplateParam>
+      <code>ArrayAccess</code>
+    </MissingTemplateParam>
+  </file>
   <file src="src/Db/Adapter/AbstractAdapter.php">
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->output)]]></code>
@@ -82,6 +103,12 @@
     <ArgumentTypeCoercion>
       <code>array_merge($versions, array_keys($migrations))</code>
     </ArgumentTypeCoercion>
+    <DeprecatedMethod>
+      <code>getDataDomain</code>
+      <code>getMigrationNamespaceByPath</code>
+      <code>getSeedNamespaceByPath</code>
+      <code>hasEnvironment</code>
+    </DeprecatedMethod>
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->container)]]></code>
     </RedundantPropertyInitializationCheck>
