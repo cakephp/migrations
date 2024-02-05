@@ -29,6 +29,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * The Migrations class is responsible for handling migrations command
  * within an none-shell application.
+ *
+ * TODO(mark) This needs to be adapted to use the configure backend selection.
  */
 class Migrations
 {

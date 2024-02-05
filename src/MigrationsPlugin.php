@@ -16,6 +16,8 @@ namespace Migrations;
 use Bake\Command\SimpleBakeCommand;
 use Cake\Console\CommandCollection;
 use Cake\Core\BasePlugin;
+use Cake\Core\Configure;
+use Cake\Core\PluginApplicationInterface;
 use Migrations\Command\MigrationsCacheBuildCommand;
 use Migrations\Command\MigrationsCacheClearCommand;
 use Migrations\Command\MigrationsCommand;
@@ -58,6 +60,21 @@ class MigrationsPlugin extends BasePlugin
         MigrationsSeedCommand::class,
         MigrationsStatusCommand::class,
     ];
+
+    /**
+     * Initialize configuration with defaults.
+     *
+     * @param \Cake\Core\PluginApplicationInterface $app The application.
+     * @return void
+     */
+    public function bootstrap(PluginApplicationInterface $app): void
+    {
+        parent::bootstrap($app);
+
+        if (!Configure::check('Migrations.backend')) {
+            Configure::write('Migrations.backend', 'phinx');
+        }
+    }
 
     /**
      * Add migrations commands.
