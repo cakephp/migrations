@@ -51,9 +51,9 @@ class MigrationsCommand extends Command
         if (parent::defaultName() === 'migrations') {
             return 'migrations';
         }
-        // TODO this will need to be patched.
-        $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
-        $name = $command->getName();
+        $className = MigrationsDispatcher::getCommands()[static::$commandName];
+        $command = new $className();
+        $name = (string)$command->getName();
 
         return 'migrations ' . $name;
     }
@@ -78,8 +78,8 @@ class MigrationsCommand extends Command
             return parent::getOptionParser();
         }
         $parser = parent::getOptionParser();
-        // Use new methods
-        $command = new MigrationsDispatcher::$phinxCommands[static::$commandName]();
+        $className = MigrationsDispatcher::getCommands()[static::$commandName];
+        $command = new $className();
 
         // Skip conversions for new commands.
         $parser->setDescription($command->getDescription());

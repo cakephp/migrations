@@ -19,26 +19,31 @@ use Symfony\Component\Console\Application;
 /**
  * Used to register all supported subcommand in order to make
  * them executable by the Symfony Console component
+ *
+ * @deprecated 4.2.0 Will be removed alongsize phinx
  */
 class MigrationsDispatcher extends Application
 {
     /**
-     * TODO convert this to a method so that config can be used.
+     * Get the map of command names to phinx commands.
      *
-     * @var array<string, string>
-     * @psalm-var array<string, class-string<\Phinx\Console\Command\AbstractCommand>|class-string<\Migrations\Command\Phinx\BaseCommand>>
+     * @return array<string, string>
+     * @psalm-return array<string, class-string<\Phinx\Console\Command\AbstractCommand>|class-string<\Migrations\Command\Phinx\BaseCommand>>
      */
-    public static array $phinxCommands = [
-        'Create' => Phinx\Create::class,
-        'Dump' => Phinx\Dump::class,
-        'MarkMigrated' => Phinx\MarkMigrated::class,
-        'Migrate' => Phinx\Migrate::class,
-        'Rollback' => Phinx\Rollback::class,
-        'Seed' => Phinx\Seed::class,
-        'Status' => Phinx\Status::class,
-        'CacheBuild' => Phinx\CacheBuild::class,
-        'CacheClear' => Phinx\CacheClear::class,
-    ];
+    public static function getCommands(): array
+    {
+        return [
+            'Create' => Phinx\Create::class,
+            'Dump' => Phinx\Dump::class,
+            'MarkMigrated' => Phinx\MarkMigrated::class,
+            'Migrate' => Phinx\Migrate::class,
+            'Rollback' => Phinx\Rollback::class,
+            'Seed' => Phinx\Seed::class,
+            'Status' => Phinx\Status::class,
+            'CacheBuild' => Phinx\CacheBuild::class,
+            'CacheClear' => Phinx\CacheClear::class,
+        ];
+    }
 
     /**
      * Initialize the Phinx console application.
@@ -49,7 +54,7 @@ class MigrationsDispatcher extends Application
     {
         parent::__construct('Migrations plugin, based on Phinx by Rob Morgan.', $version);
         // Update this to use the methods
-        foreach (static::$phinxCommands as $value) {
+        foreach ($this->getCommands() as $value) {
             $this->add(new $value());
         }
         $this->setCatchExceptions(false);
