@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+  <file src="src/Command/MigrationsCommand.php">
+    <DeprecatedClass>
+      <code>MigrationsDispatcher</code>
+      <code>MigrationsDispatcher::getCommands()</code>
+      <code>MigrationsDispatcher::getCommands()</code>
+      <code>\Migrations\MigrationsDispatcher</code>
+      <code>new MigrationsDispatcher(PHINX_VERSION)</code>
+    </DeprecatedClass>
+  </file>
   <file src="src/Command/Phinx/Create.php">
     <PossiblyUndefinedArrayOffset>
       <code>$phinxName</code>
