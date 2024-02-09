@@ -25,7 +25,7 @@ class StatusCommandTest extends TestCase
         $this->assertOutputContains('migrations status -c secondary');
     }
 
-    public function testExecuteNoMigrations(): void
+    public function testExecuteSimple(): void
     {
         $this->exec('migrations status -c test');
         $this->assertExitSuccess();
@@ -33,5 +33,25 @@ class StatusCommandTest extends TestCase
         $this->assertOutputContains('Status');
         $this->assertOutputContains('Migration ID');
         $this->assertOutputContains('Migration Name');
+    }
+
+    public function testExecuteSimpleJson(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testExecutePlugin(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testExecutePluginDoesNotExist(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testExecuteConnectionDoesNotExist(): void
+    {
+        $this->markTestIncomplete();
     }
 }
