@@ -10,14 +10,45 @@
     </DeprecatedClass>
   </file>
   <file src="src/Command/Phinx/Create.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
     <PossiblyUndefinedArrayOffset>
       <code>$phinxName</code>
     </PossiblyUndefinedArrayOffset>
   </file>
+  <file src="src/Command/Phinx/Dump.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
+  </file>
+  <file src="src/Command/Phinx/MarkMigrated.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
+  </file>
+  <file src="src/Command/Phinx/Migrate.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
+  </file>
+  <file src="src/Command/Phinx/Rollback.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
+  </file>
   <file src="src/Command/Phinx/Seed.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
     <PossiblyNullReference>
       <code>setInput</code>
     </PossiblyNullReference>
+  </file>
+  <file src="src/Command/Phinx/Status.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
   </file>
   <file src="src/Config/Config.php">
     <DeprecatedMethod>
@@ -124,6 +155,11 @@
     <ReferenceReusedFromConfusingScope>
       <code>$executedVersion</code>
     </ReferenceReusedFromConfusingScope>
+  </file>
+  <file src="src/Migrations.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
   </file>
   <file src="src/TableFinderTrait.php">
     <PossiblyUndefinedArrayOffset>
