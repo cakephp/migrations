@@ -752,9 +752,6 @@ class Manager
         // create an environment instance and cache it
         $envOptions = $config->getEnvironment($name);
         $envOptions['version_order'] = $config->getVersionOrder();
-        if ($config instanceof Config) {
-            $envOptions['data_domain'] = $config->getDataDomain();
-        }
 
         $environment = new Environment($name, $envOptions);
         $this->environments[$name] = $environment;
@@ -878,14 +875,8 @@ class Manager
                         throw new InvalidArgumentException(sprintf('Duplicate migration - "%s" has the same version as "%s"', $filePath, $versions[$version]->getVersion()));
                     }
 
-                    $config = $this->getConfig();
-                    $namespace = null;
-                    if ($config instanceof Config) {
-                        $namespace = $config->getMigrationNamespaceByPath(dirname($filePath));
-                    }
-
                     // convert the filename to a class name
-                    $class = ($namespace === null ? '' : $namespace . '\\') . Util::mapFileNameToClassName(basename($filePath));
+                    $class = Util::mapFileNameToClassName(basename($filePath));
 
                     if (isset($fileNames[$class])) {
                         throw new InvalidArgumentException(sprintf(
@@ -1031,13 +1022,9 @@ class Manager
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidSeedFileName(basename($filePath))) {
                     $config = $this->getConfig();
-                    $namespace = null;
-                    if ($config instanceof Config) {
-                        $namespace = $config->getSeedNamespaceByPath(dirname($filePath));
-                    }
 
                     // convert the filename to a class name
-                    $class = ($namespace === null ? '' : $namespace . '\\') . pathinfo($filePath, PATHINFO_FILENAME);
+                    $class = pathinfo($filePath, PATHINFO_FILENAME);
                     $fileNames[$class] = basename($filePath);
 
                     // load the seed file
@@ -1058,6 +1045,7 @@ class Manager
                     } else {
                         $seed = new $class();
                     }
+                    // TODO might need a migrations -> phinx shim here for Environment
                     $seed->setEnvironment($environment);
                     $input = $this->getInput();
                     $seed->setInput($input);

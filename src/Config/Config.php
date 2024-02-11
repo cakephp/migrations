@@ -10,19 +10,16 @@ namespace Migrations\Config;
 
 use Closure;
 use InvalidArgumentException;
-use Phinx\Config\ConfigInterface as PhinxConfigInterface;
 use Phinx\Db\Adapter\SQLiteAdapter;
-use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use ReturnTypeWillChange;
 use RuntimeException;
-use Symfony\Component\Yaml\Yaml;
 use UnexpectedValueException;
 
 /**
- * Phinx configuration class.
+ * Migrations configuration class.
  */
-class Config implements ConfigInterface, PhinxConfigInterface
+class Config implements ConfigInterface
 {
     /**
      * The value that identifies a version order by creation time.
@@ -54,90 +51,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
     public function __construct(array $configArray, ?string $configFilePath = null)
     {
         $this->configFilePath = $configFilePath;
-        $this->values = $this->replaceTokens($configArray);
-    }
-
-    /**
-     * Create a new instance of the config class using a Yaml file path.
-     *
-     * @param string $configFilePath Path to the Yaml File
-     * @throws \RuntimeException
-     * @return \Migrations\Config\ConfigInterface
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public static function fromYaml(string $configFilePath): ConfigInterface
-    {
-        if (!class_exists('Symfony\\Component\\Yaml\\Yaml', true)) {
-            // @codeCoverageIgnoreStart
-            throw new RuntimeException('Missing yaml parser, symfony/yaml package is not installed.');
-            // @codeCoverageIgnoreEnd
-        }
-
-        $configFile = file_get_contents($configFilePath);
-        $configArray = Yaml::parse($configFile);
-
-        if (!is_array($configArray)) {
-            throw new RuntimeException(sprintf(
-                'File \'%s\' must be valid YAML',
-                $configFilePath
-            ));
-        }
-
-        return new Config($configArray, $configFilePath);
-    }
-
-    /**
-     * Create a new instance of the config class using a JSON file path.
-     *
-     * @param string $configFilePath Path to the JSON File
-     * @throws \RuntimeException
-     * @return \Migrations\Config\ConfigInterface
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public static function fromJson(string $configFilePath): ConfigInterface
-    {
-        if (!function_exists('json_decode')) {
-            // @codeCoverageIgnoreStart
-            throw new RuntimeException('Need to install JSON PHP extension to use JSON config');
-            // @codeCoverageIgnoreEnd
-        }
-
-        $configArray = json_decode((string)file_get_contents($configFilePath), true);
-        if (!is_array($configArray)) {
-            throw new RuntimeException(sprintf(
-                'File \'%s\' must be valid JSON',
-                $configFilePath
-            ));
-        }
-
-        return new Config($configArray, $configFilePath);
-    }
-
-    /**
-     * Create a new instance of the config class using a PHP file path.
-     *
-     * @param string $configFilePath Path to the PHP File
-     * @throws \RuntimeException
-     * @return \Migrations\Config\ConfigInterface
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public static function fromPhp(string $configFilePath): ConfigInterface
-    {
-        ob_start();
-        /** @noinspection PhpIncludeInspection */
-        $configArray = include $configFilePath;
-
-        // Hide console output
-        ob_end_clean();
-
-        if (!is_array($configArray)) {
-            throw new RuntimeException(sprintf(
-                'PHP file \'%s\' must return an array',
-                $configFilePath
-            ));
-        }
-
-        return new Config($configArray, $configFilePath);
+        $this->values = $configArray;
     }
 
     /**
@@ -184,7 +98,7 @@ class Config implements ConfigInterface, PhinxConfigInterface
                 $environments[$name]['name'] = SQLiteAdapter::MEMORY;
             }
 
-            return $this->parseAgnosticDsn($environments[$name]);
+            return $environments[$name];
         }
 
         return null;
@@ -359,19 +273,6 @@ class Config implements ConfigInterface, PhinxConfigInterface
     }
 
     /**
-     * @inheritdoc
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getDataDomain(): array
-    {
-        if (!isset($this->values['data_domain'])) {
-            return [];
-        }
-
-        return $this->values['data_domain'];
-    }
-
-    /**
      * @inheritDoc
      */
     public function getContainer(): ?ContainerInterface
@@ -403,95 +304,6 @@ class Config implements ConfigInterface, PhinxConfigInterface
         $versionOrder = $this->getVersionOrder();
 
         return $versionOrder == self::VERSION_ORDER_CREATION_TIME;
-    }
-
-    /**
-     * @inheritdoc
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getBootstrapFile(): string|false
-    {
-        if (!isset($this->values['paths']['bootstrap'])) {
-            return false;
-        }
-
-        return $this->values['paths']['bootstrap'];
-    }
-
-    /**
-     * Replace tokens in the specified array.
-     *
-     * @param array<string, mixed> $arr Array to replace
-     * @return array<string, mixed>
-     */
-    protected function replaceTokens(array $arr): array
-    {
-        // Get environment variables
-        // Depending on configuration of server / OS and variables_order directive,
-        // environment variables either end up in $_SERVER (most likely) or $_ENV,
-        // so we search through both
-
-        /** @var array<string, string|null> $tokens */
-        $tokens = [];
-        foreach (array_merge($_ENV, $_SERVER) as $varname => $varvalue) {
-            if (strpos($varname, 'PHINX_') === 0) {
-                $tokens['%%' . $varname . '%%'] = $varvalue;
-            }
-        }
-
-        // Phinx defined tokens (override env tokens)
-        $tokens['%%PHINX_CONFIG_PATH%%'] = $this->getConfigFilePath();
-        $tokens['%%PHINX_CONFIG_DIR%%'] = $this->getConfigFilePath() !== null ? dirname((string)$this->getConfigFilePath()) : '';
-
-        // Recurse the array and replace tokens
-        return $this->recurseArrayForTokens($arr, $tokens);
-    }
-
-    /**
-     * Recurse an array for the specified tokens and replace them.
-     *
-     * @param array $arr Array to recurse
-     * @param array<string, string|null> $tokens Array of tokens to search for
-     * @return array<string, mixed>
-     */
-    protected function recurseArrayForTokens(array $arr, array $tokens): array
-    {
-        /** @var array<string, mixed> $out */
-        $out = [];
-        foreach ($arr as $name => $value) {
-            if (is_array($value)) {
-                $out[$name] = $this->recurseArrayForTokens($value, $tokens);
-                continue;
-            }
-            if (is_string($value)) {
-                foreach ($tokens as $token => $tval) {
-                    $value = str_replace($token, $tval ?? '', $value);
-                }
-                $out[$name] = $value;
-                continue;
-            }
-            $out[$name] = $value;
-        }
-
-        return $out;
-    }
-
-    /**
-     * Parse a database-agnostic DSN into individual options.
-     *
-     * @param array<string, mixed> $options Options
-     * @return array<string, mixed>
-     */
-    protected function parseAgnosticDsn(array $options): array
-    {
-        $parsed = Util::parseDsn($options['dsn'] ?? '');
-        if ($parsed) {
-            unset($options['dsn']);
-        }
-
-        $options += $parsed;
-
-        return $options;
     }
 
     /**
@@ -551,51 +363,5 @@ class Config implements ConfigInterface, PhinxConfigInterface
     public function getSeedTemplateFile(): ?string
     {
         return $this->values['templates']['seedFile'] ?? null;
-    }
-
-    /**
-     * Search $needle in $haystack and return key associate with him.
-     *
-     * @param string $needle Needle
-     * @param string[] $haystack Haystack
-     * @return string|null
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    protected function searchNamespace(string $needle, array $haystack): ?string
-    {
-        $needle = realpath($needle);
-        $haystack = array_map('realpath', $haystack);
-
-        $key = array_search($needle, $haystack, true);
-
-        return is_string($key) ? trim($key, '\\') : null;
-    }
-
-    /**
-     * Get Migration Namespace associated with path.
-     *
-     * @param string $path Path
-     * @return string|null
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getMigrationNamespaceByPath(string $path): ?string
-    {
-        $paths = $this->getMigrationPaths();
-
-        return $this->searchNamespace($path, $paths);
-    }
-
-    /**
-     * Get Seed Namespace associated with path.
-     *
-     * @param string $path Path
-     * @return string|null
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getSeedNamespaceByPath(string $path): ?string
-    {
-        $paths = $this->getSeedPaths();
-
-        return $this->searchNamespace($path, $paths);
     }
 }

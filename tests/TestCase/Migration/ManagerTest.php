@@ -169,14 +169,6 @@ class ManagerTest extends TestCase
         );
     }
 
-    public function testEnvironmentInheritsDataDomainOptions()
-    {
-        foreach ($this->config->getEnvironments() as $name => $opts) {
-            $env = $this->manager->getEnvironment($name);
-            $this->assertArrayHasKey('data_domain', $env->getOptions());
-        }
-    }
-
     public function testPrintStatusMethod()
     {
         // stub environment
