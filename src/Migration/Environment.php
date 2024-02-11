@@ -376,6 +376,7 @@ class Environment
             $adapter->setOutput($output);
         }
 
+        // TODO remove this, cake connections don't do prefixes.
         // Use the TablePrefixAdapter if table prefix/suffixes are in use
         if ($adapter->hasOption('table_prefix') || $adapter->hasOption('table_suffix')) {
             $adapter = AdapterFactory::instance()
