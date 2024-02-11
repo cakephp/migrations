@@ -3,7 +3,7 @@
          colors="true"
          cacheDirectory=".phpunit.cache"
          bootstrap="tests/bootstrap.php"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
 >
     <testsuites>
         <testsuite name="migrations">
@@ -34,7 +34,6 @@
     <php>
         <env name="FIXTURE_SCHEMA_METADATA" value="./tests/schema.php"/>
         <ini name="memory_limit" value="-1"/>
-        <ini name="apc.enable_cli" value="1"/>
 
         <!-- SQLite
         <env name="DB" value="sqlite"/>
