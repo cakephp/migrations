@@ -10,10 +10,8 @@ namespace Migrations\Config;
 
 use Closure;
 use InvalidArgumentException;
-use Phinx\Db\Adapter\SQLiteAdapter;
 use Psr\Container\ContainerInterface;
 use ReturnTypeWillChange;
-use RuntimeException;
 use UnexpectedValueException;
 
 /**
@@ -40,146 +38,20 @@ class Config implements ConfigInterface
     protected array $values = [];
 
     /**
-     * @var string|null
-     */
-    protected ?string $configFilePath = null;
-
-    /**
      * @param array $configArray Config array
-     * @param string|null $configFilePath Config file path
      */
-    public function __construct(array $configArray, ?string $configFilePath = null)
+    public function __construct(array $configArray)
     {
-        $this->configFilePath = $configFilePath;
         $this->values = $configArray;
     }
 
     /**
      * @inheritDoc
-     * @deprecated 4.2 To be removed in 5.x
      */
-    public function getEnvironments(): ?array
+    public function getEnvironment(): ?array
     {
-        if (isset($this->values['environments'])) {
-            $environments = [];
-            foreach ($this->values['environments'] as $key => $value) {
-                if (is_array($value)) {
-                    $environments[$key] = $value;
-                }
-            }
-
-            return $environments;
-        }
-
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getEnvironment(string $name): ?array
-    {
-        $environments = $this->getEnvironments();
-
-        if (isset($environments[$name])) {
-            if (
-                isset($this->values['environments']['default_migration_table'])
-                && !isset($environments[$name]['migration_table'])
-            ) {
-                $environments[$name]['migration_table'] =
-                    $this->values['environments']['default_migration_table'];
-            }
-
-            if (
-                isset($environments[$name]['adapter'])
-                && $environments[$name]['adapter'] === 'sqlite'
-                && !empty($environments[$name]['memory'])
-            ) {
-                $environments[$name]['name'] = SQLiteAdapter::MEMORY;
-            }
-
-            return $environments[$name];
-        }
-
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function hasEnvironment(string $name): bool
-    {
-        return $this->getEnvironment($name) !== null;
-    }
-
-    /**
-     * @inheritDoc
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getDefaultEnvironment(): string
-    {
-        // The $PHINX_ENVIRONMENT variable overrides all other default settings
-        $env = getenv('PHINX_ENVIRONMENT');
-        if (!empty($env)) {
-            if ($this->hasEnvironment($env)) {
-                return $env;
-            }
-
-            throw new RuntimeException(sprintf(
-                'The environment configuration (read from $PHINX_ENVIRONMENT) for \'%s\' is missing',
-                $env
-            ));
-        }
-
-        // if the user has configured a default environment then use it,
-        // providing it actually exists!
-        if (isset($this->values['environments']['default_environment'])) {
-            if ($this->hasEnvironment($this->values['environments']['default_environment'])) {
-                return $this->values['environments']['default_environment'];
-            }
-
-            throw new RuntimeException(sprintf(
-                'The environment configuration for \'%s\' is missing',
-                (string)$this->values['environments']['default_environment']
-            ));
-        }
-
-        // else default to the first available one
-        $environments = $this->getEnvironments();
-        if (is_array($environments) && count($environments) > 0) {
-            $names = array_keys($environments);
-
-            return $names[0];
-        }
-
-        throw new RuntimeException('Could not find a default environment');
-    }
-
-    /**
-     * @inheritDoc
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getAlias($alias): ?string
-    {
-        return !empty($this->values['aliases'][$alias]) ? $this->values['aliases'][$alias] : null;
-    }
-
-    /**
-     * @inheritDoc
-     * @deprecated 4.2 To be removed in 5.x
-     */
-    public function getAliases(): array
-    {
-        return !empty($this->values['aliases']) ? $this->values['aliases'] : [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getConfigFilePath(): ?string
-    {
-        return $this->configFilePath;
+        // TODO evolve this into connection only.
+        return $this->values['environment'] ?? null;
     }
 
     /**
