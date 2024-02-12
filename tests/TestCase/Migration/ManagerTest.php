@@ -74,35 +74,23 @@ class ManagerTest extends TestCase
      */
     public static function getConfigArray()
     {
-        $config = [];
-        if (static::getDriverType() === 'mysql') {
-            $dbConfig = ConnectionManager::getConfig('test');
-            $config = [
-                'adapter' => $dbConfig['scheme'],
-                'user' => $dbConfig['username'],
-                'pass' => $dbConfig['password'],
-                'host' => $dbConfig['host'],
-                'name' => $dbConfig['database'],
-            ];
-        }
+        /** @var array<string, string> $dbConfig */
+        $dbConfig = ConnectionManager::getConfig('test');
+        $config = [
+            'adapter' => $dbConfig['scheme'],
+            'user' => $dbConfig['username'],
+            'pass' => $dbConfig['password'],
+            'host' => $dbConfig['host'],
+            'name' => $dbConfig['database'],
+            'migration_table' => 'phinxlog',
+        ];
 
         return [
             'paths' => [
                 'migrations' => ROOT . '/config/ManagerMigrations',
                 'seeds' => ROOT . '/config/ManagerSeeds',
             ],
-            'environments' => [
-                'default_migration_table' => 'phinxlog',
-                'default_environment' => 'production',
-                'production' => $config,
-            ],
-            'data_domain' => [
-                'phone_number' => [
-                    'type' => 'string',
-                    'null' => true,
-                    'length' => 15,
-                ],
-            ],
+            'environment' => $config,
         ];
     }
 
@@ -143,7 +131,7 @@ class ManagerTest extends TestCase
             'name' => $connectionConfig['database'],
         ];
 
-        $configArray['environments']['production'] = $adapterConfig;
+        $configArray['environment'] = $adapterConfig;
         $this->manager->setConfig(new Config($configArray));
 
         $adapter = $this->manager->getEnvironment('production')->getAdapter();
@@ -198,7 +186,7 @@ class ManagerTest extends TestCase
                     ]
                 ));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -244,7 +232,7 @@ class ManagerTest extends TestCase
                             ],
                     ]
                 ));
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv', AbstractCommand::FORMAT_JSON);
         $expected = [
@@ -291,7 +279,7 @@ class ManagerTest extends TestCase
                     ]
                 ));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -322,7 +310,7 @@ class ManagerTest extends TestCase
         $config = new Config($configArray);
 
         $this->manager->setConfig($config);
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $this->assertEquals([], $return);
@@ -357,7 +345,7 @@ class ManagerTest extends TestCase
                     ]
                 ));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -424,7 +412,7 @@ class ManagerTest extends TestCase
                     ]
                 ));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -477,7 +465,7 @@ class ManagerTest extends TestCase
                     ]
                 ));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -524,7 +512,7 @@ class ManagerTest extends TestCase
                         'breakpoint' => 0,
                     ]]));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -576,7 +564,7 @@ class ManagerTest extends TestCase
                             'breakpoint' => 0,
                         ]]));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus('mockenv');
         $expected = [
@@ -672,7 +660,7 @@ class ManagerTest extends TestCase
                     ->method('getVersions')
                     ->will($this->returnValue($availableMigrations));
         }
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->migrateToDateTime('mockenv', new DateTime($dateString));
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -699,7 +687,7 @@ class ManagerTest extends TestCase
             ->method('getVersionLog')
             ->will($this->returnValue($availableRollbacks));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv', $version);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -732,7 +720,7 @@ class ManagerTest extends TestCase
             ->method('getVersionLog')
             ->will($this->returnValue($availableRollbacks));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv', $version, false, false);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -774,7 +762,7 @@ class ManagerTest extends TestCase
         $this->output->setDecorated(false);
 
         $this->manager = new Manager($config, $this->input, $this->output);
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv', $version);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -817,7 +805,7 @@ class ManagerTest extends TestCase
         $this->output->setDecorated(false);
 
         $this->manager = new Manager($config, $this->input, $this->output);
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv', $availableRollbacks[$version]['migration_name'] ?? $version);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -860,7 +848,7 @@ class ManagerTest extends TestCase
         $this->output->setDecorated(false);
 
         $this->manager = new Manager($config, $this->input, $this->output);
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv', $date, false, false);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -893,7 +881,7 @@ class ManagerTest extends TestCase
                 ->method('getVersions')
                 ->will($this->returnValue([20120111235330]));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -930,7 +918,7 @@ class ManagerTest extends TestCase
                     )
                 );
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -960,7 +948,7 @@ class ManagerTest extends TestCase
         $this->output = new StreamOutput(fopen('php://memory', 'a', false));
         $this->output->setDecorated(false);
         $this->manager = new Manager($config, $this->input, $this->output);
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->rollback('mockenv', null);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -2243,7 +2231,7 @@ class ManagerTest extends TestCase
         $envStub = $this->getMockBuilder(Environment::class)
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->seed('mockenv');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -2258,7 +2246,7 @@ class ManagerTest extends TestCase
         $envStub = $this->getMockBuilder(Environment::class)
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->seed('mockenv', 'UserSeeder');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -2271,7 +2259,7 @@ class ManagerTest extends TestCase
         $envStub = $this->getMockBuilder(Environment::class)
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed class "NonExistentSeeder" does not exist');
@@ -2293,7 +2281,7 @@ class ManagerTest extends TestCase
         $envStub = $this->getMockBuilder(Environment::class)
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->seed('mockenv', 'UserSeederNotExecuted');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -2328,14 +2316,6 @@ class ManagerTest extends TestCase
         foreach ($seeds as $seed) {
             $this->assertEquals($outputObject, $seed->getOutput());
         }
-    }
-
-    public function testGettingAnInvalidEnvironment()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The environment "invalidenv" does not exist');
-
-        $this->manager->getEnvironment('invalidenv');
     }
 
     public function testReversibleMigrationsWorkAsExpected()
@@ -2780,7 +2760,7 @@ class ManagerTest extends TestCase
                     ]
                 ));
 
-        $this->manager->setEnvironments(['mockenv' => $envStub]);
+        $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
         $this->manager->setBreakpoint('mockenv', 20120133235330);
 

@@ -11,7 +11,6 @@ namespace Migrations\Migration;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
-use Migrations\Config\Config;
 use Migrations\Config\ConfigInterface;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
@@ -45,9 +44,9 @@ class Manager
     protected OutputInterface $output;
 
     /**
-     * @var \Migrations\Migration\Environment[]
+     * @var \Migrations\Migration\Environment|null
      */
-    protected array $environments = [];
+    protected ?Environment $environment;
 
     /**
      * @var \Phinx\Migration\MigrationInterface[]|null
@@ -91,6 +90,7 @@ class Manager
      */
     public function printStatus(string $environment, ?string $format = null): array
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $migrations = [];
         $isJson = $format === 'json';
         $defaultMigrations = $this->getMigrations('default');
@@ -173,6 +173,7 @@ class Manager
      */
     public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         /** @var array<int> $versions */
         $versions = array_keys($this->getMigrations('default'));
         $dateString = $dateTime->format('Ymdhis');
@@ -202,6 +203,7 @@ class Manager
      */
     public function rollbackToDateTime(string $environment, DateTime $dateTime, bool $force = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
         $dateString = $dateTime->format('Ymdhis');
@@ -242,6 +244,7 @@ class Manager
      */
     public function isMigrated(int $version): bool
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $adapter = $this->getEnvironment('default')->getAdapter();
         /** @var array<int, mixed> $versions */
         $versions = array_flip($adapter->getVersions());
@@ -258,6 +261,7 @@ class Manager
      */
     public function markMigrated(int $version, string $path): bool
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $adapter = $this->getEnvironment('default')->getAdapter();
 
         $migrationFile = glob($path . DS . $version . '*');
@@ -402,6 +406,7 @@ class Manager
      */
     public function migrate(string $environment, ?int $version = null, bool $fake = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $migrations = $this->getMigrations($environment);
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
@@ -464,6 +469,7 @@ class Manager
      */
     public function executeMigration(string $name, MigrationInterface $migration, string $direction = MigrationInterface::UP, bool $fake = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $this->getOutput()->writeln('', $this->verbosityLevel);
 
         // Skip the migration if it should not be executed
@@ -583,6 +589,8 @@ class Manager
      */
     public function rollback(string $environment, int|string|null $target = null, bool $force = false, bool $targetMustMatchVersion = true, bool $fake = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
+
         // note that the migrations are indexed by name (aka creation time) in ascending order
         $migrations = $this->getMigrations($environment);
 
@@ -695,6 +703,7 @@ class Manager
      */
     public function seed(string $environment, ?string $seed = null): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $seeds = $this->getSeeds($environment);
 
         if ($seed === null) {
@@ -715,50 +724,41 @@ class Manager
     }
 
     /**
-     * Sets the environments.
-     *
-     * @param \Migrations\Migration\Environment[] $environments Environments
-     * @return $this
-     */
-    public function setEnvironments(array $environments = [])
-    {
-        $this->environments = $environments;
-
-        return $this;
-    }
-
-    /**
      * Gets the manager class for the given environment.
      *
-     * @param string $name Environment Name
      * @throws \InvalidArgumentException
      * @return \Migrations\Migration\Environment
      */
-    public function getEnvironment(string $name): Environment
+    public function getEnvironment(): Environment
     {
-        if (isset($this->environments[$name])) {
-            return $this->environments[$name];
+        if (isset($this->environment)) {
+            return $this->environment;
         }
 
         $config = $this->getConfig();
-        // check the environment exists
-        if ($config instanceof Config && !$config->hasEnvironment($name)) {
-            throw new InvalidArgumentException(sprintf(
-                'The environment "%s" does not exist',
-                $name
-            ));
-        }
-
         // create an environment instance and cache it
-        $envOptions = $config->getEnvironment($name);
+        $envOptions = $config->getEnvironment();
         $envOptions['version_order'] = $config->getVersionOrder();
 
-        $environment = new Environment($name, $envOptions);
-        $this->environments[$name] = $environment;
+        $environment = new Environment('default', $envOptions);
         $environment->setInput($this->getInput());
         $environment->setOutput($this->getOutput());
+        $this->environment = $environment;
 
         return $environment;
+    }
+
+    /**
+     * Replace the environment
+     *
+     * @param \Migrations\Migration\Environment $environment
+     * @return $this
+     */
+    public function setEnvironment(Environment $environment)
+    {
+        $this->environment = $environment;
+
+        return $this;
     }
 
     /**
@@ -843,6 +843,7 @@ class Manager
      */
     public function getMigrations(string $environment): array
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         if ($this->migrations === null) {
             $phpFiles = $this->getMigrationFiles();
 
@@ -1127,6 +1128,7 @@ class Manager
      */
     public function toggleBreakpoint(string $environment, ?int $version): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $this->markBreakpoint($environment, $version, self::BREAKPOINT_TOGGLE);
     }
 
@@ -1140,6 +1142,7 @@ class Manager
      */
     protected function markBreakpoint(string $environment, ?int $version, int $mark): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $migrations = $this->getMigrations($environment);
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersionLog();
