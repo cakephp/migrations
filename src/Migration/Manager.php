@@ -837,13 +837,11 @@ class Manager
      * Gets an array of the database migrations, indexed by migration name (aka creation time) and sorted in ascending
      * order
      *
-     * @param string $environment Environment
      * @throws \InvalidArgumentException
      * @return \Phinx\Migration\MigrationInterface[]
      */
-    public function getMigrations(string $environment): array
+    public function getMigrations(): array
     {
-        // TODO remove the environment parameter. There is only one environment with builtin
         if ($this->migrations === null) {
             $phpFiles = $this->getMigrationFiles();
 
@@ -912,7 +910,7 @@ class Manager
                     }
 
                     // instantiate it
-                    $migration = new $class($environment, $version, $this->getInput(), $this->getOutput());
+                    $migration = new $class('default', $version, $this->getInput(), $this->getOutput());
 
                     if (!($migration instanceof AbstractMigration)) {
                         throw new InvalidArgumentException(sprintf(

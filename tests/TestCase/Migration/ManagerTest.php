@@ -602,7 +602,7 @@ class ManagerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Duplicate migration/');
         $this->expectExceptionMessageMatches('/20120111235330_duplicate_migration_2.php" has the same version as "20120111235330"/');
-        $manager->getMigrations('mockenv');
+        $manager->getMigrations();
     }
 
     public function testGetMigrationsWithDuplicateMigrationNames()
@@ -613,7 +613,7 @@ class ManagerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Migration "20120111235331_duplicate_migration_name.php" has the same name as "20120111235330_duplicate_migration_name.php"');
 
-        $manager->getMigrations('mockenv');
+        $manager->getMigrations();
     }
 
     public function testGetMigrationsWithInvalidMigrationClassName()
@@ -625,7 +625,7 @@ class ManagerTest extends TestCase
         $this->expectExceptionMessageMatches('/Could not find class "InvalidClass" in file/');
         $this->expectExceptionMessageMatches('/20120111235330_invalid_class.php/');
 
-        $manager->getMigrations('mockenv');
+        $manager->getMigrations();
     }
 
     public function testGettingAValidEnvironment()
@@ -2290,7 +2290,7 @@ class ManagerTest extends TestCase
 
     public function testGettingInputObject()
     {
-        $migrations = $this->manager->getMigrations('mockenv');
+        $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds('mockenv');
         $inputObject = $this->manager->getInput();
         $this->assertInstanceOf('\Symfony\Component\Console\Input\InputInterface', $inputObject);
@@ -2305,7 +2305,7 @@ class ManagerTest extends TestCase
 
     public function testGettingOutputObject()
     {
-        $migrations = $this->manager->getMigrations('mockenv');
+        $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds('mockenv');
         $outputObject = $this->manager->getOutput();
         $this->assertInstanceOf('\Symfony\Component\Console\Output\OutputInterface', $outputObject);
