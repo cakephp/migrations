@@ -134,7 +134,7 @@ class ManagerTest extends TestCase
         $configArray['environment'] = $adapterConfig;
         $this->manager->setConfig(new Config($configArray));
 
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         // ensure the database is empty
         if ($adapterConfig['adapter'] === 'postgres') {
@@ -188,7 +188,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
           [
             'status' => 'up',
@@ -234,7 +234,7 @@ class ManagerTest extends TestCase
                 ));
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv', AbstractCommand::FORMAT_JSON);
+        $return = $this->manager->printStatus(AbstractCommand::FORMAT_JSON);
         $expected = [
             [
               'status' => 'up',
@@ -281,7 +281,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
           [
             'status' => 'up',
@@ -312,7 +312,7 @@ class ManagerTest extends TestCase
         $this->manager->setConfig($config);
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $this->assertEquals([], $return);
     }
 
@@ -347,7 +347,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
             [
               'missing' => true,
@@ -414,7 +414,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
             [
               'status' => 'up',
@@ -467,7 +467,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
             [
               'missing' => true,
@@ -514,7 +514,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
             [
               'status' => 'up',
@@ -566,7 +566,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $return = $this->manager->printStatus('mockenv');
+        $return = $this->manager->printStatus();
         $expected = [
             [
               'missing' => true,
@@ -632,7 +632,7 @@ class ManagerTest extends TestCase
     {
         $this->assertInstanceOf(
             Environment::class,
-            $this->manager->getEnvironment('production')
+            $this->manager->getEnvironment()
         );
     }
 
@@ -661,7 +661,7 @@ class ManagerTest extends TestCase
                     ->will($this->returnValue($availableMigrations));
         }
         $this->manager->setEnvironment($envStub);
-        $this->manager->migrateToDateTime('mockenv', new DateTime($dateString));
+        $this->manager->migrateToDateTime(new DateTime($dateString));
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         if (is_null($expectedMigration)) {
@@ -688,7 +688,7 @@ class ManagerTest extends TestCase
             ->will($this->returnValue($availableRollbacks));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv', $version);
+        $this->manager->rollback($version);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         if (is_null($expectedOutput)) {
@@ -721,7 +721,7 @@ class ManagerTest extends TestCase
             ->will($this->returnValue($availableRollbacks));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv', $version, false, false);
+        $this->manager->rollback($version, false, false);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         if (is_null($expectedOutput)) {
@@ -763,7 +763,7 @@ class ManagerTest extends TestCase
 
         $this->manager = new Manager($config, $this->input, $this->output);
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv', $version);
+        $this->manager->rollback($version);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
 
@@ -806,7 +806,7 @@ class ManagerTest extends TestCase
 
         $this->manager = new Manager($config, $this->input, $this->output);
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv', $availableRollbacks[$version]['migration_name'] ?? $version);
+        $this->manager->rollback($availableRollbacks[$version]['migration_name'] ?? $version);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
 
@@ -849,7 +849,7 @@ class ManagerTest extends TestCase
 
         $this->manager = new Manager($config, $this->input, $this->output);
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv', $date, false, false);
+        $this->manager->rollback($date, false, false);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
 
@@ -882,7 +882,7 @@ class ManagerTest extends TestCase
                 ->will($this->returnValue([20120111235330]));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv');
+        $this->manager->rollback();
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         $this->assertStringContainsString('== 20120111235330 TestMigration: reverting', $output);
@@ -919,7 +919,7 @@ class ManagerTest extends TestCase
                 );
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv');
+        $this->manager->rollback();
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         $this->assertStringNotContainsString('== 20120111235330 TestMigration: reverting', $output);
@@ -949,7 +949,7 @@ class ManagerTest extends TestCase
         $this->output->setDecorated(false);
         $this->manager = new Manager($config, $this->input, $this->output);
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback('mockenv', null);
+        $this->manager->rollback(null);
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         if (is_null($expectedOutput)) {
@@ -2232,7 +2232,7 @@ class ManagerTest extends TestCase
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
         $this->manager->setEnvironment($envStub);
-        $this->manager->seed('mockenv');
+        $this->manager->seed();
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         $this->assertStringContainsString('GSeeder', $output);
@@ -2247,7 +2247,7 @@ class ManagerTest extends TestCase
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
         $this->manager->setEnvironment($envStub);
-        $this->manager->seed('mockenv', 'UserSeeder');
+        $this->manager->seed('UserSeeder');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         $this->assertStringContainsString('UserSeeder', $output);
@@ -2264,12 +2264,12 @@ class ManagerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed class "NonExistentSeeder" does not exist');
 
-        $this->manager->seed('mockenv', 'NonExistentSeeder');
+        $this->manager->seed('NonExistentSeeder');
     }
 
     public function testOrderSeeds()
     {
-        $seeds = array_values($this->manager->getSeeds('mockenv'));
+        $seeds = array_values($this->manager->getSeeds());
         $this->assertInstanceOf('UserSeeder', $seeds[0]);
         $this->assertInstanceOf('GSeeder', $seeds[1]);
         $this->assertInstanceOf('PostSeeder', $seeds[2]);
@@ -2282,7 +2282,7 @@ class ManagerTest extends TestCase
             ->setConstructorArgs(['mockenv', []])
             ->getMock();
         $this->manager->setEnvironment($envStub);
-        $this->manager->seed('mockenv', 'UserSeederNotExecuted');
+        $this->manager->seed('UserSeederNotExecuted');
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
         $this->assertStringContainsString('skipped', $output);
@@ -2291,7 +2291,7 @@ class ManagerTest extends TestCase
     public function testGettingInputObject()
     {
         $migrations = $this->manager->getMigrations();
-        $seeds = $this->manager->getSeeds('mockenv');
+        $seeds = $this->manager->getSeeds();
         $inputObject = $this->manager->getInput();
         $this->assertInstanceOf('\Symfony\Component\Console\Input\InputInterface', $inputObject);
 
@@ -2306,7 +2306,7 @@ class ManagerTest extends TestCase
     public function testGettingOutputObject()
     {
         $migrations = $this->manager->getMigrations();
-        $seeds = $this->manager->getSeeds('mockenv');
+        $seeds = $this->manager->getSeeds();
         $outputObject = $this->manager->getOutput();
         $this->assertInstanceOf('\Symfony\Component\Console\Output\OutputInterface', $outputObject);
 
@@ -2325,7 +2325,7 @@ class ManagerTest extends TestCase
         ]);
 
         // migrate to the latest version
-        $this->manager->migrate('production');
+        $this->manager->migrate();
 
         // ensure up migrations worked
         $this->assertFalse($adapter->hasTable('info'));
@@ -2343,7 +2343,7 @@ class ManagerTest extends TestCase
         );
 
         // revert all changes to the first
-        $this->manager->rollback('production', '20121213232502');
+        $this->manager->rollback('20121213232502');
 
         // ensure reversed migrations worked
         $this->assertTrue($adapter->hasTable('info'));
@@ -2355,7 +2355,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('change_direction_test'));
 
         // revert all changes
-        $this->manager->rollback('production', '0');
+        $this->manager->rollback('0');
 
         $this->assertFalse($adapter->hasTable('info'));
         $this->assertFalse($adapter->hasTable('users'));
@@ -2367,7 +2367,7 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('Test requires mysql connection');
         }
         $configArray = $this->getConfigArray();
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         // override the migrations directory to use the reversible migrations
         $configArray['paths']['migrations'] = ROOT . '/config/DropIndexRegression/';
@@ -2382,7 +2382,7 @@ class ManagerTest extends TestCase
 
         // migrate to the latest version
         $this->manager->setConfig($config);
-        $this->manager->migrate('production');
+        $this->manager->migrate();
 
         // ensure up migrations worked
         $this->assertTrue($adapter->hasTable('my_table'));
@@ -2391,7 +2391,7 @@ class ManagerTest extends TestCase
         $this->assertTrue($adapter->hasForeignKey('my_table', ['entity_id']));
 
         // revert all changes to the first
-        $this->manager->rollback('production', '20121213232502');
+        $this->manager->rollback('20121213232502');
 
         // ensure reversed migrations worked
         $this->assertTrue($adapter->hasTable('my_table'));
@@ -2407,7 +2407,7 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         // override the migrations directory to use the reversible migrations
         $configArray['paths']['migrations'] = ROOT . '/config/DropTableWithFkRegression';
@@ -2422,7 +2422,7 @@ class ManagerTest extends TestCase
 
         // migrate to the latest version
         $this->manager->setConfig($config);
-        $this->manager->migrate('production');
+        $this->manager->migrate();
 
         // ensure up migrations worked
         $this->assertTrue($adapter->hasTable('orders'));
@@ -2432,7 +2432,7 @@ class ManagerTest extends TestCase
         $this->assertTrue($adapter->hasForeignKey('orders', ['customer_id']));
 
         // revert all changes to the first
-        $this->manager->rollback('production', '20190928205056');
+        $this->manager->rollback('20190928205056');
 
         // ensure reversed migrations worked
         $this->assertTrue($adapter->hasTable('orders'));
@@ -2441,7 +2441,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('customers'));
         $this->assertFalse($adapter->hasForeignKey('orders', ['customer_id']));
 
-        $this->manager->rollback('production');
+        $this->manager->rollback();
         $this->assertFalse($adapter->hasTable('orders'));
         $this->assertFalse($adapter->hasTable('customers'));
     }
@@ -2452,7 +2452,7 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         $config = new Config($configArray);
 
@@ -2465,10 +2465,10 @@ class ManagerTest extends TestCase
 
         // migrate to the latest version
         $this->manager->setConfig($config);
-        $this->manager->migrate('production');
+        $this->manager->migrate();
 
         // Get the versions
-        $originalVersions = $this->manager->getEnvironment('production')->getVersionLog();
+        $originalVersions = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(0, reset($originalVersions)['breakpoint']);
         $this->assertEquals(0, end($originalVersions)['breakpoint']);
 
@@ -2476,10 +2476,10 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Toggle the breakpoint on most recent migration
-        $this->manager->toggleBreakpoint('production', null);
+        $this->manager->toggleBreakpoint(null);
 
         // ensure breakpoint is set
-        $firstToggle = $this->manager->getEnvironment('production')->getVersionLog();
+        $firstToggle = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(0, reset($firstToggle)['breakpoint']);
         $this->assertEquals(1, end($firstToggle)['breakpoint']);
 
@@ -2496,10 +2496,10 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Toggle the breakpoint on most recent migration
-        $this->manager->toggleBreakpoint('production', null);
+        $this->manager->toggleBreakpoint(null);
 
         // ensure breakpoint is set
-        $secondToggle = $this->manager->getEnvironment('production')->getVersionLog();
+        $secondToggle = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(0, reset($secondToggle)['breakpoint']);
         $this->assertEquals(0, end($secondToggle)['breakpoint']);
 
@@ -2516,12 +2516,12 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Reset all breakpoints and toggle the most recent migration twice
-        $this->manager->removeBreakpoints('production');
-        $this->manager->toggleBreakpoint('production', null);
-        $this->manager->toggleBreakpoint('production', null);
+        $this->manager->removeBreakpoints();
+        $this->manager->toggleBreakpoint(null);
+        $this->manager->toggleBreakpoint(null);
 
         // ensure breakpoint is not set
-        $resetVersions = $this->manager->getEnvironment('production')->getVersionLog();
+        $resetVersions = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(0, reset($resetVersions)['breakpoint']);
         $this->assertEquals(0, end($resetVersions)['breakpoint']);
 
@@ -2538,10 +2538,10 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Set the breakpoint on the latest migration
-        $this->manager->setBreakpoint('production', null);
+        $this->manager->setBreakpoint(null);
 
         // ensure breakpoint is set
-        $setLastVersions = $this->manager->getEnvironment('production')->getVersionLog();
+        $setLastVersions = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(0, reset($setLastVersions)['breakpoint']);
         $this->assertEquals(1, end($setLastVersions)['breakpoint']);
 
@@ -2558,10 +2558,10 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Set the breakpoint on the first migration
-        $this->manager->setBreakpoint('production', reset($originalVersions)['version']);
+        $this->manager->setBreakpoint(reset($originalVersions)['version']);
 
         // ensure breakpoint is set
-        $setFirstVersion = $this->manager->getEnvironment('production')->getVersionLog();
+        $setFirstVersion = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(1, reset($setFirstVersion)['breakpoint']);
         $this->assertEquals(1, end($setFirstVersion)['breakpoint']);
 
@@ -2578,10 +2578,10 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Unset the breakpoint on the latest migration
-        $this->manager->unsetBreakpoint('production', null);
+        $this->manager->unsetBreakpoint(null);
 
         // ensure breakpoint is set
-        $unsetLastVersions = $this->manager->getEnvironment('production')->getVersionLog();
+        $unsetLastVersions = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(1, reset($unsetLastVersions)['breakpoint']);
         $this->assertEquals(0, end($unsetLastVersions)['breakpoint']);
 
@@ -2598,10 +2598,10 @@ class ManagerTest extends TestCase
         sleep(1);
 
         // Unset the breakpoint on the first migration
-        $this->manager->unsetBreakpoint('production', reset($originalVersions)['version']);
+        $this->manager->unsetBreakpoint(reset($originalVersions)['version']);
 
         // ensure breakpoint is set
-        $unsetFirstVersion = $this->manager->getEnvironment('production')->getVersionLog();
+        $unsetFirstVersion = $this->manager->getEnvironment()->getVersionLog();
         $this->assertEquals(0, reset($unsetFirstVersion)['breakpoint']);
         $this->assertEquals(0, end($unsetFirstVersion)['breakpoint']);
 
@@ -2621,7 +2621,7 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('test requires mysql');
         }
         $configArray = $this->getConfigArray();
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         $config = new Config($configArray);
 
@@ -2634,11 +2634,11 @@ class ManagerTest extends TestCase
 
         // migrate to the latest version
         $this->manager->setConfig($config);
-        $this->manager->migrate('production');
+        $this->manager->migrate();
         $this->manager->getOutput()->setDecorated(false);
 
         // set breakpoint on most recent migration
-        $this->manager->toggleBreakpoint('production', 999);
+        $this->manager->toggleBreakpoint(999);
 
         rewind($this->manager->getOutput()->getStream());
         $output = stream_get_contents($this->manager->getOutput()->getStream());
@@ -2656,7 +2656,7 @@ class ManagerTest extends TestCase
             'migrations' => ROOT . '/config/Postgres',
         ]);
         // migrate to the latest version
-        $this->manager->migrate('production');
+        $this->manager->migrate();
 
         $this->assertTrue($adapter->hasTable('articles'));
         $this->assertTrue($adapter->hasTable('categories'));
@@ -2667,7 +2667,7 @@ class ManagerTest extends TestCase
         $this->assertTrue($adapter->hasTable('special_tags'));
         $this->assertTrue($adapter->hasTable('users'));
 
-        $this->manager->rollback('production', 'all');
+        $this->manager->rollback('all');
 
         $this->assertFalse($adapter->hasTable('articles'));
         $this->assertFalse($adapter->hasTable('categories'));
@@ -2685,7 +2685,7 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         // override the migrations directory to use the reversible migrations
         $configArray['paths']['migrations'] = ROOT . '/config/DropColumnFkIndexRegression';
@@ -2699,7 +2699,7 @@ class ManagerTest extends TestCase
         $adapter->disconnect();
 
         $this->manager->setConfig($config);
-        $this->manager->migrate('production', 20190928205056);
+        $this->manager->migrate(20190928205056);
 
         $this->assertTrue($adapter->hasTable('table1'));
         $this->assertTrue($adapter->hasTable('table2'));
@@ -2712,7 +2712,7 @@ class ManagerTest extends TestCase
         $this->assertTrue($adapter->hasIndexByName('table1', 'table1_table3_id'));
 
         // Run the next migration
-        $this->manager->migrate('production');
+        $this->manager->migrate();
         $this->assertTrue($adapter->hasTable('table1'));
         $this->assertTrue($adapter->hasTable('table2'));
         $this->assertTrue($adapter->hasTable('table3'));
@@ -2724,8 +2724,8 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasIndexByName('table1', 'table1_table3_id'));
 
         // rollback
-        $this->manager->rollback('production');
-        $this->manager->rollback('production');
+        $this->manager->rollback();
+        $this->manager->rollback();
 
         // ensure reversed migrations worked
         $this->assertTrue($adapter->hasTable('table1'));
@@ -2762,7 +2762,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->getOutput()->setDecorated(false);
-        $this->manager->setBreakpoint('mockenv', 20120133235330);
+        $this->manager->setBreakpoint(20120133235330);
 
         rewind($this->manager->getOutput()->getStream());
         $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
@@ -2775,7 +2775,7 @@ class ManagerTest extends TestCase
             $this->markTestSkipped('Test requires mysql');
         }
         $configArray = $this->getConfigArray();
-        $adapter = $this->manager->getEnvironment('production')->getAdapter();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
 
         // override the migrations directory to use the should execute migrations
         $configArray['paths']['migrations'] = ROOT . '/config/ShouldExecute/';
@@ -2790,12 +2790,12 @@ class ManagerTest extends TestCase
 
         // Run the migration with shouldExecute returning false: the table should not be created
         $this->manager->setConfig($config);
-        $this->manager->migrate('production', 20201207205056);
+        $this->manager->migrate(20201207205056);
 
         $this->assertFalse($adapter->hasTable('info'));
 
         // Run the migration with shouldExecute returning true: the table should be created
-        $this->manager->migrate('production', 20201207205057);
+        $this->manager->migrate(20201207205057);
 
         $this->assertTrue($adapter->hasTable('info'));
     }
