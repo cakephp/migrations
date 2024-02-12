@@ -62,7 +62,7 @@ class ManagerTest extends TestCase
         $this->manager = null;
     }
 
-    private static function getCorrectedPath($path)
+    private static function getCorrectedPath(string $path): string
     {
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
@@ -72,7 +72,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public static function getConfigArray()
+    public static function getConfigArray(): array
     {
         /** @var array<string, string> $dbConfig */
         $dbConfig = ConnectionManager::getConfig('test');
@@ -94,7 +94,7 @@ class ManagerTest extends TestCase
         ];
     }
 
-    protected function getConfigWithPlugin($paths = [])
+    protected function getConfigWithPlugin(array $paths = []): array
     {
         $paths = [
             'migrations' => ROOT . 'Plugin/Manager/config/Migrations',
@@ -149,7 +149,7 @@ class ManagerTest extends TestCase
         return $adapter;
     }
 
-    public function testInstantiation()
+    public function testInstantiation(): void
     {
         $this->assertInstanceOf(
             'Symfony\Component\Console\Output\StreamOutput',
@@ -157,7 +157,7 @@ class ManagerTest extends TestCase
         );
     }
 
-    public function testPrintStatusMethod()
+    public function testPrintStatusMethod(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -204,7 +204,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testPrintStatusMethodJsonFormat()
+    public function testPrintStatusMethodJsonFormat(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -250,7 +250,7 @@ class ManagerTest extends TestCase
         $this->assertSame($expected, $return);
     }
 
-    public function testPrintStatusMethodWithBreakpointSet()
+    public function testPrintStatusMethodWithBreakpointSet(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -866,7 +866,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testRollbackToVersionWithSingleMigrationDoesNotFail()
+    public function testRollbackToVersionWithSingleMigrationDoesNotFail(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -891,7 +891,7 @@ class ManagerTest extends TestCase
         $this->assertStringNotContainsString('Undefined offset: -1', $output);
     }
 
-    public function testRollbackToVersionWithTwoMigrations()
+    public function testRollbackToVersionWithTwoMigrations(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -930,7 +930,7 @@ class ManagerTest extends TestCase
      *
      * @dataProvider rollbackLastDataProvider
      */
-    public function testRollbackLast($availableRolbacks, $versionOrder, $expectedOutput)
+    public function testRollbackLast(array $availableRolbacks, string $versionOrder, string $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -970,7 +970,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public static function migrateDateDataProvider()
+    public static function migrateDateDataProvider(): array
     {
         return [
             [['20120111235330', '20120116183504'], '20120118', '20120116183504', 'Failed to migrate all migrations when migrate to date is later than all the migrations'],
@@ -983,7 +983,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public static function rollbackToDateDataProvider()
+    public static function rollbackToDateDataProvider(): array
     {
         return [
 
@@ -1186,7 +1186,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public static function rollbackToDateByExecutionTimeDataProvider()
+    public static function rollbackToDateByExecutionTimeDataProvider(): array
     {
         return [
 
@@ -1422,7 +1422,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public static function rollbackToVersionDataProvider()
+    public static function rollbackToVersionDataProvider(): array
     {
         return [
 
@@ -1562,6 +1562,7 @@ class ManagerTest extends TestCase
                     '20120116183504',
                     null,
                 ],
+            // Breakpoint set on all migrations
             'Rollback all versions (ie. rollback to version 0) - breakpoint set on last migration' =>
                 [
                     [
@@ -1599,68 +1600,10 @@ class ManagerTest extends TestCase
                     '20111225000000',
                     'Target version (20111225000000) not found',
                 ],
-
-            // Breakpoint set on all migrations
-
-            'Rollback to one of the versions - breakpoint set on last migration' =>
-                [
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => '', 'breakpoint' => 1],
-                    ],
-                    '20120111235330',
-                    'Breakpoint reached. Further rollbacks inhibited.',
-                ],
-            'Rollback to the latest version - breakpoint set on last migration' =>
-                [
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => '', 'breakpoint' => 1],
-                    ],
-                    '20120116183504',
-                    null,
-                ],
-            'Rollback all versions (ie. rollback to version 0) - breakpoint set on last migration' =>
-                [
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => '', 'breakpoint' => 1],
-                    ],
-                    '0',
-                    'Breakpoint reached. Further rollbacks inhibited.',
-                ],
-            'Rollback last version - breakpoint set on last migration' =>
-                [
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => '', 'breakpoint' => 1],
-                    ],
-                    null,
-                    'Breakpoint reached. Further rollbacks inhibited.',
-                ],
-            'Rollback to non-existing version - breakpoint set on last migration' =>
-                [
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => '', 'breakpoint' => 1],
-                    ],
-                    '20121225000000',
-                    'Target version (20121225000000) not found',
-                ],
-            'Rollback to missing version - breakpoint set on last migration' =>
-                [
-                    [
-                        '20111225000000' => ['version' => '20111225000000', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => '', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => '', 'breakpoint' => 1],
-                    ],
-                    '20111225000000',
-                    'Target version (20111225000000) not found',
-                ],
         ];
     }
 
-    public static function rollbackToVersionByExecutionTimeDataProvider()
+    public static function rollbackToVersionByExecutionTimeDataProvider(): array
     {
         return [
 
@@ -2065,7 +2008,7 @@ class ManagerTest extends TestCase
      *
      * @return array
      */
-    public static function rollbackLastDataProvider()
+    public static function rollbackLastDataProvider(): array
     {
         return [
 
@@ -2191,16 +2134,6 @@ class ManagerTest extends TestCase
                     'Breakpoint reached. Further rollbacks inhibited.',
                 ],
 
-            'Rollback to last migration with creation time version ordering - breakpoint set on all migrations' =>
-                [
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'start_time' => '2012-01-12 23:53:30', 'breakpoint' => 1],
-                        '20120116183504' => ['version' => '20120116183504', 'start_time' => '2012-01-16 18:35:04', 'breakpoint' => 1],
-                    ],
-                    Config::VERSION_ORDER_CREATION_TIME,
-                    'Breakpoint reached. Further rollbacks inhibited.',
-                ],
-
             'Rollback to last migration with missing last migration and creation time version ordering - breakpoint set on all migrations' =>
                 [
                     [
@@ -2225,7 +2158,7 @@ class ManagerTest extends TestCase
             ];
     }
 
-    public function testExecuteSeedWorksAsExpected()
+    public function testExecuteSeedWorksAsExpected():void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2240,7 +2173,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('UserSeeder', $output);
     }
 
-    public function testExecuteASingleSeedWorksAsExpected()
+    public function testExecuteASingleSeedWorksAsExpected():void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2253,7 +2186,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('UserSeeder', $output);
     }
 
-    public function testExecuteANonExistentSeedWorksAsExpected()
+    public function testExecuteANonExistentSeedWorksAsExpected():void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2267,7 +2200,7 @@ class ManagerTest extends TestCase
         $this->manager->seed('NonExistentSeeder');
     }
 
-    public function testOrderSeeds()
+    public function testOrderSeeds():void
     {
         $seeds = array_values($this->manager->getSeeds());
         $this->assertInstanceOf('UserSeeder', $seeds[0]);
@@ -2275,7 +2208,7 @@ class ManagerTest extends TestCase
         $this->assertInstanceOf('PostSeeder', $seeds[2]);
     }
 
-    public function testSeedWillNotBeExecuted()
+    public function testSeedWillNotBeExecuted():void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2288,7 +2221,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('skipped', $output);
     }
 
-    public function testGettingInputObject()
+    public function testGettingInputObject():void
     {
         $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds();
@@ -2303,7 +2236,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testGettingOutputObject()
+    public function testGettingOutputObject():void
     {
         $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds();
@@ -2318,7 +2251,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testReversibleMigrationsWorkAsExpected()
+    public function testReversibleMigrationsWorkAsExpected():void
     {
         $adapter = $this->prepareEnvironment([
             'migrations' => ROOT . '/config/Reversiblemigrations',
@@ -2361,7 +2294,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('users'));
     }
 
-    public function testReversibleMigrationWithIndexConflict()
+    public function testReversibleMigrationWithIndexConflict():void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql connection');
@@ -2401,7 +2334,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasIndex('my_table', ['entity_id']));
     }
 
-    public function testReversibleMigrationWithFKConflictOnTableDrop()
+    public function testReversibleMigrationWithFKConflictOnTableDrop():void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql');
@@ -2446,7 +2379,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('customers'));
     }
 
-    public function testBreakpointsTogglingOperateAsExpected()
+    public function testBreakpointsTogglingOperateAsExpected(): void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql');
@@ -2615,7 +2548,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testBreakpointWithInvalidVersion()
+    public function testBreakpointWithInvalidVersion():void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('test requires mysql');
@@ -2646,7 +2579,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('is not a valid version', $output);
     }
 
-    public function testPostgresFullMigration()
+    public function testPostgresFullMigration(): void
     {
         if ($this->getDriverType() !== 'postgres') {
             $this->markTestSkipped('Test requires postgres');
@@ -2679,7 +2612,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('users'));
     }
 
-    public function testMigrationWithDropColumnAndForeignKeyAndIndex()
+    public function testMigrationWithDropColumnAndForeignKeyAndIndex(): void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql');
@@ -2739,7 +2672,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasIndexByName('table1', 'table1_table3_id'));
     }
 
-    public function testInvalidVersionBreakpoint()
+    public function testInvalidVersionBreakpoint(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2769,7 +2702,7 @@ class ManagerTest extends TestCase
         $this->assertEquals('warning 20120133235330 is not a valid version', trim($outputStr));
     }
 
-    public function testMigrationWillNotBeExecuted()
+    public function testMigrationWillNotBeExecuted(): void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql');
