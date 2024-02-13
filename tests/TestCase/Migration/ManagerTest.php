@@ -2158,7 +2158,7 @@ class ManagerTest extends TestCase
             ];
     }
 
-    public function testExecuteSeedWorksAsExpected():void
+    public function testExecuteSeedWorksAsExpected(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2173,7 +2173,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('UserSeeder', $output);
     }
 
-    public function testExecuteASingleSeedWorksAsExpected():void
+    public function testExecuteASingleSeedWorksAsExpected(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2186,7 +2186,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('UserSeeder', $output);
     }
 
-    public function testExecuteANonExistentSeedWorksAsExpected():void
+    public function testExecuteANonExistentSeedWorksAsExpected(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2200,7 +2200,7 @@ class ManagerTest extends TestCase
         $this->manager->seed('NonExistentSeeder');
     }
 
-    public function testOrderSeeds():void
+    public function testOrderSeeds(): void
     {
         $seeds = array_values($this->manager->getSeeds());
         $this->assertInstanceOf('UserSeeder', $seeds[0]);
@@ -2208,7 +2208,7 @@ class ManagerTest extends TestCase
         $this->assertInstanceOf('PostSeeder', $seeds[2]);
     }
 
-    public function testSeedWillNotBeExecuted():void
+    public function testSeedWillNotBeExecuted(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -2221,7 +2221,7 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('skipped', $output);
     }
 
-    public function testGettingInputObject():void
+    public function testGettingInputObject(): void
     {
         $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds();
@@ -2236,7 +2236,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testGettingOutputObject():void
+    public function testGettingOutputObject(): void
     {
         $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds();
@@ -2251,7 +2251,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testReversibleMigrationsWorkAsExpected():void
+    public function testReversibleMigrationsWorkAsExpected(): void
     {
         $adapter = $this->prepareEnvironment([
             'migrations' => ROOT . '/config/Reversiblemigrations',
@@ -2294,7 +2294,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('users'));
     }
 
-    public function testReversibleMigrationWithIndexConflict():void
+    public function testReversibleMigrationWithIndexConflict(): void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql connection');
@@ -2334,7 +2334,7 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasIndex('my_table', ['entity_id']));
     }
 
-    public function testReversibleMigrationWithFKConflictOnTableDrop():void
+    public function testReversibleMigrationWithFKConflictOnTableDrop(): void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('Test requires mysql');
@@ -2548,7 +2548,7 @@ class ManagerTest extends TestCase
         }
     }
 
-    public function testBreakpointWithInvalidVersion():void
+    public function testBreakpointWithInvalidVersion(): void
     {
         if ($this->getDriverType() !== 'mysql') {
             $this->markTestSkipped('test requires mysql');

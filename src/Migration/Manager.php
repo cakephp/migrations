@@ -164,7 +164,6 @@ class Manager
     /**
      * Migrate to the version of the database on a given date.
      *
-     * @param string $environment Environment
      * @param \DateTime $dateTime Date to migrate to
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the
      *                               migration
@@ -312,7 +311,7 @@ class Manager
      */
     public function getVersionsToMark(InputInterface $input): array
     {
-        $migrations = $this->getMigrations('default');
+        $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
         $versionArg = $input->getArgument('version');
@@ -1116,7 +1115,6 @@ class Manager
     /**
      * Updates the breakpoint for a specific version.
      *
-     * @param string $environment The required environment
      * @param int|null $version The version of the target migration
      * @param int $mark The state of the breakpoint as defined by self::BREAKPOINT_xxxx constants.
      * @return void
