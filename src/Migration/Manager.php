@@ -11,7 +11,6 @@ namespace Migrations\Migration;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
-use Migrations\Config\Config;
 use Migrations\Config\ConfigInterface;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
@@ -45,9 +44,9 @@ class Manager
     protected OutputInterface $output;
 
     /**
-     * @var \Migrations\Migration\Environment[]
+     * @var \Migrations\Migration\Environment|null
      */
-    protected array $environments = [];
+    protected ?Environment $environment;
 
     /**
      * @var \Phinx\Migration\MigrationInterface[]|null
@@ -84,18 +83,18 @@ class Manager
     /**
      * Prints the specified environment's migration status.
      *
-     * @param string $environment environment to print status of
      * @param string|null $format format to print status in (either text, json, or null)
      * @throws \RuntimeException
      * @return array array indicating if there are any missing or down migrations
      */
-    public function printStatus(string $environment, ?string $format = null): array
+    public function printStatus(?string $format = null): array
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $migrations = [];
         $isJson = $format === 'json';
-        $defaultMigrations = $this->getMigrations('default');
+        $defaultMigrations = $this->getMigrations();
         if (count($defaultMigrations)) {
-            $env = $this->getEnvironment($environment);
+            $env = $this->getEnvironment();
             $versions = $env->getVersionLog();
 
             foreach ($defaultMigrations as $migration) {
@@ -165,16 +164,16 @@ class Manager
     /**
      * Migrate to the version of the database on a given date.
      *
-     * @param string $environment Environment
      * @param \DateTime $dateTime Date to migrate to
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the
      *                               migration
      * @return void
      */
-    public function migrateToDateTime(string $environment, DateTime $dateTime, bool $fake = false): void
+    public function migrateToDateTime(DateTime $dateTime, bool $fake = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         /** @var array<int> $versions */
-        $versions = array_keys($this->getMigrations('default'));
+        $versions = array_keys($this->getMigrations());
         $dateString = $dateTime->format('Ymdhis');
         $versionToMigrate = null;
         foreach ($versions as $version) {
@@ -194,15 +193,15 @@ class Manager
         $this->getOutput()->writeln(
             'Migrating to version ' . $versionToMigrate
         );
-        $this->migrate($environment, $versionToMigrate, $fake);
+        $this->migrate($versionToMigrate, $fake);
     }
 
     /**
      * @inheritDoc
      */
-    public function rollbackToDateTime(string $environment, DateTime $dateTime, bool $force = false): void
+    public function rollbackToDateTime(DateTime $dateTime, bool $force = false): void
     {
-        $env = $this->getEnvironment($environment);
+        $env = $this->getEnvironment();
         $versions = $env->getVersions();
         $dateString = $dateTime->format('Ymdhis');
         sort($versions);
@@ -216,7 +215,7 @@ class Manager
 
         if ($dateString < end($versions)) {
             $this->getOutput()->writeln('Rolling back all migrations');
-            $this->rollback($environment, 0);
+            $this->rollback(0);
 
             return;
         }
@@ -231,7 +230,7 @@ class Manager
         $versionToRollback = $versions[$index];
 
         $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
-        $this->rollback($environment, $versionToRollback, $force);
+        $this->rollback($versionToRollback, $force);
     }
 
     /**
@@ -242,7 +241,7 @@ class Manager
      */
     public function isMigrated(int $version): bool
     {
-        $adapter = $this->getEnvironment('default')->getAdapter();
+        $adapter = $this->getEnvironment()->getAdapter();
         /** @var array<int, mixed> $versions */
         $versions = array_flip($adapter->getVersions());
 
@@ -258,7 +257,7 @@ class Manager
      */
     public function markMigrated(int $version, string $path): bool
     {
-        $adapter = $this->getEnvironment('default')->getAdapter();
+        $adapter = $this->getEnvironment()->getAdapter();
 
         $migrationFile = glob($path . DS . $version . '*');
 
@@ -312,7 +311,7 @@ class Manager
      */
     public function getVersionsToMark(InputInterface $input): array
     {
-        $migrations = $this->getMigrations('default');
+        $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
         $versionArg = $input->getArgument('version');
@@ -355,7 +354,7 @@ class Manager
      */
     public function markVersionsAsMigrated(string $path, array $versions, OutputInterface $output): void
     {
-        $adapter = $this->getEnvironment('default')->getAdapter();
+        $adapter = $this->getEnvironment()->getAdapter();
 
         if (!$versions) {
             $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
@@ -395,15 +394,14 @@ class Manager
     /**
      * Migrate an environment to the specified version.
      *
-     * @param string $environment Environment
      * @param int|null $version version to migrate to
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the migration
      * @return void
      */
-    public function migrate(string $environment, ?int $version = null, bool $fake = false): void
+    public function migrate(?int $version = null, bool $fake = false): void
     {
-        $migrations = $this->getMigrations($environment);
-        $env = $this->getEnvironment($environment);
+        $migrations = $this->getMigrations();
+        $env = $this->getEnvironment();
         $versions = $env->getVersions();
         $current = $env->getCurrentVersion();
 
@@ -436,7 +434,7 @@ class Manager
                 }
 
                 if (in_array($migration->getVersion(), $versions)) {
-                    $this->executeMigration($environment, $migration, MigrationInterface::DOWN, $fake);
+                    $this->executeMigration($migration, MigrationInterface::DOWN, $fake);
                 }
             }
         }
@@ -448,7 +446,7 @@ class Manager
             }
 
             if (!in_array($migration->getVersion(), $versions)) {
-                $this->executeMigration($environment, $migration, MigrationInterface::UP, $fake);
+                $this->executeMigration($migration, MigrationInterface::UP, $fake);
             }
         }
     }
@@ -456,14 +454,14 @@ class Manager
     /**
      * Execute a migration against the specified environment.
      *
-     * @param string $name Environment Name
      * @param \Phinx\Migration\MigrationInterface $migration Migration
      * @param string $direction Direction
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the migration
      * @return void
      */
-    public function executeMigration(string $name, MigrationInterface $migration, string $direction = MigrationInterface::UP, bool $fake = false): void
+    public function executeMigration(MigrationInterface $migration, string $direction = MigrationInterface::UP, bool $fake = false): void
     {
+        // TODO remove the environment parameter. There is only one environment with builtin
         $this->getOutput()->writeln('', $this->verbosityLevel);
 
         // Skip the migration if it should not be executed
@@ -477,7 +475,7 @@ class Manager
 
         // Execute the migration and log the time elapsed.
         $start = microtime(true);
-        $this->getEnvironment($name)->executeMigration($migration, $direction, $fake);
+        $this->getEnvironment()->executeMigration($migration, $direction, $fake);
         $end = microtime(true);
 
         $this->printMigrationStatus(
@@ -490,11 +488,10 @@ class Manager
     /**
      * Execute a seeder against the specified environment.
      *
-     * @param string $name Environment Name
      * @param \Phinx\Seed\SeedInterface $seed Seed
      * @return void
      */
-    public function executeSeed(string $name, SeedInterface $seed): void
+    public function executeSeed(SeedInterface $seed): void
     {
         $this->getOutput()->writeln('', $this->verbosityLevel);
 
@@ -509,7 +506,7 @@ class Manager
 
         // Execute the seeder and log the time elapsed.
         $start = microtime(true);
-        $this->getEnvironment($name)->executeSeed($seed);
+        $this->getEnvironment()->executeSeed($seed);
         $end = microtime(true);
 
         $this->printSeedStatus(
@@ -574,20 +571,19 @@ class Manager
     /**
      * Rollback an environment to the specified version.
      *
-     * @param string $environment Environment
      * @param int|string|null $target Target
      * @param bool $force Force
      * @param bool $targetMustMatchVersion Target must match version
      * @param bool $fake Flag that if true, we just record running the migration, but not actually do the migration
      * @return void
      */
-    public function rollback(string $environment, int|string|null $target = null, bool $force = false, bool $targetMustMatchVersion = true, bool $fake = false): void
+    public function rollback(int|string|null $target = null, bool $force = false, bool $targetMustMatchVersion = true, bool $fake = false): void
     {
         // note that the migrations are indexed by name (aka creation time) in ascending order
-        $migrations = $this->getMigrations($environment);
+        $migrations = $this->getMigrations();
 
         // note that the version log are also indexed by name with the proper ascending order according to the version order
-        $executedVersions = $this->getEnvironment($environment)->getVersionLog();
+        $executedVersions = $this->getEnvironment()->getVersionLog();
 
         // get a list of migrations sorted in the opposite way of the executed versions
         $sortedMigrations = [];
@@ -675,7 +671,7 @@ class Manager
                     $this->getOutput()->writeln('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
                     break;
                 }
-                $this->executeMigration($environment, $migration, MigrationInterface::DOWN, $fake);
+                $this->executeMigration($migration, MigrationInterface::DOWN, $fake);
                 $rollbacked = true;
             }
         }
@@ -688,26 +684,25 @@ class Manager
     /**
      * Run database seeders against an environment.
      *
-     * @param string $environment Environment
      * @param string|null $seed Seeder
      * @throws \InvalidArgumentException
      * @return void
      */
-    public function seed(string $environment, ?string $seed = null): void
+    public function seed(?string $seed = null): void
     {
-        $seeds = $this->getSeeds($environment);
+        $seeds = $this->getSeeds();
 
         if ($seed === null) {
             // run all seeders
             foreach ($seeds as $seeder) {
                 if (array_key_exists($seeder->getName(), $seeds)) {
-                    $this->executeSeed($environment, $seeder);
+                    $this->executeSeed($seeder);
                 }
             }
         } else {
             // run only one seeder
             if (array_key_exists($seed, $seeds)) {
-                $this->executeSeed($environment, $seeds[$seed]);
+                $this->executeSeed($seeds[$seed]);
             } else {
                 throw new InvalidArgumentException(sprintf('The seed class "%s" does not exist', $seed));
             }
@@ -715,53 +710,41 @@ class Manager
     }
 
     /**
-     * Sets the environments.
-     *
-     * @param \Migrations\Migration\Environment[] $environments Environments
-     * @return $this
-     */
-    public function setEnvironments(array $environments = [])
-    {
-        $this->environments = $environments;
-
-        return $this;
-    }
-
-    /**
      * Gets the manager class for the given environment.
      *
-     * @param string $name Environment Name
      * @throws \InvalidArgumentException
      * @return \Migrations\Migration\Environment
      */
-    public function getEnvironment(string $name): Environment
+    public function getEnvironment(): Environment
     {
-        if (isset($this->environments[$name])) {
-            return $this->environments[$name];
+        if (isset($this->environment)) {
+            return $this->environment;
         }
 
         $config = $this->getConfig();
-        // check the environment exists
-        if ($config instanceof Config && !$config->hasEnvironment($name)) {
-            throw new InvalidArgumentException(sprintf(
-                'The environment "%s" does not exist',
-                $name
-            ));
-        }
-
         // create an environment instance and cache it
-        $envOptions = $config->getEnvironment($name);
+        $envOptions = $config->getEnvironment();
         $envOptions['version_order'] = $config->getVersionOrder();
-        if ($config instanceof Config) {
-            $envOptions['data_domain'] = $config->getDataDomain();
-        }
 
-        $environment = new Environment($name, $envOptions);
-        $this->environments[$name] = $environment;
+        $environment = new Environment('default', $envOptions);
         $environment->setInput($this->getInput());
         $environment->setOutput($this->getOutput());
+        $this->environment = $environment;
 
         return $environment;
+    }
+
+    /**
+     * Replace the environment
+     *
+     * @param \Migrations\Migration\Environment $environment
+     * @return $this
+     */
+    public function setEnvironment(Environment $environment)
+    {
+        $this->environment = $environment;
+
+        return $this;
     }
 
     /**
@@ -840,11 +823,10 @@ class Manager
      * Gets an array of the database migrations, indexed by migration name (aka creation time) and sorted in ascending
      * order
      *
-     * @param string $environment Environment
      * @throws \InvalidArgumentException
      * @return \Phinx\Migration\MigrationInterface[]
      */
-    public function getMigrations(string $environment): array
+    public function getMigrations(): array
     {
         if ($this->migrations === null) {
             $phpFiles = $this->getMigrationFiles();
@@ -878,14 +860,8 @@ class Manager
                         throw new InvalidArgumentException(sprintf('Duplicate migration - "%s" has the same version as "%s"', $filePath, $versions[$version]->getVersion()));
                     }
 
-                    $config = $this->getConfig();
-                    $namespace = null;
-                    if ($config instanceof Config) {
-                        $namespace = $config->getMigrationNamespaceByPath(dirname($filePath));
-                    }
-
                     // convert the filename to a class name
-                    $class = ($namespace === null ? '' : $namespace . '\\') . Util::mapFileNameToClassName(basename($filePath));
+                    $class = Util::mapFileNameToClassName(basename($filePath));
 
                     if (isset($fileNames[$class])) {
                         throw new InvalidArgumentException(sprintf(
@@ -920,7 +896,7 @@ class Manager
                     }
 
                     // instantiate it
-                    $migration = new $class($environment, $version, $this->getInput(), $this->getOutput());
+                    $migration = new $class('default', $version, $this->getInput(), $this->getOutput());
 
                     if (!($migration instanceof AbstractMigration)) {
                         throw new InvalidArgumentException(sprintf(
@@ -1014,11 +990,10 @@ class Manager
     /**
      * Gets an array of database seeders.
      *
-     * @param string $environment Environment
      * @throws \InvalidArgumentException
      * @return \Phinx\Seed\SeedInterface[]
      */
-    public function getSeeds(string $environment): array
+    public function getSeeds(): array
     {
         if ($this->seeds === null) {
             $phpFiles = $this->getSeedFiles();
@@ -1030,14 +1005,8 @@ class Manager
 
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidSeedFileName(basename($filePath))) {
-                    $config = $this->getConfig();
-                    $namespace = null;
-                    if ($config instanceof Config) {
-                        $namespace = $config->getSeedNamespaceByPath(dirname($filePath));
-                    }
-
                     // convert the filename to a class name
-                    $class = ($namespace === null ? '' : $namespace . '\\') . pathinfo($filePath, PATHINFO_FILENAME);
+                    $class = pathinfo($filePath, PATHINFO_FILENAME);
                     $fileNames[$class] = basename($filePath);
 
                     // load the seed file
@@ -1058,7 +1027,7 @@ class Manager
                     } else {
                         $seed = new $class();
                     }
-                    $seed->setEnvironment($environment);
+                    $seed->setEnvironment('default');
                     $input = $this->getInput();
                     $seed->setInput($input);
 
@@ -1133,27 +1102,25 @@ class Manager
     /**
      * Toggles the breakpoint for a specific version.
      *
-     * @param string $environment Environment name
      * @param int|null $version Version
      * @return void
      */
-    public function toggleBreakpoint(string $environment, ?int $version): void
+    public function toggleBreakpoint(?int $version): void
     {
-        $this->markBreakpoint($environment, $version, self::BREAKPOINT_TOGGLE);
+        $this->markBreakpoint($version, self::BREAKPOINT_TOGGLE);
     }
 
     /**
      * Updates the breakpoint for a specific version.
      *
-     * @param string $environment The required environment
      * @param int|null $version The version of the target migration
      * @param int $mark The state of the breakpoint as defined by self::BREAKPOINT_xxxx constants.
      * @return void
      */
-    protected function markBreakpoint(string $environment, ?int $version, int $mark): void
+    protected function markBreakpoint(?int $version, int $mark): void
     {
-        $migrations = $this->getMigrations($environment);
-        $env = $this->getEnvironment($environment);
+        $migrations = $this->getMigrations();
+        $env = $this->getEnvironment();
         $versions = $env->getVersionLog();
 
         if (empty($versions) || empty($migrations)) {
@@ -1202,39 +1169,36 @@ class Manager
     /**
      * Remove all breakpoints
      *
-     * @param string $environment The required environment
      * @return void
      */
-    public function removeBreakpoints(string $environment): void
+    public function removeBreakpoints(): void
     {
         $this->getOutput()->writeln(sprintf(
             ' %d breakpoints cleared.',
-            $this->getEnvironment($environment)->getAdapter()->resetAllBreakpoints()
+            $this->getEnvironment()->getAdapter()->resetAllBreakpoints()
         ));
     }
 
     /**
      * Set the breakpoint for a specific version.
      *
-     * @param string $environment The required environment
      * @param int|null $version The version of the target migration
      * @return void
      */
-    public function setBreakpoint(string $environment, ?int $version): void
+    public function setBreakpoint(?int $version): void
     {
-        $this->markBreakpoint($environment, $version, self::BREAKPOINT_SET);
+        $this->markBreakpoint($version, self::BREAKPOINT_SET);
     }
 
     /**
      * Unset the breakpoint for a specific version.
      *
-     * @param string $environment The required environment
      * @param int|null $version The version of the target migration
      * @return void
      */
-    public function unsetBreakpoint(string $environment, ?int $version): void
+    public function unsetBreakpoint(?int $version): void
     {
-        $this->markBreakpoint($environment, $version, self::BREAKPOINT_UNSET);
+        $this->markBreakpoint($version, self::BREAKPOINT_UNSET);
     }
 
     /**

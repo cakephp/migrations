@@ -29,6 +29,17 @@ abstract class AbstractConfigTestCase extends TestCase
      */
     public function getConfigArray()
     {
+        /** @var array<string, string> $connectionConfig */
+        $connectionConfig = ConnectionManager::getConfig('test');
+        $adapter = [
+            'migration_table' => 'phinxlog',
+            'adapter' => $connectionConfig['scheme'],
+            'user' => $connectionConfig['username'],
+            'pass' => $connectionConfig['password'],
+            'host' => $connectionConfig['host'],
+            'name' => $connectionConfig['database'],
+        ];
+
         return [
             'default' => [
                 'paths' => [
@@ -44,39 +55,30 @@ abstract class AbstractConfigTestCase extends TestCase
                 'file' => '%%PHINX_CONFIG_PATH%%/tpl/testtemplate.txt',
                 'class' => '%%PHINX_CONFIG_PATH%%/tpl/testtemplate.php',
             ],
-            'environments' => [
-                'default_migration_table' => 'phinxlog',
-                'default_environment' => 'testing',
-                'testing' => [
-                    'adapter' => 'sqllite',
-                    'wrapper' => 'testwrapper',
-                    'path' => '%%PHINX_CONFIG_PATH%%/testdb/test.db',
-                ],
-                'production' => [
-                    'adapter' => 'mysql',
-                ],
-            ],
-            'data_domain' => [
-                'phone_number' => [
-                    'type' => 'string',
-                    'null' => true,
-                    'length' => 15,
-                ],
-            ],
+            // TODO ideally we only need the connection and migration table name.
+            'environment' => $adapter,
         ];
     }
 
     public function getMigrationsConfigArray(): array
     {
+        /** @var array<string, string> $connectionConfig */
+        $connectionConfig = ConnectionManager::getConfig('test');
+        $adapter = [
+            'migration_table' => 'phinxlog',
+            'adapter' => $connectionConfig['scheme'],
+            'user' => $connectionConfig['username'],
+            'pass' => $connectionConfig['password'],
+            'host' => $connectionConfig['host'],
+            'name' => $connectionConfig['database'],
+        ];
+
         return [
             'paths' => [
                 'migrations' => $this->getMigrationPaths(),
                 'seeds' => $this->getSeedPaths(),
             ],
-            'environment' => [
-                'migration_table' => 'phinxlog',
-                'connection' => ConnectionManager::get('test'),
-            ],
+            'environment' => $adapter,
         ];
     }
 

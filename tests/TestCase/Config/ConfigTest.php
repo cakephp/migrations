@@ -15,102 +15,22 @@ use UnexpectedValueException;
 class ConfigTest extends AbstractConfigTestCase
 {
     /**
-     * @covers \Phinx\Config\Config::getEnvironments
-     */
-    public function testGetEnvironmentsMethod()
-    {
-        $config = new Config($this->getConfigArray());
-        $this->assertCount(2, $config->getEnvironments());
-        $this->assertArrayHasKey('testing', $config->getEnvironments());
-        $this->assertArrayHasKey('production', $config->getEnvironments());
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::hasEnvironment
-     */
-    public function testHasEnvironmentDoesntHave()
-    {
-        $config = new Config([]);
-        $this->assertFalse($config->hasEnvironment('dummy'));
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::hasEnvironment
-     */
-    public function testHasEnvironmentHasOne()
-    {
-        $config = new Config($this->getConfigArray());
-        $this->assertTrue($config->hasEnvironment('testing'));
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::getEnvironments
-     */
-    public function testGetEnvironmentsNotSet()
-    {
-        $config = new Config([]);
-        $this->assertNull($config->getEnvironments());
-    }
-
-    /**
      * @covers \Phinx\Config\Config::getEnvironment
      */
     public function testGetEnvironmentMethod()
     {
         $config = new Config($this->getConfigArray());
-        $db = $config->getEnvironment('testing');
-        $this->assertEquals('sqllite', $db['adapter']);
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::getEnvironment
-     */
-    public function testHasEnvironmentMethod()
-    {
-        $configArray = $this->getConfigArray();
-        $config = new Config($configArray);
-        $this->assertTrue($config->hasEnvironment('testing'));
-        $this->assertFalse($config->hasEnvironment('fakeenvironment'));
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::getDataDomain
-     */
-    public function testGetDataDomainMethod()
-    {
-        $config = new Config($this->getConfigArray());
-        $this->assertIsArray($config->getDataDomain());
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::getDataDomain
-     */
-    public function testReturnsEmptyArrayWithEmptyDataDomain()
-    {
-        $config = new Config([]);
-        $this->assertIsArray($config->getDataDomain());
-        $this->assertCount(0, $config->getDataDomain());
-    }
-
-    /**
-     * @covers \Phinx\Config\Config::getDefaultEnvironment
-     */
-    public function testGetDefaultEnvironmentUsingDatabaseKey()
-    {
-        $configArray = $this->getConfigArray();
-        $configArray['environments']['default_environment'] = 'production';
-        $config = new Config($configArray);
-        $this->assertEquals('production', $config->getDefaultEnvironment());
+        $db = $config->getEnvironment();
+        $this->assertArrayHasKey('adapter', $db);
     }
 
     public function testEnvironmentHasMigrationTable()
     {
         $configArray = $this->getConfigArray();
-        $configArray['environments']['production']['migration_table'] = 'test_table';
+        $configArray['environment']['migration_table'] = 'test_table';
         $config = new Config($configArray);
 
-        $this->assertSame('phinxlog', $config->getEnvironment('testing')['migration_table']);
-        $this->assertSame('test_table', $config->getEnvironment('production')['migration_table']);
+        $this->assertSame('test_table', $config->getEnvironment()['migration_table']);
     }
 
     /**
@@ -187,30 +107,6 @@ class ConfigTest extends AbstractConfigTestCase
         $config = new Config([]);
         $this->assertFalse($config->getTemplateFile());
         $this->assertFalse($config->getTemplateClass());
-    }
-
-    public function testGetAliasNoAliasesEntry()
-    {
-        $config = new Config([]);
-        $this->assertNull($config->getAlias('Short'));
-    }
-
-    public function testGetAliasEmptyAliasesEntry()
-    {
-        $config = new Config(['aliases' => []]);
-        $this->assertNull($config->getAlias('Short'));
-    }
-
-    public function testGetAliasInvalidAliasRequest()
-    {
-        $config = new Config(['aliases' => ['Medium' => 'Some\Long\Classname']]);
-        $this->assertNull($config->getAlias('Short'));
-    }
-
-    public function testGetAliasValidAliasRequest()
-    {
-        $config = new Config(['aliases' => ['Short' => 'Some\Long\Classname']]);
-        $this->assertEquals('Some\Long\Classname', $config->getAlias('Short'));
     }
 
     public function testGetSeedPath()
@@ -303,85 +199,6 @@ class ConfigTest extends AbstractConfigTestCase
                 Config::VERSION_ORDER_EXECUTION_TIME, false,
             ],
         ];
-    }
-
-    public function testConfigReplacesEnvironmentTokens()
-    {
-        $_SERVER['PHINX_TEST_CONFIG_ADAPTER'] = 'sqlite';
-        $_SERVER['PHINX_TEST_CONFIG_SUFFIX'] = 'sqlite3';
-        $_ENV['PHINX_TEST_CONFIG_NAME'] = 'phinx_testing';
-        $_ENV['PHINX_TEST_CONFIG_SUFFIX'] = 'foo';
-
-        try {
-            $config = new Config([
-                'environments' => [
-                    'production' => [
-                        'adapter' => '%%PHINX_TEST_CONFIG_ADAPTER%%',
-                        'name' => '%%PHINX_TEST_CONFIG_NAME%%',
-                        'suffix' => '%%PHINX_TEST_CONFIG_SUFFIX%%',
-                    ],
-                ],
-            ]);
-
-            $this->assertSame(
-                ['adapter' => 'sqlite', 'name' => 'phinx_testing', 'suffix' => 'sqlite3'],
-                $config->getEnvironment('production')
-            );
-        } finally {
-            unset($_SERVER['PHINX_TEST_CONFIG_ADAPTER']);
-            unset($_SERVER['PHINX_TEST_CONFIG_SUFFIX']);
-            unset($_ENV['PHINX_TEST_CONFIG_NAME']);
-            unset($_ENV['PHINX_TEST_CONFIG_SUFFIX']);
-        }
-    }
-
-    public function testSqliteMemorySetsName()
-    {
-        $config = new Config([
-            'environments' => [
-                'production' => [
-                    'adapter' => 'sqlite',
-                    'memory' => true,
-                ],
-            ],
-        ]);
-        $this->assertSame(
-            ['adapter' => 'sqlite', 'memory' => true, 'name' => ':memory:'],
-            $config->getEnvironment('production')
-        );
-    }
-
-    public function testSqliteMemoryOverridesName()
-    {
-        $config = new Config([
-            'environments' => [
-                'production' => [
-                    'adapter' => 'sqlite',
-                    'memory' => true,
-                    'name' => 'blah',
-                ],
-            ],
-        ]);
-        $this->assertSame(
-            ['adapter' => 'sqlite', 'memory' => true, 'name' => ':memory:'],
-            $config->getEnvironment('production')
-        );
-    }
-
-    public function testSqliteNonBooleanMemory()
-    {
-        $config = new Config([
-            'environments' => [
-                'production' => [
-                    'adapter' => 'sqlite',
-                    'memory' => 'yes',
-                ],
-            ],
-        ]);
-        $this->assertSame(
-            ['adapter' => 'sqlite', 'memory' => 'yes', 'name' => ':memory:'],
-            $config->getEnvironment('production')
-        );
     }
 
     public function testDefaultTemplateStyle(): void

@@ -136,6 +136,7 @@ class StatusCommand extends Command
             'pass' => $connectionConfig['password'],
             'host' => $connectionConfig['host'],
             'name' => $connectionConfig['database'],
+            'migration_table' => $table,
         ];
 
         $configData = [
@@ -146,10 +147,8 @@ class StatusCommand extends Command
                 'file' => $templatePath . 'Phinx/create.php.template',
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
-            'environments' => [
-                'default_migration_table' => $table,
-                'default' => $adapterConfig,
-            ],
+            'connection' => ConnectionManager::get($connectionName),
+            'environment' => $adapterConfig,
             // TODO do we want to support the DI container in migrations?
         ];
 
@@ -180,7 +179,7 @@ class StatusCommand extends Command
     {
         /** @var string|null $format */
         $format = $args->getOption('format');
-        $migrations = $this->getManager($args)->printStatus('default', $format);
+        $migrations = $this->getManager($args)->printStatus($format);
 
         switch ($format) {
             case 'json':

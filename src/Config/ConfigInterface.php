@@ -19,22 +19,14 @@ use Psr\Container\ContainerInterface;
 interface ConfigInterface extends ArrayAccess
 {
     /**
-     * Returns the configuration for a given environment.
+     * Returns the configuration for the current environment.
      *
      * This method returns <code>null</code> if the specified environment
      * doesn't exist.
      *
-     * @param string $name Environment Name
      * @return array|null
      */
-    public function getEnvironment(string $name): ?array;
-
-    /**
-     * Gets the config file path.
-     *
-     * @return string|null
-     */
-    public function getConfigFilePath(): ?string;
+    public function getEnvironment(): ?array;
 
     /**
      * Gets the paths to search for migration files.
