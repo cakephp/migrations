@@ -1005,8 +1005,6 @@ class Manager
 
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidSeedFileName(basename($filePath))) {
-                    $config = $this->getConfig();
-
                     // convert the filename to a class name
                     $class = pathinfo($filePath, PATHINFO_FILENAME);
                     $fileNames[$class] = basename($filePath);
