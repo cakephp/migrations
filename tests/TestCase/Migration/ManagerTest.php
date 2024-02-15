@@ -77,12 +77,14 @@ class ManagerTest extends TestCase
         /** @var array<string, string> $dbConfig */
         $dbConfig = ConnectionManager::getConfig('test');
         $config = [
+            'connection' => 'test',
+            'migration_table' => 'phinxlog',
+            // TODO all of these should go away.
             'adapter' => $dbConfig['scheme'],
-            'user' => $dbConfig['username'],
-            'pass' => $dbConfig['password'],
+            'user' => $dbConfig['username'] ?? null,
+            'pass' => $dbConfig['password'] ?? null,
             'host' => $dbConfig['host'],
             'name' => $dbConfig['database'],
-            'migration_table' => 'phinxlog',
         ];
 
         return [
@@ -124,6 +126,8 @@ class ManagerTest extends TestCase
         $connectionConfig = ConnectionManager::getConfig('test');
         $adapter = $connectionConfig['scheme'] ?? null;
         $adapterConfig = [
+            'connection' => 'test',
+            // TODO all of this should go away
             'adapter' => $adapter,
             'user' => $connectionConfig['username'],
             'pass' => $connectionConfig['password'],

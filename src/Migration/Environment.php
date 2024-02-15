@@ -8,12 +8,14 @@ declare(strict_types=1);
 
 namespace Migrations\Migration;
 
+use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PhinxAdapter;
 use PDO;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\SeedInterface;
+use ReflectionProperty;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -340,21 +342,24 @@ class Environment
         }
 
         $options = $this->getOptions();
-        if (isset($options['connection'])) {
-            if (!($options['connection'] instanceof PDO)) {
-                throw new RuntimeException('The specified connection is not a PDO instance');
-            }
+        if (!isset($options['connection'])) {
+            throw new RuntimeException('No connection defined');
+        }
+        $connection = ConnectionManager::get($options['connection']);
 
-            $options['connection']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $options['adapter'] = $options['connection']->getAttribute(PDO::ATTR_DRIVER_NAME);
-        }
-        if (!isset($options['adapter'])) {
-            throw new RuntimeException('No adapter was specified for environment: ' . $this->getName());
-        }
+        // TODO this needs a better API for it.
+        // Perhaps a Driver level method
+        $driver = $connection->getDriver();
+        $reflect = new ReflectionProperty($driver, 'pdo');
+        $reflect->setAccessible(true);
+        $pdo = $reflect->getValue($driver);
+        $driverName = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+
+        $options['connection'] = $connection;
 
         $factory = AdapterFactory::instance();
         $adapter = $factory
-            ->getAdapter($options['adapter'], $options);
+            ->getAdapter($driverName, $options);
 
         // Automatically time the executed commands
         $adapter = $factory->getWrapper('timed', $adapter);
@@ -375,14 +380,6 @@ class Environment
         if ($output) {
             $adapter->setOutput($output);
         }
-
-        // TODO remove this, cake connections don't do prefixes.
-        // Use the TablePrefixAdapter if table prefix/suffixes are in use
-        if ($adapter->hasOption('table_prefix') || $adapter->hasOption('table_suffix')) {
-            $adapter = AdapterFactory::instance()
-                ->getWrapper('prefix', $adapter);
-        }
-
         $this->setAdapter($adapter);
 
         return $adapter;

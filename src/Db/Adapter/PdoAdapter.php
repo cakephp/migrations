@@ -122,7 +122,17 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         parent::setOptions($options);
 
         if (isset($options['connection'])) {
-            $this->setConnection($options['connection']);
+            // TODO Change migrations adapters to use the Cake
+            // Database API instead of PDO.
+            $driver = $options['connection']->getDriver();
+
+            // TODO this is gross and needs to be replaced
+            $reflect = new ReflectionProperty($driver, 'pdo');
+            $reflect->setAccessible(true);
+            $pdo = $reflect->getValue($driver);
+
+            assert($pdo instanceof PDO, 'Need a PDO connection');
+            $this->setConnection($pdo);
         }
 
         return $this;
