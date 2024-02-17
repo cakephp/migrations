@@ -77,19 +77,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $this->options = $options;
 
-        if (isset($options['default_migration_table'])) {
-            trigger_error('The default_migration_table setting for adapter has been deprecated since 0.13.0. Use `migration_table` instead.', E_USER_DEPRECATED);
-            if (!isset($options['migration_table'])) {
-                $options['migration_table'] = $options['default_migration_table'];
-            }
-        }
-
         if (isset($options['migration_table'])) {
             $this->setSchemaTableName($options['migration_table']);
-        }
-
-        if (isset($options['data_domain'])) {
-            $this->setDataDomain($options['data_domain']);
         }
 
         return $this;
@@ -199,96 +188,13 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * Gets the data domain.
-     *
-     * @return array
-     */
-    public function getDataDomain(): array
-    {
-        return $this->dataDomain;
-    }
-
-    /**
-     * Sets the data domain.
-     *
-     * @param array $dataDomain Array for the data domain
-     * @return $this
-     */
-    public function setDataDomain(array $dataDomain)
-    {
-        $this->dataDomain = [];
-
-        // Iterate over data domain field definitions and perform initial and
-        // simple normalization. We make sure the definition as a base 'type'
-        // and it is compatible with the base Phinx types.
-        foreach ($dataDomain as $type => $options) {
-            if (!isset($options['type'])) {
-                throw new InvalidArgumentException(sprintf(
-                    'You must specify a type for data domain type "%s".',
-                    $type
-                ));
-            }
-
-            // Replace type if it's the name of a Phinx constant
-            if (defined('static::' . $options['type'])) {
-                $options['type'] = constant('static::' . $options['type']);
-            }
-
-            if (!in_array($options['type'], $this->getColumnTypes(), true)) {
-                throw new InvalidArgumentException(sprintf(
-                    'An invalid column type "%s" was specified for data domain type "%s".',
-                    $options['type'],
-                    $type
-                ));
-            }
-
-            $internal_type = $options['type'];
-            unset($options['type']);
-
-            // Do a simple replacement for the 'length' / 'limit' option and
-            // detect hinting values for 'limit'.
-            if (isset($options['length'])) {
-                $options['limit'] = $options['length'];
-                unset($options['length']);
-            }
-
-            if (isset($options['limit']) && !is_numeric($options['limit'])) {
-                if (!defined('static::' . $options['limit'])) {
-                    throw new InvalidArgumentException(sprintf(
-                        'An invalid limit value "%s" was specified for data domain type "%s".',
-                        $options['limit'],
-                        $type
-                    ));
-                }
-
-                $options['limit'] = constant('static::' . $options['limit']);
-            }
-
-            // Save the data domain types in a more suitable format
-            $this->dataDomain[$type] = [
-                'type' => $internal_type,
-                'options' => $options,
-            ];
-        }
-
-        return $this;
-    }
-
-    /**
      * @inheritdoc
      */
     public function getColumnForType(string $columnName, string $type, array $options): Column
     {
         $column = new Column();
         $column->setName($columnName);
-
-        if (array_key_exists($type, $this->getDataDomain())) {
-            $column->setType($this->dataDomain[$type]['type']);
-            $column->setOptions($this->dataDomain[$type]['options']);
-        } else {
-            $column->setType($type);
-        }
-
+        $column->setType($type);
         $column->setOptions($options);
 
         return $column;
