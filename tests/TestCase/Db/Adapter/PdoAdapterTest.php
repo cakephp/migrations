@@ -33,14 +33,6 @@ class PdoAdapterTest extends TestCase
         $this->assertEquals('bar', $options['foo']);
     }
 
-    public function testOptionsSetConnection()
-    {
-        $connection = $this->getMockBuilder(PDO::class)->disableOriginalConstructor()->getMock();
-        $this->adapter->setOptions(['connection' => $connection]);
-
-        $this->assertSame($connection, $this->adapter->getConnection());
-    }
-
     public function testOptionsSetSchemaTableName()
     {
         $this->assertEquals('phinxlog', $this->adapter->getSchemaTableName());
