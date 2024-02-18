@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Phinx\Migration;
 
+use Cake\Datasource\ConnectionManager;
+use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Db\Adapter\PdoAdapter;
 use Migrations\Migration\Environment;
 use Phinx\Migration\AbstractMigration;
@@ -67,6 +69,20 @@ class EnvironmentTest extends TestCase
         $this->expectExceptionMessage('The datasource configuration `lolnope` was not found');
 
         $this->environment->getAdapter();
+    }
+
+    public function testGetAdapter()
+    {
+        /** @var array<string, mixed> $config */
+        $config = ConnectionManager::getConfig('test');
+        $environment = new Environment('default', [
+            'connection' => 'test',
+            'name' => $config['database'],
+            'migration_table' => 'phinxlog',
+        ]);
+        $adapter = $environment->getAdapter();
+        $this->assertNotEmpty($adapter);
+        $this->assertInstanceOf(AdapterWrapper::class, $adapter);
     }
 
     public function testSchemaName()

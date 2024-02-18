@@ -347,13 +347,10 @@ class Environment
         }
         $connection = ConnectionManager::get($options['connection']);
 
-        // TODO this needs a better API for it.
-        // Perhaps a Driver level method
+        // Get the driver classname as those are aligned with adapter names.
         $driver = $connection->getDriver();
-        $reflect = new ReflectionProperty($driver, 'pdo');
-        $reflect->setAccessible(true);
-        $pdo = $reflect->getValue($driver);
-        $driverName = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $driverClass = get_class($driver);
+        $driverName = strtolower(substr($driverClass, strrpos($driverClass, '\\') + 1));
 
         $options['connection'] = $connection;
 
