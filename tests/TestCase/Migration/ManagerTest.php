@@ -140,7 +140,6 @@ class ManagerTest extends TestCase
 
         $adapter = $this->manager->getEnvironment()->getAdapter();
 
-
         // ensure the database is empty
         if ($adapterConfig['adapter'] === 'postgres') {
             $adapter->dropSchema('public');

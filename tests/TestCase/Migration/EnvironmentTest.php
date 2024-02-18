@@ -10,7 +10,6 @@ use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use stdClass;
 
 class EnvironmentTest extends TestCase
 {
@@ -48,7 +47,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setOptions(['adapter' => 'fakeadapter']);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Adapter "fakeadapter" has not been registered');
+        $this->expectExceptionMessage('No connection defined');
 
         $this->environment->getAdapter();
     }
@@ -60,12 +59,12 @@ class EnvironmentTest extends TestCase
         $this->environment->getAdapter();
     }
 
-    public function testGetAdapterWithBadExistingPdoInstance()
+    public function testGetAdapterWithBadConnectionName()
     {
-        $this->environment->setOptions(['connection' => new stdClass()]);
+        $this->environment->setOptions(['connection' => 'lolnope']);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('The specified connection is not a PDO instance');
+        $this->expectExceptionMessage('The datasource configuration `lolnope` was not found');
 
         $this->environment->getAdapter();
     }
