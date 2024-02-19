@@ -39,7 +39,7 @@ use PDO;
 use PDOException;
 use Phinx\Config\Config;
 use Phinx\Migration\MigrationInterface;
-use ReflectionProperty;
+use ReflectionMethod;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 use UnexpectedValueException;
@@ -50,14 +50,9 @@ use UnexpectedValueException;
 abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterface
 {
     /**
-     * @var \PDO|null
-     */
-    protected ?PDO $connection = null;
-
-    /**
      * @var \Cake\Database\Connection|null
      */
-    protected ?Connection $decoratedConnection = null;
+    protected ?Connection $connection = null;
 
     /**
      * Writes a message to stdout if verbose output is on
@@ -121,18 +116,9 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     {
         parent::setOptions($options);
 
-        if (isset($options['connection'])) {
-            // TODO Change migrations adapters to use the Cake
-            // Database API instead of PDO.
-            $driver = $options['connection']->getDriver();
-
-            // TODO this is gross and needs to be replaced
-            $reflect = new ReflectionProperty($driver, 'pdo');
-            $reflect->setAccessible(true);
-            $pdo = $reflect->getValue($driver);
-
-            assert($pdo instanceof PDO, 'Need a PDO connection');
-            $this->setConnection($pdo);
+        // TODO: Consider renaming this class to ConnectionAdapter
+        if (isset($options['connection']) && $options['connection'] instanceof Connection) {
+            $this->setConnection($options['connection']);
         }
 
         return $this;
@@ -141,11 +127,13 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     /**
      * Sets the database connection.
      *
-     * @param \PDO $connection Connection
+     * @param \Cake\Database\Connection $connection Connection
      * @return \Migrations\Db\Adapter\AdapterInterface
      */
-    public function setConnection(PDO $connection): AdapterInterface
+    public function setConnection(Connection $connection): AdapterInterface
     {
+        // TODO how do PDO connection flags get set? Phinx used to
+        // turn on exception error mode, and I don't think Cake does that by default.
         $this->connection = $connection;
 
         // Create the schema table if it doesn't already exist
@@ -175,15 +163,16 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     /**
      * Gets the database connection
      *
-     * @return \PDO
+     * @return \Cake\Database\Connection
      */
-    public function getConnection(): PDO
+    public function getConnection(): Connection
     {
         if ($this->connection === null) {
+            $this->connection = $this->getOption('connection');
             $this->connect();
         }
 
-        /** @var \PDO $this->connection */
+        /** @var \Cake\Database\Connection $this->connection */
         return $this->connection;
     }
 
@@ -209,25 +198,16 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             return 0;
         }
 
+        $connection = $this->getConnection();
         if (empty($params)) {
-            $result = $this->getConnection()->exec($sql);
+            $result = $connection->execute($sql);
 
-            return is_int($result) ? $result : 0;
+            return $result->rowCount();
         }
+        $stmt = $connection->execute($sql, $params);
 
-        $stmt = $this->getConnection()->prepare($sql);
-        $result = $stmt->execute($params);
-
-        return $result ? $stmt->rowCount() : 0;
+        return $stmt->rowCount();
     }
-
-    /**
-     * Returns the Cake\Database connection object using the same underlying
-     * PDO object as this connection.
-     *
-     * @return \Cake\Database\Connection
-     */
-    abstract public function getDecoratedConnection(): Connection;
 
     /**
      * Build connection instance.
@@ -251,10 +231,10 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     public function getQueryBuilder(string $type): Query
     {
         return match ($type) {
-            Query::TYPE_SELECT => $this->getDecoratedConnection()->selectQuery(),
-            Query::TYPE_INSERT => $this->getDecoratedConnection()->insertQuery(),
-            Query::TYPE_UPDATE => $this->getDecoratedConnection()->updateQuery(),
-            Query::TYPE_DELETE => $this->getDecoratedConnection()->deleteQuery(),
+            Query::TYPE_SELECT => $this->getConnection()->selectQuery(),
+            Query::TYPE_INSERT => $this->getConnection()->insertQuery(),
+            Query::TYPE_UPDATE => $this->getConnection()->updateQuery(),
+            Query::TYPE_DELETE => $this->getConnection()->deleteQuery(),
             default => throw new InvalidArgumentException(
                 'Query type must be one of: `select`, `insert`, `update`, `delete`.'
             )
@@ -266,7 +246,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function getSelectBuilder(): SelectQuery
     {
-        return $this->getDecoratedConnection()->selectQuery();
+        return $this->getConnection()->selectQuery();
     }
 
     /**
@@ -274,7 +254,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function getInsertBuilder(): InsertQuery
     {
-        return $this->getDecoratedConnection()->insertQuery();
+        return $this->getConnection()->insertQuery();
     }
 
     /**
@@ -282,7 +262,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function getUpdateBuilder(): UpdateQuery
     {
-        return $this->getDecoratedConnection()->updateQuery();
+        return $this->getConnection()->updateQuery();
     }
 
     /**
@@ -290,24 +270,18 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function getDeleteBuilder(): DeleteQuery
     {
-        return $this->getDecoratedConnection()->deleteQuery();
+        return $this->getConnection()->deleteQuery();
     }
 
     /**
      * Executes a query and returns PDOStatement.
      *
      * @param string $sql SQL
-     * @return mixed
+     * @return \Cake\Database\StatementInterface
      */
     public function query(string $sql, array $params = []): mixed
     {
-        if (empty($params)) {
-            return $this->getConnection()->query($sql);
-        }
-        $stmt = $this->getConnection()->prepare($sql);
-        $result = $stmt->execute($params);
-
-        return $result ? $stmt : false;
+        return $this->getConnection()->execute($sql, $params);
     }
 
     /**
@@ -315,7 +289,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function fetchRow(string $sql): array|false
     {
-        return $this->query($sql)->fetch();
+        return $this->getConnection()->execute($sql)->fetch('assoc');
     }
 
     /**
@@ -323,7 +297,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function fetchAll(string $sql): array
     {
-        return $this->query($sql)->fetchAll();
+        return $this->getConnection()->execute($sql)->fetchAll('assoc');
     }
 
     /**
@@ -349,8 +323,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             $this->output->writeln($sql);
         } else {
             $sql .= ' VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-            $stmt = $this->getConnection()->prepare($sql);
-            $stmt->execute(array_values($row));
+            $this->getConnection()->execute($sql, array_values($row));
         }
     }
 
@@ -369,8 +342,12 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         if ($value === null) {
             return 'null';
         }
+        // TODO remove hacks like this by using cake's database layer better.
+        $driver = $this->getConnection()->getDriver();
+        $method = new ReflectionMethod($driver, 'getPdo');
+        $method->setAccessible(true);
 
-        return $this->getConnection()->quote($value);
+        return $method->invoke($driver)->quote($value);
     }
 
     /**
@@ -381,7 +358,12 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     protected function quoteString(string $value): string
     {
-        return $this->getConnection()->quote($value);
+        // TODO remove hacks like this by using cake's database layer better.
+        $driver = $this->getConnection()->getDriver();
+        $method = new ReflectionMethod($driver, 'getPdo');
+        $method->setAccessible(true);
+
+        return $method->invoke($driver)->quote($value);
     }
 
     /**
@@ -411,7 +393,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             $count_vars = count($rows);
             $queries = array_fill(0, $count_vars, $query);
             $sql .= implode(',', $queries);
-            $stmt = $this->getConnection()->prepare($sql);
             $vals = [];
 
             foreach ($rows as $row) {
@@ -423,8 +404,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                     }
                 }
             }
-
-            $stmt->execute($vals);
+            $this->getConnection()->execute($sql, $vals);
         }
     }
 
@@ -684,7 +664,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             $default = (string)$default;
         } elseif (is_string($default) && stripos($default, 'CURRENT_TIMESTAMP') !== 0) {
             // Ensure a defaults of CURRENT_TIMESTAMP(3) is not quoted.
-            $default = $this->getConnection()->quote($default);
+            $default = $this->quoteString($default);
         } elseif (is_bool($default)) {
             $default = $this->castToBool($default);
         } elseif ($default !== null && $columnType === static::PHINX_TYPE_BOOLEAN) {

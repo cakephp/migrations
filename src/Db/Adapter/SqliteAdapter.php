@@ -131,7 +131,7 @@ class SqliteAdapter extends PdoAdapter
      */
     public function databaseVersionAtLeast(string $ver): bool
     {
-        $actual = $this->query('SELECT sqlite_version()')->fetchColumn();
+        $actual = $this->query('SELECT sqlite_version()')->fetchColumn(0);
 
         return version_compare($actual, $ver, '>=');
     }
@@ -145,53 +145,8 @@ class SqliteAdapter extends PdoAdapter
      */
     public function connect(): void
     {
-        if ($this->connection === null) {
-            if (!class_exists('PDO') || !in_array('sqlite', PDO::getAvailableDrivers(), true)) {
-                // @codeCoverageIgnoreStart
-                throw new RuntimeException('You need to enable the PDO_SQLITE extension for Migrations to run properly.');
-                // @codeCoverageIgnoreEnd
-            }
-
-            $options = $this->getOptions();
-
-            if (PHP_VERSION_ID < 80100 && (!empty($options['mode']) || !empty($options['cache']))) {
-                throw new RuntimeException('SQLite URI support requires PHP 8.1.');
-            } elseif ((!empty($options['mode']) || !empty($options['cache'])) && !empty($options['memory'])) {
-                throw new RuntimeException('Memory must not be set when cache or mode are.');
-            } elseif (PHP_VERSION_ID >= 80100 && (!empty($options['mode']) || !empty($options['cache']))) {
-                $params = [];
-                if (!empty($options['cache'])) {
-                    $params[] = 'cache=' . $options['cache'];
-                }
-                if (!empty($options['mode'])) {
-                    $params[] = 'mode=' . $options['mode'];
-                }
-                $dsn = 'sqlite:file:' . ($options['name'] ?? '') . '?' . implode('&', $params);
-            } else {
-                // use a memory database if the option was specified
-                if (!empty($options['memory']) || $options['name'] === static::MEMORY) {
-                    $dsn = 'sqlite:' . static::MEMORY;
-                } else {
-                    $dsn = 'sqlite:' . $options['name'] . $this->suffix;
-                }
-            }
-
-            $driverOptions = [];
-
-            // use custom data fetch mode
-            if (!empty($options['fetch_mode'])) {
-                $driverOptions[PDO::ATTR_DEFAULT_FETCH_MODE] = constant('\PDO::FETCH_' . strtoupper($options['fetch_mode']));
-            }
-
-            // pass \PDO::ATTR_PERSISTENT to driver options instead of useless setting it after instantiation
-            if (isset($options['attr_persistent'])) {
-                $driverOptions[PDO::ATTR_PERSISTENT] = $options['attr_persistent'];
-            }
-
-            $db = $this->createPdoConnection($dsn, null, null, $driverOptions);
-
-            $this->setConnection($db);
-        }
+        $this->getConnection()->getDriver()->connect();
+        $this->setConnection($this->getConnection());
     }
 
     /**
@@ -218,7 +173,7 @@ class SqliteAdapter extends PdoAdapter
      */
     public function disconnect(): void
     {
-        $this->connection = null;
+        $this->getConnection()->getDriver()->disconnect();
     }
 
     /**
@@ -234,7 +189,7 @@ class SqliteAdapter extends PdoAdapter
      */
     public function beginTransaction(): void
     {
-        $this->getConnection()->beginTransaction();
+        $this->getConnection()->begin();
     }
 
     /**
@@ -1018,7 +973,7 @@ PCRE_PATTERN;
                     "SELECT name FROM sqlite_master WHERE type = 'table' AND name != ?",
                     [$tableName]
                 )
-                ->fetchAll();
+                ->fetchAll('assoc');
 
             foreach ($otherTables as $otherTable) {
                 $foreignKeyList = $this->getTableInfo($otherTable['name'], 'foreign_key_list');
@@ -1967,28 +1922,5 @@ PCRE_PATTERN;
         }
 
         return $def;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDecoratedConnection(): Connection
-    {
-        if (isset($this->decoratedConnection)) {
-            return $this->decoratedConnection;
-        }
-
-        $options = $this->getOptions();
-        $options['quoteIdentifiers'] = true;
-
-        if (!empty($options['name'])) {
-            $options['database'] = $options['name'];
-
-            if (file_exists($options['name'] . $this->suffix)) {
-                $options['database'] = $options['name'] . $this->suffix;
-            }
-        }
-
-        return $this->decoratedConnection = $this->buildConnection(SqliteDriver::class, $options);
     }
 }
