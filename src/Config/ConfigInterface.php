@@ -43,6 +43,13 @@ interface ConfigInterface extends ArrayAccess
     public function getSeedPaths(): array;
 
     /**
+     * Get the connection namee
+     *
+     * @return string|false
+     */
+    public function getConnection(): string|false;
+
+    /**
      * Get the template file name.
      *
      * @return string|false

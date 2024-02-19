@@ -111,6 +111,14 @@ class Config implements ConfigInterface
     /**
      * @inheritdoc
      */
+    public function getConnection(): string|false
+    {
+        return $this->values['connection'] ?? false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getTemplateFile(): string|false
     {
         if (!isset($this->values['templates']['file'])) {

@@ -137,6 +137,7 @@ class StatusCommand extends Command
             'host' => $connectionConfig['host'],
             'name' => $connectionConfig['database'],
             'migration_table' => $table,
+            'connection' => $connectionName,
         ];
 
         $configData = [
@@ -147,7 +148,6 @@ class StatusCommand extends Command
                 'file' => $templatePath . 'Phinx/create.php.template',
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
-            'connection' => ConnectionManager::get($connectionName),
             'environment' => $adapterConfig,
             // TODO do we want to support the DI container in migrations?
         ];

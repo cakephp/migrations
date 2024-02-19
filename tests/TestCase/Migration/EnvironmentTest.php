@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Phinx\Migration;
 
+use Cake\Datasource\ConnectionManager;
+use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Db\Adapter\PdoAdapter;
 use Migrations\Migration\Environment;
 use Phinx\Migration\AbstractMigration;
@@ -10,7 +12,6 @@ use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use stdClass;
 
 class EnvironmentTest extends TestCase
 {
@@ -48,7 +49,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setOptions(['adapter' => 'fakeadapter']);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Adapter "fakeadapter" has not been registered');
+        $this->expectExceptionMessage('No connection defined');
 
         $this->environment->getAdapter();
     }
@@ -60,14 +61,28 @@ class EnvironmentTest extends TestCase
         $this->environment->getAdapter();
     }
 
-    public function testGetAdapterWithBadExistingPdoInstance()
+    public function testGetAdapterWithBadConnectionName()
     {
-        $this->environment->setOptions(['connection' => new stdClass()]);
+        $this->environment->setOptions(['connection' => 'lolnope']);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('The specified connection is not a PDO instance');
+        $this->expectExceptionMessage('The datasource configuration `lolnope` was not found');
 
         $this->environment->getAdapter();
+    }
+
+    public function testGetAdapter()
+    {
+        /** @var array<string, mixed> $config */
+        $config = ConnectionManager::getConfig('test');
+        $environment = new Environment('default', [
+            'connection' => 'test',
+            'name' => $config['database'],
+            'migration_table' => 'phinxlog',
+        ]);
+        $adapter = $environment->getAdapter();
+        $this->assertNotEmpty($adapter);
+        $this->assertInstanceOf(AdapterWrapper::class, $adapter);
     }
 
     public function testSchemaName()
