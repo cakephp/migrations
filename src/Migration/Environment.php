@@ -343,12 +343,15 @@ class Environment
         if (!isset($options['connection'])) {
             throw new RuntimeException('No connection defined');
         }
+        // TODO Start here again. Goal is to have Connection go into
+        // AdapterFactory to choose the adapter.
+        // Adapters should use Connection API instead of PDO.
         $connection = ConnectionManager::get($options['connection']);
 
         // Get the driver classname as those are aligned with adapter names.
         $driver = $connection->getDriver();
         $driverClass = get_class($driver);
-        $driverName = strtolower(substr($driverClass, strrpos($driverClass, '\\') + 1));
+        $driverName = strtolower(substr($driverClass, (int)strrpos($driverClass, '\\') + 1));
 
         $options['connection'] = $connection;
 
