@@ -102,63 +102,15 @@ class MysqlAdapter extends PdoAdapter
      */
     public function connect(): void
     {
-        if ($this->connection === null) {
-            if (!class_exists('PDO') || !in_array('mysql', PDO::getAvailableDrivers(), true)) {
-                // @codeCoverageIgnoreStart
-                throw new RuntimeException('You need to enable the PDO_Mysql extension for Phinx to run properly.');
-                // @codeCoverageIgnoreEnd
-            }
+        $this->getConnection()->getDriver()->connect();
+        $this->setConnection($this->getConnection());
+    }
 
-            $options = $this->getOptions();
+    public function setConnection(Connection $connection): AdapterInterface
+    {
+        $connection->execute(sprintf("USE %s", $this->getOption('database')));
 
-            $dsn = 'mysql:';
-
-            if (!empty($options['unix_socket'])) {
-                // use socket connection
-                $dsn .= 'unix_socket=' . $options['unix_socket'];
-            } else {
-                // use network connection
-                $dsn .= 'host=' . $options['host'];
-                if (!empty($options['port'])) {
-                    $dsn .= ';port=' . $options['port'];
-                }
-            }
-
-            $dsn .= ';dbname=' . $options['name'];
-
-            // charset support
-            if (!empty($options['charset'])) {
-                $dsn .= ';charset=' . $options['charset'];
-            }
-
-            $driverOptions = [];
-
-            // use custom data fetch mode
-            if (!empty($options['fetch_mode'])) {
-                $driverOptions[PDO::ATTR_DEFAULT_FETCH_MODE] = constant('\PDO::FETCH_' . strtoupper($options['fetch_mode']));
-            }
-
-            // pass \PDO::ATTR_PERSISTENT to driver options instead of useless setting it after instantiation
-            if (isset($options['attr_persistent'])) {
-                $driverOptions[PDO::ATTR_PERSISTENT] = $options['attr_persistent'];
-            }
-
-            // support arbitrary \PDO::MYSQL_ATTR_* driver options and pass them to PDO
-            // https://php.net/manual/en/ref.pdo-mysql.php#pdo-mysql.constants
-            foreach ($options as $key => $option) {
-                if (strpos($key, 'mysql_attr_') === 0) {
-                    $pdoConstant = '\PDO::' . strtoupper($key);
-                    if (!defined($pdoConstant)) {
-                        throw new UnexpectedValueException('Invalid PDO attribute: ' . $key . ' (' . $pdoConstant . ')');
-                    }
-                    $driverOptions[constant($pdoConstant)] = $option;
-                }
-            }
-
-            $db = $this->createPdoConnection($dsn, $options['user'] ?? null, $options['pass'] ?? null, $driverOptions);
-
-            $this->setConnection($db);
-        }
+        return parent::setConnection($connection);
     }
 
     /**
@@ -166,7 +118,7 @@ class MysqlAdapter extends PdoAdapter
      */
     public function disconnect(): void
     {
-        $this->connection = null;
+        $this->getConnection()->getDriver()->disconnect();
     }
 
     /**
@@ -182,7 +134,7 @@ class MysqlAdapter extends PdoAdapter
      */
     public function beginTransaction(): void
     {
-        $this->execute('START TRANSACTION');
+        $this->getConnection()->begin();
     }
 
     /**
@@ -190,7 +142,7 @@ class MysqlAdapter extends PdoAdapter
      */
     public function commitTransaction(): void
     {
-        $this->execute('COMMIT');
+        $this->getConnection()->commit();
     }
 
     /**
@@ -198,7 +150,7 @@ class MysqlAdapter extends PdoAdapter
      */
     public function rollbackTransaction(): void
     {
-        $this->execute('ROLLBACK');
+        $this->getConnection()->rollback();
     }
 
     /**
@@ -237,7 +189,7 @@ class MysqlAdapter extends PdoAdapter
 
         $options = $this->getOptions();
 
-        return $this->hasTableWithSchema($options['name'], $tableName);
+        return $this->hasTableWithSchema($options['database'], $tableName);
     }
 
     /**
@@ -318,7 +270,7 @@ class MysqlAdapter extends PdoAdapter
 
         // set the table comment
         if (isset($options['comment'])) {
-            $optionsStr .= sprintf(' COMMENT=%s ', $this->getConnection()->quote($options['comment']));
+            $optionsStr .= sprintf(' COMMENT=%s ', $this->quoteString($options['comment']));
         }
 
         // set the table row format
@@ -406,7 +358,7 @@ class MysqlAdapter extends PdoAdapter
 
         // passing 'null' is to remove table comment
         $newComment = $newComment ?? '';
-        $sql = sprintf(' COMMENT=%s ', $this->getConnection()->quote($newComment));
+        $sql = sprintf(' COMMENT=%s ', $this->quoteString($newComment));
         $instructions->addAlter($sql);
 
         return $instructions;
@@ -797,7 +749,7 @@ class MysqlAdapter extends PdoAdapter
             WHERE t.CONSTRAINT_TYPE='PRIMARY KEY'
                 AND t.TABLE_SCHEMA='%s'
                 AND t.TABLE_NAME='%s'",
-            $options['name'],
+            $options['database'],
             $tableName
         ));
 
@@ -1298,6 +1250,7 @@ class MysqlAdapter extends PdoAdapter
         } else {
             $this->execute(sprintf('CREATE DATABASE `%s` DEFAULT CHARACTER SET `%s`', $name, $charset));
         }
+        $this->execute(sprintf("USE %s", $name));
     }
 
     /**
@@ -1356,7 +1309,7 @@ class MysqlAdapter extends PdoAdapter
                 // we special case NULL as it's not actually allowed an enum value,
                 // and we want MySQL to issue an error on the create statement, but
                 // quote coerces it to an empty string, which will not error
-                return $value === null ? 'NULL' : $this->getConnection()->quote($value);
+                return $value === null ? 'NULL' : $this->quoteString($value);
             }, $values)) . ')';
         }
 
@@ -1365,8 +1318,10 @@ class MysqlAdapter extends PdoAdapter
         $def .= !$column->isSigned() && isset($this->signedColumnTypes[(string)$column->getType()]) ? ' unsigned' : '';
         $def .= $column->isNull() ? ' NULL' : ' NOT NULL';
 
+        $connection = $this->getConnection();
+        $version = $connection->getDriver()->version();
         if (
-            version_compare($this->getAttribute(PDO::ATTR_SERVER_VERSION), '8', '>=')
+            version_compare($version, '8', '>=')
             && in_array($column->getType(), static::PHINX_TYPES_GEOSPATIAL)
             && !is_null($column->getSrid())
         ) {
@@ -1378,7 +1333,7 @@ class MysqlAdapter extends PdoAdapter
         $default = $column->getDefault();
         // MySQL 8 supports setting default for the following tested types, but only if they are "cast as expressions"
         if (
-            version_compare($this->getAttribute(PDO::ATTR_SERVER_VERSION), '8', '>=') &&
+            version_compare($version, '8', '>=') &&
             is_string($default) &&
             in_array(
                 $column->getType(),
@@ -1388,12 +1343,12 @@ class MysqlAdapter extends PdoAdapter
                 )
             )
         ) {
-            $default = Literal::from('(' . $this->getConnection()->quote($column->getDefault()) . ')');
+            $default = Literal::from('(' . $this->quoteString($column->getDefault()) . ')');
         }
         $def .= $this->getDefaultValueDefinition($default, (string)$column->getType());
 
         if ($column->getComment()) {
-            $def .= ' COMMENT ' . $this->getConnection()->quote((string)$column->getComment());
+            $def .= ' COMMENT ' . $this->quoteString((string)$column->getComment());
         }
 
         if ($column->getUpdate()) {
@@ -1508,7 +1463,7 @@ class MysqlAdapter extends PdoAdapter
              FROM information_schema.tables
              WHERE table_schema = '%s'
              AND table_name = '%s'",
-            $options['name'],
+            $options['database'],
             $tableName
         );
 
@@ -1525,25 +1480,5 @@ class MysqlAdapter extends PdoAdapter
     public function getColumnTypes(): array
     {
         return array_merge(parent::getColumnTypes(), static::$specificColumnTypes);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDecoratedConnection(): Connection
-    {
-        if (isset($this->decoratedConnection)) {
-            return $this->decoratedConnection;
-        }
-
-        $options = $this->getOptions();
-        $options = [
-            'username' => $options['user'] ?? null,
-            'password' => $options['pass'] ?? null,
-            'database' => $options['name'],
-            'quoteIdentifiers' => true,
-        ] + $options;
-
-        return $this->decoratedConnection = $this->buildConnection(MysqlDriver::class, $options);
     }
 }
