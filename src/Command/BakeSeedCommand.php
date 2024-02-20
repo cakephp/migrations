@@ -101,7 +101,7 @@ class BakeSeedCommand extends SimpleBakeCommand
             $namespace = $this->_pluginNamespace($this->plugin);
         }
 
-        $table = Inflector::tableize((string)$arguments->getArgumentAt(0));
+        $table = Inflector::underscore((string)$arguments->getArgumentAt(0));
         if ($arguments->hasOption('table')) {
             /** @var string $table */
             $table = $arguments->getOption('table');
