@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
@@ -59,11 +60,9 @@ class PostgresAdapterTest extends TestCase
 
         // Emulate the results of Util::parseDsn()
         $this->config = [
-            'adapter' => $config['scheme'],
-            'user' => $config['username'],
-            'pass' => $config['password'],
-            'host' => $config['host'],
-            'name' => $config['database'],
+            'adapter' => 'postgres',
+            'connection' => ConnectionManager::get('test'),
+            'database' => $config['database'],
         ];
 
         if (!self::isPostgresAvailable()) {
@@ -94,62 +93,14 @@ class PostgresAdapterTest extends TestCase
 
     private function usingPostgres10(): bool
     {
-        return version_compare($this->adapter->getConnection()->getAttribute(PDO::ATTR_SERVER_VERSION), '10.0.0', '>=');
+        $version = $this->adapter->getConnection()->getDriver()->version();
+
+        return version_compare($version, '10.0.0', '>=');
     }
 
     public function testConnection()
     {
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::ERRMODE_EXCEPTION, $this->adapter->getConnection()->getAttribute(PDO::ATTR_ERRMODE));
-    }
-
-    public function testConnectionWithFetchMode()
-    {
-        $options = $this->adapter->getOptions();
-        $options['fetch_mode'] = 'assoc';
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::FETCH_ASSOC, $this->adapter->getConnection()->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
-    }
-
-    public function testConnectionWithoutPort()
-    {
-        $options = $this->adapter->getOptions();
-        unset($options['port']);
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-    }
-
-    public function testConnectionWithInvalidCredentials()
-    {
-        $options = ['user' => 'invalidu', 'pass' => 'invalid'] + $this->config;
-
-        try {
-            $adapter = new PostgresAdapter($options, new ArrayInput([]), new NullOutput());
-            $adapter->connect();
-            $this->fail('Expected the adapter to throw an exception');
-        } catch (InvalidArgumentException $e) {
-            $this->assertInstanceOf(
-                'InvalidArgumentException',
-                $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
-            );
-            $this->assertStringContainsString('There was a problem connecting to the database', $e->getMessage());
-        }
-    }
-
-    public function testConnectionWithSocketConnection()
-    {
-        if (!getenv('POSTGRES_TEST_SOCKETS')) {
-            $this->markTestSkipped('Postgres socket connection skipped.');
-        }
-
-        $options = $this->config;
-        unset($options['host']);
-        $adapter = new PostgresAdapter($options, new ArrayInput([]), new NullOutput());
-        $adapter->connect();
-
-        $this->assertInstanceOf('\PDO', $this->adapter->getConnection());
+        $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
     public function testCreatingTheSchemaTableOnConnect()
@@ -770,7 +721,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
             AND cols.column_name = \'email\''
         );
@@ -1733,8 +1684,8 @@ class PostgresAdapterTest extends TestCase
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
-        $conn->exec($tableDef);
+        $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
+        $conn->execute($tableDef);
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
@@ -1824,7 +1775,7 @@ class PostgresAdapterTest extends TestCase
     public function testHasDatabase()
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
-        $this->assertTrue($this->adapter->hasDatabase($this->config['name']));
+        $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
     public function testDropDatabase()
@@ -1946,7 +1897,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
             AND cols.column_name = \'field1\''
         );
@@ -1966,7 +1917,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'user\'
             AND cols.column_name = \'index\''
         );
@@ -1999,7 +1950,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
             AND cols.column_name = \'field1\''
         );
@@ -2025,7 +1976,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
             AND cols.column_name = \'field1\''
         );
@@ -2053,7 +2004,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
             AND cols.column_name = \'comment1\''
         );
@@ -2066,7 +2017,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
             AND cols.column_name = \'comment2\''
         );
@@ -2095,7 +2046,7 @@ class PostgresAdapterTest extends TestCase
             from pg_catalog.pg_class c
             where c.relname=cols.table_name ) as column_comment
             FROM information_schema.columns cols
-            WHERE cols.table_catalog=\'' . $this->config['name'] . '\'
+            WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'widgets\'
             AND cols.column_name = \'transport\''
         );
@@ -2546,7 +2497,7 @@ OUTPUT;
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(0, $res[0]['count']);
     }
 
@@ -2598,7 +2549,7 @@ OUTPUT;
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(0, $res[0]['count']);
     }
 
@@ -2635,29 +2586,6 @@ OUTPUT;
 
         $actualOutput = $consoleOutput->fetch();
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
-    }
-
-    public function testDumpTransaction()
-    {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
-        $this->adapter->beginTransaction();
-        $table = new Table('schema1.table1', [], $this->adapter);
-
-        $table->addColumn('column1', 'string')
-            ->addColumn('column2', 'integer')
-            ->addColumn('column3', 'string', ['default' => 'test'])
-            ->save();
-        $this->adapter->commitTransaction();
-        $this->adapter->rollbackTransaction();
-
-        $actualOutput = $consoleOutput->fetch();
-        $this->assertStringStartsWith("BEGIN;\n", $actualOutput, 'Passing the --dry-run doesn\'t dump the transaction to the output');
-        $this->assertStringEndsWith("COMMIT;\nROLLBACK;\n", $actualOutput, 'Passing the --dry-run doesn\'t dump the transaction to the output');
     }
 
     /**
@@ -2723,13 +2651,13 @@ OUTPUT;
         ]);
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) AS c FROM table1 WHERE int_col > ?', [5]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(2, $res[0]['c']);
 
         $this->adapter->execute('UPDATE table1 SET int_col = ? WHERE int_col IS NULL', [12]);
 
         $countQuery->execute([1]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
     }
 
@@ -2777,25 +2705,5 @@ OUTPUT;
         $column = $columns[0];
         $this->assertSame($columnType, $column->getType());
         $this->assertSame("nextval('test_id_seq'::regclass)", (string)$column->getDefault());
-    }
-
-    public function testInvalidPdoAttribute()
-    {
-        $adapter = new PostgresAdapter($this->config + ['attr_invalid' => true]);
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Invalid PDO attribute: attr_invalid (\PDO::ATTR_INVALID)');
-        $adapter->connect();
-    }
-
-    public function testPdoPersistentConnection()
-    {
-        $adapter = new PostgresAdapter($this->config + ['attr_persistent' => true]);
-        $this->assertTrue($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
-    }
-
-    public function testPdoNotPersistentConnection()
-    {
-        $adapter = new PostgresAdapter($this->config);
-        $this->assertFalse($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
     }
 }
