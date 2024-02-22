@@ -199,15 +199,15 @@ class MysqlAdapter extends PdoAdapter
      */
     protected function hasTableWithSchema(string $schema, string $tableName): bool
     {
-        $result = $this->fetchRow(sprintf(
+        $connection = $this->getConnection();
+        $result = $connection->execute(
             "SELECT TABLE_NAME
             FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'",
-            $schema,
-            $tableName
-        ));
+            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+            [$schema, $tableName]
+        );
 
-        return !empty($result);
+        return $result->rowCount() === 1;
     }
 
     /**
