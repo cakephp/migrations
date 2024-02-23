@@ -417,6 +417,7 @@ class MigrationHelper extends Helper
             unset($columnOptions['collate']);
         }
 
+        // TODO this can be cleaned up when we stop using phinx data structures for column definitions
         if ($columnOptions['precision'] === null) {
             unset($columnOptions['precision']);
         } else {
