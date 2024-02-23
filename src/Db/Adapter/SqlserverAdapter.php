@@ -9,8 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
-use Cake\Database\Connection;
-use Cake\Database\Driver\Sqlserver as SqlServerDriver;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -18,11 +16,7 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
-use PDOException;
 use Phinx\Migration\MigrationInterface;
-use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * Migrations SqlServer Adapter.
@@ -1256,25 +1250,5 @@ SQL;
         $endTime = str_replace(' ', 'T', $endTime);
 
         return parent::migrated($migration, $direction, $startTime, $endTime);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDecoratedConnection(): Connection
-    {
-        if (isset($this->decoratedConnection)) {
-            return $this->decoratedConnection;
-        }
-
-        $options = $this->getOptions();
-        $options = [
-            'username' => $options['user'] ?? null,
-            'password' => $options['pass'] ?? null,
-            'database' => $options['name'],
-            'quoteIdentifiers' => true,
-        ] + $options;
-
-        return $this->decoratedConnection = $this->buildConnection(SqlServerDriver::class, $options);
     }
 }

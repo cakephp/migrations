@@ -9,8 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
-use Cake\Database\Connection;
-use Cake\Database\Driver\Sqlite as SqliteDriver;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Expression;
@@ -19,7 +17,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
 use PDOException;
 use RuntimeException;
 use const FILTER_VALIDATE_BOOLEAN;

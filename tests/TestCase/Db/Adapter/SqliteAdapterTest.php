@@ -16,7 +16,6 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
-use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
@@ -26,7 +25,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
-use UnexpectedValueException;
 
 class SqliteAdapterTest extends TestCase
 {

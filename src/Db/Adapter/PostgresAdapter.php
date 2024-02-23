@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Connection;
-use Cake\Database\Driver\Postgres as PostgresDriver;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -17,9 +16,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
-use PDOException;
-use RuntimeException;
 
 class PostgresAdapter extends PdoAdapter
 {

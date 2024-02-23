@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Connection;
-use Cake\Database\Driver\Mysql as MysqlDriver;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -17,10 +16,7 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
 use Phinx\Config\FeatureFlags;
-use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * Phinx MySQL Adapter.
@@ -106,9 +102,12 @@ class MysqlAdapter extends PdoAdapter
         $this->setConnection($this->getConnection());
     }
 
+    /**
+     * @inheritDoc
+     */
     public function setConnection(Connection $connection): AdapterInterface
     {
-        $connection->execute(sprintf("USE %s", $this->getOption('database')));
+        $connection->execute(sprintf('USE %s', $this->getOption('database')));
 
         return parent::setConnection($connection);
     }
@@ -1250,7 +1249,7 @@ class MysqlAdapter extends PdoAdapter
         } else {
             $this->execute(sprintf('CREATE DATABASE `%s` DEFAULT CHARACTER SET `%s`', $name, $charset));
         }
-        $this->execute(sprintf("USE %s", $name));
+        $this->execute(sprintf('USE %s', $name));
     }
 
     /**

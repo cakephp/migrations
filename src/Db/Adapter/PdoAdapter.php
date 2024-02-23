@@ -210,22 +210,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     }
 
     /**
-     * Build connection instance.
-     *
-     * @param class-string<\Cake\Database\Driver> $driverClass Driver class name.
-     * @param array $options Options.
-     * @return \Cake\Database\Connection
-     */
-    protected function buildConnection(string $driverClass, array $options): Connection
-    {
-        $driver = new $driverClass($options);
-        $prop = new ReflectionProperty($driver, 'pdo');
-        $prop->setValue($driver, $this->connection);
-
-        return new Connection(['driver' => $driver] + $options);
-    }
-
-    /**
      * @inheritDoc
      */
     public function getQueryBuilder(string $type): Query
@@ -637,18 +621,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     public function castToBool($value): mixed
     {
         return (bool)$value ? 1 : 0;
-    }
-
-    /**
-     * Retrieve a database connection attribute
-     *
-     * @see https://php.net/manual/en/pdo.getattribute.php
-     * @param int $attribute One of the PDO::ATTR_* constants
-     * @return mixed
-     */
-    public function getAttribute(int $attribute): mixed
-    {
-        return $this->getConnection()->getAttribute($attribute);
     }
 
     /**

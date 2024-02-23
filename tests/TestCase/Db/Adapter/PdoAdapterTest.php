@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
-use PDO;
 use PDOException;
 use Phinx\Config\Config;
 use PHPUnit\Framework\TestCase;
