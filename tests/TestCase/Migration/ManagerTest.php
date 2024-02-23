@@ -2592,6 +2592,7 @@ class ManagerTest extends TestCase
         $adapter = $this->prepareEnvironment([
             'migrations' => ROOT . '/config/Postgres',
         ]);
+        $adapter->connect();
         // migrate to the latest version
         $this->manager->migrate();
 
