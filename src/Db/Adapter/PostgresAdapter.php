@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Connection;
-use Cake\Database\Driver\Postgres as PostgresDriver;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -17,9 +16,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
-use PDOException;
-use RuntimeException;
 
 class PostgresAdapter extends PdoAdapter
 {
@@ -63,10 +59,11 @@ class PostgresAdapter extends PdoAdapter
     /**
      * {@inheritDoc}
      */
-    public function setConnection(PDO $connection): AdapterInterface
+    public function setConnection(Connection $connection): AdapterInterface
     {
         // always set here since connect() isn't always called
-        $this->useIdentity = (float)$connection->getAttribute(PDO::ATTR_SERVER_VERSION) >= 10;
+        $version = $connection->getDriver()->version();
+        $this->useIdentity = (float)$version >= 10;
 
         return parent::setConnection($connection);
     }
@@ -80,55 +77,8 @@ class PostgresAdapter extends PdoAdapter
      */
     public function connect(): void
     {
-        if ($this->connection === null) {
-            if (!class_exists('PDO') || !in_array('pgsql', PDO::getAvailableDrivers(), true)) {
-                // @codeCoverageIgnoreStart
-                throw new RuntimeException('You need to enable the PDO_Pgsql extension for Phinx to run properly.');
-                // @codeCoverageIgnoreEnd
-            }
-
-            $options = $this->getOptions();
-            $dsn = 'pgsql:dbname=' . $options['name'];
-
-            if (isset($options['host'])) {
-                $dsn .= ';host=' . $options['host'];
-            }
-
-            // if custom port is specified use it
-            if (isset($options['port'])) {
-                $dsn .= ';port=' . $options['port'];
-            }
-
-            $driverOptions = [];
-
-            // use custom data fetch mode
-            if (!empty($options['fetch_mode'])) {
-                $driverOptions[PDO::ATTR_DEFAULT_FETCH_MODE] =
-                    constant('\PDO::FETCH_' . strtoupper($options['fetch_mode']));
-            }
-
-            // pass \PDO::ATTR_PERSISTENT to driver options instead of useless setting it after instantiation
-            if (isset($options['attr_persistent'])) {
-                $driverOptions[PDO::ATTR_PERSISTENT] = $options['attr_persistent'];
-            }
-
-            $db = $this->createPdoConnection($dsn, $options['user'] ?? null, $options['pass'] ?? null, $driverOptions);
-
-            $schema = $options['schema'] ?? null;
-            if ($schema) {
-                try {
-                    $db->exec('SET search_path TO ' . $this->quoteSchemaName($schema));
-                } catch (PDOException $exception) {
-                    throw new InvalidArgumentException(
-                        sprintf('Schema does not exists: %s', $schema),
-                        0,
-                        $exception
-                    );
-                }
-            }
-
-            $this->setConnection($db);
-        }
+        $this->getConnection()->getDriver()->connect();
+        $this->setConnection($this->getConnection());
     }
 
     /**
@@ -136,7 +86,7 @@ class PostgresAdapter extends PdoAdapter
      */
     public function disconnect(): void
     {
-        $this->connection = null;
+        $this->getConnection()->getDriver()->disconnect();
     }
 
     /**
@@ -152,7 +102,7 @@ class PostgresAdapter extends PdoAdapter
      */
     public function beginTransaction(): void
     {
-        $this->execute('BEGIN');
+        $this->getConnection()->begin();
     }
 
     /**
@@ -160,7 +110,7 @@ class PostgresAdapter extends PdoAdapter
      */
     public function commitTransaction(): void
     {
-        $this->execute('COMMIT');
+        $this->getConnection()->commit();
     }
 
     /**
@@ -168,7 +118,7 @@ class PostgresAdapter extends PdoAdapter
      */
     public function rollbackTransaction(): void
     {
-        $this->execute('ROLLBACK');
+        $this->getConnection()->rollback();
     }
 
     /**
@@ -210,21 +160,18 @@ class PostgresAdapter extends PdoAdapter
         }
 
         $parts = $this->getSchemaName($tableName);
-        $result = $this->getConnection()->query(
-            sprintf(
-                'SELECT *
-                FROM information_schema.tables
-                WHERE table_schema = %s
-                AND table_name = %s',
-                $this->getConnection()->quote($parts['schema']),
-                $this->getConnection()->quote($parts['table'])
-            )
+        $connection = $this->getConnection();
+        $stmt = $connection->execute(
+            'SELECT *
+            FROM information_schema.tables
+            WHERE table_schema = ?
+            AND table_name = ?',
+            [$parts['schema'], $parts['table']]
         );
-        if (!$result) {
-            return false;
-        }
+        $count = $stmt->rowCount();
+        $stmt->closeCursor();
 
-        return $result->rowCount() === 1;
+        return $count === 1;
     }
 
     /**
@@ -310,7 +257,7 @@ class PostgresAdapter extends PdoAdapter
             $queries[] = sprintf(
                 'COMMENT ON TABLE %s IS %s',
                 $this->quoteTableName($table->getName()),
-                $this->getConnection()->quote($options['comment'])
+                $this->quoteString($options['comment'])
             );
         }
 
@@ -369,7 +316,7 @@ class PostgresAdapter extends PdoAdapter
 
         // passing 'null' is to remove table comment
         $newComment = $newComment !== null
-            ? $this->getConnection()->quote($newComment)
+            ? $this->quoteString($newComment)
             : 'NULL';
         $sql = sprintf(
             'COMMENT ON TABLE %s IS %s',
@@ -436,8 +383,8 @@ class PostgresAdapter extends PdoAdapter
              WHERE table_schema = %s AND table_name = %s
              ORDER BY ordinal_position',
             $this->useIdentity ? ', identity_generation' : '',
-            $this->getConnection()->quote($parts['schema']),
-            $this->getConnection()->quote($parts['table'])
+            $this->quoteString($parts['schema']),
+            $this->quoteString($parts['table'])
         );
         $columnsInfo = $this->fetchAll($sql);
         foreach ($columnsInfo as $columnInfo) {
@@ -504,21 +451,16 @@ class PostgresAdapter extends PdoAdapter
     public function hasColumn(string $tableName, string $columnName): bool
     {
         $parts = $this->getSchemaName($tableName);
-        $sql = sprintf(
-            'SELECT count(*)
+        $connection = $this->getConnection();
+        $sql = 'SELECT count(*)
             FROM information_schema.columns
-            WHERE table_schema = %s AND table_name = %s AND column_name = %s',
-            $this->getConnection()->quote($parts['schema']),
-            $this->getConnection()->quote($parts['table']),
-            $this->getConnection()->quote($columnName)
-        );
+            WHERE table_schema = ? AND table_name = ? AND column_name = ?';
 
-        $result = $this->fetchRow($sql);
-        if (!$result) {
-            return false;
-        }
+        $result = $connection->execute($sql, [$parts['schema'], $parts['table'], $columnName]);
+        $row = $result->fetch('assoc');
+        $result->closeCursor();
 
-        return $result['count'] > 0;
+        return $row['count'] > 0;
     }
 
     /**
@@ -557,9 +499,9 @@ class PostgresAdapter extends PdoAdapter
             'SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS column_exists
              FROM information_schema.columns
              WHERE table_schema = %s AND table_name = %s AND column_name = %s',
-            $this->getConnection()->quote($parts['schema']),
-            $this->getConnection()->quote($parts['table']),
-            $this->getConnection()->quote($columnName)
+            $this->quoteString($parts['schema']),
+            $this->quoteString($parts['table']),
+            $this->quoteString($columnName)
         );
 
         $result = $this->fetchRow($sql);
@@ -755,8 +697,8 @@ class PostgresAdapter extends PdoAdapter
             ORDER BY
                 t.relname,
                 i.relname",
-            $this->getConnection()->quote($parts['schema']),
-            $this->getConnection()->quote($parts['table'])
+            $this->quoteString($parts['schema']),
+            $this->quoteString($parts['table'])
         );
         $rows = $this->fetchAll($sql);
         foreach ($rows as $row) {
@@ -901,8 +843,8 @@ class PostgresAdapter extends PdoAdapter
                     AND tc.table_schema = %s
                     AND tc.table_name = %s
                 ORDER BY kcu.position_in_unique_constraint",
-            $this->getConnection()->quote($parts['schema']),
-            $this->getConnection()->quote($parts['table'])
+            $this->quoteString($parts['schema']),
+            $this->quoteString($parts['table'])
         ));
 
         $primaryKey = [
@@ -965,8 +907,8 @@ class PostgresAdapter extends PdoAdapter
                     JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
                 WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema = %s AND tc.table_name = %s
                 ORDER BY kcu.ordinal_position",
-            $this->getConnection()->quote($parts['schema']),
-            $this->getConnection()->quote($parts['table'])
+            $this->quoteString($parts['schema']),
+            $this->quoteString($parts['table'])
         ));
         foreach ($rows as $row) {
             $foreignKeys[$row['constraint_name']]['table'] = $row['table_name'];
@@ -1298,7 +1240,7 @@ class PostgresAdapter extends PdoAdapter
         $comment = (string)$column->getComment();
         // passing 'null' is to remove column comment
         $comment = strcasecmp($comment, 'NULL') !== 0
-                 ? $this->getConnection()->quote($comment)
+                 ? $this->quoteString($comment)
                  : 'NULL';
 
         return sprintf(
@@ -1445,7 +1387,7 @@ class PostgresAdapter extends PdoAdapter
             'SELECT count(*)
              FROM pg_namespace
              WHERE nspname = %s',
-            $this->getConnection()->quote($schemaName)
+            $this->quoteString($schemaName)
         );
         $result = $this->fetchRow($sql);
         if (!$result) {
@@ -1577,26 +1519,6 @@ class PostgresAdapter extends PdoAdapter
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getDecoratedConnection(): Connection
-    {
-        if (isset($this->decoratedConnection)) {
-            return $this->decoratedConnection;
-        }
-
-        $options = $this->getOptions();
-        $options = [
-            'username' => $options['user'] ?? null,
-            'password' => $options['pass'] ?? null,
-            'database' => $options['name'],
-            'quoteIdentifiers' => true,
-        ] + $options;
-
-        return $this->decoratedConnection = $this->buildConnection(PostgresDriver::class, $options);
-    }
-
-    /**
      * Sets search path of schemas to look through for a table
      *
      * @return void
@@ -1639,8 +1561,7 @@ class PostgresAdapter extends PdoAdapter
             $this->output->writeln($sql);
         } else {
             $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-            $stmt = $this->getConnection()->prepare($sql);
-            $stmt->execute(array_values($row));
+            $this->getConnection()->execute($sql, array_values($row));
         }
     }
 
@@ -1671,12 +1592,12 @@ class PostgresAdapter extends PdoAdapter
             $sql .= implode(', ', $values) . ';';
             $this->output->writeln($sql);
         } else {
+            $connection = $this->getConnection();
             $count_keys = count($keys);
             $query = '(' . implode(', ', array_fill(0, $count_keys, '?')) . ')';
             $count_vars = count($rows);
             $queries = array_fill(0, $count_vars, $query);
             $sql .= implode(',', $queries);
-            $stmt = $this->getConnection()->prepare($sql);
             $vals = [];
 
             foreach ($rows as $row) {
@@ -1689,7 +1610,7 @@ class PostgresAdapter extends PdoAdapter
                 }
             }
 
-            $stmt->execute($vals);
+            $connection->execute($sql, $vals);
         }
     }
 }

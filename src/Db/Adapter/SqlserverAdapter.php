@@ -9,8 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
-use Cake\Database\Connection;
-use Cake\Database\Driver\Sqlserver as SqlServerDriver;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -18,11 +16,7 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
-use PDOException;
 use Phinx\Migration\MigrationInterface;
-use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * Migrations SqlServer Adapter.
@@ -60,102 +54,8 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function connect(): void
     {
-        if ($this->connection === null) {
-            if (!class_exists('PDO') || !in_array('sqlsrv', PDO::getAvailableDrivers(), true)) {
-                // try our connection via freetds (Mac/Linux)
-                $this->connectDblib();
-
-                return;
-            }
-
-            $options = $this->getOptions();
-
-            $dsn = 'sqlsrv:server=' . $options['host'];
-            // if port is specified use it, otherwise use the SqlServer default
-            if (!empty($options['port'])) {
-                $dsn .= ',' . $options['port'];
-            }
-            $dsn .= ';database=' . $options['name'] . ';MultipleActiveResultSets=false';
-
-            // option to add additional connection options
-            // https://docs.microsoft.com/en-us/sql/connect/php/connection-options?view=sql-server-ver15
-            if (isset($options['dsn_options'])) {
-                foreach ($options['dsn_options'] as $key => $option) {
-                    $dsn .= ';' . $key . '=' . $option;
-                }
-            }
-
-            $driverOptions = [];
-
-            // charset support
-            if (isset($options['charset'])) {
-                $driverOptions[PDO::SQLSRV_ATTR_ENCODING] = $options['charset'];
-            }
-
-            // use custom data fetch mode
-            if (!empty($options['fetch_mode'])) {
-                $driverOptions[PDO::ATTR_DEFAULT_FETCH_MODE] = constant('\PDO::FETCH_' . strtoupper($options['fetch_mode']));
-            }
-
-            // Note, the PDO::ATTR_PERSISTENT attribute is not supported for sqlsrv and will throw an error when used
-            // See https://github.com/Microsoft/msphpsql/issues/65
-
-            // support arbitrary \PDO::SQLSRV_ATTR_* driver options and pass them to PDO
-            // https://php.net/manual/en/ref.pdo-sqlsrv.php#pdo-sqlsrv.constants
-            foreach ($options as $key => $option) {
-                if (strpos($key, 'sqlsrv_attr_') === 0) {
-                    $pdoConstant = '\PDO::' . strtoupper($key);
-                    if (!defined($pdoConstant)) {
-                        throw new UnexpectedValueException('Invalid PDO attribute: ' . $key . ' (' . $pdoConstant . ')');
-                    }
-                    $driverOptions[constant($pdoConstant)] = $option;
-                }
-            }
-
-            $db = $this->createPdoConnection($dsn, $options['user'] ?? null, $options['pass'] ?? null, $driverOptions);
-
-            $this->setConnection($db);
-        }
-    }
-
-    /**
-     * Connect to MSSQL using dblib/freetds.
-     *
-     * The "sqlsrv" driver is not available on Unix machines.
-     *
-     * @throws \InvalidArgumentException
-     * @throws \RuntimeException
-     * @return void
-     */
-    protected function connectDblib(): void
-    {
-        if (!class_exists('PDO') || !in_array('dblib', PDO::getAvailableDrivers(), true)) {
-            // @codeCoverageIgnoreStart
-            throw new RuntimeException('You need to enable the PDO_Dblib extension for Migrations to run properly.');
-            // @codeCoverageIgnoreEnd
-        }
-
-        $options = $this->getOptions();
-
-        // if port is specified use it, otherwise use the SqlServer default
-        if (empty($options['port'])) {
-            $dsn = 'dblib:host=' . $options['host'] . ';dbname=' . $options['name'];
-        } else {
-            $dsn = 'dblib:host=' . $options['host'] . ':' . $options['port'] . ';dbname=' . $options['name'];
-        }
-
-        $driverOptions = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-
-        try {
-            $db = new PDO($dsn, $options['user'], $options['pass'], $driverOptions);
-        } catch (PDOException $exception) {
-            throw new InvalidArgumentException(sprintf(
-                'There was a problem connecting to the database: %s',
-                $exception->getMessage()
-            ), 0, $exception);
-        }
-
-        $this->setConnection($db);
+        $this->getConnection()->getDriver()->connect();
+        $this->setConnection($this->getConnection());
     }
 
     /**
@@ -163,7 +63,7 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function disconnect(): void
     {
-        $this->connection = null;
+        $this->getConnection()->getDriver()->disconnect();
     }
 
     /**
@@ -179,7 +79,7 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function beginTransaction(): void
     {
-        $this->execute('BEGIN TRANSACTION');
+        $this->getConnection()->begin();
     }
 
     /**
@@ -187,7 +87,7 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function commitTransaction(): void
     {
-        $this->execute('COMMIT TRANSACTION');
+        $this->getConnection()->commit();
     }
 
     /**
@@ -195,7 +95,7 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function rollbackTransaction(): void
     {
-        $this->execute('ROLLBACK TRANSACTION');
+        $this->getConnection()->rollback();
     }
 
     /**
@@ -363,7 +263,7 @@ class SqlserverAdapter extends PdoAdapter
         // passing 'null' is to remove column comment
         $currentComment = $this->getColumnComment((string)$tableName, $column->getName());
 
-        $comment = strcasecmp((string)$column->getComment(), 'NULL') !== 0 ? $this->getConnection()->quote((string)$column->getComment()) : '\'\'';
+        $comment = strcasecmp((string)$column->getComment(), 'NULL') !== 0 ? $this->quoteString((string)$column->getComment()) : '\'\'';
         $command = $currentComment === null ? 'sp_addextendedproperty' : 'sp_updateextendedproperty';
 
         return sprintf(
@@ -1350,25 +1250,5 @@ SQL;
         $endTime = str_replace(' ', 'T', $endTime);
 
         return parent::migrated($migration, $direction, $startTime, $endTime);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDecoratedConnection(): Connection
-    {
-        if (isset($this->decoratedConnection)) {
-            return $this->decoratedConnection;
-        }
-
-        $options = $this->getOptions();
-        $options = [
-            'username' => $options['user'] ?? null,
-            'password' => $options['pass'] ?? null,
-            'database' => $options['name'],
-            'quoteIdentifiers' => true,
-        ] + $options;
-
-        return $this->decoratedConnection = $this->buildConnection(SqlServerDriver::class, $options);
     }
 }

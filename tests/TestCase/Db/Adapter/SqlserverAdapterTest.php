@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
@@ -12,7 +13,6 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
-use PDO;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -20,7 +20,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
-use UnexpectedValueException;
 
 class SqlserverAdapterTest extends TestCase
 {
@@ -42,18 +41,16 @@ class SqlserverAdapterTest extends TestCase
         }
         // Emulate the results of Util::parseDsn()
         $this->config = [
-            'adapter' => $config['scheme'],
-            'user' => $config['username'],
-            'pass' => $config['password'],
-            'host' => $config['host'],
-            'name' => $config['database'],
+            'adapter' => 'sqlserver',
+            'connection' => ConnectionManager::get('test'),
+            'database' => $config['database'],
         ];
 
         $this->adapter = new SqlserverAdapter($this->config, new ArrayInput([]), new NullOutput());
 
         // ensure the database is empty for each test
-        $this->adapter->dropDatabase($this->config['name']);
-        $this->adapter->createDatabase($this->config['name']);
+        $this->adapter->dropDatabase($this->config['database']);
+        $this->adapter->createDatabase($this->config['database']);
 
         // leave the adapter in a disconnected state for each test
         $this->adapter->disconnect();
@@ -69,56 +66,7 @@ class SqlserverAdapterTest extends TestCase
 
     public function testConnection()
     {
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::ERRMODE_EXCEPTION, $this->adapter->getConnection()->getAttribute(PDO::ATTR_ERRMODE));
-    }
-
-    public function testConnectionWithDsnOptions()
-    {
-        $options = $this->adapter->getOptions();
-        $options['dsn_options'] = ['TrustServerCertificate' => 'true'];
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-    }
-
-    public function testConnectionWithFetchMode()
-    {
-        $options = $this->adapter->getOptions();
-        $options['fetch_mode'] = 'assoc';
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::FETCH_ASSOC, $this->adapter->getConnection()->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
-    }
-
-    public function testConnectionWithoutPort()
-    {
-        $options = $this->adapter->getOptions();
-        unset($options['port']);
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-    }
-
-    public function testConnectionWithInvalidCredentials()
-    {
-        $options = ['user' => 'invalid', 'pass' => 'invalid'] + $this->config;
-
-        $adapter = null;
-        try {
-            $adapter = new SqlServerAdapter($options, new ArrayInput([]), new NullOutput());
-            $adapter->connect();
-            $this->fail('Expected the adapter to throw an exception');
-        } catch (InvalidArgumentException $e) {
-            $this->assertInstanceOf(
-                'InvalidArgumentException',
-                $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
-            );
-            $this->assertStringContainsString('There was a problem connecting to the database', $e->getMessage());
-        } finally {
-            if (!empty($adapter)) {
-                $adapter->disconnect();
-            }
-        }
+        $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
     public function testCreatingTheSchemaTableOnConnect()
@@ -1047,8 +995,8 @@ WHERE t.name='ntable'");
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
-        $conn->exec($tableDef);
+        $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
+        $conn->execute($tableDef);
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
@@ -1099,7 +1047,7 @@ WHERE t.name='ntable'");
     public function testHasDatabase()
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
-        $this->assertTrue($this->adapter->hasDatabase($this->config['name']));
+        $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
     public function testDropDatabase()
@@ -1334,29 +1282,6 @@ OUTPUT;
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
 
-    public function testDumpTransaction()
-    {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
-        $this->adapter->beginTransaction();
-        $table = new Table('schema1.table1', [], $this->adapter);
-
-        $table->addColumn('column1', 'string')
-            ->addColumn('column2', 'integer')
-            ->addColumn('column3', 'string', ['default' => 'test'])
-            ->save();
-        $this->adapter->commitTransaction();
-        $this->adapter->rollbackTransaction();
-
-        $actualOutput = str_replace("\r\n", "\n", $consoleOutput->fetch());
-        $this->assertStringStartsWith("BEGIN TRANSACTION;\n", $actualOutput, 'Passing the --dry-run doesn\'t dump the transaction to the output');
-        $this->assertStringEndsWith("COMMIT TRANSACTION;\nROLLBACK TRANSACTION;\n", $actualOutput, 'Passing the --dry-run doesn\'t dump the transaction to the output');
-    }
-
     /**
      * Tests interaction with the query builder
      */
@@ -1422,13 +1347,13 @@ OUTPUT;
         ]);
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) AS c FROM table1 WHERE int_col > ?', [5]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(2, $res[0]['c']);
 
         $this->adapter->execute('UPDATE table1 SET int_col = ? WHERE int_col IS NULL', [12]);
 
         $countQuery->execute([1]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
     }
 
@@ -1442,24 +1367,5 @@ INPUT;
         $columns = $table->getColumns();
         $this->assertCount(1, $columns);
         $this->assertEquals(Literal::from('smallmoney'), array_pop($columns)->getType());
-    }
-
-    public static function pdoAttributeProvider()
-    {
-        return [
-            ['sqlsrv_attr_invalid'],
-            ['attr_invalid'],
-        ];
-    }
-
-    /**
-     * @dataProvider pdoAttributeProvider
-     */
-    public function testInvalidPdoAttribute($attribute)
-    {
-        $adapter = new SqlServerAdapter($this->config + [$attribute => true]);
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Invalid PDO attribute: ' . $attribute . ' (\PDO::' . strtoupper($attribute) . ')');
-        $adapter->connect();
     }
 }

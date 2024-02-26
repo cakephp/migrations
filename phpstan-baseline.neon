@@ -26,17 +26,12 @@ parameters:
 			path: src/Db/Adapter/MysqlAdapter.php
 
 		-
-			message: "#^Parameter \\#4 \\$options of method Migrations\\\\Db\\\\Adapter\\\\PdoAdapter\\:\\:createPdoConnection\\(\\) expects array\\<int, mixed\\>, array\\<int\\|string, mixed\\> given\\.$#"
-			count: 1
-			path: src/Db/Adapter/MysqlAdapter.php
-
-		-
 			message: "#^Right side of && is always true\\.$#"
 			count: 1
 			path: src/Db/Adapter/MysqlAdapter.php
 
 		-
-			message: "#^Access to an undefined property PDO\\:\\:\\$connection\\.$#"
+			message: "#^Access to an undefined property Cake\\\\Database\\\\Connection\\:\\:\\$connection\\.$#"
 			count: 1
 			path: src/Db/Adapter/PdoAdapter.php
 
@@ -57,11 +52,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @return with type Phinx\\\\Db\\\\Adapter\\\\AdapterInterface is not subtype of native type Migrations\\\\Db\\\\Adapter\\\\AdapterInterface\\.$#"
-			count: 1
-			path: src/Db/Adapter/SqlserverAdapter.php
-
-		-
-			message: "#^Parameter \\#4 \\$options of method Migrations\\\\Db\\\\Adapter\\\\PdoAdapter\\:\\:createPdoConnection\\(\\) expects array\\<int, mixed\\>, array\\<int\\|string, mixed\\> given\\.$#"
 			count: 1
 			path: src/Db/Adapter/SqlserverAdapter.php
 

@@ -132,12 +132,9 @@ class StatusCommand extends Command
         $adapter = $connectionConfig['scheme'] ?? null;
         $adapterConfig = [
             'adapter' => $adapter,
-            'user' => $connectionConfig['username'],
-            'pass' => $connectionConfig['password'],
-            'host' => $connectionConfig['host'],
-            'name' => $connectionConfig['database'],
-            'migration_table' => $table,
             'connection' => $connectionName,
+            'database' => $connectionConfig['database'],
+            'migration_table' => $table,
         ];
 
         $configData = [

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
-use PDO;
 use PDOException;
 use Phinx\Config\Config;
 use PHPUnit\Framework\TestCase;
@@ -37,17 +36,6 @@ class PdoAdapterTest extends TestCase
     {
         $this->assertEquals('phinxlog', $this->adapter->getSchemaTableName());
         $this->adapter->setOptions(['migration_table' => 'schema_table_test']);
-        $this->assertEquals('schema_table_test', $this->adapter->getSchemaTableName());
-    }
-
-    public function testOptionsSetDefaultMigrationTableThrowsDeprecation()
-    {
-        $this->markTestIncomplete('Deprecation assertions are not supported in PHPUnit anymore. We need to adopt the cakephp TestSuite class instead');
-        $this->assertEquals('phinxlog', $this->adapter->getSchemaTableName());
-
-        $this->expectDeprecation();
-        $this->expectExceptionMessage('The default_migration_table setting for adapter has been deprecated since 0.13.0. Use `migration_table` instead.');
-        $this->adapter->setOptions(['default_migration_table' => 'schema_table_test']);
         $this->assertEquals('schema_table_test', $this->adapter->getSchemaTableName());
     }
 
@@ -168,43 +156,5 @@ class PdoAdapterTest extends TestCase
             ->will($this->throwException(new PDOException()));
 
         $this->assertEquals([], $adapter->getVersionLog());
-    }
-
-    /**
-     * Tests that execute() can be called on the adapter, and that the SQL is passed through to the PDO.
-     */
-    public function testExecuteCanBeCalled()
-    {
-        /** @var \PDO&\PHPUnit\Framework\MockObject\MockObject $pdo */
-        $pdo = $this->getMockBuilder(PDO::class)->disableOriginalConstructor()->onlyMethods(['exec'])->getMock();
-        $pdo->expects($this->once())->method('exec')->with('SELECT 1;')->will($this->returnValue(1));
-
-        $this->adapter->setConnection($pdo);
-        $this->adapter->execute('SELECT 1');
-    }
-
-    public function testExecuteRightTrimsSemiColons()
-    {
-        /** @var \PDO&\PHPUnit\Framework\MockObject\MockObject $pdo */
-        $pdo = $this->getMockBuilder(PDO::class)->disableOriginalConstructor()->onlyMethods(['exec'])->getMock();
-        $pdo->expects($this->once())->method('exec')->with('SELECT 1;')->will($this->returnValue(1));
-
-        $this->adapter->setConnection($pdo);
-        $this->adapter->execute('SELECT 1;;');
-    }
-
-    public function testQueryBuilderMethods()
-    {
-        $result = $this->adapter->getSelectBuilder();
-        $this->assertNotEmpty($result);
-
-        $result = $this->adapter->getUpdateBuilder();
-        $this->assertNotEmpty($result);
-
-        $result = $this->adapter->getDeleteBuilder();
-        $this->assertNotEmpty($result);
-
-        $result = $this->adapter->getInsertBuilder();
-        $this->assertNotEmpty($result);
     }
 }

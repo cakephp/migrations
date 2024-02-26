@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use Exception;
@@ -15,7 +16,6 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
-use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
@@ -25,38 +25,35 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
-use UnexpectedValueException;
 
 class SqliteAdapterTest extends TestCase
 {
+    private array $config;
+
     /**
      * @var \Migrations\Db\Adapter\SqliteAdapter
      */
     private $adapter;
 
-    /**
-     * @var array
-     */
-    private $config;
-
     protected function setUp(): void
     {
+        /** @var array<string, mixed> $config */
         $config = ConnectionManager::getConfig('test');
-        // Emulate the results of Util::parseDsn()
-        $this->config = [
-            'adapter' => $config['scheme'],
-            'host' => $config['host'],
-            'name' => $config['database'],
-        ];
-        if ($this->config['adapter'] !== 'sqlite') {
+        if ($config['scheme'] !== 'sqlite') {
             $this->markTestSkipped('SQLite tests disabled.');
         }
+        $this->config = [
+            'adapter' => 'sqlite',
+            'suffix' => '',
+            'connection' => ConnectionManager::get('test'),
+            'database' => $config['database'],
+        ];
         $this->adapter = new SqliteAdapter($this->config, new ArrayInput([]), new NullOutput());
 
-        if ($this->config['name'] !== ':memory:') {
+        if ($config['database'] !== ':memory:') {
             // ensure the database is empty for each test
-            $this->adapter->dropDatabase($this->config['name']);
-            $this->adapter->createDatabase($this->config['name']);
+            $this->adapter->dropDatabase($config['database']);
+            $this->adapter->createDatabase($config['database']);
         }
 
         // leave the adapter in a disconnected state for each test
@@ -70,17 +67,7 @@ class SqliteAdapterTest extends TestCase
 
     public function testConnection()
     {
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::ERRMODE_EXCEPTION, $this->adapter->getConnection()->getAttribute(PDO::ATTR_ERRMODE));
-    }
-
-    public function testConnectionWithFetchMode()
-    {
-        $options = $this->adapter->getOptions();
-        $options['fetch_mode'] = 'assoc';
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::FETCH_ASSOC, $this->adapter->getConnection()->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
+        $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
     public function testBeginTransaction()
@@ -95,8 +82,6 @@ class SqliteAdapterTest extends TestCase
 
     public function testRollbackTransaction()
     {
-        $this->adapter->getConnection()
-            ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->adapter->beginTransaction();
         $this->adapter->rollbackTransaction();
 
@@ -108,8 +93,6 @@ class SqliteAdapterTest extends TestCase
 
     public function testCommitTransactionTransaction()
     {
-        $this->adapter->getConnection()
-            ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->adapter->beginTransaction();
         $this->adapter->commitTransaction();
 
@@ -284,11 +267,6 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex('table1', ['email']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
         $this->assertTrue($this->adapter->hasIndexByName('table1', 'myemailindex'));
-    }
-
-    public function testCreateTableWithMultiplePKsAndUniqueIndexes()
-    {
-        $this->markTestIncomplete();
     }
 
     public function testCreateTableWithForeignKey()
@@ -1583,11 +1561,11 @@ class SqliteAdapterTest extends TestCase
 
     public function testHasDatabase()
     {
-        if ($this->config['name'] === ':memory:') {
+        if ($this->config['database'] === ':memory:') {
             $this->markTestSkipped('Skipping hasDatabase() when testing in-memory db.');
         }
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
-        $this->assertTrue($this->adapter->hasDatabase($this->config['name']));
+        $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
     public function testDropDatabase()
@@ -1759,8 +1737,6 @@ class SqliteAdapterTest extends TestCase
 
     public function testNullWithoutDefaultValue()
     {
-        $this->markTestSkipped('Skipping for now. See Github Issue #265.');
-
         // construct table with default/null combinations
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('aa', 'string', ['null' => true]) // no default value
@@ -1860,7 +1836,7 @@ OUTPUT;
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
         $res = $countQuery->fetchAll();
-        $this->assertEquals(0, $res[0]['COUNT(*)']);
+        $this->assertEquals(0, $res[0][0]);
     }
 
     /**
@@ -1901,7 +1877,7 @@ OUTPUT;
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
         $res = $countQuery->fetchAll();
-        $this->assertEquals(0, $res[0]['COUNT(*)']);
+        $this->assertEquals(0, $res[0][0]);
     }
 
     public function testDumpCreateTableAndThenInsert()
@@ -1998,13 +1974,13 @@ OUTPUT;
         ]);
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) AS c FROM table1 WHERE int_col > ?', [5]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(2, $res[0]['c']);
 
         $this->adapter->execute('UPDATE table1 SET int_col = ? WHERE int_col IS NULL', [12]);
 
         $countQuery->execute([1]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
     }
 
@@ -2306,11 +2282,11 @@ INPUT;
     {
         // Test case for issue #1535
         $conn = $this->adapter->getConnection();
-        $conn->exec('ATTACH DATABASE \':memory:\' as etc');
-        $conn->exec('ATTACH DATABASE \':memory:\' as "main.db"');
-        $conn->exec(sprintf('DROP TABLE IF EXISTS %s', $createName));
+        $conn->execute('ATTACH DATABASE \':memory:\' as etc');
+        $conn->execute('ATTACH DATABASE \':memory:\' as "main.db"');
+        $conn->execute(sprintf('DROP TABLE IF EXISTS %s', $createName));
         $this->assertFalse($this->adapter->hasTable($tableName), sprintf('Adapter claims table %s exists when it does not', $tableName));
-        $conn->exec(sprintf('CREATE TABLE %s (a text)', $createName));
+        $conn->execute(sprintf('CREATE TABLE %s (a text)', $createName));
         if ($exp == true) {
             $this->assertTrue($this->adapter->hasTable($tableName), sprintf('Adapter claims table %s does not exist when it does', $tableName));
         } else {
@@ -2358,7 +2334,17 @@ INPUT;
     public function testHasIndex($tableDef, $cols, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        if (strpos($tableDef, ';') !== false) {
+            $queries = explode(';', $tableDef);
+            foreach ($queries as $query) {
+                $stmt = $conn->execute($query);
+                $stmt->closeCursor();
+            }
+        } else {
+            $stmt = $conn->execute($tableDef);
+            $stmt->closeCursor();
+        }
+
         $this->assertEquals($exp, $this->adapter->hasIndex('t', $cols));
     }
 
@@ -2366,7 +2352,7 @@ INPUT;
     {
         return [
             ['create table t(a text)', 'a', false],
-            ['create table t(a text); create index test on t(a);', 'a', true],
+            ['create table t(a text); create index test on t(a)', 'a', true],
             ['create table t(a text unique)', 'a', true],
             ['create table t(a text primary key)', 'a', true],
             ['create table t(a text unique, b text unique)', ['a', 'b'], false],
@@ -2393,7 +2379,16 @@ INPUT;
     public function testHasIndexByName($tableDef, $index, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        if (strpos($tableDef, ';') !== false) {
+            $queries = explode(';', $tableDef);
+            foreach ($queries as $query) {
+                $stmt = $conn->execute($query);
+                $stmt->closeCursor();
+            }
+        } else {
+            $stmt = $conn->execute($tableDef);
+            $stmt->closeCursor();
+        }
         $this->assertEquals($exp, $this->adapter->hasIndexByName('t', $index));
     }
 
@@ -2401,12 +2396,12 @@ INPUT;
     {
         return [
             ['create table t(a text)', 'test', false],
-            ['create table t(a text); create index test on t(a);', 'test', true],
-            ['create table t(a text); create index test on t(a);', 'TEST', true],
-            ['create table t(a text); create index "TEST" on t(a);', 'test', true],
+            ['create table t(a text); create index test on t(a)', 'test', true],
+            ['create table t(a text); create index test on t(a)', 'TEST', true],
+            ['create table t(a text); create index "TEST" on t(a)', 'test', true],
             ['create table t(a text unique)', 'sqlite_autoindex_t_1', true],
             ['create table t(a text primary key)', 'sqlite_autoindex_t_1', true],
-            ['create table not_t(a text); create index test on not_t(a);', 'test', false], // test checks table t which does not exist
+            ['create table not_t(a text); create index test on not_t(a)', 'test', false], // test checks table t which does not exist
             ['create table t(a text unique); create temp table t(a text)', 'sqlite_autoindex_t_1', false],
         ];
     }
@@ -2422,7 +2417,16 @@ INPUT;
     {
         $this->assertFalse($this->adapter->hasTable('t'), 'Dirty test fixture');
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        if (strpos($tableDef, ';') !== false) {
+            $queries = explode(';', $tableDef);
+            foreach ($queries as $query) {
+                $stmt = $conn->execute($query);
+                $stmt->closeCursor();
+            }
+        } else {
+            $stmt = $conn->execute($tableDef);
+            $stmt->closeCursor();
+        }
         $this->assertSame($exp, $this->adapter->hasPrimaryKey('t', $key));
     }
 
@@ -2488,8 +2492,18 @@ INPUT;
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec('CREATE TABLE other(a integer, b integer, c integer)');
-        $conn->exec($tableDef);
+        $conn->execute('CREATE TABLE other(a integer, b integer, c integer)');
+        if (strpos($tableDef, ';') !== false) {
+            $queries = explode(';', $tableDef);
+            foreach ($queries as $query) {
+                $stmt = $conn->execute($query);
+                $stmt->closeCursor();
+            }
+        } else {
+            $stmt = $conn->execute($tableDef);
+            $stmt->closeCursor();
+        }
+
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
@@ -2929,7 +2943,17 @@ INPUT;
     public function testHasColumn($tableDef, $col, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        if (strpos($tableDef, ';') !== false) {
+            $queries = explode(';', $tableDef);
+            foreach ($queries as $query) {
+                $stmt = $conn->execute($query);
+                $stmt->closeCursor();
+            }
+        } else {
+            $stmt = $conn->execute($tableDef);
+            $stmt->closeCursor();
+        }
+
         $this->assertEquals($exp, $this->adapter->hasColumn('t', $col));
     }
 
@@ -2960,7 +2984,7 @@ INPUT;
     public function testGetColumns()
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec('create table t(a integer, b text, c char(5), d integer(12,6), e integer not null, f integer null)');
+        $conn->execute('create table t(a integer, b text, c char(5), d integer(12,6), e integer not null, f integer null)');
         $exp = [
             ['name' => 'a', 'type' => 'integer', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
             ['name' => 'b', 'type' => 'text', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
@@ -2987,7 +3011,7 @@ INPUT;
     public function testGetColumnsForIdentity($tableDef, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        $conn->execute($tableDef);
         $cols = $this->adapter->getColumns('t');
         $act = [];
         foreach ($cols as $col) {
@@ -3019,7 +3043,7 @@ INPUT;
     public function testGetColumnsForDefaults($tableDef, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        $conn->execute($tableDef);
         $act = $this->adapter->getColumns('t')[0]->getDefault();
         if (is_object($exp)) {
             $this->assertEquals($exp, $act);
@@ -3096,7 +3120,7 @@ INPUT;
             $this->markTestSkipped('SQLite 3.24.0 or later is required for this test.');
         }
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
+        $conn->execute($tableDef);
         $act = $this->adapter->getColumns('t')[0]->getDefault();
         if (is_object($exp)) {
             $this->assertEquals($exp, $act);
@@ -3124,16 +3148,17 @@ INPUT;
     public function testTruncateTable($tableDef, $tableName, $tableId)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec($tableDef);
-        $conn->exec("INSERT INTO $tableId default values");
-        $conn->exec("INSERT INTO $tableId default values");
-        $conn->exec("INSERT INTO $tableId default values");
-        $this->assertEquals(3, $conn->query("select count(*) from $tableId")->fetchColumn(), 'Broken fixture: data were not inserted properly');
-        $this->assertEquals(3, $conn->query("select max(id) from $tableId")->fetchColumn(), 'Broken fixture: data were not inserted properly');
+        $conn->execute($tableDef);
+        $conn->execute("INSERT INTO $tableId default values");
+        $conn->execute("INSERT INTO $tableId default values");
+        $conn->execute("INSERT INTO $tableId default values");
+        $this->assertEquals(3, $conn->execute("select count(*) from $tableId")->fetchColumn(0), 'Broken fixture: data were not inserted properly');
+        $this->assertEquals(3, $conn->execute("select max(id) from $tableId")->fetchColumn(0), 'Broken fixture: data were not inserted properly');
         $this->adapter->truncateTable($tableName);
-        $this->assertEquals(0, $conn->query("select count(*) from $tableId")->fetchColumn(), 'Table was not truncated');
-        $conn->exec("INSERT INTO $tableId default values");
-        $this->assertEquals(1, $conn->query("select max(id) from $tableId")->fetchColumn(), 'Autoincrement was not reset');
+        $this->assertEquals(0, $conn->execute("select count(*) from $tableId")->fetchColumn(0), 'Table was not truncated');
+        $conn->execute("INSERT INTO $tableId default values");
+        $this->assertEquals(1, $conn->execute("select max(id) from $tableId")->fetchColumn(0), 'Autoincrement was not reset');
+        $conn->execute("DROP TABLE $tableId");
     }
 
     /**
@@ -3305,30 +3330,10 @@ INPUT;
         $this->assertStringContainsString("REFERENCES `{$refTable->getName()}` (`id`)", $sql);
     }
 
-    public function testInvalidPdoAttribute()
-    {
-        $adapter = new SqliteAdapter($this->config + ['attr_invalid' => true]);
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Invalid PDO attribute: attr_invalid (\PDO::ATTR_INVALID)');
-        $adapter->connect();
-    }
-
     public function testPdoExceptionUpdateNonExistingTable()
     {
         $this->expectException(PDOException::class);
         $table = new Table('non_existing_table', [], $this->adapter);
         $table->addColumn('column', 'string')->update();
-    }
-
-    public function testPdoPersistentConnection()
-    {
-        $adapter = new SqliteAdapter($this->config + ['attr_persistent' => true]);
-        $this->assertTrue($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
-    }
-
-    public function testPdoNotPersistentConnection()
-    {
-        $adapter = new SqliteAdapter($this->config);
-        $this->assertFalse($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
     }
 }

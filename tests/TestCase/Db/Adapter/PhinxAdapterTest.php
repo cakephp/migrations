@@ -40,15 +40,15 @@ class PhinxAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
-        // Emulate the results of Util::parseDsn()
-        $this->config = [
-            'adapter' => $config['scheme'],
-            'host' => $config['host'],
-            'name' => $config['database'],
-        ];
-        if ($this->config['adapter'] !== 'sqlite') {
+        if ($config['adapter'] !== 'sqlite') {
             $this->markTestSkipped('phinx adapter tests require sqlite');
         }
+        // Emulate the results of Util::parseDsn()
+        $this->config = [
+            'adapter' => 'sqlite',
+            'connection' => ConnectionManager::get('test'),
+            'database' => $config['database'],
+        ];
         $this->adapter = new PhinxAdapter(
             new SqliteAdapter(
                 $this->config,
@@ -57,10 +57,10 @@ class PhinxAdapterTest extends TestCase
             )
         );
 
-        if ($this->config['name'] !== ':memory:') {
+        if ($this->config['database'] !== ':memory:') {
             // ensure the database is empty for each test
-            $this->adapter->dropDatabase($this->config['name']);
-            $this->adapter->createDatabase($this->config['name']);
+            $this->adapter->dropDatabase($this->config['database']);
+            $this->adapter->createDatabase($this->config['database']);
         }
 
         // leave the adapter in a disconnected state for each test
@@ -80,12 +80,11 @@ class PhinxAdapterTest extends TestCase
             $this->adapter->getConnection()->inTransaction(),
             'Underlying PDO instance did not detect new transaction'
         );
+        $this->adapter->rollbackTransaction();
     }
 
     public function testRollbackTransaction()
     {
-        $this->adapter->getConnection()
-            ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->adapter->beginTransaction();
         $this->adapter->rollbackTransaction();
 

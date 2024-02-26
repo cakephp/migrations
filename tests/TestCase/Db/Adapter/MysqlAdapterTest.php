@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
@@ -21,7 +22,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
-use UnexpectedValueException;
 
 class MysqlAdapterTest extends TestCase
 {
@@ -43,18 +43,16 @@ class MysqlAdapterTest extends TestCase
         }
         // Emulate the results of Util::parseDsn()
         $this->config = [
-            'adapter' => $config['scheme'],
-            'user' => $config['username'],
-            'pass' => $config['password'],
-            'host' => $config['host'],
-            'name' => $config['database'],
+            'adapter' => 'mysql',
+            'connection' => ConnectionManager::get('test'),
+            'database' => $config['database'],
         ];
 
         $this->adapter = new MysqlAdapter($this->config, new ArrayInput([]), new NullOutput());
 
         // ensure the database is empty for each test
-        $this->adapter->dropDatabase($this->config['name']);
-        $this->adapter->createDatabase($this->config['name'], ['charset' => 'utf8mb4']);
+        $this->adapter->dropDatabase($this->config['database']);
+        $this->adapter->createDatabase($this->config['database'], ['charset' => 'utf8mb4']);
 
         // leave the adapter in a disconnected state for each test
         $this->adapter->disconnect();
@@ -67,61 +65,14 @@ class MysqlAdapterTest extends TestCase
 
     private function usingMysql8(): bool
     {
-        return version_compare($this->adapter->getAttribute(PDO::ATTR_SERVER_VERSION), '8.0.0', '>=');
+        $version = $this->adapter->getConnection()->getDriver()->version();
+
+        return version_compare($version, '8.0.0', '>=');
     }
 
     public function testConnection()
     {
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::ERRMODE_EXCEPTION, $this->adapter->getConnection()->getAttribute(PDO::ATTR_ERRMODE));
-    }
-
-    public function testConnectionWithFetchMode()
-    {
-        $options = $this->adapter->getOptions();
-        $options['fetch_mode'] = 'assoc';
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-        $this->assertSame(PDO::FETCH_ASSOC, $this->adapter->getConnection()->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
-    }
-
-    public function testConnectionWithoutPort()
-    {
-        $options = $this->adapter->getOptions();
-        unset($options['port']);
-        $this->adapter->setOptions($options);
-        $this->assertInstanceOf('PDO', $this->adapter->getConnection());
-    }
-
-    public function testConnectionWithInvalidCredentials()
-    {
-        $options = ['user' => 'invalid', 'pass' => 'invalid'] + $this->config;
-
-        try {
-            $adapter = new MysqlAdapter($options, new ArrayInput([]), new NullOutput());
-            $adapter->connect();
-            $this->fail('Expected the adapter to throw an exception');
-        } catch (InvalidArgumentException $e) {
-            $this->assertInstanceOf(
-                'InvalidArgumentException',
-                $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
-            );
-            $this->assertStringContainsString('There was a problem connecting to the database', $e->getMessage());
-        }
-    }
-
-    public function testConnectionWithSocketConnection()
-    {
-        if (!getenv('MYSQL_UNIX_SOCKET')) {
-            $this->markTestSkipped('MySQL socket connection skipped.');
-        }
-
-        $options = ['unix_socket' => getenv('MYSQL_UNIX_SOCKET')] + $this->config;
-        $adapter = new MysqlAdapter($options, new ArrayInput([]), new NullOutput());
-        $adapter->connect();
-
-        $this->assertInstanceOf('\PDO', $this->adapter->getConnection());
+        $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
     public function testCreatingTheSchemaTableOnConnect()
@@ -199,7 +150,7 @@ class MysqlAdapterTest extends TestCase
 
         $rows = $this->adapter->fetchAll(sprintf(
             "SELECT TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='ntable'",
-            $this->config['name']
+            $this->config['database']
         ));
         $comment = $rows[0];
 
@@ -227,7 +178,7 @@ class MysqlAdapterTest extends TestCase
             "SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
              FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
              WHERE TABLE_SCHEMA='%s' AND REFERENCED_TABLE_NAME='ntable_tag'",
-            $this->config['name']
+            $this->config['database']
         ));
         $foreignKey = $rows[0];
 
@@ -403,11 +354,6 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndexByName('table1', 'myemailindex'));
     }
 
-    public function testCreateTableWithMultiplePKsAndUniqueIndexes()
-    {
-        $this->markTestIncomplete();
-    }
-
     public function testCreateTableWithMyISAMEngine()
     {
         $table = new Table('ntable', ['engine' => 'MyISAM'], $this->adapter);
@@ -425,11 +371,6 @@ class MysqlAdapterTest extends TestCase
             'collation' => 'utf8mb4_unicode_ci',
         ];
         $adapter = new MysqlAdapter($options, new ArrayInput([]), new NullOutput());
-
-        // Ensure the database is empty and the adapter is in a disconnected state
-        $adapter->dropDatabase($options['name']);
-        $adapter->createDatabase($options['name']);
-        $adapter->disconnect();
 
         $table = new Table('table_with_default_collation', [], $adapter);
         $table->addColumn('name', 'string')
@@ -536,7 +477,7 @@ class MysqlAdapterTest extends TestCase
 
     public function testCreateTableWithSchema()
     {
-        $table = new Table($this->config['name'] . '.ntable', [], $this->adapter);
+        $table = new Table($this->config['database'] . '.ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
             ->addColumn('email', 'integer')
             ->save();
@@ -603,7 +544,7 @@ class MysqlAdapterTest extends TestCase
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
-                $this->config['name'],
+                $this->config['database'],
                 'table1'
             )
         );
@@ -625,7 +566,7 @@ class MysqlAdapterTest extends TestCase
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
-                $this->config['name'],
+                $this->config['database'],
                 'table1'
             )
         );
@@ -647,7 +588,7 @@ class MysqlAdapterTest extends TestCase
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
-                $this->config['name'],
+                $this->config['database'],
                 'table1'
             )
         );
@@ -1173,7 +1114,8 @@ class MysqlAdapterTest extends TestCase
     public function testDatetimeColumn()
     {
         $this->adapter->connect();
-        if (version_compare($this->adapter->getAttribute(PDO::ATTR_SERVER_VERSION), '5.6.4') === -1) {
+        $version = $this->adapter->getConnection()->getDriver()->version();
+        if (version_compare($version, '5.6.4') === -1) {
             $this->markTestSkipped('Cannot test datetime limit on versions less than 5.6.4');
         }
         $table = new Table('t', [], $this->adapter);
@@ -1186,7 +1128,8 @@ class MysqlAdapterTest extends TestCase
     public function testDatetimeColumnLimit()
     {
         $this->adapter->connect();
-        if (version_compare($this->adapter->getAttribute(PDO::ATTR_SERVER_VERSION), '5.6.4') === -1) {
+        $version = $this->adapter->getConnection()->getDriver()->version();
+        if (version_compare($version, '5.6.4') === -1) {
             $this->markTestSkipped('Cannot test datetime limit on versions less than 5.6.4');
         }
         $limit = 6;
@@ -1200,7 +1143,8 @@ class MysqlAdapterTest extends TestCase
     public function testTimeColumnLimit()
     {
         $this->adapter->connect();
-        if (version_compare($this->adapter->getAttribute(PDO::ATTR_SERVER_VERSION), '5.6.4') === -1) {
+        $version = $this->adapter->getConnection()->getDriver()->version();
+        if (version_compare($version, '5.6.4') === -1) {
             $this->markTestSkipped('Cannot test datetime limit on versions less than 5.6.4');
         }
         $limit = 3;
@@ -1214,7 +1158,8 @@ class MysqlAdapterTest extends TestCase
     public function testTimestampColumnLimit()
     {
         $this->adapter->connect();
-        if (version_compare($this->adapter->getAttribute(PDO::ATTR_SERVER_VERSION), '5.6.4') === -1) {
+        $version = $this->adapter->getConnection()->getDriver()->version();
+        if (version_compare($version, '5.6.4') === -1) {
             $this->markTestSkipped('Cannot test datetime limit on versions less than 5.6.4');
         }
         $limit = 1;
@@ -1228,7 +1173,8 @@ class MysqlAdapterTest extends TestCase
     public function testTimestampInvalidLimit()
     {
         $this->adapter->connect();
-        if (version_compare($this->adapter->getAttribute(PDO::ATTR_SERVER_VERSION), '5.6.4') === -1) {
+        $version = $this->adapter->getConnection()->getDriver()->version();
+        if (version_compare($version, '5.6.4') === -1) {
             $this->markTestSkipped('Cannot test datetime limit on versions less than 5.6.4');
         }
         $table = new Table('t', [], $this->adapter);
@@ -1343,7 +1289,7 @@ class MysqlAdapterTest extends TestCase
 
         $this->assertContains($described['TABLE_TYPE'], ['VIEW', 'BASE TABLE']);
         $this->assertEquals($described['TABLE_NAME'], 't');
-        $this->assertEquals($described['TABLE_SCHEMA'], $this->config['name']);
+        $this->assertEquals($described['TABLE_SCHEMA'], $this->config['database']);
         $this->assertEquals($described['TABLE_ROWS'], 0);
     }
 
@@ -1421,7 +1367,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email"',
-            $this->config['name']
+            $this->config['database']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 50);
@@ -1439,13 +1385,13 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex(['email', 'username']));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "email"',
-            $this->config['name']
+            $this->config['database']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 3);
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "username"',
-            $this->config['name']
+            $this->config['database']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 2);
@@ -1463,7 +1409,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "email"',
-            $this->config['name']
+            $this->config['database']
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 3);
@@ -1800,8 +1746,8 @@ class MysqlAdapterTest extends TestCase
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec('CREATE TABLE other(a int, b int, c int, key(a), key(b), key(a,b), key(a,b,c));');
-        $conn->exec($tableDef);
+        $conn->execute('CREATE TABLE other(a int, b int, c int, key(a), key(b), key(a,b), key(a,b,c));');
+        $conn->execute($tableDef);
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
@@ -1890,14 +1836,14 @@ class MysqlAdapterTest extends TestCase
             ->addForeignKey(['ref_table_id'], 'ref_table', ['id'])
             ->save();
 
-        $this->assertTrue($this->adapter->hasForeignKey($this->config['name'] . '.' . $table->getName(), ['ref_table_id']));
-        $this->assertFalse($this->adapter->hasForeignKey($this->config['name'] . '.' . $table->getName(), ['ref_table_id2']));
+        $this->assertTrue($this->adapter->hasForeignKey($this->config['database'] . '.' . $table->getName(), ['ref_table_id']));
+        $this->assertFalse($this->adapter->hasForeignKey($this->config['database'] . '.' . $table->getName(), ['ref_table_id2']));
     }
 
     public function testHasDatabase()
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
-        $this->assertTrue($this->adapter->hasDatabase($this->config['name']));
+        $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
     public function testDropDatabase()
@@ -1919,7 +1865,7 @@ class MysqlAdapterTest extends TestCase
             FROM information_schema.columns
             WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='table1'
             ORDER BY ORDINAL_POSITION",
-            $this->config['name']
+            $this->config['database']
         ));
         $columnWithComment = $rows[1];
 
@@ -2140,7 +2086,7 @@ OUTPUT;
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(0, $res[0]['COUNT(*)']);
     }
 
@@ -2181,7 +2127,7 @@ OUTPUT;
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(0, $res[0]['COUNT(*)']);
     }
 
@@ -2214,31 +2160,6 @@ OUTPUT;
         $expectedOutput = preg_replace('~\R~u', '', $expectedOutput);
         $actualOutput = preg_replace('~\R~u', '', $actualOutput);
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
-    }
-
-    public function testDumpTransaction()
-    {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
-        $this->adapter->beginTransaction();
-        $table = new Table('table1', [], $this->adapter);
-
-        $table->addColumn('column1', 'string')
-            ->addColumn('column2', 'integer')
-            ->addColumn('column3', 'string', ['default' => 'test'])
-            ->save();
-        $this->adapter->commitTransaction();
-        $this->adapter->rollbackTransaction();
-
-        $actualOutput = $consoleOutput->fetch();
-        // Add this to be LF - CR/LF systems independent
-        $actualOutput = preg_replace('~\R~u', '', $actualOutput);
-        $this->assertStringStartsWith('START TRANSACTION;', $actualOutput, 'Passing the --dry-run doesn\'t dump the transaction to the output');
-        $this->assertStringEndsWith('COMMIT;ROLLBACK;', $actualOutput, 'Passing the --dry-run doesn\'t dump the transaction to the output');
     }
 
     /**
@@ -2304,13 +2225,13 @@ OUTPUT;
         ]);
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) AS c FROM table1 WHERE int_col > ?', [5]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(2, $res[0]['c']);
 
         $this->adapter->execute('UPDATE table1 SET int_col = ? WHERE int_col IS NULL', [12]);
 
         $countQuery->execute([1]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
     }
 
@@ -2453,29 +2374,10 @@ INPUT;
 
         $rows = $this->adapter->fetchAll(sprintf(
             "SELECT COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='exampleCurrentTimestamp3'",
-            $this->config['name']
+            $this->config['database']
         ));
         $colDef = $rows[0];
         $this->assertEqualsIgnoringCase('CURRENT_TIMESTAMP(3)', $colDef['COLUMN_DEFAULT']);
-    }
-
-    public static function pdoAttributeProvider()
-    {
-        return [
-            ['mysql_attr_invalid'],
-            ['attr_invalid'],
-        ];
-    }
-
-    /**
-     * @dataProvider pdoAttributeProvider
-     */
-    public function testInvalidPdoAttribute($attribute)
-    {
-        $adapter = new MysqlAdapter($this->config + [$attribute => true]);
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Invalid PDO attribute: ' . $attribute . ' (\PDO::' . strtoupper($attribute) . ')');
-        $adapter->connect();
     }
 
     public static function integerDataTypesSQLProvider()
@@ -2515,17 +2417,5 @@ INPUT;
 
         $this->assertSame($expectedResponse['name'], $result['name'], "Type mismatch - got '{$result['name']}' when expecting '{$expectedResponse['name']}'");
         $this->assertSame($expectedResponse['limit'], $result['limit'], "Field upper boundary mismatch - got '{$result['limit']}' when expecting '{$expectedResponse['limit']}'");
-    }
-
-    public function testPdoPersistentConnection()
-    {
-        $adapter = new MysqlAdapter($this->config + ['attr_persistent' => true]);
-        $this->assertTrue($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
-    }
-
-    public function testPdoNotPersistentConnection()
-    {
-        $adapter = new MysqlAdapter($this->config);
-        $this->assertFalse($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
     }
 }

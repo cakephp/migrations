@@ -78,13 +78,8 @@ class ManagerTest extends TestCase
         $dbConfig = ConnectionManager::getConfig('test');
         $config = [
             'connection' => 'test',
+            'database' => $dbConfig['database'],
             'migration_table' => 'phinxlog',
-            // TODO all of these should go away.
-            'adapter' => $dbConfig['scheme'],
-            'user' => $dbConfig['username'] ?? null,
-            'pass' => $dbConfig['password'] ?? null,
-            'host' => $dbConfig['host'],
-            'name' => $dbConfig['database'],
         ];
 
         return [
@@ -2597,6 +2592,7 @@ class ManagerTest extends TestCase
         $adapter = $this->prepareEnvironment([
             'migrations' => ROOT . '/config/Postgres',
         ]);
+        $adapter->connect();
         // migrate to the latest version
         $this->manager->migrate();
 
@@ -2639,6 +2635,7 @@ class ManagerTest extends TestCase
         $adapter->dropDatabase($dbName);
         $adapter->createDatabase($dbName);
         $adapter->disconnect();
+        $adapter->connect();
 
         $this->manager->setConfig($config);
         $this->manager->migrate(20190928205056);

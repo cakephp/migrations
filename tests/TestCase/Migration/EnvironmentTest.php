@@ -77,7 +77,7 @@ class EnvironmentTest extends TestCase
         $config = ConnectionManager::getConfig('test');
         $environment = new Environment('default', [
             'connection' => 'test',
-            'name' => $config['database'],
+            'database' => $config['database'],
             'migration_table' => 'phinxlog',
         ]);
         $adapter = $environment->getAdapter();
