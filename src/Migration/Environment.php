@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Migration;
 
+use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
@@ -15,8 +16,6 @@ use Migrations\Db\Adapter\PhinxAdapter;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\SeedInterface;
 use RuntimeException;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class Environment
 {
@@ -31,14 +30,9 @@ class Environment
     protected array $options;
 
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface|null
+     * @var \Cake\Console\ConsoleIo|null
      */
-    protected ?InputInterface $input = null;
-
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface|null
-     */
-    protected ?OutputInterface $output = null;
+    protected ?ConsoleIo $io = null;
 
     /**
      * @var int
@@ -213,49 +207,26 @@ class Environment
     }
 
     /**
-     * Sets the console input.
+     * Sets the consoleio.
      *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input
+     * @param \Cake\Console\ConsoleIo $io ConsoleIo
      * @return $this
      */
-    public function setInput(InputInterface $input)
+    public function setIo(ConsoleIo $io)
     {
-        $this->input = $input;
+        $this->io = $io;
 
         return $this;
     }
 
     /**
-     * Gets the console input.
+     * Get the io instance
      *
-     * @return \Symfony\Component\Console\Input\InputInterface|null
+     * @return \Cake\Console\ConsoleIo $io The io instance to use
      */
-    public function getInput(): ?InputInterface
+    public function getIo(): ?ConsoleIo
     {
-        return $this->input;
-    }
-
-    /**
-     * Sets the console output.
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output Output
-     * @return $this
-     */
-    public function setOutput(OutputInterface $output)
-    {
-        $this->output = $output;
-
-        return $this;
-    }
-
-    /**
-     * Gets the console output.
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface|null
-     */
-    public function getOutput(): ?OutputInterface
-    {
-        return $this->output;
+        return $this->io;
     }
 
     /**
@@ -343,9 +314,6 @@ class Environment
         if (!isset($options['connection'])) {
             throw new RuntimeException('No connection defined');
         }
-        // TODO Start here again. Goal is to have Connection go into
-        // AdapterFactory to choose the adapter.
-        // Adapters should use Connection API instead of PDO.
         $connection = ConnectionManager::get($options['connection']);
         $options['connection'] = $connection;
 
@@ -367,16 +335,9 @@ class Environment
                 ->getWrapper($options['wrapper'], $adapter);
         }
 
-        /** @var \Symfony\Component\Console\Input\InputInterface|null $input */
-        $input = $this->getInput();
-        if ($input) {
-            $adapter->setInput($input);
-        }
-
-        /** @var \Symfony\Component\Console\Output\OutputInterface|null $output */
-        $output = $this->getOutput();
-        if ($output) {
-            $adapter->setOutput($output);
+        $io = $this->getIo();
+        if ($io) {
+            $adapter->setIo($io);
         }
         $this->setAdapter($adapter);
 

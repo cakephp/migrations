@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Phinx\Migration;
 
+use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Db\Adapter\PdoAdapter;
@@ -253,11 +254,10 @@ class EnvironmentTest extends TestCase
 
     public function testGettingInputObject()
     {
-        $mock = $this->getMockBuilder('\Symfony\Component\Console\Input\InputInterface')
-            ->getMock();
-        $this->environment->setInput($mock);
-        $inputObject = $this->environment->getInput();
-        $this->assertInstanceOf('\Symfony\Component\Console\Input\InputInterface', $inputObject);
+        $mock = $this->getMockBuilder(ConsoleIo::class)->getMock();
+        $this->environment->setIo($mock);
+        $inputObject = $this->environment->getIo();
+        $this->assertInstanceOf(ConsoleIo::class, $inputObject);
     }
 
     public function testExecuteMigrationCallsInit()
