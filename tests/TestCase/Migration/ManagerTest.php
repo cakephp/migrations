@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Migration;
 
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
@@ -10,10 +12,12 @@ use Migrations\Config\Config;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
+use Migrations\Shim\OutputAdapter;
 use Phinx\Console\Command\AbstractCommand;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 
 class ManagerTest extends TestCase
@@ -24,14 +28,14 @@ class ManagerTest extends TestCase
     protected $config;
 
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface $input
+     * @var \Cake\Console\ConsoleIo $io
      */
-    protected $input;
+    protected $io;
 
     /**
-     * @var \Symfony\Component\Console\Output\OutputInterface $output
+     * @var \Cake\Console\StubConsoleOutput $io
      */
-    protected $output;
+    protected $out;
 
     /**
      * @var Manager
@@ -41,10 +45,12 @@ class ManagerTest extends TestCase
     protected function setUp(): void
     {
         $this->config = new Config($this->getConfigArray());
-        $this->input = new ArrayInput([]);
-        $this->output = new StreamOutput(fopen('php://memory', 'a', false));
-        $this->output->setDecorated(false);
-        $this->manager = new Manager($this->config, $this->input, $this->output);
+
+        $this->out = new StubConsoleOutput();
+        $this->out->setOutputAs(StubConsoleOutput::PLAIN);
+
+        $this->io = new ConsoleIo($this->out, $this->out);
+        $this->manager = new Manager($this->config, $this->io);
     }
 
     protected static function getDriverType(): string
@@ -55,6 +61,14 @@ class ManagerTest extends TestCase
         }
 
         return $config['scheme'];
+    }
+
+    protected function getOutput(): string
+    {
+        $lines = $this->out->messages();
+        $lines = array_map(fn ($line) => strip_tags($line), $lines);
+
+        return join("\n", $lines);
     }
 
     protected function tearDown(): void
@@ -148,14 +162,6 @@ class ManagerTest extends TestCase
         return $adapter;
     }
 
-    public function testInstantiation(): void
-    {
-        $this->assertInstanceOf(
-            'Symfony\Component\Console\Output\StreamOutput',
-            $this->manager->getOutput()
-        );
-    }
-
     public function testPrintStatusMethod(): void
     {
         // stub environment
@@ -186,7 +192,6 @@ class ManagerTest extends TestCase
                 ));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus();
         $expected = [
           [
@@ -232,7 +237,6 @@ class ManagerTest extends TestCase
                     ]
                 ));
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus(AbstractCommand::FORMAT_JSON);
         $expected = [
             [
@@ -279,7 +283,6 @@ class ManagerTest extends TestCase
                 ));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus();
         $expected = [
           [
@@ -310,7 +313,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setConfig($config);
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
+
         $return = $this->manager->printStatus();
         $this->assertEquals([], $return);
     }
@@ -345,7 +348,7 @@ class ManagerTest extends TestCase
                 ));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
+
         $return = $this->manager->printStatus();
         $expected = [
             [
@@ -412,7 +415,7 @@ class ManagerTest extends TestCase
                 ));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
+
         $return = $this->manager->printStatus();
         $expected = [
             [
@@ -465,8 +468,8 @@ class ManagerTest extends TestCase
                 ));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
         $return = $this->manager->printStatus();
+
         $expected = [
             [
               'missing' => true,
@@ -512,7 +515,7 @@ class ManagerTest extends TestCase
                     ]]));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
+
         $return = $this->manager->printStatus();
         $expected = [
             [
@@ -564,7 +567,7 @@ class ManagerTest extends TestCase
                         ]]));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
+
         $return = $this->manager->printStatus();
         $expected = [
             [
@@ -596,7 +599,7 @@ class ManagerTest extends TestCase
     public function testGetMigrationsWithDuplicateMigrationVersions()
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/Duplicateversions']]);
-        $manager = new Manager($config, $this->input, $this->output);
+        $manager = new Manager($config, $this->io);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Duplicate migration/');
@@ -607,7 +610,7 @@ class ManagerTest extends TestCase
     public function testGetMigrationsWithDuplicateMigrationNames()
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/Duplicatenames']]);
-        $manager = new Manager($config, $this->input, $this->output);
+        $manager = new Manager($config, $this->io);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Migration "20120111235331_duplicate_migration_name.php" has the same name as "20120111235330_duplicate_migration_name.php"');
@@ -618,7 +621,7 @@ class ManagerTest extends TestCase
     public function testGetMigrationsWithInvalidMigrationClassName()
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/Invalidclassname']]);
-        $manager = new Manager($config, $this->input, $this->output);
+        $manager = new Manager($config, $this->io);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Could not find class "InvalidClass" in file/');
@@ -661,8 +664,8 @@ class ManagerTest extends TestCase
         }
         $this->manager->setEnvironment($envStub);
         $this->manager->migrateToDateTime(new DateTime($dateString));
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+
+        $output = $this->getOutput();
         if (is_null($expectedMigration)) {
             $this->assertEmpty($output, $message);
         } else {
@@ -688,10 +691,10 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version);
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
         if (is_null($expectedOutput)) {
-            $this->assertEquals('No migrations to rollback' . PHP_EOL, $output);
+            $output = explode("\n", $output);
+            $this->assertEquals('No migrations to rollback', array_pop($output));
         } else {
             if (is_string($expectedOutput)) {
                 $expectedOutput = [$expectedOutput];
@@ -721,10 +724,10 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version, false, false);
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
         if (is_null($expectedOutput)) {
-            $this->assertEquals('No migrations to rollback' . PHP_EOL, $output);
+            $output = explode("\n", $output);
+            $this->assertEquals('No migrations to rollback', array_pop($output));
         } else {
             if (is_string($expectedOutput)) {
                 $expectedOutput = [$expectedOutput];
@@ -756,15 +759,11 @@ class ManagerTest extends TestCase
         $configArray = $this->getConfigArray();
         $configArray['version_order'] = Config::VERSION_ORDER_EXECUTION_TIME;
         $config = new Config($configArray);
-        $this->input = new ArrayInput([]);
-        $this->output = new StreamOutput(fopen('php://memory', 'a', false));
-        $this->output->setDecorated(false);
 
-        $this->manager = new Manager($config, $this->input, $this->output);
+        $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version);
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
 
         if (is_null($expectedOutput)) {
             $this->assertEmpty($output);
@@ -799,15 +798,11 @@ class ManagerTest extends TestCase
         $configArray = $this->getConfigArray();
         $configArray['version_order'] = Config::VERSION_ORDER_EXECUTION_TIME;
         $config = new Config($configArray);
-        $this->input = new ArrayInput([]);
-        $this->output = new StreamOutput(fopen('php://memory', 'a', false));
-        $this->output->setDecorated(false);
 
-        $this->manager = new Manager($config, $this->input, $this->output);
+        $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($availableRollbacks[$version]['migration_name'] ?? $version);
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
 
         if (is_null($expectedOutput)) {
             $this->assertEmpty($output);
@@ -842,18 +837,15 @@ class ManagerTest extends TestCase
         $configArray = $this->getConfigArray();
         $configArray['version_order'] = Config::VERSION_ORDER_EXECUTION_TIME;
         $config = new Config($configArray);
-        $this->input = new ArrayInput([]);
-        $this->output = new StreamOutput(fopen('php://memory', 'a', false));
-        $this->output->setDecorated(false);
 
-        $this->manager = new Manager($config, $this->input, $this->output);
+        $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($date, false, false);
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
 
         if (is_null($expectedOutput)) {
-            $this->assertEquals('No migrations to rollback' . PHP_EOL, $output);
+            $output = explode("\n", $output);
+            $this->assertEquals('No migrations to rollback', array_pop($output));
         } else {
             if (is_string($expectedOutput)) {
                 $expectedOutput = [$expectedOutput];
@@ -882,8 +874,8 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
+
         $this->assertStringContainsString('== 20120111235330 TestMigration: reverting', $output);
         $this->assertStringContainsString('== 20120111235330 TestMigration: reverted', $output);
         $this->assertStringNotContainsString('No migrations to rollback', $output);
@@ -919,8 +911,8 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
+
         $this->assertStringNotContainsString('== 20120111235330 TestMigration: reverting', $output);
     }
 
@@ -943,14 +935,11 @@ class ManagerTest extends TestCase
         $configArray = $this->getConfigArray();
         $configArray['version_order'] = $versionOrder;
         $config = new Config($configArray);
-        $this->input = new ArrayInput([]);
-        $this->output = new StreamOutput(fopen('php://memory', 'a', false));
-        $this->output->setDecorated(false);
-        $this->manager = new Manager($config, $this->input, $this->output);
+
+        $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback(null);
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = $this->getOutput();
         if (is_null($expectedOutput)) {
             $this->assertEquals('No migrations to rollback' . PHP_EOL, $output);
         } else {
@@ -2165,8 +2154,8 @@ class ManagerTest extends TestCase
             ->getMock();
         $this->manager->setEnvironment($envStub);
         $this->manager->seed();
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+
+        $output = join("\n", $this->out->messages());
         $this->assertStringContainsString('GSeeder', $output);
         $this->assertStringContainsString('PostSeeder', $output);
         $this->assertStringContainsString('UserSeeder', $output);
@@ -2180,8 +2169,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $this->manager->setEnvironment($envStub);
         $this->manager->seed('UserSeeder');
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+        $output = join("\n", $this->out->messages());
         $this->assertStringContainsString('UserSeeder', $output);
     }
 
@@ -2215,8 +2203,8 @@ class ManagerTest extends TestCase
             ->getMock();
         $this->manager->setEnvironment($envStub);
         $this->manager->seed('UserSeederNotExecuted');
-        rewind($this->manager->getOutput()->getStream());
-        $output = stream_get_contents($this->manager->getOutput()->getStream());
+
+        $output = join("\n", $this->out->messages());
         $this->assertStringContainsString('skipped', $output);
     }
 
@@ -2224,29 +2212,26 @@ class ManagerTest extends TestCase
     {
         $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds();
-        $inputObject = $this->manager->getInput();
-        $this->assertInstanceOf('\Symfony\Component\Console\Input\InputInterface', $inputObject);
-
         foreach ($migrations as $migration) {
-            $this->assertEquals($inputObject, $migration->getInput());
+            $this->assertInstanceOf(InputInterface::class, $migration->getInput());
         }
         foreach ($seeds as $seed) {
-            $this->assertEquals($inputObject, $seed->getInput());
+            $this->assertInstanceOf(InputInterface::class, $migration->getInput());
         }
     }
 
-    public function testGettingOutputObject(): void
+    public function testGettingIo(): void
     {
         $migrations = $this->manager->getMigrations();
         $seeds = $this->manager->getSeeds();
-        $outputObject = $this->manager->getOutput();
-        $this->assertInstanceOf('\Symfony\Component\Console\Output\OutputInterface', $outputObject);
+        $io = $this->manager->getIo();
+        $this->assertInstanceOf(ConsoleIo::class, $io);
 
         foreach ($migrations as $migration) {
-            $this->assertEquals($outputObject, $migration->getOutput());
+            $this->assertInstanceOf(OutputAdapter::class, $migration->getOutput());
         }
         foreach ($seeds as $seed) {
-            $this->assertEquals($outputObject, $seed->getOutput());
+            $this->assertInstanceOf(OutputAdapter::class, $seed->getOutput());
         }
     }
 
@@ -2700,12 +2685,10 @@ class ManagerTest extends TestCase
                 ));
 
         $this->manager->setEnvironment($envStub);
-        $this->manager->getOutput()->setDecorated(false);
         $this->manager->setBreakpoint(20120133235330);
 
-        rewind($this->manager->getOutput()->getStream());
-        $outputStr = stream_get_contents($this->manager->getOutput()->getStream());
-        $this->assertEquals('warning 20120133235330 is not a valid version', trim($outputStr));
+        $output = join("\n", $this->out->messages());
+        $this->assertStringContainsString('<comment>warning</comment> 20120133235330 is not a valid version', $output);
     }
 
     public function testMigrationWillNotBeExecuted(): void

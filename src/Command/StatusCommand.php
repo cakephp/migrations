@@ -162,7 +162,7 @@ class StatusCommand extends Command
     {
         $config = $this->getConfig($args);
 
-        return new Manager($config, new ArgvInput(), new StreamOutput(STDOUT));
+        return new Manager($config, $io);
     }
 
     /**
@@ -176,7 +176,7 @@ class StatusCommand extends Command
     {
         /** @var string|null $format */
         $format = $args->getOption('format');
-        $migrations = $this->getManager($args)->printStatus($format);
+        $migrations = $this->getManager($args, $io)->printStatus($format);
 
         switch ($format) {
             case 'json':

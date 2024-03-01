@@ -8,14 +8,13 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Cake\Console\ConsoleIo;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Console\Output\OutputInterface;
+use RuntimeException;
 
 /**
  * Base Abstract Database Adapter.
@@ -28,14 +27,9 @@ abstract class AbstractAdapter implements AdapterInterface
     protected array $options = [];
 
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface|null
+     * @var \Cake\Console\ConsoleIo
      */
-    protected ?InputInterface $input = null;
-
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected OutputInterface $output;
+    protected ConsoleIo $io;
 
     /**
      * @var string[]
@@ -56,17 +50,13 @@ abstract class AbstractAdapter implements AdapterInterface
      * Class Constructor.
      *
      * @param array<string, mixed> $options Options
-     * @param \Symfony\Component\Console\Input\InputInterface|null $input Input Interface
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output Output Interface
+     * @param \Cake\Console\ConsoleIo|null $io Console input/output
      */
-    public function __construct(array $options, ?InputInterface $input = null, ?OutputInterface $output = null)
+    public function __construct(array $options, ?ConsoleIo $io = null)
     {
         $this->setOptions($options);
-        if ($input !== null) {
-            $this->setInput($input);
-        }
-        if ($output !== null) {
-            $this->setOutput($output);
+        if ($io !== null) {
+            $this->setIo($io);
         }
     }
 
@@ -117,9 +107,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function setInput(InputInterface $input): AdapterInterface
     {
-        $this->input = $input;
-
-        return $this;
+        throw new RuntimeException('Using setInput() interface is not supported.');
     }
 
     /**
@@ -127,7 +115,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getInput(): ?InputInterface
     {
-        return $this->input;
+        throw new RuntimeException('Using getInput() interface is not supported.');
     }
 
     /**
@@ -243,6 +231,25 @@ abstract class AbstractAdapter implements AdapterInterface
     public function isValidColumnType(Column $column): bool
     {
         return $column->getType() instanceof Literal || in_array($column->getType(), $this->getColumnTypes(), true);
+    }
+
+
+    /**
+ * @inheritDoc
+     */
+    public function setIo(ConsoleIo $io)
+    {
+        $this->io = $io;
+
+        return $this;
+    }
+
+    /**
+ * @inheritDoc
+     */
+    public function getIo(): ?ConsoleIo
+    {
+        return $this->io;
     }
 
     /**

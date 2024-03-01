@@ -371,9 +371,7 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     public function setInput(InputInterface $input): PhinxAdapterInterface
     {
-        $this->adapter->setInput($input);
-
-        return $this;
+        throw new RuntimeException('Using setInput() on Adapters is no longer supported');
     }
 
     /**
@@ -381,12 +379,7 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     public function getInput(): InputInterface
     {
-        $input = $this->adapter->getInput();
-        if (!$input) {
-            throw new RuntimeException('Cannot getInput it has not been set.');
-        }
-
-        return $input;
+        throw new RuntimeException('Using getInput() on Adapters is no longer supported');
     }
 
     /**
@@ -394,9 +387,7 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     public function setOutput(OutputInterface $output): PhinxAdapterInterface
     {
-        $this->adapter->setOutput($output);
-
-        return $this;
+        throw new RuntimeException('Using setOutput() on Adapters is no longer supported');
     }
 
     /**
@@ -404,7 +395,7 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     public function getOutput(): OutputInterface
     {
-        return $this->adapter->getOutput();
+        throw new RuntimeException('Using getOutput() on Adapters is no longer supported');
     }
 
     /**
