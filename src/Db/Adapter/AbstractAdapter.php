@@ -14,7 +14,9 @@ use InvalidArgumentException;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
+use Migrations\Shim\OutputAdapter;
 use RuntimeException;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Base Abstract Database Adapter.
@@ -123,9 +125,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function setOutput(OutputInterface $output): AdapterInterface
     {
-        $this->output = $output;
-
-        return $this;
+        throw new RuntimeException('Using setInput() method is not supported');
     }
 
     /**
@@ -133,12 +133,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getOutput(): OutputInterface
     {
-        if (!isset($this->output)) {
-            $output = new NullOutput();
-            $this->setOutput($output);
-        }
-
-        return $this->output;
+        return new OutputAdapter($this->io);
     }
 
     /**
@@ -249,7 +244,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getIo(): ?ConsoleIo
     {
-        return $this->io;
+        return $this->io ?? null;
     }
 
     /**
@@ -259,10 +254,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function isDryRunEnabled(): bool
     {
-        /** @var \Symfony\Component\Console\Input\InputInterface|null $input */
-        $input = $this->getInput();
-
-        return $input && $input->hasOption('dry-run') ? (bool)$input->getOption('dry-run') : false;
+        return $this->getOption('dry-run') === true;
     }
 
     /**

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Console\ConsoleIo;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
@@ -41,7 +42,6 @@ use Phinx\Config\Config;
 use Phinx\Migration\MigrationInterface;
 use ReflectionMethod;
 use RuntimeException;
-use Symfony\Component\Console\Output\OutputInterface;
 use UnexpectedValueException;
 
 /**
@@ -62,14 +62,17 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     protected function verboseLog(string $message): void
     {
+        $io = $this->getIo();
         if (
-            !$this->isDryRunEnabled() &&
-             $this->getOutput()->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE
+            $io === null || (
+                !$this->isDryRunEnabled() &&
+                $io->level() != ConsoleIo::VERBOSE
+            )
         ) {
             return;
         }
 
-        $this->getOutput()->writeln($message);
+        $io->out($message);
     }
 
     /**
@@ -304,7 +307,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
 
         if ($this->isDryRunEnabled()) {
             $sql .= ' VALUES (' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ');';
-            $this->output->writeln($sql);
+            $this->io->out($sql);
         } else {
             $sql .= ' VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')';
             $this->getConnection()->execute($sql, array_values($row));
@@ -370,7 +373,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                 return '(' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ')';
             }, $rows);
             $sql .= implode(', ', $values) . ';';
-            $this->output->writeln($sql);
+            $this->io->out($sql);
         } else {
             $count_keys = count($keys);
             $query = '(' . implode(', ', array_fill(0, $count_keys, '?')) . ')';
