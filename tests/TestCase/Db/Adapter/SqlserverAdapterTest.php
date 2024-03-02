@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
@@ -28,10 +31,9 @@ class SqlserverAdapterTest extends TestCase
      */
     private $adapter;
 
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
+    private StubConsoleOutput $out;
+    private ConsoleIo $io;
 
     protected function setUp(): void
     {
@@ -46,7 +48,7 @@ class SqlserverAdapterTest extends TestCase
             'database' => $config['database'],
         ];
 
-        $this->adapter = new SqlserverAdapter($this->config, new ArrayInput([]), new NullOutput());
+        $this->adapter = new SqlserverAdapter($this->config, $this->getConsoleIo());
 
         // ensure the database is empty for each test
         $this->adapter->dropDatabase($this->config['database']);
@@ -61,7 +63,19 @@ class SqlserverAdapterTest extends TestCase
         if (!empty($this->adapter)) {
             $this->adapter->disconnect();
         }
-        unset($this->adapter);
+        unset($this->adapter, $this->out, $this->io);
+    }
+
+    protected function getConsoleIo(): ConsoleIo
+    {
+        $out = new StubConsoleOutput();
+        $in = new StubConsoleInput([]);
+        $io = new ConsoleIo($out, $out, $in);
+
+        $this->out = $out;
+        $this->io = $io;
+
+        return $this->io;
     }
 
     public function testConnection()
@@ -1254,11 +1268,9 @@ WHERE t.name='ntable'");
 
     public function testDumpCreateTableAndThenInsert()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $table = new Table('table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
 
@@ -1278,7 +1290,8 @@ WHERE t.name='ntable'");
 CREATE TABLE [table1] ([column1] NVARCHAR (255)   NOT NULL , [column2] INT   NULL  DEFAULT NULL, CONSTRAINT PK_table1 PRIMARY KEY ([column1]));
 INSERT INTO [table1] ([column1], [column2]) VALUES ('id1', 1);
 OUTPUT;
-        $actualOutput = str_replace("\r\n", "\n", $consoleOutput->fetch());
+        $output = join("\n", $this->out->messages());
+        $actualOutput = str_replace("\r\n", "\n", $output);
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
 
