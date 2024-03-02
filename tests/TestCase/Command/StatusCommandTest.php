@@ -43,7 +43,7 @@ class StatusCommandTest extends TestCase
 
         assert(isset($this->_out));
         $output = $this->_out->messages();
-        $parsed = json_decode($output[0], true);
+        $parsed = json_decode($output[1], true);
         $this->assertTrue(is_array($parsed));
         $this->assertCount(1, $parsed);
         $this->assertArrayHasKey('id', $parsed[0]);

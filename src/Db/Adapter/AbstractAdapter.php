@@ -254,7 +254,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function isDryRunEnabled(): bool
     {
-        return $this->getOption('dry-run') === true;
+        return $this->getOption('dryrun') === true;
     }
 
     /**

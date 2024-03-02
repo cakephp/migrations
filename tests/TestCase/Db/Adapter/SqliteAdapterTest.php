@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
@@ -29,6 +32,8 @@ use Symfony\Component\Console\Output\NullOutput;
 class SqliteAdapterTest extends TestCase
 {
     private array $config;
+    private StubConsoleOutput $out;
+    private ConsoleIo $io;
 
     /**
      * @var \Migrations\Db\Adapter\SqliteAdapter
@@ -48,7 +53,8 @@ class SqliteAdapterTest extends TestCase
             'connection' => ConnectionManager::get('test'),
             'database' => $config['database'],
         ];
-        $this->adapter = new SqliteAdapter($this->config, new ArrayInput([]), new NullOutput());
+        $io = $this->getConsoleIo();
+        $this->adapter = new SqliteAdapter($this->config, $io);
 
         if ($config['database'] !== ':memory:') {
             // ensure the database is empty for each test
@@ -60,9 +66,21 @@ class SqliteAdapterTest extends TestCase
         $this->adapter->disconnect();
     }
 
+    protected function getConsoleIo(): ConsoleIo
+    {
+        $out = new StubConsoleOutput();
+        $in = new StubConsoleInput([]);
+        $io = new ConsoleIo($out, $out, $in);
+
+        $this->out = $out;
+        $this->io = $io;
+
+        return $this->io;
+    }
+
     protected function tearDown(): void
     {
-        unset($this->adapter);
+        unset($this->adapter, $this->out, $this->io);
     }
 
     public function testConnection()
@@ -1774,12 +1792,7 @@ class SqliteAdapterTest extends TestCase
 
     public function testDumpCreateTable()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $table = new Table('table1', [], $this->adapter);
 
         $table->addColumn('column1', 'string', ['null' => false])
@@ -1790,7 +1803,7 @@ class SqliteAdapterTest extends TestCase
         $expectedOutput = <<<'OUTPUT'
 CREATE TABLE `table1` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `column1` VARCHAR NOT NULL, `column2` INTEGER NULL, `column3` VARCHAR NULL DEFAULT 'test');
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
     }
 
@@ -1806,12 +1819,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $this->adapter->insert($table->getTable(), [
             'string_col' => 'test data',
         ]);
@@ -1829,7 +1837,7 @@ INSERT INTO `table1` (`string_col`) VALUES ('test data');
 INSERT INTO `table1` (`string_col`) VALUES (null);
 INSERT INTO `table1` (`int_col`) VALUES (23);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $actualOutput = preg_replace("/\r\n|\r/", "\n", $actualOutput); // normalize line endings for Windows
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the insert to the output');
 
@@ -1851,12 +1859,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $this->adapter->bulkinsert($table->getTable(), [
             [
                 'string_col' => 'test_data1',
@@ -1871,7 +1874,7 @@ OUTPUT;
         $expectedOutput = <<<'OUTPUT'
 INSERT INTO `table1` (`string_col`, `int_col`) VALUES ('test_data1', 23), (null, 42);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the bulkinsert to the output');
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
@@ -1882,12 +1885,7 @@ OUTPUT;
 
     public function testDumpCreateTableAndThenInsert()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $table = new Table('table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
 
         $table->addColumn('column1', 'string', ['null' => false])
@@ -1906,7 +1904,7 @@ OUTPUT;
 CREATE TABLE `table1` (`column1` VARCHAR NOT NULL, `column2` INTEGER NULL, PRIMARY KEY (`column1`));
 INSERT INTO `table1` (`column1`, `column2`) VALUES ('id1', 1);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $actualOutput = preg_replace("/\r\n|\r/", "\n", $actualOutput); // normalize line endings for Windows
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
@@ -2167,7 +2165,7 @@ OUTPUT;
     {
         $adapter = $this
             ->getMockBuilder(SqliteAdapter::class)
-            ->setConstructorArgs([$this->config, new ArrayInput([]), new NullOutput()])
+            ->setConstructorArgs([$this->config, $this->io])
             ->onlyMethods(['query'])
             ->getMock();
 
