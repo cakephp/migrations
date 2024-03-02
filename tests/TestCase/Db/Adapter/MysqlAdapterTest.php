@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
@@ -34,6 +37,8 @@ class MysqlAdapterTest extends TestCase
      * @var array
      */
     private $config;
+    private StubConsoleOutput $out;
+    private ConsoleIo $io;
 
     protected function setUp(): void
     {
@@ -47,8 +52,7 @@ class MysqlAdapterTest extends TestCase
             'connection' => ConnectionManager::get('test'),
             'database' => $config['database'],
         ];
-
-        $this->adapter = new MysqlAdapter($this->config, new ArrayInput([]), new NullOutput());
+        $this->adapter = new MysqlAdapter($this->config, $this->getConsoleIo());
 
         // ensure the database is empty for each test
         $this->adapter->dropDatabase($this->config['database']);
@@ -58,9 +62,22 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->disconnect();
     }
 
+
+    protected function getConsoleIo(): ConsoleIo
+    {
+        $out = new StubConsoleOutput();
+        $in = new StubConsoleInput([]);
+        $io = new ConsoleIo($out, $out, $in);
+
+        $this->out = $out;
+        $this->io = $io;
+
+        return $this->io;
+    }
+
     protected function tearDown(): void
     {
-        unset($this->adapter);
+        unset($this->adapter, $this->out, $this->io);
     }
 
     private function usingMysql8(): bool
@@ -370,7 +387,7 @@ class MysqlAdapterTest extends TestCase
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
         ];
-        $adapter = new MysqlAdapter($options, new ArrayInput([]), new NullOutput());
+        $adapter = new MysqlAdapter($options, $this->io);
 
         $table = new Table('table_with_default_collation', [], $adapter);
         $table->addColumn('name', 'string')
@@ -2021,11 +2038,9 @@ class MysqlAdapterTest extends TestCase
 
     public function testDumpCreateTable()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $table = new Table('table1', [], $this->adapter);
 
@@ -2037,7 +2052,7 @@ class MysqlAdapterTest extends TestCase
         $expectedOutput = <<<'OUTPUT'
 CREATE TABLE `table1` (`id` INT(11) unsigned NOT NULL AUTO_INCREMENT, `column1` VARCHAR(255) NOT NULL, `column2` INT(11) NULL, `column3` VARCHAR(255) NOT NULL DEFAULT 'test', PRIMARY KEY (`id`)) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
     }
 
@@ -2053,12 +2068,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $this->adapter->insert($table->getTable(), [
             'string_col' => 'test data',
         ]);
@@ -2076,7 +2086,7 @@ INSERT INTO `table1` (`string_col`) VALUES ('test data');
 INSERT INTO `table1` (`string_col`) VALUES (null);
 INSERT INTO `table1` (`int_col`) VALUES (23);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
 
         // Add this to be LF - CR/LF systems independent
         $expectedOutput = preg_replace('~\R~u', '', $expectedOutput);
@@ -2102,12 +2112,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $this->adapter->bulkinsert($table->getTable(), [
             [
                 'string_col' => 'test_data1',
@@ -2122,7 +2127,7 @@ OUTPUT;
         $expectedOutput = <<<'OUTPUT'
 INSERT INTO `table1` (`string_col`, `int_col`) VALUES ('test_data1', 23), (null, 42);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the bulkinsert to the output');
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
@@ -2133,11 +2138,9 @@ OUTPUT;
 
     public function testDumpCreateTableAndThenInsert()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $table = new Table('table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
 
@@ -2155,7 +2158,7 @@ OUTPUT;
 CREATE TABLE `table1` (`column1` VARCHAR(255) NOT NULL, `column2` INT(11) NULL, PRIMARY KEY (`column1`)) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 INSERT INTO `table1` (`column1`, `column2`) VALUES ('id1', 1);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         // Add this to be LF - CR/LF systems independent
         $expectedOutput = preg_replace('~\R~u', '', $expectedOutput);
         $actualOutput = preg_replace('~\R~u', '', $actualOutput);
