@@ -39,7 +39,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
 
         return function () use ($started): void {
             $end = microtime(true);
-            $this->getIo()->out('    -> ' . sprintf('%.4fs', $end - $started));
+            $this->getIo()?->out('    -> ' . sprintf('%.4fs', $end - $started));
         };
     }
 
@@ -72,7 +72,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
 
                 $outArr[] = '\'' . $arg . '\'';
             }
-            $this->getIo()->verbose(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
+            $this->getIo()?->verbose(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
 
             return;
         }

@@ -1019,7 +1019,7 @@ class Manager
 
         foreach ($this->seeds as $instance) {
             // TODO fix this to not use input
-            if ($instance instanceof AbstractSeed) {
+            if (isset($input) && $instance instanceof AbstractSeed) {
                 $instance->setInput($input);
             }
         }

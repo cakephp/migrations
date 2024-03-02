@@ -23,8 +23,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Config\Config;
 use Migrations\Migration\Manager;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\StreamOutput;
 
 /**
  * Status command for built in backend
@@ -135,7 +133,7 @@ class StatusCommand extends Command
             'connection' => $connectionName,
             'database' => $connectionConfig['database'],
             'migration_table' => $table,
-            'dryrun' => $args->getOption('dry-run')
+            'dryrun' => $args->getOption('dry-run'),
         ];
 
         $configData = [

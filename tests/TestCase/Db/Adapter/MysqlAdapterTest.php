@@ -20,11 +20,6 @@ use PDOException;
 use Phinx\Config\FeatureFlags;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\NullOutput;
 
 class MysqlAdapterTest extends TestCase
 {
@@ -61,7 +56,6 @@ class MysqlAdapterTest extends TestCase
         // leave the adapter in a disconnected state for each test
         $this->adapter->disconnect();
     }
-
 
     protected function getConsoleIo(): ConsoleIo
     {

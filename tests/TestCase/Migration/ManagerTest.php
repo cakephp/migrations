@@ -16,9 +16,7 @@ use Migrations\Shim\OutputAdapter;
 use Phinx\Console\Command\AbstractCommand;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\StreamOutput;
 
 class ManagerTest extends TestCase
 {

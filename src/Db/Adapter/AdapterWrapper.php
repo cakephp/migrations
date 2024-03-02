@@ -490,7 +490,9 @@ abstract class AdapterWrapper implements WrapperInterface
      */
     public function setIo(ConsoleIo $io)
     {
-        return $this->getAdapter()->setIo($io);
+        $this->getAdapter()->setIo($io);
+
+        return $this;
     }
 
     /**

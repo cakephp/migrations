@@ -16,6 +16,7 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Shim\OutputAdapter;
 use RuntimeException;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -228,9 +229,8 @@ abstract class AbstractAdapter implements AdapterInterface
         return $column->getType() instanceof Literal || in_array($column->getType(), $this->getColumnTypes(), true);
     }
 
-
     /**
- * @inheritDoc
+     * @inheritDoc
      */
     public function setIo(ConsoleIo $io)
     {
@@ -240,7 +240,7 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
- * @inheritDoc
+     * @inheritDoc
      */
     public function getIo(): ?ConsoleIo
     {
