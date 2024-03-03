@@ -70,12 +70,6 @@
     <DeprecatedMethod>
       <code>getQueryBuilder</code>
     </DeprecatedMethod>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[$this->getAdapter()->setIo($io)]]></code>
-    </LessSpecificReturnStatement>
-    <MoreSpecificReturnType>
-      <code>setIo</code>
-    </MoreSpecificReturnType>
   </file>
   <file src="src/Db/Adapter/MysqlAdapter.php">
     <RedundantCondition>
@@ -150,10 +144,6 @@
     <MoreSpecificReturnType>
       <code>self::VERBOSITY_*</code>
     </MoreSpecificReturnType>
-    <PossiblyInvalidArgument>
-      <code>$messages</code>
-      <code>$messages</code>
-    </PossiblyInvalidArgument>
   </file>
   <file src="src/TableFinderTrait.php">
     <PossiblyUndefinedArrayOffset>

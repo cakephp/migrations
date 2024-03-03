@@ -31,6 +31,9 @@ class OutputAdapter implements OutputInterface
     {
     }
 
+    /**
+     * @inheritDoc
+     */
     public function write(string|iterable $messages, bool $newline = false, $options = 0): void
     {
         if ($messages instanceof Traversable) {
@@ -39,6 +42,9 @@ class OutputAdapter implements OutputInterface
         $this->io->out($messages, $newline ? 1 : 0);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function writeln(string|iterable $messages, $options = 0): void
     {
         if ($messages instanceof Traversable) {
