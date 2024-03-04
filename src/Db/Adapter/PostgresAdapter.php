@@ -1558,7 +1558,7 @@ class PostgresAdapter extends PdoAdapter
 
         if ($this->isDryRunEnabled()) {
             $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ');';
-            $this->output->writeln($sql);
+            $this->io->out($sql);
         } else {
             $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')';
             $this->getConnection()->execute($sql, array_values($row));
@@ -1590,7 +1590,7 @@ class PostgresAdapter extends PdoAdapter
                 return '(' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ')';
             }, $rows);
             $sql .= implode(', ', $values) . ';';
-            $this->output->writeln($sql);
+            $this->io->out($sql);
         } else {
             $connection = $this->getConnection();
             $count_keys = count($keys);

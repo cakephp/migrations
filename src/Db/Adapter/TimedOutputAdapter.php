@@ -9,11 +9,11 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Console\ConsoleIo;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Wraps any adapter to record the time spend executing its commands
@@ -39,9 +39,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
 
         return function () use ($started): void {
             $end = microtime(true);
-            if (OutputInterface::VERBOSITY_VERBOSE <= $this->getOutput()->getVerbosity()) {
-                $this->getOutput()->writeln('    -> ' . sprintf('%.4fs', $end - $started));
-            }
+            $this->getIo()?->out('    -> ' . sprintf('%.4fs', $end - $started));
         };
     }
 
@@ -54,10 +52,10 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      */
     public function writeCommand(string $command, array $args = []): void
     {
-        if (OutputInterface::VERBOSITY_VERBOSE > $this->getOutput()->getVerbosity()) {
+        $io = $this->getIo();
+        if ($io && $io->level() < ConsoleIo::VERBOSE) {
             return;
         }
-
         if (count($args)) {
             $outArr = [];
             foreach ($args as $arg) {
@@ -74,12 +72,12 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
 
                 $outArr[] = '\'' . $arg . '\'';
             }
-            $this->getOutput()->writeln(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
+            $this->getIo()?->verbose(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
 
             return;
         }
 
-        $this->getOutput()->writeln(' -- ' . $command);
+        $this->getIo()->verbose(' -- ' . $command);
     }
 
     /**

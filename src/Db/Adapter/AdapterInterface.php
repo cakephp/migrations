@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Cake\Console\ConsoleIo;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -17,8 +18,6 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
 use Phinx\Migration\MigrationInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Adapter Interface.
@@ -126,36 +125,6 @@ interface AdapterInterface
      * @return mixed
      */
     public function getOption(string $name): mixed;
-
-    /**
-     * Sets the console input.
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input
-     * @return $this
-     */
-    public function setInput(InputInterface $input);
-
-    /**
-     * Gets the console input.
-     *
-     * @return \Symfony\Component\Console\Input\InputInterface|null
-     */
-    public function getInput(): ?InputInterface;
-
-    /**
-     * Sets the console output.
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output Output
-     * @return $this
-     */
-    public function setOutput(OutputInterface $output);
-
-    /**
-     * Gets the console output.
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface
-     */
-    public function getOutput(): OutputInterface;
 
     /**
      * Returns a new Migrations\Db\Table\Column using the existent data domain.
@@ -536,4 +505,19 @@ interface AdapterInterface
      * @return mixed
      */
     public function castToBool(mixed $value): mixed;
+
+    /**
+     * Sets the consoleio.
+     *
+     * @param \Cake\Console\ConsoleIo $io ConsoleIo
+     * @return $this
+     */
+    public function setIo(ConsoleIo $io);
+
+    /**
+     * Get the io instance
+     *
+     * @return \Cake\Console\ConsoleIo $io The io instance to use
+     */
+    public function getIo(): ?ConsoleIo;
 }

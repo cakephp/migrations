@@ -57,7 +57,8 @@
   </file>
   <file src="src/Db/Adapter/AbstractAdapter.php">
     <RedundantPropertyInitializationCheck>
-      <code><![CDATA[isset($this->output)]]></code>
+      <code><![CDATA[$this->io]]></code>
+      <code>null</code>
     </RedundantPropertyInitializationCheck>
   </file>
   <file src="src/Db/Adapter/AdapterFactory.php">
@@ -69,12 +70,6 @@
     <DeprecatedMethod>
       <code>getQueryBuilder</code>
     </DeprecatedMethod>
-    <InvalidNullableReturnType>
-      <code>InputInterface</code>
-    </InvalidNullableReturnType>
-    <NullableReturnStatement>
-      <code><![CDATA[$this->adapter->getInput()]]></code>
-    </NullableReturnStatement>
   </file>
   <file src="src/Db/Adapter/MysqlAdapter.php">
     <RedundantCondition>
@@ -117,6 +112,9 @@
       <code>$columns</code>
       <code>$newColumns</code>
     </MissingParamType>
+    <PossiblyNullReference>
+      <code>verbose</code>
+    </PossiblyNullReference>
   </file>
   <file src="src/Migration/Environment.php">
     <RedundantPropertyInitializationCheck>
@@ -138,6 +136,14 @@
     <DeprecatedTrait>
       <code>ConfigurationTrait</code>
     </DeprecatedTrait>
+  </file>
+  <file src="src/Shim/OutputAdapter.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->io->level()]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code>self::VERBOSITY_*</code>
+    </MoreSpecificReturnType>
   </file>
   <file src="src/TableFinderTrait.php">
     <PossiblyUndefinedArrayOffset>

@@ -61,6 +61,11 @@ parameters:
 			path: src/Db/Adapter/SqlserverAdapter.php
 
 		-
+			message: "#^Method Migrations\\\\Shim\\\\OutputAdapter\\:\\:getVerbosity\\(\\) should return 16\\|32\\|64\\|128\\|256 but returns int\\.$#"
+			count: 1
+			path: src/Shim/OutputAdapter.php
+
+		-
 			message: "#^Possibly invalid array key type Cake\\\\Database\\\\Schema\\\\TableSchemaInterface\\|string\\.$#"
 			count: 2
 			path: src/View/Helper/MigrationHelper.php

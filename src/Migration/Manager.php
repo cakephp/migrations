@@ -8,10 +8,12 @@ declare(strict_types=1);
 
 namespace Migrations\Migration;
 
+use Cake\Console\ConsoleIo;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
+use Migrations\Shim\OutputAdapter;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
@@ -19,6 +21,7 @@ use Phinx\Seed\SeedInterface;
 use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -34,14 +37,9 @@ class Manager
     protected ConfigInterface $config;
 
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface
+     * @var \Cake\Console\ConsoleIo
      */
-    protected InputInterface $input;
-
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected OutputInterface $output;
+    protected ConsoleIo $io;
 
     /**
      * @var \Migrations\Migration\Environment|null
@@ -64,20 +62,13 @@ class Manager
     protected ContainerInterface $container;
 
     /**
-     * @var int
-     */
-    private int $verbosityLevel = OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL;
-
-    /**
      * @param \Migrations\Config\ConfigInterface $config Configuration Object
-     * @param \Symfony\Component\Console\Input\InputInterface $input Console Input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output Console Output
+     * @param \Cake\Console\ConsoleIo $io Console input/output
      */
-    public function __construct(ConfigInterface $config, InputInterface $input, OutputInterface $output)
+    public function __construct(ConfigInterface $config, ConsoleIo $io)
     {
         $this->setConfig($config);
-        $this->setInput($input);
-        $this->setOutput($output);
+        $this->setIo($io);
     }
 
     /**
@@ -89,7 +80,6 @@ class Manager
      */
     public function printStatus(?string $format = null): array
     {
-        // TODO remove the environment parameter. There is only one environment with builtin
         $migrations = [];
         $isJson = $format === 'json';
         $defaultMigrations = $this->getMigrations();
@@ -148,7 +138,8 @@ class Manager
      */
     protected function printMissingVersion(array $version, int $maxNameLength): void
     {
-        $this->getOutput()->writeln(sprintf(
+        $io = $this->getIo();
+        $io->out(sprintf(
             '     <error>up</error>  %14.0f  %19s  %19s  <comment>%s</comment>  <error>** MISSING MIGRATION FILE **</error>',
             $version['version'],
             $version['start_time'],
@@ -157,7 +148,7 @@ class Manager
         ));
 
         if ($version && $version['breakpoint']) {
-            $this->getOutput()->writeln('         <error>BREAKPOINT SET</error>');
+            $io->out('         <error>BREAKPOINT SET</error>');
         }
     }
 
@@ -182,17 +173,14 @@ class Manager
             }
         }
 
+        $io = $this->getIo();
         if ($versionToMigrate === null) {
-            $this->getOutput()->writeln(
-                'No migrations to run'
-            );
+            $io->out('No migrations to run');
 
             return;
         }
 
-        $this->getOutput()->writeln(
-            'Migrating to version ' . $versionToMigrate
-        );
+        $io->out('Migrating to version ' . $versionToMigrate);
         $this->migrate($versionToMigrate, $fake);
     }
 
@@ -208,13 +196,13 @@ class Manager
         $versions = array_reverse($versions);
 
         if (empty($versions) || $dateString > $versions[0]) {
-            $this->getOutput()->writeln('No migrations to rollback');
+            $this->getIo()->out('No migrations to rollback');
 
             return;
         }
 
         if ($dateString < end($versions)) {
-            $this->getOutput()->writeln('Rolling back all migrations');
+            $this->getIo()->out('Rolling back all migrations');
             $this->rollback(0);
 
             return;
@@ -229,7 +217,7 @@ class Manager
 
         $versionToRollback = $versions[$index];
 
-        $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
+        $this->getIo()->out('Rolling back to version ' . $versionToRollback);
         $this->rollback($versionToRollback, $force);
     }
 
@@ -314,6 +302,7 @@ class Manager
         $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
+        // TODO use console arguments
         $versionArg = $input->getArgument('version');
         $targetArg = $input->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
@@ -354,6 +343,7 @@ class Manager
      */
     public function markVersionsAsMigrated(string $path, array $versions, OutputInterface $output): void
     {
+        // TODO fix output interface usage here
         $adapter = $this->getEnvironment()->getAdapter();
 
         if (!$versions) {
@@ -413,7 +403,7 @@ class Manager
             $version = max(array_merge($versions, array_keys($migrations)));
         } else {
             if ($version != 0 && !isset($migrations[$version])) {
-                $this->output->writeln(sprintf(
+                $this->getIo()->out(sprintf(
                     '<comment>warning</comment> %s is not a valid version',
                     $version
                 ));
@@ -461,8 +451,7 @@ class Manager
      */
     public function executeMigration(MigrationInterface $migration, string $direction = MigrationInterface::UP, bool $fake = false): void
     {
-        // TODO remove the environment parameter. There is only one environment with builtin
-        $this->getOutput()->writeln('', $this->verbosityLevel);
+        $this->getIo()->out('');
 
         // Skip the migration if it should not be executed
         if (!$migration->shouldExecute()) {
@@ -493,7 +482,7 @@ class Manager
      */
     public function executeSeed(SeedInterface $seed): void
     {
-        $this->getOutput()->writeln('', $this->verbosityLevel);
+        $this->getIo()->out('');
 
         // Skip the seed if it should not be executed
         if (!$seed->shouldExecute()) {
@@ -560,11 +549,10 @@ class Manager
      */
     protected function printStatusOutput(string $name, string $status, ?string $duration = null): void
     {
-        $this->getOutput()->writeln(
+        $this->getIo()->out(
             ' ==' .
             ' <info>' . $name . ':</info>' .
             ' <comment>' . $status . ' ' . $duration . '</comment>',
-            $this->verbosityLevel
         );
     }
 
@@ -587,6 +575,7 @@ class Manager
 
         // get a list of migrations sorted in the opposite way of the executed versions
         $sortedMigrations = [];
+        $io = $this->getIo();
 
         foreach ($executedVersions as $versionCreationTime => &$executedVersion) {
             // if we have a date (ie. the target must not match a version) and we are sorting by execution time, we
@@ -619,7 +608,7 @@ class Manager
             if ($found !== false) {
                 $target = (string)$found;
             } else {
-                $this->getOutput()->writeln("<error>No migration found with name ($target)</error>");
+                $io->out("<error>No migration found with name ($target)</error>");
 
                 return;
             }
@@ -628,7 +617,7 @@ class Manager
         // Check we have at least 1 migration to revert
         $executedVersionCreationTimes = array_keys($executedVersions);
         if (empty($executedVersionCreationTimes) || $target == end($executedVersionCreationTimes)) {
-            $this->getOutput()->writeln('<error>No migrations to rollback</error>');
+            $io->out('<error>No migrations to rollback</error>');
 
             return;
         }
@@ -642,7 +631,7 @@ class Manager
 
         // If the target must match a version, check the target version exists
         if ($targetMustMatchVersion && $target !== 0 && !isset($migrations[$target])) {
-            $this->getOutput()->writeln("<error>Target version ($target) not found</error>");
+            $io->out("<error>Target version ($target) not found</error>");
 
             return;
         }
@@ -668,7 +657,7 @@ class Manager
                 }
 
                 if ($executedVersion['breakpoint'] != 0 && !$force) {
-                    $this->getOutput()->writeln('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
+                    $io->out('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
                     break;
                 }
                 $this->executeMigration($migration, MigrationInterface::DOWN, $fake);
@@ -677,7 +666,7 @@ class Manager
         }
 
         if (!$rollbacked) {
-            $this->getOutput()->writeln('<error>No migrations to rollback</error>');
+            $this->getIo()->out('<error>No migrations to rollback</error>');
         }
     }
 
@@ -727,11 +716,33 @@ class Manager
         $envOptions['version_order'] = $config->getVersionOrder();
 
         $environment = new Environment('default', $envOptions);
-        $environment->setInput($this->getInput());
-        $environment->setOutput($this->getOutput());
+        $environment->setIo($this->getIo());
         $this->environment = $environment;
 
         return $environment;
+    }
+
+    /**
+     * Set the io instance
+     *
+     * @param \Cake\Console\ConsoleIo $io The io instance to use
+     * @return $this
+     */
+    public function setIo(ConsoleIo $io)
+    {
+        $this->io = $io;
+
+        return $this;
+    }
+
+    /**
+     * Get the io instance
+     *
+     * @return \Cake\Console\ConsoleIo $io The io instance to use
+     */
+    public function getIo(): ConsoleIo
+    {
+        return $this->io;
     }
 
     /**
@@ -761,52 +772,6 @@ class Manager
     }
 
     /**
-     * Sets the console input.
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input
-     * @return $this
-     */
-    public function setInput(InputInterface $input)
-    {
-        $this->input = $input;
-
-        return $this;
-    }
-
-    /**
-     * Gets the console input.
-     *
-     * @return \Symfony\Component\Console\Input\InputInterface
-     */
-    public function getInput(): InputInterface
-    {
-        return $this->input;
-    }
-
-    /**
-     * Sets the console output.
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output Output
-     * @return $this
-     */
-    public function setOutput(OutputInterface $output)
-    {
-        $this->output = $output;
-
-        return $this;
-    }
-
-    /**
-     * Gets the console output.
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface
-     */
-    public function getOutput(): OutputInterface
-    {
-        return $this->output;
-    }
-
-    /**
      * Sets the database migrations.
      *
      * @param \Phinx\Migration\AbstractMigration[] $migrations Migrations
@@ -831,28 +796,26 @@ class Manager
         if ($this->migrations === null) {
             $phpFiles = $this->getMigrationFiles();
 
-            if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                $this->getOutput()->writeln('Migration file');
-                $this->getOutput()->writeln(
-                    array_map(
-                        function ($phpFile) {
-                            return "    <info>{$phpFile}</info>";
-                        },
-                        $phpFiles
-                    )
-                );
-            }
+            $io = $this->getIo();
+            $io->verbose('Migration file');
+            $io->verbose(
+                array_map(
+                    function ($phpFile) {
+                        return "    <info>{$phpFile}</info>";
+                    },
+                    $phpFiles
+                )
+            );
 
             // filter the files to only get the ones that match our naming scheme
             $fileNames = [];
             /** @var \Phinx\Migration\AbstractMigration[] $versions */
             $versions = [];
 
+            $io = $this->getIo();
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidMigrationFileName(basename($filePath))) {
-                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                        $this->getOutput()->writeln("Valid migration file <info>{$filePath}</info>.");
-                    }
+                    $io->verbose("Valid migration file <info>{$filePath}</info>.");
 
                     $version = Util::getVersionFromFileName(basename($filePath));
 
@@ -873,9 +836,7 @@ class Manager
 
                     $fileNames[$class] = basename($filePath);
 
-                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                        $this->getOutput()->writeln("Loading class <info>$class</info> from <info>$filePath</info>.");
-                    }
+                    $io->verbose("Loading class <info>$class</info> from <info>$filePath</info>.");
 
                     // load the migration file
                     $orig_display_errors_setting = ini_get('display_errors');
@@ -891,12 +852,13 @@ class Manager
                         ));
                     }
 
-                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                        $this->getOutput()->writeln("Running <info>$class</info>.");
-                    }
+                    $io->out("Running <info>$class</info>.");
+
+                    $input = new ArgvInput();
+                    $output = new OutputAdapter($io);
 
                     // instantiate it
-                    $migration = new $class('default', $version, $this->getInput(), $this->getOutput());
+                    $migration = new $class('default', $version, $input, $output);
 
                     if (!($migration instanceof AbstractMigration)) {
                         throw new InvalidArgumentException(sprintf(
@@ -908,9 +870,7 @@ class Manager
 
                     $versions[$version] = $migration;
                 } else {
-                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                        $this->getOutput()->writeln("Invalid migration file <error>{$filePath}</error>.");
-                    }
+                    $io->verbose("Invalid migration file <error>{$filePath}</error>.");
                 }
             }
 
@@ -1003,6 +963,9 @@ class Manager
             /** @var \Phinx\Seed\SeedInterface[] $seeds */
             $seeds = [];
 
+            $input = new ArgvInput();
+            $output = new OutputAdapter($this->io);
+
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidSeedFileName(basename($filePath))) {
                     // convert the filename to a class name
@@ -1028,10 +991,7 @@ class Manager
                         $seed = new $class();
                     }
                     $seed->setEnvironment('default');
-                    $input = $this->getInput();
                     $seed->setInput($input);
-
-                    $output = $this->getOutput();
                     $seed->setOutput($output);
 
                     if (!($seed instanceof AbstractSeed)) {
@@ -1058,8 +1018,9 @@ class Manager
         }
 
         foreach ($this->seeds as $instance) {
-            if ($instance instanceof AbstractSeed) {
-                $instance->setInput($this->input);
+            // TODO fix this to not use input
+            if (isset($input) && $instance instanceof AbstractSeed) {
+                $instance->setInput($input);
             }
         }
 
@@ -1132,8 +1093,9 @@ class Manager
             $version = $lastVersion['version'];
         }
 
+        $io = $this->getIo();
         if ($version != 0 && (!isset($versions[$version]) || !isset($migrations[$version]))) {
-            $this->output->writeln(sprintf(
+            $io->out(sprintf(
                 '<comment>warning</comment> %s is not a valid version',
                 $version
             ));
@@ -1159,7 +1121,7 @@ class Manager
 
         $versions = $env->getVersionLog();
 
-        $this->getOutput()->writeln(
+        $io->out(
             ' Breakpoint ' . ($versions[$version]['breakpoint'] ? 'set' : 'cleared') .
             ' for <info>' . $version . '</info>' .
             ' <comment>' . $migrations[$version]->getName() . '</comment>'
@@ -1173,7 +1135,7 @@ class Manager
      */
     public function removeBreakpoints(): void
     {
-        $this->getOutput()->writeln(sprintf(
+        $this->getIo()->out(sprintf(
             ' %d breakpoints cleared.',
             $this->getEnvironment()->getAdapter()->resetAllBreakpoints()
         ));
@@ -1199,17 +1161,6 @@ class Manager
     public function unsetBreakpoint(?int $version): void
     {
         $this->markBreakpoint($version, self::BREAKPOINT_UNSET);
-    }
-
-    /**
-     * @param int $verbosityLevel Verbosity level for info messages
-     * @return $this
-     */
-    public function setVerbosityLevel(int $verbosityLevel)
-    {
-        $this->verbosityLevel = $verbosityLevel;
-
-        return $this;
     }
 
     /**

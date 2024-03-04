@@ -8,13 +8,15 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Cake\Console\ConsoleIo;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
+use Migrations\Shim\OutputAdapter;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -28,14 +30,9 @@ abstract class AbstractAdapter implements AdapterInterface
     protected array $options = [];
 
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface|null
+     * @var \Cake\Console\ConsoleIo
      */
-    protected ?InputInterface $input = null;
-
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected OutputInterface $output;
+    protected ConsoleIo $io;
 
     /**
      * @var string[]
@@ -56,17 +53,13 @@ abstract class AbstractAdapter implements AdapterInterface
      * Class Constructor.
      *
      * @param array<string, mixed> $options Options
-     * @param \Symfony\Component\Console\Input\InputInterface|null $input Input Interface
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output Output Interface
+     * @param \Cake\Console\ConsoleIo|null $io Console input/output
      */
-    public function __construct(array $options, ?InputInterface $input = null, ?OutputInterface $output = null)
+    public function __construct(array $options, ?ConsoleIo $io = null)
     {
         $this->setOptions($options);
-        if ($input !== null) {
-            $this->setInput($input);
-        }
-        if ($output !== null) {
-            $this->setOutput($output);
+        if ($io !== null) {
+            $this->setIo($io);
         }
     }
 
@@ -117,9 +110,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function setInput(InputInterface $input): AdapterInterface
     {
-        $this->input = $input;
-
-        return $this;
+        throw new RuntimeException('Using setInput() interface is not supported.');
     }
 
     /**
@@ -127,7 +118,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getInput(): ?InputInterface
     {
-        return $this->input;
+        throw new RuntimeException('Using getInput() interface is not supported.');
     }
 
     /**
@@ -135,9 +126,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function setOutput(OutputInterface $output): AdapterInterface
     {
-        $this->output = $output;
-
-        return $this;
+        throw new RuntimeException('Using setInput() method is not supported');
     }
 
     /**
@@ -145,12 +134,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getOutput(): OutputInterface
     {
-        if (!isset($this->output)) {
-            $output = new NullOutput();
-            $this->setOutput($output);
-        }
-
-        return $this->output;
+        return new OutputAdapter($this->io);
     }
 
     /**
@@ -246,16 +230,31 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function setIo(ConsoleIo $io)
+    {
+        $this->io = $io;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getIo(): ?ConsoleIo
+    {
+        return $this->io ?? null;
+    }
+
+    /**
      * Determines if instead of executing queries a dump to standard output is needed
      *
      * @return bool
      */
     public function isDryRunEnabled(): bool
     {
-        /** @var \Symfony\Component\Console\Input\InputInterface|null $input */
-        $input = $this->getInput();
-
-        return $input && $input->hasOption('dry-run') ? (bool)$input->getOption('dry-run') : false;
+        return $this->getOption('dryrun') === true;
     }
 
     /**

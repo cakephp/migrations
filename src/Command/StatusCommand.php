@@ -23,8 +23,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Config\Config;
 use Migrations\Migration\Manager;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\StreamOutput;
 
 /**
  * Status command for built in backend
@@ -135,6 +133,7 @@ class StatusCommand extends Command
             'connection' => $connectionName,
             'database' => $connectionConfig['database'],
             'migration_table' => $table,
+            'dryrun' => $args->getOption('dry-run'),
         ];
 
         $configData = [
@@ -156,13 +155,14 @@ class StatusCommand extends Command
      * Get the migration manager for the current CLI options and application configuration.
      *
      * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The command io.
      * @return \Migrations\Migration\Manager
      */
-    protected function getManager(Arguments $args): Manager
+    protected function getManager(Arguments $args, ConsoleIo $io): Manager
     {
         $config = $this->getConfig($args);
 
-        return new Manager($config, new ArgvInput(), new StreamOutput(STDOUT));
+        return new Manager($config, $io);
     }
 
     /**
@@ -176,7 +176,7 @@ class StatusCommand extends Command
     {
         /** @var string|null $format */
         $format = $args->getOption('format');
-        $migrations = $this->getManager($args)->printStatus($format);
+        $migrations = $this->getManager($args, $io)->printStatus($format);
 
         switch ($format) {
             case 'json':

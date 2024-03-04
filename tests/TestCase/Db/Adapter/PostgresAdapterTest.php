@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
@@ -16,11 +19,6 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use PDO;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\NullOutput;
 
 class PostgresAdapterTest extends TestCase
 {
@@ -29,10 +27,9 @@ class PostgresAdapterTest extends TestCase
      */
     private $adapter;
 
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
+    private StubConsoleOutput $out;
+    private ConsoleIo $io;
 
     /**
      * Check if Postgres is enabled in the current PHP
@@ -68,7 +65,7 @@ class PostgresAdapterTest extends TestCase
             $this->markTestSkipped('Postgres is not available.  Please install php-pdo-pgsql or equivalent package.');
         }
 
-        $this->adapter = new PostgresAdapter($this->config, new ArrayInput([]), new NullOutput());
+        $this->adapter = new PostgresAdapter($this->config, $this->getConsoleIo());
 
         $this->adapter->dropAllSchemas();
         $this->adapter->createSchema('public');
@@ -84,10 +81,19 @@ class PostgresAdapterTest extends TestCase
 
     protected function tearDown(): void
     {
-        if ($this->adapter) {
-            // $this->adapter->dropAllSchemas();
-            unset($this->adapter);
-        }
+        unset($this->adapter, $this->out, $this->io);
+    }
+
+    protected function getConsoleIo(): ConsoleIo
+    {
+        $out = new StubConsoleOutput();
+        $in = new StubConsoleInput([]);
+        $io = new ConsoleIo($out, $out, $in);
+
+        $this->out = $out;
+        $this->io = $io;
+
+        return $this->io;
     }
 
     private function usingPostgres10(): bool
@@ -2381,11 +2387,9 @@ class PostgresAdapterTest extends TestCase
 
     public function testDumpCreateTable()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $table = new Table('table1', [], $this->adapter);
 
@@ -2403,7 +2407,7 @@ class PostgresAdapterTest extends TestCase
                 'NULL, "column2" INTEGER NULL, "column3" CHARACTER VARYING (255) NOT NULL  DEFAULT \'test\', CONSTRAINT ' .
                 '"table1_pkey" PRIMARY KEY ("id"));';
         }
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
@@ -2413,11 +2417,9 @@ class PostgresAdapterTest extends TestCase
 
     public function testDumpCreateTableWithSchema()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $table = new Table('schema1.table1', [], $this->adapter);
 
@@ -2435,7 +2437,7 @@ class PostgresAdapterTest extends TestCase
                 'NULL, "column2" INTEGER NULL, "column3" CHARACTER VARYING (255) NOT NULL  DEFAULT \'test\', CONSTRAINT ' .
                 '"table1_pkey" PRIMARY KEY ("id"));';
         }
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
@@ -2455,11 +2457,9 @@ class PostgresAdapterTest extends TestCase
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $this->adapter->insert($table->getTable(), [
             'string_col' => 'test data',
@@ -2487,7 +2487,7 @@ INSERT INTO "public"."table1" ("int_col") VALUES (23);
 OUTPUT;
         }
 
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
@@ -2512,11 +2512,9 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $this->adapter->bulkinsert($table->getTable(), [
             [
@@ -2539,7 +2537,7 @@ INSERT INTO "public"."table1" ("string_col", "int_col") VALUES ('test_data1', 23
 OUTPUT;
         }
 
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
@@ -2554,11 +2552,9 @@ OUTPUT;
 
     public function testDumpCreateTableAndThenInsert()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $options = $this->adapter->getOptions();
+        $options['dryrun'] = true;
+        $this->adapter->setOptions($options);
 
         $table = new Table('schema1.table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
         $table->addColumn('column1', 'string', ['null' => false])
@@ -2583,7 +2579,7 @@ INSERT INTO "schema1"."table1" ("column1", "column2") VALUES ('id1', 1);
 OUTPUT;
         }
 
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
 

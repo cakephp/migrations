@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Cake\Console\ConsoleIo;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -18,8 +19,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
 use PDO;
 use Phinx\Migration\MigrationInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Adapter Wrapper.
@@ -92,42 +91,6 @@ abstract class AdapterWrapper implements WrapperInterface
     public function getOption(string $name): mixed
     {
         return $this->adapter->getOption($name);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setInput(InputInterface $input): AdapterInterface
-    {
-        $this->adapter->setInput($input);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInput(): InputInterface
-    {
-        return $this->adapter->getInput();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setOutput(OutputInterface $output): AdapterInterface
-    {
-        $this->adapter->setOutput($output);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getOutput(): OutputInterface
-    {
-        return $this->adapter->getOutput();
     }
 
     /**
@@ -520,5 +483,23 @@ abstract class AdapterWrapper implements WrapperInterface
     public function getDeleteBuilder(): DeleteQuery
     {
         return $this->getAdapter()->getDeleteBuilder();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setIo(ConsoleIo $io)
+    {
+        $this->getAdapter()->setIo($io);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getIo(): ?ConsoleIo
+    {
+        return $this->getAdapter()->getIo();
     }
 }
