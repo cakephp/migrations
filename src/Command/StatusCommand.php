@@ -96,7 +96,7 @@ class StatusCommand extends Command
      */
     protected function getConfig(Arguments $args): Config
     {
-        $folder = (string)$args->getOption('source');
+        $folder = $args->getOption('source') ?? 'Migrations';
 
         // Get the filepath for migrations and seeds(not implemented yet)
         $dir = ROOT . '/config/' . $folder;

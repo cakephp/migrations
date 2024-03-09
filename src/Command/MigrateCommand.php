@@ -25,6 +25,7 @@ use Cake\Utility\Inflector;
 use DateTime;
 use Exception;
 use Migrations\Config\Config;
+use Migrations\Config\ConfigInterface;
 use Migrations\Migration\Manager;
 use Throwable;
 
@@ -72,6 +73,7 @@ class MigrateCommand extends Command
             'default' => 'default',
         ])->addOption('source', [
             'short' => 's',
+            'default' => ConfigInterface::DEFAULT_MIGRATION_FOLDER,
             'help' => 'The folder where your migrations are',
         ])->addOption('target', [
             'short' => 't',
@@ -98,7 +100,7 @@ class MigrateCommand extends Command
      */
     protected function getConfig(Arguments $args): Config
     {
-        $folder = (string)$args->getOption('source');
+        $folder = $args->getOption('source');
 
         // Get the filepath for migrations and seeds(not implemented yet)
         $dir = ROOT . '/config/' . $folder;
@@ -233,6 +235,38 @@ class MigrateCommand extends Command
 
         $io->out('');
         $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+
+        // Run dump command to generate lock file
+        /* TODO(mark) port this in
+        if (
+            isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback'], true) &&
+            !in_array('--no-lock', $this->argv, true) &&
+            $exitCode === 0
+        ) {
+            $newArgs = [];
+            if (!empty($args->getOption('connection'))) {
+                $newArgs[] = '-c';
+                $newArgs[] = $args->getOption('connection');
+            }
+
+            if (!empty($args->getOption('plugin'))) {
+                $newArgs[] = '-p';
+                $newArgs[] = $args->getOption('plugin');
+            }
+
+            $io->out('');
+            $io->out('Dumps the current schema of the database to be used while baking a diff');
+            $io->out('');
+
+            $dumpExitCode = $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
+        }
+
+        if (isset($dumpExitCode) && $exitCode === 0 && $dumpExitCode !== 0) {
+            $exitCode = 1;
+        }
+
+        return $exitCode;
+        */
 
         return self::CODE_SUCCESS;
     }
