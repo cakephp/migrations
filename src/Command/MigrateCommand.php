@@ -206,6 +206,7 @@ class MigrateCommand extends Command
 
         $versionOrder = $config->getVersionOrder();
         $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->out('<info>using paths</info> ' . implode(', ', $config->getMigrationPaths()));
         $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
 
         if ($fake) {

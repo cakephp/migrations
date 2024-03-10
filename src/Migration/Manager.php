@@ -852,7 +852,7 @@ class Manager
                         ));
                     }
 
-                    $io->out("Running <info>$class</info>.");
+                    $io->verbose("Constructing <info>$class</info>.");
 
                     $input = new ArgvInput();
                     $output = new OutputAdapter($io);
