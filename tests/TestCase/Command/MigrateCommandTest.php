@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\ConsoleOutput;
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
@@ -131,7 +130,6 @@ class MigrateCommandTest extends TestCase
     }
 
     /**
-     *
      * Test advancing migrations with an offset.
      */
     public function testMigrateTarget()

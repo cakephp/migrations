@@ -100,7 +100,7 @@ class MigrateCommand extends Command
      */
     protected function getConfig(Arguments $args): Config
     {
-        $folder = $args->getOption('source');
+        $folder = (string)$args->getOption('source');
 
         // Get the filepath for migrations and seeds(not implemented yet)
         $dir = ROOT . '/config/' . $folder;

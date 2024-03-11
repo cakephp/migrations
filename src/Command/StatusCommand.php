@@ -22,6 +22,7 @@ use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Config\Config;
+use Migrations\Config\ConfigInterface;
 use Migrations\Migration\Manager;
 
 /**
@@ -77,7 +78,7 @@ class StatusCommand extends Command
         ])->addOption('source', [
             'short' => 's',
             'help' => 'The folder under src/Config that migrations are in',
-            'default' => 'Migrations',
+            'default' => ConfigInterface::DEFAULT_MIGRATION_FOLDER,
         ])->addOption('format', [
             'short' => 'f',
             'help' => 'The output format: text or json. Defaults to text.',
@@ -96,7 +97,7 @@ class StatusCommand extends Command
      */
     protected function getConfig(Arguments $args): Config
     {
-        $folder = $args->getOption('source') ?? 'Migrations';
+        $folder = (string)$args->getOption('source');
 
         // Get the filepath for migrations and seeds(not implemented yet)
         $dir = ROOT . '/config/' . $folder;
