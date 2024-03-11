@@ -49,7 +49,7 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test -s Missing');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Missing');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Missing');
         $this->assertOutputContains('<info>using connection</info> test');
         $this->assertOutputContains('All Done');
 
@@ -66,7 +66,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
@@ -85,7 +85,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/ShouldExecute');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'ShouldExecute');
         $this->assertOutputContains('ShouldExecuteMigration:</info> <comment>migrated');
         $this->assertOutputContains('ShouldNotExecuteMigration:</info> <comment>skipped </comment>');
         $this->assertOutputContains('All Done');
@@ -103,7 +103,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
@@ -120,7 +120,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
         $this->assertOutputNotContains('MarkMigratedTest');
         $this->assertOutputContains('No migrations to run');
         $this->assertOutputContains('All Done');
@@ -138,7 +138,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('All Done');
@@ -153,7 +153,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
         $this->assertOutputNotContains('MarkMigratedTest');
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('<comment>warning</comment> 99 is not a valid version');
@@ -169,7 +169,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
         $this->assertOutputContains('warning</warning> performing fake migrations');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>migrated');
@@ -186,7 +186,7 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . '/Plugin/Migrator/config/Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'Plugin' . DS . 'Migrator' . DS . 'config' . DS . 'Migrations');
         $this->assertOutputContains('Migrator:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
