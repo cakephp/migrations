@@ -103,13 +103,13 @@ class MigrateCommand extends Command
         $folder = (string)$args->getOption('source');
 
         // Get the filepath for migrations and seeds(not implemented yet)
-        $dir = ROOT . '/config/' . $folder;
+        $dir = ROOT . DS . 'config' . DS . $folder;
         if (defined('CONFIG')) {
             $dir = CONFIG . $folder;
         }
         $plugin = $args->getOption('plugin');
         if ($plugin && is_string($plugin)) {
-            $dir = Plugin::path($plugin) . 'config/' . $folder;
+            $dir = Plugin::path($plugin) . 'config' . DS . $folder;
         }
 
         // Get the phinxlog table name. Plugins have separate migration history.
