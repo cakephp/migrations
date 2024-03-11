@@ -19,11 +19,16 @@ class MigrateCommandTest extends TestCase
         parent::setUp();
         Configure::write('Migrations.backend', 'builtin');
 
-        $table = $this->fetchTable('Phinxlog');
         try {
+            $table = $this->fetchTable('Phinxlog');
             $table->deleteAll('1=1');
         } catch (DatabaseException $e) {
-            //debug($e->getMessage());
+        }
+
+        try {
+            $table = $this->fetchTable('MigratorPhinxlog');
+            $table->deleteAll('1=1');
+        } catch (DatabaseException $e) {
         }
     }
 
@@ -206,7 +211,7 @@ class MigrateCommandTest extends TestCase
      * Test that migrating with the `--no-lock` option will not dispatch a dump shell
      *
      * @return void
-     * /
+     */
     public function testMigrateWithNoLock()
     {
         $this->markTestIncomplete('not done here');
@@ -228,7 +233,7 @@ class MigrateCommandTest extends TestCase
      * Test that rolling back without the `--no-lock` option will dispatch a dump shell
      *
      * @return void
-     * /
+     */
     public function testRollbackWithLock()
     {
         $this->markTestIncomplete('not done here');
@@ -249,7 +254,7 @@ class MigrateCommandTest extends TestCase
      * Test that rolling back with the `--no-lock` option will not dispatch a dump shell
      *
      * @return void
-     * /
+     */
     public function testRollbackWithNoLock()
     {
         $this->markTestIncomplete('not done here');
@@ -266,5 +271,4 @@ class MigrateCommandTest extends TestCase
 
         $this->command->run($argv, $this->getMockIo());
     }
-    */
 }

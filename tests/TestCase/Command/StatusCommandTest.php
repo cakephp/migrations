@@ -6,6 +6,7 @@ namespace Migrations\Test\TestCase\Command;
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
+use Cake\Database\Exception\DatabaseException;
 use Cake\TestSuite\TestCase;
 
 class StatusCommandTest extends TestCase
@@ -16,6 +17,12 @@ class StatusCommandTest extends TestCase
     {
         parent::setUp();
         Configure::write('Migrations.backend', 'builtin');
+
+        $table = $this->fetchTable('Phinxlog');
+        try {
+            $table->deleteAll('1=1');
+        } catch (DatabaseException $e) {
+        }
     }
 
     public function testHelp(): void
@@ -43,9 +50,9 @@ class StatusCommandTest extends TestCase
 
         assert(isset($this->_out));
         $output = $this->_out->messages();
-        $parsed = json_decode($output[1], true);
+        $parsed = json_decode($output[0], true);
         $this->assertTrue(is_array($parsed));
-        $this->assertCount(1, $parsed);
+        $this->assertCount(2, $parsed);
         $this->assertArrayHasKey('id', $parsed[0]);
         $this->assertArrayHasKey('status', $parsed[0]);
         $this->assertArrayHasKey('name', $parsed[0]);
