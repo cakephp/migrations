@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Console\ConsoleIo;
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -17,7 +18,6 @@ use Cake\Database\Query\UpdateQuery;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
-use PDO;
 use Phinx\Migration\MigrationInterface;
 
 /**
@@ -430,9 +430,9 @@ abstract class AdapterWrapper implements WrapperInterface
     }
 
     /**
-     * @return \PDO
+     * @return \Cake\Database\Connection
      */
-    public function getConnection(): PDO
+    public function getConnection(): Connection
     {
         return $this->getAdapter()->getConnection();
     }

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Console\ConsoleIo;
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -21,8 +22,6 @@ use Phinx\Migration\MigrationInterface;
 
 /**
  * Adapter Interface.
- *
- * @method \PDO getConnection()
  */
 interface AdapterInterface
 {
@@ -520,4 +519,11 @@ interface AdapterInterface
      * @return \Cake\Console\ConsoleIo $io The io instance to use
      */
     public function getIo(): ?ConsoleIo;
+
+    /**
+     * Get the Connection for this adapter.
+     *
+     * @return \Cake\Database\Connection The connection
+     */
+    public function getConnection(): Connection;
 }
