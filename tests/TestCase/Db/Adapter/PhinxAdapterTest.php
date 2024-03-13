@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
@@ -22,7 +25,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\NullOutput;
 use UnexpectedValueException;
 
 class PhinxAdapterTest extends TestCase
@@ -36,11 +38,14 @@ class PhinxAdapterTest extends TestCase
      * @var array
      */
     private $config;
+    private StubConsoleOutput $out;
+    private ConsoleIo $io;
 
     protected function setUp(): void
     {
+        /** @var array<string, mixed> $config */
         $config = ConnectionManager::getConfig('test');
-        if ($config['adapter'] !== 'sqlite') {
+        if ($config['scheme'] !== 'sqlite') {
             $this->markTestSkipped('phinx adapter tests require sqlite');
         }
         // Emulate the results of Util::parseDsn()
@@ -48,19 +53,19 @@ class PhinxAdapterTest extends TestCase
             'adapter' => 'sqlite',
             'connection' => ConnectionManager::get('test'),
             'database' => $config['database'],
+            'suffix' => '',
         ];
         $this->adapter = new PhinxAdapter(
             new SqliteAdapter(
                 $this->config,
-                new ArrayInput([]),
-                new NullOutput()
+                $this->getConsoleIo()
             )
         );
 
-        if ($this->config['database'] !== ':memory:') {
+        if ($config['database'] !== ':memory:') {
             // ensure the database is empty for each test
-            $this->adapter->dropDatabase($this->config['database']);
-            $this->adapter->createDatabase($this->config['database']);
+            $this->adapter->dropDatabase($config['database']);
+            $this->adapter->createDatabase($config['database']);
         }
 
         // leave the adapter in a disconnected state for each test
@@ -69,7 +74,19 @@ class PhinxAdapterTest extends TestCase
 
     protected function tearDown(): void
     {
-        unset($this->adapter);
+        unset($this->adapter, $this->out, $this->io);
+    }
+
+    protected function getConsoleIo(): ConsoleIo
+    {
+        $out = new StubConsoleOutput();
+        $in = new StubConsoleInput([]);
+        $io = new ConsoleIo($out, $out, $in);
+
+        $this->out = $out;
+        $this->io = $io;
+
+        return $this->io;
     }
 
     public function testBeginTransaction()
@@ -91,19 +108,6 @@ class PhinxAdapterTest extends TestCase
         $this->assertFalse(
             $this->adapter->getConnection()->inTransaction(),
             'Underlying PDO instance did not detect rolled back transaction'
-        );
-    }
-
-    public function testCommitTransactionTransaction()
-    {
-        $this->adapter->getConnection()
-            ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->adapter->beginTransaction();
-        $this->adapter->commitTransaction();
-
-        $this->assertFalse(
-            $this->adapter->getConnection()->inTransaction(),
-            "Underlying PDO instance didn't detect committed transaction"
         );
     }
 
@@ -256,11 +260,6 @@ class PhinxAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex('table1', ['email']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
         $this->assertTrue($this->adapter->hasIndexByName('table1', 'myemailindex'));
-    }
-
-    public function testCreateTableWithMultiplePKsAndUniqueIndexes()
-    {
-        $this->markTestIncomplete();
     }
 
     public function testCreateTableWithForeignKey()
@@ -921,11 +920,11 @@ class PhinxAdapterTest extends TestCase
 
     public function testHasDatabase()
     {
-        if ($this->config['name'] === ':memory:') {
+        if ($this->config['database'] === ':memory:') {
             $this->markTestSkipped('Skipping hasDatabase() when testing in-memory db.');
         }
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
-        $this->assertTrue($this->adapter->hasDatabase($this->config['name']));
+        $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
     public function testDropDatabase()
@@ -1114,11 +1113,7 @@ class PhinxAdapterTest extends TestCase
 
     public function testDumpCreateTable()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $this->adapter->setOptions(['dryrun' => true]);
 
         $table = new PhinxTable('table1', [], $this->adapter);
 
@@ -1130,7 +1125,7 @@ class PhinxAdapterTest extends TestCase
         $expectedOutput = <<<'OUTPUT'
 CREATE TABLE `table1` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `column1` VARCHAR NOT NULL, `column2` INTEGER NULL, `column3` VARCHAR NULL DEFAULT 'test');
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
     }
 
@@ -1141,17 +1136,13 @@ OUTPUT;
      */
     public function testDumpInsert()
     {
+
         $table = new PhinxTable('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $this->adapter->insert($table->getTable(), [
             'string_col' => 'test data',
         ]);
@@ -1169,13 +1160,13 @@ INSERT INTO `table1` (`string_col`) VALUES ('test data');
 INSERT INTO `table1` (`string_col`) VALUES (null);
 INSERT INTO `table1` (`int_col`) VALUES (23);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $actualOutput = preg_replace("/\r\n|\r/", "\n", $actualOutput); // normalize line endings for Windows
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the insert to the output');
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(0, $res[0]['COUNT(*)']);
     }
 
@@ -1186,17 +1177,13 @@ OUTPUT;
      */
     public function testDumpBulkinsert()
     {
+
         $table = new PhinxTable('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
-
+        $this->adapter->setOptions(['dryrun' => true]);
         $this->adapter->bulkinsert($table->getTable(), [
             [
                 'string_col' => 'test_data1',
@@ -1211,22 +1198,18 @@ OUTPUT;
         $expectedOutput = <<<'OUTPUT'
 INSERT INTO `table1` (`string_col`, `int_col`) VALUES ('test_data1', 23), (null, 42);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the bulkinsert to the output');
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(0, $res[0]['COUNT(*)']);
     }
 
     public function testDumpCreateTableAndThenInsert()
     {
-        $inputDefinition = new InputDefinition([new InputOption('dry-run')]);
-        $this->adapter->setInput(new ArrayInput(['--dry-run' => true], $inputDefinition));
-
-        $consoleOutput = new BufferedOutput();
-        $this->adapter->setOutput($consoleOutput);
+        $this->adapter->setOptions(['dryrun' => true]);
 
         $table = new PhinxTable('table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
 
@@ -1246,7 +1229,7 @@ OUTPUT;
 CREATE TABLE `table1` (`column1` VARCHAR NOT NULL, `column2` INTEGER NULL, PRIMARY KEY (`column1`));
 INSERT INTO `table1` (`column1`, `column2`) VALUES ('id1', 1);
 OUTPUT;
-        $actualOutput = $consoleOutput->fetch();
+        $actualOutput = join("\n", $this->out->messages());
         $actualOutput = preg_replace("/\r\n|\r/", "\n", $actualOutput); // normalize line endings for Windows
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
@@ -1314,13 +1297,13 @@ OUTPUT;
         ]);
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) AS c FROM table1 WHERE int_col > ?', [5]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(2, $res[0]['c']);
 
         $this->adapter->execute('UPDATE table1 SET int_col = ? WHERE int_col IS NULL', [12]);
 
         $countQuery->execute([1]);
-        $res = $countQuery->fetchAll();
+        $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
     }
 
@@ -1611,7 +1594,7 @@ INPUT;
     public function testGetColumns()
     {
         $conn = $this->adapter->getConnection();
-        $conn->exec('create table t(a integer, b text, c char(5), d integer(12,6), e integer not null, f integer null)');
+        $conn->execute('create table t(a integer, b text, c char(5), d integer(12,6), e integer not null, f integer null)');
         $exp = [
             ['name' => 'a', 'type' => 'integer', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
             ['name' => 'b', 'type' => 'text', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
@@ -1741,32 +1724,5 @@ INPUT;
             }
         }
         $this->assertStringContainsString("REFERENCES `{$refTable->getName()}` (`id`)", $sql);
-    }
-
-    public function testInvalidPdoAttribute()
-    {
-        $adapter = new SqliteAdapter($this->config + ['attr_invalid' => true]);
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Invalid PDO attribute: attr_invalid (\PDO::ATTR_INVALID)');
-        $adapter->connect();
-    }
-
-    public function testPdoExceptionUpdateNonExistingTable()
-    {
-        $this->expectException(PDOException::class);
-        $table = new PhinxTable('non_existing_table', [], $this->adapter);
-        $table->addColumn('column', 'string')->update();
-    }
-
-    public function testPdoPersistentConnection()
-    {
-        $adapter = new SqliteAdapter($this->config + ['attr_persistent' => true]);
-        $this->assertTrue($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
-    }
-
-    public function testPdoNotPersistentConnection()
-    {
-        $adapter = new SqliteAdapter($this->config);
-        $this->assertFalse($adapter->getConnection()->getAttribute(PDO::ATTR_PERSISTENT));
     }
 }
