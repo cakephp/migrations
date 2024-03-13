@@ -20,30 +20,24 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Exception\StopException;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
+use Cake\Event\EventDispatcherTrait;
 use Cake\Utility\Inflector;
+use DateTime;
+use Exception;
 use Migrations\Config\Config;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\Manager;
+use Throwable;
 
 /**
- * Status command for built in backend
+ * Migrate command runs migrations
  */
-class StatusCommand extends Command
+class MigrateCommand extends Command
 {
     /**
-     * Exit code for when status command is run and there are missing migrations
-     *
-     * @var int
+     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
      */
-    public const CODE_STATUS_MISSING = 2;
-
-    /**
-     * Exit code for when status command is run and there are no missing migations,
-     * but does have down migrations
-     *
-     * @var int
-     */
-    public const CODE_STATUS_DOWN = 3;
+    use EventDispatcherTrait;
 
     /**
      * The default name added to the application command list
@@ -52,7 +46,7 @@ class StatusCommand extends Command
      */
     public static function defaultName(): string
     {
-        return 'migrations status';
+        return 'migrations migrate';
     }
 
     /**
@@ -64,10 +58,12 @@ class StatusCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
-            'The <info>status</info> command prints a list of all migrations, along with their current status',
+            'Apply migrations to a SQL datasource',
             '',
-            '<info>migrations status -c secondary</info>',
-            '<info>migrations status -c secondary  -f json</info>',
+            'Will run all available migrations, optionally up to a specific version',
+            '',
+            '<info>migrations migrate --connection secondary</info>',
+            '<info>migrations migrate --connection secondary --target 003</info>',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
@@ -77,13 +73,20 @@ class StatusCommand extends Command
             'default' => 'default',
         ])->addOption('source', [
             'short' => 's',
-            'help' => 'The folder under src/Config that migrations are in',
             'default' => ConfigInterface::DEFAULT_MIGRATION_FOLDER,
-        ])->addOption('format', [
-            'short' => 'f',
-            'help' => 'The output format: text or json. Defaults to text.',
-            'choices' => ['text', 'json'],
-            'default' => 'text',
+            'help' => 'The folder where your migrations are',
+        ])->addOption('target', [
+            'short' => 't',
+            'help' => 'The target version to migrate to.',
+        ])->addOption('date', [
+            'short' => 'd',
+            'help' => 'The date to migrate to',
+        ])->addOption('fake', [
+            'help' => "Mark any migrations selected as run, but don't actually execute them",
+            'boolean' => true,
+        ])->addOption('no-lock', [
+            'help' => 'If present, no lock file will be generated after migrating',
+            'boolean' => true,
         ]);
 
         return $parser;
@@ -100,13 +103,13 @@ class StatusCommand extends Command
         $folder = (string)$args->getOption('source');
 
         // Get the filepath for migrations and seeds(not implemented yet)
-        $dir = ROOT . '/config/' . $folder;
+        $dir = ROOT . DS . 'config' . DS . $folder;
         if (defined('CONFIG')) {
             $dir = CONFIG . $folder;
         }
         $plugin = $args->getOption('plugin');
         if ($plugin && is_string($plugin)) {
-            $dir = Plugin::path($plugin) . 'config/' . $folder;
+            $dir = Plugin::path($plugin) . 'config' . DS . $folder;
         }
 
         // Get the phinxlog table name. Plugins have separate migration history.
@@ -175,58 +178,68 @@ class StatusCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io): ?int
     {
-        /** @var string|null $format */
-        $format = $args->getOption('format');
-        $migrations = $this->getManager($args, $io)->printStatus($format);
-
-        switch ($format) {
-            case 'json':
-                $flags = 0;
-                if ($args->getOption('verbose')) {
-                    $flags = JSON_PRETTY_PRINT;
-                }
-                $migrationString = (string)json_encode($migrations, $flags);
-                $io->out($migrationString);
-                break;
-            default:
-                $this->display($migrations, $io);
-                break;
+        $event = $this->dispatchEvent('Migration.beforeMigrate');
+        if ($event->isStopped()) {
+            return $event->getResult() ? self::CODE_SUCCESS : self::CODE_ERROR;
         }
+        $result = $this->executeMigrations($args, $io);
+        $this->dispatchEvent('Migration.afterMigrate');
 
-        return Command::CODE_SUCCESS;
+        return $result;
     }
 
     /**
-     * Print migration status to stdout.
+     * Execute migrations based on console inputs.
      *
-     * @param array $migrations
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io
-     * @return void
+     * @return int|null The exit code or null for success
      */
-    protected function display(array $migrations, ConsoleIo $io): void
+    protected function executeMigrations(Arguments $args, ConsoleIo $io): ?int
     {
-        if (!empty($migrations)) {
-            $rows = [];
-            $rows[] = ['Status', 'Migration ID', 'Migration Name'];
+        $version = $args->getOption('target') !== null ? (int)$args->getOption('target') : null;
+        $date = $args->getOption('date');
+        $fake = (bool)$args->getOption('fake');
 
-            foreach ($migrations as $migration) {
-                $status = $migration['status'] === 'up' ? '<info>up</info>' : '<error>down</error>';
-                $name = $migration['name'] ?
-                    '<comment>' . $migration['name'] . '</comment>' :
-                    '<error>** MISSING **</error>';
+        $manager = $this->getManager($args, $io);
+        $config = $manager->getConfig();
 
-                $missingComment = '';
-                if (!empty($migration['missing'])) {
-                    $missingComment = '<error>** MISSING **</error>';
-                }
-                $rows[] = [$status, sprintf('%14.0f ', $migration['id']), $name . $missingComment];
-            }
-            $io->helper('table')->output($rows);
-        } else {
-            $msg = 'There are no available migrations. Try creating one using the <info>create</info> command.';
-            $io->err('');
-            $io->err($msg);
-            $io->err('');
+        $versionOrder = $config->getVersionOrder();
+        $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->out('<info>using paths</info> ' . implode(', ', $config->getMigrationPaths()));
+        $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
+
+        if ($fake) {
+            $io->out('<warning>warning</warning> performing fake migrations');
         }
+
+        try {
+            // run the migrations
+            $start = microtime(true);
+            if ($date !== null) {
+                $manager->migrateToDateTime(new DateTime((string)$date), $fake);
+            } else {
+                $manager->migrate($version, $fake);
+            }
+            $end = microtime(true);
+        } catch (Exception $e) {
+            $io->err('<error>' . $e->getMessage() . '</error>');
+            $io->out($e->getTraceAsString(), 1, ConsoleIo::VERBOSE);
+
+            return self::CODE_ERROR;
+        } catch (Throwable $e) {
+            $io->err('<error>' . $e->getMessage() . '</error>');
+            $io->out($e->getTraceAsString(), 1, ConsoleIo::VERBOSE);
+
+            return self::CODE_ERROR;
+        }
+
+        $io->out('');
+        $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+
+        // Run dump command to generate lock file
+        // TODO(mark) port in logic from src/Command/MigrationsCommand.php : 142:164
+
+        return self::CODE_SUCCESS;
     }
 }

@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -32,7 +33,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use PDO;
 use Phinx\Db\Action\Action as PhinxAction;
 use Phinx\Db\Action\AddColumn as PhinxAddColumn;
 use Phinx\Db\Action\AddForeignKey as PhinxAddForeignKey;
@@ -747,9 +747,9 @@ class PhinxAdapter implements PhinxAdapterInterface
     }
 
     /**
-     * @return \PDO
+     * @return \Cake\Database\Connection
      */
-    public function getConnection(): PDO
+    public function getConnection(): Connection
     {
         return $this->adapter->getConnection();
     }
@@ -811,5 +811,13 @@ class PhinxAdapter implements PhinxAdapterInterface
     public function getDeleteBuilder(): DeleteQuery
     {
         return $this->adapter->getDeleteBuilder();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCakeConnection(): Connection
+    {
+        return $this->adapter->getConnection();
     }
 }

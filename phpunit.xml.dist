@@ -37,16 +37,19 @@
 
         <!-- SQLite
         <env name="DB" value="sqlite"/>
-        <env name="DB_URL" value="sqlite://127.0.0.1/cakephp_test"/>
+        <env name="DB_URL" value="sqlite://127.0.0.1/tests.sqlite"/>
+        <env name="DB_URL_SNAPSHOT" value="sqlite://127.0.0.1/snapshot-tests.sqlite"/>
         -->
         <!-- Postgres
         <env name="DB" value="pgsql"/>
         <env name="DB_URL" value="postgres://localhost/cake_test?timezone=UTC"/>
+        <env name="DB_URL_SNAPSHOT" value="postgres://localhost/cake_snapshot_test?timezone=UTC"/>
         -->
         <!-- Mysql
         <env name="DB" value="mysql"/>
         <env name="DB_URL" value="mysql://localhost/cake_test?timezone=UTC"/>
         <env name="DB_URL_COMPARE" value="mysql://localhost/cake_comparison"/>
+        <env name="DB_URL_SNAPSHOT" value="mysql://localhost/cake_snapshot"/>
         -->
     </php>
 </phpunit>

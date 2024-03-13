@@ -581,6 +581,11 @@ class MigrationsTest extends TestCase
                 'id' => '20150416223600',
                 'name' => 'MarkMigratedTest',
             ],
+            [
+                'status' => 'down',
+                'id' => '20240309223600',
+                'name' => 'MarkMigratedTestSecond',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -588,18 +593,19 @@ class MigrationsTest extends TestCase
         $this->assertTrue($migrate);
         $result = $this->migrations->status(['source' => 'Migrations']);
         $expected[0]['status'] = 'up';
+        $expected[1]['status'] = 'up';
         $this->assertEquals($expected, $result);
 
         $rollback = $this->migrations->rollback(['source' => 'Migrations']);
         $this->assertTrue($rollback);
         $result = $this->migrations->status(['source' => 'Migrations']);
-        $expected[0]['status'] = 'down';
+        $expected[0]['status'] = 'up';
+        $expected[1]['status'] = 'down';
         $this->assertEquals($expected, $result);
 
         $migrate = $this->migrations->markMigrated(20150416223600, ['source' => 'Migrations']);
         $this->assertTrue($migrate);
         $result = $this->migrations->status(['source' => 'Migrations']);
-        $expected[0]['status'] = 'up';
         $this->assertEquals($expected, $result);
     }
 
