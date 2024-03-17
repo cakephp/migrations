@@ -8,6 +8,7 @@ use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Database\Exception\DatabaseException;
 use Cake\TestSuite\TestCase;
+use RuntimeException;
 
 class StatusCommandTest extends TestCase
 {
@@ -74,7 +75,7 @@ class StatusCommandTest extends TestCase
 
     public function testExecuteConnectionDoesNotExist(): void
     {
+        $this->expectException(RuntimeException::class);
         $this->exec('migrations status -c lolnope');
-        $this->assertExitError();
     }
 }
