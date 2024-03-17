@@ -14,18 +14,12 @@ use Migrations\Db\Adapter\PhinxAdapter;
 use Migrations\Db\Adapter\SqliteAdapter;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\ForeignKey;
-use PDO;
 use PDOException;
 use Phinx\Db\Table as PhinxTable;
 use Phinx\Db\Table\Column as PhinxColumn;
 use Phinx\Util\Literal as PhinxLiteral;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\BufferedOutput;
-use UnexpectedValueException;
 
 class PhinxAdapterTest extends TestCase
 {
@@ -1136,7 +1130,6 @@ OUTPUT;
      */
     public function testDumpInsert()
     {
-
         $table = new PhinxTable('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
             ->addColumn('int_col', 'integer')
@@ -1177,7 +1170,6 @@ OUTPUT;
      */
     public function testDumpBulkinsert()
     {
-
         $table = new PhinxTable('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
             ->addColumn('int_col', 'integer')

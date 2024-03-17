@@ -17,16 +17,10 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Console\Exception\StopException;
-use Cake\Core\Plugin;
-use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventDispatcherTrait;
-use Cake\Utility\Inflector;
 use DateTime;
 use Exception;
-use Migrations\Config\Config;
 use Migrations\Config\ConfigInterface;
-use Migrations\Migration\Manager;
 use Migrations\Migration\ManagerFactory;
 use Throwable;
 

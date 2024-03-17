@@ -46,6 +46,12 @@ class ManagerFactory
     {
     }
 
+    /**
+     * Read configuration options used for this factory
+     *
+     * @param string $name The option name to read
+     * @return mixed Option value or null
+     */
     public function getOption(string $name): mixed
     {
         if (!isset($this->options[$name])) {
@@ -55,6 +61,11 @@ class ManagerFactory
         return $this->options[$name];
     }
 
+    /**
+     * Create a ConfigInterface instance based on the factory options.
+     *
+     * @return \Migrations\Config\ConfigInterface
+     */
     public function createConfig(): ConfigInterface
     {
         $folder = (string)$this->getOption('source');
@@ -120,11 +131,10 @@ class ManagerFactory
      * based on the factory constructor options.
      * @return \Migrations\Migration\Manager
      */
-    public function createManager(ConsoleIo $io, ConfigInterface|null $config = null): Manager
+    public function createManager(ConsoleIo $io, ?ConfigInterface $config = null): Manager
     {
         $config ??= $this->createConfig();
 
         return new Manager($config, $io);
     }
 }
-
