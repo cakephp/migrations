@@ -71,7 +71,7 @@ class DumpCommandTest extends TestCase
         $this->exec('migrations dump --connection test --source TestsMigrations');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('config/TestsMigrations/schema-dump-test.lock');
+        $this->assertOutputContains('config' . DS . 'TestsMigrations' . DS . 'schema-dump-test.lock');
 
         $this->assertFileExists($this->dumpFile);
         /** @var array<string, TableSchema> $generatedDump */
@@ -92,7 +92,7 @@ class DumpCommandTest extends TestCase
         $this->exec('migrations dump --connection test --plugin Migrator');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('Migrator/config/Migrations/schema-dump-test.lock');
+        $this->assertOutputContains('Migrator' . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test.lock');
 
         $dumpFile = Plugin::path('Migrator') . '/config/Migrations/schema-dump-test.lock';
         if (file_exists($dumpFile)) {
