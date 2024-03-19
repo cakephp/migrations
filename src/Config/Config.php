@@ -113,7 +113,7 @@ class Config implements ConfigInterface
      */
     public function getConnection(): string|false
     {
-        return $this->values['connection'] ?? false;
+        return $this->values['environment']['connection'] ?? false;
     }
 
     /**

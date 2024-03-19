@@ -17,13 +17,8 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Console\Exception\StopException;
-use Cake\Core\Plugin;
-use Cake\Datasource\ConnectionManager;
-use Cake\Utility\Inflector;
-use Migrations\Config\Config;
 use Migrations\Config\ConfigInterface;
-use Migrations\Migration\Manager;
+use Migrations\Migration\ManagerFactory;
 
 /**
  * Status command for built in backend
@@ -90,83 +85,6 @@ class StatusCommand extends Command
     }
 
     /**
-     * Generate a configuration object for the migrations operation.
-     *
-     * @param \Cake\Console\Arguments $args The console arguments
-     * @return \Migrations\Config\Config The generated config instance.
-     */
-    protected function getConfig(Arguments $args): Config
-    {
-        $folder = (string)$args->getOption('source');
-
-        // Get the filepath for migrations and seeds(not implemented yet)
-        $dir = ROOT . '/config/' . $folder;
-        if (defined('CONFIG')) {
-            $dir = CONFIG . $folder;
-        }
-        $plugin = $args->getOption('plugin');
-        if ($plugin && is_string($plugin)) {
-            $dir = Plugin::path($plugin) . 'config/' . $folder;
-        }
-
-        // Get the phinxlog table name. Plugins have separate migration history.
-        // The names and separate table history is something we could change in the future.
-        $table = 'phinxlog';
-        if ($plugin && is_string($plugin)) {
-            $prefix = Inflector::underscore($plugin) . '_';
-            $prefix = str_replace(['\\', '/', '.'], '_', $prefix);
-            $table = $prefix . $table;
-        }
-        $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
-        $connectionName = (string)$args->getOption('connection');
-
-        // TODO this all needs to go away. But first Environment and Manager need to work
-        // with Cake's ConnectionManager.
-        $connectionConfig = ConnectionManager::getConfig($connectionName);
-        if (!$connectionConfig) {
-            throw new StopException("Could not find connection `{$connectionName}`");
-        }
-
-        /** @var array<string, string> $connectionConfig */
-        $adapter = $connectionConfig['scheme'] ?? null;
-        $adapterConfig = [
-            'adapter' => $adapter,
-            'connection' => $connectionName,
-            'database' => $connectionConfig['database'],
-            'migration_table' => $table,
-            'dryrun' => $args->getOption('dry-run'),
-        ];
-
-        $configData = [
-            'paths' => [
-                'migrations' => $dir,
-            ],
-            'templates' => [
-                'file' => $templatePath . 'Phinx/create.php.template',
-            ],
-            'migration_base_class' => 'Migrations\AbstractMigration',
-            'environment' => $adapterConfig,
-            // TODO do we want to support the DI container in migrations?
-        ];
-
-        return new Config($configData);
-    }
-
-    /**
-     * Get the migration manager for the current CLI options and application configuration.
-     *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The command io.
-     * @return \Migrations\Migration\Manager
-     */
-    protected function getManager(Arguments $args, ConsoleIo $io): Manager
-    {
-        $config = $this->getConfig($args);
-
-        return new Manager($config, $io);
-    }
-
-    /**
      * Execute the command.
      *
      * @param \Cake\Console\Arguments $args The command arguments.
@@ -177,7 +95,15 @@ class StatusCommand extends Command
     {
         /** @var string|null $format */
         $format = $args->getOption('format');
-        $migrations = $this->getManager($args, $io)->printStatus($format);
+
+        $factory = new ManagerFactory([
+            'plugin' => $args->getOption('plugin'),
+            'source' => $args->getOption('source'),
+            'connection' => $args->getOption('connection'),
+            'dry-run' => $args->getOption('dry-run'),
+        ]);
+        $manager = $factory->createManager($io);
+        $migrations = $manager->printStatus($format);
 
         switch ($format) {
             case 'json':

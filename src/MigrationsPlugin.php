@@ -22,6 +22,7 @@ use Migrations\Command\BakeMigrationCommand;
 use Migrations\Command\BakeMigrationDiffCommand;
 use Migrations\Command\BakeMigrationSnapshotCommand;
 use Migrations\Command\BakeSeedCommand;
+use Migrations\Command\DumpCommand;
 use Migrations\Command\MigrateCommand;
 use Migrations\Command\MigrationsCacheBuildCommand;
 use Migrations\Command\MigrationsCacheClearCommand;
@@ -94,6 +95,7 @@ class MigrationsPlugin extends BasePlugin
             $classes = [
                 StatusCommand::class,
                 MigrateCommand::class,
+                DumpCommand::class,
             ];
             if (class_exists(SimpleBakeCommand::class)) {
                 $classes[] = BakeMigrationCommand::class;

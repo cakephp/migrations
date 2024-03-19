@@ -20,6 +20,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use ReflectionClass;
 
+// TODO(mark) Make this into a standalone class instead of a trait.
 trait TableFinderTrait
 {
     /**
