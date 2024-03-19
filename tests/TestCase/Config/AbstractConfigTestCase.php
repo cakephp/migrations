@@ -34,9 +34,9 @@ abstract class AbstractConfigTestCase extends TestCase
         $adapter = [
             'migration_table' => 'phinxlog',
             'adapter' => $connectionConfig['scheme'],
-            'user' => $connectionConfig['username'],
-            'pass' => $connectionConfig['password'],
-            'host' => $connectionConfig['host'],
+            'user' => $connectionConfig['username'] ?? '',
+            'pass' => $connectionConfig['password'] ?? '',
+            'host' => $connectionConfig['host'] ?? '',
             'name' => $connectionConfig['database'],
         ];
 
