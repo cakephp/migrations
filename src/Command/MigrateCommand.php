@@ -161,9 +161,31 @@ class MigrateCommand extends Command
         $io->out('');
         $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
 
-        // Run dump command to generate lock file
-        // TODO(mark) port in logic from src/Command/MigrationsCommand.php : 142:164
+        $exitCode = self::CODE_SUCCESS;
 
-        return self::CODE_SUCCESS;
+        // Run dump command to generate lock file
+        if (!$args->getOption('no-lock')) {
+            $newArgs = [];
+            if ($args->getOption('connection')) {
+                $newArgs[] = '-c';
+                $newArgs[] = $args->getOption('connection');
+            }
+            if ($args->getOption('plugin')) {
+                $newArgs[] = '-p';
+                $newArgs[] = $args->getOption('plugin');
+            }
+            if ($args->getOption('source')) {
+                $newArgs[] = '-s';
+                $newArgs[] = $args->getOption('source');
+            }
+
+            $io->out('');
+            $io->out('Dumping the current schema of the database to be used while baking a diff');
+            $io->out('');
+
+            $exitCode = $this->executeCommand(DumpCommand::class, $newArgs, $io);
+        }
+
+        return $exitCode;
     }
 }

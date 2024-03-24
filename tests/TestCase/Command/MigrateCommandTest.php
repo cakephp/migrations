@@ -13,6 +13,8 @@ class MigrateCommandTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
+    protected array $createdFiles = [];
+
     public function setUp(): void
     {
         parent::setUp();
@@ -31,6 +33,14 @@ class MigrateCommandTest extends TestCase
         }
     }
 
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        foreach ($this->createdFiles as $file) {
+            unlink($file);
+        }
+    }
+
     public function testHelp()
     {
         $this->exec('migrations migrate --help');
@@ -46,15 +56,19 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateNoMigrationSource()
     {
-        $this->exec('migrations migrate -c test -s Missing');
+        $migrationPath = ROOT . DS . 'config' . DS . 'Missing';
+        $this->exec('migrations migrate -c test -s Missing --no-lock');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Missing');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('<info>using connection</info> test');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(0, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->assertFileDoesNotExist($dumpFile);
     }
 
     /**
@@ -62,16 +76,22 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateSourceDefault()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
+        $this->assertOutputContains('Dumping the current schema');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(2, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
     }
 
     /**
@@ -81,17 +101,22 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateWithSourceMigration()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'ShouldExecute';
         $this->exec('migrations migrate -c test -s ShouldExecute');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'ShouldExecute');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('ShouldExecuteMigration:</info> <comment>migrated');
         $this->assertOutputContains('ShouldNotExecuteMigration:</info> <comment>skipped </comment>');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(1, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
     }
 
     /**
@@ -99,16 +124,18 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateDate()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --date 2020-01-01');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(1, $table->find()->all()->toArray());
+        $this->assertFileExists($migrationPath . DS . 'schema-dump-test.lock');
     }
 
     /**
@@ -116,17 +143,19 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateDateNotFound()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --date 2000-01-01');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputNotContains('MarkMigratedTest');
         $this->assertOutputContains('No migrations to run');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertFileExists($migrationPath . DS . 'schema-dump-test.lock');
     }
 
     /**
@@ -134,26 +163,32 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateTarget()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --target 20150416223600');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(1, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
     }
 
     public function testMigrateTargetNotFound()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --target 99');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputNotContains('MarkMigratedTest');
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('<comment>warning</comment> 99 is not a valid version');
@@ -161,15 +196,20 @@ class MigrateCommandTest extends TestCase
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(0, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
     }
 
     public function testMigrateFakeAll()
     {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --fake');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('warning</warning> performing fake migrations');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>migrated');
@@ -177,22 +217,32 @@ class MigrateCommandTest extends TestCase
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(2, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
     }
 
     public function testMigratePlugin()
     {
         $this->loadPlugins(['Migrator']);
+        $migrationPath = ROOT . DS . 'Plugin' . DS . 'Migrator' . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --plugin Migrator');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . ROOT . DS . 'Plugin' . DS . 'Migrator' . DS . 'config' . DS . 'Migrations');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('Migrator:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
         // Migration tracking table is plugin specific
         $table = $this->fetchTable('MigratorPhinxlog');
         $this->assertCount(1, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->assertOutputContains('Writing dump file `' . $dumpFile);
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
     }
 
     public function testMigratePluginInvalid()
@@ -212,61 +262,15 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateWithNoLock()
     {
-        $this->markTestIncomplete('not done here');
-        $argv = [
-            '-c',
-            'test',
-            '--no-lock',
-        ];
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitSuccess();
 
-        $this->command = $this->getMockCommand('MigrationsMigrateCommand');
-
-        $this->command->expects($this->never())
-            ->method('executeCommand');
-
-        $this->command->run($argv, $this->getMockIo());
-    }
-
-    /**
-     * Test that rolling back without the `--no-lock` option will dispatch a dump shell
-     *
-     * @return void
-     */
-    public function testRollbackWithLock()
-    {
-        $this->markTestIncomplete('not done here');
-        $argv = [
-            '-c',
-            'test',
-        ];
-
-        $this->command = $this->getMockCommand('MigrationsRollbackCommand');
-
-        $this->command->expects($this->once())
-            ->method('executeCommand');
-
-        $this->command->run($argv, $this->getMockIo());
-    }
-
-    /**
-     * Test that rolling back with the `--no-lock` option will not dispatch a dump shell
-     *
-     * @return void
-     */
-    public function testRollbackWithNoLock()
-    {
-        $this->markTestIncomplete('not done here');
-        $argv = [
-            '-c',
-            'test',
-            '--no-lock',
-        ];
-
-        $this->command = $this->getMockCommand('MigrationsRollbackCommand');
-
-        $this->command->expects($this->never())
-            ->method('executeCommand');
-
-        $this->command->run($argv, $this->getMockIo());
+        $this->assertOutputContains('<info>using connection</info> test');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
+        $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
+        $this->assertOutputContains('All Done');
+        $this->assertOutputNotContains('Dumping');
+        $this->assertFileDoesNotExist($migrationPath . DS . 'schema-dump-test.lock');
     }
 }
