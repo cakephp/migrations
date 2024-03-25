@@ -23,6 +23,7 @@ use Migrations\Command\BakeMigrationDiffCommand;
 use Migrations\Command\BakeMigrationSnapshotCommand;
 use Migrations\Command\BakeSeedCommand;
 use Migrations\Command\DumpCommand;
+use Migrations\Command\MarkMigratedCommand;
 use Migrations\Command\MigrateCommand;
 use Migrations\Command\MigrationsCacheBuildCommand;
 use Migrations\Command\MigrationsCacheClearCommand;
@@ -94,6 +95,7 @@ class MigrationsPlugin extends BasePlugin
         if (Configure::read('Migrations.backend') == 'builtin') {
             $classes = [
                 StatusCommand::class,
+                MarkMigratedCommand::class,
                 MigrateCommand::class,
                 DumpCommand::class,
             ];

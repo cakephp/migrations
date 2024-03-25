@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Migration;
 
+use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use DateTime;
 use Exception;
@@ -291,20 +292,20 @@ class Manager
     /**
      * Decides which versions it should mark as migrated
      *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input interface from which argument and options
-     * will be extracted to determine which versions to be marked as migrated
+     * @param \Cake\Console\Arguments $args Console arguments will be extracted
+     *   to determine which versions to be marked as migrated
      * @return array<int> Array of versions that should be marked as migrated
      * @throws \InvalidArgumentException If the `--exclude` or `--only` options are used without `--target`
      * or version not found
      */
-    public function getVersionsToMark(InputInterface $input): array
+    public function getVersionsToMark(Arguments $args): array
     {
         $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
         // TODO use console arguments
-        $versionArg = $input->getArgument('version');
-        $targetArg = $input->getOption('target');
+        $versionArg = $args->getArgument('version');
+        $targetArg = $args->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
         if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
             return $versions;
@@ -312,7 +313,7 @@ class Manager
 
         $version = (int)$targetArg ?: (int)$versionArg;
 
-        if ($input->getOption('only') || !empty($versionArg)) {
+        if ($args->getOption('only') || !empty($versionArg)) {
             if (!in_array($version, $versions)) {
                 throw new InvalidArgumentException("Migration `$version` was not found !");
             }
@@ -320,7 +321,7 @@ class Manager
             return [$version];
         }
 
-        $lengthIncrease = $input->getOption('exclude') ? 0 : 1;
+        $lengthIncrease = $args->getOption('exclude') ? 0 : 1;
         $index = array_search($version, $versions);
 
         if ($index === false) {
@@ -337,17 +338,15 @@ class Manager
      *
      * @param string $path Path where to look for migrations
      * @param array<int> $versions Versions which should be marked
-     * @param \Symfony\Component\Console\Output\OutputInterface $output OutputInterface used to store
-     * the command output
+     * @param \Cake\Console\ConsoleIo $io ConsoleIo to write output too
      * @return void
      */
-    public function markVersionsAsMigrated(string $path, array $versions, OutputInterface $output): void
+    public function markVersionsAsMigrated(string $path, array $versions, ConsoleIo $io): void
     {
-        // TODO fix output interface usage here
         $adapter = $this->getEnvironment()->getAdapter();
 
         if (!$versions) {
-            $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
+            $io->out('<info>No migrations were found. Nothing to mark as migrated.</info>');
 
             return;
         }
@@ -355,25 +354,25 @@ class Manager
         $adapter->beginTransaction();
         foreach ($versions as $version) {
             if ($this->isMigrated($version)) {
-                $output->writeln(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
+                $io->out(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
                 continue;
             }
 
             try {
                 $this->markMigrated($version, $path);
-                $output->writeln(
+                $io->out(
                     sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
                 );
             } catch (Exception $e) {
                 $adapter->rollbackTransaction();
-                $output->writeln(
+                $io->out(
                     sprintf(
                         '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
                         $version,
                         $e->getMessage()
                     )
                 );
-                $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
+                $io->out('<error>All marked migrations during this process were unmarked.</error>');
 
                 return;
             }
