@@ -23,8 +23,6 @@ use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class Manager
 {

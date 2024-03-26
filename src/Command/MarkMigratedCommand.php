@@ -17,12 +17,9 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use DateTime;
-use Exception;
 use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
-use Throwable;
 
 /**
  * MarkMigrated command marks migrations as run when they haven't been.

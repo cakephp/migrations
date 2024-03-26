@@ -17,15 +17,6 @@ use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
-use Exception;
-use Migrations\CakeManager;
-use Migrations\MigrationsDispatcher;
-use Migrations\Test\CommandTester as TestCommandTester;
-use Migrations\Test\TestCase\DriverConnectionTrait;
-use PDO;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\StreamOutput;
-use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * MarkMigratedTest class
@@ -33,6 +24,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 class MarkMigratedTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
+
     /**
      * Instance of a Cake Connection object
      *
@@ -268,6 +260,7 @@ class MarkMigratedTest extends TestCase
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
         );
     }
+
     public function testExecuteInvalidUseOfOnly(): void
     {
         $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --only');
