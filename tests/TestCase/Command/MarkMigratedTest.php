@@ -109,304 +109,182 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals(4, $result->fetchColumn(0));
     }
 
-    /**
-     * Test executing "mark_migration" with deprecated `all` version
-     *
-     * @return void
-     */
-    public function testExecuteAll()
-    {
-        $this->markTestIncomplete();
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            'version' => 'all',
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
-
-        $this->assertStringContainsString(
-            'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
-        );
-        $this->assertStringContainsString(
-            'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
-        );
-        $this->assertStringContainsString(
-            'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
-        );
-        $this->assertStringContainsString(
-            'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead',
-            $this->commandTester->getDisplay()
-        );
-
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
-        $this->assertEquals('20150704160200', $result[0]['version']);
-        $this->assertEquals('20150724233100', $result[1]['version']);
-        $this->assertEquals('20150826191400', $result[2]['version']);
-
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            'version' => 'all',
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
-
-        $this->assertStringContainsString(
-            'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
-        );
-        $this->assertStringContainsString(
-            'Skipping migration `20150724233100` (already migrated).',
-            $this->commandTester->getDisplay()
-        );
-        $this->assertStringContainsString(
-            'Skipping migration `20150826191400` (already migrated).',
-            $this->commandTester->getDisplay()
-        );
-        $this->assertStringContainsString(
-            'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead',
-            $this->commandTester->getDisplay()
-        );
-    }
-
     public function testExecuteTarget()
     {
-        $this->markTestIncomplete();
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150704160200',
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150704160200');
+        $this->assertExitSuccess();
 
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()
+            ->select(['*'])
+            ->from('phinxlog')
+            ->execute()
+            ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
 
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150826191400',
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150826191400');
+        $this->assertExitSuccess();
 
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
         );
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()
+            ->select(['*'])
+            ->from('phinxlog')
+            ->execute()
+            ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
         $this->assertEquals('20150724233100', $result[1]['version']);
         $this->assertEquals('20150826191400', $result[2]['version']);
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
+
+        $result = $this->connection->selectQuery()
+            ->select(['COUNT(*)'])
+            ->from('phinxlog')
+            ->execute();
         $this->assertEquals(3, $result->fetchColumn(0));
+    }
 
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150704160610',
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+    public function testTargetNotFound(): void
+    {
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150704160610');
+        $this->assertExitError();
 
-        $this->assertStringContainsString(
+        $this->assertErrorContains(
             'Migration `20150704160610` was not found !',
-            $this->commandTester->getDisplay()
         );
     }
 
     public function testExecuteTargetWithExclude()
     {
-        $this->markTestIncomplete();
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150724233100',
-            '--exclude' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
-
-        $this->assertStringContainsString(
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150724233100 --exclude');
+        $this->assertExitSuccess();
+        $this->assertOutputContains(
             'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()
+            ->select(['*'])
+            ->from('phinxlog')
+            ->execute()
+            ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
 
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150826191400',
-            '--exclude' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150826191400 --exclude');
 
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
         );
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()
+            ->select(['*'])
+            ->from('phinxlog')
+            ->execute()
+            ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
         $this->assertEquals('20150724233100', $result[1]['version']);
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
+
+        $result = $this->connection->selectQuery()
+            ->select(['COUNT(*)'])
+            ->from('phinxlog')
+            ->execute();
         $this->assertEquals(2, $result->fetchColumn(0));
+    }
 
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150704160610',
-            '--exclude' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+    public function testExecuteTargetWithExcludeNotFound(): void
+    {
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150704160610 --exclude');
+        $this->assertExitError();
 
-        $this->assertStringContainsString(
+        $this->assertErrorContains(
             'Migration `20150704160610` was not found !',
-            $this->commandTester->getDisplay()
         );
     }
 
     public function testExecuteTargetWithOnly()
     {
-        $this->markTestIncomplete();
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150724233100',
-            '--only' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150724233100 --only');
+        $this->assertExitSuccess();
 
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()
+            ->select(['*'])
+            ->from('phinxlog')
+            ->execute()
+            ->fetchAll('assoc');
         $this->assertEquals('20150724233100', $result[0]['version']);
 
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150826191400',
-            '--only' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150826191400 --only');
 
-        $this->assertStringContainsString(
+        $this->assertOutputContains(
             'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()
+            ->select(['*'])
+            ->from('phinxlog')
+            ->execute()
+            ->fetchAll('assoc');
         $this->assertEquals('20150826191400', $result[1]['version']);
         $this->assertEquals('20150724233100', $result[0]['version']);
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
+        $result = $this->connection->selectQuery()
+            ->select(['COUNT(*)'])
+            ->from('phinxlog')
+            ->execute();
         $this->assertEquals(2, $result->fetchColumn(0));
+    }
 
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150704160610',
-            '--only' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+    public function testExecuteTargetWithOnlyNotFound(): void
+    {
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150704160610 --only');
+        $this->assertExitError();
 
-        $this->assertStringContainsString(
+        $this->assertErrorContains(
             'Migration `20150704160610` was not found !',
-            $this->commandTester->getDisplay()
         );
     }
 
-    public function testExecuteWithVersionAsArgument()
+    public function testExecuteInvalidUseOfExclude()
     {
-        $this->markTestIncomplete();
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            'version' => '20150724233100',
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --exclude');
 
-        $this->assertStringContainsString(
-            'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+        $this->assertExitError();
+        $this->assertErrorContains(
+            'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
         );
-        $this->assertStringContainsString(
-            'DEPRECATED: VERSION as argument is deprecated. Use: ' .
-            '`bin/cake migrations mark_migrated --target=VERSION --only`',
-            $this->commandTester->getDisplay()
-        );
+    }
+    public function testExecuteInvalidUseOfOnly(): void
+    {
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --only');
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
-        $this->assertSame(1, count($result));
-        $this->assertEquals('20150724233100', $result[0]['version']);
+        $this->assertExitError();
+        $this->assertErrorContains(
+            'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
+        );
     }
 
-    public function testExecuteInvalidUseOfOnlyAndExclude()
+    public function testExecuteInvalidUseOfOnlyAndExclude(): void
     {
-        $this->markTestIncomplete();
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--exclude' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
+        $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --only --exclude');
 
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertEquals(0, $result->fetchColumn(0));
-        $this->assertStringContainsString(
+        $this->assertExitError();
+        $this->assertErrorContains(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
-            $this->commandTester->getDisplay()
-        );
-
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--only' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
-
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertEquals(0, $result->fetchColumn(0));
-        $this->assertStringContainsString(
-            'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
-            $this->commandTester->getDisplay()
-        );
-
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            '--target' => '20150724233100',
-            '--only' => true,
-            '--exclude' => true,
-            '--connection' => 'test',
-            '--source' => 'TestsMigrations',
-        ]);
-
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
-        $this->assertEquals(0, $result->fetchColumn(0));
-        $this->assertStringContainsString(
-            'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
-            $this->commandTester->getDisplay()
         );
     }
 }
