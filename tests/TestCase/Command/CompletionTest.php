@@ -44,7 +44,7 @@ class CompletionTest extends TestCase
     {
         $this->exec('completion subcommands migrations.migrations');
         $expected = [
-            'dump migrate orm-cache-build orm-cache-clear create mark_migrated rollback seed status',
+            'dump mark_migrated migrate orm-cache-build orm-cache-clear create rollback seed status',
         ];
         $actual = $this->_out->messages();
         $this->assertEquals($expected, $actual);
