@@ -7,6 +7,8 @@ use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
 use Cake\Database\Exception\DatabaseException;
+use Cake\Event\EventInterface;
+use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
 
@@ -230,5 +232,42 @@ class RollbackCommandTest extends TestCase
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
+    }
+
+    public function testEventsFired(): void
+    {
+        /** @var array<int, string> $fired */
+        $fired = [];
+        EventManager::instance()->on('Migration.beforeRollback', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        EventManager::instance()->on('Migration.afterRollback', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        $this->exec('migrations rollback -c test --no-lock');
+        $this->assertExitSuccess();
+        $this->assertSame(['Migration.beforeRollback', 'Migration.afterRollback'], $fired);
+    }
+
+    public function testBeforeMigrateEventAbort(): void
+    {
+        /** @var array<int, string> $fired */
+        $fired = [];
+        EventManager::instance()->on('Migration.beforeRollback', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+            $event->stopPropagation();
+            $event->setResult(0);
+        });
+        EventManager::instance()->on('Migration.afterRollback', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        $this->exec('migrations rollback -c test --no-lock');
+        $this->assertExitError();
+
+        // Only one event was fired
+        $this->assertSame(['Migration.beforeRollback'], $fired);
+
+        $table = $this->fetchTable('Phinxlog');
+        $this->assertEquals(0, $table->find()->count());
     }
 }
