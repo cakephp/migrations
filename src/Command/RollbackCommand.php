@@ -20,14 +20,15 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
 use DateTime;
 use Exception;
+use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 use Throwable;
 
 /**
- * Migrate command runs migrations
+ * Rollback command runs reverse actions of migrations
  */
-class MigrateCommand extends Command
+class RollbackCommand extends Command
 {
     /**
      * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
@@ -41,7 +42,7 @@ class MigrateCommand extends Command
      */
     public static function defaultName(): string
     {
-        return 'migrations migrate';
+        return 'migrations rollback';
     }
 
     /**
@@ -53,15 +54,15 @@ class MigrateCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
-            'Apply migrations to a SQL datasource',
+            'Rollback migrations to a specific migration',
             '',
-            'Will run all available migrations, optionally up to a specific version',
+            'Reverts the last migration or optionally to a specific migration',
             '',
-            '<info>migrations migrate --connection secondary</info>',
-            '<info>migrations migrate --connection secondary --target 003</info>',
+            '<info>migrations rollback --connection secondary</info>',
+            '<info>migrations rollback --connection secondary --target 003</info>',
         ])->addOption('plugin', [
             'short' => 'p',
-            'help' => 'The plugin to run migrations for',
+            'help' => 'The plugin to rollback migrations for',
         ])->addOption('connection', [
             'short' => 'c',
             'help' => 'The datasource connection to use',
@@ -72,15 +73,20 @@ class MigrateCommand extends Command
             'help' => 'The folder where your migrations are',
         ])->addOption('target', [
             'short' => 't',
-            'help' => 'The target version to migrate to.',
+            'help' => 'The target version to rollback to.',
         ])->addOption('date', [
             'short' => 'd',
-            'help' => 'The date to migrate to',
+            'help' => 'The date to rollback to',
         ])->addOption('fake', [
             'help' => "Mark any migrations selected as run, but don't actually execute them",
             'boolean' => true,
+        ])->addOption('force', [
+            'help' => 'Force rollback to ignore breakpoints',
+            'short' => 'f',
+            'boolean' => true,
         ])->addOption('dry-run', [
-            'help' => 'Dump queries to stdout instead of executing them',
+            'help' => 'Dump queries to stdout instead of running them.',
+            'short' => 'x',
             'boolean' => true,
         ])->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after migrating',
@@ -99,12 +105,12 @@ class MigrateCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io): ?int
     {
-        $event = $this->dispatchEvent('Migration.beforeMigrate');
+        $event = $this->dispatchEvent('Migration.beforeRollback');
         if ($event->isStopped()) {
             return $event->getResult() ? self::CODE_SUCCESS : self::CODE_ERROR;
         }
         $result = $this->executeMigrations($args, $io);
-        $this->dispatchEvent('Migration.afterMigrate');
+        $this->dispatchEvent('Migration.afterRollback');
 
         return $result;
     }
@@ -121,6 +127,7 @@ class MigrateCommand extends Command
         $version = $args->getOption('target') !== null ? (int)$args->getOption('target') : null;
         $date = $args->getOption('date');
         $fake = (bool)$args->getOption('fake');
+        $force = (bool)$args->getOption('force');
         $dryRun = (bool)$args->getOption('dry-run');
 
         $factory = new ManagerFactory([
@@ -133,26 +140,29 @@ class MigrateCommand extends Command
         $config = $manager->getConfig();
 
         $versionOrder = $config->getVersionOrder();
-        if ($dryRun) {
-            $io->out('<warning>dry-run mode enabled</warning>');
-        }
-        $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->out('<info>using paths</info> ' . implode(', ', $config->getMigrationPaths()));
         $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
 
+        if ($dryRun) {
+            $io->out('<warning>dry-run mode enabled</warning>');
+        }
         if ($fake) {
-            $io->out('<warning>warning</warning> performing fake migrations');
+            $io->out('<warning>warning</warning> performing fake rollbacks');
+        }
+
+        if ($date === null) {
+            $targetMustMatch = true;
+            $target = $version;
+        } else {
+            $targetMustMatch = false;
+            $target = $this->getTargetFromDate($date);
         }
 
         try {
             // run the migrations
             $start = microtime(true);
-            if ($date !== null) {
-                $manager->migrateToDateTime(new DateTime((string)$date), $fake);
-            } else {
-                $manager->migrate($version, $fake);
-            }
+            $manager->rollback($target, $force, $targetMustMatch, $fake);
             $end = microtime(true);
         } catch (Exception $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
@@ -172,7 +182,7 @@ class MigrateCommand extends Command
         $exitCode = self::CODE_SUCCESS;
 
         // Run dump command to generate lock file
-        if (!$args->getOption('no-lock') && !$args->getOption('dry-run')) {
+        if (!$args->getOption('no-lock')) {
             $newArgs = [];
             if ($args->getOption('connection')) {
                 $newArgs[] = '-c';
@@ -195,5 +205,46 @@ class MigrateCommand extends Command
         }
 
         return $exitCode;
+    }
+
+    /**
+     * Get Target from Date
+     *
+     * @param string|bool $date The date to convert to a target.
+     * @throws \InvalidArgumentException
+     * @return string The target
+     */
+    protected function getTargetFromDate(string|bool $date): string
+    {
+        // Narrow types as getOption() can return null|bool|string
+        if (!is_string($date) || !preg_match('/^\d{4,14}$/', $date)) {
+            throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
+        }
+        // what we need to append to the date according to the possible date string lengths
+        $dateStrlenToAppend = [
+            14 => '',
+            12 => '00',
+            10 => '0000',
+            8 => '000000',
+            6 => '01000000',
+            4 => '0101000000',
+        ];
+
+        /** @var string $date */
+        if (!isset($dateStrlenToAppend[strlen($date)])) {
+            throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
+        }
+        $dateLength = strlen($date);
+        if (!isset($dateStrlenToAppend[$dateLength])) {
+            throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
+        }
+        $target = $date . $dateStrlenToAppend[$dateLength];
+        $dateTime = DateTime::createFromFormat('YmdHis', $target);
+
+        if ($dateTime === false) {
+            throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
+        }
+
+        return $dateTime->format('YmdHis');
     }
 }

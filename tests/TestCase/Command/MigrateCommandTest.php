@@ -51,10 +51,8 @@ class MigrateCommandTest extends TestCase
 
     /**
      * Test that running with no migrations is successful
-     *
-     * @return void
      */
-    public function testMigrateNoMigrationSource()
+    public function testMigrateNoMigrationSource(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Missing';
         $this->exec('migrations migrate -c test -s Missing --no-lock');
@@ -74,7 +72,7 @@ class MigrateCommandTest extends TestCase
     /**
      * Test that source parameter defaults to Migrations
      */
-    public function testMigrateSourceDefault()
+    public function testMigrateSourceDefault(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test');
@@ -96,10 +94,8 @@ class MigrateCommandTest extends TestCase
 
     /**
      * Test that running with a no-op migrations is successful
-     *
-     * @return void
      */
-    public function testMigrateWithSourceMigration()
+    public function testMigrateWithSourceMigration(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'ShouldExecute';
         $this->exec('migrations migrate -c test -s ShouldExecute');
@@ -117,6 +113,28 @@ class MigrateCommandTest extends TestCase
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
         $this->assertFileExists($dumpFile);
+    }
+
+    /**
+     * Test dry-run
+     */
+    public function testMigrateDryRun()
+    {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
+        $this->exec('migrations migrate -c test --dry-run');
+        $this->assertExitSuccess();
+
+        $this->assertOutputContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('<info>using connection</info> test');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
+        $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
+        $this->assertOutputContains('All Done');
+
+        $table = $this->fetchTable('Phinxlog');
+        $this->assertCount(0, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->assertFileDoesNotExist($dumpFile);
     }
 
     /**
