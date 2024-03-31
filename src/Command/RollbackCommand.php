@@ -231,16 +231,12 @@ class RollbackCommand extends Command
         ];
 
         /** @var string $date */
-        if (!isset($dateStrlenToAppend[strlen($date)])) {
-            throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
-        }
         $dateLength = strlen($date);
         if (!isset($dateStrlenToAppend[$dateLength])) {
             throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
         }
         $target = $date . $dateStrlenToAppend[$dateLength];
         $dateTime = DateTime::createFromFormat('YmdHis', $target);
-
         if ($dateTime === false) {
             throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');
         }
