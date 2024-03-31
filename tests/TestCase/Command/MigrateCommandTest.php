@@ -7,6 +7,8 @@ use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Database\Exception\DatabaseException;
+use Cake\Event\EventInterface;
+use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 
 class MigrateCommandTest extends TestCase
@@ -290,5 +292,42 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('All Done');
         $this->assertOutputNotContains('Dumping');
         $this->assertFileDoesNotExist($migrationPath . DS . 'schema-dump-test.lock');
+    }
+
+    public function testEventsFired(): void
+    {
+        /** @var array<int, string> $fired */
+        $fired = [];
+        EventManager::instance()->on('Migration.beforeMigrate', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        EventManager::instance()->on('Migration.afterMigrate', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitSuccess();
+        $this->assertSame(['Migration.beforeMigrate', 'Migration.afterMigrate'], $fired);
+    }
+
+    public function testBeforeMigrateEventAbort(): void
+    {
+        /** @var array<int, string> $fired */
+        $fired = [];
+        EventManager::instance()->on('Migration.beforeMigrate', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+            $event->stopPropagation();
+            $event->setResult(0);
+        });
+        EventManager::instance()->on('Migration.afterMigrate', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitError();
+
+        // Only one event was fired
+        $this->assertSame(['Migration.beforeMigrate'], $fired);
+
+        $table = $this->fetchTable('Phinxlog');
+        $this->assertEquals(0, $table->find()->count());
     }
 }
