@@ -80,7 +80,7 @@ class MigrateCommand extends Command
             'help' => "Mark any migrations selected as run, but don't actually execute them",
             'boolean' => true,
         ])->addOption('dry-run', [
-            'help' => "Dump queries to stdout instead of executing them",
+            'help' => 'Dump queries to stdout instead of executing them',
             'boolean' => true,
         ])->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after migrating',

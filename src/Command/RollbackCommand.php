@@ -210,11 +210,11 @@ class RollbackCommand extends Command
     /**
      * Get Target from Date
      *
-     * @param string|false $date The date to convert to a target.
+     * @param string|bool $date The date to convert to a target.
      * @throws \InvalidArgumentException
      * @return string The target
      */
-    protected function getTargetFromDate(string|false $date): string
+    protected function getTargetFromDate(string|bool $date): string
     {
         // Narrow types as getOption() can return null|bool|string
         if (!is_string($date) || !preg_match('/^\d{4,14}$/', $date)) {

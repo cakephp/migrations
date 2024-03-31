@@ -6,7 +6,6 @@ namespace Migrations\Test\TestCase\Command;
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
-use Cake\Core\Exception\MissingPluginException;
 use Cake\Database\Exception\DatabaseException;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
@@ -208,6 +207,28 @@ class RollbackCommandTest extends TestCase
         $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>reverted');
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
         $this->assertFileExists($dumpFile);
+    }
+
+    public function testFakeOption(): void
+    {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitSuccess();
+        $this->resetOutput();
+        $table = $this->fetchTable('Phinxlog');
+        $this->assertCount(2, $table->find()->all()->toArray());
+
+        $this->exec('migrations rollback -c test --no-lock --target MarkMigratedTestSecond --fake');
+        $this->assertExitSuccess();
+
+        $this->assertOutputContains('performing fake rollbacks');
+        $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>reverted');
+
+        $this->assertCount(0, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->assertFileDoesNotExist($dumpFile);
     }
 }
