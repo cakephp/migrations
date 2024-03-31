@@ -51,10 +51,8 @@ class MigrateCommandTest extends TestCase
 
     /**
      * Test that running with no migrations is successful
-     *
-     * @return void
      */
-    public function testMigrateNoMigrationSource()
+    public function testMigrateNoMigrationSource(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Missing';
         $this->exec('migrations migrate -c test -s Missing --no-lock');
@@ -74,7 +72,7 @@ class MigrateCommandTest extends TestCase
     /**
      * Test that source parameter defaults to Migrations
      */
-    public function testMigrateSourceDefault()
+    public function testMigrateSourceDefault(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test');
@@ -96,10 +94,8 @@ class MigrateCommandTest extends TestCase
 
     /**
      * Test that running with a no-op migrations is successful
-     *
-     * @return void
      */
-    public function testMigrateWithSourceMigration()
+    public function testMigrateWithSourceMigration(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'ShouldExecute';
         $this->exec('migrations migrate -c test -s ShouldExecute');
