@@ -79,6 +79,9 @@ class MigrateCommand extends Command
         ])->addOption('fake', [
             'help' => "Mark any migrations selected as run, but don't actually execute them",
             'boolean' => true,
+        ])->addOption('dry-run', [
+            'help' => "Dump queries to stdout instead of executing them",
+            'boolean' => true,
         ])->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after migrating',
             'boolean' => true,
@@ -118,17 +121,22 @@ class MigrateCommand extends Command
         $version = $args->getOption('target') !== null ? (int)$args->getOption('target') : null;
         $date = $args->getOption('date');
         $fake = (bool)$args->getOption('fake');
+        $dryRun = (bool)$args->getOption('dry-run');
 
         $factory = new ManagerFactory([
             'plugin' => $args->getOption('plugin'),
             'source' => $args->getOption('source'),
             'connection' => $args->getOption('connection'),
-            'dry-run' => $args->getOption('dry-run'),
+            'dry-run' => $dryRun,
         ]);
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
 
         $versionOrder = $config->getVersionOrder();
+        if ($dryRun) {
+            $io->out('<warning>dry-run mode enabled</warning>');
+        }
+        $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->out('<info>using paths</info> ' . implode(', ', $config->getMigrationPaths()));
         $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
@@ -164,7 +172,7 @@ class MigrateCommand extends Command
         $exitCode = self::CODE_SUCCESS;
 
         // Run dump command to generate lock file
-        if (!$args->getOption('no-lock')) {
+        if (!$args->getOption('no-lock') && !$args->getOption('dry-run')) {
             $newArgs = [];
             if ($args->getOption('connection')) {
                 $newArgs[] = '-c';

@@ -120,6 +120,28 @@ class MigrateCommandTest extends TestCase
     }
 
     /**
+     * Test dry-run
+     */
+    public function testMigrateDryRun()
+    {
+        $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
+        $this->exec('migrations migrate -c test --dry-run');
+        $this->assertExitSuccess();
+
+        $this->assertOutputContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('<info>using connection</info> test');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
+        $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
+        $this->assertOutputContains('All Done');
+
+        $table = $this->fetchTable('Phinxlog');
+        $this->assertCount(0, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->assertFileDoesNotExist($dumpFile);
+    }
+
+    /**
      * Test that migrations only run to a certain date
      */
     public function testMigrateDate()
