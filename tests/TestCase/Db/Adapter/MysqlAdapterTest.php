@@ -59,7 +59,7 @@ class MysqlAdapterTest extends TestCase
 
     protected function getConsoleIo(): ConsoleIo
     {
-        $out = new StubConsoleOutput();
+        $out = new StubConsoleOutput(STDOUT);
         $in = new StubConsoleInput([]);
         $io = new ConsoleIo($out, $out, $in);
 

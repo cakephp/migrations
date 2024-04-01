@@ -46,7 +46,7 @@ class RollbackCommandTest extends TestCase
 
     protected function resetOutput(): void
     {
-        $this->_out = new StubConsoleOutput();
+        $this->_out = new StubConsoleOutput(STDOUT);
     }
 
     public function testHelp(): void

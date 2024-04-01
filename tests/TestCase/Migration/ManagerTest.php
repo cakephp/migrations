@@ -44,7 +44,7 @@ class ManagerTest extends TestCase
     {
         $this->config = new Config($this->getConfigArray());
 
-        $this->out = new StubConsoleOutput();
+        $this->out = new StubConsoleOutput(STDOUT);
         $this->out->setOutputAs(StubConsoleOutput::PLAIN);
 
         $this->io = new ConsoleIo($this->out, $this->out);

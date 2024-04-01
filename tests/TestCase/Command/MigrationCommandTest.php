@@ -113,7 +113,7 @@ class MigrationCommandTest extends TestCase
     protected function getMockIo()
     {
         $in = new StubConsoleInput([]);
-        $output = new StubConsoleOutput();
+        $output = new StubConsoleOutput(STDOUT);
         $io = $this->getMockBuilder(ConsoleIo::class)
             ->setConstructorArgs([$output, $output, $in])
             ->getMock();
