@@ -63,7 +63,7 @@ class SqlserverAdapterTest extends TestCase
 
     protected function getConsoleIo(): ConsoleIo
     {
-        $out = new StubConsoleOutput(STDOUT);
+        $out = new StubConsoleOutput();
         $in = new StubConsoleInput([]);
         $io = new ConsoleIo($out, $out, $in);
 

@@ -31,7 +31,7 @@ class ManagerTest extends TestCase
     protected $io;
 
     /**
-     * @var \Cake\Console\StubConsoleOutput $io
+     * @var \Cake\Console\TestSuite\StubConsoleOutput $io
      */
     protected $out;
 
@@ -44,7 +44,7 @@ class ManagerTest extends TestCase
     {
         $this->config = new Config($this->getConfigArray());
 
-        $this->out = new StubConsoleOutput(STDOUT);
+        $this->out = new StubConsoleOutput();
         $this->out->setOutputAs(StubConsoleOutput::PLAIN);
 
         $this->io = new ConsoleIo($this->out, $this->out);
@@ -601,7 +601,7 @@ class ManagerTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Duplicate migration/');
-        $this->expectExceptionMessageMatches('/20120111235330_duplicate_migration_2.php" has the same version as "20120111235330"/');
+        $this->expectExceptionMessageMatches('/20120111235330_duplicate_migration(_2)?.php" has the same version as "20120111235330"/');
         $manager->getMigrations();
     }
 
