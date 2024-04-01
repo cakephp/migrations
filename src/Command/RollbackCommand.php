@@ -183,24 +183,11 @@ class RollbackCommand extends Command
 
         // Run dump command to generate lock file
         if (!$args->getOption('no-lock')) {
-            $newArgs = [];
-            if ($args->getOption('connection')) {
-                $newArgs[] = '-c';
-                $newArgs[] = $args->getOption('connection');
-            }
-            if ($args->getOption('plugin')) {
-                $newArgs[] = '-p';
-                $newArgs[] = $args->getOption('plugin');
-            }
-            if ($args->getOption('source')) {
-                $newArgs[] = '-s';
-                $newArgs[] = $args->getOption('source');
-            }
-
             $io->out('');
             $io->out('Dumping the current schema of the database to be used while baking a diff');
             $io->out('');
 
+            $newArgs = DumpCommand::extractArgs($args);
             $exitCode = $this->executeCommand(DumpCommand::class, $newArgs, $io);
         }
 

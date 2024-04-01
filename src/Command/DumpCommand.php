@@ -45,6 +45,31 @@ class DumpCommand extends Command
     }
 
     /**
+     * Extract options for the dump command from another migrations option parser.
+     *
+     * @param \Cake\Console\Arguments $args
+     * @return array<string, mixed>
+     */
+    public static function extractArgs(Arguments $args): array
+    {
+        $newArgs = [];
+        if ($args->getOption('connection')) {
+            $newArgs[] = '-c';
+            $newArgs[] = $args->getOption('connection');
+        }
+        if ($args->getOption('plugin')) {
+            $newArgs[] = '-p';
+            $newArgs[] = $args->getOption('plugin');
+        }
+        if ($args->getOption('source')) {
+            $newArgs[] = '-s';
+            $newArgs[] = $args->getOption('source');
+        }
+
+        return $newArgs;
+    }
+
+    /**
      * Configure the option parser
      *
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
