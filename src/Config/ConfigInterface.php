@@ -19,6 +19,7 @@ use Psr\Container\ContainerInterface;
 interface ConfigInterface extends ArrayAccess
 {
     public const DEFAULT_MIGRATION_FOLDER = 'Migrations';
+    public const DEFAULT_SEED_FOLDER = 'Seeds';
 
     /**
      * Returns the configuration for the current environment.

@@ -1006,10 +1006,7 @@ class Manager
             ksort($seeds);
             $this->setSeeds($seeds);
         }
-
-        assert(!empty($this->seeds), 'seeds must be set');
-        $this->seeds = $this->orderSeedsByDependencies($this->seeds);
-
+        $this->seeds = $this->orderSeedsByDependencies((array)$this->seeds);
         if (empty($this->seeds)) {
             return [];
         }

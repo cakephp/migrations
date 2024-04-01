@@ -35,7 +35,7 @@ class ManagerFactory
      *
      * ## Options
      *
-     * - source - The directory in app/config that migrations should be read from.
+     * - source - The directory in app/config that migrations and seeds should be read from.
      * - plugin - The plugin name that migrations are being run on.
      * - connection - The connection name.
      * - dry-run - Whether or not dry-run mode should be enabled.
@@ -70,7 +70,8 @@ class ManagerFactory
     {
         $folder = (string)$this->getOption('source');
 
-        // Get the filepath for migrations and seeds(not implemented yet)
+        // Get the filepath for migrations and seeds.
+        // We rely on factory parameters to define which directory to use.
         $dir = ROOT . DS . 'config' . DS . $folder;
         if (defined('CONFIG')) {
             $dir = CONFIG . $folder;
@@ -110,7 +111,9 @@ class ManagerFactory
 
         $configData = [
             'paths' => [
+                // TODO make paths a simple list.
                 'migrations' => $dir,
+                'seeds' => $dir,
             ],
             'templates' => [
                 'file' => $templatePath . 'Phinx/create.php.template',

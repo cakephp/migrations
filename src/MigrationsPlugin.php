@@ -36,6 +36,7 @@ use Migrations\Command\MigrationsRollbackCommand;
 use Migrations\Command\MigrationsSeedCommand;
 use Migrations\Command\MigrationsStatusCommand;
 use Migrations\Command\RollbackCommand;
+use Migrations\Command\SeedCommand;
 use Migrations\Command\StatusCommand;
 
 /**
@@ -95,11 +96,12 @@ class MigrationsPlugin extends BasePlugin
     {
         if (Configure::read('Migrations.backend') == 'builtin') {
             $classes = [
-                StatusCommand::class,
+                DumpCommand::class,
                 MarkMigratedCommand::class,
                 MigrateCommand::class,
-                DumpCommand::class,
                 RollbackCommand::class,
+                SeedCommand::class,
+                StatusCommand::class,
             ];
             if (class_exists(SimpleBakeCommand::class)) {
                 $classes[] = BakeMigrationCommand::class;

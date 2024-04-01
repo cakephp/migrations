@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
 use Cake\Database\Exception\DatabaseException;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
+use ReflectionProperty;
 
 class RollbackCommandTest extends TestCase
 {
@@ -46,7 +46,10 @@ class RollbackCommandTest extends TestCase
 
     protected function resetOutput(): void
     {
-        $this->_out = new StubConsoleOutput();
+        if ($this->_out) {
+            $property = new ReflectionProperty($this->_out, '_out');
+            $property->setValue($this->_out, []);
+        }
     }
 
     public function testHelp(): void
