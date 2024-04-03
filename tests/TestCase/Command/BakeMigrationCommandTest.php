@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\BaseCommand;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Migrations\Command\BakeMigrationCommand;
@@ -111,12 +112,21 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertErrorContains('A migration with the name `CreateUsers` already exists. Please use a different name.');
     }
 
+    public function testCreateBuiltinAlias()
+    {
+        Configure::write('Migrations.backend', 'builtin');
+        $this->exec('migrations create CreateUsers --connection test');
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $this->assertOutputRegExp('/Wrote.*?CreateUsers\.php/');
+    }
+
     /**
      * Tests that baking a migration with the "drop" string inside the name generates a valid drop migration.
      */
     public function testCreateDropMigration()
     {
         $this->exec('bake migration DropUsers --connection test');
+        $this->assertOutputRegExp('/Wrote.*?DropUsers\.php/');
 
         $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_DropUsers.php');
         $filePath = current($file);
