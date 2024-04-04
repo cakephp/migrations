@@ -103,7 +103,8 @@ class MigrationsPlugin extends BasePlugin
                 SeedCommand::class,
                 StatusCommand::class,
             ];
-            if (class_exists(SimpleBakeCommand::class)) {
+            $hasBake = class_exists(SimpleBakeCommand::class);
+            if ($hasBake) {
                 $classes[] = BakeMigrationCommand::class;
                 $classes[] = BakeMigrationDiffCommand::class;
                 $classes[] = BakeMigrationSnapshotCommand::class;
@@ -120,6 +121,10 @@ class MigrationsPlugin extends BasePlugin
                 }
                 $found['migrations.' . $name] = $class;
             }
+            if ($hasBake) {
+                $found['migrations create'] = BakeMigrationCommand::class;
+            }
+
             $commands->addMany($found);
 
             return $commands;
