@@ -161,7 +161,6 @@ class Manager
      */
     public function migrateToDateTime(DateTime $dateTime, bool $fake = false): void
     {
-        // TODO remove the environment parameter. There is only one environment with builtin
         /** @var array<int> $versions */
         $versions = array_keys($this->getMigrations());
         $dateString = $dateTime->format('Ymdhis');
@@ -301,7 +300,6 @@ class Manager
         $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
-        // TODO use console arguments
         $versionArg = $args->getArgument('version');
         $targetArg = $args->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
@@ -1012,7 +1010,6 @@ class Manager
         }
 
         foreach ($this->seeds as $instance) {
-            // TODO fix this to not use input
             if (isset($input) && $instance instanceof AbstractSeed) {
                 $instance->setInput($input);
             }

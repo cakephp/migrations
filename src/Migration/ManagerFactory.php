@@ -92,8 +92,6 @@ class ManagerFactory
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
         $connectionName = (string)$this->getOption('connection');
 
-        // TODO this all needs to go away. But first Environment and Manager need to work
-        // with Cake's ConnectionManager.
         $connectionConfig = ConnectionManager::getConfig($connectionName);
         if (!$connectionConfig) {
             throw new RuntimeException("Could not find connection `{$connectionName}`");

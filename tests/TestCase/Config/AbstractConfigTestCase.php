@@ -55,7 +55,6 @@ abstract class AbstractConfigTestCase extends TestCase
                 'file' => '%%PHINX_CONFIG_PATH%%/tpl/testtemplate.txt',
                 'class' => '%%PHINX_CONFIG_PATH%%/tpl/testtemplate.php',
             ],
-            // TODO ideally we only need the connection and migration table name.
             'environment' => $adapter,
         ];
     }
