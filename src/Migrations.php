@@ -141,10 +141,10 @@ class Migrations
     {
         $backend = (string)(Configure::read('Migrations.backend') ?? 'phinx');
         if ($backend === 'builtin') {
-            return new BuiltinBackend();
+            return new BuiltinBackend($this->default);
         }
         if ($backend === 'phinx') {
-            return new PhinxBackend();
+            return new PhinxBackend($this->default);
         }
 
         throw new RuntimeException("Unknown `Migrations.backend` of `{$backend}`");
@@ -164,7 +164,6 @@ class Migrations
      */
     public function status(array $options = []): array
     {
-        $options = $options + $this->default;
         $backend = $this->getBackend();
 
         return $backend->status($options);
@@ -186,19 +185,9 @@ class Migrations
      */
     public function migrate(array $options = []): bool
     {
-        $this->setCommand('migrate');
-        $input = $this->getInput('Migrate', [], $options);
-        $method = 'migrate';
-        $params = ['default', $input->getOption('target')];
+        $backend = $this->getBackend();
 
-        if ($input->getOption('date')) {
-            $method = 'migrateToDateTime';
-            $params[1] = new DateTime($input->getOption('date'));
-        }
-
-        $this->run($method, $params, $input);
-
-        return true;
+        return $backend->migrate($options);
     }
 
     /**

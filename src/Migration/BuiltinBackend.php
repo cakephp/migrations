@@ -169,17 +169,17 @@ class BuiltinBackend
      */
     public function migrate(array $options = []): bool
     {
-        $this->setCommand('migrate');
-        $input = $this->getInput('Migrate', [], $options);
-        $method = 'migrate';
-        $params = ['default', $input->getOption('target')];
+        $manager = $this->getManager($options);
 
-        if ($input->getOption('date')) {
-            $method = 'migrateToDateTime';
-            $params[1] = new DateTime($input->getOption('date'));
+        if (!empty($options['date'])) {
+            $date = new DateTime($options['date']);
+
+            $manager->migrateToDateTime($date);
+
+            return true;
         }
 
-        $this->run($method, $params, $input);
+        $manager->migrate($options['target'] ?? null);
 
         return true;
     }
@@ -351,6 +351,8 @@ class BuiltinBackend
      */
     public function getManager(array $options): Manager
     {
+        $options += $this->default;
+
         $factory = new ManagerFactory([
             'plugin' => $options['plugin'] ?? null,
             'source' => $options['source'] ?? null,

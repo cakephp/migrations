@@ -170,10 +170,13 @@ class MigrationsTest extends TestCase
     /**
      * Tests the migrations and rollbacks
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMigrateAndRollback()
+    public function testMigrateAndRollback($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         if ($this->Connection->getDriver() instanceof Sqlserver) {
             // TODO This test currently fails in CI because numbers table
             // has no columns in sqlserver. This table should have columns as the
