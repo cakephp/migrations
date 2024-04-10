@@ -11,18 +11,21 @@ declare(strict_types=1);
  * @link          https://cakephp.org CakePHP(tm) Project
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations;
+namespace Migrations\Migration;
 
-use Cake\Core\Configure;
+use Cake\Command\Command;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
-use Migrations\Migration\BuiltinBackend;
-use Migrations\Migration\PhinxBackend;
+use Migrations\Command\StatusCommand;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Phinx\Db\Adapter\WrapperInterface;
-use Phinx\Migration\Manager;
+use Migrations\Migration\Manager;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,12 +36,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  * The Migrations class is responsible for handling migrations command
  * within an none-shell application.
  *
- * TODO(mark) This needs to be adapted to use the configure backend selection.
+ * @internal
  */
-class Migrations
+class BuiltinBackend
 {
-    use ConfigurationTrait;
-
     /**
      * The OutputInterface.
      * Should be a \Symfony\Component\Console\Output\NullOutput instance
@@ -48,11 +49,11 @@ class Migrations
     protected OutputInterface $output;
 
     /**
-     * CakeManager instance
+     * Manager instance
      *
-     * @var \Migrations\CakeManager|null
+     * @var \Migrations\Migration\Manager|null
      */
-    protected ?CakeManager $manager = null;
+    protected ?Manager $manager = null;
 
     /**
      * Default options to use
@@ -133,24 +134,6 @@ class Migrations
     }
 
     /**
-     * Get the Migrations interface backend based on configuration data.
-     *
-     * @return \Migrations\Migration\BuiltinBackend|\Migrations\Migration\PhinxBackend
-     */
-    protected function getBackend(): BuiltinBackend|PhinxBackend
-    {
-        $backend = (string)(Configure::read('Migrations.backend') ?? 'phinx');
-        if ($backend === 'builtin') {
-            return new BuiltinBackend();
-        }
-        if ($backend === 'phinx') {
-            return new PhinxBackend();
-        }
-
-        throw new RuntimeException("Unknown `Migrations.backend` of `{$backend}`");
-    }
-
-    /**
      * Returns the status of each migrations based on the options passed
      *
      * @param array<string, mixed> $options Options to pass to the command
@@ -160,14 +143,14 @@ class Migrations
      * - `connection` The datasource connection to use
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
+     *
      * @return array The migrations list and their statuses
      */
     public function status(array $options = []): array
     {
-        $options = $options + $this->default;
-        $backend = $this->getBackend();
+        $manager = $this->getManager($options);
 
-        return $backend->status($options);
+        return $manager->printStatus($options['format'] ?? null);
     }
 
     /**
@@ -361,68 +344,25 @@ class Migrations
     }
 
     /**
-     * Returns an instance of CakeManager
+     * Returns an instance of Manager
      *
-     * @param \Phinx\Config\ConfigInterface|null $config ConfigInterface the Manager needs to run
-     * @return \Migrations\CakeManager Instance of CakeManager
+     * @param array $options The options for manager creation
+     * @return \Migrations\Migration\Manager Instance of Manager
      */
-    public function getManager(?ConfigInterface $config = null): CakeManager
+    public function getManager(array $options): Manager
     {
-        if (!($this->manager instanceof CakeManager)) {
-            if (!($config instanceof ConfigInterface)) {
-                throw new RuntimeException(
-                    'You need to pass a ConfigInterface object for your first getManager() call'
-                );
-            }
+        $factory = new ManagerFactory([
+            'plugin' => $options['plugin'] ?? null,
+            'source' => $options['source'] ?? null,
+            'connection' => $options['connection'] ?? 'default',
+        ]);
+        $io = new ConsoleIo(
+            new StubConsoleOutput(),
+            new StubConsoleOutput(),
+            new StubConsoleInput([]),
+        );
 
-            $input = $this->input ?: $this->stubInput;
-            $this->manager = new CakeManager($config, $input, $this->output);
-        } elseif ($config !== null) {
-            $defaultEnvironment = $config->getEnvironment('default');
-            try {
-                $environment = $this->manager->getEnvironment('default');
-                $oldConfig = $environment->getOptions();
-                unset($oldConfig['connection']);
-                if ($oldConfig === $defaultEnvironment) {
-                    $defaultEnvironment['connection'] = $environment
-                        ->getAdapter()
-                        ->getConnection();
-                }
-            } catch (InvalidArgumentException $e) {
-            }
-            $config['environments'] = ['default' => $defaultEnvironment];
-            $this->manager->setEnvironments([]);
-            $this->manager->setConfig($config);
-        }
-
-        $this->setAdapter();
-
-        return $this->manager;
-    }
-
-    /**
-     * Sets the adapter the manager is going to need to operate on the DB
-     * This will make sure the adapter instance is a \Migrations\CakeAdapter instance
-     *
-     * @return void
-     */
-    public function setAdapter(): void
-    {
-        if ($this->input === null) {
-            return;
-        }
-
-        /** @var string $connectionName */
-        $connectionName = $this->input()->getOption('connection') ?: 'default';
-        /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get($connectionName);
-
-        /** @psalm-suppress PossiblyNullReference */
-        $env = $this->manager->getEnvironment('default');
-        $adapter = $env->getAdapter();
-        if (!$adapter instanceof CakeAdapter) {
-            $env->setAdapter(new CakeAdapter($adapter, $connection));
-        }
+        return $factory->createManager($io);
     }
 
     /**
@@ -438,6 +378,7 @@ class Migrations
      */
     public function getInput(string $command, array $arguments, array $options): InputInterface
     {
+        // TODO this could make an array of options for the manager.
         $className = 'Migrations\Command\Phinx\\' . $command;
         $options = $arguments + $this->prepareOptions($options);
         /** @var \Symfony\Component\Console\Command\Command $command */

@@ -11,14 +11,14 @@ declare(strict_types=1);
  * @link          https://cakephp.org CakePHP(tm) Project
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations;
+namespace Migrations\Migration;
 
-use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
-use Migrations\Migration\BuiltinBackend;
-use Migrations\Migration\PhinxBackend;
+use Migrations\CakeAdapter;
+use Migrations\CakeManager;
+use Migrations\ConfigurationTrait;
 use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
 use Phinx\Db\Adapter\WrapperInterface;
@@ -33,9 +33,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * The Migrations class is responsible for handling migrations command
  * within an none-shell application.
  *
- * TODO(mark) This needs to be adapted to use the configure backend selection.
+ * @internal
  */
-class Migrations
+class PhinxBackend
 {
     use ConfigurationTrait;
 
@@ -133,24 +133,6 @@ class Migrations
     }
 
     /**
-     * Get the Migrations interface backend based on configuration data.
-     *
-     * @return \Migrations\Migration\BuiltinBackend|\Migrations\Migration\PhinxBackend
-     */
-    protected function getBackend(): BuiltinBackend|PhinxBackend
-    {
-        $backend = (string)(Configure::read('Migrations.backend') ?? 'phinx');
-        if ($backend === 'builtin') {
-            return new BuiltinBackend();
-        }
-        if ($backend === 'phinx') {
-            return new PhinxBackend();
-        }
-
-        throw new RuntimeException("Unknown `Migrations.backend` of `{$backend}`");
-    }
-
-    /**
      * Returns the status of each migrations based on the options passed
      *
      * @param array<string, mixed> $options Options to pass to the command
@@ -164,10 +146,13 @@ class Migrations
      */
     public function status(array $options = []): array
     {
-        $options = $options + $this->default;
-        $backend = $this->getBackend();
+        // TODO This class could become an interface that chooses between a phinx and builtin
+        // implementation. Having two implementations would be easier to cleanup
+        // than having all the logic in one class with branching
+        $input = $this->getInput('Status', [], $options);
+        $params = ['default', $input->getOption('format')];
 
-        return $backend->status($options);
+        return $this->run('printStatus', $params, $input);
     }
 
     /**

@@ -123,13 +123,24 @@ class MigrationsTest extends TestCase
         FeatureFlags::setFlagsFromConfig(Configure::read('Migrations'));
     }
 
+    public static function backendProvider(): array
+    {
+        return [
+            ['builtin'],
+            ['phinx']
+        ];
+    }
+
     /**
      * Tests the status method
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testStatus()
+    public function testStatus(string $backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $result = $this->migrations->status();
         $expected = [
             [
@@ -154,13 +165,6 @@ class MigrationsTest extends TestCase
             ],
         ];
         $this->assertEquals($expected, $result);
-
-        $adapter = $this->migrations
-            ->getManager()
-            ->getEnvironment('default')
-            ->getAdapter();
-
-        $this->assertInstanceOf(CakeAdapter::class, $adapter);
     }
 
     /**
