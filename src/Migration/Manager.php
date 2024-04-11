@@ -335,45 +335,44 @@ class Manager
      * @param string $path Path where to look for migrations
      * @param array<int> $versions Versions which should be marked
      * @param \Cake\Console\ConsoleIo $io ConsoleIo to write output too
-     * @return void
+     * @return list<string> Output from the operation
      */
-    public function markVersionsAsMigrated(string $path, array $versions, ConsoleIo $io): void
+    public function markVersionsAsMigrated(string $path, array $versions): array
     {
         $adapter = $this->getEnvironment()->getAdapter();
+        $out = [];
 
         if (!$versions) {
-            $io->out('<info>No migrations were found. Nothing to mark as migrated.</info>');
+            $out[] = '<info>No migrations were found. Nothing to mark as migrated.</info>';
 
-            return;
+            return $out;
         }
 
         $adapter->beginTransaction();
         foreach ($versions as $version) {
             if ($this->isMigrated($version)) {
-                $io->out(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
+                $out[] = sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version);
                 continue;
             }
 
             try {
                 $this->markMigrated($version, $path);
-                $io->out(
-                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
-                );
+                $out[] = sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version);
             } catch (Exception $e) {
                 $adapter->rollbackTransaction();
-                $io->out(
-                    sprintf(
-                        '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
-                        $version,
-                        $e->getMessage()
-                    )
+                $out[] = sprintf(
+                    '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
+                    $version,
+                    $e->getMessage()
                 );
-                $io->out('<error>All marked migrations during this process were unmarked.</error>');
+                $out[] = '<error>All marked migrations during this process were unmarked.</error>';
 
-                return;
+                return $out;
             }
         }
         $adapter->commitTransaction();
+
+        return $out;
     }
 
     /**

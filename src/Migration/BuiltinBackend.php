@@ -99,41 +99,6 @@ class BuiltinBackend
     }
 
     /**
-     * Sets the command
-     *
-     * @param string $command Command name to store.
-     * @return $this
-     */
-    public function setCommand(string $command)
-    {
-        $this->command = $command;
-
-        return $this;
-    }
-
-    /**
-     * Sets the input object that should be used for the command class. This object
-     * is used to inspect the extra options that are needed for CakePHP apps.
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
-     * @return void
-     */
-    public function setInput(InputInterface $input): void
-    {
-        $this->input = $input;
-    }
-
-    /**
-     * Gets the command
-     *
-     * @return string Command name
-     */
-    public function getCommand(): string
-    {
-        return $this->command;
-    }
-
-    /**
      * Returns the status of each migrations based on the options passed
      *
      * @param array<string, mixed> $options Options to pass to the command
@@ -200,17 +165,17 @@ class BuiltinBackend
      */
     public function rollback(array $options = []): bool
     {
-        $this->setCommand('rollback');
-        $input = $this->getInput('Rollback', [], $options);
-        $method = 'rollback';
-        $params = ['default', $input->getOption('target')];
+        $manager = $this->getManager($options);
 
-        if ($input->getOption('date')) {
-            $method = 'rollbackToDateTime';
-            $params[1] = new DateTime($input->getOption('date'));
+        if (!empty($options['date'])) {
+            $date = new DateTime($options['date']);
+
+            $manager->rollbackToDateTime($date);
+
+            return true;
         }
 
-        $this->run($method, $params, $input);
+        $manager->rollback($options['target'] ?? null);
 
         return true;
     }
@@ -229,8 +194,6 @@ class BuiltinBackend
      */
     public function markMigrated(int|string|null $version = null, array $options = []): bool
     {
-        $this->setCommand('mark_migrated');
-
         if (
             isset($options['target']) &&
             isset($options['exclude']) &&
@@ -239,20 +202,11 @@ class BuiltinBackend
             $exceptionMessage = 'You should use `exclude` OR `only` (not both) along with a `target` argument';
             throw new InvalidArgumentException($exceptionMessage);
         }
+        $args = new Arguments([(string)$version], $options, ['version']);
 
-        $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
-        $this->setInput($input);
-
-        // This will need to vary based on the config option.
-        $migrationPaths = $this->getConfig()->getMigrationPaths();
-        $config = $this->getConfig(true);
-        $params = [
-            array_pop($migrationPaths),
-            $this->getManager($config)->getVersionsToMark($input),
-            $this->output,
-        ];
-
-        $this->run('markVersionsAsMigrated', $params, $input);
+        $manager = $this->getManager($options);
+        $versions = $manager->getVersionsToMark($args);
+        $manager->markVersionsAsMigrated($path, $versions);
 
         return true;
     }
@@ -271,16 +225,9 @@ class BuiltinBackend
      */
     public function seed(array $options = []): bool
     {
-        $this->setCommand('seed');
-        $input = $this->getInput('Seed', [], $options);
-
-        $seed = $input->getOption('seed');
-        if (!$seed) {
-            $seed = null;
-        }
-
-        $params = ['default', $seed];
-        $this->run('seed', $params, $input);
+        $seed = $options['seed'] ?? null;
+        $manager = $this->getManager($options);
+        $manager->seed($seed);
 
         return true;
     }
