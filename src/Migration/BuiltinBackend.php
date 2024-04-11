@@ -205,6 +205,9 @@ class BuiltinBackend
         $args = new Arguments([(string)$version], $options, ['version']);
 
         $manager = $this->getManager($options);
+        $config = $manager->getConfig();
+        $path = $config->getMigrationPaths()[0];
+
         $versions = $manager->getVersionsToMark($args);
         $manager->markVersionsAsMigrated($path, $versions);
 
@@ -233,64 +236,6 @@ class BuiltinBackend
     }
 
     /**
-     * Runs the method needed to execute and return
-     *
-     * @param string $method Manager method to call
-     * @param array $params Manager params to pass
-     * @param \Symfony\Component\Console\Input\InputInterface $input InputInterface needed for the
-     * Manager to properly run
-     * @return mixed The result of the CakeManager::$method() call
-     */
-    protected function run(string $method, array $params, InputInterface $input): mixed
-    {
-        // This will need to vary based on the backend configuration
-        if ($this->configuration instanceof Config) {
-            $migrationPaths = $this->getConfig()->getMigrationPaths();
-            $migrationPath = array_pop($migrationPaths);
-            $seedPaths = $this->getConfig()->getSeedPaths();
-            $seedPath = array_pop($seedPaths);
-        }
-
-        $pdo = null;
-        if ($this->manager instanceof Manager) {
-            $pdo = $this->manager->getEnvironment('default')
-                ->getAdapter()
-                ->getConnection();
-        }
-
-        $this->setInput($input);
-        $newConfig = $this->getConfig(true);
-        $manager = $this->getManager($newConfig);
-        $manager->setInput($input);
-
-        // Why is this being done? Is this something we can eliminate in the new code path?
-        if ($pdo !== null) {
-            /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
-            /** @psalm-suppress PossiblyNullReference */
-            $adapter = $this->manager->getEnvironment('default')->getAdapter();
-            while ($adapter instanceof WrapperInterface) {
-                /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
-                $adapter = $adapter->getAdapter();
-            }
-            $adapter->setConnection($pdo);
-        }
-
-        $newMigrationPaths = $newConfig->getMigrationPaths();
-        if (isset($migrationPath) && array_pop($newMigrationPaths) !== $migrationPath) {
-            $manager->resetMigrations();
-        }
-        $newSeedPaths = $newConfig->getSeedPaths();
-        if (isset($seedPath) && array_pop($newSeedPaths) !== $seedPath) {
-            $manager->resetSeeds();
-        }
-
-        /** @var callable $callable */
-        $callable = [$manager, $method];
-
-        return call_user_func_array($callable, $params);
-    }
-
-    /**
      * Returns an instance of Manager
      *
      * @param array $options The options for manager creation
@@ -312,49 +257,5 @@ class BuiltinBackend
         );
 
         return $factory->createManager($io);
-    }
-
-    /**
-     * Get the input needed for each commands to be run
-     *
-     * @param string $command Command name for which we need the InputInterface
-     * @param array<string, mixed> $arguments Simple key/values array representing the command arguments
-     * to pass to the InputInterface
-     * @param array<string, mixed> $options Simple key/values array representing the command options
-     * to pass to the InputInterface
-     * @return \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
-     * Manager to properly run
-     */
-    public function getInput(string $command, array $arguments, array $options): InputInterface
-    {
-        // TODO this could make an array of options for the manager.
-        $className = 'Migrations\Command\Phinx\\' . $command;
-        $options = $arguments + $this->prepareOptions($options);
-        /** @var \Symfony\Component\Console\Command\Command $command */
-        $command = new $className();
-        $definition = $command->getDefinition();
-
-        return new ArrayInput($options, $definition);
-    }
-
-    /**
-     * Prepares the option to pass on to the InputInterface
-     *
-     * @param array<string, mixed> $options Simple key-values array to pass to the InputInterface
-     * @return array<string, mixed> Prepared $options
-     */
-    protected function prepareOptions(array $options = []): array
-    {
-        $options += $this->default;
-        if (!$options) {
-            return $options;
-        }
-
-        foreach ($options as $name => $value) {
-            $options['--' . $name] = $value;
-            unset($options[$name]);
-        }
-
-        return $options;
     }
 }
