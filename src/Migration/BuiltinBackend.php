@@ -13,22 +13,13 @@ declare(strict_types=1);
  */
 namespace Migrations\Migration;
 
-use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
-use Cake\Datasource\ConnectionManager;
 use DateTime;
 use InvalidArgumentException;
-use Migrations\Command\StatusCommand;
-use Phinx\Config\Config;
-use Phinx\Config\ConfigInterface;
-use Phinx\Db\Adapter\WrapperInterface;
-use Migrations\Migration\Manager;
-use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -108,7 +99,6 @@ class BuiltinBackend
      * - `connection` The datasource connection to use
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
-     *
      * @return array The migrations list and their statuses
      */
     public function status(array $options = []): array

@@ -20,7 +20,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Exception;
 use InvalidArgumentException;
-use Migrations\CakeAdapter;
 use Migrations\Migrations;
 use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\WrapperInterface;
@@ -127,7 +126,7 @@ class MigrationsTest extends TestCase
     {
         return [
             ['builtin'],
-            ['phinx']
+            ['phinx'],
         ];
     }
 

@@ -22,7 +22,9 @@ use Phinx\Seed\SeedInterface;
 use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
-use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 
 class Manager
 {
@@ -848,7 +850,12 @@ class Manager
 
                     $io->verbose("Constructing <info>$class</info>.");
 
-                    $input = new ArgvInput();
+                    $config = $this->getConfig();
+                    $input = new ArrayInput([
+                        '--plugin' => $config['plugin'],
+                        '--source' => $config['source'],
+                        '--connection' => $config->getConnection(),
+                    ]);
                     $output = new OutputAdapter($io);
 
                     // instantiate it
@@ -957,7 +964,17 @@ class Manager
             /** @var \Phinx\Seed\SeedInterface[] $seeds */
             $seeds = [];
 
-            $input = new ArgvInput();
+            $config = $this->getConfig();
+            $optionDef = new InputDefinition([
+                new InputOption('plugin', mode: InputOption::VALUE_OPTIONAL, default: ''),
+                new InputOption('connection', mode: InputOption::VALUE_OPTIONAL, default: ''),
+                new InputOption('source', mode: InputOption::VALUE_OPTIONAL, default: ''),
+            ]);
+            $input = new ArrayInput([
+                '--plugin' => $config['plugin'],
+                '--connection' => $config->getConnection(),
+                '--source' => $config['source'],
+            ], $optionDef);
             $output = new OutputAdapter($this->io);
 
             foreach ($phpFiles as $filePath) {

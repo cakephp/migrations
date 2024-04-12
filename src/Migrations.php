@@ -15,14 +15,10 @@ namespace Migrations;
 
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
-use DateTime;
 use InvalidArgumentException;
 use Migrations\Migration\BuiltinBackend;
 use Migrations\Migration\PhinxBackend;
-use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
-use Phinx\Db\Adapter\WrapperInterface;
-use Phinx\Migration\Manager;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,8 +28,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * The Migrations class is responsible for handling migrations command
  * within an none-shell application.
- *
- * TODO(mark) This needs to be adapted to use the configure backend selection.
  */
 class Migrations
 {

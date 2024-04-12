@@ -118,6 +118,8 @@ class ManagerFactory
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',
             'environment' => $adapterConfig,
+            'plugin' => $plugin,
+            'source' =>  (string)$this->getOption('source'),
             // TODO do we want to support the DI container in migrations?
         ];
 
