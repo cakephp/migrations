@@ -6,6 +6,7 @@ namespace Migrations\Test\Db\Adapter;
 use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
+use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
@@ -17,7 +18,6 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use PDO;
 use PDOException;
-use Phinx\Config\FeatureFlags;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -465,7 +465,7 @@ class MysqlAdapterTest extends TestCase
     {
         $this->adapter->connect();
 
-        FeatureFlags::$unsignedPrimaryKeys = false;
+        Configure::write('Migrations.unsigned_primary_keys', false);
 
         $table = new Table('table1', [], $this->adapter);
         $table->create();

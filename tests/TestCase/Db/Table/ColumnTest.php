@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Db\Table;
 
+use Cake\Core\Configure;
 use Migrations\Db\Table\Column;
-use Phinx\Config\FeatureFlags;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -39,7 +39,7 @@ class ColumnTest extends TestCase
         $column = new Column();
         $this->assertTrue($column->isNull());
 
-        FeatureFlags::$columnNullDefault = false;
+        Configure::write('Migrations.column_null_default', false);
         $column = new Column();
         $this->assertFalse($column->isNull());
     }

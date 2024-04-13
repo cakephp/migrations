@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
+use Cake\Core\Configure;
 use Cake\Database\Connection;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
@@ -16,7 +17,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Phinx\Config\FeatureFlags;
 
 /**
  * Phinx MySQL Adapter.
@@ -232,12 +232,13 @@ class MysqlAdapter extends PdoAdapter
         }
 
         if (isset($options['id']) && is_string($options['id'])) {
+            $useUnsigned = (bool)Configure::read('Migrations.unsigned_primary_keys');
             // Handle id => "field_name" to support AUTO_INCREMENT
             $column = new Column();
             $column->setName($options['id'])
                    ->setType('integer')
                    ->setOptions([
-                       'signed' => $options['signed'] ?? !FeatureFlags::$unsignedPrimaryKeys,
+                       'signed' => $options['signed'] ?? !$useUnsigned,
                        'identity' => true,
                    ]);
 

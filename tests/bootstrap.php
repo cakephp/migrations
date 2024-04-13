@@ -20,7 +20,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\MigrationsPlugin;
-use Phinx\Config\FeatureFlags;
 use SimpleSnapshot\Plugin as SimpleSnapshotPlugin;
 use TestBlog\Plugin as TestBlogPlugin;
 use function Cake\Core\env;
@@ -69,8 +68,8 @@ Configure::write('App', [
 ]);
 
 Configure::write('Migrations', [
-    'unsigned_primary_keys' => FeatureFlags::$unsignedPrimaryKeys,
-    'column_null_default' => FeatureFlags::$columnNullDefault,
+    'unsigned_primary_keys' => true,
+    'column_null_default' => true,
 ]);
 
 Cache::setConfig([

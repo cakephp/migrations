@@ -24,7 +24,6 @@ use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
-use Phinx\Config\FeatureFlags;
 
 /**
  * Migration Helper class for output of field data in migration files.
@@ -309,10 +308,7 @@ class MigrationHelper extends Helper
             return false;
         }
 
-        $useUnsignedPrimaryKes = Configure::read(
-            'Migrations.unsigned_primary_keys',
-            FeatureFlags::$unsignedPrimaryKeys
-        );
+        $useUnsignedPrimaryKes = (bool)Configure::read('Migrations.unsigned_primary_keys');
 
         foreach ($tables as $table) {
             $schema = $table;
