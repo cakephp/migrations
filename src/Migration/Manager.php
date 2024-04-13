@@ -336,7 +336,6 @@ class Manager
      *
      * @param string $path Path where to look for migrations
      * @param array<int> $versions Versions which should be marked
-     * @param \Cake\Console\ConsoleIo $io ConsoleIo to write output too
      * @return list<string> Output from the operation
      */
     public function markVersionsAsMigrated(string $path, array $versions): array
@@ -852,8 +851,8 @@ class Manager
 
                     $config = $this->getConfig();
                     $input = new ArrayInput([
-                        '--plugin' => $config['plugin'],
-                        '--source' => $config['source'],
+                        '--plugin' => $config['plugin'] ?? null,
+                        '--source' => $config['source'] ?? null,
                         '--connection' => $config->getConnection(),
                     ]);
                     $output = new OutputAdapter($io);
@@ -971,9 +970,9 @@ class Manager
                 new InputOption('source', mode: InputOption::VALUE_OPTIONAL, default: ''),
             ]);
             $input = new ArrayInput([
-                '--plugin' => $config['plugin'],
+                '--plugin' => $config['plugin'] ?? null,
+                '--source' => $config['source'] ?? null,
                 '--connection' => $config->getConnection(),
-                '--source' => $config['source'],
             ], $optionDef);
             $output = new OutputAdapter($this->io);
 
