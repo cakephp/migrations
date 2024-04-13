@@ -119,7 +119,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     {
         parent::setOptions($options);
 
-        // TODO: Consider renaming this class to ConnectionAdapter
         if (isset($options['connection']) && $options['connection'] instanceof Connection) {
             $this->setConnection($options['connection']);
         }

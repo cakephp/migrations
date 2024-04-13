@@ -134,7 +134,6 @@ class ManagerTest extends TestCase
         $adapter = $connectionConfig['scheme'] ?? null;
         $adapterConfig = [
             'connection' => 'test',
-            // TODO all of this should go away
             'adapter' => $adapter,
             'user' => $connectionConfig['username'],
             'pass' => $connectionConfig['password'],

@@ -22,7 +22,9 @@ use Phinx\Seed\SeedInterface;
 use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
-use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 
 class Manager
 {
@@ -161,7 +163,6 @@ class Manager
      */
     public function migrateToDateTime(DateTime $dateTime, bool $fake = false): void
     {
-        // TODO remove the environment parameter. There is only one environment with builtin
         /** @var array<int> $versions */
         $versions = array_keys($this->getMigrations());
         $dateString = $dateTime->format('Ymdhis');
@@ -301,7 +302,6 @@ class Manager
         $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
-        // TODO use console arguments
         $versionArg = $args->getArgument('version');
         $targetArg = $args->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
@@ -336,46 +336,44 @@ class Manager
      *
      * @param string $path Path where to look for migrations
      * @param array<int> $versions Versions which should be marked
-     * @param \Cake\Console\ConsoleIo $io ConsoleIo to write output too
-     * @return void
+     * @return list<string> Output from the operation
      */
-    public function markVersionsAsMigrated(string $path, array $versions, ConsoleIo $io): void
+    public function markVersionsAsMigrated(string $path, array $versions): array
     {
         $adapter = $this->getEnvironment()->getAdapter();
+        $out = [];
 
         if (!$versions) {
-            $io->out('<info>No migrations were found. Nothing to mark as migrated.</info>');
+            $out[] = '<info>No migrations were found. Nothing to mark as migrated.</info>';
 
-            return;
+            return $out;
         }
 
         $adapter->beginTransaction();
         foreach ($versions as $version) {
             if ($this->isMigrated($version)) {
-                $io->out(sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version));
+                $out[] = sprintf('<info>Skipping migration `%s` (already migrated).</info>', $version);
                 continue;
             }
 
             try {
                 $this->markMigrated($version, $path);
-                $io->out(
-                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
-                );
+                $out[] = sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version);
             } catch (Exception $e) {
                 $adapter->rollbackTransaction();
-                $io->out(
-                    sprintf(
-                        '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
-                        $version,
-                        $e->getMessage()
-                    )
+                $out[] = sprintf(
+                    '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
+                    $version,
+                    $e->getMessage()
                 );
-                $io->out('<error>All marked migrations during this process were unmarked.</error>');
+                $out[] = '<error>All marked migrations during this process were unmarked.</error>';
 
-                return;
+                return $out;
             }
         }
         $adapter->commitTransaction();
+
+        return $out;
     }
 
     /**
@@ -851,7 +849,12 @@ class Manager
 
                     $io->verbose("Constructing <info>$class</info>.");
 
-                    $input = new ArgvInput();
+                    $config = $this->getConfig();
+                    $input = new ArrayInput([
+                        '--plugin' => $config['plugin'] ?? null,
+                        '--source' => $config['source'] ?? null,
+                        '--connection' => $config->getConnection(),
+                    ]);
                     $output = new OutputAdapter($io);
 
                     // instantiate it
@@ -960,7 +963,17 @@ class Manager
             /** @var \Phinx\Seed\SeedInterface[] $seeds */
             $seeds = [];
 
-            $input = new ArgvInput();
+            $config = $this->getConfig();
+            $optionDef = new InputDefinition([
+                new InputOption('plugin', mode: InputOption::VALUE_OPTIONAL, default: ''),
+                new InputOption('connection', mode: InputOption::VALUE_OPTIONAL, default: ''),
+                new InputOption('source', mode: InputOption::VALUE_OPTIONAL, default: ''),
+            ]);
+            $input = new ArrayInput([
+                '--plugin' => $config['plugin'] ?? null,
+                '--source' => $config['source'] ?? null,
+                '--connection' => $config->getConnection(),
+            ], $optionDef);
             $output = new OutputAdapter($this->io);
 
             foreach ($phpFiles as $filePath) {
@@ -1012,7 +1025,6 @@ class Manager
         }
 
         foreach ($this->seeds as $instance) {
-            // TODO fix this to not use input
             if (isset($input) && $instance instanceof AbstractSeed) {
                 $instance->setInput($input);
             }

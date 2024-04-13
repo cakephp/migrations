@@ -185,6 +185,7 @@ class StatusTest extends TestCase
         $migrations = $this->getMigrations();
         $migrations->migrate();
 
+        $migrations = $this->getMigrations();
         $migrationPaths = $migrations->getConfig()->getMigrationPaths();
         $migrationPath = array_pop($migrationPaths);
         $origin = $migrationPath . DS . '20150724233100_update_numbers_table.php';
@@ -248,7 +249,14 @@ class StatusTest extends TestCase
             'connection' => 'test',
             'source' => 'TestsMigrations',
         ];
+        $args = [
+            '--connection' => $params['connection'],
+            '--source' => $params['source'],
+        ];
+        $input = new ArrayInput($args, $this->command->getDefinition());
         $migrations = new Migrations($params);
+        $migrations->setInput($input);
+        $this->command->setInput($input);
 
         $adapter = $migrations
             ->getManager($this->command->getConfig())

@@ -132,6 +132,11 @@
       <code>$executedVersion</code>
     </ReferenceReusedFromConfusingScope>
   </file>
+  <file src="src/Migration/PhinxBackend.php">
+    <DeprecatedTrait>
+      <code>ConfigurationTrait</code>
+    </DeprecatedTrait>
+  </file>
   <file src="src/Migrations.php">
     <DeprecatedTrait>
       <code>ConfigurationTrait</code>

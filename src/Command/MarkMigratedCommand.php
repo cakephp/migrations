@@ -135,7 +135,8 @@ class MarkMigratedCommand extends Command
             return self::CODE_ERROR;
         }
 
-        $manager->markVersionsAsMigrated($path, $versions, $io);
+        $output = $manager->markVersionsAsMigrated($path, $versions);
+        array_map(fn ($line) => $io->out($line), $output);
 
         return self::CODE_SUCCESS;
     }

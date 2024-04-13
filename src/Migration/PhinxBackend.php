@@ -11,14 +11,18 @@ declare(strict_types=1);
  * @link          https://cakephp.org CakePHP(tm) Project
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations;
+namespace Migrations\Migration;
 
-use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
+use DateTime;
 use InvalidArgumentException;
-use Migrations\Migration\BuiltinBackend;
-use Migrations\Migration\PhinxBackend;
+use Migrations\CakeAdapter;
+use Migrations\CakeManager;
+use Migrations\ConfigurationTrait;
+use Phinx\Config\Config;
 use Phinx\Config\ConfigInterface;
+use Phinx\Db\Adapter\WrapperInterface;
+use Phinx\Migration\Manager;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,8 +32,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * The Migrations class is responsible for handling migrations command
  * within an none-shell application.
+ *
+ * @internal
  */
-class Migrations
+class PhinxBackend
 {
     use ConfigurationTrait;
 
@@ -127,24 +133,6 @@ class Migrations
     }
 
     /**
-     * Get the Migrations interface backend based on configuration data.
-     *
-     * @return \Migrations\Migration\BuiltinBackend|\Migrations\Migration\PhinxBackend
-     */
-    protected function getBackend(): BuiltinBackend|PhinxBackend
-    {
-        $backend = (string)(Configure::read('Migrations.backend') ?? 'phinx');
-        if ($backend === 'builtin') {
-            return new BuiltinBackend($this->default);
-        }
-        if ($backend === 'phinx') {
-            return new PhinxBackend($this->default);
-        }
-
-        throw new RuntimeException("Unknown `Migrations.backend` of `{$backend}`");
-    }
-
-    /**
      * Returns the status of each migrations based on the options passed
      *
      * @param array<string, mixed> $options Options to pass to the command
@@ -158,9 +146,13 @@ class Migrations
      */
     public function status(array $options = []): array
     {
-        $backend = $this->getBackend();
+        // TODO This class could become an interface that chooses between a phinx and builtin
+        // implementation. Having two implementations would be easier to cleanup
+        // than having all the logic in one class with branching
+        $input = $this->getInput('Status', [], $options);
+        $params = ['default', $input->getOption('format')];
 
-        return $backend->status($options);
+        return $this->run('printStatus', $params, $input);
     }
 
     /**
@@ -179,9 +171,19 @@ class Migrations
      */
     public function migrate(array $options = []): bool
     {
-        $backend = $this->getBackend();
+        $this->setCommand('migrate');
+        $input = $this->getInput('Migrate', [], $options);
+        $method = 'migrate';
+        $params = ['default', $input->getOption('target')];
 
-        return $backend->migrate($options);
+        if ($input->getOption('date')) {
+            $method = 'migrateToDateTime';
+            $params[1] = new DateTime($input->getOption('date'));
+        }
+
+        $this->run($method, $params, $input);
+
+        return true;
     }
 
     /**
@@ -200,9 +202,19 @@ class Migrations
      */
     public function rollback(array $options = []): bool
     {
-        $backend = $this->getBackend();
+        $this->setCommand('rollback');
+        $input = $this->getInput('Rollback', [], $options);
+        $method = 'rollback';
+        $params = ['default', $input->getOption('target')];
 
-        return $backend->rollback($options);
+        if ($input->getOption('date')) {
+            $method = 'rollbackToDateTime';
+            $params[1] = new DateTime($input->getOption('date'));
+        }
+
+        $this->run($method, $params, $input);
+
+        return true;
     }
 
     /**
@@ -219,9 +231,32 @@ class Migrations
      */
     public function markMigrated(int|string|null $version = null, array $options = []): bool
     {
-        $backend = $this->getBackend();
+        $this->setCommand('mark_migrated');
 
-        return $backend->markMigrated($version, $options);
+        if (
+            isset($options['target']) &&
+            isset($options['exclude']) &&
+            isset($options['only'])
+        ) {
+            $exceptionMessage = 'You should use `exclude` OR `only` (not both) along with a `target` argument';
+            throw new InvalidArgumentException($exceptionMessage);
+        }
+
+        $input = $this->getInput('MarkMigrated', ['version' => $version], $options);
+        $this->setInput($input);
+
+        // This will need to vary based on the config option.
+        $migrationPaths = $this->getConfig()->getMigrationPaths();
+        $config = $this->getConfig(true);
+        $params = [
+            array_pop($migrationPaths),
+            $this->getManager($config)->getVersionsToMark($input),
+            $this->output,
+        ];
+
+        $this->run('markVersionsAsMigrated', $params, $input);
+
+        return true;
     }
 
     /**
@@ -238,9 +273,76 @@ class Migrations
      */
     public function seed(array $options = []): bool
     {
-        $backend = $this->getBackend();
+        $this->setCommand('seed');
+        $input = $this->getInput('Seed', [], $options);
 
-        return $backend->seed($options);
+        $seed = $input->getOption('seed');
+        if (!$seed) {
+            $seed = null;
+        }
+
+        $params = ['default', $seed];
+        $this->run('seed', $params, $input);
+
+        return true;
+    }
+
+    /**
+     * Runs the method needed to execute and return
+     *
+     * @param string $method Manager method to call
+     * @param array $params Manager params to pass
+     * @param \Symfony\Component\Console\Input\InputInterface $input InputInterface needed for the
+     * Manager to properly run
+     * @return mixed The result of the CakeManager::$method() call
+     */
+    protected function run(string $method, array $params, InputInterface $input): mixed
+    {
+        // This will need to vary based on the backend configuration
+        if ($this->configuration instanceof Config) {
+            $migrationPaths = $this->getConfig()->getMigrationPaths();
+            $migrationPath = array_pop($migrationPaths);
+            $seedPaths = $this->getConfig()->getSeedPaths();
+            $seedPath = array_pop($seedPaths);
+        }
+
+        $pdo = null;
+        if ($this->manager instanceof Manager) {
+            $pdo = $this->manager->getEnvironment('default')
+                ->getAdapter()
+                ->getConnection();
+        }
+
+        $this->setInput($input);
+        $newConfig = $this->getConfig(true);
+        $manager = $this->getManager($newConfig);
+        $manager->setInput($input);
+
+        // Why is this being done? Is this something we can eliminate in the new code path?
+        if ($pdo !== null) {
+            /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
+            /** @psalm-suppress PossiblyNullReference */
+            $adapter = $this->manager->getEnvironment('default')->getAdapter();
+            while ($adapter instanceof WrapperInterface) {
+                /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
+                $adapter = $adapter->getAdapter();
+            }
+            $adapter->setConnection($pdo);
+        }
+
+        $newMigrationPaths = $newConfig->getMigrationPaths();
+        if (isset($migrationPath) && array_pop($newMigrationPaths) !== $migrationPath) {
+            $manager->resetMigrations();
+        }
+        $newSeedPaths = $newConfig->getSeedPaths();
+        if (isset($seedPath) && array_pop($newSeedPaths) !== $seedPath) {
+            $manager->resetSeeds();
+        }
+
+        /** @var callable $callable */
+        $callable = [$manager, $method];
+
+        return call_user_func_array($callable, $params);
     }
 
     /**
