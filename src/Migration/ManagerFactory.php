@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Migration;
 
 use Cake\Console\ConsoleIo;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
@@ -120,6 +121,10 @@ class ManagerFactory
             'environment' => $adapterConfig,
             'plugin' => $plugin,
             'source' => (string)$this->getOption('source'),
+            'feature_flags' => [
+                'unsigned_primary_keys' => Configure::read('Migrations.unsigned_primary_keys'),
+                'column_null_default' => Configure::read('Migrations.column_null_default'),
+            ],
             // TODO do we want to support the DI container in migrations?
         ];
 

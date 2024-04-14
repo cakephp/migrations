@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Table;
 
+use Cake\Core\Configure;
 use Migrations\Db\Literal;
-use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\PostgresAdapter;
 use RuntimeException;
@@ -166,7 +166,7 @@ class Column
      */
     public function __construct()
     {
-        $this->null = FeatureFlags::$columnNullDefault;
+        $this->null = (bool)Configure::read('Migrations.column_null_default');
     }
 
     /**

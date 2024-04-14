@@ -21,7 +21,6 @@ use Cake\TestSuite\TestCase;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Migrations;
-use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\WrapperInterface;
 use function Cake\Core\env;
 
@@ -118,8 +117,6 @@ class MigrationsTest extends TestCase
                 unlink($file);
             }
         }
-
-        FeatureFlags::setFlagsFromConfig(Configure::read('Migrations'));
     }
 
     public static function backendProvider(): array

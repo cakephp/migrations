@@ -19,6 +19,7 @@ use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use DateTime;
 use InvalidArgumentException;
+use Migrations\Config\ConfigInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -218,7 +219,9 @@ class BuiltinBackend
      */
     public function seed(array $options = []): bool
     {
+        $options['source'] ??= ConfigInterface::DEFAULT_SEED_FOLDER;
         $seed = $options['seed'] ?? null;
+
         $manager = $this->getManager($options);
         $manager->seed($seed);
 
@@ -237,7 +240,7 @@ class BuiltinBackend
 
         $factory = new ManagerFactory([
             'plugin' => $options['plugin'] ?? null,
-            'source' => $options['source'] ?? null,
+            'source' => $options['source'] ?? ConfigInterface::DEFAULT_MIGRATION_FOLDER,
             'connection' => $options['connection'] ?? 'default',
         ]);
         $io = new ConsoleIo(
