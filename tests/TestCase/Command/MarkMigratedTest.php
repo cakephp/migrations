@@ -15,6 +15,7 @@ namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
+use Cake\Core\Exception\MissingPluginException;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 
@@ -43,6 +44,7 @@ class MarkMigratedTest extends TestCase
         Configure::write('Migrations.backend', 'builtin');
 
         $this->connection = ConnectionManager::get('test');
+        $this->connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
     }
@@ -55,6 +57,7 @@ class MarkMigratedTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
+        $this->connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
     }
@@ -279,5 +282,32 @@ class MarkMigratedTest extends TestCase
         $this->assertErrorContains(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
         );
+    }
+
+    public function testExecutePluginInvalid(): void
+    {
+        try {
+            $this->exec('migrations mark_migrated -c test --plugin NotThere');
+            $this->fail('Should raise an error or exit with an error');
+        } catch (MissingPluginException $e) {
+            $this->assertTrue(true);
+        }
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertNotContains('not_there_phinxlog', $tables);
+    }
+
+    public function testExecutePlugin(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations mark_migrated -c test --plugin Migrator --only --target 20211001000000');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('`20211001000000` successfully marked migrated');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertContains('migrator_phinxlog', $tables);
     }
 }
