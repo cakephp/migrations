@@ -7,6 +7,7 @@ use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Database\Exception\DatabaseException;
+use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
@@ -273,6 +274,11 @@ class MigrateCommandTest extends TestCase
         } catch (MissingPluginException $e) {
             $this->assertTrue(true);
         }
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $tables = $connection->getSchemaCollection()->listTables();
+        $this->assertNotContains('not_there_phinxlog', $tables);
     }
 
     /**
