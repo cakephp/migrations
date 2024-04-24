@@ -49,4 +49,17 @@ class EntryCommandTest extends TestCase
         $this->assertOutputContains('migrations status');
         $this->assertOutputContains('migrations rollback');
     }
+
+    /**
+     * Test execute() generating help
+     *
+     * @return void
+     */
+    public function testExecuteMissingCommand()
+    {
+        $this->exec('migrations derp');
+
+        $this->assertExitError();
+        $this->assertErrorContains('Could not find migrations command named `derp`');
+    }
 }
