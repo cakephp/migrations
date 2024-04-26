@@ -308,7 +308,7 @@ class MigrationHelper extends Helper
             return false;
         }
 
-        $useUnsignedPrimaryKes = Configure::read(
+        $useUnsignedPrimaryKeys = Configure::read(
             'Migrations.unsigned_primary_keys',
             FeatureFlags::$unsignedPrimaryKeys
         );
@@ -321,7 +321,7 @@ class MigrationHelper extends Helper
 
             foreach ($schema->getPrimaryKey() as $column) {
                 $data = $schema->getColumn($column);
-                if (isset($data['unsigned']) && $data['unsigned'] === !$useUnsignedPrimaryKes) {
+                if (isset($data['unsigned']) && $data['unsigned'] === !$useUnsignedPrimaryKeys) {
                     return true;
                 }
             }
