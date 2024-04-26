@@ -45,6 +45,7 @@ class AbstractMigration extends BaseAbstractMigration
         }
 
         $table = new Table($tableName, $options, $this->getAdapter());
+        $this->tables[] = $table;
 
         return $table;
     }
