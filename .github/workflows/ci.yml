@@ -33,8 +33,15 @@ jobs:
         ports:
           - 5432:5432
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pg-password
+          PGPASSWORD: pg-password
           POSTGRES_DB: cakephp_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -49,9 +56,11 @@ jobs:
 
       - name: Setup Postgres
         if: matrix.db-type == 'pgsql'
+        env:
+          PGUSER: postgres
+          PGPASSWORD: pg-password
         run: |
-          export PGPASSWORD='pg-password'
-          psql -h 127.0.0.1 -U postgres -c 'CREATE DATABASE "cakephp_snapshot";'
+          psql -h 127.0.0.1 -c 'CREATE DATABASE "cakephp_snapshot";'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
