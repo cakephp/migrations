@@ -16,7 +16,7 @@ namespace Migrations\Command\Phinx;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use Migrations\ConfigurationTrait;
-use Migrations\TableFinderTrait;
+use Migrations\Util\TableFinder;
 use Phinx\Console\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,7 +31,6 @@ class Dump extends AbstractCommand
 {
     use CommandTrait;
     use ConfigurationTrait;
-    use TableFinderTrait;
 
     /**
      * Output object.
@@ -96,7 +95,8 @@ class Dump extends AbstractCommand
             'require-table' => false,
             'plugin' => $this->getPlugin($input),
         ];
-        $tables = $this->getTablesToBake($collection, $options);
+        $finder = new TableFinder($connectionName);
+        $tables = $finder->getTablesToBake($collection, $options);
 
         $dump = [];
         if ($tables) {

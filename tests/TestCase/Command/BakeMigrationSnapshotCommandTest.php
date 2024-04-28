@@ -83,32 +83,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     }
 
     /**
-     * Test that the BakeMigrationSnapshotCommand::getTableNames properly returns the table list
-     * when we want tables from a plugin
-     *
-     * @return void
-     */
-    public function testGetTableNames()
-    {
-        /** @var \Migrations\Test\TestCase\Command\TestClassWithSnapshotTrait|\PHPUnit\Framework\MockObject\MockObject $class */
-        $class = $this->getMockBuilder(TestClassWithSnapshotTrait::class)
-            ->onlyMethods(['findTables', 'fetchTableName'])
-            ->getMock();
-
-        $class->expects($this->any())
-            ->method('findTables')
-            ->with('TestBlog')
-            ->will($this->returnValue(['ArticlesTable.php', 'TagsTable.php']));
-
-        $class->method('fetchTableName')
-            ->will($this->onConsecutiveCalls(['articles_tags', 'articles'], ['articles_tags', 'tags']));
-
-        $results = $class->getTableNames('TestBlog');
-        $expected = ['articles_tags', 'articles', 'tags'];
-        $this->assertEquals(array_values($expected), array_values($results));
-    }
-
-    /**
      * Test baking a snapshot
      *
      * @return void
@@ -233,40 +207,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->assertOutputContains('Creating a dump of the new database state...');
         $this->assertNotEmpty($this->generatedFiles);
         $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
-    }
-
-    /**
-     * Test that using MigrationSnapshotTask::fetchTableName in a Table object class
-     * where the table name is composed with the database name (e.g. mydb.mytable)
-     * will return :
-     * - only the table name if the current connection `database` parameter is the first part
-     * of the table name
-     * - the full string (e.g. mydb.mytable) if the current connection `database` parameter
-     * is not the first part of the table name
-     *
-     * @return void
-     */
-    public function testFetchTableNames()
-    {
-        $class = new TestClassWithSnapshotTrait();
-        $class->connection = 'alternative';
-        $expected = ['alternative.special_tags'];
-        $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
-
-        ConnectionManager::setConfig('alternative', [
-            'database' => 'alternative',
-        ]);
-        $class->connection = 'alternative';
-        $expected = ['special_tags'];
-        $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
-
-        ConnectionManager::drop('alternative');
-        ConnectionManager::setConfig('alternative', [
-            'schema' => 'alternative',
-        ]);
-        $class->connection = 'alternative';
-        $expected = ['special_tags'];
-        $this->assertEquals($expected, $class->fetchTableName('SpecialTagsTable.php', 'TestBlog'));
     }
 
     /**

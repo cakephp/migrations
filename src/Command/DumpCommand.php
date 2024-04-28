@@ -21,7 +21,7 @@ use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
-use Migrations\TableFinderTrait;
+use Migrations\Util\TableFinder;
 
 /**
  * Dump command class.
@@ -30,8 +30,6 @@ use Migrations\TableFinderTrait;
  */
 class DumpCommand extends Command
 {
-    use TableFinderTrait;
-
     protected string $connection;
 
     /**
@@ -125,7 +123,8 @@ class DumpCommand extends Command
         ];
         // The connection property is used by the trait methods.
         $this->connection = $connectionName;
-        $tables = $this->getTablesToBake($collection, $options);
+        $finder = new TableFinder($connectionName);
+        $tables = $finder->getTablesToBake($collection, $options);
 
         $dump = [];
         if ($tables) {
