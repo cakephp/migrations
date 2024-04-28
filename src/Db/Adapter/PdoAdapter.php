@@ -134,8 +134,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function setConnection(Connection $connection): AdapterInterface
     {
-        // TODO how do PDO connection flags get set? Phinx used to
-        // turn on exception error mode, and I don't think Cake does that by default.
         $this->connection = $connection;
 
         // Create the schema table if it doesn't already exist
