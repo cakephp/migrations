@@ -50,8 +50,13 @@ class Config implements ConfigInterface
      */
     public function getEnvironment(): ?array
     {
-        // TODO evolve this into connection only.
-        return $this->values['environment'] ?? null;
+        if (empty($this->values['environment'])) {
+            return null;
+        }
+        $config = (array)$this->values['environment'];
+        $config['version_order'] = $this->getVersionOrder();
+
+        return $config;
     }
 
     /**
@@ -93,6 +98,7 @@ class Config implements ConfigInterface
      */
     public function getMigrationBaseClassName(bool $dropNamespace = true): string
     {
+        /** @var string $className */
         $className = !isset($this->values['migration_base_class']) ? 'Phinx\Migration\AbstractMigration' : $this->values['migration_base_class'];
 
         return $dropNamespace ? (substr((string)strrchr($className, '\\'), 1) ?: $className) : $className;
@@ -103,6 +109,7 @@ class Config implements ConfigInterface
      */
     public function getSeedBaseClassName(bool $dropNamespace = true): string
     {
+        /** @var string $className */
         $className = !isset($this->values['seed_base_class']) ? 'Phinx\Seed\AbstractSeed' : $this->values['seed_base_class'];
 
         return $dropNamespace ? substr((string)strrchr($className, '\\'), 1) : $className;

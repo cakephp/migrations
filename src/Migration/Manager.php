@@ -708,7 +708,6 @@ class Manager
         $config = $this->getConfig();
         // create an environment instance and cache it
         $envOptions = $config->getEnvironment();
-        $envOptions['version_order'] = $config->getVersionOrder();
 
         $environment = new Environment('default', $envOptions);
         $environment->setIo($this->getIo());
