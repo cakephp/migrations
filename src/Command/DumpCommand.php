@@ -111,7 +111,7 @@ class DumpCommand extends Command
             'connection' => $args->getOption('connection'),
         ]);
         $config = $factory->createConfig();
-        $path = $config->getMigrationPaths()[0];
+        $path = $config->getMigrationPath();
         $connectionName = (string)$config->getConnection();
         $connection = ConnectionManager::get($connectionName);
         assert($connection instanceof Connection);

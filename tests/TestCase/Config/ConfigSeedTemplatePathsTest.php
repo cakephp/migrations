@@ -56,6 +56,6 @@ class ConfigSeedTemplatePathsTest extends AbstractConfigTestCase
         $actualValue = $config->getSeedTemplateFile();
         $this->assertNull($actualValue);
 
-        $config->getSeedPaths();
+        $config->getSeedPath();
     }
 }

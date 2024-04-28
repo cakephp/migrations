@@ -110,7 +110,6 @@ class ManagerFactory
 
         $configData = [
             'paths' => [
-                // TODO make paths a simple list.
                 'migrations' => $dir,
                 'seeds' => $dir,
             ],

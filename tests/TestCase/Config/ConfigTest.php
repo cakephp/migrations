@@ -112,10 +112,10 @@ class ConfigTest extends AbstractConfigTestCase
     public function testGetSeedPath()
     {
         $config = new Config(['paths' => ['seeds' => 'db/seeds']]);
-        $this->assertEquals(['db/seeds'], $config->getSeedPaths());
+        $this->assertEquals('db/seeds', $config->getSeedPath());
 
         $config = new Config(['paths' => ['seeds' => ['db/seeds1', 'db/seeds2']]]);
-        $this->assertEquals(['db/seeds1', 'db/seeds2'], $config->getSeedPaths());
+        $this->assertEquals('db/seeds1', $config->getSeedPath());
     }
 
     /**
@@ -128,7 +128,7 @@ class ConfigTest extends AbstractConfigTestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('Seeds path missing from config file');
 
-        $config->getSeedPaths();
+        $config->getSeedPath();
     }
 
     /**

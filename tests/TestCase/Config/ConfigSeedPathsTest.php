@@ -16,7 +16,7 @@ class ConfigSeedPathsTest extends AbstractConfigTestCase
 
         $this->expectException(UnexpectedValueException::class);
 
-        $config->getSeedPaths();
+        $config->getSeedPath();
     }
 
     /**
@@ -25,7 +25,7 @@ class ConfigSeedPathsTest extends AbstractConfigTestCase
     public function testGetSeedPaths()
     {
         $config = new Config($this->getConfigArray());
-        $this->assertEquals($this->getSeedPaths(), $config->getSeedPaths());
+        $this->assertEquals($this->getSeedPath(), $config->getSeedPath());
     }
 
     public function testGetSeedPathConvertsStringToArray()
@@ -37,9 +37,7 @@ class ConfigSeedPathsTest extends AbstractConfigTestCase
         ];
 
         $config = new Config($values);
-        $paths = $config->getSeedPaths();
-
-        $this->assertIsArray($paths);
-        $this->assertCount(1, $paths);
+        $path = $config->getSeedPath();
+        $this->assertEquals('/test', $path);
     }
 }

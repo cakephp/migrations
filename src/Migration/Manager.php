@@ -887,7 +887,7 @@ class Manager
      */
     protected function getMigrationFiles(): array
     {
-        return Util::getFiles($this->getConfig()->getMigrationPaths());
+        return Util::getFiles($this->getConfig()->getMigrationPath());
     }
 
     /**
@@ -1039,7 +1039,7 @@ class Manager
      */
     protected function getSeedFiles(): array
     {
-        return Util::getFiles($this->getConfig()->getSeedPaths());
+        return Util::getFiles($this->getConfig()->getSeedPath());
     }
 
     /**

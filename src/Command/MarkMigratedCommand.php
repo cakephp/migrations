@@ -116,8 +116,7 @@ class MarkMigratedCommand extends Command
         ]);
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
-        $migrationPaths = $config->getMigrationPaths();
-        $path = array_pop($migrationPaths);
+        $path = $config->getMigrationPath();
 
         if ($this->invalidOnlyOrExclude($args)) {
             $io->err(

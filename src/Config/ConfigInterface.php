@@ -31,18 +31,18 @@ interface ConfigInterface extends ArrayAccess
     public function getEnvironment(): ?array;
 
     /**
-     * Gets the paths to search for migration files.
+     * Gets the path to search for migration files.
      *
-     * @return string[]
+     * @return string
      */
-    public function getMigrationPaths(): array;
+    public function getMigrationPath(): string;
 
     /**
-     * Gets the paths to search for seed files.
+     * Gets the path to search for seed files.
      *
-     * @return string[]
+     * @return string
      */
-    public function getSeedPaths(): array;
+    public function getSeedPath(): string;
 
     /**
      * Get the connection namee

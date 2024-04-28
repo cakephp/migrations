@@ -62,14 +62,13 @@ class Config implements ConfigInterface
      * @inheritDoc
      * @throws \UnexpectedValueException
      */
-    public function getMigrationPaths(): array
+    public function getMigrationPath(): string
     {
         if (!isset($this->values['paths']['migrations'])) {
             throw new UnexpectedValueException('Migrations path missing from config file');
         }
-
-        if (is_string($this->values['paths']['migrations'])) {
-            $this->values['paths']['migrations'] = [$this->values['paths']['migrations']];
+        if (is_array($this->values['paths']['migrations']) && isset($this->values['paths']['migrations'][0])) {
+            return $this->values['paths']['migrations'][0];
         }
 
         return $this->values['paths']['migrations'];
@@ -79,14 +78,13 @@ class Config implements ConfigInterface
      * @inheritDoc
      * @throws \UnexpectedValueException
      */
-    public function getSeedPaths(): array
+    public function getSeedPath(): string
     {
         if (!isset($this->values['paths']['seeds'])) {
             throw new UnexpectedValueException('Seeds path missing from config file');
         }
-
-        if (is_string($this->values['paths']['seeds'])) {
-            $this->values['paths']['seeds'] = [$this->values['paths']['seeds']];
+        if (is_array($this->values['paths']['seeds']) && isset($this->values['paths']['seeds'][0])) {
+            return $this->values['paths']['seeds'][0];
         }
 
         return $this->values['paths']['seeds'];

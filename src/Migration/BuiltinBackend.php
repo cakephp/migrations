@@ -197,7 +197,7 @@ class BuiltinBackend
 
         $manager = $this->getManager($options);
         $config = $manager->getConfig();
-        $path = $config->getMigrationPaths()[0];
+        $path = $config->getMigrationPath();
 
         $versions = $manager->getVersionsToMark($args);
         $manager->markVersionsAsMigrated($path, $versions);
