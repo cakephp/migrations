@@ -82,7 +82,7 @@ class TableFinder
 
                     $config = (array)ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
-                    if ($config[$key] === $split[1]) {
+                    if (isset($split[0]) && $config[$key] === $split[1]) {
                         $table = $split[0];
                     }
                 }
@@ -197,7 +197,7 @@ class TableFinder
             $config = ConnectionManager::getConfig($this->connection);
             if ($config) {
                 $key = isset($config['schema']) ? 'schema' : 'database';
-                if ($config[$key] === $splitted[1]) {
+                if (isset($splitted[0]) && $config[$key] === $splitted[1]) {
                     $tableName = $splitted[0];
                 }
             }
