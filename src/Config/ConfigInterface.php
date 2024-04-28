@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Migrations\Config;
 
 use ArrayAccess;
-use Psr\Container\ContainerInterface;
 
 /**
  * Phinx configuration interface.
@@ -72,13 +71,6 @@ interface ConfigInterface extends ArrayAccess
      * @return string
      */
     public function getTemplateStyle(): string;
-
-    /**
-     * Get the user-provided container for instantiating seeds
-     *
-     * @return \Psr\Container\ContainerInterface|null
-     */
-    public function getContainer(): ?ContainerInterface;
 
     /**
      * Get the version order.

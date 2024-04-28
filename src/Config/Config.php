@@ -10,7 +10,6 @@ namespace Migrations\Config;
 
 use Closure;
 use InvalidArgumentException;
-use Psr\Container\ContainerInterface;
 use ReturnTypeWillChange;
 use UnexpectedValueException;
 
@@ -157,18 +156,6 @@ class Config implements ConfigInterface
         }
 
         return $this->values['templates']['style'] === self::TEMPLATE_STYLE_UP_DOWN ? self::TEMPLATE_STYLE_UP_DOWN : self::TEMPLATE_STYLE_CHANGE;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getContainer(): ?ContainerInterface
-    {
-        if (!isset($this->values['container'])) {
-            return null;
-        }
-
-        return $this->values['container'];
     }
 
     /**

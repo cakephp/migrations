@@ -125,7 +125,6 @@ class ManagerFactory
                 'unsigned_primary_keys' => Configure::read('Migrations.unsigned_primary_keys'),
                 'column_null_default' => Configure::read('Migrations.column_null_default'),
             ],
-            // TODO do we want to support the DI container in migrations?
         ];
 
         return new Config($configData);
