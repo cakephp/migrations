@@ -10,7 +10,6 @@ namespace Migrations\Config;
 
 use Closure;
 use InvalidArgumentException;
-use Psr\Container\ContainerInterface;
 use ReturnTypeWillChange;
 use UnexpectedValueException;
 
@@ -50,22 +49,26 @@ class Config implements ConfigInterface
      */
     public function getEnvironment(): ?array
     {
-        // TODO evolve this into connection only.
-        return $this->values['environment'] ?? null;
+        if (empty($this->values['environment'])) {
+            return null;
+        }
+        $config = (array)$this->values['environment'];
+        $config['version_order'] = $this->getVersionOrder();
+
+        return $config;
     }
 
     /**
      * @inheritDoc
      * @throws \UnexpectedValueException
      */
-    public function getMigrationPaths(): array
+    public function getMigrationPath(): string
     {
         if (!isset($this->values['paths']['migrations'])) {
             throw new UnexpectedValueException('Migrations path missing from config file');
         }
-
-        if (is_string($this->values['paths']['migrations'])) {
-            $this->values['paths']['migrations'] = [$this->values['paths']['migrations']];
+        if (is_array($this->values['paths']['migrations']) && isset($this->values['paths']['migrations'][0])) {
+            return $this->values['paths']['migrations'][0];
         }
 
         return $this->values['paths']['migrations'];
@@ -75,14 +78,13 @@ class Config implements ConfigInterface
      * @inheritDoc
      * @throws \UnexpectedValueException
      */
-    public function getSeedPaths(): array
+    public function getSeedPath(): string
     {
         if (!isset($this->values['paths']['seeds'])) {
             throw new UnexpectedValueException('Seeds path missing from config file');
         }
-
-        if (is_string($this->values['paths']['seeds'])) {
-            $this->values['paths']['seeds'] = [$this->values['paths']['seeds']];
+        if (is_array($this->values['paths']['seeds']) && isset($this->values['paths']['seeds'][0])) {
+            return $this->values['paths']['seeds'][0];
         }
 
         return $this->values['paths']['seeds'];
@@ -93,6 +95,7 @@ class Config implements ConfigInterface
      */
     public function getMigrationBaseClassName(bool $dropNamespace = true): string
     {
+        /** @var string $className */
         $className = !isset($this->values['migration_base_class']) ? 'Phinx\Migration\AbstractMigration' : $this->values['migration_base_class'];
 
         return $dropNamespace ? (substr((string)strrchr($className, '\\'), 1) ?: $className) : $className;
@@ -103,6 +106,7 @@ class Config implements ConfigInterface
      */
     public function getSeedBaseClassName(bool $dropNamespace = true): string
     {
+        /** @var string $className */
         $className = !isset($this->values['seed_base_class']) ? 'Phinx\Seed\AbstractSeed' : $this->values['seed_base_class'];
 
         return $dropNamespace ? substr((string)strrchr($className, '\\'), 1) : $className;
@@ -150,18 +154,6 @@ class Config implements ConfigInterface
         }
 
         return $this->values['templates']['style'] === self::TEMPLATE_STYLE_UP_DOWN ? self::TEMPLATE_STYLE_UP_DOWN : self::TEMPLATE_STYLE_CHANGE;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getContainer(): ?ContainerInterface
-    {
-        if (!isset($this->values['container'])) {
-            return null;
-        }
-
-        return $this->values['container'];
     }
 
     /**

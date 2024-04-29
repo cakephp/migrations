@@ -8,7 +8,10 @@ declare(strict_types=1);
 
 namespace Migrations\Db;
 
-// TODO replace/merge with cakephp/database
+/**
+ * Represent a value that should be used as a literal value when being
+ * interpolated into SQL commands.
+ */
 class Literal
 {
     /**

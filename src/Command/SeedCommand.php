@@ -115,7 +115,7 @@ class SeedCommand extends Command
 
         $versionOrder = $config->getVersionOrder();
         $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
-        $io->out('<info>using paths</info> ' . implode(', ', $config->getMigrationPaths()));
+        $io->out('<info>using paths</info> ' . $config->getMigrationPath());
         $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
 
         $start = microtime(true);

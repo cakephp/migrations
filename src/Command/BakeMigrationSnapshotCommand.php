@@ -24,7 +24,7 @@ use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Migrations\TableFinderTrait;
+use Migrations\Util\TableFinder;
 use Migrations\Util\UtilTrait;
 
 /**
@@ -33,7 +33,6 @@ use Migrations\Util\UtilTrait;
 class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
 {
     use SnapshotTrait;
-    use TableFinderTrait;
     use UtilTrait;
 
     /**
@@ -95,7 +94,8 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             'require-table' => $arguments->getOption('require-table'),
             'plugin' => $this->plugin,
         ];
-        $tables = $this->getTablesToBake($collection, $options);
+        $finder = new TableFinder($this->connection);
+        $tables = $finder->getTablesToBake($collection, $options);
 
         sort($tables, SORT_NATURAL);
 

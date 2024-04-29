@@ -48,8 +48,8 @@ abstract class AbstractConfigTestCase extends TestCase
                 ],
             ],
             'paths' => [
-                'migrations' => $this->getMigrationPaths(),
-                'seeds' => $this->getSeedPaths(),
+                'migrations' => $this->getMigrationPath(),
+                'seeds' => $this->getSeedPath(),
             ],
             'templates' => [
                 'file' => '%%PHINX_CONFIG_PATH%%/tpl/testtemplate.txt',
@@ -74,8 +74,8 @@ abstract class AbstractConfigTestCase extends TestCase
 
         return [
             'paths' => [
-                'migrations' => $this->getMigrationPaths(),
-                'seeds' => $this->getSeedPaths(),
+                'migrations' => $this->getMigrationPath(),
+                'seeds' => $this->getSeedPath(),
             ],
             'environment' => $adapter,
         ];
@@ -84,28 +84,28 @@ abstract class AbstractConfigTestCase extends TestCase
     /**
      * Generate dummy migration paths
      *
-     * @return string[]
+     * @return string
      */
-    protected function getMigrationPaths()
+    protected function getMigrationPath(): string
     {
         if ($this->migrationPath === null) {
             $this->migrationPath = uniqid('phinx', true);
         }
 
-        return [$this->migrationPath];
+        return $this->migrationPath;
     }
 
     /**
      * Generate dummy seed paths
      *
-     * @return string[]
+     * @return string
      */
-    protected function getSeedPaths()
+    protected function getSeedPath(): string
     {
         if ($this->seedPath === null) {
             $this->seedPath = uniqid('phinx', true);
         }
 
-        return [$this->seedPath];
+        return $this->seedPath;
     }
 }

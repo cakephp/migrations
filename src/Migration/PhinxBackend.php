@@ -146,9 +146,6 @@ class PhinxBackend
      */
     public function status(array $options = []): array
     {
-        // TODO This class could become an interface that chooses between a phinx and builtin
-        // implementation. Having two implementations would be easier to cleanup
-        // than having all the logic in one class with branching
         $input = $this->getInput('Status', [], $options);
         $params = ['default', $input->getOption('format')];
 

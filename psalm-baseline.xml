@@ -150,10 +150,4 @@
       <code>self::VERBOSITY_*</code>
     </MoreSpecificReturnType>
   </file>
-  <file src="src/TableFinderTrait.php">
-    <PossiblyUndefinedArrayOffset>
-      <code>$split[0]</code>
-      <code>$splitted[0]</code>
-    </PossiblyUndefinedArrayOffset>
-  </file>
 </files>

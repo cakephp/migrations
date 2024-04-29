@@ -708,7 +708,7 @@ class Manager
         $config = $this->getConfig();
         // create an environment instance and cache it
         $envOptions = $config->getEnvironment();
-        $envOptions['version_order'] = $config->getVersionOrder();
+        assert(is_array($envOptions));
 
         $environment = new Environment('default', $envOptions);
         $environment->setIo($this->getIo());
@@ -888,7 +888,7 @@ class Manager
      */
     protected function getMigrationFiles(): array
     {
-        return Util::getFiles($this->getConfig()->getMigrationPaths());
+        return Util::getFiles($this->getConfig()->getMigrationPath());
     }
 
     /**
@@ -1040,7 +1040,7 @@ class Manager
      */
     protected function getSeedFiles(): array
     {
-        return Util::getFiles($this->getConfig()->getSeedPaths());
+        return Util::getFiles($this->getConfig()->getSeedPath());
     }
 
     /**
