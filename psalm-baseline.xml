@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+<files psalm-version="5.20.0@3f284e96c9d9be6fe6b15c79416e1d1903dcfef4">
   <file src="src/Command/MigrationsCommand.php">
     <DeprecatedClass>
       <code>MigrationsDispatcher</code>
@@ -149,5 +149,17 @@
     <MoreSpecificReturnType>
       <code>self::VERBOSITY_*</code>
     </MoreSpecificReturnType>
+  </file>
+  <file src="src/Util/ColumnParser.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseField]]></code>
+    </ArgumentTypeCoercion>
+    <TypeDoesNotContainType>
+      <code>empty($indexes[$indexName])</code>
+    </TypeDoesNotContainType>
   </file>
 </files>

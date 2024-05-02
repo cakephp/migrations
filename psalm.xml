@@ -27,5 +27,6 @@
         <PropertyNotSetInConstructor errorLevel="suppress"/>
         <UnresolvableInclude errorLevel="suppress"/>
         <UnsafeInstantiation errorLevel="suppress"/>
+        <RiskyTruthyFalsyComparison errorLevel="suppress"/>
     </issueHandlers>
 </psalm>

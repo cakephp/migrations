@@ -77,7 +77,7 @@ class TableFinder
             }
 
             foreach ($tableNamesInModel as $num => $table) {
-                if (str_contains($table, '.')) {
+                if ($table && str_contains($table, '.')) {
                     $split = array_reverse(explode('.', $table, 2));
 
                     $config = (array)ConnectionManager::getConfig($this->connection);
@@ -108,7 +108,7 @@ class TableFinder
      * Gets list Tables Names
      *
      * @param string|null $pluginName Plugin name if exists.
-     * @return string[]
+     * @return array<int, string|null>
      */
     public function getTableNames(?string $pluginName = null): array
     {
@@ -157,7 +157,7 @@ class TableFinder
      *
      * @param string $className Name of Table Class.
      * @param string|null $pluginName Plugin name if exists.
-     * @return string[]
+     * @return list<null|string>
      */
     public function fetchTableName(string $className, ?string $pluginName = null): array
     {

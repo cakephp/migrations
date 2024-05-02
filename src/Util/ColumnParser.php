@@ -194,7 +194,7 @@ class ColumnParser
     public function getTypeAndLength(string $field, ?string $type): array
     {
         if ($type && preg_match($this->regexpParseField, $type, $matches)) {
-            if (strpos($matches[2], ',') !== false) {
+            if (str_contains($matches[2], ',')) {
                 $matches[2] = explode(',', $matches[2]);
             }
 
