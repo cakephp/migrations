@@ -17,11 +17,9 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Routing\Router;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase as BaseTestCase;
-use Phinx\Config\FeatureFlags;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -63,8 +61,6 @@ abstract class TestCase extends BaseTestCase
             }
             $this->generatedFiles = [];
         }
-
-        FeatureFlags::setFlagsFromConfig(Configure::read('Migrations'));
     }
 
     /**

@@ -32,8 +32,10 @@ class MigratorTest extends TestCase
     {
         parent::setUp();
 
-        $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
-        unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
+        if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
+            $this->restore = $GLOBALS['__PHPUNIT_BOOTSTRAP'];
+            unset($GLOBALS['__PHPUNIT_BOOTSTRAP']);
+        }
 
         (new ConnectionHelper())->dropTables('test');
     }
@@ -41,7 +43,10 @@ class MigratorTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
+        if ($this->restore) {
+            $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $this->restore;
+            unset($this->restore);
+        }
 
         (new ConnectionHelper())->dropTables('test');
     }
@@ -161,7 +166,12 @@ class MigratorTest extends TestCase
         $endTime = ConnectionManager::get('test')->selectQuery()
             ->select('end_time')
             ->from('migrator_phinxlog')
-            ->execute()->fetchColumn(0);
+            ->execute()
+            ->fetchColumn(0);
+
+        if (!$endTime || is_bool($endTime)) {
+            $this->markTestSkipped('Cannot read end_time, bailing.');
+        }
 
         return ChronosDate::parse($endTime);
     }

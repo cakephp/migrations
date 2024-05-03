@@ -150,9 +150,11 @@ class BakeSeedCommand extends SimpleBakeCommand
      */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
+        /** @var array<string, bool|string|null> $options */
+        $options = array_merge($args->getOptions(), ['no-test' => true]);
         $newArgs = new Arguments(
             $args->getArguments(),
-            ['no-test' => true] + $args->getOptions(),
+            $options,
             ['name']
         );
         $this->_name = $name;

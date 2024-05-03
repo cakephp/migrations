@@ -20,7 +20,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\MigrationsPlugin;
-use Phinx\Config\FeatureFlags;
 use SimpleSnapshot\Plugin as SimpleSnapshotPlugin;
 use TestBlog\Plugin as TestBlogPlugin;
 use function Cake\Core\env;
@@ -69,8 +68,8 @@ Configure::write('App', [
 ]);
 
 Configure::write('Migrations', [
-    'unsigned_primary_keys' => FeatureFlags::$unsignedPrimaryKeys,
-    'column_null_default' => FeatureFlags::$columnNullDefault,
+    'unsigned_primary_keys' => true,
+    'column_null_default' => true,
 ]);
 
 Cache::setConfig([
@@ -121,10 +120,11 @@ if (getenv('DB_URL_COMPARE') !== false) {
     ]);
 }
 
-Plugin::getCollection()->add(new MigrationsPlugin());
-Plugin::getCollection()->add(new BakePlugin());
-Plugin::getCollection()->add(new SimpleSnapshotPlugin());
-Plugin::getCollection()->add(new TestBlogPlugin());
+Plugin::getCollection()
+    ->add(new MigrationsPlugin())
+    ->add(new BakePlugin())
+    ->add(new SimpleSnapshotPlugin())
+    ->add(new TestBlogPlugin());
 
 if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', strpos('@PHINX_VERSION@', '@PHINX_VERSION') === 0 ? 'UNKNOWN' : '@PHINX_VERSION@');

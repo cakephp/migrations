@@ -33,6 +33,8 @@ use Symfony\Component\Console\Input\InputInterface;
  * the methods in phinx that are responsible for reading the project configuration.
  * This is needed so that we can use the application configuration instead of having
  * a configuration yaml file.
+ *
+ * @deprecated 4.2.0 Will be removed in 5.0 alongside phinx.
  */
 trait ConfigurationTrait
 {
@@ -119,7 +121,6 @@ trait ConfigurationTrait
         $connection = $this->getConnectionName($this->input());
 
         $connectionConfig = (array)ConnectionManager::getConfig($connection);
-
         $adapterName = $this->getAdapterName($connectionConfig['driver']);
         $dsnOptions = $this->extractDsnOptions($adapterName, $connectionConfig);
 

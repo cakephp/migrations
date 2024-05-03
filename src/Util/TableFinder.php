@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @link          https://cakephp.org CakePHP(tm) Project
  * @license       https://www.opensource.org/licenses/mit-license.php MIT License
  */
-namespace Migrations;
+namespace Migrations\Util;
 
 use Cake\Core\App;
 use Cake\Core\Plugin as CorePlugin;
@@ -20,7 +20,10 @@ use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 use ReflectionClass;
 
-trait TableFinderTrait
+/**
+ * @internal
+ */
+class TableFinder
 {
     /**
      * Tables to skip
@@ -37,6 +40,15 @@ trait TableFinderTrait
     public string $skipTablesRegex = '_phinxlog';
 
     /**
+     * Constructor
+     *
+     * @param string $connection The connection name to use.
+     */
+    public function __construct(protected string $connection)
+    {
+    }
+
+    /**
      * Gets a list of table to baked based on the Collection instance passed and the options passed to
      * the shell call.
      *
@@ -45,7 +57,7 @@ trait TableFinderTrait
      * @param array $options Array of options passed to a shell call.
      * @return array
      */
-    protected function getTablesToBake(CollectionInterface $collection, array $options = []): array
+    public function getTablesToBake(CollectionInterface $collection, array $options = []): array
     {
         $options += [
             'require-table' => false,
@@ -70,7 +82,7 @@ trait TableFinderTrait
 
                     $config = (array)ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
-                    if ($config[$key] === $split[1]) {
+                    if (isset($split[0], $split[1]) && $config[$key] === $split[1]) {
                         $table = $split[0];
                     }
                 }
@@ -98,7 +110,7 @@ trait TableFinderTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return array<int, string|null>
      */
-    protected function getTableNames(?string $pluginName = null): array
+    public function getTableNames(?string $pluginName = null): array
     {
         if ($pluginName !== null && !CorePlugin::getCollection()->has($pluginName)) {
             return [];
@@ -123,7 +135,7 @@ trait TableFinderTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return array
      */
-    protected function findTables(?string $pluginName = null): array
+    public function findTables(?string $pluginName = null): array
     {
         $path = 'Model' . DS . 'Table' . DS;
         if ($pluginName) {
@@ -147,7 +159,7 @@ trait TableFinderTrait
      * @param string|null $pluginName Plugin name if exists.
      * @return list<null|string>
      */
-    protected function fetchTableName(string $className, ?string $pluginName = null): array
+    public function fetchTableName(string $className, ?string $pluginName = null): array
     {
         $tables = [];
         $className = str_replace('Table.php', '', $className);
@@ -183,9 +195,9 @@ trait TableFinderTrait
         $splitted = array_reverse(explode('.', $tableName, 2));
         if (isset($splitted[1])) {
             $config = ConnectionManager::getConfig($this->connection);
-            if ($config) {
+            if (is_array($config)) {
                 $key = isset($config['schema']) ? 'schema' : 'database';
-                if ($config[$key] === $splitted[1]) {
+                if (isset($splitted[0]) && $config[$key] === $splitted[1]) {
                     $tableName = $splitted[0];
                 }
             }

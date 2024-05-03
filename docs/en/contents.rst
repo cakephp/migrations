@@ -3,3 +3,4 @@
     :caption: CakePHP Migrations
 
     /index
+    /upgrading-to-builtin-backend

@@ -16,6 +16,56 @@ parameters:
 			path: src/Command/BakeMigrationSnapshotCommand.php
 
 		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Db/Adapter/AdapterFactory.php
+
+		-
+			message: "#^Offset 'id' on non\\-empty\\-array\\<string, mixed\\> in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 2
+			path: src/Db/Adapter/MysqlAdapter.php
+
+		-
+			message: "#^Right side of && is always true\\.$#"
+			count: 1
+			path: src/Db/Adapter/MysqlAdapter.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Database\\\\Connection\\:\\:\\$connection\\.$#"
+			count: 1
+			path: src/Db/Adapter/PdoAdapter.php
+
+		-
+			message: "#^Offset 'id' on array\\<string, mixed\\> in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 2
+			path: src/Db/Adapter/PostgresAdapter.php
+
+		-
+			message: "#^Offset 'id' on array\\<string, mixed\\> in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 2
+			path: src/Db/Adapter/SqliteAdapter.php
+
+		-
+			message: "#^Offset 'id' on array\\<string, mixed\\> in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 2
+			path: src/Db/Adapter/SqlserverAdapter.php
+
+		-
+			message: "#^PHPDoc tag @return with type Phinx\\\\Db\\\\Adapter\\\\AdapterInterface is not subtype of native type Migrations\\\\Db\\\\Adapter\\\\AdapterInterface\\.$#"
+			count: 1
+			path: src/Db/Adapter/SqlserverAdapter.php
+
+		-
+			message: "#^Ternary operator condition is always true\\.$#"
+			count: 2
+			path: src/Db/Adapter/SqlserverAdapter.php
+
+		-
+			message: "#^Method Migrations\\\\Shim\\\\OutputAdapter\\:\\:getVerbosity\\(\\) should return 16\\|32\\|64\\|128\\|256 but returns int\\.$#"
+			count: 1
+			path: src/Shim/OutputAdapter.php
+
+		-
 			message: "#^Possibly invalid array key type Cake\\\\Database\\\\Schema\\\\TableSchemaInterface\\|string\\.$#"
 			count: 2
 			path: src/View/Helper/MigrationHelper.php

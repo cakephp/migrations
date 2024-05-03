@@ -3,16 +3,20 @@
          colors="true"
          cacheDirectory=".phpunit.cache"
          bootstrap="tests/bootstrap.php"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
 >
-
     <testsuites>
         <testsuite name="migrations">
             <directory>tests/TestCase</directory>
             <exclude>tests/TestCase/TestSuite</exclude>
+            <exclude>tests/TestCase/Migration/ManagerTest.php</exclude>
         </testsuite>
         <testsuite name="migrator">
             <directory>tests/TestCase/TestSuite</directory>
+        </testsuite>
+        <!-- Has to run last individually as these tests drop the database -->
+        <testsuite name="manager">
+            <file>tests/TestCase/Migration/ManagerTest.php</file>
         </testsuite>
     </testsuites>
 
@@ -30,20 +34,22 @@
     <php>
         <env name="FIXTURE_SCHEMA_METADATA" value="./tests/schema.php"/>
         <ini name="memory_limit" value="-1"/>
-        <ini name="apc.enable_cli" value="1"/>
 
         <!-- SQLite
         <env name="DB" value="sqlite"/>
-        <env name="DB_URL" value="sqlite://127.0.0.1/cakephp_test"/>
+        <env name="DB_URL" value="sqlite://127.0.0.1/tests.sqlite"/>
+        <env name="DB_URL_SNAPSHOT" value="sqlite://127.0.0.1/snapshot-tests.sqlite"/>
         -->
         <!-- Postgres
         <env name="DB" value="pgsql"/>
         <env name="DB_URL" value="postgres://localhost/cake_test?timezone=UTC"/>
+        <env name="DB_URL_SNAPSHOT" value="postgres://localhost/cake_snapshot_test?timezone=UTC"/>
         -->
         <!-- Mysql
         <env name="DB" value="mysql"/>
         <env name="DB_URL" value="mysql://localhost/cake_test?timezone=UTC"/>
         <env name="DB_URL_COMPARE" value="mysql://localhost/cake_comparison"/>
+        <env name="DB_URL_SNAPSHOT" value="mysql://localhost/cake_snapshot"/>
         -->
     </php>
 </phpunit>

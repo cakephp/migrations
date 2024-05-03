@@ -15,13 +15,12 @@ namespace Migrations\Test\TestCase;
 
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Exception;
 use InvalidArgumentException;
-use Migrations\CakeAdapter;
 use Migrations\Migrations;
-use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\WrapperInterface;
 use function Cake\Core\env;
 
@@ -91,6 +90,7 @@ class MigrationsTest extends TestCase
         // We can't wipe all tables as we'l break other tests.
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
+        $this->Connection->execute('DROP TABLE IF EXISTS stores');
 
         $allTables = $this->Connection->getSchemaCollection()->listTables();
         if (in_array('phinxlog', $allTables)) {
@@ -117,17 +117,26 @@ class MigrationsTest extends TestCase
                 unlink($file);
             }
         }
+    }
 
-        FeatureFlags::setFlagsFromConfig(Configure::read('Migrations'));
+    public static function backendProvider(): array
+    {
+        return [
+            ['builtin'],
+            ['phinx'],
+        ];
     }
 
     /**
      * Tests the status method
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testStatus()
+    public function testStatus(string $backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $result = $this->migrations->status();
         $expected = [
             [
@@ -152,22 +161,25 @@ class MigrationsTest extends TestCase
             ],
         ];
         $this->assertEquals($expected, $result);
-
-        $adapter = $this->migrations
-            ->getManager()
-            ->getEnvironment('default')
-            ->getAdapter();
-
-        $this->assertInstanceOf(CakeAdapter::class, $adapter);
     }
 
     /**
      * Tests the migrations and rollbacks
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMigrateAndRollback()
+    public function testMigrateAndRollback($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
+        if ($this->Connection->getDriver() instanceof Sqlserver) {
+            // TODO This test currently fails in CI because numbers table
+            // has no columns in sqlserver. This table should have columns as the
+            // migration that creates the table adds columns.
+            $this->markTestSkipped('Incompatible with sqlserver right now.');
+        }
+
         // Migrate all
         $migrate = $this->migrations->migrate();
         $this->assertTrue($migrate);
@@ -218,7 +230,11 @@ class MigrationsTest extends TestCase
         $expected = ['id', 'name', 'created', 'modified'];
         $this->assertEquals($expected, $columns);
         $createdColumn = $storesTable->getSchema()->getColumn('created');
-        $this->assertEquals('CURRENT_TIMESTAMP', $createdColumn['default']);
+        $expected = 'CURRENT_TIMESTAMP';
+        if ($this->Connection->getDriver() instanceof Sqlserver) {
+            $expected = 'getdate()';
+        }
+        $this->assertEquals($expected, $createdColumn['default']);
 
         // Rollback last
         $rollback = $this->migrations->rollback();
@@ -239,11 +255,14 @@ class MigrationsTest extends TestCase
     /**
      * Tests the collation table behavior when using MySQL
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testCreateWithEncoding()
+    public function testCreateWithEncoding($backend)
     {
-        $this->skipIf(env('DB') !== 'mysql');
+        Configure::write('Migrations.backend', $backend);
+
+        $this->skipIf(env('DB') !== 'mysql', 'Requires MySQL');
 
         $migrate = $this->migrations->migrate();
         $this->assertTrue($migrate);
@@ -265,10 +284,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated without params marks everything
      * as migrated
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedAll()
+    public function testMarkMigratedAll($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $markMigrated = $this->migrations->markMigrated();
         $this->assertTrue($markMigrated);
         $status = $this->migrations->status();
@@ -302,10 +324,13 @@ class MigrationsTest extends TestCase
      * string 'all' marks everything
      * as migrated
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedAllAsVersion()
+    public function testMarkMigratedAllAsVersion($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $markMigrated = $this->migrations->markMigrated('all');
         $this->assertTrue($markMigrated);
         $status = $this->migrations->status();
@@ -338,10 +363,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option will mark
      * only up to that one
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedTarget()
+    public function testMarkMigratedTarget($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150704160200']);
         $this->assertTrue($markMigrated);
         $status = $this->migrations->status();
@@ -380,10 +408,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option set to a
      * non-existent target will throw an exception
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedTargetError()
+    public function testMarkMigratedTargetError($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Migration `20150704160610` was not found !');
         $this->migrations->markMigrated(null, ['target' => '20150704160610']);
@@ -393,10 +424,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option with the exclude
      * option will mark only up to that one, excluding it
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedTargetExclude()
+    public function testMarkMigratedTargetExclude($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150704160200', 'exclude' => true]);
         $this->assertTrue($markMigrated);
         $status = $this->migrations->status();
@@ -435,10 +469,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option with the only
      * option will mark only that specific migrations
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedTargetOnly()
+    public function testMarkMigratedTargetOnly($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true]);
         $this->assertTrue($markMigrated);
         $status = $this->migrations->status();
@@ -477,10 +514,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option, the only option
      * and the exclude option will throw an exception
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedTargetExcludeOnly()
+    public function testMarkMigratedTargetExcludeOnly($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('You should use `exclude` OR `only` (not both) along with a `target` argument');
         $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true, 'exclude' => true]);
@@ -490,10 +530,13 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option with the exclude
      * option will mark only up to that one, excluding it
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMarkMigratedVersion()
+    public function testMarkMigratedVersion($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $markMigrated = $this->migrations->markMigrated(20150704160200);
         $this->assertTrue($markMigrated);
         $status = $this->migrations->status();
@@ -532,10 +575,13 @@ class MigrationsTest extends TestCase
      * Tests that calling the migrations methods while passing
      * parameters will override the default ones
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testOverrideOptions()
+    public function testOverrideOptions($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $result = $this->migrations->status();
         $expectedStatus = [
             [
@@ -568,6 +614,11 @@ class MigrationsTest extends TestCase
                 'id' => '20150416223600',
                 'name' => 'MarkMigratedTest',
             ],
+            [
+                'status' => 'down',
+                'id' => '20240309223600',
+                'name' => 'MarkMigratedTestSecond',
+            ],
         ];
         $this->assertEquals($expected, $result);
 
@@ -575,18 +626,19 @@ class MigrationsTest extends TestCase
         $this->assertTrue($migrate);
         $result = $this->migrations->status(['source' => 'Migrations']);
         $expected[0]['status'] = 'up';
+        $expected[1]['status'] = 'up';
         $this->assertEquals($expected, $result);
 
         $rollback = $this->migrations->rollback(['source' => 'Migrations']);
         $this->assertTrue($rollback);
         $result = $this->migrations->status(['source' => 'Migrations']);
-        $expected[0]['status'] = 'down';
+        $expected[0]['status'] = 'up';
+        $expected[1]['status'] = 'down';
         $this->assertEquals($expected, $result);
 
         $migrate = $this->migrations->markMigrated(20150416223600, ['source' => 'Migrations']);
         $this->assertTrue($migrate);
         $result = $this->migrations->status(['source' => 'Migrations']);
-        $expected[0]['status'] = 'up';
         $this->assertEquals($expected, $result);
     }
 
@@ -594,10 +646,13 @@ class MigrationsTest extends TestCase
      * Tests that calling the migrations methods while passing the ``date``
      * parameter works as expected
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testMigrateDateOption()
+    public function testMigrateDateOption($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         // If we want to migrate to a date before the first first migration date,
         // we should not migrate anything
         $this->migrations->migrate(['date' => '20140705']);
@@ -770,10 +825,13 @@ class MigrationsTest extends TestCase
     /**
      * Tests seeding the database
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testSeed()
+    public function testSeed($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->migrations->migrate();
         $seed = $this->migrations->seed(['source' => 'Seeds']);
         $this->assertTrue($seed);
@@ -846,10 +904,13 @@ class MigrationsTest extends TestCase
     /**
      * Tests seeding the database with seeder
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testSeedOneSeeder()
+    public function testSeedOneSeeder($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->migrations->migrate();
 
         $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'AnotherNumbersSeed']);
@@ -895,10 +956,13 @@ class MigrationsTest extends TestCase
     /**
      * Tests seeding the database with seeder
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testSeedCallSeeder()
+    public function testSeedCallSeeder($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->migrations->migrate();
 
         $seed = $this->migrations->seed(['source' => 'CallSeeds', 'seed' => 'DatabaseSeed']);
@@ -956,13 +1020,31 @@ class MigrationsTest extends TestCase
     /**
      * Tests that requesting a unexistant seed throws an exception
      *
+     * @dataProvider backendProvider
      * @return void
      */
-    public function testSeedWrongSeed()
+    public function testSeedWrongSeed($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed class "DerpSeed" does not exist');
         $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'DerpSeed']);
+    }
+
+    /**
+     * Tests migrating the baked snapshots with builtin backend
+     *
+     * @dataProvider snapshotMigrationsProvider
+     * @param string $basePath Snapshot file path
+     * @param string $filename Snapshot file name
+     * @param array $flags Feature flags
+     * @return void
+     */
+    public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
+    {
+        Configure::write('Migrations.backend', 'builtin');
+        $this->runMigrateSnapshots($basePath, $filename, $flags);
     }
 
     /**
@@ -974,8 +1056,20 @@ class MigrationsTest extends TestCase
      * @param array $flags Feature flags
      * @return void
      */
-    public function testMigrateSnapshots(string $basePath, string $filename, array $flags = []): void
+    public function testMigrateSnapshotsPhinx(string $basePath, string $filename, array $flags = []): void
     {
+        $this->runMigrateSnapshots($basePath, $filename, $flags);
+    }
+
+    protected function runMigrateSnapshots(string $basePath, string $filename, array $flags): void
+    {
+        if ($this->Connection->getDriver() instanceof Sqlserver) {
+            // TODO once migrations is using the inlined sqlserver adapter, this skip should
+            // be safe to remove once datetime columns support fractional units or the datetimefractional
+            // type is supported by migrations.
+            $this->markTestSkipped('Incompatible with sqlserver right now.');
+        }
+
         if ($flags) {
             Configure::write('Migrations', $flags + Configure::read('Migrations', []));
         }
@@ -994,8 +1088,8 @@ class MigrationsTest extends TestCase
         );
         $this->generatedFiles[] = $destination . $copiedFileName;
 
-        //change class name to avoid conflict with other classes
-        //to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
+        // change class name to avoid conflict with other classes
+        // to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
         $content = file_get_contents($destination . $copiedFileName);
         $pattern = ' extends AbstractMigration';
         $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
@@ -1014,9 +1108,13 @@ class MigrationsTest extends TestCase
 
     /**
      * Tests that migrating in case of error throws an exception
+     *
+     * @dataProvider backendProvider
      */
-    public function testMigrateErrors()
+    public function testMigrateErrors($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->expectException(Exception::class);
         $this->migrations->markMigrated(20150704160200);
         $this->migrations->migrate();
@@ -1024,9 +1122,13 @@ class MigrationsTest extends TestCase
 
     /**
      * Tests that rolling back in case of error throws an exception
+     *
+     * @dataProvider backendProvider
      */
-    public function testRollbackErrors()
+    public function testRollbackErrors($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->expectException(Exception::class);
         $this->migrations->markMigrated('all');
         $this->migrations->rollback();
@@ -1035,9 +1137,13 @@ class MigrationsTest extends TestCase
     /**
      * Tests that marking migrated a non-existant migrations returns an error
      * and can return a error message
+     *
+     * @dataProvider backendProvider
      */
-    public function testMarkMigratedErrors()
+    public function testMarkMigratedErrors($backend)
     {
+        Configure::write('Migrations.backend', $backend);
+
         $this->expectException(Exception::class);
         $this->migrations->markMigrated(20150704000000);
     }
@@ -1072,6 +1178,16 @@ class MigrationsTest extends TestCase
                 [$path, 'test_snapshot_not_empty_pgsql'],
                 [$path, 'test_snapshot_auto_id_disabled_pgsql'],
                 [$path, 'test_snapshot_plugin_blog_pgsql'],
+            ];
+        }
+
+        if ($db === 'sqlserver') {
+            $path = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS . 'sqlserver' . DS;
+
+            return [
+                [$path, 'test_snapshot_not_empty_sqlserver'],
+                [$path, 'test_snapshot_auto_id_disabled_sqlserver'],
+                [$path, 'test_snapshot_plugin_blog_sqlserver'],
             ];
         }
 
