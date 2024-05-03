@@ -181,52 +181,52 @@ class Config implements ConfigInterface
     /**
      * {@inheritDoc}
      *
-     * @param mixed $id ID
+     * @param mixed $offset ID
      * @param mixed $value Value
      * @return void
      */
-    public function offsetSet($id, $value): void
+    public function offsetSet($offset, $value): void
     {
-        $this->values[$id] = $value;
+        $this->values[$offset] = $value;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @param mixed $id ID
+     * @param mixed $offset ID
      * @throws \InvalidArgumentException
      * @return mixed
      */
     #[ReturnTypeWillChange]
-    public function offsetGet($id)
+    public function offsetGet($offset)
     {
-        if (!array_key_exists($id, $this->values)) {
-            throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $id));
+        if (!array_key_exists($offset, $this->values)) {
+            throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $offset));
         }
 
-        return $this->values[$id] instanceof Closure ? $this->values[$id]($this) : $this->values[$id];
+        return $this->values[$offset] instanceof Closure ? $this->values[$offset]($this) : $this->values[$offset];
     }
 
     /**
      * {@inheritDoc}
      *
-     * @param mixed $id ID
+     * @param mixed $offset ID
      * @return bool
      */
-    public function offsetExists($id): bool
+    public function offsetExists($offset): bool
     {
-        return isset($this->values[$id]);
+        return isset($this->values[$offset]);
     }
 
     /**
      * {@inheritDoc}
      *
-     * @param mixed $id ID
+     * @param mixed $offset ID
      * @return void
      */
-    public function offsetUnset($id): void
+    public function offsetUnset($offset): void
     {
-        unset($this->values[$id]);
+        unset($this->values[$offset]);
     }
 
     /**

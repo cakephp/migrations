@@ -704,7 +704,7 @@ PCRE_PATTERN;
                     $this->quoteColumnName((string)$column->getName()),
                     $this->getColumnSqlDefinition($column)
                 ),
-                $state['createSQL'],
+                (string)$state['createSQL'],
                 1
             );
             $this->execute($sql);
@@ -1213,7 +1213,7 @@ PCRE_PATTERN;
             $sql = str_replace(
                 $this->quoteColumnName($columnName),
                 $this->quoteColumnName($newColumnName),
-                $state['createSQL']
+                (string)$state['createSQL']
             );
             $this->execute($sql);
 
@@ -1241,7 +1241,7 @@ PCRE_PATTERN;
             $sql = preg_replace(
                 sprintf("/%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+([,)])/", $this->quoteColumnName($columnName)),
                 sprintf('%s %s$1', $this->quoteColumnName($newColumnName), $this->getColumnSqlDefinition($newColumn)),
-                $state['createSQL'],
+                (string)$state['createSQL'],
                 1
             );
             $this->execute($sql);
@@ -1275,7 +1275,7 @@ PCRE_PATTERN;
             $sql = preg_replace(
                 sprintf("/%s\s%s.*(,\s(?!')|\)$)/U", preg_quote($this->quoteColumnName($columnName)), preg_quote($state['columnType'])),
                 '',
-                $state['createSQL']
+                (string)$state['createSQL']
             );
 
             if (substr($sql, -2) === ', ') {
@@ -1542,7 +1542,7 @@ PCRE_PATTERN;
                         $replace = '$1 $2 NOT NULL PRIMARY KEY';
                     }
 
-                    $sql = preg_replace($matchPattern, $replace, $state['createSQL'], 1);
+                    $sql = preg_replace($matchPattern, $replace, (string)$state['createSQL'], 1);
                 }
             }
 
@@ -1574,7 +1574,7 @@ PCRE_PATTERN;
 
         $instructions->addPostStep(function ($state) {
             $search = "/(,?\s*PRIMARY KEY\s*\([^\)]*\)|\s+PRIMARY KEY(\s+AUTOINCREMENT)?)/";
-            $sql = preg_replace($search, '', $state['createSQL'], 1);
+            $sql = preg_replace($search, '', (string)$state['createSQL'], 1);
 
             if ($sql) {
                 $this->execute($sql);
@@ -1679,7 +1679,7 @@ PCRE_PATTERN;
                     )
                 ),
             );
-            $sql = preg_replace($search, '', $state['createSQL']);
+            $sql = preg_replace($search, '', (string)$state['createSQL']);
 
             if ($sql) {
                 $this->execute($sql);

@@ -195,9 +195,9 @@ class TableFinder
         $splitted = array_reverse(explode('.', $tableName, 2));
         if (isset($splitted[1])) {
             $config = ConnectionManager::getConfig($this->connection);
-            if ($config) {
+            if (is_array($config)) {
                 $key = isset($config['schema']) ? 'schema' : 'database';
-                if (isset($splitted[0], $splitted[1]) && $config[$key] === $splitted[1]) {
+                if (isset($splitted[0]) && $config[$key] === $splitted[1]) {
                     $tableName = $splitted[0];
                 }
             }
