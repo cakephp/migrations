@@ -811,7 +811,7 @@ class MysqlAdapter extends PdoAdapter
               REFERENCED_COLUMN_NAME
             FROM information_schema.KEY_COLUMN_USAGE
             WHERE REFERENCED_TABLE_NAME IS NOT NULL
-              AND TABLE_SCHEMA = '%s'
+              AND TABLE_SCHEMA = %s
               AND TABLE_NAME = '%s'
             ORDER BY POSITION_IN_UNIQUE_CONSTRAINT",
             empty($schema) ? 'DATABASE()' : "'$schema'",
