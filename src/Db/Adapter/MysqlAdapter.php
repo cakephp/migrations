@@ -107,7 +107,7 @@ class MysqlAdapter extends PdoAdapter
      */
     public function setConnection(Connection $connection): AdapterInterface
     {
-        $connection->execute(sprintf('USE %s', $this->getOption('database')));
+        $connection->execute(sprintf('USE %s', $this->quoteTableName($this->getOption('database'))));
 
         return parent::setConnection($connection);
     }
@@ -811,7 +811,7 @@ class MysqlAdapter extends PdoAdapter
               REFERENCED_COLUMN_NAME
             FROM information_schema.KEY_COLUMN_USAGE
             WHERE REFERENCED_TABLE_NAME IS NOT NULL
-              AND TABLE_SCHEMA = %s
+              AND TABLE_SCHEMA = '%s'
               AND TABLE_NAME = '%s'
             ORDER BY POSITION_IN_UNIQUE_CONSTRAINT",
             empty($schema) ? 'DATABASE()' : "'$schema'",
@@ -1242,15 +1242,15 @@ class MysqlAdapter extends PdoAdapter
 
         if (isset($options['collation'])) {
             $this->execute(sprintf(
-                'CREATE DATABASE `%s` DEFAULT CHARACTER SET `%s` COLLATE `%s`',
-                $name,
+                'CREATE DATABASE %s DEFAULT CHARACTER SET `%s` COLLATE `%s`',
+                $this->quoteTableName($name),
                 $charset,
                 $options['collation']
             ));
         } else {
-            $this->execute(sprintf('CREATE DATABASE `%s` DEFAULT CHARACTER SET `%s`', $name, $charset));
+            $this->execute(sprintf('CREATE DATABASE %s DEFAULT CHARACTER SET `%s`', $this->quoteTableName($name), $charset));
         }
-        $this->execute(sprintf('USE %s', $name));
+        $this->execute(sprintf('USE %s', $this->quoteTableName($name)));
     }
 
     /**
@@ -1279,7 +1279,7 @@ class MysqlAdapter extends PdoAdapter
      */
     public function dropDatabase(string $name): void
     {
-        $this->execute(sprintf('DROP DATABASE IF EXISTS `%s`', $name));
+        $this->execute(sprintf('DROP DATABASE IF EXISTS %s', $this->quoteTableName($name)));
         $this->createdTables = [];
     }
 
