@@ -104,6 +104,14 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));
     }
 
+    public function testDatabaseNameWithEscapedCharacter()
+    {
+        $this->adapter->dropDatabase($this->config['database'] . '-test');
+        $this->adapter->createDatabase($this->config['database'] . '-test', ['charset' => 'utf8mb4']);
+        $this->assertTrue($this->adapter->hasDatabase($this->config['database'] . '-test'));
+        $this->adapter->dropDatabase($this->config['database'] . '-test');
+    }
+
     public function testQuoteTableName()
     {
         $this->assertEquals('`test_table`', $this->adapter->quoteTableName('test_table'));
