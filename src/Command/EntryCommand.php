@@ -23,6 +23,7 @@ use Cake\Console\CommandCollection;
 use Cake\Console\CommandCollectionAwareInterface;
 use Cake\Console\ConsoleIo;
 use Cake\Console\Exception\ConsoleException;
+use Cake\Core\Configure;
 
 /**
  * Command that provides help and an entry point to migrations tools.
@@ -82,10 +83,13 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
 
         // This is the variance from Command::run()
         if (!$args->getArgumentAt(0) && $args->getOption('help')) {
+            $backend = (string)(Configure::read('Migrations.backend') ?? 'phinx');
             $io->out([
                 '<info>Migrations</info>',
                 '',
                 "Migrations provides commands for managing your application's database schema and initial data.",
+                '',
+                "Using <info>{$backend}</info> backend.",
                 '',
             ]);
             $help = $this->getHelp();
