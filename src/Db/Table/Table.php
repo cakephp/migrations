@@ -10,6 +10,9 @@ namespace Migrations\Db\Table;
 
 use InvalidArgumentException;
 
+/**
+ * @internal
+ */
 class Table
 {
     /**
