@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db;
 
+use Cake\Core\Configure;
 use InvalidArgumentException;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
@@ -35,6 +36,8 @@ use RuntimeException;
  *
  * TODO(mark) Having both Migrations\Db\Table and Migrations\Db\Table\Table seems redundant.
  * The table models should be joined together so that we have a simpler API exposed.
+ *
+ * @internal
  */
 class Table
 {
@@ -543,9 +546,14 @@ class Table
         if (!$createdAt && !$updatedAt) {
             throw new RuntimeException('Cannot set both created_at and updated_at columns to false');
         }
+        $timestampConfig = (bool)Configure::read('Migrations.add_timestamps_use_datetime');
+        $timestampType = 'timestamp';
+        if ($timestampConfig === true) {
+            $timestampType = 'datetime';
+        }
 
         if ($createdAt) {
-            $this->addColumn($createdAt, 'timestamp', [
+            $this->addColumn($createdAt, $timestampType, [
                 'null' => false,
                 'default' => 'CURRENT_TIMESTAMP',
                 'update' => '',
@@ -553,7 +561,7 @@ class Table
             ]);
         }
         if ($updatedAt) {
-            $this->addColumn($updatedAt, 'timestamp', [
+            $this->addColumn($updatedAt, $timestampType, [
                 'null' => true,
                 'default' => null,
                 'update' => 'CURRENT_TIMESTAMP',
