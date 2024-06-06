@@ -199,6 +199,28 @@ class RollbackCommandTest extends TestCase
         $this->assertFileDoesNotExist($dumpFile);
     }
 
+    public function testPluginOption(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations migrate -c test --plugin Migrator --no-lock');
+        $this->assertExitSuccess();
+
+        // migration state was recorded.
+        $phinxlog = $this->fetchTable('MigratorPhinxlog');
+        $this->assertEquals(1, $phinxlog->find()->count());
+        // Table was created.
+        $this->assertNotEmpty($this->fetchTable('Migrator')->getSchema());
+
+        $this->resetOutput();
+
+        $this->exec('migrations rollback -c test --plugin Migrator --no-lock');
+        $this->assertExitSuccess();
+
+        $this->assertOutputContains('Migrator:</info> <comment>reverted');
+        // No more recorded migrations
+        $this->assertEquals(0, $phinxlog->find()->count());
+    }
+
     public function testLockOption(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
