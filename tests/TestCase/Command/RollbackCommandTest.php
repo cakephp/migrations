@@ -6,6 +6,7 @@ namespace Migrations\Test\TestCase\Command;
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\Database\Exception\DatabaseException;
+use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
@@ -202,12 +203,15 @@ class RollbackCommandTest extends TestCase
     public function testPluginOption(): void
     {
         $this->loadPlugins(['Migrator']);
+        $connection = ConnectionManager::get('test');
+        $connection->execute('DROP TABLE IF EXISTS migrator');
+
         $this->exec('migrations migrate -c test --plugin Migrator --no-lock');
         $this->assertExitSuccess();
 
         // migration state was recorded.
         $phinxlog = $this->fetchTable('MigratorPhinxlog');
-        $this->assertEquals(1, $phinxlog->find()->count());
+        $this->assertEquals(1, $phinxlog->find()->count(), 'migrate makes a row');
         // Table was created.
         $this->assertNotEmpty($this->fetchTable('Migrator')->getSchema());
 
