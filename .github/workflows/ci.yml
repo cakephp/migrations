@@ -94,7 +94,7 @@ jobs:
           elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
             composer update --prefer-lowest --prefer-stable
           elif ${{ matrix.cake_version != '' }}; then
-            composer require cakephp/cakephp:${{ matrix.cake_version }}
+            composer require --dev cakephp/cakephp:${{ matrix.cake_version }}
             composer update
           else
             composer update
