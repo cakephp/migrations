@@ -302,7 +302,10 @@ class Manager
         $migrations = $this->getMigrations();
         $versions = array_keys($migrations);
 
-        $versionArg = $args->getArgument('version');
+        $versionArg = null;
+        if ($args->hasArgument('version')) {
+            $versionArg = $args->getArgument('version');
+        }
         $targetArg = $args->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
         if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
