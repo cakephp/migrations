@@ -29,7 +29,7 @@ jobs:
             prefer-lowest: 'prefer-lowest'
           - php-version: '8.1'
             db-type: 'sqlite'
-            cake_version: ^5.1.0-RC1
+            cake_version: 'dev-5.next as 5.1.0'
 
     services:
       postgres:
@@ -94,7 +94,7 @@ jobs:
           elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
             composer update --prefer-lowest --prefer-stable
           elif ${{ matrix.cake_version != '' }}; then
-            composer require --dev cakephp/cakephp:${{ matrix.cake_version }}
+            composer require --dev "cakephp/cakephp:${{ matrix.cake_version }}"
             composer update
           else
             composer update
