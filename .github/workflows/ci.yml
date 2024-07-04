@@ -22,10 +22,14 @@ jobs:
         php-version: ['8.1', '8.2']
         db-type: [mysql, pgsql, sqlite]
         prefer-lowest: ['']
+        cake_version: ['']
         include:
           - php-version: '8.1'
             db-type: 'sqlite'
             prefer-lowest: 'prefer-lowest'
+          - php-version: '8.1'
+            db-type: 'sqlite'
+            cake_version: 'dev-5.next as 5.1.0'
 
     services:
       postgres:
@@ -89,6 +93,9 @@ jobs:
             composer install --ignore-platform-req=php
           elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
             composer update --prefer-lowest --prefer-stable
+          elif ${{ matrix.cake_version != '' }}; then
+            composer require --dev "cakephp/cakephp:${{ matrix.cake_version }}"
+            composer update
           else
             composer update
           fi
