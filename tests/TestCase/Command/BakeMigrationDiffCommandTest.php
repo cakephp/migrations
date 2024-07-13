@@ -44,9 +44,6 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->loadPlugins([
-            'Migrations' => ['boostrap' => true],
-        ]);
         $this->generatedFiles = [];
     }
 

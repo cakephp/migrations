@@ -59,9 +59,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
         $this->migrationPath = ROOT . DS . 'config' . DS . 'Migrations' . DS;
 
-        $this->loadPlugins([
-            'Migrations' => ['boostrap' => true],
-        ]);
         $this->generatedFiles = [];
     }
 
