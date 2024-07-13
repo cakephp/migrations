@@ -137,7 +137,6 @@ class MigrateCommand extends Command
             $io->out('<warning>dry-run mode enabled</warning>');
         }
         $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
-        $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->out('<info>using paths</info> ' . $config->getMigrationPath());
         $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
 
