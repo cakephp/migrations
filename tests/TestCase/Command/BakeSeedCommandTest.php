@@ -49,7 +49,6 @@ class BakeSeedCommandTest extends TestCase
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Seeds' . DS;
-        $this->clearPlugins();
     }
 
     /**
