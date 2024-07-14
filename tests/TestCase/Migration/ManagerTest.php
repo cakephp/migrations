@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Migration;
 
 use Cake\Console\ConsoleIo;
+use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Datasource\ConnectionManager;
 use DateTime;
@@ -31,9 +32,14 @@ class ManagerTest extends TestCase
     protected $io;
 
     /**
-     * @var \Cake\Console\TestSuite\StubConsoleOutput $io
+     * @var \Cake\Console\TestSuite\StubConsoleOutput $out
      */
     protected $out;
+
+    /**
+     * @var \Cake\Console\TestSuite\StubConsoleInput $in
+     */
+    protected $in;
 
     /**
      * @var Manager
@@ -46,8 +52,9 @@ class ManagerTest extends TestCase
 
         $this->out = new StubConsoleOutput();
         $this->out->setOutputAs(StubConsoleOutput::PLAIN);
+        $this->in = new StubConsoleInput([]);
 
-        $this->io = new ConsoleIo($this->out, $this->out);
+        $this->io = new ConsoleIo($this->out, $this->out, $this->in);
         $this->manager = new Manager($this->config, $this->io);
     }
 
