@@ -30,7 +30,7 @@
         "cakephp/bake": "dev-3.next as 3.1.0",
         "cakephp/cakephp": "dev-5.next as 5.1.0",
         "cakephp/cakephp-codesniffer": "^5.0",
-        "phpunit/phpunit": "^10.1.0"
+        "phpunit/phpunit": "^11.2.8"
     },
     "suggest": {
         "cakephp/bake": "If you want to generate migrations.",
