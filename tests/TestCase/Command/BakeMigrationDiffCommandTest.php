@@ -24,7 +24,7 @@ use Migrations\Test\TestCase\TestCase;
 use function Cake\Core\env;
 
 /**
- * MigrationSnapshotTaskTest class
+ * BakeMigrationDiffCommandTest class
  */
 class BakeMigrationDiffCommandTest extends TestCase
 {
