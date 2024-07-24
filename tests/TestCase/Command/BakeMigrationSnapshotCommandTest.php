@@ -181,6 +181,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testPluginBlog()
     {
+        $this->loadPlugins(['TestBlog']);
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
 
         $this->runSnapshotTest('PluginBlog', '-p TestBlog');
