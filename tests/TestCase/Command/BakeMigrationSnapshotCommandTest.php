@@ -181,6 +181,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testPluginBlog()
     {
+        $this->loadPlugins(['TestBlog']);
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
 
         $this->runSnapshotTest('PluginBlog', '-p TestBlog');
@@ -251,6 +252,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function testSnapshotWithNonDefaultCollation(): void
     {
         $this->skipIf(env('DB') !== 'mysql');
+        $this->loadPlugins(['SimpleSnapshot']);
 
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 

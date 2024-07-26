@@ -27,8 +27,8 @@
         "robmorgan/phinx": "^0.16.0"
     },
     "require-dev": {
-        "cakephp/bake": "dev-3.next as 3.1.0",
-        "cakephp/cakephp": "dev-5.next as 5.1.0",
+        "cakephp/bake": "^3.0",
+        "cakephp/cakephp": "^5.0.3",
         "cakephp/cakephp-codesniffer": "^5.0",
         "phpunit/phpunit": "^10.1.0"
     },

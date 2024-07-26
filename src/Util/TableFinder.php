@@ -70,13 +70,13 @@ class TableFinder
         }
 
         if ($options['require-table'] === true || $options['plugin']) {
-            $tableNamesInModel = $this->getTableNames($options['plugin']);
+            $tableNamesInPlugin = $this->getTableNames($options['plugin']);
 
-            if (empty($tableNamesInModel)) {
+            if (empty($tableNamesInPlugin)) {
                 return [];
             }
 
-            foreach ($tableNamesInModel as $num => $table) {
+            foreach ($tableNamesInPlugin as $num => $table) {
                 if ($table && str_contains($table, '.')) {
                     $split = array_reverse(explode('.', $table, 2));
 
@@ -88,10 +88,10 @@ class TableFinder
                 }
 
                 if (!in_array($table, $tables, true)) {
-                    unset($tableNamesInModel[$num]);
+                    unset($tableNamesInPlugin[$num]);
                 }
             }
-            $tables = $tableNamesInModel;
+            $tables = $tableNamesInPlugin;
         } else {
             foreach ($tables as $num => $table) {
                 if (in_array($table, $this->skipTables, true) || (strpos($table, $this->skipTablesRegex) !== false)) {
