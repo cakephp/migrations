@@ -78,9 +78,11 @@ class SqliteAdapterTest extends TestCase
         unset($this->adapter, $this->out, $this->io);
     }
 
-    public function testConnection()
+    public function testGetConnection()
     {
-        $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
+        $connection = $this->adapter->getConnection();
+        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertSame($connection, $this->adapter->getDecoratedConnection());
     }
 
     public function testBeginTransaction()
