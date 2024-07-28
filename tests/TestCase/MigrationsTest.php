@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase;
 
 use Cake\Core\Plugin;
+use Cake\Database\Query\InsertQuery;
+use Cake\Database\Query\SelectQuery;
+use Cake\Database\Query\UpdateQuery;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Migrations\CakeAdapter;
@@ -1000,5 +1003,22 @@ class MigrationsTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    public function testQueryBuilder(): void
+    {
+        $adapter = $this->migrations
+            ->getManager()
+            ->getEnvironment('default')
+            ->getAdapter();
+
+        $this->assertInstanceOf(CakeAdapter::class, $adapter);
+        $this->assertInstanceOf(DeleteQuery::class, $adapter->getQueryBuilder('delete'));
+        $this->assertInstanceOf(InsertQuery::class, $adapter->getQueryBuilder('insert'));
+        $this->assertInstanceOf(SelectQuery::class, $adapter->getQueryBuilder('select'));
+        $this->assertInstanceOf(UpdateQuery::class, $adapter->getQueryBuilder('update'));
+        $this->deprecated(function () use ($adapter) {
+            $this->assertInstanceOf(SelectQuery::class, $adapter->getQueryBuilder());
+        });
     }
 }

@@ -20,6 +20,8 @@ use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Adapter\AdapterWrapper;
 
+use function Cake\Core\deprecationWarning;
+
 /**
  * Decorates an AdapterInterface in order to proxy some method to the actual
  * connection object.
@@ -76,11 +78,29 @@ class CakeAdapter extends AdapterWrapper
     /**
      * Returns a new Query object
      *
+     * @param string|null $type The query type to get. Defaults to null emitting a deprecation
      * @return \Cake\Database\Query
      */
-    public function getQueryBuilder(): Query
+    public function getQueryBuilder(?string $type = null): Query
     {
-        return $this->getCakeConnection()->newQuery();
+        switch ($type) {
+            case 'delete':
+                return $this->getCakeConnection()->deleteQuery();
+            case 'insert':
+                return $this->getCakeConnection()->insertQuery();
+            case 'select':
+                return $this->getCakeConnection()->selectQuery();
+            case 'update':
+                return $this->getCakeConnection()->updateQuery();
+            case null:
+            default:
+                deprecationWarning(
+                    'Using getQueryBuilder() with no parameters is deprecated. ' .
+                    "Please provide a query type parameter e.g `getQueryBuilder('select')`"
+                );
+
+                return $this->getCakeConnection()->newQuery();
+        }
     }
 
     /**
