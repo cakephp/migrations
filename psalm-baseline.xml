@@ -152,8 +152,5 @@
       <code><![CDATA[$this->regexpParseColumn]]></code>
       <code><![CDATA[$this->regexpParseField]]></code>
     </ArgumentTypeCoercion>
-    <TypeDoesNotContainType>
-      <code>empty($indexes[$indexName])</code>
-    </TypeDoesNotContainType>
   </file>
 </files>
