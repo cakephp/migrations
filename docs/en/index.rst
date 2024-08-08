@@ -455,7 +455,7 @@ creates the file::
         {
             $table = $this->table('products');
             $table->removeColumn('price')
-                  ->save();
+                  ->update();
         }
     }
 
