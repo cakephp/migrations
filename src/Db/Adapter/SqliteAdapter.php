@@ -1098,12 +1098,8 @@ PCRE_PATTERN;
             }
         }
 
-        $selectColumns = array_filter($selectColumns, function ($value) {
-            return strlen($value) > 0;
-        });
-        $writeColumns = array_filter($writeColumns, function ($value) {
-            return strlen($value) > 0;
-        });
+        $selectColumns = array_filter($selectColumns, fn ($value) => $value !== '');
+        $writeColumns = array_filter($writeColumns, fn ($value) => $value !== '');
         $selectColumns = array_map([$this, 'quoteColumnName'], $selectColumns);
         $writeColumns = array_map([$this, 'quoteColumnName'], $writeColumns);
 
