@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="5.20.0@3f284e96c9d9be6fe6b15c79416e1d1903dcfef4">
   <file src="src/Command/MigrationsCommand.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->argv]]></code>
+    </ArgumentTypeCoercion>
     <DeprecatedClass>
       <code>MigrationsDispatcher</code>
       <code>MigrationsDispatcher::getCommands()</code>
@@ -112,6 +115,12 @@
   </file>
   <file src="src/Migration/Manager.php">
     <ArgumentTypeCoercion>
+      <code><![CDATA[array_map(
+                    function ($phpFile) {
+                        return "    <info>{$phpFile}</info>";
+                    },
+                    $phpFiles
+                )]]></code>
       <code>array_merge($versions, array_keys($migrations))</code>
     </ArgumentTypeCoercion>
     <RedundantPropertyInitializationCheck>
@@ -137,12 +146,23 @@
     </DeprecatedTrait>
   </file>
   <file src="src/Shim/OutputAdapter.php">
+    <ArgumentTypeCoercion>
+      <code>$messages</code>
+      <code>$messages</code>
+    </ArgumentTypeCoercion>
     <LessSpecificReturnStatement>
       <code><![CDATA[$this->io->level()]]></code>
     </LessSpecificReturnStatement>
     <MoreSpecificReturnType>
       <code>self::VERBOSITY_*</code>
     </MoreSpecificReturnType>
+  </file>
+  <file src="src/TestSuite/Migrator.php">
+    <ArgumentTypeCoercion>
+      <code>$dropTables</code>
+      <code>$phinxTables</code>
+      <code>$tables</code>
+    </ArgumentTypeCoercion>
   </file>
   <file src="src/Util/ColumnParser.php">
     <ArgumentTypeCoercion>
