@@ -134,9 +134,6 @@ class MigrationHelperTest extends TestCase
         unset($this->helper, $this->view, $this->collection, $this->connection);
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::tableMethod()
-     */
     public function testTableMethod()
     {
         $this->assertSame('drop', $this->helper->tableMethod('drop_table'));
@@ -144,9 +141,6 @@ class MigrationHelperTest extends TestCase
         $this->assertSame('update', $this->helper->tableMethod('other_method'));
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::indexMethod()
-     */
     public function testIndexMethod()
     {
         $this->assertSame('removeIndex', $this->helper->indexMethod('drop_field'));
@@ -154,9 +148,6 @@ class MigrationHelperTest extends TestCase
         $this->assertSame('addIndex', $this->helper->indexMethod('alter_field'));
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::columnMethod()
-     */
     public function testColumnMethod()
     {
         $this->assertSame('removeColumn', $this->helper->columnMethod('drop_field'));
@@ -164,9 +155,6 @@ class MigrationHelperTest extends TestCase
         $this->assertSame('changeColumn', $this->helper->columnMethod('alter_field'));
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::columns()
-     */
     public function testColumns()
     {
         $extra = [];
@@ -217,9 +205,6 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->columns('users'));
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::column()
-     */
     public function testColumn()
     {
         $tableSchema = $this->collection->describe('users');
@@ -291,9 +276,6 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->column($tableSchema, 'updated'));
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::value()
-     */
     public function testValue()
     {
         $this->assertSame('null', $this->helper->value(null));
@@ -314,9 +296,6 @@ class MigrationHelperTest extends TestCase
         $this->assertSame("'o\\\"ne'", $this->helper->value('o"ne'));
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::attributes()
-     */
     public function testAttributes()
     {
         $attributes = [
@@ -389,9 +368,6 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals($attributes, $result);
     }
 
-    /**
-     * @covers \Migrations\View\Helper\MigrationHelper::stringifyList()
-     */
     public function testStringifyList()
     {
         $this->assertSame('', $this->helper->stringifyList([]));

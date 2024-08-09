@@ -19,6 +19,7 @@ use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Migrations\Command\BakeMigrationCommand;
 use Migrations\Test\TestCase\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * BakeMigrationCommandTest class
@@ -86,10 +87,9 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * Test the execute method.
      *
-     * @dataProvider nameVariations
      * @return void
      */
-    public function testCreate($name, $fileSuffix)
+    #[DataProvider('nameVariations')] public function testCreate($name, $fileSuffix)
     {
         $this->exec("bake migration CreateUsers  {$name} --connection test");
 
@@ -181,7 +181,6 @@ class BakeMigrationCommandTest extends TestCase
     }
 
     /**
-     * @covers \Migrations\Command\BakeMigrationCommand::detectAction()
      * @return void
      */
     public function testDetectAction()

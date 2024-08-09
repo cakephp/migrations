@@ -8,7 +8,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
-use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use Exception;
 use InvalidArgumentException;
@@ -20,6 +19,7 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use PDOException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use RuntimeException;
@@ -512,10 +512,7 @@ class SqliteAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider irregularCreateTableProvider
-     */
-    public function testAddColumnToIrregularCreateTableStatements(string $createTableSql, array $expectedColumns): void
+    #[DataProvider('irregularCreateTableProvider')] public function testAddColumnToIrregularCreateTableStatements(string $createTableSql, array $expectedColumns): void
     {
         $this->adapter->execute($createTableSql);
         $table = new Table('users', [], $this->adapter);
@@ -761,11 +758,10 @@ class SqliteAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider customIndexSQLDataProvider
      * @param string $indexSQL Index creation SQL
      * @param string $newIndexSQL Expected new index creation SQL
      */
-    public function testRenameColumnWithCustomIndex(string $indexSQL, string $newIndexSQL)
+    #[DataProvider('customIndexSQLDataProvider')] public function testRenameColumnWithCustomIndex(string $indexSQL, string $newIndexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -860,11 +856,10 @@ class SqliteAdapterTest extends TestCase
      * Index SQL is mostly returned as-is, hence custom indices can contain
      * a wide variety of formats.
      *
-     * @dataProvider customCompositeIndexSQLDataProvider
      * @param string $indexSQL Index creation SQL
      * @param string $newIndexSQL Expected new index creation SQL
      */
-    public function testRenameColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL)
+    #[DataProvider('customCompositeIndexSQLDataProvider')] public function testRenameColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -922,9 +917,6 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals("'test1'", $rows[1]['dflt_value']);
     }
 
-    /**
-     * @group bug922
-     */
     public function testChangeColumnWithForeignKey()
     {
         $refTable = new Table('ref_table', [], $this->adapter);
@@ -1039,10 +1031,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('another default', (string)$cols[1]->getDefault());
     }
 
-    /**
-     * @dataProvider columnCreationArgumentProvider
-     */
-    public function testDropColumn($columnCreationArgs)
+    #[DataProvider('columnCreationArgumentProvider')] public function testDropColumn($columnCreationArgs)
     {
         $table = new Table('t', [], $this->adapter);
         $columnName = $columnCreationArgs[0];
@@ -1163,10 +1152,9 @@ class SqliteAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider customIndexSQLDataProvider
      * @param string $indexSQL Index creation SQL
      */
-    public function testDropColumnWithCustomIndex(string $indexSQL)
+    #[DataProvider('customIndexSQLDataProvider')] public function testDropColumnWithCustomIndex(string $indexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1183,10 +1171,9 @@ class SqliteAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider customCompositeIndexSQLDataProvider
      * @param string $indexSQL Index creation SQL
      */
-    public function testDropColumnWithCustomCompositeIndex(string $indexSQL)
+    #[DataProvider('customCompositeIndexSQLDataProvider')] public function testDropColumnWithCustomCompositeIndex(string $indexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1509,10 +1496,9 @@ class SqliteAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider nonExistentForeignKeyColumnsProvider
      * @param array $columns
      */
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')] public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -2264,13 +2250,7 @@ INPUT;
         $this->assertEquals(Literal::from('decimal'), array_pop($columns)->getType());
     }
 
-    /**
-     * @dataProvider provideTableNamesForPresenceCheck
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasTable
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::resolveTable
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::quoteString
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getSchemaName
-     */
+    #[DataProvider('provideTableNamesForPresenceCheck')]
     public function testHasTable($createName, $tableName, $exp)
     {
         // Test case for issue #1535
@@ -2316,14 +2296,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideIndexColumnsToCheck
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getIndexes
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::resolveIndex
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasIndex
-     */
+    #[DataProvider('provideIndexColumnsToCheck')]
     public function testHasIndex($tableDef, $cols, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -2362,13 +2335,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideIndexNamesToCheck
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getIndexes
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasIndexByName
-     */
+    #[DataProvider('provideIndexNamesToCheck')]
     public function testHasIndexByName($tableDef, $index, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -2399,13 +2366,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider providePrimaryKeysToCheck
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasPrimaryKey
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getPrimaryKey
-     */
+    #[DataProvider('providePrimaryKeysToCheck')]
     public function testHasPrimaryKey($tableDef, $key, $exp)
     {
         $this->assertFalse($this->adapter->hasTable('t'), 'Dirty test fixture');
@@ -2465,9 +2426,6 @@ INPUT;
         ];
     }
 
-    /**
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasPrimaryKey
-     */
     public function testHasNamedPrimaryKey()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -2475,13 +2433,7 @@ INPUT;
         $this->adapter->hasPrimaryKey('t', [], 'named_constraint');
     }
 
-    /**
-     * @dataProvider provideForeignKeysToCheck
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasForeignKey
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getForeignKeys
-     */
+    #[DataProvider('provideForeignKeysToCheck')]
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -2528,7 +2480,6 @@ INPUT;
         ];
     }
 
-    /** @covers \Migrations\Db\Adapter\SqliteAdapter::hasForeignKey */
     public function testHasNamedForeignKey()
     {
         $refTable = new Table('tbl_parent_1', [], $this->adapter);
@@ -2581,10 +2532,7 @@ INPUT;
         $this->assertFalse($this->adapter->hasForeignKey('tbl_child', [], 'check_constraint_2'));
     }
 
-    /**
-     * @dataProvider providePhinxTypes
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getSqlType
-     */
+    #[DataProvider('providePhinxTypes')]
     public function testGetSqlType($phinxType, $limit, $exp)
     {
         if ($exp instanceof Exception) {
@@ -2640,10 +2588,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideSqlTypes
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::getPhinxType
-     */
+    #[DataProvider('provideSqlTypes')]
     public function testGetPhinxType($sqlType, $exp)
     {
         $this->assertEquals($exp, $this->adapter->getPhinxType($sqlType));
@@ -2821,7 +2766,6 @@ INPUT;
         ];
     }
 
-    /** @covers \Migrations\Db\Adapter\SqliteAdapter::getColumnTypes */
     public function testGetColumnTypes()
     {
         $columnTypes = $this->adapter->getColumnTypes();
@@ -2855,10 +2799,7 @@ INPUT;
         $this->assertEquals($expected, $columnTypes);
     }
 
-    /**
-     * @dataProvider provideColumnTypesForValidation
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::isValidColumnType
-     */
+    #[DataProvider('provideColumnTypesForValidation')]
     public function testIsValidColumnType($phinxType, $exp)
     {
         $col = (new Column())->setType($phinxType);
@@ -2905,10 +2846,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideDatabaseVersionStrings
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::databaseVersionAtLeast
-     */
+    #[DataProvider('provideDatabaseVersionStrings')]
     public function testDatabaseVersionAtLeast($ver, $exp)
     {
         $this->assertSame($exp, $this->adapter->databaseVersionAtLeast($ver));
@@ -2927,12 +2865,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideColumnNamesToCheck
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::hasColumn
-     */
+    #[DataProvider('provideColumnNamesToCheck')]
     public function testHasColumn($tableDef, $col, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -2970,10 +2903,6 @@ INPUT;
         ];
     }
 
-    /** @covers \Phinx\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::getColumns
-     */
     public function testGetColumns()
     {
         $conn = $this->adapter->getConnection();
@@ -2997,10 +2926,7 @@ INPUT;
         }
     }
 
-    /**
-     * @dataProvider provideIdentityCandidates
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::resolveIdentity
-     */
+    #[DataProvider('provideIdentityCandidates')]
     public function testGetColumnsForIdentity($tableDef, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -3029,10 +2955,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideDefaultValues
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::parseDefaultValue
-     */
+    #[DataProvider('provideDefaultValues')]
     public function testGetColumnsForDefaults($tableDef, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -3103,10 +3026,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideBooleanDefaultValues
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::parseDefaultValue
-     */
+    #[DataProvider('provideBooleanDefaultValues')]
     public function testGetColumnsForBooleanDefaults($tableDef, $exp)
     {
         if (!$this->adapter->databaseVersionAtLeast('3.24')) {
@@ -3134,10 +3054,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider provideTablesForTruncation
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::truncateTable
-     */
+    #[DataProvider('provideTablesForTruncation')]
     public function testTruncateTable($tableDef, $tableName, $tableId)
     {
         $conn = $this->adapter->getConnection();

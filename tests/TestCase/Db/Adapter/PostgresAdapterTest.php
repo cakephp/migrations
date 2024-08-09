@@ -7,7 +7,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
-use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AbstractAdapter;
@@ -18,6 +17,7 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use PDO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class PostgresAdapterTest extends TestCase
@@ -557,10 +557,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerAddColumnIdentity
-     */
-    public function testAddColumnIdentity($generated, $addToColumn)
+    #[DataProvider('providerAddColumnIdentity')] public function testAddColumnIdentity($generated, $addToColumn)
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
@@ -653,10 +650,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerIgnoresLimit
-     */
-    public function testAddColumnIgnoresLimit(string $column_type, ?string $actual_type = null): void
+    #[DataProvider('providerIgnoresLimit')] public function testAddColumnIgnoresLimit(string $column_type, ?string $actual_type = null): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -823,10 +817,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerArrayType
-     */
-    public function testAddColumnArrayType($column_name, $column_type)
+    #[DataProvider('providerArrayType')] public function testAddColumnArrayType($column_name, $column_type)
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -904,10 +895,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerChangeColumnIdentity
-     */
-    public function testChangeColumnIdentity($generated)
+    #[DataProvider('providerChangeColumnIdentity')] public function testChangeColumnIdentity($generated)
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
@@ -971,10 +959,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider integersProvider
-     */
-    public function testChangeColumnFromTextToInteger($type, $value)
+    #[DataProvider('integersProvider')] public function testChangeColumnFromTextToInteger($type, $value)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'text')
@@ -1131,10 +1116,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
-    public function testGetColumns($colName, $type, $options, $actualType = null)
+    #[DataProvider('columnsProvider')] public function testGetColumns($colName, $type, $options, $actualType = null)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn($colName, $type, $options)->save();
@@ -1154,10 +1136,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
-    public function testGetColumnsWithSchema($colName, $type, $options, $actualType = null)
+    #[DataProvider('columnsProvider')] public function testGetColumnsWithSchema($colName, $type, $options, $actualType = null)
     {
         $this->adapter->createSchema('tschema');
 
@@ -1615,10 +1594,9 @@ class PostgresAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider nonExistentForeignKeyColumnsProvider
      * @param array $columns
      */
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')] public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1683,10 +1661,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    /**
-     * @dataProvider provideForeignKeysToCheck
-     */
-    public function testHasForeignKey($tableDef, $key, $exp)
+    #[DataProvider('provideForeignKeysToCheck')] public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
@@ -2687,10 +2662,7 @@ OUTPUT;
         ];
     }
 
-    /**
-     * @dataProvider serialProvider
-     */
-    public function testSerialAliases(string $columnType): void
+    #[DataProvider('serialProvider')] public function testSerialAliases(string $columnType): void
     {
         $table = new Table('test', ['id' => false], $this->adapter);
         $table->addColumn('id', $columnType, ['identity' => true, 'generated' => null])->create();

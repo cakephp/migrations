@@ -8,7 +8,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
-use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\SqlserverAdapter;
@@ -16,6 +15,7 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -620,10 +620,7 @@ WHERE t.name='ntable'");
         ];
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
-    public function testGetColumns($colName, $type, $options)
+    #[DataProvider('columnsProvider')] public function testGetColumns($colName, $type, $options)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -930,10 +927,9 @@ WHERE t.name='ntable'");
     }
 
     /**
-     * @dataProvider nonExistentForeignKeyColumnsProvider
      * @param array $columns
      */
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')] public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -998,10 +994,7 @@ WHERE t.name='ntable'");
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    /**
-     * @dataProvider provideForeignKeysToCheck
-     */
-    public function testHasForeignKey($tableDef, $key, $exp)
+    #[DataProvider('provideForeignKeysToCheck')] public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');

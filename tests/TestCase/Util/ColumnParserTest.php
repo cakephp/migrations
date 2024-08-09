@@ -18,8 +18,6 @@ use Migrations\Util\ColumnParser;
 
 /**
  * Tests the ColumnParser
- *
- * @covers \Migrations\Util\ColumnParser
  */
 class ColumnParserTest extends TestCase
 {
@@ -39,9 +37,6 @@ class ColumnParserTest extends TestCase
         $this->columnParser = new ColumnParser();
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::parseFields()
-     */
     public function testParseFields()
     {
         $this->assertEquals([
@@ -232,9 +227,6 @@ class ColumnParserTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::parseIndexes()
-     */
     public function testParseIndexes()
     {
         $this->assertEquals(['UNIQUE_ID' => [
@@ -255,9 +247,6 @@ class ColumnParserTest extends TestCase
         ]));
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::parsePrimaryKey()
-     */
     public function testParsePrimaryKey()
     {
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:primary']));
@@ -269,9 +258,6 @@ class ColumnParserTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::validArguments()
-     */
     public function testValidArguments()
     {
         $this->assertEquals(
@@ -324,9 +310,6 @@ class ColumnParserTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::getType()
-     */
     public function testGetType()
     {
         $this->assertSame('integer', $this->columnParser->getType('id', null));
@@ -349,9 +332,6 @@ class ColumnParserTest extends TestCase
         $this->assertSame('decimal', $this->columnParser->getType('longitude', null));
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::getTypeAndLength()
-     */
     public function testGetTypeAndLength()
     {
         $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('name', 'string'));
@@ -366,9 +346,6 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['decimal', [10, 6]], $this->columnParser->getTypeAndLength('latitude', 'decimal[10,6]'));
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::getLength()
-     */
     public function testGetLength()
     {
         $this->assertSame(255, $this->columnParser->getLength('string'));
@@ -378,9 +355,6 @@ class ColumnParserTest extends TestCase
         $this->assertNull($this->columnParser->getLength('text'));
     }
 
-    /**
-     * @covers \Migrations\Util\ColumnParser::getIndexName()
-     */
     public function testGetIndexName()
     {
         $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', true));

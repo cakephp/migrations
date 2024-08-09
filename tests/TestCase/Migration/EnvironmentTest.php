@@ -288,10 +288,12 @@ class EnvironmentTest extends TestCase
         $upMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
             public bool $initExecuted = false;
             public bool $upExecuted = false;
+
             public function init(): void
             {
                 $this->initExecuted = true;
             }
+
             public function up(): void
             {
                 $this->upExecuted = true;
@@ -316,10 +318,12 @@ class EnvironmentTest extends TestCase
         $seed = new class ('mockenv', 20110301080000) extends AbstractSeed {
             public bool $initExecuted = false;
             public bool $runExecuted = false;
+
             public function init(): void
             {
                 $this->initExecuted = true;
             }
+
             public function run(): void
             {
                 $this->runExecuted = true;

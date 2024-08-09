@@ -15,6 +15,7 @@ use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
 use Migrations\Shim\OutputAdapter;
 use Phinx\Console\Command\AbstractCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -516,7 +517,7 @@ class ManagerTest extends TestCase
                         'end_time' => '2012-01-16 18:35:41',
                         'migration_name' => '',
                         'breakpoint' => 0,
-                    ]
+                    ],
                 ]);
 
         $this->manager->setEnvironment($envStub);
@@ -569,7 +570,7 @@ class ManagerTest extends TestCase
                             'end_time' => '2012-01-16 18:35:41',
                             'migration_name' => 'Example',
                             'breakpoint' => 0,
-                        ]
+                        ],
                 ]);
 
         $this->manager->setEnvironment($envStub);
@@ -648,13 +649,12 @@ class ManagerTest extends TestCase
      * Test that migrating by date chooses the correct
      * migration to point to.
      *
-     * @dataProvider migrateDateDataProvider
      * @param string[] $availableMigrations
      * @param string $dateString
      * @param string $expectedMigration
      * @param string $message
      */
-    public function testMigrationsByDate(array $availableMigrations, $dateString, $expectedMigration, $message)
+    #[DataProvider('migrateDateDataProvider')] public function testMigrationsByDate(array $availableMigrations, $dateString, $expectedMigration, $message)
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -682,10 +682,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to version chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToVersionDataProvider
      */
-    public function testRollbackToVersion($availableRollbacks, $version, $expectedOutput)
+    #[DataProvider('rollbackToVersionDataProvider')] public function testRollbackToVersion($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -715,10 +713,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to date chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToDateDataProvider
      */
-    public function testRollbackToDate($availableRollbacks, $version, $expectedOutput)
+    #[DataProvider('rollbackToDateDataProvider')] public function testRollbackToDate($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -748,10 +744,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to version by execution time chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToVersionByExecutionTimeDataProvider
      */
-    public function testRollbackToVersionByExecutionTime($availableRollbacks, $version, $expectedOutput)
+    #[DataProvider('rollbackToVersionByExecutionTimeDataProvider')] public function testRollbackToVersionByExecutionTime($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -787,10 +781,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to version by migration name chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToVersionByExecutionTimeDataProvider
      */
-    public function testRollbackToVersionByName($availableRollbacks, $version, $expectedOutput)
+    #[DataProvider('rollbackToVersionByExecutionTimeDataProvider')] public function testRollbackToVersionByName($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -826,10 +818,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to date by execution time chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToDateByExecutionTimeDataProvider
      */
-    public function testRollbackToDateByExecutionTime($availableRollbacks, $date, $expectedOutput)
+    #[DataProvider('rollbackToDateByExecutionTimeDataProvider')] public function testRollbackToDateByExecutionTime($availableRollbacks, $date, $expectedOutput)
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -920,10 +910,8 @@ class ManagerTest extends TestCase
 
     /**
      * Test that rollbacking last migration
-     *
-     * @dataProvider rollbackLastDataProvider
      */
-    public function testRollbackLast(array $availableRolbacks, string $versionOrder, string $expectedOutput): void
+    #[DataProvider('rollbackLastDataProvider')] public function testRollbackLast(array $availableRolbacks, string $versionOrder, string $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
