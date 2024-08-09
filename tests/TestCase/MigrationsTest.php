@@ -133,7 +133,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testStatus(string $backend)
+    #[DataProvider('backendProvider')]
+    public function testStatus(string $backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -168,7 +169,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMigrateAndRollback($backend)
+    #[DataProvider('backendProvider')]
+    public function testMigrateAndRollback($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -256,7 +258,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testCreateWithEncoding($backend)
+    #[DataProvider('backendProvider')]
+    public function testCreateWithEncoding($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -284,7 +287,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedAll($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedAll($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -323,7 +327,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedAllAsVersion($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedAllAsVersion($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -361,7 +366,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedTarget($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedTarget($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -405,7 +411,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedTargetError($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedTargetError($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -420,7 +427,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedTargetExclude($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedTargetExclude($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -464,7 +472,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedTargetOnly($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedTargetOnly($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -508,7 +517,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedTargetExcludeOnly($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedTargetExcludeOnly($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -523,7 +533,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedVersion($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedVersion($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -567,7 +578,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testOverrideOptions($backend)
+    #[DataProvider('backendProvider')]
+    public function testOverrideOptions($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -637,7 +649,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testMigrateDateOption($backend)
+    #[DataProvider('backendProvider')]
+    public function testMigrateDateOption($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -815,7 +828,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testSeed($backend)
+    #[DataProvider('backendProvider')]
+    public function testSeed($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -893,7 +907,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testSeedOneSeeder($backend)
+    #[DataProvider('backendProvider')]
+    public function testSeedOneSeeder($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -944,7 +959,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testSeedCallSeeder($backend)
+    #[DataProvider('backendProvider')]
+    public function testSeedCallSeeder($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -1007,7 +1023,8 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('backendProvider')] public function testSeedWrongSeed($backend)
+    #[DataProvider('backendProvider')]
+    public function testSeedWrongSeed($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -1024,7 +1041,8 @@ class MigrationsTest extends TestCase
      * @param array $flags Feature flags
      * @return void
      */
-    #[DataProvider('snapshotMigrationsProvider')] public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
+    #[DataProvider('snapshotMigrationsProvider')]
+    public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
     {
         Configure::write('Migrations.backend', 'builtin');
         $this->runMigrateSnapshots($basePath, $filename, $flags);
@@ -1038,7 +1056,8 @@ class MigrationsTest extends TestCase
      * @param array $flags Feature flags
      * @return void
      */
-    #[DataProvider('snapshotMigrationsProvider')] public function testMigrateSnapshotsPhinx(string $basePath, string $filename, array $flags = []): void
+    #[DataProvider('snapshotMigrationsProvider')]
+    public function testMigrateSnapshotsPhinx(string $basePath, string $filename, array $flags = []): void
     {
         $this->runMigrateSnapshots($basePath, $filename, $flags);
     }
@@ -1091,7 +1110,8 @@ class MigrationsTest extends TestCase
     /**
      * Tests that migrating in case of error throws an exception
      */
-    #[DataProvider('backendProvider')] public function testMigrateErrors($backend)
+    #[DataProvider('backendProvider')]
+    public function testMigrateErrors($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -1103,7 +1123,8 @@ class MigrationsTest extends TestCase
     /**
      * Tests that rolling back in case of error throws an exception
      */
-    #[DataProvider('backendProvider')] public function testRollbackErrors($backend)
+    #[DataProvider('backendProvider')]
+    public function testRollbackErrors($backend)
     {
         Configure::write('Migrations.backend', $backend);
 
@@ -1116,7 +1137,8 @@ class MigrationsTest extends TestCase
      * Tests that marking migrated a non-existant migrations returns an error
      * and can return a error message
      */
-    #[DataProvider('backendProvider')] public function testMarkMigratedErrors($backend)
+    #[DataProvider('backendProvider')]
+    public function testMarkMigratedErrors($backend)
     {
         Configure::write('Migrations.backend', $backend);
 

@@ -116,7 +116,8 @@ class TableTest extends TestCase
      * @param AdapterInterface $adapter
      * @param string|null      $createdAtColumnName * @param string|null      $updatedAtColumnName * @param string           $expectedCreatedAtColumnName * @param string           $expectedUpdatedAtColumnName * @param bool $withTimezone
      */
-    #[DataProvider('provideTimestampColumnNames')] public function testAddTimestamps(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
+    #[DataProvider('provideTimestampColumnNames')]
+    public function testAddTimestamps(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
     {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps($createdAtColumnName, $updatedAtColumnName, $withTimezone);
@@ -145,7 +146,8 @@ class TableTest extends TestCase
     /**
      * @param AdapterInterface $adapter
      */
-    #[DataProvider('provideAdapters')] public function testAddTimestampsNoUpdated(AdapterInterface $adapter)
+    #[DataProvider('provideAdapters')]
+    public function testAddTimestampsNoUpdated(AdapterInterface $adapter)
     {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps(null, false);
@@ -169,7 +171,8 @@ class TableTest extends TestCase
     /**
      * @param AdapterInterface $adapter
      */
-    #[DataProvider('provideAdapters')] public function testAddTimestampsNoCreated(AdapterInterface $adapter)
+    #[DataProvider('provideAdapters')]
+    public function testAddTimestampsNoCreated(AdapterInterface $adapter)
     {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps(false, null);
@@ -194,7 +197,8 @@ class TableTest extends TestCase
     /**
      * @param AdapterInterface $adapter
      */
-    #[DataProvider('provideAdapters')] public function testAddTimestampsThrowsOnBothFalse(AdapterInterface $adapter)
+    #[DataProvider('provideAdapters')]
+    public function testAddTimestampsThrowsOnBothFalse(AdapterInterface $adapter)
     {
         $table = new Table('ntable', [], $adapter);
         $this->expectException(RuntimeException::class);
@@ -210,7 +214,8 @@ class TableTest extends TestCase
      * @param string           $expectedUpdatedAtColumnName
      * @param bool $withTimezone
      */
-    #[DataProvider('provideTimestampColumnNames')] public function testAddTimestampsWithTimezone(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
+    #[DataProvider('provideTimestampColumnNames')]
+    public function testAddTimestampsWithTimezone(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
     {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestampsWithTimezone($createdAtColumnName, $updatedAtColumnName);
@@ -413,7 +418,8 @@ class TableTest extends TestCase
      * @param string $indexIdentifier
      * @param Index $index
      */
-    #[DataProvider('removeIndexDataprovider')] public function testRemoveIndex($indexIdentifier, Index $index)
+    #[DataProvider('removeIndexDataprovider')]
+    public function testRemoveIndex($indexIdentifier, Index $index)
     {
         $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
             ->setConstructorArgs([[]])

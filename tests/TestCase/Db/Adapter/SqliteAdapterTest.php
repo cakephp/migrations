@@ -512,7 +512,8 @@ class SqliteAdapterTest extends TestCase
         ];
     }
 
-    #[DataProvider('irregularCreateTableProvider')] public function testAddColumnToIrregularCreateTableStatements(string $createTableSql, array $expectedColumns): void
+    #[DataProvider('irregularCreateTableProvider')]
+    public function testAddColumnToIrregularCreateTableStatements(string $createTableSql, array $expectedColumns): void
     {
         $this->adapter->execute($createTableSql);
         $table = new Table('users', [], $this->adapter);
@@ -761,7 +762,8 @@ class SqliteAdapterTest extends TestCase
      * @param string $indexSQL Index creation SQL
      * @param string $newIndexSQL Expected new index creation SQL
      */
-    #[DataProvider('customIndexSQLDataProvider')] public function testRenameColumnWithCustomIndex(string $indexSQL, string $newIndexSQL)
+    #[DataProvider('customIndexSQLDataProvider')]
+    public function testRenameColumnWithCustomIndex(string $indexSQL, string $newIndexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -859,7 +861,8 @@ class SqliteAdapterTest extends TestCase
      * @param string $indexSQL Index creation SQL
      * @param string $newIndexSQL Expected new index creation SQL
      */
-    #[DataProvider('customCompositeIndexSQLDataProvider')] public function testRenameColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL)
+    #[DataProvider('customCompositeIndexSQLDataProvider')]
+    public function testRenameColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1031,7 +1034,8 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('another default', (string)$cols[1]->getDefault());
     }
 
-    #[DataProvider('columnCreationArgumentProvider')] public function testDropColumn($columnCreationArgs)
+    #[DataProvider('columnCreationArgumentProvider')]
+    public function testDropColumn($columnCreationArgs)
     {
         $table = new Table('t', [], $this->adapter);
         $columnName = $columnCreationArgs[0];
@@ -1154,7 +1158,8 @@ class SqliteAdapterTest extends TestCase
     /**
      * @param string $indexSQL Index creation SQL
      */
-    #[DataProvider('customIndexSQLDataProvider')] public function testDropColumnWithCustomIndex(string $indexSQL)
+    #[DataProvider('customIndexSQLDataProvider')]
+    public function testDropColumnWithCustomIndex(string $indexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1173,7 +1178,8 @@ class SqliteAdapterTest extends TestCase
     /**
      * @param string $indexSQL Index creation SQL
      */
-    #[DataProvider('customCompositeIndexSQLDataProvider')] public function testDropColumnWithCustomCompositeIndex(string $indexSQL)
+    #[DataProvider('customCompositeIndexSQLDataProvider')]
+    public function testDropColumnWithCustomCompositeIndex(string $indexSQL)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1498,7 +1504,8 @@ class SqliteAdapterTest extends TestCase
     /**
      * @param array $columns
      */
-    #[DataProvider('nonExistentForeignKeyColumnsProvider')] public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')]
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable

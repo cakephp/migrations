@@ -748,7 +748,8 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    #[DataProvider('integerDataProvider')] public function testIntegerColumnTypes($phinx_type, $options, $sql_type, $width, $extra)
+    #[DataProvider('integerDataProvider')]
+    public function testIntegerColumnTypes($phinx_type, $options, $sql_type, $width, $extra)
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -969,7 +970,8 @@ class MysqlAdapterTest extends TestCase
     /**
      * The second argument is not typed as MysqlAdapter::INT_BIG is a float, and all other values are integers
      */
-    #[DataProvider('sqlTypeIntConversionProvider')] public function testGetSqlTypeIntegerConversion(string $type, $limit, string $expectedType, int $expectedLimit)
+    #[DataProvider('sqlTypeIntConversionProvider')]
+    public function testGetSqlTypeIntegerConversion(string $type, $limit, string $expectedType, int $expectedLimit)
     {
         $sqlType = $this->adapter->getSqlType($type, $limit);
         $this->assertSame($expectedType, $sqlType['name']);
@@ -1021,7 +1023,8 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    #[DataProvider('binaryToBlobAutomaticConversionData')] public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
+    #[DataProvider('binaryToBlobAutomaticConversionData')]
+    public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'binary', ['limit' => $limit])
@@ -1047,7 +1050,8 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    #[DataProvider('varbinaryToBlobAutomaticConversionData')] public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
+    #[DataProvider('varbinaryToBlobAutomaticConversionData')]
+    public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'varbinary', ['limit' => $limit])
@@ -1088,7 +1092,8 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    #[DataProvider('blobColumnsData')] public function testblobColumns(string $type, string $expectedType, ?int $limit, int $expectedLimit)
+    #[DataProvider('blobColumnsData')]
+    public function testblobColumns(string $type, string $expectedType, ?int $limit, int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', $type, ['limit' => $limit])
@@ -1268,7 +1273,8 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    #[DataProvider('columnsProvider')] public function testGetColumns($colName, $type, $options)
+    #[DataProvider('columnsProvider')]
+    public function testGetColumns($colName, $type, $options)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn($colName, $type, $options)->save();
@@ -1687,7 +1693,8 @@ class MysqlAdapterTest extends TestCase
     /**
      * @param array $columns
      */
-    #[DataProvider('nonExistentForeignKeyColumnsProvider')] public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')]
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1775,7 +1782,8 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    #[DataProvider('provideForeignKeysToCheck')] public function testHasForeignKey($tableDef, $key, $exp)
+    #[DataProvider('provideForeignKeysToCheck')]
+    public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, key(a), key(b), key(a,b), key(a,b,c));');
@@ -2279,7 +2287,8 @@ INPUT;
      * @param string $type
      * @param string $geom
      */
-    #[DataProvider('geometryTypeProvider')] public function testGeometrySridSupport($type, $geom)
+    #[DataProvider('geometryTypeProvider')]
+    public function testGeometrySridSupport($type, $geom)
     {
         $this->adapter->connect();
         if (!$this->usingMysql8()) {
@@ -2302,7 +2311,8 @@ INPUT;
      * @param string $type
      * @param string $geom
      */
-    #[DataProvider('geometryTypeProvider')] public function testGeometrySridThrowsInsertDifferentSrid($type, $geom)
+    #[DataProvider('geometryTypeProvider')]
+    public function testGeometrySridThrowsInsertDifferentSrid($type, $geom)
     {
         $this->adapter->connect();
         if (!$this->usingMysql8()) {
@@ -2358,7 +2368,8 @@ INPUT;
      * @param string $type
      * @param string $default
      */
-    #[DataProvider('defaultsCastAsExpressions')] public function testDefaultsCastAsExpressionsForCertainTypes(string $type, string $default): void
+    #[DataProvider('defaultsCastAsExpressions')]
+    public function testDefaultsCastAsExpressionsForCertainTypes(string $type, string $default): void
     {
         $this->adapter->connect();
 
@@ -2423,7 +2434,8 @@ INPUT;
         ];
     }
 
-    #[DataProvider('integerDataTypesSQLProvider')] public function testGetPhinxTypeFromSQLDefinition(string $sqlDefinition, array $expectedResponse)
+    #[DataProvider('integerDataTypesSQLProvider')]
+    public function testGetPhinxTypeFromSQLDefinition(string $sqlDefinition, array $expectedResponse)
     {
         $result = $this->adapter->getPhinxType($sqlDefinition);
 

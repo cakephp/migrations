@@ -621,7 +621,8 @@ WHERE t.name='ntable'");
         ];
     }
 
-    #[DataProvider('columnsProvider')] public function testGetColumns($colName, $type, $options)
+    #[DataProvider('columnsProvider')]
+    public function testGetColumns($colName, $type, $options)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -930,7 +931,8 @@ WHERE t.name='ntable'");
     /**
      * @param array $columns
      */
-    #[DataProvider('nonExistentForeignKeyColumnsProvider')] public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')]
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -995,7 +997,8 @@ WHERE t.name='ntable'");
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    #[DataProvider('provideForeignKeysToCheck')] public function testHasForeignKey($tableDef, $key, $exp)
+    #[DataProvider('provideForeignKeysToCheck')]
+    public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');

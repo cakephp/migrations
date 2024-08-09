@@ -89,7 +89,8 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('nameVariations')] public function testCreate($name, $fileSuffix)
+    #[DataProvider('nameVariations')]
+    public function testCreate($name, $fileSuffix)
     {
         $this->exec("bake migration CreateUsers  {$name} --connection test");
 
