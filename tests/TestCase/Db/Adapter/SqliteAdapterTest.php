@@ -1914,7 +1914,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_INSERT);
+        $builder = $this->adapter->getInsertBuilder();
         $stm = $builder
             ->insert(['string_col', 'int_col'])
             ->into('table1')
@@ -1924,7 +1924,7 @@ OUTPUT;
 
         $this->assertEquals(2, $stm->rowCount());
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_SELECT);
+        $builder = $this->adapter->getSelectBuilder();
         $stm = $builder
             ->select('*')
             ->from('table1')
@@ -1937,7 +1937,7 @@ OUTPUT;
             $stm->fetch('assoc')
         );
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_DELETE);
+        $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
             ->where(['int_col <' => 2])

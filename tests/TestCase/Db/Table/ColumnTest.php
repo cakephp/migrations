@@ -5,6 +5,7 @@ namespace Migrations\Test\TestCase\Db\Table;
 
 use Cake\Core\Configure;
 use Migrations\Db\Table\Column;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -31,9 +32,7 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->isIdentity());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testColumnNullFeatureFlag()
     {
         $column = new Column();
