@@ -18,6 +18,7 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use PDO;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 
 class PostgresAdapterTest extends TestCase
@@ -1909,9 +1910,7 @@ class PostgresAdapterTest extends TestCase
         );
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testCanChangeColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1938,9 +1937,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($comment, $row['column_comment'], 'Dont change column comment correctly');
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testCanRemoveColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1964,9 +1961,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEmpty($row['column_comment'], 'Dont remove column comment correctly');
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testCanAddMultipleCommentsToOneTable()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -2005,9 +2000,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($comment2, $row['column_comment'], 'Could not create second column comment');
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testColumnsAreResetBetweenTables()
     {
         $table = new Table('widgets', [], $this->adapter);

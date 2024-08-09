@@ -18,6 +18,7 @@ use Migrations\Db\Table\Column;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -466,9 +467,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testUnsignedPksFeatureFlag()
     {
         $this->adapter->connect();
@@ -484,9 +483,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($columns[0]->getSigned());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testAddTimestampsFeatureFlag()
     {
         Configure::write('Migrations.add_timestamps_use_datetime', true);

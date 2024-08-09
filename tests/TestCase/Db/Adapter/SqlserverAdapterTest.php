@@ -16,6 +16,7 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -1109,9 +1110,7 @@ WHERE t.name='ntable'");
         $this->assertEquals($comment, $resultComment, 'Dont set column comment correctly');
     }
 
-    /**
-     * @dependss testAddColumnComment
-     */
+    #[Depends('testAddColumnComment')]
     public function testChangeColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1126,9 +1125,7 @@ WHERE t.name='ntable'");
         $this->assertEquals($comment, $resultComment, 'Dont change column comment correctly');
     }
 
-    /**
-     * @depends testAddColumnComment
-     */
+    #[Depends('testAddColumnComment')]
     public function testRemoveColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
