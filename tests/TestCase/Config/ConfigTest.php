@@ -179,7 +179,7 @@ class ConfigTest extends AbstractConfigTestCase
 
         $configStub->expects($this->once())
             ->method('getVersionOrder')
-            ->will($this->returnValue($versionOrder));
+            ->willReturn($versionOrder);
 
         $this->assertEquals($expected, $configStub->isVersionOrderCreationTime());
     }

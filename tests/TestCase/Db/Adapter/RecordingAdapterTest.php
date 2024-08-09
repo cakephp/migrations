@@ -24,7 +24,7 @@ class RecordingAdapterTest extends TestCase
 
         $stub->expects($this->any())
             ->method('isValidColumnType')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->adapter = new RecordingAdapter($stub);
     }
@@ -63,7 +63,7 @@ class RecordingAdapterTest extends TestCase
             ->getAdapter()
             ->expects($this->any())
             ->method('hasTable')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->adapter
             ->getAdapter()
@@ -92,7 +92,7 @@ class RecordingAdapterTest extends TestCase
             ->getAdapter()
             ->expects($this->any())
             ->method('hasTable')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $table = new Table('atable', [], $this->adapter);
         $table->renameColumn('oldname', 'newname')
@@ -110,7 +110,7 @@ class RecordingAdapterTest extends TestCase
             ->getAdapter()
             ->expects($this->any())
             ->method('hasTable')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $table = new Table('atable', [], $this->adapter);
         $table->addIndex(['email'])
@@ -128,7 +128,7 @@ class RecordingAdapterTest extends TestCase
             ->getAdapter()
             ->expects($this->any())
             ->method('hasTable')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $table = new Table('atable', [], $this->adapter);
         $table->addForeignKey(['ref_table_id'], 'refTable')
@@ -146,7 +146,7 @@ class RecordingAdapterTest extends TestCase
             ->getAdapter()
             ->expects($this->any())
             ->method('hasTable')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $table = new Table('atable', [], $this->adapter);
         $table->removeColumn('thing')
