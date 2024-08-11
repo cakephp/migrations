@@ -5,6 +5,7 @@ namespace Migrations\Test\TestCase\Phinx\Db\Table;
 
 use InvalidArgumentException;
 use Migrations\Db\Table\ForeignKey;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -37,8 +38,8 @@ class ForeignKeyTest extends TestCase
     /**
      * @param string $dirtyValue
      * @param string $valueOfConstant
-     * @dataProvider actionsProvider
      */
+    #[DataProvider('actionsProvider')]
     public function testBothActionsCanBeSetThroughSetters($dirtyValue, $valueOfConstant)
     {
         $this->fk->setOnDelete($dirtyValue)->setOnUpdate($dirtyValue);
@@ -49,8 +50,8 @@ class ForeignKeyTest extends TestCase
     /**
      * @param string $dirtyValue
      * @param string $valueOfConstant
-     * @dataProvider actionsProvider
      */
+    #[DataProvider('actionsProvider')]
     public function testBothActionsCanBeSetThroughOptions($dirtyValue, $valueOfConstant)
     {
         $this->fk->setOptions([

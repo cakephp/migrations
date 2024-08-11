@@ -135,11 +135,11 @@ class MigrationCommandTest extends TestCase
 
         $mock->expects($this->any())
             ->method('getOutput')
-            ->will($this->returnValue(new NullOutput()));
+            ->willReturn(new NullOutput());
 
         $mock->expects($this->any())
             ->method('getApp')
-            ->will($this->returnValue(new MigrationsDispatcher(PHINX_VERSION)));
+            ->willReturn(new MigrationsDispatcher(PHINX_VERSION));
 
         return $mock;
     }

@@ -8,7 +8,6 @@ use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
-use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AdapterInterface;
@@ -18,6 +17,8 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use PDO;
 use PDOException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -466,9 +467,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testUnsignedPksFeatureFlag()
     {
         $this->adapter->connect();
@@ -484,9 +483,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($columns[0]->getSigned());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testAddTimestampsFeatureFlag()
     {
         Configure::write('Migrations.add_timestamps_use_datetime', true);
@@ -751,9 +748,7 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider integerDataProvider
-     */
+    #[DataProvider('integerDataProvider')]
     public function testIntegerColumnTypes($phinx_type, $options, $sql_type, $width, $extra)
     {
         $table = new Table('table1', [], $this->adapter);
@@ -973,9 +968,9 @@ class MysqlAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider sqlTypeIntConversionProvider
      * The second argument is not typed as MysqlAdapter::INT_BIG is a float, and all other values are integers
      */
+    #[DataProvider('sqlTypeIntConversionProvider')]
     public function testGetSqlTypeIntegerConversion(string $type, $limit, string $expectedType, int $expectedLimit)
     {
         $sqlType = $this->adapter->getSqlType($type, $limit);
@@ -1028,7 +1023,7 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    /** @dataProvider binaryToBlobAutomaticConversionData */
+    #[DataProvider('binaryToBlobAutomaticConversionData')]
     public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
@@ -1055,7 +1050,7 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    /** @dataProvider varbinaryToBlobAutomaticConversionData */
+    #[DataProvider('varbinaryToBlobAutomaticConversionData')]
     public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
@@ -1097,7 +1092,7 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    /** @dataProvider blobColumnsData */
+    #[DataProvider('blobColumnsData')]
     public function testblobColumns(string $type, string $expectedType, ?int $limit, int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
@@ -1278,9 +1273,7 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
+    #[DataProvider('columnsProvider')]
     public function testGetColumns($colName, $type, $options)
     {
         $table = new Table('t', [], $this->adapter);
@@ -1698,9 +1691,9 @@ class MysqlAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider nonExistentForeignKeyColumnsProvider
      * @param array $columns
      */
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')]
     public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
@@ -1789,9 +1782,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    /**
-     * @dataProvider provideForeignKeysToCheck
-     */
+    #[DataProvider('provideForeignKeysToCheck')]
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -2207,7 +2198,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_INSERT);
+        $builder = $this->adapter->getInsertBuilder();
         $stm = $builder
             ->insert(['string_col', 'int_col'])
             ->into('table1')
@@ -2217,7 +2208,7 @@ OUTPUT;
 
         $this->assertEquals(2, $stm->rowCount());
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_SELECT);
+        $builder = $this->adapter->getSelectBuilder();
         $stm = $builder
             ->select('*')
             ->from('table1')
@@ -2230,7 +2221,7 @@ OUTPUT;
             $stm->fetch('assoc')
         );
 
-        $builder = $this->adapter->getQueryBuilder(query::TYPE_DELETE);
+        $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
             ->where(['int_col <' => 2])
@@ -2293,10 +2284,10 @@ INPUT;
     }
 
     /**
-     * @dataProvider geometryTypeProvider
      * @param string $type
      * @param string $geom
      */
+    #[DataProvider('geometryTypeProvider')]
     public function testGeometrySridSupport($type, $geom)
     {
         $this->adapter->connect();
@@ -2317,10 +2308,10 @@ INPUT;
     }
 
     /**
-     * @dataProvider geometryTypeProvider
      * @param string $type
      * @param string $geom
      */
+    #[DataProvider('geometryTypeProvider')]
     public function testGeometrySridThrowsInsertDifferentSrid($type, $geom)
     {
         $this->adapter->connect();
@@ -2374,10 +2365,10 @@ INPUT;
      * MySQL 8 added support for specifying defaults for the BLOB, TEXT, GEOMETRY, and JSON data types,
      * however requiring that they be wrapped in expressions.
      *
-     * @dataProvider defaultsCastAsExpressions
      * @param string $type
      * @param string $default
      */
+    #[DataProvider('defaultsCastAsExpressions')]
     public function testDefaultsCastAsExpressionsForCertainTypes(string $type, string $default): void
     {
         $this->adapter->connect();
@@ -2443,9 +2434,7 @@ INPUT;
         ];
     }
 
-    /**
-     * @dataProvider integerDataTypesSQLProvider
-     */
+    #[DataProvider('integerDataTypesSQLProvider')]
     public function testGetPhinxTypeFromSQLDefinition(string $sqlDefinition, array $expectedResponse)
     {
         $result = $this->adapter->getPhinxType($sqlDefinition);

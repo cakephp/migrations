@@ -15,6 +15,7 @@ use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
 use Migrations\Shim\OutputAdapter;
 use Phinx\Console\Command\AbstractCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -174,7 +175,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120111235330' =>
                             [
@@ -193,7 +194,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
 
         $this->manager->setEnvironment($envStub);
         $return = $this->manager->printStatus();
@@ -220,7 +221,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120111235330' =>
                             [
@@ -239,7 +240,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
         $this->manager->setEnvironment($envStub);
         $return = $this->manager->printStatus(AbstractCommand::FORMAT_JSON);
         $expected = [
@@ -265,7 +266,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120111235330' =>
                             [
@@ -284,7 +285,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
 
         $this->manager->setEnvironment($envStub);
         $return = $this->manager->printStatus();
@@ -330,7 +331,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120103083300' =>
                             [
@@ -349,7 +350,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
 
         $this->manager->setEnvironment($envStub);
 
@@ -389,7 +390,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120111235330' =>
                             [
@@ -416,7 +417,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
 
         $this->manager->setEnvironment($envStub);
 
@@ -450,7 +451,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120103083300' =>
                             [
@@ -469,7 +470,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
 
         $this->manager->setEnvironment($envStub);
         $return = $this->manager->printStatus();
@@ -509,14 +510,15 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue([
+                ->willReturn([
                     '20120111235330' => [
                         'version' => '20120111235330',
                         'start_time' => '2012-01-16 18:35:40',
                         'end_time' => '2012-01-16 18:35:41',
                         'migration_name' => '',
                         'breakpoint' => 0,
-                    ]]));
+                    ],
+                ]);
 
         $this->manager->setEnvironment($envStub);
 
@@ -544,7 +546,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue([
+                ->willReturn([
                     '20120111235330' =>
                         [
                             'version' => '20120111235330',
@@ -568,7 +570,8 @@ class ManagerTest extends TestCase
                             'end_time' => '2012-01-16 18:35:41',
                             'migration_name' => 'Example',
                             'breakpoint' => 0,
-                        ]]));
+                        ],
+                ]);
 
         $this->manager->setEnvironment($envStub);
 
@@ -646,12 +649,12 @@ class ManagerTest extends TestCase
      * Test that migrating by date chooses the correct
      * migration to point to.
      *
-     * @dataProvider migrateDateDataProvider
      * @param string[] $availableMigrations
      * @param string $dateString
      * @param string $expectedMigration
      * @param string $message
      */
+    #[DataProvider('migrateDateDataProvider')]
     public function testMigrationsByDate(array $availableMigrations, $dateString, $expectedMigration, $message)
     {
         // stub environment
@@ -664,7 +667,7 @@ class ManagerTest extends TestCase
         } else {
             $envStub->expects($this->once())
                     ->method('getVersions')
-                    ->will($this->returnValue($availableMigrations));
+                    ->willReturn($availableMigrations);
         }
         $this->manager->setEnvironment($envStub);
         $this->manager->migrateToDateTime(new DateTime($dateString));
@@ -680,9 +683,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to version chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToVersionDataProvider
      */
+    #[DataProvider('rollbackToVersionDataProvider')]
     public function testRollbackToVersion($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
@@ -691,7 +693,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
             ->method('getVersionLog')
-            ->will($this->returnValue($availableRollbacks));
+            ->willReturn($availableRollbacks);
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version);
@@ -713,9 +715,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to date chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToDateDataProvider
      */
+    #[DataProvider('rollbackToDateDataProvider')]
     public function testRollbackToDate($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
@@ -724,7 +725,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
             ->method('getVersionLog')
-            ->will($this->returnValue($availableRollbacks));
+            ->willReturn($availableRollbacks);
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version, false, false);
@@ -746,9 +747,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to version by execution time chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToVersionByExecutionTimeDataProvider
      */
+    #[DataProvider('rollbackToVersionByExecutionTimeDataProvider')]
     public function testRollbackToVersionByExecutionTime($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
@@ -757,7 +757,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
             ->method('getVersionLog')
-            ->will($this->returnValue($availableRollbacks));
+            ->willReturn($availableRollbacks);
 
         // get a manager with a config whose version order is set to execution time
         $configArray = $this->getConfigArray();
@@ -785,9 +785,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to version by migration name chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToVersionByExecutionTimeDataProvider
      */
+    #[DataProvider('rollbackToVersionByExecutionTimeDataProvider')]
     public function testRollbackToVersionByName($availableRollbacks, $version, $expectedOutput)
     {
         // stub environment
@@ -796,7 +795,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
             ->method('getVersionLog')
-            ->will($this->returnValue($availableRollbacks));
+            ->willReturn($availableRollbacks);
 
         // get a manager with a config whose version order is set to execution time
         $configArray = $this->getConfigArray();
@@ -824,9 +823,8 @@ class ManagerTest extends TestCase
     /**
      * Test that rollbacking to date by execution time chooses the correct
      * migration to point to.
-     *
-     * @dataProvider rollbackToDateByExecutionTimeDataProvider
      */
+    #[DataProvider('rollbackToDateByExecutionTimeDataProvider')]
     public function testRollbackToDateByExecutionTime($availableRollbacks, $date, $expectedOutput)
     {
         // stub environment
@@ -835,7 +833,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
             ->method('getVersionLog')
-            ->will($this->returnValue($availableRollbacks));
+            ->willReturn($availableRollbacks);
 
         // get a manager with a config whose version order is set to execution time
         $configArray = $this->getConfigArray();
@@ -869,12 +867,12 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
                 ->method('getVersionLog')
-                ->will($this->returnValue([
+                ->willReturn([
                     '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
-                ]));
+                ]);
         $envStub->expects($this->any())
                 ->method('getVersions')
-                ->will($this->returnValue([20120111235330]));
+                ->willReturn([20120111235330]);
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
@@ -894,23 +892,19 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
                 ->method('getVersionLog')
-                ->will(
-                    $this->returnValue(
-                        [
-                            '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
-                            '20120116183504' => ['version' => '20120815145812', 'migration' => '', 'breakpoint' => 0],
-                        ]
-                    )
+                ->willReturn(
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
+                        '20120116183504' => ['version' => '20120815145812', 'migration' => '', 'breakpoint' => 0],
+                    ]
                 );
         $envStub->expects($this->any())
                 ->method('getVersions')
-                ->will(
-                    $this->returnValue(
-                        [
-                            20120111235330,
-                            20120116183504,
-                        ]
-                    )
+                ->willReturn(
+                    [
+                        20120111235330,
+                        20120116183504,
+                    ]
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -922,9 +916,8 @@ class ManagerTest extends TestCase
 
     /**
      * Test that rollbacking last migration
-     *
-     * @dataProvider rollbackLastDataProvider
      */
+    #[DataProvider('rollbackLastDataProvider')]
     public function testRollbackLast(array $availableRolbacks, string $versionOrder, string $expectedOutput): void
     {
         // stub environment
@@ -933,7 +926,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->any())
             ->method('getVersionLog')
-            ->will($this->returnValue($availableRolbacks));
+            ->willReturn($availableRolbacks);
 
         // get a manager with a config whose version order is set to execution time
         $configArray = $this->getConfigArray();
@@ -2675,7 +2668,7 @@ class ManagerTest extends TestCase
             ->getMock();
         $envStub->expects($this->once())
                 ->method('getVersionLog')
-                ->will($this->returnValue(
+                ->willReturn(
                     [
                         '20120111235330' =>
                             [
@@ -2686,7 +2679,7 @@ class ManagerTest extends TestCase
                                 'breakpoint' => '0',
                             ],
                     ]
-                ));
+                );
 
         $this->manager->setEnvironment($envStub);
         $this->manager->setBreakpoint(20120133235330);

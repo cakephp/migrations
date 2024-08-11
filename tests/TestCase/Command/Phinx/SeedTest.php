@@ -118,7 +118,7 @@ class SeedTest extends TestCase
         $result = $this->connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
-            ->order('id DESC')
+            ->orderBy('id DESC')
             ->limit(1)
             ->execute()->fetchAll('assoc');
         $expected = [
@@ -160,7 +160,7 @@ class SeedTest extends TestCase
         $result = $this->connection->selectQuery()
             ->select(['*'])
             ->from('numbers')
-            ->order('id DESC')
+            ->orderBy('id DESC')
             ->limit(1)
             ->execute()->fetchAll('assoc');
         $expected = [

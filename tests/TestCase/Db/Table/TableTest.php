@@ -13,6 +13,7 @@ use Phinx\Db\Adapter\SqlServerAdapter;
 use Phinx\Db\Table;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\Index;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use RuntimeException;
@@ -112,10 +113,10 @@ class TableTest extends TestCase
     }
 
     /**
-     * @dataProvider provideTimestampColumnNames
      * @param AdapterInterface $adapter
      * @param string|null      $createdAtColumnName * @param string|null      $updatedAtColumnName * @param string           $expectedCreatedAtColumnName * @param string           $expectedUpdatedAtColumnName * @param bool $withTimezone
      */
+    #[DataProvider('provideTimestampColumnNames')]
     public function testAddTimestamps(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
     {
         $table = new Table('ntable', [], $adapter);
@@ -143,9 +144,9 @@ class TableTest extends TestCase
     }
 
     /**
-     * @dataProvider provideAdapters
      * @param AdapterInterface $adapter
      */
+    #[DataProvider('provideAdapters')]
     public function testAddTimestampsNoUpdated(AdapterInterface $adapter)
     {
         $table = new Table('ntable', [], $adapter);
@@ -168,9 +169,9 @@ class TableTest extends TestCase
     }
 
     /**
-     * @dataProvider provideAdapters
      * @param AdapterInterface $adapter
      */
+    #[DataProvider('provideAdapters')]
     public function testAddTimestampsNoCreated(AdapterInterface $adapter)
     {
         $table = new Table('ntable', [], $adapter);
@@ -194,9 +195,9 @@ class TableTest extends TestCase
     }
 
     /**
-     * @dataProvider provideAdapters
      * @param AdapterInterface $adapter
      */
+    #[DataProvider('provideAdapters')]
     public function testAddTimestampsThrowsOnBothFalse(AdapterInterface $adapter)
     {
         $table = new Table('ntable', [], $adapter);
@@ -206,7 +207,6 @@ class TableTest extends TestCase
     }
 
     /**
-     * @dataProvider provideTimestampColumnNames
      * @param AdapterInterface $adapter
      * @param string|null      $createdAtColumnName
      * @param string|null      $updatedAtColumnName
@@ -214,6 +214,7 @@ class TableTest extends TestCase
      * @param string           $expectedUpdatedAtColumnName
      * @param bool $withTimezone
      */
+    #[DataProvider('provideTimestampColumnNames')]
     public function testAddTimestampsWithTimezone(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
     {
         $table = new Table('ntable', [], $adapter);
@@ -414,10 +415,10 @@ class TableTest extends TestCase
     }
 
     /**
-     * @dataProvider removeIndexDataprovider
      * @param string $indexIdentifier
      * @param Index $index
      */
+    #[DataProvider('removeIndexDataprovider')]
     public function testRemoveIndex($indexIdentifier, Index $index)
     {
         $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')

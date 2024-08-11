@@ -101,7 +101,7 @@ class EnvironmentTest extends TestCase
             ->getMock();
         $stub->expects($this->any())
              ->method('getVersions')
-             ->will($this->returnValue([20110301080000]));
+             ->willReturn([20110301080000]);
 
         $this->environment->setAdapter($stub);
 
@@ -121,14 +121,16 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20110301080000'])
-            ->addMethods(['up'])
-            ->getMock();
-        $upMigration->expects($this->once())
-                    ->method('up');
+        $upMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function up(): void
+            {
+                $this->executed = true;
+            }
+        };
 
         $this->environment->executeMigration($upMigration, MigrationInterface::UP);
+        $this->assertTrue($upMigration->executed);
     }
 
     public function testExecutingAMigrationDown()
@@ -144,14 +146,16 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // down
-        $downMigration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20110301080000'])
-            ->addMethods(['down'])
-            ->getMock();
-        $downMigration->expects($this->once())
-                      ->method('down');
+        $downMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function down(): void
+            {
+                $this->executed = true;
+            }
+        };
 
         $this->environment->executeMigration($downMigration, MigrationInterface::DOWN);
+        $this->assertTrue($downMigration->executed);
     }
 
     public function testExecutingAMigrationWithTransactions()
@@ -168,19 +172,21 @@ class EnvironmentTest extends TestCase
 
         $adapterStub->expects($this->exactly(2))
                     ->method('hasTransactions')
-                    ->will($this->returnValue(true));
+                    ->willReturn(true);
 
         $this->environment->setAdapter($adapterStub);
 
         // migrate
-        $migration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20110301080000'])
-            ->addMethods(['up'])
-            ->getMock();
-        $migration->expects($this->once())
-                  ->method('up');
+        $migration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function up(): void
+            {
+                $this->executed = true;
+            }
+        };
 
         $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $this->assertTrue($migration->executed);
     }
 
     public function testExecutingAChangeMigrationUp()
@@ -196,14 +202,16 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20130301080000'])
-            ->addMethods(['change'])
-            ->getMock();
-        $migration->expects($this->once())
-                  ->method('change');
+        $migration = new class ('mockenv', 20130301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function change(): void
+            {
+                $this->executed = true;
+            }
+        };
 
         $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $this->assertTrue($migration->executed);
     }
 
     public function testExecutingAChangeMigrationDown()
@@ -219,14 +227,16 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20130301080000'])
-            ->addMethods(['change'])
-            ->getMock();
-        $migration->expects($this->once())
-                  ->method('change');
+        $migration = new class ('mockenv', 20130301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function change(): void
+            {
+                $this->executed = true;
+            }
+        };
 
         $this->environment->executeMigration($migration, MigrationInterface::DOWN);
+        $this->assertTrue($migration->executed);
     }
 
     public function testExecutingAFakeMigration()
@@ -242,14 +252,16 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20130301080000'])
-            ->addMethods(['change'])
-            ->getMock();
-        $migration->expects($this->never())
-                  ->method('change');
+        $migration = new class ('mockenv', 20130301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function change(): void
+            {
+                $this->executed = true;
+            }
+        };
 
         $this->environment->executeMigration($migration, MigrationInterface::UP, true);
+        $this->assertFalse($migration->executed);
     }
 
     public function testGettingInputObject()
@@ -273,16 +285,24 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = $this->getMockBuilder(AbstractMigration::class)
-            ->setConstructorArgs(['mockenv', '20110301080000'])
-            ->addMethods(['up', 'init'])
-            ->getMock();
-        $upMigration->expects($this->once())
-                    ->method('up');
-        $upMigration->expects($this->once())
-                    ->method('init');
+        $upMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+            public bool $initExecuted = false;
+            public bool $upExecuted = false;
+
+            public function init(): void
+            {
+                $this->initExecuted = true;
+            }
+
+            public function up(): void
+            {
+                $this->upExecuted = true;
+            }
+        };
 
         $this->environment->executeMigration($upMigration, MigrationInterface::UP);
+        $this->assertTrue($upMigration->initExecuted);
+        $this->assertTrue($upMigration->upExecuted);
     }
 
     public function testExecuteSeedInit()
@@ -295,16 +315,23 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $seed = $this->getMockBuilder(AbstractSeed::class)
-            ->addMethods(['init'])
-            ->onlyMethods(['run'])
-            ->getMock();
+        $seed = new class ('mockenv', 20110301080000) extends AbstractSeed {
+            public bool $initExecuted = false;
+            public bool $runExecuted = false;
 
-        $seed->expects($this->once())
-                    ->method('run');
-        $seed->expects($this->once())
-                    ->method('init');
+            public function init(): void
+            {
+                $this->initExecuted = true;
+            }
+
+            public function run(): void
+            {
+                $this->runExecuted = true;
+            }
+        };
 
         $this->environment->executeSeed($seed);
+        $this->assertTrue($seed->initExecuted);
+        $this->assertTrue($seed->runExecuted);
     }
 }

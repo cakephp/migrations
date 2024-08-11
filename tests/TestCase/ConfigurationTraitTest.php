@@ -277,12 +277,10 @@ class ConfigurationTraitTest extends TestCase
         $command->setInput($input);
         $command->expects($this->any())
             ->method('getOperationsPath')
-            ->will(
-                $this->returnValueMap([
-                    [$input, 'Migrations', $migrationsPath],
-                    [$input, 'Seeds', $seedsPath],
-                ])
-            );
+            ->willReturnMap([
+                [$input, 'Migrations', $migrationsPath],
+                [$input, 'Seeds', $seedsPath],
+            ]);
 
         return $command;
     }

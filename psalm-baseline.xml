@@ -112,6 +112,12 @@
   </file>
   <file src="src/Migration/Manager.php">
     <ArgumentTypeCoercion>
+      <code><![CDATA[array_map(
+                    function ($phpFile) {
+                        return "    <info>{$phpFile}</info>";
+                    },
+                    $phpFiles
+                )]]></code>
       <code>array_merge($versions, array_keys($migrations))</code>
     </ArgumentTypeCoercion>
     <RedundantPropertyInitializationCheck>
@@ -137,12 +143,23 @@
     </DeprecatedTrait>
   </file>
   <file src="src/Shim/OutputAdapter.php">
+    <ArgumentTypeCoercion>
+      <code>$messages</code>
+      <code>$messages</code>
+    </ArgumentTypeCoercion>
     <LessSpecificReturnStatement>
       <code><![CDATA[$this->io->level()]]></code>
     </LessSpecificReturnStatement>
     <MoreSpecificReturnType>
       <code>self::VERBOSITY_*</code>
     </MoreSpecificReturnType>
+  </file>
+  <file src="src/TestSuite/Migrator.php">
+    <ArgumentTypeCoercion>
+      <code>$dropTables</code>
+      <code>$phinxTables</code>
+      <code>$tables</code>
+    </ArgumentTypeCoercion>
   </file>
   <file src="src/Util/ColumnParser.php">
     <ArgumentTypeCoercion>

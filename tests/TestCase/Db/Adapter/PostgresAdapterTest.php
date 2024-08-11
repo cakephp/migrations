@@ -7,7 +7,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
-use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AbstractAdapter;
@@ -18,6 +17,8 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use PDO;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 
 class PostgresAdapterTest extends TestCase
@@ -557,9 +558,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerAddColumnIdentity
-     */
+    #[DataProvider('providerAddColumnIdentity')]
     public function testAddColumnIdentity($generated, $addToColumn)
     {
         if (!$this->usingPostgres10()) {
@@ -653,9 +652,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerIgnoresLimit
-     */
+    #[DataProvider('providerIgnoresLimit')]
     public function testAddColumnIgnoresLimit(string $column_type, ?string $actual_type = null): void
     {
         $table = new Table('table1', [], $this->adapter);
@@ -823,9 +820,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerArrayType
-     */
+    #[DataProvider('providerArrayType')]
     public function testAddColumnArrayType($column_name, $column_type)
     {
         $table = new Table('table1', [], $this->adapter);
@@ -904,9 +899,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerChangeColumnIdentity
-     */
+    #[DataProvider('providerChangeColumnIdentity')]
     public function testChangeColumnIdentity($generated)
     {
         if (!$this->usingPostgres10()) {
@@ -971,9 +964,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider integersProvider
-     */
+    #[DataProvider('integersProvider')]
     public function testChangeColumnFromTextToInteger($type, $value)
     {
         $table = new Table('t', [], $this->adapter);
@@ -1131,9 +1122,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
+    #[DataProvider('columnsProvider')]
     public function testGetColumns($colName, $type, $options, $actualType = null)
     {
         $table = new Table('t', [], $this->adapter);
@@ -1154,9 +1143,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
+    #[DataProvider('columnsProvider')]
     public function testGetColumnsWithSchema($colName, $type, $options, $actualType = null)
     {
         $this->adapter->createSchema('tschema');
@@ -1615,9 +1602,9 @@ class PostgresAdapterTest extends TestCase
     }
 
     /**
-     * @dataProvider nonExistentForeignKeyColumnsProvider
      * @param array $columns
      */
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')]
     public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
@@ -1683,9 +1670,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    /**
-     * @dataProvider provideForeignKeysToCheck
-     */
+    #[DataProvider('provideForeignKeysToCheck')]
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -1934,9 +1919,7 @@ class PostgresAdapterTest extends TestCase
         );
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testCanChangeColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1963,9 +1946,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($comment, $row['column_comment'], 'Dont change column comment correctly');
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testCanRemoveColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1989,9 +1970,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEmpty($row['column_comment'], 'Dont remove column comment correctly');
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testCanAddMultipleCommentsToOneTable()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -2030,9 +2009,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($comment2, $row['column_comment'], 'Could not create second column comment');
     }
 
-    /**
-     * @depends testCanAddColumnComment
-     */
+    #[Depends('testCanAddColumnComment')]
     public function testColumnsAreResetBetweenTables()
     {
         $table = new Table('widgets', [], $this->adapter);
@@ -2593,7 +2570,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_INSERT);
+        $builder = $this->adapter->getInsertBuilder();
         $stm = $builder
             ->insert(['string_col', 'int_col'])
             ->into('table1')
@@ -2603,7 +2580,7 @@ OUTPUT;
 
         $this->assertEquals(2, $stm->rowCount());
 
-        $builder = $this->adapter->getQueryBuilder(query::TYPE_SELECT);
+        $builder = $this->adapter->getSelectBuilder();
         $stm = $builder
             ->select('*')
             ->from('table1')
@@ -2616,7 +2593,7 @@ OUTPUT;
             $stm->fetch('assoc')
         );
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_DELETE);
+        $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
             ->where(['int_col <' => 2])
@@ -2687,9 +2664,7 @@ OUTPUT;
         ];
     }
 
-    /**
-     * @dataProvider serialProvider
-     */
+    #[DataProvider('serialProvider')]
     public function testSerialAliases(string $columnType): void
     {
         $table = new Table('test', ['id' => false], $this->adapter);

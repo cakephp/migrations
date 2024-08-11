@@ -22,6 +22,7 @@ use Exception;
 use InvalidArgumentException;
 use Migrations\Migrations;
 use Phinx\Db\Adapter\WrapperInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use function Cake\Core\env;
 
 /**
@@ -130,9 +131,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests the status method
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testStatus(string $backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -166,9 +167,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests the migrations and rollbacks
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMigrateAndRollback($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -255,9 +256,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests the collation table behavior when using MySQL
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testCreateWithEncoding($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -284,9 +285,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated without params marks everything
      * as migrated
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedAll($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -324,9 +325,9 @@ class MigrationsTest extends TestCase
      * string 'all' marks everything
      * as migrated
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedAllAsVersion($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -363,9 +364,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option will mark
      * only up to that one
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedTarget($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -408,9 +409,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option set to a
      * non-existent target will throw an exception
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedTargetError($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -424,9 +425,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option with the exclude
      * option will mark only up to that one, excluding it
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedTargetExclude($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -469,9 +470,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option with the only
      * option will mark only that specific migrations
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedTargetOnly($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -514,9 +515,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option, the only option
      * and the exclude option will throw an exception
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedTargetExcludeOnly($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -530,9 +531,9 @@ class MigrationsTest extends TestCase
      * Tests calling Migrations::markMigrated with the target option with the exclude
      * option will mark only up to that one, excluding it
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedVersion($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -575,9 +576,9 @@ class MigrationsTest extends TestCase
      * Tests that calling the migrations methods while passing
      * parameters will override the default ones
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testOverrideOptions($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -646,9 +647,9 @@ class MigrationsTest extends TestCase
      * Tests that calling the migrations methods while passing the ``date``
      * parameter works as expected
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testMigrateDateOption($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -825,9 +826,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests seeding the database
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testSeed($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -904,9 +905,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests seeding the database with seeder
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testSeedOneSeeder($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -956,9 +957,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests seeding the database with seeder
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testSeedCallSeeder($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -1020,9 +1021,9 @@ class MigrationsTest extends TestCase
     /**
      * Tests that requesting a unexistant seed throws an exception
      *
-     * @dataProvider backendProvider
      * @return void
      */
+    #[DataProvider('backendProvider')]
     public function testSeedWrongSeed($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -1035,12 +1036,12 @@ class MigrationsTest extends TestCase
     /**
      * Tests migrating the baked snapshots with builtin backend
      *
-     * @dataProvider snapshotMigrationsProvider
      * @param string $basePath Snapshot file path
      * @param string $filename Snapshot file name
      * @param array $flags Feature flags
      * @return void
      */
+    #[DataProvider('snapshotMigrationsProvider')]
     public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
     {
         Configure::write('Migrations.backend', 'builtin');
@@ -1050,12 +1051,12 @@ class MigrationsTest extends TestCase
     /**
      * Tests migrating the baked snapshots
      *
-     * @dataProvider snapshotMigrationsProvider
      * @param string $basePath Snapshot file path
      * @param string $filename Snapshot file name
      * @param array $flags Feature flags
      * @return void
      */
+    #[DataProvider('snapshotMigrationsProvider')]
     public function testMigrateSnapshotsPhinx(string $basePath, string $filename, array $flags = []): void
     {
         $this->runMigrateSnapshots($basePath, $filename, $flags);
@@ -1108,9 +1109,8 @@ class MigrationsTest extends TestCase
 
     /**
      * Tests that migrating in case of error throws an exception
-     *
-     * @dataProvider backendProvider
      */
+    #[DataProvider('backendProvider')]
     public function testMigrateErrors($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -1122,9 +1122,8 @@ class MigrationsTest extends TestCase
 
     /**
      * Tests that rolling back in case of error throws an exception
-     *
-     * @dataProvider backendProvider
      */
+    #[DataProvider('backendProvider')]
     public function testRollbackErrors($backend)
     {
         Configure::write('Migrations.backend', $backend);
@@ -1137,9 +1136,8 @@ class MigrationsTest extends TestCase
     /**
      * Tests that marking migrated a non-existant migrations returns an error
      * and can return a error message
-     *
-     * @dataProvider backendProvider
      */
+    #[DataProvider('backendProvider')]
     public function testMarkMigratedErrors($backend)
     {
         Configure::write('Migrations.backend', $backend);
