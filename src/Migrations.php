@@ -133,7 +133,7 @@ class Migrations
      */
     protected function getBackend(): BuiltinBackend|PhinxBackend
     {
-        $backend = (string)(Configure::read('Migrations.backend') ?? 'phinx');
+        $backend = (string)(Configure::read('Migrations.backend') ?? 'builtin');
         if ($backend === 'builtin') {
             return new BuiltinBackend($this->default);
         }
