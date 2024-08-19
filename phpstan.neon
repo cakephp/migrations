@@ -3,9 +3,11 @@ includes:
 
 parameters:
     level: 7
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
     paths:
         - src/
     bootstrapFiles:
         - tests/bootstrap.php
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+

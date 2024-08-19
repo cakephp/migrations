@@ -1,7 +1,7 @@
 Upgrading to the builtin backend
 ################################
 
-As of migrations XXX there is a new migrations backend that uses CakePHP's
+As of migrations 4.3 there is a new migrations backend that uses CakePHP's
 database abstractions and ORM. Longer term this will allow for phinx to be
 removed as a dependency. This greatly reduces the dependency footprint of
 migrations.

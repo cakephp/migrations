@@ -61,7 +61,7 @@ class MigrationsCommand extends Command
     /**
      * Array of arguments to run the shell with.
      *
-     * @var array<string>
+     * @var list<string>
      */
     public array $argv = [];
 
@@ -198,6 +198,7 @@ class MigrationsCommand extends Command
         $name = explode(' ', $name);
 
         array_unshift($argv, ...$name);
+        /** @var list<string> $argv */
         $this->argv = $argv;
 
         return parent::run($argv, $io);

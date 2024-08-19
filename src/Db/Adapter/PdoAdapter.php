@@ -177,6 +177,16 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     }
 
     /**
+     * Backwards compatibility shim for migrations 3.x
+     *
+     * @return \Cake\Database\Connection
+     */
+    public function getDecoratedConnection(): Connection
+    {
+        return $this->getConnection();
+    }
+
+    /**
      * @inheritDoc
      */
     abstract public function connect(): void;
