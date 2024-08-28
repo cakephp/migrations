@@ -83,7 +83,7 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
 
         // This is the variance from Command::run()
         if (!$args->getArgumentAt(0) && $args->getOption('help')) {
-            $backend = Configure::read('Migrations.backend', 'phinx');
+            $backend = Configure::read('Migrations.backend', 'builtin');
             $io->out([
                 '<info>Migrations</info>',
                 '',

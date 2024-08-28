@@ -18,6 +18,7 @@ use PDOException;
 use Phinx\Db\Table as PhinxTable;
 use Phinx\Db\Table\Column as PhinxColumn;
 use Phinx\Util\Literal as PhinxLiteral;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -643,9 +644,6 @@ class PhinxAdapterTest extends TestCase
         $this->assertEquals("'test1'", $rows[1]['dflt_value']);
     }
 
-    /**
-     * @group bug922
-     */
     public function testChangeColumnWithForeignKey()
     {
         $refTable = new PhinxTable('ref_table', [], $this->adapter);
@@ -1485,9 +1483,6 @@ INPUT;
         $this->assertEquals(Literal::from('decimal'), array_pop($columns)->getType());
     }
 
-    /**
-     * @covers \Migrations\Db\Adapter\SqliteAdapter::hasPrimaryKey
-     */
     public function testHasNamedPrimaryKey()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -1495,7 +1490,6 @@ INPUT;
         $this->adapter->hasPrimaryKey('t', [], 'named_constraint');
     }
 
-    /** @covers \Migrations\Db\Adapter\SqliteAdapter::getColumnTypes */
     public function testGetColumnTypes()
     {
         $columnTypes = $this->adapter->getColumnTypes();
@@ -1529,10 +1523,7 @@ INPUT;
         $this->assertEquals($expected, $columnTypes);
     }
 
-    /**
-     * @dataProvider provideColumnTypesForValidation
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::isValidColumnType
-     */
+    #[DataProvider('provideColumnTypesForValidation')]
     public function testIsValidColumnType($phinxType, $exp)
     {
         $col = (new PhinxColumn())->setType($phinxType);
@@ -1579,10 +1570,6 @@ INPUT;
         ];
     }
 
-    /** @covers \Phinx\Db\Adapter\SqliteAdapter::getSchemaName
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::getTableInfo
-     * @covers \Phinx\Db\Adapter\SqliteAdapter::getColumns
-     */
     public function testGetColumns()
     {
         $conn = $this->adapter->getConnection();

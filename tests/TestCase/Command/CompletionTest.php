@@ -44,31 +44,10 @@ class CompletionTest extends TestCase
     {
         $this->exec('completion subcommands migrations.migrations');
         $expected = [
-            'dump mark_migrated migrate orm-cache-build orm-cache-clear create rollback seed status',
+            'dump mark_migrated migrate rollback seed status',
         ];
         $actual = $this->_out->messages();
         $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * Test that subcommands from the Migrations shell are correctly returned
-     * if needed with the autocompletion feature
-     *
-     * @return void
-     */
-    public function testMigrationsOptionsCreate()
-    {
-        $this->exec('completion options migrations.migrations create');
-        $this->assertCount(1, $this->_out->messages());
-        $output = $this->_out->messages()[0];
-        $expected = '--class -l --connection -c --help -h --path --plugin -p --quiet';
-        $expected .= ' -q --source -s --template -t --verbose -v';
-        $outputExplode = explode(' ', trim($output));
-        sort($outputExplode);
-        $expectedExplode = explode(' ', $expected);
-        sort($expectedExplode);
-
-        $this->assertEquals($outputExplode, $expectedExplode);
     }
 
     /**

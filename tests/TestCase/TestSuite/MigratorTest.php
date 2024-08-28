@@ -19,6 +19,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
 use Migrations\TestSuite\Migrator;
+use PHPUnit\Framework\Attributes\Depends;
 use RuntimeException;
 
 class MigratorTest extends TestCase
@@ -139,9 +140,7 @@ class MigratorTest extends TestCase
         }
     }
 
-    /**
-     * @depends testMigrateDropNoTruncate
-     */
+    #[Depends('testMigrateDropNoTruncate')]
     public function testTruncateAfterMigrations(): void
     {
         $this->testMigrateDropNoTruncate();

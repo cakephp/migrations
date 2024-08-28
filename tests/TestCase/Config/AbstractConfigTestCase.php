@@ -7,8 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Class AbstractConfigTest
- *
- * @coversNothing
  */
 abstract class AbstractConfigTestCase extends TestCase
 {

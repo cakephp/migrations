@@ -3,8 +3,11 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Migrations\Db\Adapter\PdoAdapter;
+use Migrations\Test\TestCase\Db\Adapter\DefaultPdoAdapterTrait;
 use PDOException;
 use Phinx\Config\Config;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -17,7 +20,9 @@ class PdoAdapterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->adapter = $this->getMockForAbstractClass('\Migrations\Db\Adapter\PdoAdapter', [['foo' => 'bar']]);
+        $this->adapter = new class (['foo' => 'bar', 'version_order' => Config::VERSION_ORDER_CREATION_TIME]) extends PdoAdapter {
+            use DefaultPdoAdapterTrait;
+        };
     }
 
     protected function tearDown(): void
@@ -46,45 +51,36 @@ class PdoAdapterTest extends TestCase
         $this->assertEquals('schema_table_test', $this->adapter->getSchemaTableName());
     }
 
-    /**
-     * @dataProvider getVersionLogDataProvider
-     */
+    #[DataProvider('getVersionLogDataProvider')]
     public function testGetVersionLog($versionOrder, $expectedOrderBy)
     {
-        $adapter = $this->getMockForAbstractClass(
-            '\Migrations\Db\Adapter\PdoAdapter',
-            [['version_order' => $versionOrder]],
-            '',
-            true,
-            true,
-            true,
-            ['fetchAll', 'getSchemaTableName', 'quoteTableName']
-        );
+        $adapter = new class (['version_order' => $versionOrder]) extends PdoAdapter {
+            use DefaultPdoAdapterTrait;
 
-        $schemaTableName = 'log';
-        $adapter->expects($this->once())
-            ->method('getSchemaTableName')
-            ->will($this->returnValue($schemaTableName));
-        $adapter->expects($this->once())
-            ->method('quoteTableName')
-            ->with($schemaTableName)
-            ->will($this->returnValue("'$schemaTableName'"));
+            public function getSchemaTableName(): string
+            {
+                return 'log';
+            }
 
-        $mockRows = [
-            [
-                'version' => '20120508120534',
-                'key' => 'value',
-            ],
-            [
-                'version' => '20130508120534',
-                'key' => 'value',
-            ],
-        ];
+            public function quoteTableName(string $tableName): string
+            {
+                return "'$tableName'";
+            }
 
-        $adapter->expects($this->once())
-            ->method('fetchAll')
-            ->with("SELECT * FROM '$schemaTableName' ORDER BY $expectedOrderBy")
-            ->will($this->returnValue($mockRows));
+            public function fetchAll(string $sql): array
+            {
+                return [
+                    [
+                        'version' => '20120508120534',
+                        'key' => 'value',
+                    ],
+                    [
+                        'version' => '20130508120534',
+                        'key' => 'value',
+                    ],
+                ];
+            }
+        };
 
         // we expect the mock rows but indexed by version creation time
         $expected = [
@@ -116,10 +112,9 @@ class PdoAdapterTest extends TestCase
     public function testGetVersionLogInvalidVersionOrderKO()
     {
         $this->expectExceptionMessage('Invalid version_order configuration option');
-        $adapter = $this->getMockForAbstractClass(
-            '\Migrations\Db\Adapter\PdoAdapter',
-            [['version_order' => 'invalid']]
-        );
+        $adapter = new class (['version_order' => 'invalid']) extends PdoAdapter {
+            use DefaultPdoAdapterTrait;
+        };
 
         $this->expectException(RuntimeException::class);
 
@@ -128,32 +123,24 @@ class PdoAdapterTest extends TestCase
 
     public function testGetVersionLongDryRun()
     {
-        $adapter = $this->getMockForAbstractClass(
-            '\Migrations\Db\Adapter\PdoAdapter',
-            [['version_order' => Config::VERSION_ORDER_CREATION_TIME]],
-            '',
-            true,
-            true,
-            true,
-            ['isDryRunEnabled', 'fetchAll', 'getSchemaTableName', 'quoteTableName']
-        );
+        $adapter = new class (['version_order' => Config::VERSION_ORDER_CREATION_TIME]) extends PdoAdapter {
+            use DefaultPdoAdapterTrait;
 
-        $schemaTableName = 'log';
+            public function isDryRunEnabled(): bool
+            {
+                return true;
+            }
 
-        $adapter->expects($this->once())
-            ->method('isDryRunEnabled')
-            ->will($this->returnValue(true));
-        $adapter->expects($this->once())
-            ->method('getSchemaTableName')
-            ->will($this->returnValue($schemaTableName));
-        $adapter->expects($this->once())
-            ->method('quoteTableName')
-            ->with($schemaTableName)
-            ->will($this->returnValue("'$schemaTableName'"));
-        $adapter->expects($this->once())
-            ->method('fetchAll')
-            ->with("SELECT * FROM '$schemaTableName' ORDER BY version ASC")
-            ->will($this->throwException(new PDOException()));
+            public function getSchemaTableName(): string
+            {
+                return 'log';
+            }
+
+            public function fetchAll(string $sql): array
+            {
+                throw new PDOException();
+            }
+        };
 
         $this->assertEquals([], $adapter->getVersionLog());
     }

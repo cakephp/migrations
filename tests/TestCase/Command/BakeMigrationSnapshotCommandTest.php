@@ -56,6 +56,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     {
         parent::setUp();
 
+        $this->loadPlugins(['SimpleSnapshot']);
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
         $this->migrationPath = ROOT . DS . 'config' . DS . 'Migrations' . DS;
 
@@ -181,6 +182,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      */
     public function testPluginBlog()
     {
+        $this->loadPlugins(['TestBlog']);
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
 
         $this->runSnapshotTest('PluginBlog', '-p TestBlog');
@@ -251,6 +253,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function testSnapshotWithNonDefaultCollation(): void
     {
         $this->skipIf(env('DB') !== 'mysql');
+        $this->loadPlugins(['SimpleSnapshot']);
 
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 

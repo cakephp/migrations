@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.1', '8.2']
+        php-version: ['8.1', '8.2', '8.3', '8.4']
         db-type: [mysql, pgsql, sqlite]
         prefer-lowest: ['']
         cake_version: ['']
@@ -89,12 +89,13 @@ jobs:
 
       - name: Composer install
         run: |
-          if [[ ${{ matrix.php-version }} == '8.2' ]]; then
+          if [[ ${{ matrix.php-version }} == '8.2' || ${{ matrix.php-version }} == '8.3' || ${{ matrix.php-version }} == '8.4' ]]; then
             composer install --ignore-platform-req=php
           elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
             composer update --prefer-lowest --prefer-stable
           elif ${{ matrix.cake_version != '' }}; then
             composer require --dev "cakephp/cakephp:${{ matrix.cake_version }}"
+            composer require --dev --with-all-dependencies "cakephp/bake:dev-3.next as 3.1.0"
             composer update
           else
             composer update

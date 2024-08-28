@@ -8,7 +8,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
-use Cake\Database\Query;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\SqlserverAdapter;
@@ -16,6 +15,8 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -620,9 +621,7 @@ WHERE t.name='ntable'");
         ];
     }
 
-    /**
-     * @dataProvider columnsProvider
-     */
+    #[DataProvider('columnsProvider')]
     public function testGetColumns($colName, $type, $options)
     {
         $table = new Table('t', [], $this->adapter);
@@ -930,9 +929,9 @@ WHERE t.name='ntable'");
     }
 
     /**
-     * @dataProvider nonExistentForeignKeyColumnsProvider
      * @param array $columns
      */
+    #[DataProvider('nonExistentForeignKeyColumnsProvider')]
     public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
     {
         $refTable = new Table('ref_table', [], $this->adapter);
@@ -998,9 +997,7 @@ WHERE t.name='ntable'");
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    /**
-     * @dataProvider provideForeignKeysToCheck
-     */
+    #[DataProvider('provideForeignKeysToCheck')]
     public function testHasForeignKey($tableDef, $key, $exp)
     {
         $conn = $this->adapter->getConnection();
@@ -1116,9 +1113,7 @@ WHERE t.name='ntable'");
         $this->assertEquals($comment, $resultComment, 'Dont set column comment correctly');
     }
 
-    /**
-     * @dependss testAddColumnComment
-     */
+    #[Depends('testAddColumnComment')]
     public function testChangeColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1133,9 +1128,7 @@ WHERE t.name='ntable'");
         $this->assertEquals($comment, $resultComment, 'Dont change column comment correctly');
     }
 
-    /**
-     * @depends testAddColumnComment
-     */
+    #[Depends('testAddColumnComment')]
     public function testRemoveColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -1300,7 +1293,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_INSERT);
+        $builder = $this->adapter->getInsertBuilder();
         $stm = $builder
             ->insert(['string_col', 'int_col'])
             ->into('table1')
@@ -1310,7 +1303,7 @@ OUTPUT;
 
         $stm->closeCursor();
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_SELECT);
+        $builder = $this->adapter->getSelectBuilder();
         $stm = $builder
             ->select('*')
             ->from('table1')
@@ -1325,7 +1318,7 @@ OUTPUT;
 
         $stm->closeCursor();
 
-        $builder = $this->adapter->getQueryBuilder(Query::TYPE_DELETE);
+        $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
             ->where(['int_col <' => 2])

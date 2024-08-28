@@ -5,6 +5,7 @@ namespace Migrations\Test\Db\Adapter;
 
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\PdoAdapter;
+use Migrations\Test\TestCase\Db\Adapter\DefaultPdoAdapterTrait;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;
@@ -33,14 +34,16 @@ class AdapterFactoryTest extends TestCase
 
     public function testRegisterAdapter()
     {
-        $mock = $this->getMockForAbstractClass(PdoAdapter::class, [['foo' => 'bar']]);
-        $this->factory->registerAdapter('test', function (array $options) use ($mock) {
+        $pdo = new class (['foo' => 'bar']) extends PdoAdapter {
+            use DefaultPdoAdapterTrait;
+        };
+        $this->factory->registerAdapter('test', function (array $options) use ($pdo) {
             $this->assertEquals('value', $options['key']);
 
-            return $mock;
+            return $pdo;
         });
 
-        $this->assertEquals($mock, $this->factory->getAdapter('test', ['key' => 'value']));
+        $this->assertEquals($pdo, $this->factory->getAdapter('test', ['key' => 'value']));
     }
 
     public function testRegisterAdapterFailure()

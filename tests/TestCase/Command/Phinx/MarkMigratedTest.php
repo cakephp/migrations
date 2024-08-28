@@ -154,9 +154,9 @@ class MarkMigratedTest extends TestCase
             ->getMock();
 
         $manager->expects($this->any())
-            ->method('getEnvironment')->will($this->returnValue($env));
+            ->method('getEnvironment')->willReturn($env);
         $manager->expects($this->any())
-            ->method('getMigrations')->will($this->returnValue($migrations));
+            ->method('getMigrations')->willReturn($migrations);
         $manager
             ->method('markMigrated')->will($this->throwException(new Exception('Error during marking process')));
 

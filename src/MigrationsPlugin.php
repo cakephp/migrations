@@ -83,7 +83,7 @@ class MigrationsPlugin extends BasePlugin
         parent::bootstrap($app);
 
         if (!Configure::check('Migrations.backend')) {
-            Configure::write('Migrations.backend', 'phinx');
+            Configure::write('Migrations.backend', 'builtin');
         }
     }
 
