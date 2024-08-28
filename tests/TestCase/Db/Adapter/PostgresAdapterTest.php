@@ -137,12 +137,11 @@ class PostgresAdapterTest extends TestCase
     {
         $config = ConnectionManager::getConfig('test');
         $config['schema'] = 'test_schema';
-        ConnectionManager::drop('test');
-        ConnectionManager::setConfig('test', $config);
+        ConnectionManager::setConfig('test-schema', $config);
         // Emulate the results of Util::parseDsn()
         $this->config = [
             'adapter' => 'postgres',
-            'connection' => ConnectionManager::get('test'),
+            'connection' => ConnectionManager::get('test-schema'),
             'database' => $config['database'],
         ];
 
@@ -155,12 +154,7 @@ class PostgresAdapterTest extends TestCase
 
         $this->assertEquals('"test_schema"."table"', $this->adapter->quoteTableName('table'));
 
-        $config = ConnectionManager::getConfig('test');
-        unset($config['schema']);
-        ConnectionManager::drop('test');
-        ConnectionManager::setConfig('test', $config);
-
-        $this->adapter->disconnect();
+        ConnectionManager::drop('test-schema');
     }
 
     public function testQuoteTableName()
