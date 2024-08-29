@@ -133,6 +133,30 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals('"schema.schema"', $this->adapter->quoteSchemaName('schema.schema'));
     }
 
+    public function testGetGlobalSchemaName()
+    {
+        $config = ConnectionManager::getConfig('test');
+        $config['schema'] = 'test_schema';
+        ConnectionManager::setConfig('test-schema', $config);
+        // Emulate the results of Util::parseDsn()
+        $this->config = [
+            'adapter' => 'postgres',
+            'connection' => ConnectionManager::get('test-schema'),
+            'database' => $config['database'],
+        ];
+
+        $this->adapter = new PostgresAdapter($this->config, $this->getConsoleIo());
+
+        $this->adapter->dropAllSchemas();
+        $this->adapter->createSchema('test_schema');
+
+        $this->adapter->disconnect();
+
+        $this->assertEquals('"test_schema"."table"', $this->adapter->quoteTableName('table'));
+
+        ConnectionManager::drop('test-schema');
+    }
+
     public function testQuoteTableName()
     {
         $this->assertEquals('"public"."table"', $this->adapter->quoteTableName('table'));

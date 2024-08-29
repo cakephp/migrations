@@ -1506,8 +1506,9 @@ class PostgresAdapter extends PdoAdapter
     protected function getGlobalSchemaName(): string
     {
         $options = $this->getOptions();
+        $config = $options['connection']->config() ?? [];
 
-        return empty($options['schema']) ? 'public' : $options['schema'];
+        return empty($config['schema']) ? 'public' : $config['schema'];
     }
 
     /**
