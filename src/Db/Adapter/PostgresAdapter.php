@@ -16,6 +16,7 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
+use Phinx\Util\Literal as PhinxLiteral;
 
 class PostgresAdapter extends PdoAdapter
 {
@@ -1560,8 +1561,20 @@ class PostgresAdapter extends PdoAdapter
             $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ');';
             $this->io->out($sql);
         } else {
-            $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-            $this->getConnection()->execute($sql, array_values($row));
+            $values = [];
+            $vals = [];
+            foreach ($row as $value) {
+                $placeholder = '?';
+                if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+                    $placeholder = (string)$value;
+                }
+                $values[] = $placeholder;
+                if ($placeholder === '?') {
+                    $vals[] = $value;
+                }
+            }
+            $sql .= ' ' . $override . 'VALUES (' . implode(',', $values) . ')';
+            $this->getConnection()->execute($sql, $vals);
         }
     }
 
@@ -1592,25 +1605,29 @@ class PostgresAdapter extends PdoAdapter
             $sql .= implode(', ', $values) . ';';
             $this->io->out($sql);
         } else {
-            $connection = $this->getConnection();
-            $count_keys = count($keys);
-            $query = '(' . implode(', ', array_fill(0, $count_keys, '?')) . ')';
-            $count_vars = count($rows);
-            $queries = array_fill(0, $count_vars, $query);
-            $sql .= implode(',', $queries);
             $vals = [];
-
+            $queries = [];
             foreach ($rows as $row) {
+                $values = [];
                 foreach ($row as $v) {
-                    if (is_bool($v)) {
-                        $vals[] = $this->castToBool($v);
-                    } else {
-                        $vals[] = $v;
+                    $placeholder = '?';
+                    if ($v instanceof Literal || $v instanceof PhinxLiteral) {
+                        $placeholder = (string)$v;
+                    }
+                    $values[] = $placeholder;
+                    if ($placeholder == '?') {
+                        if (is_bool($v)) {
+                            $vals[] = $this->castToBool($v);
+                        } else {
+                            $vals[] = $v;
+                        }
                     }
                 }
+                $query = '(' . implode(', ', $values) . ')';
+                $queries[] = $query;
             }
-
-            $connection->execute($sql, $vals);
+            $sql .= implode(',', $queries);
+            $this->getConnection()->execute($sql, $vals);
         }
     }
 }
