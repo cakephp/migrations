@@ -1224,8 +1224,8 @@ WHERE t.name='ntable'");
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
         $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column2']);
-        $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column2']);
-        $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column2']);
+        $this->assertEquals('2024-01-01 00:00:00.000', $rows[1]['column2']);
+        $this->assertEquals('2025-01-01 00:00:00.000', $rows[2]['column2']);
     }
 
     public function testInsertData()
@@ -1293,8 +1293,8 @@ WHERE t.name='ntable'");
         $this->assertEquals('test', $rows[1]['column2']);
         $this->assertEquals('foo', $rows[2]['column2']);
         $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column3']);
-        $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column3']);
-        $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column3']);
+        $this->assertEquals('2024-01-01 00:00:00.000', $rows[1]['column3']);
+        $this->assertEquals('2025-01-01 00:00:00.000', $rows[2]['column3']);
     }
 
     public function testTruncateTable()
