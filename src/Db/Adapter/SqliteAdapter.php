@@ -1046,13 +1046,14 @@ PCRE_PATTERN;
                 $state['selectColumns']
             );
 
-            $foreignKeysEnabled = (bool)$this->fetchRow('PRAGMA foreign_keys')['foreign_keys'] ?? false;
+            $result = $this->fetchRow('PRAGMA foreign_keys');
+            $foreignKeysEnabled = $result ? (bool)$result['foreign_keys'] : false;
             if ($foreignKeysEnabled) {
-                // $this->execute('PRAGMA foreign_keys = OFF');
+                $this->execute('PRAGMA foreign_keys = OFF');
             }
             $this->execute(sprintf('DROP TABLE %s', $this->quoteTableName($tableName)));
             if ($foreignKeysEnabled) {
-                // $this->execute('PRAGMA foreign_keys = ON');
+                $this->execute('PRAGMA foreign_keys = ON');
             }
             $this->execute(sprintf(
                 'ALTER TABLE %s RENAME TO %s',
