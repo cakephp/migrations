@@ -210,10 +210,12 @@ class EnvironmentTest extends TestCase
         // migrate
         $migration = new class ('mockenv', 20110301080000) extends AbstractMigration {
             public bool $executed = false;
+
             public function useTransactions(): bool
             {
                 return false;
             }
+
             public function up(): void
             {
                 $this->executed = true;
