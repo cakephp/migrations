@@ -170,7 +170,7 @@ class EnvironmentTest extends TestCase
         $adapterStub->expects($this->once())
                     ->method('commitTransaction');
 
-        $adapterStub->expects($this->exactly(2))
+        $adapterStub->expects($this->exactly(1))
                     ->method('hasTransactions')
                     ->willReturn(true);
 
@@ -179,6 +179,41 @@ class EnvironmentTest extends TestCase
         // migrate
         $migration = new class ('mockenv', 20110301080000) extends AbstractMigration {
             public bool $executed = false;
+            public function up(): void
+            {
+                $this->executed = true;
+            }
+        };
+
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $this->assertTrue($migration->executed);
+    }
+
+    public function testExecutingAMigrationWithUseTransactions()
+    {
+        // stub adapter
+        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+            ->setConstructorArgs([[]])
+            ->getMock();
+        $adapterStub->expects($this->never())
+                    ->method('beginTransaction');
+
+        $adapterStub->expects($this->never())
+                    ->method('commitTransaction');
+
+        $adapterStub->expects($this->exactly(1))
+                    ->method('hasTransactions')
+                    ->willReturn(true);
+
+        $this->environment->setAdapter($adapterStub);
+
+        // migrate
+        $migration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+            public bool $executed = false;
+            public function useTransactions(): bool
+            {
+                return false;
+            }
             public function up(): void
             {
                 $this->executed = true;
