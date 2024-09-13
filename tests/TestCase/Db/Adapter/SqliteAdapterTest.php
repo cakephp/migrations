@@ -1601,6 +1601,32 @@ class SqliteAdapterTest extends TestCase
         $this->assertMatchesRegularExpression('/\/\* Comments from "column1" \*\//', $sql);
     }
 
+    public function testAddColumnTableWithConstraint()
+    {
+        $this->adapter->execute('PRAGMA foreign_keys = ON');
+        $roles = new Table('constraint_roles', [], $this->adapter);
+        $roles->addColumn('name', 'string')
+            ->save();
+        $users = new Table('constraint_users', [], $this->adapter);
+        $users->addColumn('username', 'string')
+            ->addColumn('role_id', 'integer', ['null' => false])
+            ->addForeignKey(['role_id'], $roles->getTable(), ['id'])
+            ->save();
+
+        $this->adapter->insert($roles->getTable(), ['name' => 'admin']);
+        $this->adapter->insert($users->getTable(), ['username' => 'test', 'role_id' => 1]);
+
+        $updatedRoles = new Table($roles->getName(), [], $this->adapter);
+        // This should fail, but passes locally :(
+        $updatedRoles
+            ->addColumn('description', 'string', ['default' => 'short desc'])
+            ->update();
+        $res = $this->adapter->fetchAll('select * from sqlite_master where type = \'table\'');
+        $res = $this->adapter->fetchRow('select * from constraint_roles LIMIT 1');
+        $this->assertArrayHasKey('description', $res, 'Should have new column in output');
+        $this->assertEquals('short desc', $res['description']);
+    }
+
     public function testPhinxTypeLiteral()
     {
         $this->assertEquals(
