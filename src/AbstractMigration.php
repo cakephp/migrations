@@ -30,6 +30,19 @@ class AbstractMigration extends BaseAbstractMigration
     public bool $autoId = true;
 
     /**
+     * Hook method to decide if this migration should use transactions
+     *
+     * By default if your driver supports transactions, a transaction will be opened
+     * before the migration begins, and commit when the migration completes.
+     *
+     * @return bool
+     */
+    public function useTransactions(): bool
+    {
+        return $this->getAdapter()->hasTransactions();
+    }
+
+    /**
      * Returns an instance of the Table class.
      *
      * You can use this class to create and manipulate tables.

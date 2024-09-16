@@ -85,8 +85,12 @@ class Environment
             $migration->{MigrationInterface::INIT}();
         }
 
+        $atomic = $adapter->hasTransactions();
+        if (method_exists($migration, 'useTransactions')) {
+            $atomic = $migration->useTransactions();
+        }
         // begin the transaction if the adapter supports it
-        if ($adapter->hasTransactions()) {
+        if ($atomic) {
             $adapter->beginTransaction();
         }
 
@@ -121,7 +125,7 @@ class Environment
         $adapter->migrated($migration, $direction, date('Y-m-d H:i:s', $startTime), date('Y-m-d H:i:s', time()));
 
         // commit the transaction if the adapter supports it
-        if ($adapter->hasTransactions()) {
+        if ($atomic) {
             $adapter->commitTransaction();
         }
 
@@ -143,9 +147,9 @@ class Environment
         if (method_exists($seed, SeedInterface::INIT)) {
             $seed->{SeedInterface::INIT}();
         }
-
         // begin the transaction if the adapter supports it
-        if ($adapter->hasTransactions()) {
+        $atomic = $adapter->hasTransactions();
+        if ($atomic) {
             $adapter->beginTransaction();
         }
 
@@ -155,7 +159,7 @@ class Environment
         }
 
         // commit the transaction if the adapter supports it
-        if ($adapter->hasTransactions()) {
+        if ($atomic) {
             $adapter->commitTransaction();
         }
     }
