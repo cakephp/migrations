@@ -1614,4 +1614,18 @@ class PostgresAdapter extends PdoAdapter
             $connection->execute($sql, $vals);
         }
     }
+
+    /**
+     * Get the adapter type name
+     *
+     * @return string
+     */
+    public function getAdapterType(): string
+    {
+        // Hardcoded because the parent implementation
+        // reads an option that is based off of Database\Driver
+        // names which is postgres, but pgsql is required for
+        // compatibility.
+        return 'pgsql';
+    }
 }
