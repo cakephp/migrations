@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Migrations;
 
+use Cake\Console\ConsoleIo;
+use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -45,20 +47,6 @@ interface SeedInterface
     public function getDependencies(): array;
 
     /**
-     * Sets the environment.
-     *
-     * @return $this
-     */
-    public function setEnvironment(string $environment);
-
-    /**
-     * Gets the environment.
-     *
-     * @return string
-     */
-    public function getEnvironment(): string;
-
-    /**
      * Sets the database adapter.
      *
      * @param \Migrations\Db\Adapter\AdapterInterface $adapter Database Adapter
@@ -74,32 +62,52 @@ interface SeedInterface
     public function getAdapter(): AdapterInterface;
 
     /**
-     * Sets the input object to be used in migration object
+     * Set the Console IO object to be used.
      *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input
+     * @param \Cake\Console\ConsoleIo $io The Io
      * @return $this
      */
-    public function setInput(InputInterface $input);
+    public function setIo(ConsoleIo $io);
+
+    /**
+     * Get the Console IO object to be used.
+     *
+     * @return \Cake\Console\ConsoleIo|null
+     */
+    public function getIo(): ?ConsoleIo;
+
+    /**
+     * Gets the config.
+     *
+     * @return \Migrations\Config\ConfigInterface
+     */
+    public function getConfig(): ConfigInterface;
+
+    /**
+     * Sets the config.
+     *
+     * @param \Migrations\Config\ConfigInterface $config Configuration Object
+     * @return $this
+     */
+    public function setConfig(ConfigInterface $config);
 
     /**
      * Gets the input object to be used in migration object
      *
+     * A new InputInteface will be generated each time `getOutput` is called.
+     *
      * @return \Symfony\Component\Console\Input\InputInterface
+     * @deprecated 4.5.0 Use getIo() instead.
      */
     public function getInput(): InputInterface;
 
     /**
-     * Sets the output object to be used in migration object
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output Output
-     * @return $this
-     */
-    public function setOutput(OutputInterface $output);
-
-    /**
      * Gets the output object to be used in migration object
      *
+     * A new OutputInteface will be generated each time `getOutput` is called.
+     *
      * @return \Symfony\Component\Console\Output\OutputInterface
+     * @deprecated 4.5.0 Use getIo() instead.
      */
     public function getOutput(): OutputInterface;
 

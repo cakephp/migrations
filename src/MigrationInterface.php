@@ -8,11 +8,13 @@ declare(strict_types=1);
 
 namespace Migrations;
 
+use Cake\Console\ConsoleIo;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
+use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -61,32 +63,52 @@ interface MigrationInterface
     public function getAdapter(): ?AdapterInterface;
 
     /**
-     * Sets the input object to be used in migration object
+     * Set the Console IO object to be used.
      *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input
+     * @param \Cake\Console\ConsoleIo $io The Io
      * @return $this
      */
-    public function setInput(InputInterface $input);
+    public function setIo(ConsoleIo $io);
+
+    /**
+     * Get the Console IO object to be used.
+     *
+     * @return \Cake\Console\ConsoleIo|null
+     */
+    public function getIo(): ?ConsoleIo;
+
+    /**
+     * Gets the config.
+     *
+     * @return \Migrations\Config\ConfigInterface
+     */
+    public function getConfig(): ConfigInterface;
+
+    /**
+     * Sets the config.
+     *
+     * @param \Migrations\Config\ConfigInterface $config Configuration Object
+     * @return $this
+     */
+    public function setConfig(ConfigInterface $config);
 
     /**
      * Gets the input object to be used in migration object
      *
+     * A new InputInterface will be generated each time `getOutput` is called.
+     *
      * @return \Symfony\Component\Console\Input\InputInterface|null
+     * @deprecated 4.5.0 Use getIo() instead.
      */
     public function getInput(): ?InputInterface;
 
     /**
-     * Sets the output object to be used in migration object
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output Output
-     * @return $this
-     */
-    public function setOutput(OutputInterface $output);
-
-    /**
      * Gets the output object to be used in migration object
      *
+     * A new OutputInterface will be generated each time `getOutput` is called.
+     *
      * @return \Symfony\Component\Console\Output\OutputInterface|null
+     * @deprecated 4.5.0 Use getIo() instead.
      */
     public function getOutput(): ?OutputInterface;
 
@@ -96,13 +118,6 @@ interface MigrationInterface
      * @return string
      */
     public function getName(): string;
-
-    /**
-     * Gets the detected environment
-     *
-     * @return string
-     */
-    public function getEnvironment(): string;
 
     /**
      * Sets the migration version number.
