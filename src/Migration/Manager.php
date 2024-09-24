@@ -853,13 +853,17 @@ class Manager
                     $io->verbose("Constructing <info>$class</info>.");
 
                     $config = $this->getConfig();
+                    // TODO Subset config and pass forward.
+                    // Move this to the Migration/phinx shim
                     $input = new ArrayInput([
                         '--plugin' => $config['plugin'] ?? null,
                         '--source' => $config['source'] ?? null,
                         '--connection' => $config->getConnection(),
                     ]);
+                    // TODO move this to the migration/phinx shim
                     $output = new OutputAdapter($io);
 
+                    // TODO constructor should take $io and $config
                     // instantiate it
                     $migration = new $class('default', $version, $input, $output);
 
@@ -967,16 +971,20 @@ class Manager
             $seeds = [];
 
             $config = $this->getConfig();
+            // TODO Subset config and pass forward.
+            // TODO move this to the migration/phinx shim
             $optionDef = new InputDefinition([
                 new InputOption('plugin', mode: InputOption::VALUE_OPTIONAL, default: ''),
                 new InputOption('connection', mode: InputOption::VALUE_OPTIONAL, default: ''),
                 new InputOption('source', mode: InputOption::VALUE_OPTIONAL, default: ''),
             ]);
+            // TODO move this to the migration/phinx shim
             $input = new ArrayInput([
                 '--plugin' => $config['plugin'] ?? null,
                 '--source' => $config['source'] ?? null,
                 '--connection' => $config->getConnection(),
             ], $optionDef);
+            // TODO move this to the migration/phinx shim
             $output = new OutputAdapter($this->io);
 
             foreach ($phpFiles as $filePath) {
@@ -1003,6 +1011,7 @@ class Manager
                     } else {
                         $seed = new $class();
                     }
+                    // TODO Replace with with setIo and setConfig
                     $seed->setEnvironment('default');
                     $seed->setInput($input);
                     $seed->setOutput($output);
@@ -1027,6 +1036,7 @@ class Manager
             return [];
         }
 
+        // TODO remove this
         foreach ($this->seeds as $instance) {
             if (isset($input) && $instance instanceof AbstractSeed) {
                 $instance->setInput($input);
