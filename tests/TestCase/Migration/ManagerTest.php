@@ -2187,9 +2187,9 @@ class ManagerTest extends TestCase
     public function testOrderSeeds(): void
     {
         $seeds = array_values($this->manager->getSeeds());
-        $this->assertInstanceOf('UserSeeder', $seeds[0]);
-        $this->assertInstanceOf('GSeeder', $seeds[1]);
-        $this->assertInstanceOf('PostSeeder', $seeds[2]);
+        $this->assertEquals('UserSeeder', $seeds[0]->getName());
+        $this->assertEquals('GSeeder', $seeds[1]->getName());
+        $this->assertEquals('PostSeeder', $seeds[2]->getName());
     }
 
     public function testSeedWillNotBeExecuted(): void
@@ -2228,7 +2228,7 @@ class ManagerTest extends TestCase
             $this->assertInstanceOf(OutputAdapter::class, $migration->getOutput());
         }
         foreach ($seeds as $seed) {
-            $this->assertInstanceOf(OutputAdapter::class, $seed->getOutput());
+            $this->assertInstanceOf(ConsoleIo::class, $seed->getIo());
         }
     }
 

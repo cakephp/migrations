@@ -79,9 +79,9 @@ interface SeedInterface
     /**
      * Gets the config.
      *
-     * @return \Migrations\Config\ConfigInterface
+     * @return \Migrations\Config\ConfigInterface|null
      */
-    public function getConfig(): ConfigInterface;
+    public function getConfig(): ?ConfigInterface;
 
     /**
      * Sets the config.
@@ -90,26 +90,6 @@ interface SeedInterface
      * @return $this
      */
     public function setConfig(ConfigInterface $config);
-
-    /**
-     * Gets the input object to be used in migration object
-     *
-     * A new InputInteface will be generated each time `getOutput` is called.
-     *
-     * @return \Symfony\Component\Console\Input\InputInterface
-     * @deprecated 4.5.0 Use getIo() instead.
-     */
-    public function getInput(): InputInterface;
-
-    /**
-     * Gets the output object to be used in migration object
-     *
-     * A new OutputInteface will be generated each time `getOutput` is called.
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface
-     * @deprecated 4.5.0 Use getIo() instead.
-     */
-    public function getOutput(): OutputInterface;
 
     /**
      * Gets the name.
@@ -195,4 +175,14 @@ interface SeedInterface
      * @return bool
      */
     public function shouldExecute(): bool;
+
+    /**
+     * Gives the ability to a seeder to call another seeder.
+     * This is particularly useful if you need to run the seeders of your applications in a specific sequences,
+     * for instance to respect foreign key constraints.
+     *
+     * @param string $seeder Name of the seeder to call from the current seed
+     * @return void
+     */
+    public function call(string $seeder): void;
 }
