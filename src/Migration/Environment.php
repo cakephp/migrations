@@ -131,7 +131,7 @@ class Environment
     /**
      * Executes the specified seeder on this environment.
      *
-     * @param \Migrations\Seed\SeedInterface $seed Seed
+     * @param \Migrations\SeedInterface $seed Seed
      * @return void
      */
     public function executeSeed(SeedInterface $seed): void

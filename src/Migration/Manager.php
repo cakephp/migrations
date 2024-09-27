@@ -474,7 +474,7 @@ class Manager
     /**
      * Execute a seeder against the specified environment.
      *
-     * @param \Migrations\Seed\SeedInterface $seed Seed
+     * @param \Migrations\SeedInterface $seed Seed
      * @return void
      */
     public function executeSeed(SeedInterface $seed): void
@@ -522,7 +522,7 @@ class Manager
     /**
      * Print Seed Status
      *
-     * @param \Migrations\Seed\SeedInterface $seed Seed
+     * @param \Migrations\SeedInterface $seed Seed
      * @param string $status Status of the seed
      * @param string|null $duration Duration the seed took the be executed
      * @return void
@@ -992,7 +992,7 @@ class Manager
                     }
 
                     // instantiate it
-                    /** @var \Phinx\Seed\AbstractSeed $seed */
+                    /** @var \Phinx\Seed\AbstractSeed|\Migrations\SeedInterface $seed */
                     if (isset($this->container)) {
                         $seed = $this->container->get($class);
                     } else {
@@ -1003,6 +1003,7 @@ class Manager
                     if ($seed instanceof PhinxSeedInterface) {
                         $seed = new SeedAdapter($seed);
                     }
+                    /** @var \Migrations\SeedInterface $seed */
                     $seed->setIo($io);
                     $seed->setConfig($config);
 

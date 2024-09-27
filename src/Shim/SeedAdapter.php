@@ -119,6 +119,10 @@ class SeedAdapter implements SeedInterface
      */
     public function getAdapter(): AdapterInterface
     {
+        if (!$this->adapter) {
+            throw new RuntimeException('Cannot call getAdapter() until after setAdapter().');
+        }
+
         return $this->adapter;
     }
 
