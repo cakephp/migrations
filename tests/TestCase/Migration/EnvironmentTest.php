@@ -8,6 +8,7 @@ use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Db\Adapter\PdoAdapter;
 use Migrations\Migration\Environment;
+use Migrations\Shim\SeedAdapter;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\AbstractSeed;
@@ -314,7 +315,6 @@ class EnvironmentTest extends TestCase
 
         $this->environment->setAdapter($adapterStub);
 
-        // up
         $seed = new class ('mockenv', 20110301080000) extends AbstractSeed {
             public bool $initExecuted = false;
             public bool $runExecuted = false;
@@ -330,7 +330,9 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeSeed($seed);
+        $seedWrapper = new SeedAdapter($seed);
+        $this->environment->executeSeed($seedWrapper);
+
         $this->assertTrue($seed->initExecuted);
         $this->assertTrue($seed->runExecuted);
     }

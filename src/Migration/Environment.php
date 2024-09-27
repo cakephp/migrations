@@ -13,8 +13,8 @@ use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PhinxAdapter;
+use Migrations\SeedInterface;
 use Phinx\Migration\MigrationInterface;
-use Phinx\Seed\SeedInterface;
 use RuntimeException;
 
 class Environment
@@ -131,15 +131,13 @@ class Environment
     /**
      * Executes the specified seeder on this environment.
      *
-     * @param \Phinx\Seed\SeedInterface $seed Seed
+     * @param \Migrations\SeedInterface $seed Seed
      * @return void
      */
     public function executeSeed(SeedInterface $seed): void
     {
         $adapter = $this->getAdapter();
-        $phinxAdapter = new PhinxAdapter($adapter);
-
-        $seed->setAdapter($phinxAdapter);
+        $seed->setAdapter($adapter);
         if (method_exists($seed, SeedInterface::INIT)) {
             $seed->{SeedInterface::INIT}();
         }
