@@ -15,6 +15,7 @@ use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PhinxAdapter;
 use Migrations\SeedInterface;
 use Migrations\MigrationInterface;
+use Migrations\Shim\MigrationAdapter;
 use RuntimeException;
 
 class Environment
@@ -91,32 +92,32 @@ class Environment
         }
 
         if (!$fake) {
-            // TODO this is tricky as the adapter would need to implement
-            // this method, but then it always exists. One option is to copy this
-            // is to special case the adapter and move this logic there?
-
-            // Run the migration
-            if (method_exists($migration, MigrationInterface::CHANGE)) {
-                if ($direction === MigrationInterface::DOWN) {
-                    // Create an instance of the RecordingAdapter so we can record all
-                    // of the migration commands for reverse playback
-
-                    /** @var \Migrations\Db\Adapter\RecordingAdapter $recordAdapter */
-                    $recordAdapter = AdapterFactory::instance()
-                        ->getWrapper('record', $adapter);
-
-                    // Wrap the adapter with a phinx shim to maintain contain
-                    $migration->setAdapter($adapter);
-
-                    $migration->{MigrationInterface::CHANGE}();
-                    $recordAdapter->executeInvertedCommands();
-
-                    $migration->setAdapter($this->getAdapter());
-                } else {
-                    $migration->{MigrationInterface::CHANGE}();
-                }
+            if ($migration instanceof MigrationAdapter) {
+                $migration->applyDirection($direction);
             } else {
-                $migration->{$direction}();
+                // Run the migration
+                if (method_exists($migration, MigrationInterface::CHANGE)) {
+                    if ($direction === MigrationInterface::DOWN) {
+                        // Create an instance of the RecordingAdapter so we can record all
+                        // of the migration commands for reverse playback
+
+                        /** @var \Migrations\Db\Adapter\RecordingAdapter $recordAdapter */
+                        $recordAdapter = AdapterFactory::instance()
+                            ->getWrapper('record', $adapter);
+
+                        // Wrap the adapter with a phinx shim to maintain contain
+                        $migration->setAdapter($adapter);
+
+                        $migration->{MigrationInterface::CHANGE}();
+                        $recordAdapter->executeInvertedCommands();
+
+                        $migration->setAdapter($this->getAdapter());
+                    } else {
+                        $migration->{MigrationInterface::CHANGE}();
+                    }
+                } else {
+                    $migration->{$direction}();
+                }
             }
         }
 

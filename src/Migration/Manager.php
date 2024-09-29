@@ -257,11 +257,19 @@ class Manager
         /** @var class-string<\Phinx\Migration\MigrationInterface> $className */
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
-        $Migration = new $className('default', $version);
+
+        /** @var \Migrations\MigrationInterface $migration */
+        if (is_subclass_of($className, PhinxMigrationInterface::class)) {
+            $migration = new MigrationAdapter($className, $version);
+        } else {
+            $migration = new $className($version);
+        }
+        $config = $this->getConfig();
+        $migration->setConfig($config);
 
         $time = date('Y-m-d H:i:s', time());
 
-        $adapter->migrated($Migration, 'up', $time, $time);
+        $adapter->migrated($migration, 'up', $time, $time);
 
         return true;
     }

@@ -19,6 +19,7 @@ use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PhinxAdapter;
 use Migrations\Db\Table;
 use Migrations\MigrationInterface;
+use Phinx\Db\Adapter\AdapterFactory as PhinxAdapterFactory;
 use Phinx\Migration\MigrationInterface as PhinxMigrationInterface;
 use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -98,6 +99,40 @@ class MigrationAdapter implements MigrationInterface
     {
         if (method_exists($this->migration, MigrationInterface::INIT)) {
             $this->migration->{MigrationInterface::INIT}();
+        }
+    }
+
+    /**
+     * Compatibility shim for executing change/up/down
+     */
+    public function applyDirection(string $direction): void
+    {
+        $adapter = $this->getAdapter();
+
+        // Run the migration
+        if (method_exists($this->migration, MigrationInterface::CHANGE)) {
+            if ($direction === MigrationInterface::DOWN) {
+                // Create an instance of the RecordingAdapter so we can record all
+                // of the migration commands for reverse playback
+                $adapter = $this->migration->getAdapter();
+                assert($adapter !== null, 'Adapter must be set in migration');
+
+                /** @var \Phinx\Db\Adapter\ProxyAdapter $proxyAdapter */
+                $proxyAdapter = PhinxAdapterFactory::instance()
+                    ->getWrapper('proxy', $adapter);
+
+                // Wrap the adapter with a phinx shim to maintain contain
+                $this->migration->setAdapter($proxyAdapter);
+
+                $this->migration->{MigrationInterface::CHANGE}();
+                $proxyAdapter->executeInvertedCommands();
+
+                $this->migration->setAdapter($adapter);
+            } else {
+                $this->migration->{MigrationInterface::CHANGE}();
+            }
+        } else {
+            $this->migration->{$direction}();
         }
     }
 

@@ -131,7 +131,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($upMigration, MigrationInterface::UP);
+        $migrationWrapper = new MigrationAdapter($upMigration, $upMigration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
         $this->assertTrue($upMigration->executed);
     }
 
@@ -156,7 +157,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($downMigration, MigrationInterface::DOWN);
+        $migrationWrapper = new MigrationAdapter($downMigration, $downMigration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::DOWN);
         $this->assertTrue($downMigration->executed);
     }
 
@@ -187,7 +189,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
         $this->assertTrue($migration->executed);
     }
 
@@ -212,7 +215,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
         $this->assertTrue($migration->executed);
     }
 
@@ -237,7 +241,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($migration, MigrationInterface::DOWN);
+        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::DOWN);
         $this->assertTrue($migration->executed);
     }
 
@@ -262,7 +267,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($migration, MigrationInterface::UP, true);
+        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP, true);
         $this->assertFalse($migration->executed);
     }
 
