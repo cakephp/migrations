@@ -18,7 +18,7 @@ use Cake\Database\Query\UpdateQuery;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
-use Phinx\Migration\MigrationInterface;
+use Migrations\MigrationInterface;
 
 /**
  * Adapter Interface.
@@ -138,7 +138,7 @@ interface AdapterInterface
     /**
      * Records a migration being run.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration Migration
+     * @param \Migrations\MigrationInterface $migration Migration
      * @param string $direction Direction
      * @param string $startTime Start Time
      * @param string $endTime End Time
@@ -149,7 +149,7 @@ interface AdapterInterface
     /**
      * Toggle a migration breakpoint.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration Migration
+     * @param \Migrations\MigrationInterface $migration Migration
      * @return $this
      */
     public function toggleBreakpoint(MigrationInterface $migration);
@@ -164,7 +164,7 @@ interface AdapterInterface
     /**
      * Set a migration breakpoint.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration The migration target for the breakpoint set
+     * @param \Migrations\MigrationInterface $migration The migration target for the breakpoint set
      * @return $this
      */
     public function setBreakpoint(MigrationInterface $migration);
@@ -172,7 +172,7 @@ interface AdapterInterface
     /**
      * Unset a migration breakpoint.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration The migration target for the breakpoint unset
+     * @param \Migrations\MigrationInterface $migration The migration target for the breakpoint unset
      * @return $this
      */
     public function unsetBreakpoint(MigrationInterface $migration);

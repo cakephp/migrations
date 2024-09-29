@@ -14,16 +14,15 @@ use DateTime;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
+use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
-use Migrations\Shim\OutputAdapter;
+use Migrations\Shim\MigrationAdapter;
 use Migrations\Shim\SeedAdapter;
-use Phinx\Migration\AbstractMigration;
-use Phinx\Migration\MigrationInterface;
+use Phinx\Migration\MigrationInterface as PhinxMigrationInterface;
 use Phinx\Seed\SeedInterface as PhinxSeedInterface;
 use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
-use Symfony\Component\Console\Input\ArrayInput;
 
 class Manager
 {
@@ -771,7 +770,7 @@ class Manager
     /**
      * Sets the database migrations.
      *
-     * @param \Phinx\Migration\AbstractMigration[] $migrations Migrations
+     * @param \Migrations\MigrationInterface[] $migrations Migrations
      * @return $this
      */
     public function setMigrations(array $migrations)
@@ -786,7 +785,7 @@ class Manager
      * order
      *
      * @throws \InvalidArgumentException
-     * @return \Phinx\Migration\MigrationInterface[]
+     * @return \Migrations\MigrationInterface[]
      */
     public function getMigrations(): array
     {
@@ -806,7 +805,7 @@ class Manager
 
             // filter the files to only get the ones that match our naming scheme
             $fileNames = [];
-            /** @var \Phinx\Migration\AbstractMigration[] $versions */
+            /** @var \Migration\MigrationInterface[] $versions */
             $versions = [];
 
             $io = $this->getIo();
@@ -850,29 +849,15 @@ class Manager
                     }
 
                     $io->verbose("Constructing <info>$class</info>.");
-
-                    $config = $this->getConfig();
-                    // TODO Subset config and pass forward.
-                    // Move this to the Migration/phinx shim
-                    $input = new ArrayInput([
-                        '--plugin' => $config['plugin'] ?? null,
-                        '--source' => $config['source'] ?? null,
-                        '--connection' => $config->getConnection(),
-                    ]);
-                    // TODO move this to the migration/phinx shim
-                    $output = new OutputAdapter($io);
-
-                    // TODO constructor should take $io and $config
-                    // instantiate it
-                    $migration = new $class('default', $version, $input, $output);
-
-                    if (!($migration instanceof AbstractMigration)) {
-                        throw new InvalidArgumentException(sprintf(
-                            'The class "%s" in file "%s" must extend \Phinx\Migration\AbstractMigration',
-                            $class,
-                            $filePath
-                        ));
+                    /** @var \Migrations\MigrationInterface $migration */
+                    if (is_subclass_of($class, PhinxMigrationInterface::class)) {
+                        $migration = new MigrationAdapter($class, $version);
+                    } else {
+                        $migration = new $class($version);
                     }
+                    $config = $this->getConfig();
+                    $migration->setConfig($config);
+                    $migration->setIo($io);
 
                     $versions[$version] = $migration;
                 } else {

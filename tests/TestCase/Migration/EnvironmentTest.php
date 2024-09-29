@@ -8,6 +8,7 @@ use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Db\Adapter\PdoAdapter;
 use Migrations\Migration\Environment;
+use Migrations\Shim\MigrationAdapter;
 use Migrations\Shim\SeedAdapter;
 use Phinx\Migration\AbstractMigration;
 use Phinx\Migration\MigrationInterface;
@@ -300,8 +301,8 @@ class EnvironmentTest extends TestCase
                 $this->upExecuted = true;
             }
         };
-
-        $this->environment->executeMigration($upMigration, MigrationInterface::UP);
+        $migrationWrapper = new MigrationAdapter($upMigration, $upMigration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
         $this->assertTrue($upMigration->initExecuted);
         $this->assertTrue($upMigration->upExecuted);
     }
