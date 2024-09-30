@@ -13,12 +13,10 @@ use Migrations\Config\Config;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
-use Migrations\Shim\OutputAdapter;
 use Phinx\Console\Command\AbstractCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Symfony\Component\Console\Input\InputInterface;
 
 class ManagerTest extends TestCase
 {

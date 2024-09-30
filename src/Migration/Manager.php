@@ -46,7 +46,7 @@ class Manager
     protected ?Environment $environment;
 
     /**
-     * @var \Phinx\Migration\MigrationInterface[]|null
+     * @var \Migrations\MigrationInterface[]|null
      */
     protected ?array $migrations = null;
 
@@ -254,16 +254,16 @@ class Manager
         }
 
         $migrationFile = $migrationFile[0];
-        /** @var class-string<\Phinx\Migration\MigrationInterface> $className */
+        /** @var class-string<\Phinx\Migration\MigrationInterface|\Migrations\MigrationInterface> $className */
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
 
-        /** @var \Migrations\MigrationInterface $migration */
         if (is_subclass_of($className, PhinxMigrationInterface::class)) {
             $migration = new MigrationAdapter($className, $version);
         } else {
             $migration = new $className($version);
         }
+        /** @var \Migrations\MigrationInterface $migration */
         $config = $this->getConfig();
         $migration->setConfig($config);
 
@@ -448,7 +448,7 @@ class Manager
     /**
      * Execute a migration against the specified environment.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration Migration
+     * @param \Migrations\MigrationInterface $migration Migration
      * @param string $direction Direction
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the migration
      * @return void
@@ -512,7 +512,7 @@ class Manager
     /**
      * Print Migration Status
      *
-     * @param \Phinx\Migration\MigrationInterface $migration Migration
+     * @param \Migrations\MigrationInterface $migration Migration
      * @param string $status Status of the migration
      * @param string|null $duration Duration the migration took the be executed
      * @return void
@@ -813,7 +813,7 @@ class Manager
 
             // filter the files to only get the ones that match our naming scheme
             $fileNames = [];
-            /** @var \Migration\MigrationInterface[] $versions */
+            /** @var \Migrations\MigrationInterface[] $versions */
             $versions = [];
 
             $io = $this->getIo();
@@ -857,12 +857,12 @@ class Manager
                     }
 
                     $io->verbose("Constructing <info>$class</info>.");
-                    /** @var \Migrations\MigrationInterface $migration */
                     if (is_subclass_of($class, PhinxMigrationInterface::class)) {
                         $migration = new MigrationAdapter($class, $version);
                     } else {
                         $migration = new $class($version);
                     }
+                    /** @var \Migrations\MigrationInterface $migration */
                     $config = $this->getConfig();
                     $migration->setConfig($config);
                     $migration->setIo($io);

@@ -12,9 +12,8 @@ use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
-use Migrations\Db\Adapter\PhinxAdapter;
-use Migrations\SeedInterface;
 use Migrations\MigrationInterface;
+use Migrations\SeedInterface;
 use Migrations\Shim\MigrationAdapter;
 use RuntimeException;
 

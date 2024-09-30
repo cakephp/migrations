@@ -33,6 +33,7 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
+use Migrations\Shim\MigrationAdapter;
 use Phinx\Db\Action\Action as PhinxAction;
 use Phinx\Db\Action\AddColumn as PhinxAddColumn;
 use Phinx\Db\Action\AddForeignKey as PhinxAddForeignKey;
@@ -52,7 +53,7 @@ use Phinx\Db\Table\Column as PhinxColumn;
 use Phinx\Db\Table\ForeignKey as PhinxForeignKey;
 use Phinx\Db\Table\Index as PhinxIndex;
 use Phinx\Db\Table\Table as PhinxTable;
-use Phinx\Migration\MigrationInterface;
+use Phinx\Migration\MigrationInterface as PhinxMigrationInterface;
 use Phinx\Util\Literal as PhinxLiteral;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -491,9 +492,10 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * @inheritDoc
      */
-    public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): PhinxAdapterInterface
+    public function migrated(PhinxMigrationInterface $migration, string $direction, string $startTime, string $endTime): PhinxAdapterInterface
     {
-        $this->adapter->migrated($migration, $direction, $startTime, $endTime);
+        $wrapped = new MigrationAdapter($migration, $migration->getVersion());
+        $this->adapter->migrated($wrapped, $direction, $startTime, $endTime);
 
         return $this;
     }
@@ -501,9 +503,10 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * @inheritDoc
      */
-    public function toggleBreakpoint(MigrationInterface $migration): PhinxAdapterInterface
+    public function toggleBreakpoint(PhinxMigrationInterface $migration): PhinxAdapterInterface
     {
-        $this->adapter->toggleBreakpoint($migration);
+        $wrapped = new MigrationAdapter($migration, $migration->getVersion());
+        $this->adapter->toggleBreakpoint($wrapped);
 
         return $this;
     }
@@ -519,9 +522,10 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * @inheritDoc
      */
-    public function setBreakpoint(MigrationInterface $migration): PhinxAdapterInterface
+    public function setBreakpoint(PhinxMigrationInterface $migration): PhinxAdapterInterface
     {
-        $this->adapter->setBreakpoint($migration);
+        $wrapped = new MigrationAdapter($migration, $migration->getVersion());
+        $this->adapter->setBreakpoint($wrapped);
 
         return $this;
     }
@@ -529,9 +533,10 @@ class PhinxAdapter implements PhinxAdapterInterface
     /**
      * @inheritDoc
      */
-    public function unsetBreakpoint(MigrationInterface $migration): PhinxAdapterInterface
+    public function unsetBreakpoint(PhinxMigrationInterface $migration): PhinxAdapterInterface
     {
-        $this->adapter->unsetBreakpoint($migration);
+        $wrapped = new MigrationAdapter($migration, $migration->getVersion());
+        $this->adapter->unsetBreakpoint($wrapped);
 
         return $this;
     }

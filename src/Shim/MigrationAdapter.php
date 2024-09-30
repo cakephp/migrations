@@ -64,7 +64,6 @@ class MigrationAdapter implements MigrationInterface
      *
      * @param string|object $migrationClass The phinx migration to adapt
      * @param int $version The migration version
-     * @param \Cake\Console\ConsoleIo $io The io
      */
     public function __construct(
         string|object $migrationClass,
