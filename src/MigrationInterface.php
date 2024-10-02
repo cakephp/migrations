@@ -17,8 +17,6 @@ use Cake\Database\Query\UpdateQuery;
 use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Table;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Migration interface.
@@ -80,9 +78,9 @@ interface MigrationInterface
     /**
      * Gets the config.
      *
-     * @return \Migrations\Config\ConfigInterface
+     * @return \Migrations\Config\ConfigInterface|null
      */
-    public function getConfig(): ConfigInterface;
+    public function getConfig(): ?ConfigInterface;
 
     /**
      * Sets the config.
@@ -91,26 +89,6 @@ interface MigrationInterface
      * @return $this
      */
     public function setConfig(ConfigInterface $config);
-
-    /**
-     * Gets the input object to be used in migration object
-     *
-     * A new InputInterface will be generated each time `getOutput` is called.
-     *
-     * @return \Symfony\Component\Console\Input\InputInterface|null
-     * @deprecated 4.5.0 Use getIo() instead.
-     */
-    public function getInput(): ?InputInterface;
-
-    /**
-     * Gets the output object to be used in migration object
-     *
-     * A new OutputInterface will be generated each time `getOutput` is called.
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface|null
-     * @deprecated 4.5.0 Use getIo() instead.
-     */
-    public function getOutput(): ?OutputInterface;
 
     /**
      * Gets the name.

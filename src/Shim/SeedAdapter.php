@@ -38,7 +38,7 @@ use Symfony\Component\Console\Input\InputOption;
 class SeedAdapter implements SeedInterface
 {
     /**
-     * A ConsoleIo instance
+     * A migrations adapter instance
      *
      * @var \Migrations\Db\Adapter\AdapterInterface|null
      */
@@ -98,10 +98,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Sets the database adapter.
-     *
-     * @param \Migrations\Db\Adapter\AdapterInterface $adapter Database Adapter
-     * @return $this
+     * {@inheritDoc}
      */
     public function setAdapter(AdapterInterface $adapter)
     {
@@ -113,9 +110,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Gets the database adapter.
-     *
-     * @return \Migrations\Db\Adapter\AdapterInterface
+     * {@inheritDoc}
      */
     public function getAdapter(): AdapterInterface
     {
@@ -146,9 +141,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Gets the config.
-     *
-     * @return ?\Migrations\Config\ConfigInterface
+     * {@inheritDoc}
      */
     public function getConfig(): ?ConfigInterface
     {
@@ -156,10 +149,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Sets the config.
-     *
-     * @param \Migrations\Config\ConfigInterface $config Configuration Object
-     * @return $this
+     * {@inheritDoc}
      */
     public function setConfig(ConfigInterface $config)
     {
@@ -181,9 +171,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Gets the name.
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getName(): string
     {
@@ -191,11 +179,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Executes a SQL statement and returns the number of affected rows.
-     *
-     * @param string $sql SQL
-     * @param array $params parameters to use for prepared query
-     * @return int
+     * {@inheritDoc}
      */
     public function execute(string $sql, array $params = []): int
     {
@@ -203,75 +187,47 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Executes a SQL statement.
-     *
-     * The return type depends on the underlying adapter being used. To improve
-     * IDE auto-completion possibility, you can overwrite the query method
-     * phpDoc in your (typically custom abstract parent) seed class, where
-     * you can set the return type by the adapter in your current use.
-     *
-     * @param string $sql SQL
-     * @param array $params parameters to use for prepared query
-     * @return mixed
+     * {@inheritDoc}
      */
     public function query(string $sql, array $params = []): mixed
     {
-        return $this->query($sql, $params);
+        return $this->seed->query($sql, $params);
     }
 
     /**
-     * Executes a query and returns only one row as an array.
-     *
-     * @param string $sql SQL
-     * @return array|false
+     * {@inheritDoc}
      */
     public function fetchRow(string $sql): array|false
     {
-        return $this->fetchRow($sql);
+        return $this->seed->fetchRow($sql);
     }
 
     /**
-     * Executes a query and returns an array of rows.
-     *
-     * @param string $sql SQL
-     * @return array
+     * {@inheritDoc}
      */
     public function fetchAll(string $sql): array
     {
-        return $this->fetchAll($sql);
+        return $this->seed->fetchAll($sql);
     }
 
     /**
-     * Insert data into a table.
-     *
-     * @param string $tableName Table name
-     * @param array $data Data
-     * @return void
+     * {@inheritDoc}
      */
     public function insert(string $tableName, array $data): void
     {
-        $this->insert($tableName, $data);
+        $this->seed->insert($tableName, $data);
     }
 
     /**
-     * Checks to see if a table exists.
-     *
-     * @param string $tableName Table name
-     * @return bool
+     * {@inheritDoc}
      */
     public function hasTable(string $tableName): bool
     {
-        return $this->hasTable($tableName);
+        return $this->seed->hasTable($tableName);
     }
 
     /**
-     * Returns an instance of the <code>\Table</code> class.
-     *
-     * You can use this class to create and manipulate tables.
-     *
-     * @param string $tableName Table name
-     * @param array<string, mixed> $options Options
-     * @return \Migrations\Db\Table
+     * {@inheritDoc}
      */
     public function table(string $tableName, array $options): Table
     {
@@ -279,13 +235,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Checks to see if the seed should be executed.
-     *
-     * Returns true by default.
-     *
-     * You can use this to prevent a seed from executing.
-     *
-     * @return bool
+     * {@inheritDoc}
      */
     public function shouldExecute(): bool
     {
@@ -293,12 +243,7 @@ class SeedAdapter implements SeedInterface
     }
 
     /**
-     * Gives the ability to a seeder to call another seeder.
-     * This is particularly useful if you need to run the seeders of your applications in a specific sequences,
-     * for instance to respect foreign key constraints.
-     *
-     * @param string $seeder Name of the seeder to call from the current seed
-     * @return void
+     * {@inheritDoc}
      */
     public function call(string $seeder): void
     {

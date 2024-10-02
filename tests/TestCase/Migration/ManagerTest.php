@@ -13,12 +13,10 @@ use Migrations\Config\Config;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
-use Migrations\Shim\OutputAdapter;
 use Phinx\Console\Command\AbstractCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Symfony\Component\Console\Input\InputInterface;
 
 class ManagerTest extends TestCase
 {
@@ -2205,18 +2203,6 @@ class ManagerTest extends TestCase
         $this->assertStringContainsString('skipped', $output);
     }
 
-    public function testGettingInputObject(): void
-    {
-        $migrations = $this->manager->getMigrations();
-        $seeds = $this->manager->getSeeds();
-        foreach ($migrations as $migration) {
-            $this->assertInstanceOf(InputInterface::class, $migration->getInput());
-        }
-        foreach ($seeds as $seed) {
-            $this->assertInstanceOf(InputInterface::class, $migration->getInput());
-        }
-    }
-
     public function testGettingIo(): void
     {
         $migrations = $this->manager->getMigrations();
@@ -2225,7 +2211,7 @@ class ManagerTest extends TestCase
         $this->assertInstanceOf(ConsoleIo::class, $io);
 
         foreach ($migrations as $migration) {
-            $this->assertInstanceOf(OutputAdapter::class, $migration->getOutput());
+            $this->assertInstanceOf(ConsoleIo::class, $migration->getIo());
         }
         foreach ($seeds as $seed) {
             $this->assertInstanceOf(ConsoleIo::class, $seed->getIo());

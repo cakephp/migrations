@@ -16,7 +16,7 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Phinx\Migration\MigrationInterface;
+use Migrations\MigrationInterface;
 
 /**
  * Migrations SqlServer Adapter.
@@ -1238,7 +1238,7 @@ SQL;
     /**
      * Records a migration being run.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration Migration
+     * @param \Migrations\MigrationInterface $migration Migration
      * @param string $direction Direction
      * @param string $startTime Start Time
      * @param string $endTime End Time

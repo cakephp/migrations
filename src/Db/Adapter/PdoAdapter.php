@@ -36,10 +36,10 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
+use Migrations\MigrationInterface;
 use PDO;
 use PDOException;
 use Phinx\Config\Config;
-use Phinx\Migration\MigrationInterface;
 use Phinx\Util\Literal as PhinxLiteral;
 use ReflectionMethod;
 use RuntimeException;
@@ -570,7 +570,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     /**
      * Mark a migration breakpoint.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration The migration target for the breakpoint
+     * @param \Migrations\MigrationInterface $migration The migration target for the breakpoint
      * @param bool $state The required state of the breakpoint
      * @return \Migrations\Db\Adapter\AdapterInterface
      */

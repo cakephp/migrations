@@ -18,7 +18,7 @@ use Cake\Database\Query\UpdateQuery;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
-use Phinx\Migration\MigrationInterface;
+use Migrations\MigrationInterface;
 
 /**
  * Adapter Wrapper.

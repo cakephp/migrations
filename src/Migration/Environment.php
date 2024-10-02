@@ -12,9 +12,9 @@ use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
-use Migrations\Db\Adapter\PhinxAdapter;
+use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
-use Phinx\Migration\MigrationInterface;
+use Migrations\Shim\MigrationAdapter;
 use RuntimeException;
 
 class Environment
@@ -62,7 +62,7 @@ class Environment
     /**
      * Executes the specified migration on this environment.
      *
-     * @param \Phinx\Migration\MigrationInterface $migration Migration
+     * @param \Migrations\MigrationInterface $migration Migration
      * @param string $direction Direction
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the migration
      * @return void
@@ -73,11 +73,11 @@ class Environment
         $migration->setMigratingUp($direction === MigrationInterface::UP);
 
         $startTime = time();
+
         // Use an adapter shim to bridge between the new migrations
         // engine and the Phinx compatible interface
         $adapter = $this->getAdapter();
-        $phinxShim = new PhinxAdapter($adapter);
-        $migration->setAdapter($phinxShim);
+        $migration->setAdapter($adapter);
 
         $migration->preFlightCheck();
 
@@ -91,29 +91,32 @@ class Environment
         }
 
         if (!$fake) {
-            // Run the migration
-            if (method_exists($migration, MigrationInterface::CHANGE)) {
-                if ($direction === MigrationInterface::DOWN) {
-                    // Create an instance of the RecordingAdapter so we can record all
-                    // of the migration commands for reverse playback
-
-                    /** @var \Migrations\Db\Adapter\RecordingAdapter $recordAdapter */
-                    $recordAdapter = AdapterFactory::instance()
-                        ->getWrapper('record', $adapter);
-
-                    // Wrap the adapter with a phinx shim to maintain contain
-                    $phinxAdapter = new PhinxAdapter($recordAdapter);
-                    $migration->setAdapter($phinxAdapter);
-
-                    $migration->{MigrationInterface::CHANGE}();
-                    $recordAdapter->executeInvertedCommands();
-
-                    $migration->setAdapter(new PhinxAdapter($this->getAdapter()));
-                } else {
-                    $migration->{MigrationInterface::CHANGE}();
-                }
+            if ($migration instanceof MigrationAdapter) {
+                $migration->applyDirection($direction);
             } else {
-                $migration->{$direction}();
+                // Run the migration
+                if (method_exists($migration, MigrationInterface::CHANGE)) {
+                    if ($direction === MigrationInterface::DOWN) {
+                        // Create an instance of the RecordingAdapter so we can record all
+                        // of the migration commands for reverse playback
+
+                        /** @var \Migrations\Db\Adapter\RecordingAdapter $recordAdapter */
+                        $recordAdapter = AdapterFactory::instance()
+                            ->getWrapper('record', $adapter);
+
+                        // Wrap the adapter with a phinx shim to maintain contain
+                        $migration->setAdapter($adapter);
+
+                        $migration->{MigrationInterface::CHANGE}();
+                        $recordAdapter->executeInvertedCommands();
+
+                        $migration->setAdapter($this->getAdapter());
+                    } else {
+                        $migration->{MigrationInterface::CHANGE}();
+                    }
+                } else {
+                    $migration->{$direction}();
+                }
             }
         }
 
