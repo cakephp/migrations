@@ -21,7 +21,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Utility\Inflector;
-use Phinx\Util\Util;
+use Migrations\Util\Util;
 
 /**
  * Task class for generating migration snapshot files.

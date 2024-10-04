@@ -21,6 +21,8 @@ use Phinx\Db\Table\Column;
 use Phinx\Util\Literal;
 
 /**
+ * TODO figure out how to update this for built-in backend.
+ *
  * @method \Migrations\CakeAdapter getAdapter()
  */
 class Table extends BaseTable
