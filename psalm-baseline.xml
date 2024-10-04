@@ -1,64 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.20.0@3f284e96c9d9be6fe6b15c79416e1d1903dcfef4">
+<files psalm-version="5.25.0@01a8eb06b9e9cc6cfb6a320bf9fb14331919d505">
+  <file src="src/Command/BakeSimpleMigrationCommand.php">
+    <DeprecatedClass>
+      <code><![CDATA[Util::getCurrentTimestamp()]]></code>
+    </DeprecatedClass>
+  </file>
   <file src="src/Command/MigrationsCommand.php">
     <DeprecatedClass>
-      <code>MigrationsDispatcher</code>
-      <code>MigrationsDispatcher::getCommands()</code>
-      <code>MigrationsDispatcher::getCommands()</code>
-      <code>\Migrations\MigrationsDispatcher</code>
-      <code>new MigrationsDispatcher(PHINX_VERSION)</code>
+      <code><![CDATA[MigrationsDispatcher]]></code>
+      <code><![CDATA[MigrationsDispatcher::getCommands()]]></code>
+      <code><![CDATA[MigrationsDispatcher::getCommands()]]></code>
+      <code><![CDATA[\Migrations\MigrationsDispatcher]]></code>
+      <code><![CDATA[new MigrationsDispatcher(PHINX_VERSION)]]></code>
     </DeprecatedClass>
   </file>
   <file src="src/Command/Phinx/Create.php">
+    <DeprecatedClass>
+      <code><![CDATA[Util::getCurrentTimestamp()]]></code>
+      <code><![CDATA[Util::mapClassNameToFileName($name)]]></code>
+    </DeprecatedClass>
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
     <PossiblyUndefinedArrayOffset>
-      <code>$phinxName</code>
+      <code><![CDATA[$phinxName]]></code>
     </PossiblyUndefinedArrayOffset>
   </file>
   <file src="src/Command/Phinx/Dump.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Command/Phinx/MarkMigrated.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Command/Phinx/Migrate.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Command/Phinx/Rollback.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Command/Phinx/Seed.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
     <PossiblyNullReference>
-      <code>setInput</code>
+      <code><![CDATA[setInput]]></code>
     </PossiblyNullReference>
   </file>
   <file src="src/Command/Phinx/Status.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Config/ConfigInterface.php">
     <MissingTemplateParam>
-      <code>ArrayAccess</code>
+      <code><![CDATA[ArrayAccess]]></code>
     </MissingTemplateParam>
   </file>
   <file src="src/Db/Adapter/AbstractAdapter.php">
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[$this->io]]></code>
-      <code>null</code>
+      <code><![CDATA[null]]></code>
     </RedundantPropertyInitializationCheck>
   </file>
   <file src="src/Db/Adapter/AdapterFactory.php">
@@ -68,41 +77,41 @@
   </file>
   <file src="src/Db/Adapter/AdapterWrapper.php">
     <DeprecatedMethod>
-      <code>getQueryBuilder</code>
+      <code><![CDATA[getQueryBuilder]]></code>
     </DeprecatedMethod>
   </file>
   <file src="src/Db/Adapter/MysqlAdapter.php">
     <RedundantCondition>
-      <code>$opened</code>
-      <code>is_array($newColumns)</code>
+      <code><![CDATA[$opened]]></code>
+      <code><![CDATA[is_array($newColumns)]]></code>
     </RedundantCondition>
   </file>
   <file src="src/Db/Adapter/PhinxAdapter.php">
     <DeprecatedMethod>
-      <code>getQueryBuilder</code>
+      <code><![CDATA[getQueryBuilder]]></code>
     </DeprecatedMethod>
   </file>
   <file src="src/Db/Adapter/SqlserverAdapter.php">
     <ImplementedReturnTypeMismatch>
-      <code>\Phinx\Db\Adapter\AdapterInterface</code>
+      <code><![CDATA[\Phinx\Db\Adapter\AdapterInterface]]></code>
     </ImplementedReturnTypeMismatch>
     <LessSpecificImplementedReturnType>
-      <code>\Phinx\Db\Adapter\AdapterInterface</code>
+      <code><![CDATA[\Phinx\Db\Adapter\AdapterInterface]]></code>
     </LessSpecificImplementedReturnType>
     <MismatchingDocblockReturnType>
-      <code>\Phinx\Db\Adapter\AdapterInterface</code>
+      <code><![CDATA[\Phinx\Db\Adapter\AdapterInterface]]></code>
     </MismatchingDocblockReturnType>
     <RedundantCondition>
-      <code>is_array($newColumns)</code>
+      <code><![CDATA[is_array($newColumns)]]></code>
     </RedundantCondition>
   </file>
   <file src="src/Db/Adapter/TimedOutputAdapter.php">
     <MissingParamType>
-      <code>$columns</code>
-      <code>$newColumns</code>
+      <code><![CDATA[$columns]]></code>
+      <code><![CDATA[$newColumns]]></code>
     </MissingParamType>
     <PossiblyNullReference>
-      <code>verbose</code>
+      <code><![CDATA[verbose]]></code>
     </PossiblyNullReference>
   </file>
   <file src="src/Migration/Environment.php">
@@ -118,47 +127,55 @@
                     },
                     $phpFiles
                 )]]></code>
-      <code>array_merge($versions, array_keys($migrations))</code>
+      <code><![CDATA[array_merge($versions, array_keys($migrations))]]></code>
     </ArgumentTypeCoercion>
+    <DeprecatedClass>
+      <code><![CDATA[Util::getFiles($this->getConfig()->getMigrationPath())]]></code>
+      <code><![CDATA[Util::getFiles($this->getConfig()->getSeedPath())]]></code>
+      <code><![CDATA[Util::getVersionFromFileName(basename($filePath))]]></code>
+      <code><![CDATA[Util::isValidMigrationFileName(basename($filePath))]]></code>
+      <code><![CDATA[Util::isValidSeedFileName(basename($filePath))]]></code>
+      <code><![CDATA[Util::mapFileNameToClassName(basename($filePath))]]></code>
+    </DeprecatedClass>
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->container)]]></code>
     </RedundantPropertyInitializationCheck>
     <ReferenceReusedFromConfusingScope>
-      <code>$executedVersion</code>
+      <code><![CDATA[$executedVersion]]></code>
     </ReferenceReusedFromConfusingScope>
   </file>
   <file src="src/Migration/ManagerFactory.php">
     <UndefinedConstant>
-      <code>CONFIG</code>
+      <code><![CDATA[CONFIG]]></code>
     </UndefinedConstant>
   </file>
   <file src="src/Migration/PhinxBackend.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Migrations.php">
     <DeprecatedTrait>
-      <code>ConfigurationTrait</code>
+      <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
   </file>
   <file src="src/Shim/OutputAdapter.php">
     <ArgumentTypeCoercion>
-      <code>$messages</code>
-      <code>$messages</code>
+      <code><![CDATA[$messages]]></code>
+      <code><![CDATA[$messages]]></code>
     </ArgumentTypeCoercion>
     <LessSpecificReturnStatement>
       <code><![CDATA[$this->io->level()]]></code>
     </LessSpecificReturnStatement>
     <MoreSpecificReturnType>
-      <code>self::VERBOSITY_*</code>
+      <code><![CDATA[self::VERBOSITY_*]]></code>
     </MoreSpecificReturnType>
   </file>
   <file src="src/TestSuite/Migrator.php">
     <ArgumentTypeCoercion>
-      <code>$dropTables</code>
-      <code>$phinxTables</code>
-      <code>$tables</code>
+      <code><![CDATA[$dropTables]]></code>
+      <code><![CDATA[$phinxTables]]></code>
+      <code><![CDATA[$tables]]></code>
     </ArgumentTypeCoercion>
   </file>
   <file src="src/Util/ColumnParser.php">

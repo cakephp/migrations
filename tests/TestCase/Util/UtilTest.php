@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Test\Phinx\Util;
 
+use Cake\TestSuite\TestCase;
 use DateTime;
 use DateTimeZone;
 use Migrations\Util\Util;
 use RuntimeException;
-use Cake\TestSuite\TestCase;
 
 class UtilTest extends TestCase
 {
