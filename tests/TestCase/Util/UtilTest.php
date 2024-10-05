@@ -68,7 +68,7 @@ class UtilTest extends TestCase
         Util::getVersionFromFileName('0_foo.php');
     }
 
-    public function providerMapClassNameToFileName(): array
+    public static function providerMapClassNameToFileName(): array
     {
         return [
             ['CamelCase87afterSomeBooze', '/^\d{14}_camel_case_87after_some_booze\.php$/'],
@@ -85,7 +85,7 @@ class UtilTest extends TestCase
         $this->assertMatchesRegularExpression($pattern, Util::mapClassNameToFileName($name));
     }
 
-    public function providerMapFileName(): array
+    public static function providerMapFileName(): array
     {
         return [
             ['20150902094024_create_user_table.php', 'CreateUserTable'],
@@ -105,7 +105,7 @@ class UtilTest extends TestCase
         $this->assertEquals($className, Util::mapFileNameToClassName($fileName));
     }
 
-    public function providerValidClassName(): array
+    public static function providerValidClassName(): array
     {
         return [
             ['camelCase', false],
