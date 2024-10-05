@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Util;
 
+use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -118,7 +119,8 @@ class Util
      */
     public static function mapClassNameToFileName(string $className): string
     {
-        // TODO replace with Inflector
+        // TODO it would be nice to replace this with Inflector::underscore
+        // but it will break compatibility for little end user gain.
         $snake = function ($matches) {
             return '_' . strtolower($matches[0]);
         };
@@ -137,7 +139,6 @@ class Util
      */
     public static function mapFileNameToClassName(string $fileName): string
     {
-        // TODO replace with Inflector
         $matches = [];
         if (preg_match(static::MIGRATION_FILE_NAME_PATTERN, $fileName, $matches)) {
             $fileName = $matches[1];
@@ -145,9 +146,7 @@ class Util
             return 'V' . substr($fileName, 0, strlen($fileName) - 4);
         }
 
-        $className = str_replace('_', '', ucwords($fileName, '_'));
-
-        return $className;
+        return Inflector::camelize($fileName);
     }
 
     /**
@@ -169,22 +168,6 @@ class Util
         $existingClassNames = static::getExistingMigrationClassNames($path);
 
         return !in_array($className, $existingClassNames, true);
-    }
-
-    /**
-     * Check if a migration/seed class name is valid.
-     *
-     * Migration & Seed class names must be in CamelCase format.
-     * e.g: CreateUserTable, AddIndexToPostsTable or UserSeeder.
-     *
-     * Single words are not allowed on their own.
-     *
-     * @param string $className Class Name
-     * @return bool
-     */
-    public static function isValidPhinxClassName(string $className): bool
-    {
-        return (bool)preg_match(static::CLASS_NAME_PATTERN, $className);
     }
 
     /**

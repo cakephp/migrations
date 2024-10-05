@@ -105,31 +105,6 @@ class UtilTest extends TestCase
         $this->assertEquals($className, Util::mapFileNameToClassName($fileName));
     }
 
-    public static function providerValidClassName(): array
-    {
-        return [
-            ['camelCase', false],
-            ['CreateUserTable', true],
-            ['UserSeeder', true],
-            ['Test', true],
-            ['test', false],
-            ['Q', true],
-            ['XMLTriggers', true],
-            ['Form_Cards', false],
-            ['snake_high_scores', false],
-            ['Code2319Incidents', true],
-            ['V20200509232007', true],
-        ];
-    }
-
-    /**
-     * @dataProvider providerValidClassName
-     */
-    public function testIsValidPhinxClassName(string $className, bool $valid): void
-    {
-        $this->assertSame($valid, Util::isValidPhinxClassName($className));
-    }
-
     public function testGlobPath()
     {
         $files = Util::glob(__DIR__ . '/_files/migrations/empty.txt');
