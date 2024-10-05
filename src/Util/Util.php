@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Temporary compatibility shim that can be refactored away.
  *
- * @deprecated This compatibility shim will be removed in 5.0
+ * @internal
  */
 class Util
 {

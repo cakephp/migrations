@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Phinx\Util;
+namespace Migrations\Test\TestCase\Util;
 
 use Cake\TestSuite\TestCase;
 use DateTime;
