@@ -114,6 +114,7 @@ class ManagerFactory
                 'seeds' => $dir,
             ],
             'templates' => [
+                // TODO remove templates from config. templates should use bake going forward
                 'file' => $templatePath . 'Phinx/create.php.template',
             ],
             'migration_base_class' => 'Migrations\AbstractMigration',

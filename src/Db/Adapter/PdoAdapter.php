@@ -444,6 +444,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         $result = [];
 
         switch ($this->options['version_order']) {
+            // TODO use Migrations classes instead
             case Config::VERSION_ORDER_CREATION_TIME:
                 $orderBy = 'version ASC';
                 break;

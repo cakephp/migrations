@@ -19,7 +19,7 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
 
 /**
- * Phinx MySQL Adapter.
+ * Migrations MySQL Adapter.
  */
 class MysqlAdapter extends PdoAdapter
 {
@@ -411,6 +411,7 @@ class MysqlAdapter extends PdoAdapter
         $columns = [];
         $rows = $this->fetchAll(sprintf('SHOW FULL COLUMNS FROM %s', $this->quoteTableName($tableName)));
         foreach ($rows as $columnInfo) {
+            // TODO this method should have a migrations alias. Perhaps getAbstractType()
             $phinxType = $this->getPhinxType($columnInfo['Type']);
 
             $column = new Column();

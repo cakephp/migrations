@@ -260,6 +260,7 @@ class MigrationHelper extends Helper
      */
     public function formatConstraintAction(string $constraint): string
     {
+        // TODO use Migrations classes instead
         if (defined('\Phinx\Db\Table\ForeignKey::' . $constraint)) {
             return $constraint;
         }

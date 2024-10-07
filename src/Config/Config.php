@@ -95,6 +95,7 @@ class Config implements ConfigInterface
      */
     public function getMigrationBaseClassName(bool $dropNamespace = true): string
     {
+        // TODO should use Configure to select the migrations backend
         /** @var string $className */
         $className = !isset($this->values['migration_base_class']) ? 'Phinx\Migration\AbstractMigration' : $this->values['migration_base_class'];
 
@@ -106,6 +107,7 @@ class Config implements ConfigInterface
      */
     public function getSeedBaseClassName(bool $dropNamespace = true): string
     {
+        // TODO should use Configure to select the migrations backend
         /** @var string $className */
         $className = !isset($this->values['seed_base_class']) ? 'Phinx\Seed\AbstractSeed' : $this->values['seed_base_class'];
 

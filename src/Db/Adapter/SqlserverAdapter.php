@@ -363,6 +363,7 @@ class SqlserverAdapter extends PdoAdapter
         $rows = $this->fetchAll($sql);
         foreach ($rows as $columnInfo) {
             try {
+                // TODO this method should have a migrations alias. Perhaps getAbstractType()
                 $type = $this->getPhinxType($columnInfo['type']);
             } catch (UnsupportedColumnTypeException $e) {
                 $type = Literal::from($columnInfo['type']);
@@ -1019,9 +1020,11 @@ ORDER BY T.[name], I.[index_id];";
      */
     public function getPhinxType(string $sqlType): string
     {
+        // TODO this method should have a migrations alias. Perhaps getAbstractType()
         switch ($sqlType) {
             case 'nvarchar':
             case 'varchar':
+                // TODO Use cake Database names for these.
                 return static::PHINX_TYPE_STRING;
             case 'char':
             case 'nchar':

@@ -217,6 +217,7 @@ class ColumnParser
      */
     public function getType(string $field, ?string $type): ?string
     {
+        // TODO replace with migrations
         $reflector = new ReflectionClass(AdapterInterface::class);
         $collection = new Collection($reflector->getConstants());
 

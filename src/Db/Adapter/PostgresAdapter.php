@@ -394,6 +394,7 @@ class PostgresAdapter extends PdoAdapter
             if ($isUserDefined) {
                 $columnType = Literal::from($columnInfo['udt_name']);
             } else {
+                // TODO this method should have a migrations alias. Perhaps getAbstractType()
                 $columnType = $this->getPhinxType($columnInfo['data_type']);
             }
 
