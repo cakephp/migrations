@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="5.25.0@01a8eb06b9e9cc6cfb6a320bf9fb14331919d505">
-  <file src="src/Command/BakeSimpleMigrationCommand.php">
-    <DeprecatedClass>
-      <code><![CDATA[Util::getCurrentTimestamp()]]></code>
-    </DeprecatedClass>
-  </file>
   <file src="src/Command/MigrationsCommand.php">
     <DeprecatedClass>
       <code><![CDATA[MigrationsDispatcher]]></code>
@@ -15,10 +10,6 @@
     </DeprecatedClass>
   </file>
   <file src="src/Command/Phinx/Create.php">
-    <DeprecatedClass>
-      <code><![CDATA[Util::getCurrentTimestamp()]]></code>
-      <code><![CDATA[Util::mapClassNameToFileName($name)]]></code>
-    </DeprecatedClass>
     <DeprecatedTrait>
       <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
@@ -129,14 +120,6 @@
                 )]]></code>
       <code><![CDATA[array_merge($versions, array_keys($migrations))]]></code>
     </ArgumentTypeCoercion>
-    <DeprecatedClass>
-      <code><![CDATA[Util::getFiles($this->getConfig()->getMigrationPath())]]></code>
-      <code><![CDATA[Util::getFiles($this->getConfig()->getSeedPath())]]></code>
-      <code><![CDATA[Util::getVersionFromFileName(basename($filePath))]]></code>
-      <code><![CDATA[Util::isValidMigrationFileName(basename($filePath))]]></code>
-      <code><![CDATA[Util::isValidSeedFileName(basename($filePath))]]></code>
-      <code><![CDATA[Util::mapFileNameToClassName(basename($filePath))]]></code>
-    </DeprecatedClass>
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->container)]]></code>
     </RedundantPropertyInitializationCheck>
