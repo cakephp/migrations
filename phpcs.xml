@@ -6,6 +6,7 @@
     <file>tests/</file>
 
     <exclude-pattern>*/tests/comparisons/*</exclude-pattern>
+    <exclude-pattern>*/tests/TestCase/Util/_files/*</exclude-pattern>
     <exclude-pattern>*/test_app/config/*</exclude-pattern>
     <exclude-pattern>*/TestBlog/config/*</exclude-pattern>
     <exclude-pattern>*/BarPlugin/config/*</exclude-pattern>

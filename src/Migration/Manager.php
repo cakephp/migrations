@@ -18,9 +18,9 @@ use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
 use Migrations\Shim\MigrationAdapter;
 use Migrations\Shim\SeedAdapter;
+use Migrations\Util\Util;
 use Phinx\Migration\MigrationInterface as PhinxMigrationInterface;
 use Phinx\Seed\SeedInterface as PhinxSeedInterface;
-use Phinx\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 

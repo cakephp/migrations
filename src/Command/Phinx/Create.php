@@ -15,8 +15,8 @@ namespace Migrations\Command\Phinx;
 
 use Cake\Utility\Inflector;
 use Migrations\ConfigurationTrait;
+use Migrations\Util\Util;
 use Phinx\Console\Command\Create as CreateCommand;
-use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
