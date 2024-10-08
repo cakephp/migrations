@@ -522,7 +522,16 @@ class MysqlAdapter extends PdoAdapter
             if (strcasecmp($row['Field'], $columnName) === 0) {
                 $null = $row['Null'] === 'NO' ? 'NOT NULL' : 'NULL';
                 $comment = isset($row['Comment']) ? ' COMMENT ' . '\'' . addslashes($row['Comment']) . '\'' : '';
-                $extra = ' ' . strtoupper($row['Extra']);
+
+                // create the extra string by also filtering out the DEFAULT_GENERATED option (MySQL 8 fix)
+                $extras = array_filter(
+                    explode(' ', strtoupper($row['Extra'])),
+                    static function ($value) {
+                        return $value !== 'DEFAULT_GENERATED';
+                    },
+                );
+                $extra = ' ' . implode(' ', $extras);
+
                 if (($row['Default'] !== null)) {
                     $extra .= $this->getDefaultValueDefinition($row['Default']);
                 }
