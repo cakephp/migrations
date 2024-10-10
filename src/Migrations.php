@@ -16,6 +16,7 @@ namespace Migrations;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
+use Migrations\Migration\BackendInterface;
 use Migrations\Migration\BuiltinBackend;
 use Migrations\Migration\PhinxBackend;
 use Phinx\Config\ConfigInterface;
@@ -131,7 +132,7 @@ class Migrations
      *
      * @return \Migrations\Migration\BackendInterface
      */
-    protected function getBackend(): BuiltinBackend|PhinxBackend
+    protected function getBackend(): BackendInterface
     {
         $backend = (string)(Configure::read('Migrations.backend') ?? 'builtin');
         if ($backend === 'builtin') {

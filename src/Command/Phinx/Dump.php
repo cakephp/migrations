@@ -26,6 +26,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Dump command class.
  * A "dump" is a snapshot of a database at a given point in time. It is stored in a
  * .lock file in the same folder as migrations files.
+ *
+ * @deprecated 4.5.0 This command is deprecated alongside phinx compatibility.
  */
 class Dump extends AbstractCommand
 {
