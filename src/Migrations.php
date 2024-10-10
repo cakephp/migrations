@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * The Migrations class is responsible for handling migrations command
- * within an none-shell application.
+ * within an non-shell application.
  */
 class Migrations
 {
@@ -129,7 +129,7 @@ class Migrations
     /**
      * Get the Migrations interface backend based on configuration data.
      *
-     * @return \Migrations\Migration\BuiltinBackend|\Migrations\Migration\PhinxBackend
+     * @return \Migrations\Migration\BackendInterface
      */
     protected function getBackend(): BuiltinBackend|PhinxBackend
     {
