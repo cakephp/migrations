@@ -121,6 +121,16 @@ interface MigrationInterface
     public function setMigratingUp(bool $isMigratingUp);
 
     /**
+     * Hook method to decide if this migration should use transactions
+     *
+     * By default if your driver supports transactions, a transaction will be opened
+     * before the migration begins, and commit when the migration completes.
+     *
+     * @return bool
+     */
+    public function useTransactions(): bool;
+
+    /**
      * Gets whether this migration is being applied or reverted.
      * True means that the migration is being applied.
      *
