@@ -20,9 +20,6 @@ use Cake\Console\TestSuite\StubConsoleOutput;
 use DateTime;
 use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * The Migrations class is responsible for handling migrations command
@@ -32,14 +29,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class BuiltinBackend implements BackendInterface
 {
-    /**
-     * The OutputInterface.
-     * Should be a \Symfony\Component\Console\Output\NullOutput instance
-     *
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected OutputInterface $output;
-
     /**
      * Manager instance
      *
@@ -64,14 +53,6 @@ class BuiltinBackend implements BackendInterface
     protected string $command;
 
     /**
-     * Stub input to feed the manager class since we might not have an input ready when we get the Manager using
-     * the `getManager()` method
-     *
-     * @var \Symfony\Component\Console\Input\ArrayInput
-     */
-    protected ArrayInput $stubInput;
-
-    /**
      * Constructor
      *
      * @param array<string, mixed> $default Default option to be used when calling a method.
@@ -82,9 +63,6 @@ class BuiltinBackend implements BackendInterface
      */
     public function __construct(array $default = [])
     {
-        $this->output = new NullOutput();
-        $this->stubInput = new ArrayInput([]);
-
         if ($default) {
             $this->default = $default;
         }
