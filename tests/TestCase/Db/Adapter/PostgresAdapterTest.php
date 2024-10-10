@@ -104,6 +104,11 @@ class PostgresAdapterTest extends TestCase
         return version_compare($version, '10.0.0', '>=');
     }
 
+    public function testAdapterType()
+    {
+        $this->assertEquals('pgsql', $this->adapter->getAdapterType());
+    }
+
     public function testConnection()
     {
         $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
