@@ -35,7 +35,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @internal
  */
-class PhinxBackend
+class PhinxBackend implements BackendInterface
 {
     use ConfigurationTrait;
 
@@ -133,16 +133,7 @@ class PhinxBackend
     }
 
     /**
-     * Returns the status of each migrations based on the options passed
-     *
-     * @param array<string, mixed> $options Options to pass to the command
-     * Available options are :
-     *
-     * - `format` Format to output the response. Can be 'json'
-     * - `connection` The datasource connection to use
-     * - `source` The folder where migrations are in
-     * - `plugin` The plugin containing the migrations
-     * @return array The migrations list and their statuses
+     * {@inheritDoc}
      */
     public function status(array $options = []): array
     {
@@ -153,18 +144,7 @@ class PhinxBackend
     }
 
     /**
-     * Migrates available migrations
-     *
-     * @param array<string, mixed> $options Options to pass to the command
-     * Available options are :
-     *
-     * - `target` The version number to migrate to. If not provided, will migrate
-     * everything it can
-     * - `connection` The datasource connection to use
-     * - `source` The folder where migrations are in
-     * - `plugin` The plugin containing the migrations
-     * - `date` The date to migrate to
-     * @return bool Success
+     * {@inheritDoc}
      */
     public function migrate(array $options = []): bool
     {
@@ -184,18 +164,7 @@ class PhinxBackend
     }
 
     /**
-     * Rollbacks migrations
-     *
-     * @param array<string, mixed> $options Options to pass to the command
-     * Available options are :
-     *
-     * - `target` The version number to migrate to. If not provided, will only migrate
-     * the last migrations registered in the phinx log
-     * - `connection` The datasource connection to use
-     * - `source` The folder where migrations are in
-     * - `plugin` The plugin containing the migrations
-     * - `date` The date to rollback to
-     * @return bool Success
+     * {@inheritDoc}
      */
     public function rollback(array $options = []): bool
     {
@@ -215,16 +184,7 @@ class PhinxBackend
     }
 
     /**
-     * Marks a migration as migrated
-     *
-     * @param int|string|null $version The version number of the migration to mark as migrated
-     * @param array<string, mixed> $options Options to pass to the command
-     * Available options are :
-     *
-     * - `connection` The datasource connection to use
-     * - `source` The folder where migrations are in
-     * - `plugin` The plugin containing the migrations
-     * @return bool Success
+     * {@inheritDoc}
      */
     public function markMigrated(int|string|null $version = null, array $options = []): bool
     {
@@ -257,16 +217,7 @@ class PhinxBackend
     }
 
     /**
-     * Seed the database using a seed file
-     *
-     * @param array<string, mixed> $options Options to pass to the command
-     * Available options are :
-     *
-     * - `connection` The datasource connection to use
-     * - `source` The folder where migrations are in
-     * - `plugin` The plugin containing the migrations
-     * - `seed` The seed file to use
-     * @return bool Success
+     * {@inheritDoc}
      */
     public function seed(array $options = []): bool
     {
@@ -285,13 +236,7 @@ class PhinxBackend
     }
 
     /**
-     * Runs the method needed to execute and return
-     *
-     * @param string $method Manager method to call
-     * @param array $params Manager params to pass
-     * @param \Symfony\Component\Console\Input\InputInterface $input InputInterface needed for the
-     * Manager to properly run
-     * @return mixed The result of the CakeManager::$method() call
+     * {@inheritDoc}
      */
     protected function run(string $method, array $params, InputInterface $input): mixed
     {

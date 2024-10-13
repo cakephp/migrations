@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="5.25.0@01a8eb06b9e9cc6cfb6a320bf9fb14331919d505">
+  <file src="src/AbstractSeed.php">
+    <DeprecatedClass>
+      <code><![CDATA[new Seed()]]></code>
+    </DeprecatedClass>
+  </file>
+  <file src="src/Command/BakeMigrationDiffCommand.php">
+    <DeprecatedClass>
+      <code><![CDATA[Dump::class]]></code>
+      <code><![CDATA[new $className()]]></code>
+    </DeprecatedClass>
+  </file>
   <file src="src/Command/MigrationsCommand.php">
     <DeprecatedClass>
       <code><![CDATA[MigrationsDispatcher]]></code>
@@ -7,6 +18,23 @@
       <code><![CDATA[MigrationsDispatcher::getCommands()]]></code>
       <code><![CDATA[\Migrations\MigrationsDispatcher]]></code>
       <code><![CDATA[new MigrationsDispatcher(PHINX_VERSION)]]></code>
+    </DeprecatedClass>
+  </file>
+  <file src="src/Command/Phinx/CommandTrait.php">
+    <DeprecatedClass>
+      <code><![CDATA[$this->addOption('--environment', '-e', InputArgument::OPTIONAL)]]></code>
+      <code><![CDATA[$this->addOption('--environment', '-e', InputArgument::OPTIONAL)]]></code>
+      <code><![CDATA[$this->addOption('--environment', '-e', InputArgument::OPTIONAL)]]></code>
+      <code><![CDATA[$this->addOption('--environment', '-e', InputArgument::OPTIONAL)]]></code>
+      <code><![CDATA[$this->addOption('--environment', '-e', InputArgument::OPTIONAL)]]></code>
+      <code><![CDATA[$this->addOption('--environment', '-e', InputArgument::OPTIONAL)]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
+      <code><![CDATA[$this->setManager(new CakeManager($this->getConfig(), $input, $output))]]></code>
     </DeprecatedClass>
   </file>
   <file src="src/Command/Phinx/Create.php">
@@ -141,6 +169,22 @@
     <DeprecatedTrait>
       <code><![CDATA[ConfigurationTrait]]></code>
     </DeprecatedTrait>
+  </file>
+  <file src="src/MigrationsDispatcher.php">
+    <DeprecatedClass>
+      <code><![CDATA[Phinx\Create::class]]></code>
+      <code><![CDATA[Phinx\Dump::class]]></code>
+      <code><![CDATA[Phinx\MarkMigrated::class]]></code>
+      <code><![CDATA[Phinx\Migrate::class]]></code>
+      <code><![CDATA[Phinx\Rollback::class]]></code>
+      <code><![CDATA[Phinx\Seed::class]]></code>
+      <code><![CDATA[Phinx\Status::class]]></code>
+    </DeprecatedClass>
+  </file>
+  <file src="src/Shim/MigrationAdapter.php">
+    <PossiblyNullReference>
+      <code><![CDATA[hasTransactions]]></code>
+    </PossiblyNullReference>
   </file>
   <file src="src/Shim/OutputAdapter.php">
     <ArgumentTypeCoercion>

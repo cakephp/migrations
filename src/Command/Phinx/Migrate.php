@@ -20,6 +20,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @deprecated 4.5.0 This command is deprecated alongside phinx compatibility.
+ */
 class Migrate extends MigrateCommand
 {
     use CommandTrait {

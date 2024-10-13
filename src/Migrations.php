@@ -16,6 +16,7 @@ namespace Migrations;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
+use Migrations\Migration\BackendInterface;
 use Migrations\Migration\BuiltinBackend;
 use Migrations\Migration\PhinxBackend;
 use Phinx\Config\ConfigInterface;
@@ -27,7 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * The Migrations class is responsible for handling migrations command
- * within an none-shell application.
+ * within an non-shell application.
  */
 class Migrations
 {
@@ -129,9 +130,9 @@ class Migrations
     /**
      * Get the Migrations interface backend based on configuration data.
      *
-     * @return \Migrations\Migration\BuiltinBackend|\Migrations\Migration\PhinxBackend
+     * @return \Migrations\Migration\BackendInterface
      */
-    protected function getBackend(): BuiltinBackend|PhinxBackend
+    protected function getBackend(): BackendInterface
     {
         $backend = (string)(Configure::read('Migrations.backend') ?? 'builtin');
         if ($backend === 'builtin') {

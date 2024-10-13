@@ -204,9 +204,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Gets the name.
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getName(): string
     {
@@ -214,10 +212,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Sets the migration version number.
-     *
-     * @param int $version Version
-     * @return $this
+     * {@inheritDoc}
      */
     public function setVersion(int $version)
     {
@@ -227,9 +222,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Gets the migration version number.
-     *
-     * @return int
+     * {@inheritDoc}
      */
     public function getVersion(): int
     {
@@ -237,10 +230,19 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Sets whether this migration is being applied or reverted
-     *
-     * @param bool $isMigratingUp True if the migration is being applied
-     * @return $this
+     * {@inheritDoc}
+     */
+    public function useTransactions(): bool
+    {
+        if (method_exists($this->migration, 'useTransactions')) {
+            return $this->migration->useTransactions();
+        }
+
+        return $this->migration->getAdapter()->hasTransactions();
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public function setMigratingUp(bool $isMigratingUp)
     {
@@ -250,10 +252,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Gets whether this migration is being applied or reverted.
-     * True means that the migration is being applied.
-     *
-     * @return bool
+     * {@inheritDoc}
      */
     public function isMigratingUp(): bool
     {
@@ -261,11 +260,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Executes a SQL statement and returns the number of affected rows.
-     *
-     * @param string $sql SQL
-     * @param array $params parameters to use for prepared query
-     * @return int
+     * {@inheritDoc}
      */
     public function execute(string $sql, array $params = []): int
     {
@@ -273,16 +268,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Executes a SQL statement.
-     *
-     * The return type depends on the underlying adapter being used. To improve
-     * IDE auto-completion possibility, you can overwrite the query method
-     * phpDoc in your (typically custom abstract parent) migration class, where
-     * you can set the return type by the adapter in your current use.
-     *
-     * @param string $sql SQL
-     * @param array $params parameters to use for prepared query
-     * @return mixed
+     * {@inheritDoc}
      */
     public function query(string $sql, array $params = []): mixed
     {
@@ -290,15 +276,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Returns a new Query object that can be used to build complex SELECT, UPDATE, INSERT or DELETE
-     * queries and execute them against the current database.
-     *
-     * Queries executed through the query builder are always sent to the database, regardless of the
-     * the dry-run settings.
-     *
-     * @see https://api.cakephp.org/3.6/class-Cake.Database.Query.html
-     * @param string $type Query
-     * @return \Cake\Database\Query
+     * {@inheritDoc}
      */
     public function getQueryBuilder(string $type): Query
     {
@@ -306,13 +284,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Returns a new SelectQuery object that can be used to build complex
-     * SELECT queries and execute them against the current database.
-     *
-     * Queries executed through the query builder are always sent to the database, regardless of the
-     * the dry-run settings.
-     *
-     * @return \Cake\Database\Query\SelectQuery
+     * {@inheritDoc}
      */
     public function getSelectBuilder(): SelectQuery
     {
@@ -320,13 +292,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Returns a new InsertQuery object that can be used to build complex
-     * INSERT queries and execute them against the current database.
-     *
-     * Queries executed through the query builder are always sent to the database, regardless of the
-     * the dry-run settings.
-     *
-     * @return \Cake\Database\Query\InsertQuery
+     * {@inheritDoc}
      */
     public function getInsertBuilder(): InsertQuery
     {
@@ -334,13 +300,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Returns a new UpdateQuery object that can be used to build complex
-     * UPDATE queries and execute them against the current database.
-     *
-     * Queries executed through the query builder are always sent to the database, regardless of the
-     * the dry-run settings.
-     *
-     * @return \Cake\Database\Query\UpdateQuery
+     * {@inheritDoc}
      */
     public function getUpdateBuilder(): UpdateQuery
     {
@@ -348,13 +308,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Returns a new DeleteQuery object that can be used to build complex
-     * DELETE queries and execute them against the current database.
-     *
-     * Queries executed through the query builder are always sent to the database, regardless of the
-     * the dry-run settings.
-     *
-     * @return \Cake\Database\Query\DeleteQuery
+     * {@inheritDoc}
      */
     public function getDeleteBuilder(): DeleteQuery
     {
@@ -362,10 +316,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Executes a query and returns only one row as an array.
-     *
-     * @param string $sql SQL
-     * @return array|false
+     * {@inheritDoc}
      */
     public function fetchRow(string $sql): array|false
     {
@@ -373,10 +324,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Executes a query and returns an array of rows.
-     *
-     * @param string $sql SQL
-     * @return array
+     * {@inheritDoc}
      */
     public function fetchAll(string $sql): array
     {
@@ -384,11 +332,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Create a new database.
-     *
-     * @param string $name Database Name
-     * @param array<string, mixed> $options Options
-     * @return void
+     * {@inheritDoc}
      */
     public function createDatabase(string $name, array $options): void
     {
@@ -396,10 +340,7 @@ class MigrationAdapter implements MigrationInterface
     }
 
     /**
-     * Drop a database.
-     *
-     * @param string $name Database Name
-     * @return void
+     * {@inheritDoc}
      */
     public function dropDatabase(string $name): void
     {

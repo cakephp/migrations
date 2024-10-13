@@ -21,6 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @method \Migrations\CakeManager getManager()
+ * @deprecated 4.5.0 This command is deprecated alongside phinx compatibility.
  */
 class Status extends StatusCommand
 {

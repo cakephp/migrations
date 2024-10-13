@@ -9,9 +9,9 @@ declare(strict_types=1);
 namespace Migrations\Db\Table;
 
 use Cake\Core\Configure;
+use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Literal;
-use Phinx\Db\Adapter\AdapterInterface;
-use Phinx\Db\Adapter\PostgresAdapter;
 use RuntimeException;
 
 /**

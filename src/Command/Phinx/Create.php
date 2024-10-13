@@ -22,6 +22,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @deprecated 4.5.0 This command is deprecated alongside phinx compatibility.
+ */
 class Create extends CreateCommand
 {
     use CommandTrait {

@@ -174,7 +174,7 @@ class EnvironmentTest extends TestCase
         $adapterStub->expects($this->once())
                     ->method('commitTransaction');
 
-        $adapterStub->expects($this->exactly(1))
+        $adapterStub->expects($this->atLeastOnce())
                     ->method('hasTransactions')
                     ->willReturn(true);
 
@@ -206,7 +206,7 @@ class EnvironmentTest extends TestCase
         $adapterStub->expects($this->never())
                     ->method('commitTransaction');
 
-        $adapterStub->expects($this->exactly(1))
+        $adapterStub->expects($this->atLeastOnce())
                     ->method('hasTransactions')
                     ->willReturn(true);
 
@@ -227,7 +227,8 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
+        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
         $this->assertTrue($migration->executed);
     }
 
