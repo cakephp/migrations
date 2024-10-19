@@ -42,6 +42,7 @@ class MigrateCommandTest extends TestCase
         foreach ($this->createdFiles as $file) {
             unlink($file);
         }
+        ConnectionManager::drop('invalid');
     }
 
     public function testHelp()
@@ -70,6 +71,18 @@ class MigrateCommandTest extends TestCase
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
+    }
+
+    /**
+     * Test that source parameter defaults to Migrations
+     */
+    public function testMigrateInvalidConnection(): void
+    {
+        ConnectionManager::setConfig('invalid', [
+            'database' => null,
+        ]);
+        $this->expectExceptionMessage('has no `database` key defined');
+        $this->exec('migrations migrate -c invalid');
     }
 
     /**

@@ -97,6 +97,9 @@ class ManagerFactory
         if (!$connectionConfig) {
             throw new RuntimeException("Could not find connection `{$connectionName}`");
         }
+        if (!isset($connectionConfig['database'])) {
+            throw new RuntimeException("The `{$connectionName}` connection has no `database` key defined.");
+        }
 
         /** @var array<string, string> $connectionConfig */
         $adapter = $connectionConfig['scheme'] ?? null;
