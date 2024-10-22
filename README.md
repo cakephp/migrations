@@ -40,7 +40,7 @@ public function bootstrap(): void
 
 ### Enabling the builtin backend
 
-In a future release migrations will be switching to a new backend based on the CakePHP ORM. We're aiming
+In a future release, migrations will be switching to a new backend based on the CakePHP ORM. We're aiming
 to be compatible with as many existing migrations as possible, and could use your feedback. Enable the
 new backend with:
 
