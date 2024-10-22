@@ -29,6 +29,7 @@ bin/cake plugin load Migrations
 ```
 
 Or you can manually add the loading statement in the **src/Application.php** file of your application:
+
 ```php
 public function bootstrap(): void
 {
@@ -37,7 +38,20 @@ public function bootstrap(): void
 }
 ```
 
-Additionally, you will need to configure the ``default`` database configuration in your **config/app.php** file.
+### Enabling the builtin backend
+
+In a future release, migrations will be switching to a new backend based on the CakePHP ORM. We're aiming
+to be compatible with as many existing migrations as possible, and could use your feedback. Enable the
+new backend with:
+
+```php
+// in app/config/app_local.php
+$config = [
+    // Other configuration
+    'Migrations' => ['backend' => 'builtin'],
+];
+
+```
 
 ## Documentation
 
