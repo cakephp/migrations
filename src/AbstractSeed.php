@@ -23,6 +23,8 @@ use function Cake\Core\pluginSplit;
  * Class AbstractSeed
  * Extends Phinx base AbstractSeed class in order to extend the features the seed class
  * offers.
+ *
+ * @deprecated 4.5.0 You should use Migrations\BaseSeed for new seeds.
  */
 abstract class AbstractSeed extends BaseAbstractSeed
 {

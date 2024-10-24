@@ -245,7 +245,7 @@ class SeedAdapter implements SeedInterface
     /**
      * {@inheritDoc}
      */
-    public function call(string $seeder): void
+    public function call(string $seeder, array $options = []): void
     {
         throw new RuntimeException('Not implemented');
     }
