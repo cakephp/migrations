@@ -132,6 +132,7 @@ class SeedCommandTest extends TestCase
         $this->assertOutputContains('radix=10');
         $this->assertOutputContains('fetchRow=121');
         $this->assertOutputContains('hasTable=1');
+        $this->assertOutputContains('fetchAll=121');
         $this->assertOutputContains('All Done');
 
         $connection = ConnectionManager::get('test');
