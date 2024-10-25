@@ -219,11 +219,13 @@ class BaseSeed implements SeedInterface
     protected function runCall(string $seeder, array $options = []): void
     {
         [$pluginName, $seeder] = pluginSplit($seeder);
+        $adapter = $this->getAdapter();
+        $connection = $adapter->getConnection()->configName();
 
         $factory = new ManagerFactory([
             'plugin' => $options['plugin'] ?? $pluginName ?? null,
             'source' => $options['source'] ?? null,
-            'connection' => $options['connection'] ?? null,
+            'connection' => $options['connection'] ?? $connection,
         ]);
         $io = $this->getIo();
         assert($io !== null, 'Missing ConsoleIo instance');

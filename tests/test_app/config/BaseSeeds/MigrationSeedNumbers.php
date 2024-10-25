@@ -24,7 +24,22 @@ class MigrationSeedNumbers extends BaseSeed
             ],
         ];
 
-        $table = $this->table('numbers');
-        $table->insert($data)->save();
+        // Call various methods on the seeder for runtime checks
+        // and generate output to assert behavior with in an integration test.
+        $this->table('numbers');
+        $this->insert('numbers', $data);
+
+        $this->call('AnotherNumbersSeed', ['source' => 'AltSeeds']);
+
+        $io = $this->getIo();
+        $query = $this->query('SELECT radix FROM numbers');
+        $io->out('radix=' . $query->fetchColumn(0));
+
+        $row = $this->fetchRow('SELECT 121 as key');
+        $io->out('fetchRow=' . $row['key']);
+        $io->out('hasTable=' . $this->hasTable('numbers'));
+
+        $row = $this->fetchAll('SELECT 121 as key');
+        $io->out('fetchAll=' . $row[0]['key']);
     }
 }

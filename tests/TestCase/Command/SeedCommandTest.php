@@ -128,7 +128,16 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --source BaseSeeds --seed MigrationSeedNumbers');
         $this->assertExitSuccess();
         $this->assertOutputContains('MigrationSeedNumbers:</info> <comment>seeding');
+        $this->assertOutputContains('AnotherNumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('radix=10');
+        $this->assertOutputContains('fetchRow=121');
+        $this->assertOutputContains('hasTable=1');
         $this->assertOutputContains('All Done');
+
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        // Two seeders run == 2 rows
+        $this->assertEquals(2, $query->fetchColumn(0));
     }
 
     public function testSeederImplictAll(): void
