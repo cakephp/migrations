@@ -161,7 +161,7 @@ interface SeedInterface
      * @param array<string, mixed> $options Options
      * @return \Migrations\Db\Table
      */
-    public function table(string $tableName, array $options): Table;
+    public function table(string $tableName, array $options = []): Table;
 
     /**
      * Checks to see if the seed should be executed.

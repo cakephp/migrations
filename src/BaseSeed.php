@@ -168,7 +168,7 @@ class BaseSeed implements SeedInterface
     /**
      * {@inheritDoc}
      */
-    public function table(string $tableName, array $options): Table
+    public function table(string $tableName, array $options = []): Table
     {
         return new Table($tableName, $options, $this->getAdapter());
     }

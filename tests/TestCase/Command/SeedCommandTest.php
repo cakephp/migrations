@@ -122,6 +122,15 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(1, $query->fetchColumn(0));
     }
 
+    public function testSeederBaseSeed(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --source BaseSeeds --seed MigrationSeedNumbers');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('MigrationSeedNumbers:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+    }
+
     public function testSeederImplictAll(): void
     {
         $this->createTables();
