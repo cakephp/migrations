@@ -498,13 +498,13 @@ class MysqlAdapterTest extends TestCase
         $this->assertCount(3, $columns);
         $this->assertSame('id', $columns[0]->getName());
 
-        $this->assertEquals('created_at', $columns[1]->getName());
+        $this->assertEquals('created', $columns[1]->getName());
         $this->assertEquals('datetime', $columns[1]->getType());
         $this->assertEquals('', $columns[1]->getUpdate());
         $this->assertFalse($columns[1]->isNull());
         $this->assertEquals('CURRENT_TIMESTAMP', $columns[1]->getDefault());
 
-        $this->assertEquals('updated_at', $columns[2]->getName());
+        $this->assertEquals('updated', $columns[2]->getName());
         $this->assertEquals('datetime', $columns[2]->getType());
         $this->assertEquals('CURRENT_TIMESTAMP', $columns[2]->getUpdate());
         $this->assertTrue($columns[2]->isNull());

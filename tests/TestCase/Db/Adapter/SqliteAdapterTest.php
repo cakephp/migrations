@@ -1875,7 +1875,7 @@ class SqliteAdapterTest extends TestCase
 
     public function testDumpCreateTable()
     {
-        $this->adapter->setOptions(['dryrun' => true]);
+        $this->adapter->setOptions($this->adapter->getOptions() + ['dryrun' => true]);
         $table = new Table('table1', [], $this->adapter);
 
         $table->addColumn('column1', 'string', ['null' => false])
@@ -1902,7 +1902,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $this->adapter->setOptions(['dryrun' => true]);
+        $this->adapter->setOptions($this->adapter->getOptions() + ['dryrun' => true]);
         $this->adapter->insert($table->getTable(), [
             'string_col' => 'test data',
         ]);
@@ -1942,7 +1942,7 @@ OUTPUT;
             ->addColumn('int_col', 'integer')
             ->save();
 
-        $this->adapter->setOptions(['dryrun' => true]);
+        $this->adapter->setOptions($this->adapter->getOptions() + ['dryrun' => true]);
         $this->adapter->bulkinsert($table->getTable(), [
             [
                 'string_col' => 'test_data1',
@@ -1968,7 +1968,7 @@ OUTPUT;
 
     public function testDumpCreateTableAndThenInsert()
     {
-        $this->adapter->setOptions(['dryrun' => true]);
+        $this->adapter->setOptions($this->adapter->getOptions() + ['dryrun' => true]);
         $table = new Table('table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
 
         $table->addColumn('column1', 'string', ['null' => false])
@@ -2086,8 +2086,8 @@ OUTPUT;
             ['name' => 'string_col', 'type' => 'string', 'default' => '', 'null' => true],
             ['name' => 'string_col_2', 'type' => 'string', 'default' => null, 'null' => true],
             ['name' => 'string_col_3', 'type' => 'string', 'default' => null, 'null' => false],
-            ['name' => 'created_at', 'type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'null' => false],
-            ['name' => 'updated_at', 'type' => 'timestamp', 'default' => null, 'null' => true],
+            ['name' => 'created', 'type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'null' => false],
+            ['name' => 'updated', 'type' => 'timestamp', 'default' => null, 'null' => true],
         ];
 
         $this->assertEquals(count($expected), count($columns));
