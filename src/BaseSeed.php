@@ -23,8 +23,25 @@ use function Cake\Core\pluginSplit;
  */
 class BaseSeed implements SeedInterface
 {
+    /**
+     * The Adapter instance
+     *
+     * @var \Migrations\Db\Adapter\AdapterInterface
+     */
     protected ?AdapterInterface $adapter = null;
+
+    /**
+     * The ConsoleIo instance
+     *
+     * @var \Cake\Console\ConsoleIo
+     */
     protected ?ConsoleIo $io = null;
+
+    /**
+     * The config instance.
+     *
+     * @var \Migrations\Config\ConfigInterface
+     */
     protected ?ConfigInterface $config;
 
     /**
