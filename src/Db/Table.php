@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db;
 
+use Cake\Collection\Collection;
 use Cake\Core\Configure;
 use InvalidArgumentException;
 use Migrations\Db\Action\AddColumn;
@@ -60,6 +61,15 @@ class Table
      * @var array
      */
     protected array $data = [];
+
+    /**
+     * Primary key for this table.
+     * Can either be a string or an array in case of composite
+     * primary key.
+     *
+     * @var string|string[]
+     */
+    protected string|array $primaryKey;
 
     /**
      * @param string $name Table Name
@@ -287,6 +297,19 @@ class Table
     {
         $this->actions = new Intent();
         $this->resetData();
+    }
+
+    /**
+     * Add a primary key to a database table.
+     *
+     * @param string|string[] $columns Table Column(s)
+     * @return $this
+     */
+    public function addPrimaryKey(string|array $columns)
+    {
+        $this->primaryKey = $columns;
+
+        return $this;
     }
 
     /**
@@ -538,10 +561,10 @@ class Table
      * @param bool $withTimezone Whether to set the timezone option on the added columns
      * @return $this
      */
-    public function addTimestamps(string|false|null $createdAt = 'created_at', string|false|null $updatedAt = 'updated_at', bool $withTimezone = false)
+    public function addTimestamps(string|false|null $createdAt = 'created', string|false|null $updatedAt = 'updated', bool $withTimezone = false)
     {
-        $createdAt = $createdAt ?? 'created_at';
-        $updatedAt = $updatedAt ?? 'updated_at';
+        $createdAt = $createdAt ?? 'created';
+        $updatedAt = $updatedAt ?? 'updated';
 
         if (!$createdAt && !$updatedAt) {
             throw new RuntimeException('Cannot set both created_at and updated_at columns to false');
@@ -625,9 +648,89 @@ class Table
      */
     public function create(): void
     {
+        $options = $this->getTable()->getOptions();
+        if ((!isset($options['id']) || $options['id'] === false) && !empty($this->primaryKey)) {
+            $options['primary_key'] = $this->primaryKey;
+            $this->filterPrimaryKey();
+        }
+
+        $adapter = $this->getAdapter();
+        if ($adapter->getAdapterType() === 'mysql' && empty($options['collation'])) {
+            // TODO this should be a method on the MySQL adapter.
+            // It could be a hook method on the adapter?
+            $encodingRequest = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+                FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname';
+
+            $connection = $adapter->getConnection();
+            $connectionConfig = $connection->config();
+
+            $statement = $connection->execute($encodingRequest, ['dbname' => $connectionConfig['database']]);
+            $defaultEncoding = $statement->fetch('assoc');
+            if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
+                $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];
+            }
+        }
+
+        $this->getTable()->setOptions($options);
+
         $this->executeActions(false);
         $this->saveData();
         $this->reset(); // reset pending changes
+    }
+
+    /**
+     * This method is called in case a primary key was defined using the addPrimaryKey() method.
+     * It currently does something only if using SQLite.
+     * If a column is an auto-increment key in SQLite, it has to be a primary key and it has to defined
+     * when defining the column. Phinx takes care of that so we have to make sure columns defined as autoincrement were
+     * not added with the addPrimaryKey method, otherwise, SQL queries will be wrong.
+     *
+     * @return void
+     */
+    protected function filterPrimaryKey(): void
+    {
+        $options = $this->getTable()->getOptions();
+        if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($options['primary_key'])) {
+            return;
+        }
+
+        $primaryKey = $options['primary_key'];
+        if (!is_array($primaryKey)) {
+            $primaryKey = [$primaryKey];
+        }
+        $primaryKey = array_flip($primaryKey);
+
+        $columnsCollection = (new Collection($this->actions->getActions()))
+            ->filter(function ($action) {
+                return $action instanceof AddColumn;
+            })
+            ->map(function ($action) {
+                /** @var \Phinx\Db\Action\ChangeColumn|\Phinx\Db\Action\RenameColumn|\Phinx\Db\Action\RemoveColumn|\Phinx\Db\Action\AddColumn $action */
+                return $action->getColumn();
+            });
+        $primaryKeyColumns = $columnsCollection->filter(function (Column $columnDef, $key) use ($primaryKey) {
+            return isset($primaryKey[$columnDef->getName()]);
+        })->toArray();
+
+        if (empty($primaryKeyColumns)) {
+            return;
+        }
+
+        foreach ($primaryKeyColumns as $primaryKeyColumn) {
+            if ($primaryKeyColumn->isIdentity()) {
+                unset($primaryKey[$primaryKeyColumn->getName()]);
+            }
+        }
+
+        $primaryKey = array_flip($primaryKey);
+
+        if (!empty($primaryKey)) {
+            $options['primary_key'] = $primaryKey;
+        } else {
+            unset($options['primary_key']);
+        }
+
+        $this->getTable()->setOptions($options);
     }
 
     /**

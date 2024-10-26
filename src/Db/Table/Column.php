@@ -765,6 +765,7 @@ class Column
         return [
             'length' => 'limit',
             'precision' => 'limit',
+            'autoIncrement' => 'identity',
         ];
     }
 
