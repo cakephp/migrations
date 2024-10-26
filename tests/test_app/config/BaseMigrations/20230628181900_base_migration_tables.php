@@ -10,6 +10,10 @@ class BaseMigrationTables extends BaseMigration
         $table
             ->addColumn('name', 'string')
             ->addTimestamps()
+            ->addPrimaryKey('id')
             ->create();
+        $io = $this->getIo();
+        $res = $this->query('SELECT 121 as val');
+        $io->out('query=' . $res->fetchColumn(0));
     }
 }

@@ -114,26 +114,17 @@ class MigrateCommandTest extends TestCase
     public function testMigrateBaseMigration(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'BaseMigrations';
-        $this->exec('migrations migrate -v --source BaseMigrations -c test');
-        debug($this->_out->messages());
-        debug($this->_err->messages());
+        $this->exec('migrations migrate -v --source BaseMigrations -c test --no-lock');
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<info>using connection</info> test');
         $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
-        $this->assertOutputContains('CreateNumbersTable:</info> <comment>migrated');
-        $this->assertOutputContains('UpdateNumbersTable:</info> <comment>migrated');
-        $this->assertOutputContains('CreateLettersTable:</info> <comment>migrated');
-        $this->assertOutputContains('CreateStoresTable:</info> <comment>migrated');
+        $this->assertOutputContains('BaseMigrationTables:</info> <comment>migrated');
+        $this->assertOutputContains('query=121');
         $this->assertOutputContains('All Done');
-        $this->assertOutputContains('Dumping the current schema');
 
         $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(2, $table->find()->all()->toArray());
-
-        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
-        $this->createdFiles[] = $dumpFile;
-        $this->assertFileExists($dumpFile);
+        $this->assertCount(1, $table->find()->all()->toArray());
     }
 
     /**

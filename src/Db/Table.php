@@ -650,8 +650,8 @@ class Table
     {
         $options = $this->getTable()->getOptions();
         if ((!isset($options['id']) || $options['id'] === false) && !empty($this->primaryKey)) {
-            $options['primary_key'] = $this->primaryKey;
-            $this->filterPrimaryKey();
+            $options['primary_key'] = (array)$this->primaryKey;
+            $this->filterPrimaryKey($options);
         }
 
         $adapter = $this->getAdapter();
@@ -687,9 +687,8 @@ class Table
      *
      * @return void
      */
-    protected function filterPrimaryKey(): void
+    protected function filterPrimaryKey(array $options): void
     {
-        $options = $this->getTable()->getOptions();
         if ($this->getAdapter()->getAdapterType() !== 'sqlite' || empty($options['primary_key'])) {
             return;
         }
