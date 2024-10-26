@@ -374,7 +374,7 @@ class MigrationAdapter implements MigrationInterface
     /**
      * {@inheritDoc}
      */
-    public function table(string $tableName, array $options): Table
+    public function table(string $tableName, array $options = []): Table
     {
         throw new RuntimeException('MigrationAdapter::table is not implemented');
     }

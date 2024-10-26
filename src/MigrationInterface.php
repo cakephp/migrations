@@ -290,7 +290,7 @@ interface MigrationInterface
      * @param array<string, mixed> $options Options
      * @return \Migrations\Db\Table
      */
-    public function table(string $tableName, array $options): Table;
+    public function table(string $tableName, array $options = []): Table;
 
     /**
      * Perform checks on the migration, printing a warning
