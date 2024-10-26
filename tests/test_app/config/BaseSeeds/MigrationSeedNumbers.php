@@ -35,11 +35,11 @@ class MigrationSeedNumbers extends BaseSeed
         $query = $this->query('SELECT radix FROM numbers');
         $io->out('radix=' . $query->fetchColumn(0));
 
-        $row = $this->fetchRow('SELECT 121 as key');
-        $io->out('fetchRow=' . $row['key']);
+        $row = $this->fetchRow('SELECT 121 as row_val');
+        $io->out('fetchRow=' . $row['row_val']);
         $io->out('hasTable=' . $this->hasTable('numbers'));
 
-        $row = $this->fetchAll('SELECT 121 as key');
-        $io->out('fetchAll=' . $row[0]['key']);
+        $rows = $this->fetchAll('SELECT 121 as row_val');
+        $io->out('fetchAll=' . $rows[0]['row_val']);
     }
 }
