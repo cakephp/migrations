@@ -2,7 +2,7 @@
 
 use Migrations\BaseMigration;
 
-class UpdateNumbersTable extends BaseMigration
+class BaseUpdateNumbersTable extends BaseMigration
 {
     public function up(): void
     {

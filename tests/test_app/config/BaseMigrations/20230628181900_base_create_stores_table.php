@@ -2,7 +2,7 @@
 
 use Migrations\BaseMigration;
 
-class CreateStoresTable extends BaseMigration
+class BaseCreateStoresTable extends BaseMigration
 {
     public function change(): void
     {

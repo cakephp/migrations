@@ -2,7 +2,7 @@
 
 use Migrations\BaseMigration;
 
-class CreateLettersTable extends BaseMigration
+class BaseCreateLettersTable extends BaseMigration
 {
     public bool $autoId = false;
 
