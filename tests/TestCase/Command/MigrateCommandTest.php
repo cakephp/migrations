@@ -121,6 +121,8 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('BaseMigrationTables:</info> <comment>migrated');
         $this->assertOutputContains('query=121');
+        $this->assertOutputContains('fetchRow=122');
+        $this->assertOutputContains('hasTable=1');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');

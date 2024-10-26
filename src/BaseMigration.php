@@ -55,6 +55,13 @@ class BaseMigration implements MigrationInterface
     protected array $tables = [];
 
     /**
+     * Is migrating up prop
+     *
+     * @var bool
+     */
+    protected bool $isMigratingUp = true;
+
+    /**
      * Whether the tables created in this migration
      * should auto-create an `id` field or not
      *
@@ -200,9 +207,7 @@ class BaseMigration implements MigrationInterface
      */
     public function isMigratingUp(): bool
     {
-        $this->isMigratingUp = $isMigratingUp;
-
-        return $this;
+        return $this->isMigratingUp;
     }
 
     /**

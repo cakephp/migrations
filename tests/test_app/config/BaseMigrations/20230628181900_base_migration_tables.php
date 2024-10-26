@@ -13,7 +13,16 @@ class BaseMigrationTables extends BaseMigration
             ->addPrimaryKey('id')
             ->create();
         $io = $this->getIo();
+
         $res = $this->query('SELECT 121 as val');
         $io->out('query=' . $res->fetchColumn(0));
+        $io->out('fetchRow=' . $this->fetchRow('SELECT 122 as val')['val']);
+        $io->out('hasTable=' . $this->hasTable('base_stores'));
+
+        // Run for coverage
+        $this->getSelectBuilder();
+        $this->getInsertBuilder();
+        $this->getDeleteBuilder();
+        $this->getUpdateBuilder();
     }
 }
