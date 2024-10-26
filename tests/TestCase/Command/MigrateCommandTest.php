@@ -109,6 +109,34 @@ class MigrateCommandTest extends TestCase
     }
 
     /**
+     * Integration test for BaseMigration with built-in backend.
+     */
+    public function testMigrateBaseMigration(): void
+    {
+        $migrationPath = ROOT . DS . 'config' . DS . 'BaseMigrations';
+        $this->exec('migrations migrate -v --source BaseMigrations -c test');
+        debug($this->_out->messages());
+        debug($this->_err->messages());
+        $this->assertExitSuccess();
+
+        $this->assertOutputContains('<info>using connection</info> test');
+        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
+        $this->assertOutputContains('CreateNumbersTable:</info> <comment>migrated');
+        $this->assertOutputContains('UpdateNumbersTable:</info> <comment>migrated');
+        $this->assertOutputContains('CreateLettersTable:</info> <comment>migrated');
+        $this->assertOutputContains('CreateStoresTable:</info> <comment>migrated');
+        $this->assertOutputContains('All Done');
+        $this->assertOutputContains('Dumping the current schema');
+
+        $table = $this->fetchTable('Phinxlog');
+        $this->assertCount(2, $table->find()->all()->toArray());
+
+        $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
+        $this->createdFiles[] = $dumpFile;
+        $this->assertFileExists($dumpFile);
+    }
+
+    /**
      * Test that running with a no-op migrations is successful
      */
     public function testMigrateWithSourceMigration(): void
