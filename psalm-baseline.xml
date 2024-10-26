@@ -5,6 +5,11 @@
       <code><![CDATA[new Seed()]]></code>
     </DeprecatedClass>
   </file>
+  <file src="src/BaseMigration.php">
+    <DeprecatedMethod>
+      <code><![CDATA[getQueryBuilder]]></code>
+    </DeprecatedMethod>
+  </file>
   <file src="src/Command/BakeMigrationDiffCommand.php">
     <DeprecatedClass>
       <code><![CDATA[Dump::class]]></code>

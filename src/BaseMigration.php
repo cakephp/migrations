@@ -431,10 +431,10 @@ class BaseMigration implements MigrationInterface
             ) {
                 $io = $this->getIo();
                 if ($io) {
-                    $io->out(sprintf(
+                    $io->out(
                         '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
                         ' <warning>Ignoring up() and down()</warning>.'
-                    ));
+                    );
                 }
             }
         }
