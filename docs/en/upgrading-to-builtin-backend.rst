@@ -2,7 +2,8 @@ Upgrading to the builtin backend
 ################################
 
 As of migrations 4.3 there is a new migrations backend that uses CakePHP's
-database abstractions and ORM. Longer term this will allow for phinx to be
+database abstractions and ORM. In 4.4, the ``builtin`` backend became the
+default backend. Longer term this will allow for phinx to be
 removed as a dependency. This greatly reduces the dependency footprint of
 migrations.
 
@@ -42,16 +43,16 @@ Similar changes are for fetching a single row::
     $stmt = $this->getAdapter()->query('SELECT * FROM articles');
     $rows = $stmt->fetch('assoc');
 
-Enabling the new backend
-========================
+Problems with the new backend?
+==============================
 
-The new backend can be enabled through application configuration. Add the
+The new backend is enabled by default. If your migrations contain errors when
+run with the builtin backend, please open `an issue
+<https://github.com/cakephp/migrations/issues/new>`_. You can also switch back
+to the ``phinx`` backend through application configuration. Add the
 following to your ``config/app.php``::
 
     return [
         // Other configuration.
-        'Migrations' => ['backend' => 'builtin'],
+        'Migrations' => ['backend' => 'phinx'],
     ];
-
-If your migrations have problems running with the builtin backend, removing this
-configuration option will revert to using phinx.
