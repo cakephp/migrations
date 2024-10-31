@@ -16,12 +16,21 @@
 <?php
 declare(strict_types=1);
 
+{% if backend == "builtin" %}
+use Migrations\BaseSeed;
+
+/**
+ * {{ name }} seed.
+ */
+class {{ name }}Seed extends BaseSeed
+{% else %}
 use Migrations\AbstractSeed;
 
 /**
  * {{ name }} seed.
  */
 class {{ name }}Seed extends AbstractSeed
+{% endif %}
 {
     /**
      * Run Method.

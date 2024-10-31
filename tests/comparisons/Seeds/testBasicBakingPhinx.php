@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\BaseSeed;
+use Migrations\AbstractSeed;
 
 /**
  * Articles seed.
  */
-class ArticlesSeed extends BaseSeed
+class ArticlesSeed extends AbstractSeed
 {
     /**
      * Run Method.
