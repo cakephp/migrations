@@ -200,6 +200,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*.php");
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
+
         $generatedMigration = basename($generatedMigration[0]);
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class TestSnapshotPluginBlogPgsql extends AbstractMigration
+class TestSnapshotPluginBlogPgsql extends BaseMigration
 {
     /**
      * Up Method.

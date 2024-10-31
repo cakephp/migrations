@@ -18,6 +18,7 @@ namespace Migrations\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Schema\CollectionInterface;
 use Cake\Database\Schema\TableSchema;
@@ -199,6 +200,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             'data' => $this->templateData,
             'dumpSchema' => $this->dumpSchema,
             'currentSchema' => $this->currentSchema,
+            'backend' => Configure::read('Migrations.backend', 'builtin'),
         ];
     }
 

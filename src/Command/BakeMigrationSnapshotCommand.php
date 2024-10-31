@@ -115,6 +115,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             'action' => 'create_table',
             'name' => $this->_name,
             'autoId' => $autoId,
+            'backend' => Configure::read('Migrations.backend', 'builtin'),
         ];
     }
 
