@@ -20,9 +20,15 @@
 <?php
 declare(strict_types=1);
 
+{% if backend == "builtin" %}
+use Migrations\BaseMigration;
+
+class {{ name }} extends BaseMigration
+{% else %}
 use Migrations\AbstractMigration;
 
 class {{ name }} extends AbstractMigration
+{% endif %}
 {
 {% if tableMethod == 'create' and columns['primaryKey'] %}
     public bool $autoId = false;

@@ -103,6 +103,23 @@ class BakeMigrationCommandTest extends TestCase
     }
 
     /**
+     * Test that when the phinx backend is active migrations use
+     * phinx base classes.
+     */
+    public function testCreatePhinx()
+    {
+        Configure::write('Migrations.backend', 'phinx');
+        $this->exec("bake migration CreateUsers  name --connection test");
+
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
+        $filePath = current($file);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    /**
      * Tests that baking a migration with the name as another will throw an exception.
      */
     public function testCreateDuplicateName()
