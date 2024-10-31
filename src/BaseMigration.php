@@ -62,6 +62,13 @@ class BaseMigration implements MigrationInterface
     protected bool $isMigratingUp = true;
 
     /**
+     * The version number.
+     *
+     * @var int
+     */
+    protected int $version;
+
+    /**
      * Whether the tables created in this migration
      * should auto-create an `id` field or not
      *
@@ -78,9 +85,10 @@ class BaseMigration implements MigrationInterface
      *
      * @param int $version The version this migration is
      */
-    public function __construct(protected int $version)
+    public function __construct(int $version)
     {
-        $this->validateVersion($this->version);
+        $this->validateVersion($version);
+        $this->version = $version;
     }
 
     /**
