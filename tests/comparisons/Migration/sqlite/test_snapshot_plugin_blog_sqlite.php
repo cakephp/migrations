@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class TestSnapshotPluginBlogSqlite extends AbstractMigration
+class TestSnapshotPluginBlogSqlite extends BaseMigration
 {
     /**
      * Up Method.

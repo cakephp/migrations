@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class TestSnapshotAutoIdDisabledSqlite extends AbstractMigration
+class TestSnapshotAutoIdDisabledSqlite extends BaseMigration
 {
     public bool $autoId = false;
 
