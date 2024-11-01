@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\BaseMigration;
+use Migrations\AbstractMigration;
 
-class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
+class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends AbstractMigration
 {
     /**
      * Up Method.
