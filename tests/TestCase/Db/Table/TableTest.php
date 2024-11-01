@@ -22,7 +22,7 @@ class TableTest extends TestCase
 {
     public static function provideAdapters()
     {
-        return [[new SqlServerAdapter([])], [new MysqlAdapter([])], [new PostgresAdapter([])], [new SQLiteAdapter([])]];
+        return [[new SqlServerAdapter([])], [new MysqlAdapter([])], [new PostgresAdapter([])], [new SQLiteAdapter(['name' => ':memory:'])]];
     }
 
     public static function provideTimestampColumnNames()
