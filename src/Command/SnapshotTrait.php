@@ -15,7 +15,6 @@ namespace Migrations\Command;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
-use Cake\Core\Configure;
 
 /**
  * Trait needed for all "snapshot" type of bake operations.
@@ -63,11 +62,7 @@ trait SnapshotTrait
         $newArgs = array_merge($newArgs, $this->parseOptions($args));
 
         $io->out('Marking the migration ' . $fileName . ' as migrated...');
-        if (Configure::read('Migrations.backend') == 'builtin') {
-            $this->executeCommand(MarkMigratedCommand::class, $newArgs, $io);
-        } else {
-            $this->executeCommand(MigrationsMarkMigratedCommand::class, $newArgs, $io);
-        }
+        $this->executeCommand(MigrationsMarkMigratedCommand::class, $newArgs, $io);
     }
 
     /**
@@ -83,11 +78,7 @@ trait SnapshotTrait
         $newArgs = $this->parseOptions($args);
 
         $io->out('Creating a dump of the new database state...');
-        if (Configure::read('Migrations.backend') == 'builtin') {
-            $this->executeCommand(DumpCommand::class, $newArgs, $io);
-        } else {
-            $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
-        }
+        $this->executeCommand(MigrationsDumpCommand::class, $newArgs, $io);
     }
 
     /**
