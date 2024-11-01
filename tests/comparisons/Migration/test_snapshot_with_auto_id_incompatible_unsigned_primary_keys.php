@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class TestSnapshotWithAutoIdIncompatibleUnsignedPrimaryKeys extends AbstractMigration
+class TestSnapshotWithAutoIdIncompatibleUnsignedPrimaryKeys extends BaseMigration
 {
     public bool $autoId = false;
 
