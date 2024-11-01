@@ -109,7 +109,7 @@ class BakeMigrationCommandTest extends TestCase
     public function testCreatePhinx()
     {
         Configure::write('Migrations.backend', 'phinx');
-        $this->exec("bake migration CreateUsers  name --connection test");
+        $this->exec('bake migration CreateUsers  name --connection test');
 
         $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $filePath = current($file);
