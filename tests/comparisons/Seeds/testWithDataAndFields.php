@@ -14,7 +14,7 @@ class EventsSeed extends BaseSeed
      * Write your database seeder using this method.
      *
      * More information on writing seeds is available here:
-     * https://book.cakephp.org/phinx/0/en/seeding.html
+     * https://book.cakephp.org/migrations/4/en/seeding.html
      *
      * @return void
      */
