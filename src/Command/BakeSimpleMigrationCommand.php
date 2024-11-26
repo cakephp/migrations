@@ -55,11 +55,20 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function fileName($name): string
+    public function fileName($name, ?string $path = null): string
     {
         $name = $this->getMigrationName($name);
+        $timestamp = Util::getCurrentTimestamp();
+        $suffix = '_' . Inflector::camelize($name) . '.php';
 
-        return Util::getCurrentTimestamp() . '_' . Inflector::camelize($name) . '.php';
+        if ($path) {
+            $offset = 0;
+            while (glob($path . $timestamp . '_*\\.php')) {
+                $timestamp = Util::getCurrentTimestamp(++$offset);
+            }
+        }
+
+        return $timestamp . $suffix;
     }
 
     /**
@@ -128,10 +137,11 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $renderer->set($this->templateData($args));
         $contents = $renderer->generate($this->template());
 
-        $filename = $this->getPath($args) . $this->fileName($name);
+        $path = $this->getPath($args);
+        $filename = $path . $this->fileName($name, $path);
         $this->createFile($filename, $contents, $args, $io);
 
-        $emptyFile = $this->getPath($args) . '.gitkeep';
+        $emptyFile = $path . '.gitkeep';
         $this->deleteEmptyFile($emptyFile, $io);
     }
 

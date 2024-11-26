@@ -57,9 +57,13 @@ class Util
      *
      * @return string
      */
-    public static function getCurrentTimestamp(): string
+    public static function getCurrentTimestamp(?int $offset = null): string
     {
-        $dt = new DateTime('now', new DateTimeZone('UTC'));
+        $time = 'now';
+        if ($offset) {
+            $time = '+' . $offset . ' seconds';
+        }
+        $dt = new DateTime($time, new DateTimeZone('UTC'));
 
         return $dt->format(static::DATE_FORMAT);
     }
