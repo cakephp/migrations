@@ -45,6 +45,13 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     protected ?ConsoleIo $io = null;
 
     /**
+     * Arguments
+     *
+     * @var \Cake\Console\Arguments|null
+     */
+    protected ?Arguments $args = null;
+
+    /**
      * @inheritDoc
      */
     public function name(): string
@@ -55,17 +62,16 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function fileName($name, ?string $path = null): string
+    public function fileName($name): string
     {
         $name = $this->getMigrationName($name);
         $timestamp = Util::getCurrentTimestamp();
         $suffix = '_' . Inflector::camelize($name) . '.php';
 
-        if ($path) {
-            $offset = 0;
-            while (glob($path . $timestamp . '_*\\.php')) {
-                $timestamp = Util::getCurrentTimestamp(++$offset);
-            }
+        $path = $this->getPath($this->args);
+        $offset = 0;
+        while (glob($path . $timestamp . '_*\\.php')) {
+            $timestamp = Util::getCurrentTimestamp(++$offset);
         }
 
         return $timestamp . $suffix;
@@ -109,6 +115,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->io = $io;
+        $this->args = $args;
         $migrationWithSameName = glob($this->getPath($args) . '*_' . $name . '.php');
         if (!empty($migrationWithSameName)) {
             $force = $args->getOption('force');
@@ -138,7 +145,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $contents = $renderer->generate($this->template());
 
         $path = $this->getPath($args);
-        $filename = $path . $this->fileName($name, $path);
+        $filename = $path . $this->fileName($name);
         $this->createFile($filename, $contents, $args, $io);
 
         $emptyFile = $path . '.gitkeep';
