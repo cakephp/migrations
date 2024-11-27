@@ -68,6 +68,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $timestamp = Util::getCurrentTimestamp();
         $suffix = '_' . Inflector::camelize($name) . '.php';
 
+        /** @psalm-suppress PossiblyNullArgument */
         $path = $this->getPath($this->args);
         $offset = 0;
         while (glob($path . $timestamp . '_*\\.php')) {
