@@ -145,7 +145,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $contents = $renderer->generate($this->template());
 
         $path = $this->getPath($args);
-        $filename = $path . $this->fileName($name, $path);
+        $filename = $path . $this->fileName($name);
         $this->createFile($filename, $contents, $args, $io);
 
         $emptyFile = $path . '.gitkeep';
