@@ -149,7 +149,7 @@ class TableFinder
             return [];
         }
 
-        return array_map('basename', glob($path . '*.php') ?: []);
+        return array_map('basename', glob($path . '*\\.php') ?: []);
     }
 
     /**

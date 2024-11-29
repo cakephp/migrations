@@ -111,7 +111,7 @@ class UtilTest extends TestCase
         $this->assertCount(1, $files);
         $this->assertEquals('empty.txt', basename($files[0]));
 
-        $files = Util::glob(__DIR__ . '/_files/migrations/*.php');
+        $files = Util::glob(__DIR__ . '/_files/migrations/*\\.php');
         $this->assertCount(3, $files);
         $this->assertEquals('20120111235330_test_migration.php', basename($files[0]));
         $this->assertEquals('20120116183504_test_migration_2.php', basename($files[1]));
@@ -121,8 +121,8 @@ class UtilTest extends TestCase
     public function testGlobAll()
     {
         $files = Util::globAll([
-            __DIR__ . '/_files/migrations/*.php',
-            __DIR__ . '/_files/migrations/subdirectory/*.txt',
+            __DIR__ . '/_files/migrations/*\\.php',
+            __DIR__ . '/_files/migrations/subdirectory/*\\.txt',
         ]);
 
         $this->assertCount(4, $files);

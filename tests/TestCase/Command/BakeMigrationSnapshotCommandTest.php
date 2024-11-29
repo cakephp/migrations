@@ -101,7 +101,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
         $this->exec("bake migration_snapshot {$bakeName} -c test --no-lock");
 
-        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*.php');
+        $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*\\.php');
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
         $generatedMigration = basename($generatedMigration[0]);
@@ -198,7 +198,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $bakeName = $this->getBakeName("TestSnapshot{$scenario}");
         $this->exec("bake migration_snapshot {$bakeName} -c test{$arguments}");
 
-        $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*.php");
+        $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*\\.php");
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
 
