@@ -131,7 +131,7 @@ class MigrationsPlugin extends BasePlugin
 
             return $commands;
         }
-        
+
         if (class_exists(SimpleBakeCommand::class)) {
             $found = $commands->discoverPlugin($this->getName());
 
