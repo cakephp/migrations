@@ -139,7 +139,7 @@ class SqlserverAdapter extends PdoAdapter
         $parts = $this->getSchemaName($tableName);
         /** @var array<string, mixed> $result */
         $result = $this->query(
-            "SELECT count(*) as [count] FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+            'SELECT count(*) as [count] FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',
             [$parts['schema'], $parts['table']]
         )->fetch('assoc');
 
@@ -351,7 +351,7 @@ class SqlserverAdapter extends PdoAdapter
    AND columns.column_id = extended_properties.minor_id
    AND extended_properties.name = 'MS_Description'
    WHERE schemas.[name] = ? AND tables.[name] = ? AND columns.[name] = ?";
-        $params  = [ $this->schema, $tableName, (string)$columnName];
+        $params = [$this->schema, $tableName, (string)$columnName];
         $row = $this->query($sql, $params)->fetch('assoc');
 
         if ($row) {
@@ -1095,7 +1095,7 @@ ORDER BY T.[name], I.[index_id]";
     {
         /** @var array<string, mixed> $result */
         $result = $this->query(
-            "SELECT count(*) as [count] FROM master.dbo.sysdatabases WHERE [name] = ?",
+            'SELECT count(*) as [count] FROM master.dbo.sysdatabases WHERE [name] = ?',
             [$name]
         )->fetch('assoc');
 
@@ -1257,13 +1257,8 @@ SQL;
      */
     public function hasSchema(string $schemaName): bool
     {
-        $sql = sprintf(
-            'SELECT count(*) AS [count]
-             FROM sys.schemas
-             WHERE name = %s',
-            $this->quoteString($schemaName)
-        );
-        $result = $this->fetchRow($sql);
+        $sql = 'SELECT count(*) AS [count] FROM sys.schemas WHERE name = ?';
+        $result = $this->query($sql, [$schemaName])->fetch('assoc');
         if (!$result) {
             return false;
         }

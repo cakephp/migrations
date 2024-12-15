@@ -479,7 +479,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         if (strcasecmp($direction, MigrationInterface::UP) === 0) {
             // up
             $sql = sprintf(
-                "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?);",
+                'INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?);',
                 $this->quoteTableName($this->getSchemaTableName()),
                 $this->quoteColumnName('version'),
                 $this->quoteColumnName('migration_name'),
