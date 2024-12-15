@@ -751,19 +751,22 @@ class MysqlAdapter extends PdoAdapter
     public function getPrimaryKey(string $tableName): array
     {
         $options = $this->getOptions();
-        $rows = $this->fetchAll(sprintf(
+        $params = [
+            $options['database'],
+            $tableName,
+        ];
+        $rows = $this->query(
             "SELECT
                 k.CONSTRAINT_NAME,
                 k.COLUMN_NAME
             FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS t
             JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
                 USING(CONSTRAINT_NAME,TABLE_SCHEMA,TABLE_NAME)
-            WHERE t.CONSTRAINT_TYPE='PRIMARY KEY'
-                AND t.TABLE_SCHEMA='%s'
-                AND t.TABLE_NAME='%s'",
-            $options['database'],
-            $tableName
-        ));
+            WHERE t.CONSTRAINT_TYPE = 'PRIMARY KEY'
+                AND t.TABLE_SCHEMA = ?
+                AND t.TABLE_NAME = ?",
+            $params
+        )->fetchAll('assoc');
 
         $primaryKey = [
             'columns' => [],
@@ -814,7 +817,11 @@ class MysqlAdapter extends PdoAdapter
         }
 
         $foreignKeys = [];
-        $rows = $this->fetchAll(sprintf(
+        $params = [
+            empty($schema) ? 'DATABASE()' : "'$schema'",
+            $tableName,
+        ];
+        $rows = $this->query(
             "SELECT
               CONSTRAINT_NAME,
               CONCAT(TABLE_SCHEMA, '.', TABLE_NAME) AS TABLE_NAME,
@@ -826,9 +833,8 @@ class MysqlAdapter extends PdoAdapter
               AND TABLE_SCHEMA = %s
               AND TABLE_NAME = '%s'
             ORDER BY POSITION_IN_UNIQUE_CONSTRAINT",
-            empty($schema) ? 'DATABASE()' : "'$schema'",
-            $tableName
-        ));
+            $params
+        )->fetchAll('assoc');
         foreach ($rows as $row) {
             $foreignKeys[$row['CONSTRAINT_NAME']]['table'] = $row['TABLE_NAME'];
             $foreignKeys[$row['CONSTRAINT_NAME']]['columns'][] = $row['COLUMN_NAME'];
@@ -1270,12 +1276,10 @@ class MysqlAdapter extends PdoAdapter
      */
     public function hasDatabase(string $name): bool
     {
-        $rows = $this->fetchAll(
-            sprintf(
-                'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'%s\'',
-                $name
-            )
-        );
+        $rows = $this->query(
+            'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?',
+            [$name]
+        )->fetchAll('assoc');
 
         foreach ($rows as $row) {
             if (!empty($row)) {
@@ -1470,16 +1474,13 @@ class MysqlAdapter extends PdoAdapter
         $options = $this->getOptions();
 
         // mysql specific
-        $sql = sprintf(
-            "SELECT *
+        $sql = "SELECT *
              FROM information_schema.tables
-             WHERE table_schema = '%s'
-             AND table_name = '%s'",
-            $options['database'],
-            $tableName
-        );
+             WHERE table_schema = ?
+             AND table_name = ?";
+        $params = [$options['database'], $tableName];
 
-        $table = $this->fetchRow($sql);
+        $table = $this->query($sql, $params)->fetch('assoc');
 
         return $table !== false ? $table : [];
     }
