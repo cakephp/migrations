@@ -1070,6 +1070,8 @@ class MigrationsTest extends TestCase
             // type is supported by migrations.
             $this->markTestSkipped('Incompatible with sqlserver right now.');
         }
+        $snapshotConfig = ConnectionManager::getConfig('test_snapshot');
+        $this->skipIf(empty($snapshotConfig['database']), 'Requires test_snapshot connection');
 
         if ($flags) {
             Configure::write('Migrations', $flags + Configure::read('Migrations', []));

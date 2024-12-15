@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Phinx\Migration;
+namespace Migrations\Test\TestCase\Migration;
 
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;

@@ -170,7 +170,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffWithAutoIdCompatibleSignedPrimaryKeys(): void
     {
-        $this->skipIf(getenv('DB_URL_COMPARE') === false);
+        $this->skipIf(!env('DB_URL_COMPARE'));
 
         Configure::write('Migrations.unsigned_primary_keys', false);
 
@@ -183,7 +183,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffWithAutoIdIncompatibleSignedPrimaryKeys(): void
     {
-        $this->skipIf(getenv('DB_URL_COMPARE') === false);
+        $this->skipIf(!env('DB_URL_COMPARE'));
 
         $this->runDiffBakingTest('WithAutoIdIncompatibleSignedPrimaryKeys');
     }
@@ -194,7 +194,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffWithAutoIdIncompatibleUnsignedPrimaryKeys(): void
     {
-        $this->skipIf(getenv('DB_URL_COMPARE') === false);
+        $this->skipIf(!env('DB_URL_COMPARE'));
 
         Configure::write('Migrations.unsigned_primary_keys', false);
 
@@ -203,6 +203,8 @@ class BakeMigrationDiffCommandTest extends TestCase
 
     protected function runDiffBakingTest(string $scenario): void
     {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
         $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . Inflector::underscore($scenario) . '_' . env('DB') . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
