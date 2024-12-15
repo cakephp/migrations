@@ -580,7 +580,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     {
         $params = [
             $this->castToBool($state),
-                $migration->getVersion()
+            $migration->getVersion(),
         ];
         $this->query(
             sprintf(

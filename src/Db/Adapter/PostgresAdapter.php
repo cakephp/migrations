@@ -496,16 +496,15 @@ class PostgresAdapter extends PdoAdapter
         string $newColumnName
     ): AlterInstructions {
         $parts = $this->getSchemaName($tableName);
-        $sql = sprintf(
-            'SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS column_exists
+        $sql = 'SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS column_exists
              FROM information_schema.columns
-             WHERE table_schema = %s AND table_name = %s AND column_name = %s',
-            $this->quoteString($parts['schema']),
-            $this->quoteString($parts['table']),
-            $this->quoteString($columnName)
-        );
-
-        $result = $this->fetchRow($sql);
+             WHERE table_schema = ? AND table_name = ? AND column_name = ?';
+        $params = [
+            $parts['schema'],
+            $parts['table'],
+            $columnName,
+        ];
+        $result = $this->query($sql, $params)->fetch('assoc');
         if (!$result || !(bool)$result['column_exists']) {
             throw new InvalidArgumentException("The specified column does not exist: $columnName");
         }
@@ -833,7 +832,11 @@ class PostgresAdapter extends PdoAdapter
     public function getPrimaryKey(string $tableName): array
     {
         $parts = $this->getSchemaName($tableName);
-        $rows = $this->fetchAll(sprintf(
+        $params = [
+            $parts['schema'],
+            $parts['table'],
+        ];
+        $rows = $this->query(
             "SELECT
                     tc.constraint_name,
                     kcu.column_name
@@ -841,12 +844,11 @@ class PostgresAdapter extends PdoAdapter
                 JOIN information_schema.key_column_usage AS kcu
                     ON tc.constraint_name = kcu.constraint_name
                 WHERE constraint_type = 'PRIMARY KEY'
-                    AND tc.table_schema = %s
-                    AND tc.table_name = %s
+                    AND tc.table_schema = ?
+                    AND tc.table_name = ?
                 ORDER BY kcu.position_in_unique_constraint",
-            $this->quoteString($parts['schema']),
-            $this->quoteString($parts['table'])
-        ));
+            $params,
+        )->fetchAll('assoc');
 
         $primaryKey = [
             'columns' => [],
@@ -896,7 +898,11 @@ class PostgresAdapter extends PdoAdapter
     {
         $parts = $this->getSchemaName($tableName);
         $foreignKeys = [];
-        $rows = $this->fetchAll(sprintf(
+        $params = [
+            $parts['schema'],
+            $parts['table'],
+        ];
+        $rows = $this->query(
             "SELECT
                     tc.constraint_name,
                     tc.table_name, kcu.column_name,
@@ -906,11 +912,10 @@ class PostgresAdapter extends PdoAdapter
                     information_schema.table_constraints AS tc
                     JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
                     JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
-                WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema = %s AND tc.table_name = %s
+                WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema = ? AND tc.table_name = ?
                 ORDER BY kcu.ordinal_position",
-            $this->quoteString($parts['schema']),
-            $this->quoteString($parts['table'])
-        ));
+            $params,
+        )->fetchAll('assoc');
         foreach ($rows as $row) {
             $foreignKeys[$row['constraint_name']]['table'] = $row['table_name'];
             $foreignKeys[$row['constraint_name']]['columns'][] = $row['column_name'];
@@ -1384,13 +1389,8 @@ class PostgresAdapter extends PdoAdapter
      */
     public function hasSchema(string $schemaName): bool
     {
-        $sql = sprintf(
-            'SELECT count(*)
-             FROM pg_namespace
-             WHERE nspname = %s',
-            $this->quoteString($schemaName)
-        );
-        $result = $this->fetchRow($sql);
+        $sql = 'SELECT count(*) FROM pg_namespace WHERE nspname = ?';
+        $result = $this->query($sql, [$schemaName])->fetch('assoc');
         if (!$result) {
             return false;
         }
