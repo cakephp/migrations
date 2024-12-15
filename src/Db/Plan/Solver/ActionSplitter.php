@@ -46,7 +46,7 @@ class ActionSplitter
     protected $conflictFilter;
 
     /**
-     * Comstructor
+     * Constructor
      *
      * @param string $conflictClass The fully qualified class name of the Action class to match for conflicts
      * @param string $conflictClassDual The fully qualified class name of the Action class to match for conflicts,
@@ -61,7 +61,7 @@ class ActionSplitter
     }
 
     /**
-     * Returs a sequence of AlterTable instructions that are non conflicting
+     * Returns a sequence of AlterTable instructions that are non conflicting
      * based on the constructor parameters.
      *
      * @param \Migrations\Db\Plan\AlterTable $alter The collection of actions to inspect

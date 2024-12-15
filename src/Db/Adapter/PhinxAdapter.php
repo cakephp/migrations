@@ -198,7 +198,7 @@ class PhinxAdapter implements PhinxAdapterInterface
      */
     protected function convertForeignKey(PhinxForeignKey $phinxKey): ForeignKey
     {
-        $foreignkey = new ForeignKey();
+        $foreignKey = new ForeignKey();
         $attrs = [
             'columns', 'referencedColumns', 'onDelete', 'onUpdate', 'constraint',
         ];
@@ -212,7 +212,7 @@ class PhinxAdapter implements PhinxAdapterInterface
                 $value = null;
             }
             if ($value !== null) {
-                $foreignkey->{$set}($value);
+                $foreignKey->{$set}($value);
             }
         }
 
@@ -222,10 +222,10 @@ class PhinxAdapter implements PhinxAdapterInterface
             $referenced = null;
         }
         if ($referenced) {
-            $foreignkey->setReferencedTable($this->convertTable($referenced));
+            $foreignKey->setReferencedTable($this->convertTable($referenced));
         }
 
-        return $foreignkey;
+        return $foreignKey;
     }
 
     /**

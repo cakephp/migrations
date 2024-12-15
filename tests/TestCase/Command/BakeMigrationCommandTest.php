@@ -43,9 +43,16 @@ class BakeMigrationCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $createUsers = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Users.php');
-        if ($createUsers) {
-            foreach ($createUsers as $file) {
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Users.php');
+        if ($files) {
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
+
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_PrefixNew.php');
+        if ($files) {
+            foreach ($files as $file) {
                 unlink($file);
             }
         }
@@ -128,6 +135,17 @@ class BakeMigrationCommandTest extends TestCase
         $this->exec('bake migration CreateUsers --connection test');
         $this->assertExitCode(BaseCommand::CODE_ERROR);
         $this->assertErrorContains('A migration with the name `CreateUsers` already exists. Please use a different name.');
+    }
+
+    /**
+     * Tests that baking a migration with the name as reserved keyword triggers prefixing.
+     */
+    public function testCreateWithReservedKeyword()
+    {
+        $this->exec('bake migration New --connection test', ['Prefix']);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $this->assertOutputRegExp('/Wrote.*?PrefixNew\.php/');
     }
 
     public function testCreateBuiltinAlias()

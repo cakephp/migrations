@@ -9,8 +9,6 @@ It allows you to evolve your database tables over time. Instead of writing
 schema modifications in SQL, this plugin allows you to use an intuitive set of
 methods to implement your database changes.
 
-This plugin is a wrapper for the database migrations library `Phinx <https://phinx.org/>`_.
-
 Installation
 ============
 
@@ -57,15 +55,15 @@ columns, create indexes and even insert data into your database.
 Here's an example of a migration::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class CreateProducts extends AbstractMigration
+    class CreateProducts extends BaseMigration
     {
         /**
          * Change Method.
          *
          * More information on this method is available here:
-         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
+         * https://book.cakephp.org/migrations/3/en/writing-migrations.html#the-change-method
          * @return void
          */
         public function change()
@@ -142,10 +140,8 @@ Here are examples of migration filenames:
 The easiest way to create a migrations file is by using ``bin/cake bake
 migration`` CLI command.
 
-Please make sure you read the official
-`Phinx documentation <https://book.cakephp.org/phinx/0/en/migrations.html>`_
-in order to know the complete list of methods you can use for writing migration
-files.
+See the :ref:`creating-a-table` section to learn more about using migrations to
+define tables.
 
 .. note::
 
@@ -198,14 +194,6 @@ Migration names can follow any of the following patterns:
 You can also use the ``underscore_form`` as the name for your migrations i.e.
 ``create_products``.
 
-.. versionadded:: cakephp/migrations 1.5.2
-
-    As of v1.5.2 of the `migrations plugin <https://github.com/cakephp/migrations/>`_,
-    the migration filename will be automatically camelized. This version of the
-    plugin is only available with a release of CakePHP >= to 3.1. Prior to this
-    version of the plugin the migration name would be in the underscore form,
-    i.e. ``20160121164955_create_products.php``.
-
 .. warning::
 
     Migration names are used as migration class names, and thus may collide with
@@ -242,7 +230,7 @@ written between bracket.
 Fields named ``created`` and ``modified``, as well as any field with a ``_at``
 suffix, will automatically be set to the type ``datetime``.
 
-Field types are those generically made available by the ``Phinx`` library. Those
+Field types are those generically made available by CakePHP. Those
 can be:
 
 * string
@@ -258,6 +246,10 @@ can be:
 * binary
 * boolean
 * uuid
+* geometry
+* point
+* linestring
+* polygon
 
 There are some heuristics to choosing fieldtypes when left unspecified or set to
 an invalid value. Default field type is ``string``:
@@ -278,15 +270,15 @@ You can use ``bake`` to create a table:
 The command line above will generate a migration file that resembles::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class CreateProducts extends AbstractMigration
+    class CreateProducts extends BaseMigration
     {
         /**
          * Change Method.
          *
          * More information on this method is available here:
-         * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
+         * https://book.cakephp.org/migrations/3/en/writing-migrations.html#the-change-method
          * @return void
          */
         public function change()
@@ -327,9 +319,9 @@ the code for creating the columns will be generated:
 Executing the command line above will generate::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class AddPriceToProducts extends AbstractMigration
+    class AddPriceToProducts extends BaseMigration
     {
         public function change()
         {
@@ -356,9 +348,9 @@ It is also possible to add indexes to columns:
 will generate::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class AddNameIndexToProducts extends AbstractMigration
+    class AddNameIndexToProducts extends BaseMigration
     {
         public function change()
         {
@@ -387,9 +379,9 @@ field type, ie:
 Executing the command line above will generate::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class AddFullDescriptionToProducts extends AbstractMigration
+    class AddFullDescriptionToProducts extends BaseMigration
     {
         public function change()
         {
@@ -422,9 +414,9 @@ command line, if the migration name is of the form "AlterXXXOnYYY":
 will generate::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class AlterPriceOnProducts extends AbstractMigration
+    class AlterPriceOnProducts extends BaseMigration
     {
         public function change()
         {
@@ -447,9 +439,9 @@ command line, if the migration name is of the form "RemoveXXXFromYYY":
 creates the file::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class RemovePriceFromProducts extends AbstractMigration
+    class RemovePriceFromProducts extends BaseMigration
     {
         public function up()
         {
@@ -514,8 +506,8 @@ to the snapshot of your plugin.
     When baking a snapshot for a plugin, the migration files will be created
     in your plugin's **config/Migrations** directory.
 
-Be aware that when you bake a snapshot, it is automatically added to the phinx
-log table as migrated.
+Be aware that when you bake a snapshot, it is automatically added to the
+migrations log table as migrated.
 
 Generating a diff between two database states
 =============================================
@@ -683,11 +675,6 @@ just like for the ``migrate`` command.
     When you bake a snapshot with the ``cake bake migration_snapshot``
     command, the created migration will automatically be marked as migrated.
 
-.. deprecated:: 1.4.0
-
-    The following way of using the command has been deprecated. Use it only
-    if you are using a version of the plugin < 1.4.0.
-
 This command expects the migration version number as argument:
 
 .. code-block:: bash
@@ -704,11 +691,11 @@ value. If you use it, it will mark all found migrations as migrated:
 ``seed`` : Seeding your database
 --------------------------------
 
-As of 1.5.5, you can use the ``migrations`` shell to seed your database. This
-leverages the `Phinx library seed feature <https://book.cakephp.org/phinx/0/en/seeding.html>`_.
+Seed classes are a good way to populate your database with default or starter
+data. They are also a great way to generate data for development environments.
+
 By default, seed files will be looked for in the ``config/Seeds`` directory of
-your application. Please make sure you follow
-`Phinx instructions to build your seed files <https://book.cakephp.org/phinx/0/en/seeding.html#creating-a-new-seed-class>`_.
+your application. See the :doc:`seeding` for how to build seed classes.
 
 As for migrations, a ``bake`` interface is provided for seed files:
 
@@ -727,16 +714,7 @@ As for migrations, a ``bake`` interface is provided for seed files:
     # You can specify an alternative connection when generating a seeder.
     bin/cake bake seed Articles --connection connection
 
-.. versionadded:: cakephp/migrations 1.6.4
-
-    Options ``--data``, ``--limit`` and ``--fields`` were added to export
-    data from your database.
-
-As of 1.6.4, the ``bake seed`` command allows you to create a seed file with
-data exported from your database by using the ``--data`` flag:
-
-.. code-block:: bash
-
+    # Include data from the Articles table in your seed.
     bin/cake bake seed --data Articles
 
 By default, it will export all the rows found in your table. You can limit the
@@ -787,16 +765,14 @@ that the same seeder can be applied multiple times.
 Calling a Seeder from another Seeder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. versionadded:: cakephp/migrations 1.6.2
-
 Usually when seeding, the order in which to insert the data must be respected
 to not encounter constraints violations. Since Seeders are executed in the
-alphabetical order by default, you can use the ``\Migrations\AbstractSeed::call()``
+alphabetical order by default, you can use the ``\Migrations\BaseSeed::call()``
 method to define your own sequence of seeders execution::
 
-    use Migrations\AbstractSeed;
+    use Migrations\BaseSeed;
 
-    class DatabaseSeed extends AbstractSeed
+    class DatabaseSeed extends BaseSeed
     {
         public function run(): void
         {
@@ -808,11 +784,6 @@ method to define your own sequence of seeders execution::
         }
     }
 
-.. note::
-
-    Make sure to extend the Migrations plugin ``AbstractSeed`` class if you want
-    to be able to use the ``call()`` method. This class was added with release
-    1.6.2.
 
 ``dump`` : Generating a dump file for the diff baking feature
 -------------------------------------------------------------
@@ -984,8 +955,7 @@ pass them to the method::
 Feature Flags
 =============
 
-Migrations uses Phinx, which has some feature flags that are disabled by default for now, but
-can enabled if you want them to:
+Migrations offers a few feature flags to compatibility with phinx. These features are disabled by default but can be enabled if required:
 
 * ``unsigned_primary_keys``: Should Migrations create primary keys as unsigned integers? (default: ``false``)
 * ``column_null_default``: Should Migrations create columns as null by default? (default: ``false``)
@@ -999,8 +969,6 @@ Set them via Configure to enable (e.g. in ``config/app.php``)::
         'column_null_default' => true,
     ],
 
-For details see `Phinx documentation <https://book.cakephp.org/phinx/0/en/configuration.html#feature-flags>`_.
-
 Tips and tricks
 ===============
 
@@ -1012,9 +980,9 @@ adding new tables to the database, you can use the second argument of the
 ``table()`` method::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class CreateProductsTable extends AbstractMigration
+    class CreateProductsTable extends BaseMigration
     {
         public function change()
         {
@@ -1041,16 +1009,16 @@ The above will create a ``CHAR(36)`` ``id`` column that is also the primary key.
 
 Additionally, since Migrations 1.3, a new way to deal with primary key was
 introduced. To do so, your migration class should extend the new
-``Migrations\AbstractMigration`` class.
+``Migrations\BaseMigration`` class.
 You can specify a ``autoId`` property in the Migration class and set it to
 ``false``, which will turn off the automatic ``id`` column creation. You will
 need to manually create the column that will be used as a primary key and add
 it to the table declaration::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class CreateProductsTable extends AbstractMigration
+    class CreateProductsTable extends BaseMigration
     {
 
         public bool $autoId = false;
@@ -1088,9 +1056,9 @@ If you need to create a table with a different collation than the database
 default one, you can define it with the ``table()`` method, as an option::
 
     <?php
-    use Migrations\AbstractMigration;
+    use Migrations\BaseMigration;
 
-    class CreateCategoriesTable extends AbstractMigration
+    class CreateCategoriesTable extends BaseMigration
     {
         public function change()
         {
@@ -1176,6 +1144,31 @@ for instance when deploying on your production environment, by using the
     bin/cake migrations rollback --no-lock
 
     bin/cake bake migration_snapshot MyMigration --no-lock
+
+Alert of missing migrations
+---------------------------
+
+You can use the ``Migrations.PendingMigrations`` middleware in local development
+to alert developers about new migrations that have not been applied::
+
+    use Migrations\Middleware\PendingMigrationsMiddleware;
+
+    $config = [
+        'plugins' => [
+            ... // Optionally include a list of plugins with migrations to check.
+        ],
+    ];
+
+    $middlewareQueue
+        ... // ErrorHandler middleware
+        ->add(new PendingMigrationsMiddleware($config))
+        ... // rest
+
+You can add `'app'` config key set to `false` if you are only interested in
+checking plugin migrations.
+
+You can temporarily disable the migration check by adding
+``skip-migration-check=1`` to the URL query string
 
 IDE autocomplete support
 ------------------------

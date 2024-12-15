@@ -11,10 +11,7 @@ namespace Migrations\Util;
 use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
-use Exception;
 use RuntimeException;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Temporary compatibility shim that can be refactored away.
@@ -47,19 +44,17 @@ class Util
     protected const SEED_FILE_NAME_PATTERN = '/^([a-z][a-z\d]*)\.php$/i';
 
     /**
-     * @var string
-     * @psalm-var non-empty-string
-     */
-    protected const CLASS_NAME_PATTERN = '/^(?:[A-Z][a-z\d]*)+$/';
-
-    /**
      * Gets the current timestamp string, in UTC.
      *
      * @return string
      */
-    public static function getCurrentTimestamp(): string
+    public static function getCurrentTimestamp(?int $offset = null): string
     {
-        $dt = new DateTime('now', new DateTimeZone('UTC'));
+        $time = 'now';
+        if ($offset) {
+            $time = '+' . $offset . ' seconds';
+        }
+        $dt = new DateTime($time, new DateTimeZone('UTC'));
 
         return $dt->format(static::DATE_FORMAT);
     }
@@ -150,27 +145,6 @@ class Util
     }
 
     /**
-     * Check if a migration class name is unique regardless of the
-     * timestamp.
-     *
-     * This method takes a class name and a path to a migrations directory.
-     *
-     * Migration class names must be in PascalCase format but consecutive
-     * capitals are allowed.
-     * e.g: AddIndexToPostsTable or CustomHTMLTitle.
-     *
-     * @param string $className Class Name
-     * @param string $path Path
-     * @return bool
-     */
-    public static function isUniqueMigrationClassName(string $className, string $path): bool
-    {
-        $existingClassNames = static::getExistingMigrationClassNames($path);
-
-        return !in_array($className, $existingClassNames, true);
-    }
-
-    /**
      * Check if a migration file name is valid.
      *
      * @param string $fileName File Name
@@ -227,43 +201,6 @@ class Util
     }
 
     /**
-     * Takes the path to a php file and attempts to include it if readable
-     *
-     * @param string $filename Filename
-     * @param \Symfony\Component\Console\Input\InputInterface|null $input Input
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output Output
-     * @param \Phinx\Console\Command\AbstractCommand|mixed|null $context Context
-     * @throws \Exception
-     * @return string
-     */
-    public static function loadPhpFile(string $filename, ?InputInterface $input = null, ?OutputInterface $output = null, mixed $context = null): string
-    {
-        $filePath = realpath($filename);
-        if (!$filePath || !file_exists($filePath)) {
-            throw new Exception(sprintf("File does not exist: %s \n", $filename));
-        }
-
-        /**
-         * I lifed this from phpunits FileLoader class
-         *
-         * @see https://github.com/sebastianbergmann/phpunit/pull/2751
-         */
-        $isReadable = @fopen($filePath, 'r') !== false;
-
-        if (!$isReadable) {
-            throw new Exception(sprintf("Cannot open file %s \n", $filename));
-        }
-
-        // TODO remove $input, $output, and $context from scope
-        // prevent this to be propagated to the included file
-        unset($isReadable);
-
-        include_once $filePath;
-
-        return $filePath;
-    }
-
-    /**
      * Given an array of paths, return all unique PHP files that are in them
      *
      * @param string|string[] $paths Path or array of paths to get .php files.
@@ -281,5 +218,21 @@ class Util
         $files = array_unique($files);
 
         return $files;
+    }
+
+    /**
+     * @param string|null $plugin
+     * @return string
+     */
+    public static function tableName(?string $plugin): string
+    {
+        $table = 'phinxlog';
+        if ($plugin) {
+            $prefix = Inflector::underscore($plugin) . '_';
+            $prefix = str_replace(['\\', '/', '.'], '_', $prefix);
+            $table = $prefix . $table;
+        }
+
+        return $table;
     }
 }

@@ -104,19 +104,20 @@ if (!getenv('DB')) {
     }
     putenv('DB=' . $db);
 }
+
 ConnectionManager::setConfig('test', [
     'cacheMetadata' => false,
-    'url' => getenv('DB_URL'),
+    'url' => getenv('DB_URL') ?: null,
 ]);
 ConnectionManager::setConfig('test_snapshot', [
     'cacheMetadata' => false,
-    'url' => getenv('DB_URL_SNAPSHOT'),
+    'url' => getenv('DB_URL_SNAPSHOT') ?: null,
 ]);
 
 if (getenv('DB_URL_COMPARE') !== false) {
     ConnectionManager::setConfig('test_comparisons', [
         'cacheMetadata' => false,
-        'url' => getenv('DB_URL_COMPARE'),
+        'url' => getenv('DB_URL_COMPARE') ?: null,
     ]);
 }
 

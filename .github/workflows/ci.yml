@@ -49,6 +49,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup MySQL
         if: matrix.db-type == 'mysql'
@@ -137,6 +139,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: Get date part for cache key
       id: key-date

@@ -337,8 +337,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * Calculate the diff between contraints in existing tables.
-     * This will look for contraints addition, contraints removal and changes in contraints metadata
+     * Calculate the diff between constraints in existing tables.
+     * This will look for constraints addition, constraints removal and changes in constraints metadata
      * such as change of referenced columns if the old constraints and the new one have the same name.
      *
      * The method directly sets the diff in a property of the class.

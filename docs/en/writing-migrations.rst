@@ -1,14 +1,12 @@
 Writing Migrations
-==================
+##################
 
 Migrations are a declarative API that helps you transform your database. Each migration
 is represented by a PHP class in a unique file. It is preferred that you write
 your migrations using the Migrations API, but raw SQL is also supported.
 
 Creating a New Migration
-------------------------
-Generating a skeleton migration file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 Let's start by creating a new migration with ``bake``:
 
@@ -57,7 +55,7 @@ Database migrations can transform your database in many ways, such as creating
 new tables, inserting rows, adding indexes and modifying columns.
 
 The Change Method
-~~~~~~~~~~~~~~~~~
+=================
 
 Migrations supports 'reversible migrations'. In many scenarios, you
 only need to define the ``up`` logic, and Migrations can figure out how to migrate
@@ -133,28 +131,28 @@ up or down direction. For example:
         }
 
 The Up Method
-~~~~~~~~~~~~~
+=============
 
 The up method is automatically run by Migrations when you are migrating up and it
 detects the given migration hasn't been executed previously. You should use the
 up method to transform the database with your intended changes.
 
 The Down Method
-~~~~~~~~~~~~~~~
+===============
 
 The down method is automatically run by Migrations when you are migrating down and
 it detects the given migration has been executed in the past. You should use
 the down method to reverse/undo the transformations described in the up method.
 
 The Init Method
-~~~~~~~~~~~~~~~
+===============
 
 The ``init()`` method is run by Migrations before the migration methods if it exists.
 This can be used for setting common class properties that are then used within
 the migration methods.
 
 The Should Execute Method
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 The ``shouldExecute()`` method is run by Migrations before executing the migration.
 This can be used to prevent the migration from being executed at this time. It always
@@ -162,7 +160,7 @@ returns true by default. You can override it in your custom ``BaseMigration``
 implementation.
 
 Executing Queries
------------------
+=================
 
 Queries can be executed with the ``execute()`` and ``query()`` methods. The
 ``execute()`` method returns the number of affected rows whereas the
@@ -245,7 +243,7 @@ and if used will cause the underlying connection to use a prepared statement.
     and examining `errorInfo <https://php.net/manual/en/pdostatement.errorinfo.php>`_.
 
 Fetching Rows
--------------
+=============
 
 There are two methods available to fetch rows. The ``fetchRow()`` method will
 fetch a single row, whilst the ``fetchAll()`` method will return multiple rows.
@@ -281,7 +279,7 @@ Both methods accept raw SQL as their only parameter.
         }
 
 Inserting Data
---------------
+==============
 
 Migrations makes it easy to insert data into your tables. Whilst this feature is
 intended for the :doc:`seed feature <seeding>`, you are also free to use the
@@ -340,10 +338,7 @@ insert methods in your migrations.
     `up()` and `down()` methods.
 
 Working With Tables
--------------------
-
-The Table Object
-~~~~~~~~~~~~~~~~
+===================
 
 The Table object is one of the most useful APIs provided by Migrations. It allows
 you to easily manipulate database tables using PHP code. You can retrieve an
@@ -379,7 +374,7 @@ You can then manipulate this table using the methods provided by the Table
 object.
 
 Saving Changes
-~~~~~~~~~~~~~~
+--------------
 
 When working with the Table object, Migrations stores certain operations in a
 pending changes cache. Once you have made the changes you want to the table,
@@ -400,8 +395,10 @@ the more explicit methods.
 When in doubt with working with tables, it is always recommended to call
 the appropriate function and commit any pending changes to the database.
 
+.. _creating-a-table::
+
 Creating a Table
-~~~~~~~~~~~~~~~~
+----------------
 
 Creating a table is really easy using the Table object. Let's create a table to
 store a collection of users.
@@ -531,7 +528,7 @@ comment   set a text comment on the table
 To view available column types and options, see `Valid Column Types`_ for details.
 
 Determining Whether a Table Exists
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 You can determine whether or not a table exists by using the ``hasTable()``
 method.
@@ -565,7 +562,7 @@ method.
         }
 
 Dropping a Table
-~~~~~~~~~~~~~~~~
+----------------
 
 Tables can be dropped quite easily using the ``drop()`` method. It is a
 good idea to recreate the table again in the ``down()`` method.
@@ -610,7 +607,7 @@ plan migrations when more than one table is involved.
         }
 
 Renaming a Table
-~~~~~~~~~~~~~~~~
+----------------
 
 To rename a table access an instance of the Table object then call the
 ``rename()`` method.
@@ -647,7 +644,7 @@ To rename a table access an instance of the Table object then call the
         }
 
 Changing the Primary Key
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 To change the primary key on an existing table, use the ``changePrimaryKey()`` method.
 Pass in a column name or array of columns names to include in the primary key, or ``null`` to drop the primary key.
@@ -688,7 +685,7 @@ Note that the mentioned columns must be added to the table, they will not be add
         }
 
 Changing the Table Comment
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 To change the comment on an existing table, use the ``changeComment()`` method.
 Pass in a string to set as the new table comment, or ``null`` to drop the existing comment.
@@ -726,13 +723,10 @@ Pass in a string to set as the new table comment, or ``null`` to drop the existi
             }
         }
 
-Working With Columns
---------------------
-
 .. _valid-column-types:
 
-Valid Column Types
-~~~~~~~~~~~~~~~~~~
+Working With Columns
+====================
 
 Column types are specified as strings and can be one of:
 
@@ -761,7 +755,7 @@ In addition, the Postgres adapter supports ``interval``, ``json``, ``jsonb``, ``
 (PostgreSQL 9.3 and above).
 
 Valid Column Options
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 The following are valid column options:
 
@@ -893,7 +887,7 @@ You can pass one or more of these options to any column with the optional
 third argument array.
 
 Limit Option and MySQL
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 When using the MySQL adapter, there are a couple things to consider when working with limits:
 
@@ -936,7 +930,7 @@ For ``binary`` or ``varbinary`` types, if limit is set greater than allowed 255 
               ->create();
 
 Custom Column Types & Default Values
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 Some DBMS systems provide additional column types and default values that are specific to them.
 If you don't want to keep your migrations DBMS-agnostic you can use those custom types in your migrations
@@ -973,7 +967,7 @@ is a function, in PostgreSQL. This method of preventing the built-in escaping is
         }
 
 Get a column list
-~~~~~~~~~~~~~~~~~
+-----------------
 
 To retrieve all table columns, simply create a ``table`` object and call ``getColumns()``
 method. This method will return an array of Column classes with basic info. Example below:
@@ -1005,7 +999,7 @@ method. This method will return an array of Column classes with basic info. Exam
         }
 
 Get a column by name
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 To retrieve one table column, simply create a ``table`` object and call the ``getColumn()``
 method. This method will return a Column class with basic info or NULL when the column doesn't exist. Example below:
@@ -1037,7 +1031,7 @@ method. This method will return a Column class with basic info or NULL when the 
         }
 
 Checking whether a column exists
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 You can check if a table already has a certain column by using the
 ``hasColumn()`` method.
@@ -1066,7 +1060,7 @@ You can check if a table already has a certain column by using the
         }
 
 Renaming a Column
-~~~~~~~~~~~~~~~~~
+-----------------
 
 To rename a column, access an instance of the Table object then call the
 ``renameColumn()`` method.
@@ -1101,7 +1095,7 @@ To rename a column, access an instance of the Table object then call the
         }
 
 Adding a Column After Another Column
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 When adding a column with the MySQL adapter, you can dictate its position using the ``after`` option,
 where its value is the name of the column to position it after.
@@ -1130,7 +1124,7 @@ This would create the new column ``city`` and position it after the ``email`` co
 created as the first column in that table.
 
 Dropping a Column
-~~~~~~~~~~~~~~~~~
+-----------------
 
 To drop a column, use the ``removeColumn()`` method.
 
@@ -1155,7 +1149,7 @@ To drop a column, use the ``removeColumn()`` method.
 
 
 Specifying a Column Limit
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 You can limit the maximum length of a column by using the ``limit`` option.
 
@@ -1179,7 +1173,7 @@ You can limit the maximum length of a column by using the ``limit`` option.
         }
 
 Changing Column Attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 To change column type or options on an existing column, use the ``changeColumn()`` method.
 See :ref:`valid-column-types` and `Valid Column Options`_ for allowed values.
@@ -1577,7 +1571,7 @@ plan migrations when more than one table is involved.
 
 
 Using the Query Builder
------------------------
+=======================
 
 It is not uncommon to pair database structure changes with data changes. For example, you may want to
 migrate the data in a couple columns from the users to a newly created table. For this type of scenarios,
@@ -1609,7 +1603,7 @@ be easy to work with as it resembles very closely plain SQL. Accesing the query 
         }
 
 Selecting Fields
-~~~~~~~~~~~~~~~~
+----------------
 
 Adding fields to the SELECT clause:
 
@@ -1629,7 +1623,7 @@ Adding fields to the SELECT clause:
 
 
 Where Conditions
-~~~~~~~~~~~~~~~~
+----------------
 
 Generating conditions:
 
@@ -1732,8 +1726,7 @@ When using the expression objects you can use the following methods to create co
 
 
 Aggregates and SQL Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+----------------------------
 
 .. code-block:: php
 
@@ -1771,7 +1764,7 @@ other SQL literals. Bound parameters can be used to safely add user data to SQL 
 
 
 Getting Results out of a Query
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 Once you’ve made your query, you’ll want to retrieve rows from it. There are a few ways of doing this:
 
@@ -1789,7 +1782,7 @@ Once you’ve made your query, you’ll want to retrieve rows from it. There are
 
 
 Creating an Insert Query
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Creating insert queries is also possible:
 
@@ -1837,7 +1830,7 @@ The above code will generate:
 
 
 Creating an update Query
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Creating update queries is similar to both inserting and selecting:
 
@@ -1853,7 +1846,7 @@ Creating update queries is similar to both inserting and selecting:
 
 
 Creating a Delete Query
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 Finally, delete queries:
 

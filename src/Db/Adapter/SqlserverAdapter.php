@@ -99,11 +99,24 @@ class SqlserverAdapter extends PdoAdapter
     }
 
     /**
+     * Quotes a schema name for use in a query.
+     *
+     * @param string $schemaName Schema Name
+     * @return string
+     */
+    public function quoteSchemaName(string $schemaName): string
+    {
+        return $this->quoteColumnName($schemaName);
+    }
+
+    /**
      * @inheritDoc
      */
     public function quoteTableName(string $tableName): string
     {
-        return str_replace('.', '].[', $this->quoteColumnName($tableName));
+        $parts = $this->getSchemaName($tableName);
+
+        return $this->quoteSchemaName($parts['schema']) . '.' . $this->quoteColumnName($parts['table']);
     }
 
     /**
@@ -123,10 +136,11 @@ class SqlserverAdapter extends PdoAdapter
             return true;
         }
 
+        $parts = $this->getSchemaName($tableName);
         /** @var array<string, mixed> $result */
         $result = $this->query(
-            "SELECT count(*) as [count] FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?",
-            [$tableName]
+            "SELECT count(*) as [count] FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+            [$parts['schema'], $parts['table']]
         )->fetch('assoc');
 
         return $result['count'] > 0;
@@ -138,6 +152,7 @@ class SqlserverAdapter extends PdoAdapter
     public function createTable(Table $table, array $columns = [], array $indexes = []): void
     {
         $options = $table->getOptions();
+        $parts = $this->getSchemaName($table->getName());
 
         // Add the default primary key
         if (!isset($options['id']) || $options['id'] === true) {
@@ -173,7 +188,7 @@ class SqlserverAdapter extends PdoAdapter
 
         // set the primary key(s)
         if (isset($options['primary_key'])) {
-            $pkSql = sprintf('CONSTRAINT PK_%s PRIMARY KEY (', $table->getName());
+            $pkSql = sprintf('CONSTRAINT PK_%s PRIMARY KEY (', $parts['table']);
             /** @var string|array $primaryKey */
             $primaryKey = $options['primary_key'];
 
@@ -255,7 +270,7 @@ class SqlserverAdapter extends PdoAdapter
     }
 
     /**
-     * Gets the SqlServer Column Comment Defininition for a column object.
+     * Gets the SqlServer column comment definition for a column object.
      *
      * @param \Migrations\Db\Table\Column $column Column
      * @param ?string $tableName Table name
@@ -351,6 +366,7 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function getColumns(string $tableName): array
     {
+        $parts = $this->getSchemaName($tableName);
         $columns = [];
         $sql = "SELECT DISTINCT TABLE_SCHEMA AS [schema], TABLE_NAME as [table_name], COLUMN_NAME AS [name], DATA_TYPE AS [type],
             IS_NULLABLE AS [null], COLUMN_DEFAULT AS [default],
@@ -359,9 +375,11 @@ class SqlserverAdapter extends PdoAdapter
             NUMERIC_SCALE AS [scale], ORDINAL_POSITION AS [ordinal_position],
             COLUMNPROPERTY(object_id(TABLE_NAME), COLUMN_NAME, 'IsIdentity') as [identity]
         FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = ?
         WHERE TABLE_NAME = ?
         ORDER BY ordinal_position";
-        $rows = $this->query($sql, [$tableName])->fetchAll('assoc');
+        $rows = $this->query($sql, [$parts['schema'], $parts['table']])
+            ->fetchAll('assoc');
         foreach ($rows as $columnInfo) {
             try {
                 $type = $this->getPhinxType($columnInfo['type']);
@@ -416,11 +434,12 @@ class SqlserverAdapter extends PdoAdapter
      */
     public function hasColumn(string $tableName, string $columnName): bool
     {
+        $parts = $this->getSchemaName($tableName);
         $sql = "SELECT count(*) as [count]
              FROM INFORMATION_SCHEMA.COLUMNS
-             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?";
         /** @var array<string, mixed> $result */
-        $result = $this->query($sql, [$tableName, $columnName])->fetch('assoc');
+        $result = $this->query($sql, [$parts['schema'], $parts['table'], $columnName])->fetch('assoc');
 
         return $result['count'] > 0;
     }
@@ -607,7 +626,7 @@ SQL;
      * @param string $indexId Index ID
      * @return array
      */
-    protected function getIndexColums(string $tableId, string $indexId): array
+    protected function getIndexColumns(string $tableId, string $indexId): array
     {
         $sql = 'SELECT AC.[name] AS [column_name]
 FROM sys.[index_columns] IC
@@ -633,16 +652,19 @@ ORDER BY IC.[key_ordinal]';
      */
     public function getIndexes(string $tableName): array
     {
+        $parts = $this->getSchemaName($tableName);
+
         $indexes = [];
         $sql = "SELECT I.[name] AS [index_name], I.[index_id] as [index_id], T.[object_id] as [table_id]
 FROM sys.[tables] AS T
   INNER JOIN sys.[indexes] I ON T.[object_id] = I.[object_id]
-WHERE T.[is_ms_shipped] = 0 AND I.[type_desc] <> 'HEAP'  AND T.[name] = ?
+  INNER JOIN sys.[schemas] S ON s.schema_id = T.schema_id
+WHERE T.[is_ms_shipped] = 0 AND I.[type_desc] <> 'HEAP' AND S.[name] = ? AND T.[name] = ?
 ORDER BY T.[name], I.[index_id]";
 
-        $rows = $this->query($sql, [$tableName])->fetchAll('assoc');
+        $rows = $this->query($sql, [$parts['schema'], $parts['table']])->fetchAll('assoc');
         foreach ($rows as $row) {
-            $columns = $this->getIndexColums($row['table_id'], $row['index_id']);
+            $columns = $this->getIndexColumns($row['table_id'], $row['index_id']);
             $indexes[$row['index_name']] = ['columns' => $columns];
         }
 
@@ -786,6 +808,7 @@ ORDER BY T.[name], I.[index_id]";
      */
     public function getPrimaryKey(string $tableName): array
     {
+        $parts = $this->getSchemaName($tableName);
         $rows = $this->query(
             "SELECT
                     tc.CONSTRAINT_NAME,
@@ -794,9 +817,10 @@ ORDER BY T.[name], I.[index_id]";
                 JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu
                     ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
                 WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'
+                    AND tc.CONSTRAINT_SCHEMA = '%s'
                     AND tc.TABLE_NAME = '%s'
                 ORDER BY kcu.ORDINAL_POSITION",
-            [$tableName]
+            [$parts['schema'], $parts['table']]
         )->fetchAll('assoc');
 
         $primaryKey = [
@@ -845,6 +869,7 @@ ORDER BY T.[name], I.[index_id]";
      */
     protected function getForeignKeys(string $tableName): array
     {
+        $parts = $this->getSchemaName($tableName);
         $foreignKeys = [];
         $rows = $this->query(
             "SELECT
@@ -856,9 +881,9 @@ ORDER BY T.[name], I.[index_id]";
                 INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS tc
                 JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
                 JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS ccu ON ccu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
-            WHERE CONSTRAINT_TYPE = 'FOREIGN KEY' AND tc.TABLE_NAME = ?
+            WHERE CONSTRAINT_TYPE = 'FOREIGN KEY' AND tc.TABLE_SCHEMA = ? AND tc.TABLE_NAME = ?
             ORDER BY kcu.ORDINAL_POSITION",
-            [$tableName]
+            [$parts['schema'], $parts['table']]
         )->fetchAll('assoc');
         foreach ($rows as $row) {
             $foreignKeys[$row['CONSTRAINT_NAME']]['table'] = $row['TABLE_NAME'];
@@ -1152,15 +1177,17 @@ SQL;
      * Gets the SqlServer Index Definition for an Index object.
      *
      * @param \Migrations\Db\Table\Index $index Index
-     * @param ?string $tableName Table name
+     * @param string $tableName Table name
      * @return string
      */
-    protected function getIndexSqlDefinition(Index $index, ?string $tableName): string
+    protected function getIndexSqlDefinition(Index $index, string $tableName): string
     {
+        $parts = $this->getSchemaName($tableName);
         $columnNames = (array)$index->getColumns();
+
         $indexName = $index->getName();
         if (!is_string($indexName)) {
-            $indexName = sprintf('%s_%s', (string)$tableName, implode('_', $columnNames));
+            $indexName = sprintf('%s_%s', $parts['table'], implode('_', $columnNames));
         }
         $order = $index->getOrder() ?? [];
         $columnNames = array_map(function ($columnName) use ($order) {
@@ -1179,7 +1206,7 @@ SQL;
             'CREATE %s INDEX %s ON %s (%s) %s;',
             ($index->getType() === Index::UNIQUE ? 'UNIQUE' : ''),
             $indexName,
-            $this->quoteTableName((string)$tableName),
+            $this->quoteTableName($tableName),
             implode(',', $columnNames),
             $includedColumns
         );
@@ -1206,6 +1233,122 @@ SQL;
         }
 
         return $def;
+    }
+
+    /**
+     * Creates the specified schema.
+     *
+     * @param string $schemaName Schema Name
+     * @return void
+     */
+    public function createSchema(string $schemaName = 'public'): void
+    {
+        if ($this->hasSchema($schemaName) === false) {
+            $sql = sprintf('CREATE SCHEMA %s', $this->quoteColumnName($schemaName));
+            $this->execute($sql);
+        }
+    }
+
+    /**
+     * Checks to see if a schema exists.
+     *
+     * @param string $schemaName Schema Name
+     * @return bool
+     */
+    public function hasSchema(string $schemaName): bool
+    {
+        $sql = sprintf(
+            'SELECT count(*) AS [count]
+             FROM sys.schemas
+             WHERE name = %s',
+            $this->quoteString($schemaName)
+        );
+        $result = $this->fetchRow($sql);
+        if (!$result) {
+            return false;
+        }
+
+        return $result['count'] > 0;
+    }
+
+    /**
+     * Drops the specified schema table.
+     *
+     * @param string $schemaName Schema name
+     * @return void
+     */
+    public function dropSchema(string $schemaName): void
+    {
+        $sql = sprintf('DROP SCHEMA IF EXISTS %s', $this->quoteSchemaName($schemaName));
+        $this->execute($sql);
+
+        foreach ($this->createdTables as $idx => $createdTable) {
+            if ($this->getSchemaName($createdTable)['schema'] === $this->quoteSchemaName($schemaName)) {
+                unset($this->createdTables[$idx]);
+            }
+        }
+    }
+
+    /**
+     * Drops all schemas.
+     *
+     * @return void
+     */
+    public function dropAllSchemas(): void
+    {
+        foreach ($this->getAllSchemas() as $schema) {
+            $this->dropSchema($schema);
+        }
+    }
+
+    /**
+     * Returns schemas.
+     *
+     * @return array
+     */
+    public function getAllSchemas(): array
+    {
+        $sql = "SELECT name
+                FROM sys.schemas
+                WHERE name not in ('information_schema', 'sys', 'guest', 'dbo') AND name not like 'db_%'";
+        $items = $this->fetchAll($sql);
+        $schemaNames = [];
+        foreach ($items as $item) {
+            $schemaNames[] = $item['name'];
+        }
+
+        return $schemaNames;
+    }
+
+    /**
+     * @param string $tableName Table name
+     * @return array
+     */
+    protected function getSchemaName(string $tableName): array
+    {
+        $schema = $this->getGlobalSchemaName();
+        $table = $tableName;
+        if (strpos($tableName, '.') !== false) {
+            [$schema, $table] = explode('.', $tableName);
+        }
+
+        return [
+            'schema' => $schema,
+            'table' => $table,
+        ];
+    }
+
+    /**
+     * Gets the schema name.
+     *
+     * @return string
+     */
+    protected function getGlobalSchemaName(): string
+    {
+        $options = $this->getOptions();
+        $config = $options['connection']->config() ?? [];
+
+        return empty($config['schema']) ? $this->schema : $config['schema'];
     }
 
     /**

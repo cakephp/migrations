@@ -30,6 +30,14 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
 {
     public const DEFAULT_MIGRATION_FOLDER = 'Migrations';
 
+    protected const RESERVED_KEYWORDS = [
+        'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone', 'const',
+        'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
+        'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally', 'for', 'foreach',
+        'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'interface',
+        'isset', 'list', 'namespace', 'new', 'or', 'parent', 'private', 'protected', 'public', 'return','static',
+    ];
+
     /**
      * path to Migration directory
      *
@@ -45,6 +53,13 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     protected ?ConsoleIo $io = null;
 
     /**
+     * Arguments
+     *
+     * @var \Cake\Console\Arguments|null
+     */
+    protected ?Arguments $args = null;
+
+    /**
      * @inheritDoc
      */
     public function name(): string
@@ -58,8 +73,17 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     public function fileName($name): string
     {
         $name = $this->getMigrationName($name);
+        $timestamp = Util::getCurrentTimestamp();
+        $suffix = '_' . Inflector::camelize($name) . '.php';
 
-        return Util::getCurrentTimestamp() . '_' . Inflector::camelize($name) . '.php';
+        /** @psalm-suppress PossiblyNullArgument */
+        $path = $this->getPath($this->args);
+        $offset = 0;
+        while (glob($path . $timestamp . '_*.php')) {
+            $timestamp = Util::getCurrentTimestamp(++$offset);
+        }
+
+        return $timestamp . $suffix;
     }
 
     /**
@@ -100,8 +124,14 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->io = $io;
+        $this->args = $args;
+        if ($this->isReservedKeyword($name)) {
+            $prefix = $io->ask('Reserved keywords cannot be used for class names. What prefix would you like to use? Defaults to `Migration`.', 'Migration');
+            $name = $prefix . ucfirst($name);
+        }
+
         $migrationWithSameName = glob($this->getPath($args) . '*_' . $name . '.php');
-        if (!empty($migrationWithSameName)) {
+        if ($migrationWithSameName) {
             $force = $args->getOption('force');
             if (!$force) {
                 $io->abort(
@@ -128,10 +158,11 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $renderer->set($this->templateData($args));
         $contents = $renderer->generate($this->template());
 
-        $filename = $this->getPath($args) . $this->fileName($name);
+        $path = $this->getPath($args);
+        $filename = $path . $this->fileName($name);
         $this->createFile($filename, $contents, $args, $io);
 
-        $emptyFile = $this->getPath($args) . '.gitkeep';
+        $emptyFile = $path . '.gitkeep';
         $this->deleteEmptyFile($emptyFile, $io);
     }
 
@@ -199,5 +230,16 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         ]);
 
         return $parser;
+    }
+
+    /**
+     * If reserved PHP keyword.
+     *
+     * @param string $name
+     * @return bool
+     */
+    protected function isReservedKeyword(string $name): bool
+    {
+        return in_array(strtolower($name), static::RESERVED_KEYWORDS);
     }
 }

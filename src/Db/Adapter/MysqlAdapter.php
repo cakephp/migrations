@@ -977,7 +977,7 @@ class MysqlAdapter extends PdoAdapter
                 return ['name' => 'varbinary', 'limit' => $limit];
             case static::PHINX_TYPE_BLOB:
                 if ($limit !== null) {
-                    // Rework this part as the choosen types were always UNDER the required length
+                    // Rework this part as the chosen types were always UNDER the required length
                     $sizes = [
                         'tinyblob' => static::BLOB_SMALL,
                         'blob' => static::BLOB_REGULAR,

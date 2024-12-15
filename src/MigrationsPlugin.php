@@ -130,27 +130,28 @@ class MigrationsPlugin extends BasePlugin
             $commands->addMany($found);
 
             return $commands;
-        } else {
-            if (class_exists(SimpleBakeCommand::class)) {
-                $found = $commands->discoverPlugin($this->getName());
+        }
 
-                return $commands->addMany($found);
-            }
-            $found = [];
-            // Convert to a method and use config to toggle command names.
-            foreach ($this->migrationCommandsList as $class) {
-                $name = $class::defaultName();
-                // If the short name has been used, use the full name.
-                // This allows app commands to have name preference.
-                // and app commands to overwrite migration commands.
-                if (!$commands->has($name)) {
-                    $found[$name] = $class;
-                }
-                // full name
-                $found['migrations.' . $name] = $class;
-            }
+        if (class_exists(SimpleBakeCommand::class)) {
+            $found = $commands->discoverPlugin($this->getName());
 
             return $commands->addMany($found);
         }
+
+        $found = [];
+        // Convert to a method and use config to toggle command names.
+        foreach ($this->migrationCommandsList as $class) {
+            $name = $class::defaultName();
+            // If the short name has been used, use the full name.
+            // This allows app commands to have name preference.
+            // and app commands to overwrite migration commands.
+            if (!$commands->has($name)) {
+                $found[$name] = $class;
+            }
+            // full name
+            $found['migrations.' . $name] = $class;
+        }
+
+        return $commands->addMany($found);
     }
 }

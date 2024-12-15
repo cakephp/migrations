@@ -33,7 +33,7 @@ class StatusCommand extends Command
     public const CODE_STATUS_MISSING = 2;
 
     /**
-     * Exit code for when status command is run and there are no missing migations,
+     * Exit code for when status command is run and there are no missing migrations,
      * but does have down migrations
      *
      * @var int

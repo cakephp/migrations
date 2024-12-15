@@ -20,7 +20,7 @@ use Symfony\Component\Console\Application;
  * Used to register all supported subcommand in order to make
  * them executable by the Symfony Console component
  *
- * @deprecated 4.2.0 Will be removed alongsize phinx
+ * @deprecated 4.2.0 Will be removed alongside phinx
  */
 class MigrationsDispatcher extends Application
 {

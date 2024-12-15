@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\NullOutput;
 class MigrationCommandTest extends TestCase
 {
     /**
-     * @var \Migrations\MigrationsMigrateCommand
+     * @var \Migrations\Command\MigrationsMigrateCommand
      */
     protected $command;
 

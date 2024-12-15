@@ -1,5 +1,5 @@
 Database Seeding
-================
+################
 
 Seed classes are a great way to easily fill your database with data after
 it's created. By default they are stored in the `seeds` directory; however, this
@@ -11,7 +11,7 @@ path can be changed in your configuration file.
     directory by default.
 
 Creating a New Seed Class
--------------------------
+=========================
 
 Migrations includes a command to easily generate a new seed class:
 
@@ -43,15 +43,15 @@ It is based on a skeleton template:
             }
         }
 
-The AbstractSeed Class
-----------------------
+The BaseSeed Class
+======================
 
 All Migrations seeds extend from the ``BaseSeed`` or ``AbstractSeed`` classes.
 These classes provide the necessary support to create your seed classes. Seed
 classes are primarily used to insert test data.
 
 The Run Method
-~~~~~~~~~~~~~~
+==============
 
 The run method is automatically invoked by Migrations when you execute the
 ``cake migration seed`` command. You should use this method to insert your test
@@ -64,13 +64,13 @@ data.
     mind when developing them.
 
 The Init Method
-~~~~~~~~~~~~~~~
+===============
 
 The ``init()`` method is run by Migrations before the run method if it exists. This
 can be used to initialize properties of the Seed class before using run.
 
 The Should Execute Method
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 The ``shouldExecute()`` method is run by Migrations before executing the seed.
 This can be used to prevent the seed from being executed at this time. It always
@@ -78,7 +78,7 @@ returns true by default. You can override it in your custom ``BaseSeed``
 implementation.
 
 Foreign Key Dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 Often you'll find that seeders need to run in a particular order, so they don't
 violate foreign key constraints. To define this order, you can implement the
@@ -114,14 +114,11 @@ current seeder:
     They won't be considered when running specific seed classes.
 
 Inserting Data
---------------
+==============
 
-Using The Table Object
-~~~~~~~~~~~~~~~~~~~~~~
-
-Seed classes can also use the familiar `Table` object to insert data. You can
+Seed classes can also use the familiar ``Table`` object to insert data. You can
 retrieve an instance of the Table object by calling the ``table()`` method from
-within your seed class and then use the `insert()` method to insert data:
+within your seed class and then use the ``insert()`` method to insert data:
 
 .. code-block:: php
 
@@ -155,7 +152,7 @@ within your seed class and then use the `insert()` method to insert data:
     Migrations will buffer data until you do so.
 
 Truncating Tables
------------------
+=================
 
 In addition to inserting data Migrations makes it trivial to empty your tables using the
 SQL `TRUNCATE` command:
@@ -197,7 +194,7 @@ SQL `TRUNCATE` command:
     after truncating a table. Migrations does not do this automatically.
 
 Executing Seed Classes
-----------------------
+======================
 
 This is the easy part. To seed your database, simply use the ``migrations seed`` command:
 

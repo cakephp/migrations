@@ -45,7 +45,7 @@ interface ConfigInterface extends ArrayAccess
     public function getSeedPath(): string;
 
     /**
-     * Get the connection namee
+     * Get the connection name
      *
      * @return string|false
      */

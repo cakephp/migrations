@@ -17,9 +17,9 @@ use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
-use Cake\Utility\Inflector;
 use Migrations\Config\Config;
 use Migrations\Config\ConfigInterface;
+use Migrations\Util\Util;
 use RuntimeException;
 
 /**
@@ -77,19 +77,14 @@ class ManagerFactory
         if (defined('CONFIG')) {
             $dir = CONFIG . $folder;
         }
-        $plugin = $this->getOption('plugin');
-        if ($plugin && is_string($plugin)) {
+        $plugin = (string)$this->getOption('plugin') ?: null;
+        if ($plugin) {
             $dir = Plugin::path($plugin) . 'config' . DS . $folder;
         }
 
         // Get the phinxlog table name. Plugins have separate migration history.
         // The names and separate table history is something we could change in the future.
-        $table = 'phinxlog';
-        if ($plugin && is_string($plugin)) {
-            $prefix = Inflector::underscore($plugin) . '_';
-            $prefix = str_replace(['\\', '/', '.'], '_', $prefix);
-            $table = $prefix . $table;
-        }
+        $table = Util::tableName($plugin);
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
         $connectionName = (string)$this->getOption('connection');
 

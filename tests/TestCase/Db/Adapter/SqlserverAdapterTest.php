@@ -99,7 +99,8 @@ class SqlserverAdapterTest extends TestCase
 
     public function testQuoteTableName()
     {
-        $this->assertEquals('[test_table]', $this->adapter->quoteTableName('test_table'));
+        $this->assertEquals('[dbo].[test_table]', $this->adapter->quoteTableName('test_table'));
+        $this->assertEquals('[schema].[table]', $this->adapter->quoteTableName('schema.table'));
     }
 
     public function testQuoteColumnName()
@@ -118,6 +119,24 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ntable', 'realname'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'email'));
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
+    }
+
+    public function testCreateTableWithSchema()
+    {
+        $this->adapter->createSchema('nschema');
+
+        $table = new Table('nschema.ntable', [], $this->adapter);
+        $table->addColumn('realname', 'string')
+              ->addColumn('email', 'integer')
+              ->save();
+        $this->assertTrue($this->adapter->hasTable('nschema.ntable'));
+        $this->assertTrue($this->adapter->hasColumn('nschema.ntable', 'id'));
+        $this->assertTrue($this->adapter->hasColumn('nschema.ntable', 'realname'));
+        $this->assertTrue($this->adapter->hasColumn('nschema.ntable', 'email'));
+        $this->assertFalse($this->adapter->hasColumn('nschema.ntable', 'address'));
+
+        $this->adapter->dropTable('nschema.ntable');
+        $this->adapter->dropSchema('nschema');
     }
 
     public function testCreateTableCustomIdColumn()
@@ -1064,6 +1083,38 @@ WHERE t.name='ntable'");
         $this->adapter->dropDatabase('phinx_temp_database');
     }
 
+    public function testCreateSchema()
+    {
+        $this->adapter->createSchema('foo');
+        $this->assertTrue($this->adapter->hasSchema('foo'));
+    }
+
+    public function testDropSchema()
+    {
+        $this->adapter->createSchema('foo');
+        $this->assertTrue($this->adapter->hasSchema('foo'));
+        $this->adapter->dropSchema('foo');
+        $this->assertFalse($this->adapter->hasSchema('foo'));
+    }
+
+    public function testDropAllSchemas()
+    {
+        $this->adapter->createSchema('foo');
+        $this->adapter->createSchema('bar');
+
+        $this->assertTrue($this->adapter->hasSchema('foo'));
+        $this->assertTrue($this->adapter->hasSchema('bar'));
+        $this->adapter->dropAllSchemas();
+        $this->assertFalse($this->adapter->hasSchema('foo'));
+        $this->assertFalse($this->adapter->hasSchema('bar'));
+    }
+
+    public function testQuoteSchemaName()
+    {
+        $this->assertEquals('[schema]', $this->adapter->quoteSchemaName('schema'));
+        $this->assertEquals('[schema.schema]', $this->adapter->quoteSchemaName('schema.schema'));
+    }
+
     public function testInvalidSqlType()
     {
         $this->expectException(RuntimeException::class);
@@ -1342,8 +1393,8 @@ WHERE t.name='ntable'");
         ])->save();
 
         $expectedOutput = <<<'OUTPUT'
-CREATE TABLE [table1] ([column1] NVARCHAR (255)   NOT NULL , [column2] INT   NULL  DEFAULT NULL, CONSTRAINT PK_table1 PRIMARY KEY ([column1]));
-INSERT INTO [table1] ([column1], [column2]) VALUES ('id1', 1);
+CREATE TABLE [dbo].[table1] ([column1] NVARCHAR (255)   NOT NULL , [column2] INT   NULL  DEFAULT NULL, CONSTRAINT PK_table1 PRIMARY KEY ([column1]));
+INSERT INTO [dbo].[table1] ([column1], [column2]) VALUES ('id1', 1);
 OUTPUT;
         $output = join("\n", $this->out->messages());
         $actualOutput = str_replace("\r\n", "\n", $output);

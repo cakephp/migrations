@@ -77,7 +77,7 @@ class DumpCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
-            'Dumps the current scheam of the database to be used while baking a diff',
+            'Dumps the current schema of the database to be used while baking a diff',
             '',
             '<info>migrations dump -c secondary</info>',
         ])->addOption('plugin', [

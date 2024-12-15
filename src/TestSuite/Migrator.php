@@ -125,7 +125,7 @@ class Migrator
                     "Migrations failed to apply with message:\n\n" .
                     $e->getMessage() . "\n\n" .
                     'If you are using the `skip` option and running multiple sets of migrations ' .
-                    'on the same connection try calling `truncate()` before `runMany()` to avoid this.',
+                    'on the same connection, you can\'t skip tables managed by CakePHP in the connection.',
                     0,
                     $e
                 );
