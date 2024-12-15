@@ -479,31 +479,33 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         if (strcasecmp($direction, MigrationInterface::UP) === 0) {
             // up
             $sql = sprintf(
-                "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ('%s', '%s', '%s', '%s', %s);",
+                "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?);",
                 $this->quoteTableName($this->getSchemaTableName()),
                 $this->quoteColumnName('version'),
                 $this->quoteColumnName('migration_name'),
                 $this->quoteColumnName('start_time'),
                 $this->quoteColumnName('end_time'),
                 $this->quoteColumnName('breakpoint'),
+            );
+            $params = [
                 $migration->getVersion(),
                 substr($migration->getName(), 0, 100),
                 $startTime,
                 $endTime,
-                $this->castToBool(false)
-            );
+                $this->castToBool(false),
+            ];
 
-            $this->execute($sql);
+            $this->execute($sql, $params);
         } else {
             // down
             $sql = sprintf(
-                "DELETE FROM %s WHERE %s = '%s'",
+                'DELETE FROM %s WHERE %s = ?',
                 $this->quoteTableName($this->getSchemaTableName()),
                 $this->quoteColumnName('version'),
-                $migration->getVersion()
             );
+            $params = [$migration->getVersion()];
 
-            $this->execute($sql);
+            $this->execute($sql, $params);
         }
 
         return $this;
@@ -514,17 +516,18 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function toggleBreakpoint(MigrationInterface $migration): AdapterInterface
     {
+        $params = [
+            $migration->getVersion(),
+        ];
         $this->query(
             sprintf(
-                'UPDATE %1$s SET %2$s = CASE %2$s WHEN %3$s THEN %4$s ELSE %3$s END, %7$s = %7$s WHERE %5$s = \'%6$s\';',
+                'UPDATE %1$s SET %2$s = CASE %2$s WHEN true THEN false ELSE true END, %4$s = %4$s WHERE %3$s = ?;',
                 $this->quoteTableName($this->getSchemaTableName()),
                 $this->quoteColumnName('breakpoint'),
-                $this->castToBool(true),
-                $this->castToBool(false),
                 $this->quoteColumnName('version'),
-                $migration->getVersion(),
                 $this->quoteColumnName('start_time')
-            )
+            ),
+            $params
         );
 
         return $this;
@@ -575,16 +578,19 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     protected function markBreakpoint(MigrationInterface $migration, bool $state): AdapterInterface
     {
+        $params = [
+            $this->castToBool($state),
+                $migration->getVersion()
+        ];
         $this->query(
             sprintf(
-                'UPDATE %1$s SET %2$s = %3$s, %4$s = %4$s WHERE %5$s = \'%6$s\';',
+                'UPDATE %1$s SET %2$s = ?, %3$s = %3$s WHERE %4$s = ?;',
                 $this->quoteTableName($this->getSchemaTableName()),
                 $this->quoteColumnName('breakpoint'),
-                $this->castToBool($state),
                 $this->quoteColumnName('start_time'),
                 $this->quoteColumnName('version'),
-                $migration->getVersion()
-            )
+            ),
+            $params
         );
 
         return $this;
