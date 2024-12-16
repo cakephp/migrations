@@ -97,6 +97,12 @@ parameters:
 			path: src/Db/Adapter/SqliteAdapter.php
 
 		-
+			message: '#^Strict comparison using \!\=\= between Cake\\Database\\StatementInterface and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Db/Adapter/SqliteAdapter.php
+
+		-
 			message: '#^PHPDoc tag @return with type Phinx\\Db\\Adapter\\AdapterInterface is not subtype of native type Migrations\\Db\\Adapter\\AdapterInterface\.$#'
 			identifier: return.phpDocType
 			count: 1

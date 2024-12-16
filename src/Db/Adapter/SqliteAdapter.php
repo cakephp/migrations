@@ -332,7 +332,10 @@ class SqliteAdapter extends PdoAdapter
                     "SELECT name FROM {$master} WHERE type = 'table' AND lower(name) = ?",
                     [$table]
                 );
-                $rows = $result->fetchAll('assoc');
+                // null on error
+                if ($result !== null) {
+                    $rows = $result->fetchAll('assoc');
+                }
             } catch (PDOException $e) {
                 // an exception can occur if the schema part of the table refers to a database which is not attached
                 break;
