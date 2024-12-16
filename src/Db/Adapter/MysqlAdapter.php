@@ -812,29 +812,31 @@ class MysqlAdapter extends PdoAdapter
      */
     protected function getForeignKeys(string $tableName): array
     {
+        $schema = null;
         if (strpos($tableName, '.') !== false) {
             [$schema, $tableName] = explode('.', $tableName);
         }
 
-        $foreignKeys = [];
-        $params = [
-            empty($schema) ? 'DATABASE()' : "'$schema'",
-            $tableName,
-        ];
-        $rows = $this->query(
-            "SELECT
+        $params = [];
+        $query = "SELECT
               CONSTRAINT_NAME,
               CONCAT(TABLE_SCHEMA, '.', TABLE_NAME) AS TABLE_NAME,
               COLUMN_NAME,
               CONCAT(REFERENCED_TABLE_SCHEMA, '.', REFERENCED_TABLE_NAME) AS REFERENCED_TABLE_NAME,
               REFERENCED_COLUMN_NAME
             FROM information_schema.KEY_COLUMN_USAGE
-            WHERE REFERENCED_TABLE_NAME IS NOT NULL
-              AND TABLE_SCHEMA = ?
-              AND TABLE_NAME = ?
-            ORDER BY POSITION_IN_UNIQUE_CONSTRAINT",
-            $params
-        )->fetchAll('assoc');
+            WHERE REFERENCED_TABLE_NAME IS NOT NULL";
+
+        if ($schema) {
+            $query .= ' AND TABLE_SCHEMA = ?';
+            $params[] = $schema;
+        }
+
+        $query .= ' AND TABLE_NAME = ? ORDER BY POSITION_IN_UNIQUE_CONSTRAINT';
+        $params[] = $tableName;
+
+        $foreignKeys = [];
+        $rows = $this->query($query, $params)->fetchAll('assoc');
         foreach ($rows as $row) {
             $foreignKeys[$row['CONSTRAINT_NAME']]['table'] = $row['TABLE_NAME'];
             $foreignKeys[$row['CONSTRAINT_NAME']]['columns'][] = $row['COLUMN_NAME'];
