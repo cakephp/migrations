@@ -816,8 +816,8 @@ ORDER BY T.[name], I.[index_id]";
                 JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu
                     ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
                 WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'
-                    AND tc.CONSTRAINT_SCHEMA = '%s'
-                    AND tc.TABLE_NAME = '%s'
+                    AND tc.CONSTRAINT_SCHEMA = ?
+                    AND tc.TABLE_NAME = ?
                 ORDER BY kcu.ORDINAL_POSITION",
             [$parts['schema'], $parts['table']]
         )->fetchAll('assoc');
