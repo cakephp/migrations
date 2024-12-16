@@ -375,8 +375,7 @@ class SqlserverAdapter extends PdoAdapter
             NUMERIC_SCALE AS [scale], ORDINAL_POSITION AS [ordinal_position],
             COLUMNPROPERTY(object_id(TABLE_NAME), COLUMN_NAME, 'IsIdentity') as [identity]
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = ?
-        WHERE TABLE_NAME = ?
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
         ORDER BY ordinal_position";
         $rows = $this->query($sql, [$parts['schema'], $parts['table']])
             ->fetchAll('assoc');
