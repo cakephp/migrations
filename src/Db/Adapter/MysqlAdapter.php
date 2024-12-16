@@ -830,6 +830,8 @@ class MysqlAdapter extends PdoAdapter
         if ($schema) {
             $query .= ' AND TABLE_SCHEMA = ?';
             $params[] = $schema;
+        } else {
+            $query .= ' AND TABLE_SCHEMA = DATABASE()';
         }
 
         $query .= ' AND TABLE_NAME = ? ORDER BY POSITION_IN_UNIQUE_CONSTRAINT';
