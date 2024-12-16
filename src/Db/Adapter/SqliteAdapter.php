@@ -326,12 +326,15 @@ class SqliteAdapter extends PdoAdapter
             } else {
                 $master = sprintf('%s.%s', $this->quoteColumnName($schema), 'sqlite_master');
             }
+            $rows = [];
             try {
-                $params = [$table];
-                $rows = $this->query(
+                $result = $this->query(
                     "SELECT name FROM {$master} WHERE type = 'table' AND lower(name) = ?",
-                    $params
-                )->fetchAll('assoc');
+                    [$table]
+                );
+                if ($result) {
+                    $rows = $result->fetchAll('assoc');
+                }
             } catch (PDOException $e) {
                 // an exception can occur if the schema part of the table refers to a database which is not attached
                 break;
