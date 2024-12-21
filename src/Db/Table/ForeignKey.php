@@ -10,7 +10,15 @@ namespace Migrations\Db\Table;
 
 use InvalidArgumentException;
 use RuntimeException;
+use function Cake\Core\deprecationWarning;
 
+/**
+ * Foreign key value object
+ *
+ * Used to define foreign keys that are added to tables as part of migrations.
+ *
+ * @see \Migrations\Db\Table::addForeignKey()
+ */
 class ForeignKey
 {
     public const CASCADE = 'CASCADE';
@@ -24,7 +32,7 @@ class ForeignKey
     /**
      * @var array<string>
      */
-    protected static array $validOptions = ['delete', 'update', 'constraint', 'deferrable'];
+    protected static array $validOptions = ['delete', 'update', 'constraint', 'name', 'deferrable'];
 
     /**
      * @var string[]
@@ -54,7 +62,7 @@ class ForeignKey
     /**
      * @var string|null
      */
-    protected ?string $constraint = null;
+    protected ?string $name = null;
 
     /**
      * @var string|null
@@ -87,11 +95,14 @@ class ForeignKey
     /**
      * Sets the foreign key referenced table.
      *
-     * @param \Migrations\Db\Table\Table $table The table this KEY is pointing to
+     * @param \Migrations\Db\Table\Table|string $table The table this KEY is pointing to
      * @return $this
      */
-    public function setReferencedTable(Table $table)
+    public function setReferencedTable(Table|string $table)
     {
+        if (is_string($table)) {
+            $table = new Table($table);
+        }
         $this->referencedTable = $table;
 
         return $this;
@@ -177,6 +188,29 @@ class ForeignKey
     }
 
     /**
+     * Set the constraint name for the foreign key.
+     *
+     * @param string $name Constraint name
+     * @return $this
+     */
+    public function setName(string $name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get the constraint name if set.
+     *
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
      * Sets constraint for the foreign key.
      *
      * @param string $constraint Constraint
@@ -184,7 +218,8 @@ class ForeignKey
      */
     public function setConstraint(string $constraint)
     {
-        $this->constraint = $constraint;
+        deprecationWarning('4.6.0', 'setConstraint() is deprecated. Use setName() instead.');
+        $this->name = $constraint;
 
         return $this;
     }
@@ -196,7 +231,9 @@ class ForeignKey
      */
     public function getConstraint(): ?string
     {
-        return $this->constraint;
+        deprecationWarning('4.6.0', 'getConstraint() is deprecated. Use getName() instead.');
+
+        return $this->name;
     }
 
     /**

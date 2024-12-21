@@ -21,6 +21,13 @@ class ForeignKeyTest extends TestCase
         $this->fk = new ForeignKey();
     }
 
+    public function testName(): void
+    {
+        $this->assertNull($this->fk->getName());
+        $this->assertSame($this->fk, $this->fk->setName('fk_name'));
+        $this->assertEquals('fk_name', $this->fk->getName());
+    }
+
     public function testOnDeleteSetNullCanBeSetThroughOptions()
     {
         $this->assertEquals(

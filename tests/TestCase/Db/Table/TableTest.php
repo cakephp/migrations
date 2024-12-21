@@ -4,15 +4,18 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Db\Table;
 
 use InvalidArgumentException;
-use Phinx\Db\Action\DropIndex;
-use Phinx\Db\Adapter\AdapterInterface;
-use Phinx\Db\Adapter\MysqlAdapter;
-use Phinx\Db\Adapter\PostgresAdapter;
-use Phinx\Db\Adapter\SQLiteAdapter;
-use Phinx\Db\Adapter\SqlServerAdapter;
-use Phinx\Db\Table;
-use Phinx\Db\Table\Column;
-use Phinx\Db\Table\Index;
+use Migrations\Db\Action\AddColumn;
+use Migrations\Db\Action\AddForeignKey;
+use Migrations\Db\Action\AddIndex;
+use Migrations\Db\Action\DropIndex;
+use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\Db\Adapter\MysqlAdapter;
+use Migrations\Db\Adapter\PostgresAdapter;
+use Migrations\Db\Adapter\SQLiteAdapter;
+use Migrations\Db\Adapter\SqlServerAdapter;
+use Migrations\Db\Table;
+use Migrations\Db\Table\Column;
+use Migrations\Db\Table\Index;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -33,11 +36,11 @@ class TableTest extends TestCase
             $result = array_merge(
                 $result,
                 [
-                    [$adapter[0], null, null, 'created_at', 'updated_at', false],
+                    [$adapter[0], null, null, 'created', 'updated', false],
                     [$adapter[0], 'created_at', 'updated_at', 'created_at', 'updated_at', true],
                     [$adapter[0], 'created', 'updated', 'created', 'updated', false],
-                    [$adapter[0], null, 'amendment_date', 'created_at', 'amendment_date', true],
-                    [$adapter[0], 'insertion_date', null, 'insertion_date', 'updated_at', true],
+                    [$adapter[0], null, 'amendment_date', 'created', 'amendment_date', true],
+                    [$adapter[0], 'insertion_date', null, 'insertion_date', 'updated', true],
                 ]
             );
         }
@@ -72,7 +75,7 @@ class TableTest extends TestCase
         $table = new Table('ntable', [], $adapter);
         $table->addColumn($column);
         $actions = $this->getPendingActions($table);
-        $this->assertInstanceOf('Phinx\Db\Action\AddColumn', $actions[0]);
+        $this->assertInstanceOf(AddColumn::class, $actions[0]);
         $this->assertSame($column, $actions[0]->getColumn());
     }
 
@@ -108,17 +111,108 @@ class TableTest extends TestCase
         $table = new Table('ntable', [], $adapter);
         $table->addIndex($index);
         $actions = $this->getPendingActions($table);
-        $this->assertInstanceOf('Phinx\Db\Action\AddIndex', $actions[0]);
+        $this->assertInstanceOf(AddIndex::class, $actions[0]);
         $this->assertSame($index, $actions[0]->getIndex());
+    }
+
+    public function testAddForeignKeyPositionalParameters(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->addForeignKey('user_id', 'users', 'id', [
+            'delete' => 'CASCADE',
+            'update' => 'CASCADE',
+            'name' => 'fk_user_id',
+        ]);
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
+        $key = $actions[0]->getForeignKey();
+        $this->assertSame($key->getReferencedTable()->getName(), 'users');
+        $this->assertSame($key->getReferencedColumns(), ['id']);
+        $this->assertSame($key->getColumns(), ['user_id']);
+        $this->assertSame($key->getName(), 'fk_user_id');
+    }
+
+    public function testAddForeignKeyWithObject(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->addForeignKey(
+            $table->foreignKey('user_id')
+                ->setReferencedTable('users')
+                ->setReferencedColumns(['id'])
+                ->setOnDelete('CASCADE')
+                ->setOnUpdate('CASCADE')
+                ->setName('fk_user_id')
+        );
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
+        $key = $actions[0]->getForeignKey();
+        $this->assertSame($key->getReferencedTable()->getName(), 'users');
+        $this->assertSame($key->getReferencedColumns(), ['id']);
+        $this->assertSame($key->getColumns(), ['user_id']);
+        $this->assertSame($key->getName(), 'fk_user_id');
+    }
+
+    public function testAddForeignKeyWithNamePositionalParameters(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->addForeignKeyWithName('fk_user_id', 'user_id', 'users', 'id', [
+            'delete' => 'CASCADE',
+            'update' => 'CASCADE',
+        ]);
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
+        $key = $actions[0]->getForeignKey();
+        $this->assertSame($key->getReferencedTable()->getName(), 'users');
+        $this->assertSame($key->getReferencedColumns(), ['id']);
+        $this->assertSame($key->getColumns(), ['user_id']);
+        $this->assertSame($key->getName(), 'fk_user_id');
+    }
+
+    public function testAddForeignKeyWithNameObject(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->addForeignKeyWithName(
+            $table->foreignKey('user_id')
+                ->setReferencedTable('users')
+                ->setReferencedColumns(['id'])
+                ->setOnDelete('CASCADE')
+                ->setOnUpdate('CASCADE')
+                ->setName('fk_user_id')
+        );
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
+        $key = $actions[0]->getForeignKey();
+        $this->assertSame($key->getReferencedTable()->getName(), 'users');
+        $this->assertSame($key->getReferencedColumns(), ['id']);
+        $this->assertSame($key->getColumns(), ['user_id']);
+        $this->assertSame($key->getName(), 'fk_user_id');
     }
 
     /**
      * @param AdapterInterface $adapter
-     * @param string|null      $createdAtColumnName * @param string|null      $updatedAtColumnName * @param string           $expectedCreatedAtColumnName * @param string           $expectedUpdatedAtColumnName * @param bool $withTimezone
+     * @param string|null      $createdAtColumnName
+     * @param string|null      $updatedAtColumnName
+     * @param string           $expectedCreatedAtColumnName
+     * @param string           $expectedUpdatedAtColumnName
+     * @param bool $withTimezone
      */
     #[DataProvider('provideTimestampColumnNames')]
-    public function testAddTimestamps(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
-    {
+    public function testAddTimestamps(
+        AdapterInterface $adapter,
+        $createdAtColumnName,
+        $updatedAtColumnName,
+        $expectedCreatedAtColumnName,
+        $expectedUpdatedAtColumnName,
+        $withTimezone
+    ): void {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps($createdAtColumnName, $updatedAtColumnName, $withTimezone);
         $actions = $this->getPendingActions($table);
@@ -161,7 +255,7 @@ class TableTest extends TestCase
 
         $this->assertCount(1, $columns);
 
-        $this->assertSame('created_at', $columns[0]->getName());
+        $this->assertSame('created', $columns[0]->getName());
         $this->assertSame('timestamp', $columns[0]->getType());
         $this->assertSame('CURRENT_TIMESTAMP', $columns[0]->getDefault());
         $this->assertFalse($columns[0]->getTimezone());
@@ -186,7 +280,7 @@ class TableTest extends TestCase
 
         $this->assertCount(1, $columns);
 
-        $this->assertSame('updated_at', $columns[0]->getName());
+        $this->assertSame('updated', $columns[0]->getName());
         $this->assertSame('timestamp', $columns[0]->getType());
         $this->assertFalse($columns[0]->getTimezone());
         $this->assertSame('CURRENT_TIMESTAMP', $columns[0]->getUpdate());
@@ -215,8 +309,14 @@ class TableTest extends TestCase
      * @param bool $withTimezone
      */
     #[DataProvider('provideTimestampColumnNames')]
-    public function testAddTimestampsWithTimezone(AdapterInterface $adapter, $createdAtColumnName, $updatedAtColumnName, $expectedCreatedAtColumnName, $expectedUpdatedAtColumnName, $withTimezone)
-    {
+    public function testAddTimestampsWithTimezone(
+        AdapterInterface $adapter,
+        $createdAtColumnName,
+        $updatedAtColumnName,
+        $expectedCreatedAtColumnName,
+        $expectedUpdatedAtColumnName,
+        $withTimezone
+    ): void {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestampsWithTimezone($createdAtColumnName, $updatedAtColumnName);
         $actions = $this->getPendingActions($table);
@@ -243,7 +343,7 @@ class TableTest extends TestCase
 
     public function testInsert()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -260,7 +360,7 @@ class TableTest extends TestCase
 
     public function testInsertMultipleRowsWithoutZeroKey()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -281,7 +381,7 @@ class TableTest extends TestCase
 
     public function testInsertSaveEmptyData()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -293,7 +393,7 @@ class TableTest extends TestCase
 
     public function testInsertSaveData()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -326,7 +426,7 @@ class TableTest extends TestCase
 
     public function testSaveAfterSaveData()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -359,7 +459,7 @@ class TableTest extends TestCase
 
     public function testResetAfterAddingData()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -371,7 +471,7 @@ class TableTest extends TestCase
 
     public function testPendingAfterAddingData()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
@@ -383,7 +483,7 @@ class TableTest extends TestCase
 
     public function testPendingAfterAddingColumn()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->any())
@@ -396,7 +496,7 @@ class TableTest extends TestCase
 
     public function testGetColumn()
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
+        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
 
@@ -421,11 +521,8 @@ class TableTest extends TestCase
     #[DataProvider('removeIndexDataprovider')]
     public function testRemoveIndex($indexIdentifier, Index $index)
     {
-        $adapterStub = $this->getMockBuilder('\Phinx\Db\Adapter\MysqlAdapter')
-            ->setConstructorArgs([[]])
-            ->getMock();
-
-        $table = new Table('table', [], $adapterStub);
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('table', [], $adapter);
         $table->removeIndex($indexIdentifier);
 
         $indexes = array_map(function (DropIndex $action) {

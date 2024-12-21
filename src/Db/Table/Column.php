@@ -62,7 +62,7 @@ class Column
     /**
      * @var string
      */
-    protected string $name;
+    protected string $name = '';
 
     /**
      * @var string|\Migrations\Db\Literal
