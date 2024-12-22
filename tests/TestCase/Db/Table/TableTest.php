@@ -11,8 +11,8 @@ use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Adapter\PostgresAdapter;
-use Migrations\Db\Adapter\SQLiteAdapter;
-use Migrations\Db\Adapter\SqlServerAdapter;
+use Migrations\Db\Adapter\SqliteAdapter;
+use Migrations\Db\Adapter\SqlserverAdapter;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Index;
@@ -23,12 +23,12 @@ use RuntimeException;
 
 class TableTest extends TestCase
 {
-    public static function provideAdapters()
+    public static function provideAdapters(): array
     {
-        return [[new SqlServerAdapter([])], [new MysqlAdapter([])], [new PostgresAdapter([])], [new SQLiteAdapter(['name' => ':memory:'])]];
+        return [[new SqlserverAdapter([])], [new MysqlAdapter([])], [new PostgresAdapter([])], [new SqliteAdapter(['name' => ':memory:'])]];
     }
 
-    public static function provideTimestampColumnNames()
+    public static function provideTimestampColumnNames(): array
     {
         $result = [];
         $adapters = static::provideAdapters();
