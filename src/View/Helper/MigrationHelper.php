@@ -236,17 +236,21 @@ class MigrationHelper extends Helper
         if ($tableConstraints[0] === 'primary') {
             unset($tableConstraints[0]);
         }
-        if (!empty($tableConstraints)) {
-            foreach ($tableConstraints as $name) {
-                $constraint = $tableSchema->getConstraint($name);
-                if ($constraint && isset($constraint['update'])) {
-                    $constraint['update'] = $this->formatConstraintAction($constraint['update']);
-                }
-                if ($constraint && isset($constraint['delete'])) {
-                    $constraint['delete'] = $this->formatConstraintAction($constraint['delete']);
-                }
-                $constraints[$name] = $constraint;
+        foreach ($tableConstraints as $name) {
+            $constraint = $tableSchema->getConstraint($name);
+            if (!$constraint) {
+                continue;
             }
+            if ($constraint['type'] === 'primary') {
+                continue;
+            }
+            if (isset($constraint['update'])) {
+                $constraint['update'] = $this->formatConstraintAction($constraint['update']);
+            }
+            if (isset($constraint['delete'])) {
+                $constraint['delete'] = $this->formatConstraintAction($constraint['delete']);
+            }
+            $constraints[$name] = $constraint;
         }
 
         return $constraints;
