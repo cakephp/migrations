@@ -17,6 +17,7 @@ use Cake\Cache\Cache;
 use Cake\Console\BaseCommand;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
+use Cake\Database\Driver\Mysql;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
@@ -102,6 +103,35 @@ class BakeMigrationDiffCommandTest extends TestCase
         $this->assertOutputContains('Your migrations history is empty and you do not have any migrations files.');
         $this->assertOutputNotContains('Something went wrong during the snapshot baking. Please try again.');
         $this->assertExitCode(BaseCommand::CODE_ERROR);
+    }
+
+    public function testWithUserLimitTable(): void
+    {
+        $connection = ConnectionManager::get('test');
+        $this->skipIf(!($connection->getDriver() instanceof Mysql), 'Requires mysql');
+        $sql = <<<SQL
+DROP TABLE IF EXISTS `user_rate_limits`;
+CREATE TABLE `user_rate_limits` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT NULL,
+  `ip_address` varchar(64) NOT NULL,
+  `limit_type` enum('per_day','per_minute','auth') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+SQL;
+        $connection->execute($sql);
+        $connection->execute('DROP TABLE user_rate_limits');
+
+        $folderName = 'UserLimitTable';
+        $this->exec('bake migration_diff UserLimitTableCreate -c test -s ' . $folderName);
+
+        $path = ROOT . DS . 'config' . DS . $folderName . DS;
+        $this->generatedFiles = glob($path . '*_UserLimitTableCreate.php');
+        $fileName = pathinfo($this->generatedFiles[0], PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
     }
 
     /**
