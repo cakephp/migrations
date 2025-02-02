@@ -370,7 +370,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             $this->quoteTableName($table->getName())
         );
         $columns = array_keys($row);
-        $sql .= '(' . implode(', ', array_map([$this, 'quoteColumnName'], $columns)) . ')';
+        $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $columns)) . ')';
 
         foreach ($row as $column => $value) {
             if (is_bool($value)) {
@@ -379,7 +379,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         }
 
         if ($this->isDryRunEnabled()) {
-            $sql .= ' VALUES (' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ');';
+            $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ');';
             $this->io->out($sql);
         } else {
             $values = [];
@@ -453,12 +453,11 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         $current = current($rows);
         $keys = array_keys($current);
 
-        $callback = fn ($key) => $this->quoteColumnName($key);
-        $sql .= '(' . implode(', ', array_map($callback, $keys)) . ') VALUES ';
+        $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $keys)) . ') VALUES ';
 
         if ($this->isDryRunEnabled()) {
             $values = array_map(function ($row) {
-                return '(' . implode(', ', array_map([$this, 'quoteValue'], $row)) . ')';
+                return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
             $sql .= implode(', ', $values) . ';';
             $this->io->out($sql);

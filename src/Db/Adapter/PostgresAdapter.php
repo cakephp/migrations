@@ -321,13 +321,15 @@ class PostgresAdapter extends PdoAdapter
              datetime_precision
              %s
              FROM information_schema.columns
-             WHERE table_schema = %s AND table_name = %s
+             WHERE table_schema = ? AND table_name = ?
              ORDER BY ordinal_position',
             $this->useIdentity ? ', identity_generation' : '',
-            $this->quoteString($parts['schema']),
-            $this->quoteString($parts['table'])
         );
-        $columnsInfo = $this->fetchAll($sql);
+        $params = [
+            $parts['schema'],
+            $parts['table'],
+        ];
+        $columnsInfo = $this->query($sql, $params)->fetchAll('assoc');
         foreach ($columnsInfo as $columnInfo) {
             $isUserDefined = strtoupper(trim($columnInfo['data_type'])) === 'USER-DEFINED';
 

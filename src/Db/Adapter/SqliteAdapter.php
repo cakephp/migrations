@@ -442,12 +442,11 @@ class SqliteAdapter extends PdoAdapter
 
         // assuming no error occurred, reset the autoincrement (if any)
         if ($this->hasTable($info['schema'] . '.sqlite_sequence')) {
-            $this->execute(sprintf(
-                'DELETE FROM %s.%s where name  = %s',
+            $sql = sprintf(
+                'DELETE FROM %s.sqlite_sequence where name = ?',
                 $this->quoteColumnName($info['schema']),
-                'sqlite_sequence',
-                $this->quoteString($info['table'])
-            ));
+            );
+            $this->execute($sql, [$info['table']]);
         }
     }
 
