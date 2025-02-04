@@ -117,6 +117,12 @@
     </DeprecatedMethod>
   </file>
   <file src="src/Db/Adapter/MysqlAdapter.php">
+    <DeprecatedMethod>
+      <code><![CDATA[describeColumnSql]]></code>
+      <code><![CDATA[describeForeignKeySql]]></code>
+      <code><![CDATA[describeIndexSql]]></code>
+      <code><![CDATA[listTablesSql]]></code>
+    </DeprecatedMethod>
     <RedundantCondition>
       <code><![CDATA[$opened]]></code>
       <code><![CDATA[is_array($newColumns)]]></code>
@@ -127,7 +133,24 @@
       <code><![CDATA[getQueryBuilder]]></code>
     </DeprecatedMethod>
   </file>
+  <file src="src/Db/Adapter/PostgresAdapter.php">
+    <DeprecatedMethod>
+      <code><![CDATA[describeIndexSql]]></code>
+      <code><![CDATA[listTablesSql]]></code>
+    </DeprecatedMethod>
+  </file>
+  <file src="src/Db/Adapter/SqliteAdapter.php">
+    <DeprecatedMethod>
+      <code><![CDATA[describeColumnSql]]></code>
+      <code><![CDATA[describeIndexSql]]></code>
+    </DeprecatedMethod>
+  </file>
   <file src="src/Db/Adapter/SqlserverAdapter.php">
+    <DeprecatedMethod>
+      <code><![CDATA[describeForeignKeySql]]></code>
+      <code><![CDATA[describeIndexSql]]></code>
+      <code><![CDATA[listTablesSql]]></code>
+    </DeprecatedMethod>
     <ImplementedReturnTypeMismatch>
       <code><![CDATA[\Phinx\Db\Adapter\AdapterInterface]]></code>
     </ImplementedReturnTypeMismatch>
