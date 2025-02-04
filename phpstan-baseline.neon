@@ -91,6 +91,12 @@ parameters:
 			path: src/Db/Adapter/MysqlAdapter.php
 
 		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(int\|string\)\: mixed\)\|null, Closure\(string\)\: string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PdoAdapter.php
+
+		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
