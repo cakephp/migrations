@@ -14,21 +14,10 @@ declare(strict_types=1);
 namespace TestApp\Model\Table;
 
 use Cake\ORM\Table;
-use function Cake\Core\env;
 
 /**
  * Numbers Model
  */
 class NumbersTable extends Table
 {
-    public function initialize(array $config): void
-    {
-        $db = env('DB');
-        $schema = 'cakephp_test.';
-        if ($db === 'pgsql') {
-            $schema = '';
-        }
-
-        $this->setTable($schema . 'numbers');
-    }
 }
