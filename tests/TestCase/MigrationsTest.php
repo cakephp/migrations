@@ -93,6 +93,7 @@ class MigrationsTest extends TestCase
         $this->Connection->execute('DROP TABLE IF EXISTS numbers');
         $this->Connection->execute('DROP TABLE IF EXISTS letters');
         $this->Connection->execute('DROP TABLE IF EXISTS stores');
+        $this->Connection->execute('DROP TABLE IF EXISTS articles');
 
         $allTables = $this->Connection->getSchemaCollection()->listTables();
         if (in_array('phinxlog', $allTables)) {
@@ -1103,6 +1104,15 @@ class MigrationsTest extends TestCase
             $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
         }
         file_put_contents($destination . $copiedFileName, $content);
+
+        $snapshotConn = ConnectionManager::get('test_snapshot');
+        $cleanup = [
+            'articles', 'orders', 'products', 'categories', 'composite_pks', 'events',
+            'parts', 'special_pks', 'special_tags', 'texts', 'users',
+        ];
+        foreach ($cleanup as $item) {
+            $snapshotConn->execute("DROP TABLE IF EXISTS {$item}");
+        }
 
         $migrations = new Migrations([
             'connection' => 'test_snapshot',
