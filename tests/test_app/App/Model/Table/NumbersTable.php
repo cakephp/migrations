@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace TestApp\Model\Table;
 
+use Cake\Database\Driver\Mysql;
 use Cake\ORM\Table;
 
 /**
@@ -20,4 +21,14 @@ use Cake\ORM\Table;
  */
 class NumbersTable extends Table
 {
+    public function initialize(array $config): void
+    {
+        $driver = $this->getConnection()->getDriver();
+        $schema = '';
+        if ($driver instanceof Mysql) {
+            $schema = $driver->config()['database'] . '.';
+        }
+
+        $this->setTable($schema . 'numbers');
+    }
 }
