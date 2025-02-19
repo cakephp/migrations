@@ -114,7 +114,7 @@ class TestSnapshotPluginBlogSqlite extends BaseMigration
                     ->setReferencedColumns('id')
                     ->setOnDelete('NO_ACTION')
                     ->setOnUpdate('NO_ACTION')
-                    ->setName('category_id_0_fk')
+                    ->setName('articles_category_fk')
             )
             ->update();
     }

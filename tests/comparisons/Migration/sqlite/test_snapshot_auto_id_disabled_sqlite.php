@@ -369,7 +369,7 @@ class TestSnapshotAutoIdDisabledSqlite extends BaseMigration
                     ])
                     ->setOnDelete('CASCADE')
                     ->setOnUpdate('CASCADE')
-                    ->setName('product_category_product_id_0_fk')
+                    ->setName('orders_product_fk')
             )
             ->update();
 
@@ -380,7 +380,7 @@ class TestSnapshotAutoIdDisabledSqlite extends BaseMigration
                     ->setReferencedColumns('id')
                     ->setOnDelete('CASCADE')
                     ->setOnUpdate('CASCADE')
-                    ->setName('category_id_0_fk')
+                    ->setName('products_category_fk')
             )
             ->update();
     }
