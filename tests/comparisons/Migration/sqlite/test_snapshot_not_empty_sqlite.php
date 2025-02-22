@@ -292,7 +292,7 @@ class TestSnapshotNotEmptySqlite extends BaseMigration
                     ->setReferencedColumns('id')
                     ->setOnDelete('NO_ACTION')
                     ->setOnUpdate('NO_ACTION')
-                    ->setName('category_id_0_fk')
+                    ->setName('articles_category_fk')
             )
             ->update();
 
@@ -309,7 +309,7 @@ class TestSnapshotNotEmptySqlite extends BaseMigration
                     ])
                     ->setOnDelete('CASCADE')
                     ->setOnUpdate('CASCADE')
-                    ->setName('product_category_product_id_0_fk')
+                    ->setName('orders_product_fk')
             )
             ->update();
 
@@ -320,7 +320,7 @@ class TestSnapshotNotEmptySqlite extends BaseMigration
                     ->setReferencedColumns('id')
                     ->setOnDelete('CASCADE')
                     ->setOnUpdate('CASCADE')
-                    ->setName('category_id_0_fk')
+                    ->setName('products_category_fk')
             )
             ->update();
     }
