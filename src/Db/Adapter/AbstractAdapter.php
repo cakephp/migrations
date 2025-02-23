@@ -51,7 +51,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Base Abstract Database Adapter.
  */
-abstract class AbstractAdapter implements AdapterInterface
+abstract class AbstractAdapter implements AdapterInterface, DirectActionInterface
 {
     /**
      * @var array<string, mixed>
@@ -1094,7 +1094,7 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * @inheritdoc
      */
-    public function dropIndex(string $tableName, $columns): void
+    public function dropIndex(string $tableName, string|array $columns): void
     {
         $instructions = $this->getDropIndexByColumnsInstructions($tableName, $columns);
         $this->executeAlterSteps($tableName, $instructions);
@@ -1215,7 +1215,7 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * @inheritdoc
      */
-    public function changePrimaryKey(TableMetadata $table, $newColumns): void
+    public function changePrimaryKey(TableMetadata $table, string|array|null $newColumns): void
     {
         $instructions = $this->getChangePrimaryKeyInstructions($table, $newColumns);
         $this->executeAlterSteps($table->getName(), $instructions);
