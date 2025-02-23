@@ -21,7 +21,7 @@ use Migrations\MigrationInterface;
 /**
  * Migrations SqlServer Adapter.
  */
-class SqlserverAdapter extends PdoAdapter
+class SqlserverAdapter extends AbstractAdapter
 {
     /**
      * @var string[]

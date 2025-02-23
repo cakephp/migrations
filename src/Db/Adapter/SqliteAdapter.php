@@ -24,7 +24,7 @@ use const FILTER_VALIDATE_BOOLEAN;
 /**
  * Migrations SQLite Adapter.
  */
-class SqliteAdapter extends PdoAdapter
+class SqliteAdapter extends AbstractAdapter
 {
     public const MEMORY = ':memory:';
 

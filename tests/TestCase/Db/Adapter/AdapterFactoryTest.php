@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Migrations\Test\Db\Adapter;
 
 use Migrations\Db\Adapter\AdapterFactory;
-use Migrations\Db\Adapter\PdoAdapter;
-use Migrations\Test\TestCase\Db\Adapter\DefaultPdoAdapterTrait;
+use Migrations\Db\Adapter\AbstractAdapter;
+use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;
@@ -34,8 +34,8 @@ class AdapterFactoryTest extends TestCase
 
     public function testRegisterAdapter()
     {
-        $pdo = new class (['foo' => 'bar']) extends PdoAdapter {
-            use DefaultPdoAdapterTrait;
+        $pdo = new class (['foo' => 'bar']) extends AbstractAdapter {
+            use DefaultAdapterTrait;
         };
         $this->factory->registerAdapter('test', function (array $options) use ($pdo) {
             $this->assertEquals('value', $options['key']);

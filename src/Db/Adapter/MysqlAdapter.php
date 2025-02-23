@@ -22,7 +22,7 @@ use Migrations\Db\Table\Table;
 /**
  * Phinx MySQL Adapter.
  */
-class MysqlAdapter extends PdoAdapter
+class MysqlAdapter extends AbstractAdapter
 {
     /**
      * @var string[]

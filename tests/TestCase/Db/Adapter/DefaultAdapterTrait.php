@@ -10,7 +10,7 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
 
-trait DefaultPdoAdapterTrait
+trait DefaultAdapterTrait
 {
     public function hasTransactions(): bool
     {

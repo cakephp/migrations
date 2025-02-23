@@ -5,8 +5,8 @@ namespace Migrations\Test\TestCase\Migration;
 
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
+use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\AdapterWrapper;
-use Migrations\Db\Adapter\PdoAdapter;
 use Migrations\Migration\Environment;
 use Migrations\Shim\MigrationAdapter;
 use Migrations\Shim\SeedAdapter;
@@ -98,7 +98,7 @@ class EnvironmentTest extends TestCase
 
     public function testCurrentVersion()
     {
-        $stub = $this->getMockBuilder(PdoAdapter::class)
+        $stub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $stub->expects($this->any())
@@ -113,7 +113,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAMigrationUp()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -139,7 +139,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAMigrationDown()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -165,7 +165,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAMigrationWithTransactions()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -197,7 +197,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAMigrationWithUseTransactions()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->never())
@@ -235,7 +235,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAChangeMigrationUp()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -261,7 +261,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAChangeMigrationDown()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -287,7 +287,7 @@ class EnvironmentTest extends TestCase
     public function testExecutingAFakeMigration()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -321,7 +321,7 @@ class EnvironmentTest extends TestCase
     public function testExecuteMigrationCallsInit()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $adapterStub->expects($this->once())
@@ -354,7 +354,7 @@ class EnvironmentTest extends TestCase
     public function testExecuteSeedInit()
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(PdoAdapter::class)
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
 

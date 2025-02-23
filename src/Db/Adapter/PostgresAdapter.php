@@ -18,7 +18,7 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
 use Phinx\Util\Literal as PhinxLiteral;
 
-class PostgresAdapter extends PdoAdapter
+class PostgresAdapter extends AbstractAdapter
 {
     public const GENERATED_ALWAYS = 'ALWAYS';
     public const GENERATED_BY_DEFAULT = 'BY DEFAULT';

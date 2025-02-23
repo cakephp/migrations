@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\RecordingAdapter;
 use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
@@ -18,7 +19,7 @@ class RecordingAdapterTest extends TestCase
 
     protected function setUp(): void
     {
-        $stub = $this->getMockBuilder('\Migrations\Db\Adapter\PdoAdapter')
+        $stub = $this->getMockBuilder(AbstractAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
 
