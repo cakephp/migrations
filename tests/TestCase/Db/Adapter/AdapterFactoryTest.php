@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
-use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AbstractAdapter;
+use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
