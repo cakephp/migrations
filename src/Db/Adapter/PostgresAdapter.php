@@ -807,11 +807,8 @@ class PostgresAdapter extends PdoAdapter
     protected function getForeignKeys(string $tableName): array
     {
         $parts = $this->getSchemaName($tableName);
-
-        /*
-        // This should work but is blocked on a bug in cakephp/database
-        // The field ordering after reflection is lost
         $dialect = $this->getSchemaDialect();
+
         [$query, $params] = $dialect->describeForeignKeySql($parts['table'], [
             'schema' => $parts['schema'],
             'database' => $this->getOption('database'),
@@ -824,34 +821,6 @@ class PostgresAdapter extends PdoAdapter
             $foreignKeys[$name]['columns'][] = $row['column_name'];
             $foreignKeys[$name]['referenced_table'] = $row['references_table'];
             $foreignKeys[$name]['referenced_columns'][] = $row['references_field'];
-        }
-        */
-
-        $foreignKeys = [];
-        $parts = $this->getSchemaName($tableName);
-        $params = [
-            $parts['schema'],
-            $parts['table'],
-        ];
-        $rows = $this->query(
-            "SELECT
-                    tc.constraint_name,
-                    tc.table_name, kcu.column_name,
-                    ccu.table_name AS referenced_table_name,
-                    ccu.column_name AS referenced_column_name
-                FROM
-                    information_schema.table_constraints AS tc
-                    JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
-                    JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
-                WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema = ? AND tc.table_name = ?
-                ORDER BY kcu.ordinal_position",
-            $params,
-        )->fetchAll('assoc');
-        foreach ($rows as $row) {
-            $foreignKeys[$row['constraint_name']]['table'] = $row['table_name'];
-            $foreignKeys[$row['constraint_name']]['columns'][] = $row['column_name'];
-            $foreignKeys[$row['constraint_name']]['referenced_table'] = $row['referenced_table_name'];
-            $foreignKeys[$row['constraint_name']]['referenced_columns'][] = $row['referenced_column_name'];
         }
         foreach ($foreignKeys as $name => $key) {
             $foreignKeys[$name]['columns'] = array_values(array_unique($key['columns']));
