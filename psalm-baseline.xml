@@ -135,6 +135,7 @@
   </file>
   <file src="src/Db/Adapter/PostgresAdapter.php">
     <DeprecatedMethod>
+      <code><![CDATA[describeForeignKeySql]]></code>
       <code><![CDATA[describeIndexSql]]></code>
       <code><![CDATA[listTablesSql]]></code>
     </DeprecatedMethod>
