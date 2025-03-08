@@ -517,7 +517,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $connectionName = $inputArgs['--connection'] = $args->getOption('connection');
         }
 
-        if (!empty($args->getOption('source'))) {
+        if ($args->getOption('source')) {
             $inputArgs['--source'] = $args->getOption('source');
         }
 
