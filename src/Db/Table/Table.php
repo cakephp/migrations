@@ -33,7 +33,7 @@ class Table
      */
     public function __construct(string $name, array $options = [])
     {
-        if (empty($name)) {
+        if (!$name) {
             throw new InvalidArgumentException('Cannot use an empty table name');
         }
 

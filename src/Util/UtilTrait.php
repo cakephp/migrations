@@ -45,7 +45,7 @@ trait UtilTrait
     {
         $table = 'phinxlog';
 
-        if (empty($plugin)) {
+        if (!$plugin) {
             return $table;
         }
 

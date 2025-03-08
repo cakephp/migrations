@@ -85,7 +85,7 @@ class MigrationsCommand extends Command
         $parser->setDescription($command->getDescription());
         $definition = $command->getDefinition();
         foreach ($definition->getOptions() as $option) {
-            if (!empty($option->getShortcut())) {
+            if ($option->getShortcut()) {
                 $parser->addOption($option->getName(), [
                     'short' => $option->getShortcut(),
                     'help' => $option->getDescription(),
@@ -140,12 +140,12 @@ class MigrationsCommand extends Command
             $exitCode === 0
         ) {
             $newArgs = [];
-            if (!empty($args->getOption('connection'))) {
+            if ($args->getOption('connection')) {
                 $newArgs[] = '-c';
                 $newArgs[] = $args->getOption('connection');
             }
 
-            if (!empty($args->getOption('plugin'))) {
+            if ($args->getOption('plugin')) {
                 $newArgs[] = '-p';
                 $newArgs[] = $args->getOption('plugin');
             }

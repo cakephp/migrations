@@ -279,7 +279,7 @@ class Environment
         $versions = $this->getVersions();
         $version = 0;
 
-        if (!empty($versions)) {
+        if ($versions) {
             $version = end($versions);
         }
 

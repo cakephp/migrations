@@ -164,7 +164,7 @@ class CakeManager extends Manager
         sort($versions);
         $versions = array_reverse($versions);
 
-        if (empty($versions) || $dateString > $versions[0]) {
+        if (!$versions || $dateString > $versions[0]) {
             $this->getOutput()->writeln('No migrations to rollback');
 
             return;
@@ -218,7 +218,7 @@ class CakeManager extends Manager
 
         $migrationFile = glob($path . DS . $version . '*');
 
-        if (empty($migrationFile)) {
+        if (!$migrationFile) {
             throw new RuntimeException(
                 sprintf('A migration file matching version number `%s` could not be found', $version)
             );
@@ -254,13 +254,13 @@ class CakeManager extends Manager
         $versionArg = $input->getArgument('version');
         $targetArg = $input->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
-        if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
+        if ((!$versionArg && !$targetArg) || $hasAllVersion) {
             return $versions;
         }
 
         $version = (int)$targetArg ?: (int)$versionArg;
 
-        if ($input->getOption('only') || !empty($versionArg)) {
+        if ($input->getOption('only') || $versionArg) {
             if (!in_array($version, $versions)) {
                 throw new InvalidArgumentException("Migration `$version` was not found !");
             }
@@ -375,7 +375,7 @@ class CakeManager extends Manager
     public function getSeeds(string $environment): array
     {
         parent::getSeeds($environment);
-        if (empty($this->seeds)) {
+        if (!$this->seeds) {
             return [];
         }
 

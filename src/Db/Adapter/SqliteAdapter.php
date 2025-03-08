@@ -369,7 +369,7 @@ class SqliteAdapter extends AbstractAdapter
 
         // Drop the existing primary key
         $primaryKey = $this->getPrimaryKey($table->getName());
-        if (!empty($primaryKey)) {
+        if ($primaryKey) {
             $instructions->merge(
                 // FIXME: array access is a hack to make this incomplete implementation work with a correct getPrimaryKey implementation
                 $this->getDropPrimaryKeyInstructions($table, $primaryKey[0])
@@ -377,7 +377,7 @@ class SqliteAdapter extends AbstractAdapter
         }
 
         // Add the primary key(s)
-        if (!empty($newColumns)) {
+        if ($newColumns) {
             if (!is_string($newColumns)) {
                 throw new InvalidArgumentException(sprintf(
                     'Invalid value for primary key: %s',

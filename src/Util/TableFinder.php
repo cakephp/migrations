@@ -65,14 +65,14 @@ class TableFinder
         ];
         $tables = $collection->listTables();
 
-        if (empty($tables)) {
+        if (!$tables) {
             return $tables;
         }
 
         if ($options['require-table'] === true || $options['plugin']) {
             $tableNamesInPlugin = $this->getTableNames($options['plugin']);
 
-            if (empty($tableNamesInPlugin)) {
+            if (!$tableNamesInPlugin) {
                 return [];
             }
 
@@ -115,13 +115,13 @@ class TableFinder
         if ($pluginName !== null && !CorePlugin::getCollection()->has($pluginName)) {
             return [];
         }
-        $list = [];
-        $tables = $this->findTables($pluginName);
 
-        if (empty($tables)) {
+        $tables = $this->findTables($pluginName);
+        if (!$tables) {
             return [];
         }
 
+        $list = [];
         foreach ($tables as $table) {
             $list = array_merge($list, $this->fetchTableName($table, $pluginName));
         }

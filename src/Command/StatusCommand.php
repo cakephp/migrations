@@ -131,7 +131,7 @@ class StatusCommand extends Command
      */
     protected function display(array $migrations, ConsoleIo $io): void
     {
-        if (!empty($migrations)) {
+        if ($migrations) {
             $rows = [];
             $rows[] = ['Status', 'Migration ID', 'Migration Name'];
 

@@ -277,7 +277,7 @@ class MysqlAdapter extends AbstractAdapter
         }
 
         // Add the primary key(s)
-        if (!empty($newColumns)) {
+        if ($newColumns) {
             $sql = 'ADD PRIMARY KEY (';
             if (is_string($newColumns)) { // handle primary_key => 'id'
                 $sql .= $this->quoteColumnName($newColumns);
@@ -449,7 +449,7 @@ class MysqlAdapter extends AbstractAdapter
     protected function afterClause(Column $column): string
     {
         $after = $column->getAfter();
-        if (empty($after)) {
+        if (!$after) {
             return '';
         }
 
@@ -815,7 +815,7 @@ class MysqlAdapter extends AbstractAdapter
             }
         }
 
-        if (empty($matches)) {
+        if (!$matches) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
                 implode(', ', $columns)
@@ -1219,7 +1219,7 @@ class MysqlAdapter extends AbstractAdapter
         )->fetchAll('assoc');
 
         foreach ($rows as $row) {
-            if (!empty($row)) {
+            if ($row) {
                 return true;
             }
         }

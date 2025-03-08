@@ -52,7 +52,7 @@ class CacheClear extends BaseCommand
             return static::CODE_ERROR;
         }
         $tables = [$name];
-        if (empty($name)) {
+        if (!$name) {
             $tables = $schema->listTables();
         }
         $cacher = $schema->getCacher();

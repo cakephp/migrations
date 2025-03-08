@@ -513,7 +513,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         $connection = $this->getConnection();
-        if (empty($params)) {
+        if (!$params) {
             $result = $connection->execute($sql);
 
             return $result->rowCount();

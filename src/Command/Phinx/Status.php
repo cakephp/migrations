@@ -105,7 +105,7 @@ class Status extends StatusCommand
     {
         $output = $this->getManager()->getOutput();
 
-        if (!empty($migrations)) {
+        if ($migrations) {
             $output->writeln('');
             $output->writeln(' Status  Migration ID    Migration Name ');
             $output->writeln('-----------------------------------------');

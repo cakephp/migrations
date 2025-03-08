@@ -91,7 +91,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
             $this->io->abort('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`. See: https://book.cakephp.org/migrations/4/en/index.html#migrations-file-name');
         }
 
-        if (empty($action)) {
+        if (!$action) {
             return [
                 'plugin' => $this->plugin,
                 'pluginPath' => $pluginPath,
@@ -103,7 +103,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
             ];
         }
 
-        if (in_array($action[0], ['alter_table', 'add_field'], true) && !empty($primaryKey)) {
+        if (in_array($action[0], ['alter_table', 'add_field'], true) && $primaryKey) {
             /** @psalm-suppress PossiblyNullReference */
             $this->io->abort('Adding a primary key to an already existing table is not supported.');
         }

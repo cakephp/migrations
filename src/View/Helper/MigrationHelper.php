@@ -204,7 +204,7 @@ class MigrationHelper extends Helper
 
         $tableIndexes = $tableSchema->indexes();
         $indexes = [];
-        if (!empty($tableIndexes)) {
+        if ($tableIndexes) {
             foreach ($tableIndexes as $name) {
                 $indexes[$name] = $tableSchema->getIndex($name);
             }
@@ -229,7 +229,7 @@ class MigrationHelper extends Helper
 
         $constraints = [];
         $tableConstraints = $tableSchema->constraints();
-        if (empty($tableConstraints)) {
+        if (!$tableConstraints) {
             return $constraints;
         }
 
@@ -550,7 +550,7 @@ class MigrationHelper extends Helper
      */
     public function stringifyList(array $list, array $options = [], array $wantedOptions = []): string
     {
-        if (!empty($wantedOptions)) {
+        if ($wantedOptions) {
             $list = array_intersect_key($list, $wantedOptions);
             if (empty($list['comment'])) {
                 unset($list['comment']);

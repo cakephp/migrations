@@ -176,14 +176,14 @@ class PostgresAdapter extends AbstractAdapter
         $queries[] = $sql;
 
         // process column comments
-        if (!empty($this->columnsWithComments)) {
+        if ($this->columnsWithComments) {
             foreach ($this->columnsWithComments as $column) {
                 $queries[] = $this->getColumnCommentSqlDefinition($column, $table->getName());
             }
         }
 
         // set the indexes
-        if (!empty($indexes)) {
+        if ($indexes) {
             foreach ($indexes as $index) {
                 $queries[] = $this->getIndexSqlDefinition($index, $table->getName());
             }
@@ -227,7 +227,7 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         // Add the new primary key
-        if (!empty($newColumns)) {
+        if ($newColumns) {
             $sql = sprintf(
                 'ADD CONSTRAINT %s PRIMARY KEY (',
                 $this->quoteColumnName($parts['table'] . '_pkey')
@@ -698,7 +698,7 @@ class PostgresAdapter extends AbstractAdapter
         $indexes = $this->getIndexes($tableName);
         foreach ($indexes as $indexName => $index) {
             $a = array_diff($columns, $index['columns']);
-            if (empty($a)) {
+            if (!$a) {
                 return new AlterInstructions([], [sprintf(
                     'DROP INDEX IF EXISTS %s',
                     '"' . ($parts['schema'] . '".' . $this->quoteColumnName($indexName))
@@ -733,8 +733,7 @@ class PostgresAdapter extends AbstractAdapter
     public function hasPrimaryKey(string $tableName, $columns, ?string $constraint = null): bool
     {
         $primaryKey = $this->getPrimaryKey($tableName);
-
-        if (empty($primaryKey)) {
+        if (!$primaryKey) {
             return false;
         }
 
@@ -871,7 +870,7 @@ class PostgresAdapter extends AbstractAdapter
             }
         }
 
-        if (empty($matches)) {
+        if (!$matches) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
                 implode(', ', $columns)

@@ -193,7 +193,7 @@ class Manager
         sort($versions);
         $versions = array_reverse($versions);
 
-        if (empty($versions) || $dateString > $versions[0]) {
+        if (!$versions || $dateString > $versions[0]) {
             $this->getIo()->out('No migrations to rollback');
 
             return;
@@ -247,7 +247,7 @@ class Manager
 
         $migrationFile = glob($path . DS . $version . '*');
 
-        if (empty($migrationFile)) {
+        if (!$migrationFile) {
             throw new RuntimeException(
                 sprintf('A migration file matching version number `%s` could not be found', $version)
             );
@@ -314,13 +314,13 @@ class Manager
         }
         $targetArg = $args->getOption('target');
         $hasAllVersion = in_array($versionArg, ['all', '*'], true);
-        if ((empty($versionArg) && empty($targetArg)) || $hasAllVersion) {
+        if ((!$versionArg && !$targetArg) || $hasAllVersion) {
             return $versions;
         }
 
         $version = (int)$targetArg ?: (int)$versionArg;
 
-        if ($args->getOption('only') || !empty($versionArg)) {
+        if ($args->getOption('only') || $versionArg) {
             if (!in_array($version, $versions)) {
                 throw new InvalidArgumentException("Migration `$version` was not found !");
             }
@@ -399,7 +399,7 @@ class Manager
         $versions = $env->getVersions();
         $current = $env->getCurrentVersion();
 
-        if (empty($versions) && empty($migrations)) {
+        if (!$versions && !$migrations) {
             return;
         }
 
@@ -620,7 +620,7 @@ class Manager
 
         // Check we have at least 1 migration to revert
         $executedVersionCreationTimes = array_keys($executedVersions);
-        if (empty($executedVersionCreationTimes) || $target == end($executedVersionCreationTimes)) {
+        if (!$executedVersionCreationTimes || $target == end($executedVersionCreationTimes)) {
             $io->out('<error>No migrations to rollback</error>');
 
             return;
@@ -913,7 +913,7 @@ class Manager
     {
         $dependenciesInstances = [];
         $dependencies = $seed->getDependencies();
-        if (!empty($dependencies) && !empty($this->seeds)) {
+        if ($dependencies && $this->seeds) {
             foreach ($dependencies as $dependency) {
                 foreach ($this->seeds as $seed) {
                     $name = $seed->getName();
@@ -940,7 +940,7 @@ class Manager
             $name = $seed->getName();
             $orderedSeeds[$name] = $seed;
             $dependencies = $this->getSeedDependenciesInstances($seed);
-            if (!empty($dependencies)) {
+            if ($dependencies) {
                 $orderedSeeds = array_merge($this->orderSeedsByDependencies($dependencies), $orderedSeeds);
             }
         }
@@ -1008,7 +1008,7 @@ class Manager
             $this->setSeeds($seeds);
         }
         $this->seeds = $this->orderSeedsByDependencies((array)$this->seeds);
-        if (empty($this->seeds)) {
+        if (!$this->seeds) {
             return [];
         }
 
@@ -1072,7 +1072,7 @@ class Manager
         $env = $this->getEnvironment();
         $versions = $env->getVersionLog();
 
-        if (empty($versions) || empty($migrations)) {
+        if (!$versions || !$migrations) {
             return;
         }
 

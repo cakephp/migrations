@@ -105,7 +105,7 @@ class Create extends CreateCommand
         [$phinxTimestamp, $phinxName] = explode('_', Util::mapClassNameToFileName($name), 2);
         $migrationFilename = glob($migrationPath . '*' . $phinxName);
 
-        if (empty($migrationFilename)) {
+        if (!$migrationFilename) {
             $output->writeln('<info>An error occurred while renaming file</info>');
         } else {
             $migrationFilename = $migrationFilename[0];

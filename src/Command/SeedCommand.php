@@ -119,7 +119,7 @@ class SeedCommand extends Command
         $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
 
         $start = microtime(true);
-        if (empty($seeds)) {
+        if (!$seeds) {
             // run all the seed(ers)
             $manager->seed();
         } else {

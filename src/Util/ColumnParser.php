@@ -278,7 +278,7 @@ class ColumnParser
      */
     public function getIndexName(string $field, ?string $indexType, ?string $indexName, bool $indexUnique): string
     {
-        if (empty($indexName)) {
+        if (!$indexName) {
             $indexName = strtoupper('BY_' . $field);
             if ($indexType === 'primary') {
                 $indexName = 'PRIMARY';

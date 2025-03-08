@@ -181,7 +181,7 @@ class SqlserverAdapter extends AbstractAdapter
         }
 
         // Add the primary key(s)
-        if (!empty($newColumns)) {
+        if ($newColumns) {
             $sql = sprintf(
                 'ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (',
                 $this->quoteTableName($table->getName()),
@@ -463,7 +463,7 @@ SQL;
             $default = ltrim($this->getDefaultValueDefinition($default));
         }
 
-        if (empty($default)) {
+        if (!$default) {
             return $instructions;
         }
 
@@ -635,8 +635,7 @@ ORDER BY IC.[key_ordinal]';
 
         foreach ($indexes as $index) {
             $a = array_diff($columns, $index['columns']);
-
-            if (empty($a)) {
+            if (!$a) {
                 return true;
             }
         }
@@ -687,7 +686,7 @@ ORDER BY IC.[key_ordinal]';
 
         foreach ($indexes as $indexName => $index) {
             $a = array_diff($columns, $index['columns']);
-            if (empty($a)) {
+            if (!$a) {
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s ON %s',
                     $this->quoteColumnName($indexName),
@@ -738,8 +737,7 @@ ORDER BY IC.[key_ordinal]';
     public function hasPrimaryKey(string $tableName, $columns, ?string $constraint = null): bool
     {
         $primaryKey = $this->getPrimaryKey($tableName);
-
-        if (empty($primaryKey)) {
+        if (!$primaryKey) {
             return false;
         }
 
@@ -882,7 +880,7 @@ ORDER BY IC.[key_ordinal]';
             }
         }
 
-        if (empty($matches)) {
+        if (!$matches) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
                 implode(', ', $columns)
