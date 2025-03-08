@@ -681,7 +681,7 @@ class Table
     public function create(): void
     {
         $options = $this->getTable()->getOptions();
-        if ((!isset($options['id']) || $options['id'] === false) && $this->primaryKey) {
+        if ((!isset($options['id']) || $options['id'] === false) && !empty($this->primaryKey)) {
             $options['primary_key'] = (array)$this->primaryKey;
             $this->filterPrimaryKey($options);
         }
