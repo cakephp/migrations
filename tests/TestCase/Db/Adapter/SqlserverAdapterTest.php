@@ -1521,4 +1521,28 @@ INPUT;
         $this->assertCount(1, $columns);
         $this->assertEquals(Literal::from('smallmoney'), array_pop($columns)->getType());
     }
+
+    public function testIdentityInsert()
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->save();
+
+        $this->adapter->execute('SET IDENTITY_INSERT table1 ON;');
+        $table->insert([
+            [
+                'id' => 20,
+                'name' => 'test20',
+            ],
+            [
+                'id' => 50,
+                'name' => 'test50',
+            ],
+        ])->saveData();
+        $this->adapter->execute('SET IDENTITY_INSERT table1 OFF;');
+
+        $countQuery = $this->adapter->query('SELECT * FROM table1');
+        $res = $countQuery->fetchAll('assoc');
+        var_dump($res);
+    }
 }
