@@ -1528,6 +1528,7 @@ INPUT;
         $table->addColumn('name', 'string')
             ->save();
 
+        $this->adapter->beginTransaction();
         $this->adapter->execute('SET IDENTITY_INSERT table1 ON;');
         $table->insert([
             [
@@ -1540,6 +1541,7 @@ INPUT;
             ],
         ])->saveData();
         $this->adapter->execute('SET IDENTITY_INSERT table1 OFF;');
+        $this->adapter->commitTransaction();
 
         $countQuery = $this->adapter->query('SELECT * FROM table1');
         $res = $countQuery->fetchAll('assoc');
