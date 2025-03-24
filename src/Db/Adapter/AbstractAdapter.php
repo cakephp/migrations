@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -603,6 +604,34 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function insert(TableMetadata $table, array $row): void
     {
+        $sql = $this->generateInsertSql($table, $row);
+
+        if ($this->isDryRunEnabled()) {
+            $this->io->out($sql);
+        } else {
+            $vals = [];
+            foreach ($row as $value) {
+                $placeholder = '?';
+                if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+                    $placeholder = (string)$value;
+                }
+                if ($placeholder === '?') {
+                    $vals[] = $value;
+                }
+            }
+            $this->getConnection()->execute($sql, $vals);
+        }
+    }
+
+    /**
+     * Generates the SQL for an insert.
+     *
+     * @param \Migrations\Db\Table\Table $table The table to insert into
+     * @param array $row The row to insert
+     * @return string
+     */
+    protected function generateInsertSql(TableMetadata $table, array $row): string
+    {
         $sql = sprintf(
             'INSERT INTO %s ',
             $this->quoteTableName($table->getName())
@@ -618,22 +647,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         if ($this->isDryRunEnabled()) {
             $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ');';
-            $this->io->out($sql);
+            return $sql;
         } else {
             $values = [];
-            $vals = [];
             foreach ($row as $value) {
                 $placeholder = '?';
                 if ($value instanceof Literal || $value instanceof PhinxLiteral) {
                     $placeholder = (string)$value;
                 }
                 $values[] = $placeholder;
-                if ($placeholder === '?') {
-                    $vals[] = $value;
-                }
             }
             $sql .= ' VALUES (' . implode(',', $values) . ')';
-            $this->getConnection()->execute($sql, $vals);
+            return $sql;
         }
     }
 
@@ -684,6 +709,39 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function bulkinsert(TableMetadata $table, array $rows): void
     {
+        $sql = $this->generateBulkInsertSql($table, $rows);
+
+        if ($this->isDryRunEnabled()) {
+            $this->io->out($sql);
+        } else {
+            $vals = [];
+            foreach ($rows as $row) {
+                foreach ($row as $v) {
+                    $placeholder = '?';
+                    if ($v instanceof Literal || $v instanceof PhinxLiteral) {
+                        $placeholder = (string)$v;
+                    }
+                    if ($placeholder == '?') {
+                        if (is_bool($v)) {
+                            $vals[] = $this->castToBool($v);
+                        } else {
+                            $vals[] = $v;
+                        }
+                    }
+                }
+            }
+            $this->getConnection()->execute($sql, $vals);
+        }
+    }
+    /**
+     * Generates the SQL for a bulk insert.
+     *
+     * @param \Migrations\Db\Table\Table $table The table to insert into
+     * @param array $rows The rows to insert
+     * @return string
+     */
+    protected function generateBulkInsertSql(TableMetadata $table, array $rows): string
+    {
         $sql = sprintf(
             'INSERT INTO %s ',
             $this->quoteTableName($table->getName())
@@ -698,9 +756,8 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
             $sql .= implode(', ', $values) . ';';
-            $this->io->out($sql);
+            return $sql;
         } else {
-            $vals = [];
             $queries = [];
             foreach ($rows as $row) {
                 $values = [];
@@ -710,19 +767,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                         $placeholder = (string)$v;
                     }
                     $values[] = $placeholder;
-                    if ($placeholder == '?') {
-                        if (is_bool($v)) {
-                            $vals[] = $this->castToBool($v);
-                        } else {
-                            $vals[] = $v;
-                        }
-                    }
                 }
                 $query = '(' . implode(', ', $values) . ')';
                 $queries[] = $query;
             }
             $sql .= implode(',', $queries);
-            $this->getConnection()->execute($sql, $vals);
+            return $sql;
         }
     }
 
