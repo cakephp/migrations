@@ -1381,7 +1381,6 @@ SQL;
     {
         $options = $this->getOptions();
         if (isset($options['identity_insert']) && $options['identity_insert'] == true) {
-            echo ('Identity insert is enabled, so we will set IDENTITY_INSERT ON/OFF' . PHP_EOL);
             $identityInsertStart = sprintf(
                 'SET IDENTITY_INSERT %s ON',
                 $this->quoteTableName($tableName)

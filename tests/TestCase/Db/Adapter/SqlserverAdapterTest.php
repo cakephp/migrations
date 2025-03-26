@@ -1531,9 +1531,7 @@ INPUT;
         $options = $table->getAdapter()->getOptions();
         $options['identity_insert'] = true;
         $table->getAdapter()->setOptions($options);
-        #echo all of the options
         $table->getAdapter()->beginTransaction();
-        //$this->adapter->execute('SET IDENTITY_INSERT table1 ON;');
         $table->insert([
             [
                 'id' => 20,
@@ -1544,11 +1542,11 @@ INPUT;
                 'name' => 'test50',
             ],
         ])->saveData();
-        //$this->adapter->execute('SET IDENTITY_INSERT table1 OFF;');
         $this->adapter->commitTransaction();
 
         $countQuery = $this->adapter->query('SELECT * FROM table1');
         $res = $countQuery->fetchAll('assoc');
-        var_dump($res);
+        $this->assertEquals(20, $res[0]['id']);
+        $this->assertEquals(50, $res[1]['id']);
     }
 }
