@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
@@ -112,8 +113,8 @@ class SqlserverAdapterTest extends TestCase
     {
         $table = new Table('ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
-              ->addColumn('email', 'integer')
-              ->save();
+            ->addColumn('email', 'integer')
+            ->save();
         $this->assertTrue($this->adapter->hasTable('ntable'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'id'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'realname'));
@@ -127,8 +128,8 @@ class SqlserverAdapterTest extends TestCase
 
         $table = new Table('nschema.ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
-              ->addColumn('email', 'integer')
-              ->save();
+            ->addColumn('email', 'integer')
+            ->save();
         $this->assertTrue($this->adapter->hasTable('nschema.ntable'));
         $this->assertTrue($this->adapter->hasColumn('nschema.ntable', 'id'));
         $this->assertTrue($this->adapter->hasColumn('nschema.ntable', 'realname'));
@@ -143,8 +144,8 @@ class SqlserverAdapterTest extends TestCase
     {
         $table = new Table('ntable', ['id' => 'custom_id'], $this->adapter);
         $table->addColumn('realname', 'string')
-              ->addColumn('email', 'integer')
-              ->save();
+            ->addColumn('email', 'integer')
+            ->save();
         $this->assertTrue($this->adapter->hasTable('ntable'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'custom_id'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'realname'));
@@ -155,8 +156,8 @@ class SqlserverAdapterTest extends TestCase
     public function testCreateTableIdentityColumn()
     {
         $table = new Table('ntable', ['id' => false, 'primary_key' => 'id'], $this->adapter);
-        $table->addColumn('id', 'integer', ['identity' => true, 'seed' => 1, 'increment' => 10 ])
-              ->save();
+        $table->addColumn('id', 'integer', ['identity' => true, 'seed' => 1, 'increment' => 10])
+            ->save();
         $this->assertTrue($this->adapter->hasTable('ntable'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'id'));
 
@@ -176,7 +177,7 @@ WHERE t.name='ntable'");
         ];
         $table = new Table('atable', $options, $this->adapter);
         $table->addColumn('user_id', 'integer')
-              ->save();
+            ->save();
         $this->assertFalse($this->adapter->hasColumn('atable', 'id'));
     }
 
@@ -235,8 +236,8 @@ WHERE t.name='ntable'");
         ];
         $table = new Table('table1', $options, $this->adapter);
         $table->addColumn('user_id', 'integer', ['null' => false])
-              ->addColumn('tag_id', 'integer', ['null' => false])
-              ->save();
+            ->addColumn('tag_id', 'integer', ['null' => false])
+            ->save();
         $this->assertTrue($this->adapter->hasIndex('table1', ['user_id', 'tag_id']));
         $this->assertTrue($this->adapter->hasIndex('table1', ['tag_id', 'USER_ID']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_email']));
@@ -274,10 +275,10 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addColumn('name', 'string')
-              ->addIndex('email')
-              ->addIndex('name')
-              ->save();
+            ->addColumn('name', 'string')
+            ->addIndex('email')
+            ->addIndex('name')
+            ->save();
         $this->assertTrue($this->adapter->hasIndex('table1', ['email']));
         $this->assertTrue($this->adapter->hasIndex('table1', ['name']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
@@ -288,8 +289,8 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addIndex('email', ['unique' => true])
-              ->save();
+            ->addIndex('email', ['unique' => true])
+            ->save();
         $this->assertTrue($this->adapter->hasIndex('table1', ['email']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
     }
@@ -298,8 +299,8 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addIndex('email', ['name' => 'myemailindex'])
-              ->save();
+            ->addIndex('email', ['name' => 'myemailindex'])
+            ->save();
         $this->assertTrue($this->adapter->hasIndex('table1', ['email']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
         $this->assertTrue($this->adapter->hasIndexByName('table1', 'myemailindex'));
@@ -319,9 +320,9 @@ WHERE t.name='ntable'");
 
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addColumn('is_verified', 'boolean')
-              ->addIndex($index)
-              ->save();
+            ->addColumn('is_verified', 'boolean')
+            ->addIndex($index)
+            ->save();
         $queries = $this->out->messages();
         $indexQuery = $queries[1];
         $this->assertStringContainsString('CREATE UNIQUE INDEX active_email_index', $indexQuery);
@@ -427,7 +428,7 @@ WHERE t.name='ntable'");
         $table->save();
         $this->assertFalse($table->hasColumn('email'));
         $table->addColumn('email', 'string')
-              ->save();
+            ->save();
         $this->assertTrue($table->hasColumn('email'));
     }
 
@@ -436,7 +437,7 @@ WHERE t.name='ntable'");
         $table = new Table('table1', [], $this->adapter);
         $table->save();
         $table->addColumn('default_zero', 'string', ['default' => 'test'])
-              ->save();
+            ->save();
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'default_zero') {
@@ -450,7 +451,7 @@ WHERE t.name='ntable'");
         $table = new Table('table1', [], $this->adapter);
         $table->save();
         $table->addColumn('default_zero', 'integer', ['default' => 0])
-              ->save();
+            ->save();
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'default_zero') {
@@ -512,7 +513,7 @@ WHERE t.name='ntable'");
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
-              ->save();
+            ->save();
         $this->assertTrue($this->adapter->hasColumn('t', 'column1'));
         $this->assertFalse($this->adapter->hasColumn('t', 'column2'));
         $this->adapter->renameColumn('t', 'column1', 'column2');
@@ -524,7 +525,7 @@ WHERE t.name='ntable'");
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
-              ->save();
+            ->save();
 
         try {
             $this->adapter->renameColumn('t', 'column2', 'column1');
@@ -543,7 +544,7 @@ WHERE t.name='ntable'");
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
-              ->save();
+            ->save();
         $this->assertTrue($this->adapter->hasColumn('t', 'column1'));
         $newColumn1 = new Column();
         $newColumn1->setName('column1')
@@ -681,10 +682,10 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->save();
+            ->save();
         $this->assertFalse($table->hasIndex('email'));
         $table->addIndex('email')
-              ->save();
+            ->save();
         $this->assertTrue($table->hasIndex('email'));
     }
 
@@ -692,11 +693,11 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addColumn('username', 'string')
-              ->save();
+            ->addColumn('username', 'string')
+            ->save();
         $this->assertFalse($table->hasIndexByName('table1_email_username'));
         $table->addIndex(['email', 'username'], ['name' => 'table1_email_username', 'order' => ['email' => 'DESC', 'username' => 'ASC']])
-              ->save();
+            ->save();
         $this->assertTrue($table->hasIndexByName('table1_email_username'));
         $rows = $this->adapter->fetchAll("SELECT case when ic.is_descending_key = 1 then 'DESC' else 'ASC' end AS sort_order
                         FROM   sys.indexes AS i
@@ -720,12 +721,12 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addColumn('firstname', 'string')
-              ->addColumn('lastname', 'string')
-              ->save();
+            ->addColumn('firstname', 'string')
+            ->addColumn('lastname', 'string')
+            ->save();
         $this->assertFalse($table->hasIndex('email'));
         $table->addIndex(['email'], ['include' => ['firstname', 'lastname']])
-              ->save();
+            ->save();
         $this->assertTrue($table->hasIndex('email'));
         $rows = $this->adapter->fetchAll("SELECT ic.is_included_column AS included
                         FROM   sys.indexes AS i
@@ -758,10 +759,10 @@ WHERE t.name='ntable'");
         // single column index
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addColumn('username', 'string')
-              ->addIndex('email')
-              ->addIndex(['email', 'username'], ['unique' => true, 'name' => 'email_username'])
-              ->save();
+            ->addColumn('username', 'string')
+            ->addIndex('email')
+            ->addIndex(['email', 'username'], ['unique' => true, 'name' => 'email_username'])
+            ->save();
 
         $indexes = $this->adapter->getIndexes('table1');
         $this->assertArrayHasKey('PK_table1', $indexes);
@@ -778,8 +779,8 @@ WHERE t.name='ntable'");
         // single column index
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addIndex('email')
-              ->save();
+            ->addIndex('email')
+            ->save();
         $this->assertTrue($table->hasIndex('email'));
         $this->adapter->dropIndex($table->getName(), 'email');
         $this->assertFalse($table->hasIndex('email'));
@@ -787,9 +788,9 @@ WHERE t.name='ntable'");
         // multiple column index
         $table2 = new Table('table2', [], $this->adapter);
         $table2->addColumn('fname', 'string')
-               ->addColumn('lname', 'string')
-               ->addIndex(['fname', 'lname'])
-               ->save();
+            ->addColumn('lname', 'string')
+            ->addIndex(['fname', 'lname'])
+            ->save();
         $this->assertTrue($table2->hasIndex(['fname', 'lname']));
         $this->adapter->dropIndex($table2->getName(), ['fname', 'lname']);
         $this->assertFalse($table2->hasIndex(['fname', 'lname']));
@@ -797,8 +798,8 @@ WHERE t.name='ntable'");
         // index with name specified, but dropping it by column name
         $table3 = new Table('table3', [], $this->adapter);
         $table3->addColumn('email', 'string')
-               ->addIndex('email', ['name' => 'someindexname'])
-               ->save();
+            ->addIndex('email', ['name' => 'someindexname'])
+            ->save();
         $this->assertTrue($table3->hasIndex('email'));
         $this->adapter->dropIndex($table3->getName(), 'email');
         $this->assertFalse($table3->hasIndex('email'));
@@ -806,9 +807,9 @@ WHERE t.name='ntable'");
         // multiple column index with name specified
         $table4 = new Table('table4', [], $this->adapter);
         $table4->addColumn('fname', 'string')
-               ->addColumn('lname', 'string')
-               ->addIndex(['fname', 'lname'], ['name' => 'multiname'])
-               ->save();
+            ->addColumn('lname', 'string')
+            ->addIndex(['fname', 'lname'], ['name' => 'multiname'])
+            ->save();
         $this->assertTrue($table4->hasIndex(['fname', 'lname']));
         $this->adapter->dropIndex($table4->getName(), ['fname', 'lname']);
         $this->assertFalse($table4->hasIndex(['fname', 'lname']));
@@ -819,8 +820,8 @@ WHERE t.name='ntable'");
         // single column index
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
-              ->addIndex('email', ['name' => 'myemailindex'])
-              ->save();
+            ->addIndex('email', ['name' => 'myemailindex'])
+            ->save();
         $this->assertTrue($table->hasIndex('email'));
         $this->adapter->dropIndexByName($table->getName(), 'myemailindex');
         $this->assertFalse($table->hasIndex('email'));
@@ -828,12 +829,12 @@ WHERE t.name='ntable'");
         // multiple column index
         $table2 = new Table('table2', [], $this->adapter);
         $table2->addColumn('fname', 'string')
-               ->addColumn('lname', 'string')
-               ->addIndex(
-                   ['fname', 'lname'],
-                   ['name' => 'twocolumnuniqueindex', 'unique' => true]
-               )
-               ->save();
+            ->addColumn('lname', 'string')
+            ->addIndex(
+                ['fname', 'lname'],
+                ['name' => 'twocolumnuniqueindex', 'unique' => true]
+            )
+            ->save();
         $this->assertTrue($table2->hasIndex(['fname', 'lname']));
         $this->adapter->dropIndexByName($table2->getName(), 'twocolumnuniqueindex');
         $this->assertFalse($table2->hasIndex(['fname', 'lname']));
@@ -849,9 +850,9 @@ WHERE t.name='ntable'");
 
         $fk = new ForeignKey();
         $fk->setReferencedTable($refTable->getTable())
-           ->setColumns(['ref_table_id'])
-           ->setReferencedColumns(['id'])
-           ->setName('fk1');
+            ->setColumns(['ref_table_id'])
+            ->setReferencedColumns(['id'])
+            ->setName('fk1');
 
         $this->adapter->addForeignKey($table->getTable(), $fk);
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id'], 'fk1'));
@@ -1191,7 +1192,7 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => $comment = 'Comments from column "field1"'])
-              ->save();
+            ->save();
 
         $resultComment = $this->adapter->getColumnComment('table1', 'field1');
 
@@ -1203,10 +1204,10 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => 'Comments from column "field1"'])
-              ->save();
+            ->save();
 
         $table->changeColumn('field1', 'string', ['comment' => $comment = 'New Comments from column "field1"'])
-              ->save();
+            ->save();
 
         $resultComment = $this->adapter->getColumnComment('table1', 'field1');
 
@@ -1218,10 +1219,10 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => 'Comments from column "field1"'])
-              ->save();
+            ->save();
 
         $table->changeColumn('field1', 'string', ['comment' => 'null'])
-              ->save();
+            ->save();
 
         $resultComment = $this->adapter->getColumnComment('table1', 'field1');
 
@@ -1241,8 +1242,8 @@ WHERE t.name='ntable'");
 
         $foreign = new Table('sessions', ['id' => $sessionId], $this->adapter);
         $foreign->addColumn('user', 'integer')
-                ->addForeignKey('user', 'users', $userId)
-                ->create();
+            ->addForeignKey('user', 'users', $userId)
+            ->create();
 
         $this->assertTrue($foreign->hasForeignKey('user'));
     }
@@ -1251,24 +1252,24 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
-              ->addColumn('column2', 'integer')
-              ->save();
+            ->addColumn('column2', 'integer')
+            ->save();
         $table->insert([
-                  [
-                      'column1' => 'value1',
-                      'column2' => 1,
-                  ],
-                  [
-                      'column1' => 'value2',
-                      'column2' => 2,
-                  ],
-              ])
-              ->insert(
-                  [
-                      'column1' => 'value3',
-                      'column2' => 3,
-                  ]
-              );
+            [
+                'column1' => 'value1',
+                'column2' => 1,
+            ],
+            [
+                'column1' => 'value2',
+                'column2' => 2,
+            ],
+        ])
+            ->insert(
+                [
+                    'column1' => 'value3',
+                    'column2' => 3,
+                ]
+            );
         $this->adapter->bulkinsert($table->getTable(), $table->getData());
         $table->reset();
 
@@ -1317,24 +1318,24 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
-              ->addColumn('column2', 'integer')
-              ->insert([
-                  [
-                      'column1' => 'value1',
-                      'column2' => 1,
-                  ],
-                  [
-                      'column1' => 'value2',
-                      'column2' => 2,
-                  ],
-              ])
-              ->insert(
-                  [
-                      'column1' => 'value3',
-                      'column2' => 3,
-                  ]
-              )
-              ->save();
+            ->addColumn('column2', 'integer')
+            ->insert([
+                [
+                    'column1' => 'value1',
+                    'column2' => 1,
+                ],
+                [
+                    'column1' => 'value2',
+                    'column2' => 2,
+                ],
+            ])
+            ->insert(
+                [
+                    'column1' => 'value3',
+                    'column2' => 3,
+                ]
+            )
+            ->save();
 
         $rows = $this->adapter->fetchAll('SELECT * FROM table1');
 
@@ -1386,18 +1387,18 @@ WHERE t.name='ntable'");
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
-              ->addColumn('column2', 'integer')
-              ->insert([
-                  [
-                      'column1' => 'value1',
-                      'column2' => 1,
-                  ],
-                  [
-                      'column1' => 'value2',
-                      'column2' => 2,
-                  ],
-              ])
-              ->save();
+            ->addColumn('column2', 'integer')
+            ->insert([
+                [
+                    'column1' => 'value1',
+                    'column2' => 1,
+                ],
+                [
+                    'column1' => 'value2',
+                    'column2' => 2,
+                ],
+            ])
+            ->save();
 
         $rows = $this->adapter->fetchAll('SELECT * FROM table1');
         $this->assertCount(2, $rows);
@@ -1527,9 +1528,10 @@ INPUT;
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('name', 'string')
             ->save();
-
-        $this->adapter->beginTransaction();
-        $this->adapter->execute('SET IDENTITY_INSERT table1 ON;');
+        $options = $table->getAdapter()->getOptions();
+        $options['identity_insert'] = true;
+        $table->getAdapter()->setOptions($options);
+        $table->getAdapter()->beginTransaction();
         $table->insert([
             [
                 'id' => 20,
@@ -1540,11 +1542,11 @@ INPUT;
                 'name' => 'test50',
             ],
         ])->saveData();
-        $this->adapter->execute('SET IDENTITY_INSERT table1 OFF;');
         $this->adapter->commitTransaction();
 
         $countQuery = $this->adapter->query('SELECT * FROM table1');
         $res = $countQuery->fetchAll('assoc');
-        var_dump($res);
+        $this->assertEquals(20, $res[0]['id']);
+        $this->assertEquals(50, $res[1]['id']);
     }
 }
