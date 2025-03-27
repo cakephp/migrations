@@ -713,7 +713,7 @@ class MigrationHelper extends Helper
                 $data['constraints'],
                 function ($constraint) {
                     return $constraint['type'] !== 'unique';
-                }
+                },
             );
             if ($tableConstraintsNoUnique) {
                 $result['constraints'][$tableName] = $data['constraints'];

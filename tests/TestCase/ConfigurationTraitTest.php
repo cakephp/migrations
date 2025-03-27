@@ -107,7 +107,7 @@ class ConfigurationTraitTest extends TestCase
 
         $this->assertSame(
             'phinxlog',
-            $config['environments']['default_migration_table']
+            $config['environments']['default_migration_table'],
         );
 
         $environment = $config['environments']['default'];
@@ -158,7 +158,7 @@ class ConfigurationTraitTest extends TestCase
                 'Encrypt' => true,
                 'TrustServerCertificate' => true,
             ],
-            $environment['dsn_options']
+            $environment['dsn_options'],
         );
     }
 
@@ -210,7 +210,7 @@ class ConfigurationTraitTest extends TestCase
 
         $this->assertSame(
             'my_plugin_phinxlog',
-            $config['environments']['default_migration_table']
+            $config['environments']['default_migration_table'],
         );
     }
 
@@ -246,7 +246,7 @@ class ConfigurationTraitTest extends TestCase
 
         $this->assertSame(
             'phinxlog',
-            $config['environments']['default_migration_table']
+            $config['environments']['default_migration_table'],
         );
 
         $environment = $config['environments']['default'];
@@ -309,7 +309,7 @@ class ConfigurationTraitTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(sprintf(
             'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
-            $migrationsPath
+            $migrationsPath,
         ));
         $command->getConfig();
     }

@@ -70,7 +70,7 @@ class ManagerTest extends TestCase
     protected function getOutput(): string
     {
         $lines = $this->out->messages();
-        $lines = array_map(fn ($line) => strip_tags($line), $lines);
+        $lines = array_map(fn($line) => strip_tags($line), $lines);
 
         return join("\n", $lines);
     }
@@ -191,7 +191,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => '',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -237,7 +237,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => '',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
         $this->manager->setEnvironment($envStub);
         $return = $this->manager->printStatus(AbstractCommand::FORMAT_JSON);
@@ -282,7 +282,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => '',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -347,7 +347,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => 'Example',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -414,7 +414,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => 'Example',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -467,7 +467,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => 'Example',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -639,7 +639,7 @@ class ManagerTest extends TestCase
     {
         $this->assertInstanceOf(
             Environment::class,
-            $this->manager->getEnvironment()
+            $this->manager->getEnvironment(),
         );
     }
 
@@ -894,7 +894,7 @@ class ManagerTest extends TestCase
                     [
                         '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
                         '20120116183504' => ['version' => '20120815145812', 'migration' => '', 'breakpoint' => 0],
-                    ]
+                    ],
                 );
         $envStub->expects($this->any())
                 ->method('getVersions')
@@ -902,7 +902,7 @@ class ManagerTest extends TestCase
                     [
                         20120111235330,
                         20120116183504,
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);
@@ -2240,7 +2240,7 @@ class ManagerTest extends TestCase
         $this->assertTrue($adapter->hasColumn('change_direction_test', 'subthing'));
         $this->assertEquals(
             2,
-            count($adapter->fetchAll('SELECT * FROM change_direction_test WHERE subthing IS NOT NULL'))
+            count($adapter->fetchAll('SELECT * FROM change_direction_test WHERE subthing IS NOT NULL')),
         );
 
         // revert all changes to the first
@@ -2664,7 +2664,7 @@ class ManagerTest extends TestCase
                                 'migration_name' => '',
                                 'breakpoint' => '0',
                             ],
-                    ]
+                    ],
                 );
 
         $this->manager->setEnvironment($envStub);

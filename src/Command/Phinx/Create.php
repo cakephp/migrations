@@ -46,7 +46,7 @@ class Create extends CreateCommand
             ->setHelp(sprintf(
                 '%sCreates a new database migration file%s',
                 PHP_EOL,
-                PHP_EOL
+                PHP_EOL,
             ))
             ->addOption('plugin', 'p', InputOption::VALUE_REQUIRED, 'The plugin the file should be created for')
             ->addOption('connection', 'c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
@@ -56,13 +56,13 @@ class Create extends CreateCommand
                 'class',
                 'l',
                 InputOption::VALUE_REQUIRED,
-                'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template'
+                'Use a class implementing "' . parent::CREATION_INTERFACE . '" to generate the template',
             )
             ->addOption(
                 'path',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Specify the path in which to create this migration'
+                'Specify the path in which to create this migration',
             );
     }
 

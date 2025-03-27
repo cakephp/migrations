@@ -240,33 +240,33 @@ class PhinxAdapter implements PhinxAdapterInterface
         if ($phinxAction instanceof PhinxAddColumn) {
             $action = new AddColumn(
                 $this->convertTable($phinxAction->getTable()),
-                $this->convertColumn($phinxAction->getColumn())
+                $this->convertColumn($phinxAction->getColumn()),
             );
         } elseif ($phinxAction instanceof PhinxAddForeignKey) {
             $action = new AddForeignKey(
                 $this->convertTable($phinxAction->getTable()),
-                $this->convertForeignKey($phinxAction->getForeignKey())
+                $this->convertForeignKey($phinxAction->getForeignKey()),
             );
         } elseif ($phinxAction instanceof PhinxAddIndex) {
             $action = new AddIndex(
                 $this->convertTable($phinxAction->getTable()),
-                $this->convertIndex($phinxAction->getIndex())
+                $this->convertIndex($phinxAction->getIndex()),
             );
         } elseif ($phinxAction instanceof PhinxChangeColumn) {
             $action = new ChangeColumn(
                 $this->convertTable($phinxAction->getTable()),
                 $phinxAction->getColumnName(),
-                $this->convertColumn($phinxAction->getColumn())
+                $this->convertColumn($phinxAction->getColumn()),
             );
         } elseif ($phinxAction instanceof PhinxChangeComment) {
             $action = new ChangeComment(
                 $this->convertTable($phinxAction->getTable()),
-                $phinxAction->getNewComment()
+                $phinxAction->getNewComment(),
             );
         } elseif ($phinxAction instanceof PhinxChangePrimaryKey) {
             $action = new ChangePrimaryKey(
                 $this->convertTable($phinxAction->getTable()),
-                $phinxAction->getNewColumns()
+                $phinxAction->getNewColumns(),
             );
         } elseif ($phinxAction instanceof PhinxCreateTable) {
             $action = new CreateTable(
@@ -280,7 +280,7 @@ class PhinxAdapter implements PhinxAdapterInterface
         } elseif ($phinxAction instanceof PhinxDropIndex) {
             $action = new DropIndex(
                 $this->convertTable($phinxAction->getTable()),
-                $this->convertIndex($phinxAction->getIndex())
+                $this->convertIndex($phinxAction->getIndex()),
             );
         } elseif ($phinxAction instanceof PhinxDropTable) {
             $action = new DropTable(
@@ -289,7 +289,7 @@ class PhinxAdapter implements PhinxAdapterInterface
         } elseif ($phinxAction instanceof PhinxRemoveColumn) {
             $action = new RemoveColumn(
                 $this->convertTable($phinxAction->getTable()),
-                $this->convertColumn($phinxAction->getColumn())
+                $this->convertColumn($phinxAction->getColumn()),
             );
         } elseif ($phinxAction instanceof PhinxRenameColumn) {
             $action = new RenameColumn(
@@ -300,7 +300,7 @@ class PhinxAdapter implements PhinxAdapterInterface
         } elseif ($phinxAction instanceof PhinxRenameTable) {
             $action = new RenameTable(
                 $this->convertTable($phinxAction->getTable()),
-                $phinxAction->getNewName()
+                $phinxAction->getNewName(),
             );
         }
         if (!$action) {

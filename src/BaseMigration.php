@@ -465,7 +465,7 @@ class BaseMigration implements MigrationInterface
                 if ($io) {
                     $io->out(
                         '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
-                        ' <warning>Ignoring up() and down()</warning>.'
+                        ' <warning>Ignoring up() and down()</warning>.',
                     );
                 }
             }

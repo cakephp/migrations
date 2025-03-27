@@ -47,7 +47,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
         $this->io = new ConsoleIo(
             new StubConsoleOutput(),
             new StubConsoleOutput(),
-            new StubConsoleInput([])
+            new StubConsoleInput([]),
         );
     }
 

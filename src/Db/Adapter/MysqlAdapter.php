@@ -170,7 +170,7 @@ class MysqlAdapter extends AbstractAdapter
         $options = array_merge(
             $defaultOptions,
             array_intersect_key($this->getOptions(), $defaultOptions),
-            $table->getOptions()
+            $table->getOptions(),
         );
 
         // Add the default primary key
@@ -286,7 +286,7 @@ class MysqlAdapter extends AbstractAdapter
             } else {
                 throw new InvalidArgumentException(sprintf(
                     'Invalid value for primary key: %s',
-                    json_encode($newColumns)
+                    json_encode($newColumns),
                 ));
             }
             $sql .= ')';
@@ -320,7 +320,7 @@ class MysqlAdapter extends AbstractAdapter
         $sql = sprintf(
             'RENAME TABLE %s TO %s',
             $this->quoteTableName($tableName),
-            $this->quoteTableName($newTableName)
+            $this->quoteTableName($newTableName),
         );
 
         return new AlterInstructions([], [$sql]);
@@ -344,7 +344,7 @@ class MysqlAdapter extends AbstractAdapter
     {
         $sql = sprintf(
             'TRUNCATE TABLE %s',
-            $this->quoteTableName($tableName)
+            $this->quoteTableName($tableName),
         );
 
         $this->execute($sql);
@@ -391,8 +391,8 @@ class MysqlAdapter extends AbstractAdapter
                     $column->getType(),
                     array_merge(
                         static::PHINX_TYPES_GEOSPATIAL,
-                        [static::PHINX_TYPE_BLOB, static::PHINX_TYPE_JSON, static::PHINX_TYPE_TEXT]
-                    )
+                        [static::PHINX_TYPE_BLOB, static::PHINX_TYPE_JSON, static::PHINX_TYPE_TEXT],
+                    ),
                 )
             ) {
                 // The default that comes back from MySQL for these types prefixes the collation type and
@@ -432,7 +432,7 @@ class MysqlAdapter extends AbstractAdapter
         $alter = sprintf(
             'ADD %s %s',
             $this->quoteColumnName((string)$column->getName()),
-            $this->getColumnSqlDefinition($column)
+            $this->getColumnSqlDefinition($column),
         );
 
         $alter .= $this->afterClause($column);
@@ -492,7 +492,7 @@ class MysqlAdapter extends AbstractAdapter
                     'CHANGE COLUMN %s %s %s',
                     $this->quoteColumnName($columnName),
                     $this->quoteColumnName($newColumnName),
-                    $definition
+                    $definition,
                 );
 
                 return new AlterInstructions([$alter]);
@@ -501,7 +501,7 @@ class MysqlAdapter extends AbstractAdapter
 
         throw new InvalidArgumentException(sprintf(
             "The specified column doesn't exist: %s",
-            $columnName
+            $columnName,
         ));
     }
 
@@ -515,7 +515,7 @@ class MysqlAdapter extends AbstractAdapter
             $this->quoteColumnName($columnName),
             $this->quoteColumnName((string)$newColumn->getName()),
             $this->getColumnSqlDefinition($newColumn),
-            $this->afterClause($newColumn)
+            $this->afterClause($newColumn),
         );
 
         return new AlterInstructions([$alter]);
@@ -603,14 +603,14 @@ class MysqlAdapter extends AbstractAdapter
             $alter = sprintf(
                 'ALTER TABLE %s ADD %s',
                 $this->quoteTableName($table->getName()),
-                $this->getIndexSqlDefinition($index)
+                $this->getIndexSqlDefinition($index),
             );
 
             $instructions->addPostStep($alter);
         } else {
             $alter = sprintf(
                 'ADD %s',
-                $this->getIndexSqlDefinition($index)
+                $this->getIndexSqlDefinition($index),
             );
 
             $instructions->addAlter($alter);
@@ -637,14 +637,14 @@ class MysqlAdapter extends AbstractAdapter
             if ($columns == $index['columns']) {
                 return new AlterInstructions([sprintf(
                     'DROP INDEX %s',
-                    $this->quoteColumnName($indexName)
+                    $this->quoteColumnName($indexName),
                 )]);
             }
         }
 
         throw new InvalidArgumentException(sprintf(
             "The specified index on columns '%s' does not exist",
-            implode(',', $columns)
+            implode(',', $columns),
         ));
     }
 
@@ -661,14 +661,14 @@ class MysqlAdapter extends AbstractAdapter
             if ($name === $indexName) {
                 return new AlterInstructions([sprintf(
                     'DROP INDEX %s',
-                    $this->quoteColumnName($indexName)
+                    $this->quoteColumnName($indexName),
                 )]);
             }
         }
 
         throw new InvalidArgumentException(sprintf(
             "The specified index name '%s' does not exist",
-            $indexName
+            $indexName,
         ));
     }
 
@@ -777,7 +777,7 @@ class MysqlAdapter extends AbstractAdapter
     {
         $alter = sprintf(
             'ADD %s',
-            $this->getForeignKeySqlDefinition($foreignKey)
+            $this->getForeignKeySqlDefinition($foreignKey),
         );
 
         return new AlterInstructions([$alter]);
@@ -790,7 +790,7 @@ class MysqlAdapter extends AbstractAdapter
     {
         $alter = sprintf(
             'DROP FOREIGN KEY %s',
-            $constraint
+            $constraint,
         );
 
         return new AlterInstructions([$alter]);
@@ -818,13 +818,13 @@ class MysqlAdapter extends AbstractAdapter
         if (!$matches) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
-                implode(', ', $columns)
+                implode(', ', $columns),
             ));
         }
 
         foreach ($matches as $name) {
             $instructions->merge(
-                $this->getDropForeignKeyInstructions($tableName, $name)
+                $this->getDropForeignKeyInstructions($tableName, $name),
             );
         }
 
@@ -995,7 +995,7 @@ class MysqlAdapter extends AbstractAdapter
             case static::PHINX_TYPE_NATIVEUUID:
                 if (!$this->hasNativeUuid()) {
                     throw new UnsupportedColumnTypeException(
-                        'Column type "' . $type . '" is not supported by this version of MySQL.'
+                        'Column type "' . $type . '" is not supported by this version of MySQL.',
                     );
                 }
 
@@ -1200,7 +1200,7 @@ class MysqlAdapter extends AbstractAdapter
                 'CREATE DATABASE %s DEFAULT CHARACTER SET `%s` COLLATE `%s`',
                 $this->quoteTableName($name),
                 $charset,
-                $options['collation']
+                $options['collation'],
             ));
         } else {
             $this->execute(sprintf('CREATE DATABASE %s DEFAULT CHARACTER SET `%s`', $this->quoteTableName($name), $charset));
@@ -1215,7 +1215,7 @@ class MysqlAdapter extends AbstractAdapter
     {
         $rows = $this->query(
             'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?',
-            [$name]
+            [$name],
         )->fetchAll('assoc');
 
         foreach ($rows as $row) {
@@ -1292,8 +1292,8 @@ class MysqlAdapter extends AbstractAdapter
                 $column->getType(),
                 array_merge(
                     static::PHINX_TYPES_GEOSPATIAL,
-                    [static::PHINX_TYPE_BLOB, static::PHINX_TYPE_JSON, static::PHINX_TYPE_TEXT]
-                )
+                    [static::PHINX_TYPE_BLOB, static::PHINX_TYPE_JSON, static::PHINX_TYPE_TEXT],
+                ),
             )
         ) {
             $default = Literal::from('(' . $this->quoteString($column->getDefault()) . ')');

@@ -533,8 +533,8 @@ class PostgresAdapterTest extends TestCase
                     FROM pg_description
                     JOIN pg_class ON pg_description.objoid = pg_class.oid
                     WHERE relname = '%s'",
-                'table1'
-            )
+                'table1',
+            ),
         );
         $this->assertEquals('comment1', $rows[0]['description']);
     }
@@ -554,8 +554,8 @@ class PostgresAdapterTest extends TestCase
                     FROM pg_description
                     JOIN pg_class ON pg_description.objoid = pg_class.oid
                     WHERE relname = '%s'",
-                'table1'
-            )
+                'table1',
+            ),
         );
         $this->assertEquals('comment2', $rows[0]['description']);
     }
@@ -575,8 +575,8 @@ class PostgresAdapterTest extends TestCase
                     FROM pg_description
                     JOIN pg_class ON pg_description.objoid = pg_class.oid
                     WHERE relname = '%s'",
-                'table1'
-            )
+                'table1',
+            ),
         );
         $this->assertEmpty($rows);
     }
@@ -813,7 +813,7 @@ class PostgresAdapterTest extends TestCase
                 $this->assertEquals(
                     'citext',
                     (string)$column->getType(),
-                    'column: ' . $column->getName()
+                    'column: ' . $column->getName(),
                 );
             }
         }
@@ -839,13 +839,13 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
-            AND cols.column_name = \'email\''
+            AND cols.column_name = \'email\'',
         );
 
         $this->assertEquals(
             $comment,
             $row['column_comment'],
-            'The column comment was not set when you used addColumn()'
+            'The column comment was not set when you used addColumn()',
         );
     }
 
@@ -982,7 +982,7 @@ class PostgresAdapterTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
+                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
             );
             $this->assertEquals('The specified column does not exist: column2', $e->getMessage());
         }
@@ -1550,7 +1550,7 @@ class PostgresAdapterTest extends TestCase
                ->addColumn('lname', 'string')
                ->addIndex(
                    ['fname', 'lname'],
-                   ['name' => 'twocolumnuniqueindex', 'unique' => true]
+                   ['name' => 'twocolumnuniqueindex', 'unique' => true],
                )
                ->save();
         $this->assertTrue($table2->hasIndex(['fname', 'lname']));
@@ -1577,7 +1577,7 @@ class PostgresAdapterTest extends TestCase
             ->addColumn('lname', 'string')
             ->addIndex(
                 ['fname', 'lname'],
-                ['name' => 'twocolumnuniqueindex', 'unique' => true]
+                ['name' => 'twocolumnuniqueindex', 'unique' => true],
             )
             ->save();
         $this->assertTrue($table2->hasIndex(['fname', 'lname']));
@@ -1635,7 +1635,7 @@ class PostgresAdapterTest extends TestCase
                 ['id'],
                 [
                     'deferrable' => 'DEFERRED',
-                ]
+                ],
             )
             ->save();
 
@@ -1676,17 +1676,17 @@ class PostgresAdapterTest extends TestCase
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->addForeignKey(
                 ['ref_table_field1', 'ref_table_id'],
                 'ref_table',
-                ['field1', 'id']
+                ['field1', 'id'],
             )
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1', 'ref_table_field2'],
                 'ref_table',
-                ['id', 'field1', 'field2']
+                ['id', 'field1', 'field2'],
             )
             ->save();
 
@@ -1696,11 +1696,11 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']));
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1', 'ref_table_field2']),
-            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns'
+            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns',
         );
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']),
-            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order'
+            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order',
         );
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
@@ -1775,14 +1775,14 @@ class PostgresAdapterTest extends TestCase
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->save();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf(
             'No foreign key on column(s) `%s` exists',
-            implode(', ', $columns)
+            implode(', ', $columns),
         ));
 
         $this->adapter->dropForeignKey($table->getName(), $columns);
@@ -1804,7 +1804,7 @@ class PostgresAdapterTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf(
             'No foreign key on column(s) `%s` exists',
-            implode(', ', ['ref_table_id'])
+            implode(', ', ['ref_table_id']),
         ));
 
         $this->adapter->dropForeignKey($table->getName(), ['ref_table_id']);
@@ -2030,8 +2030,8 @@ class PostgresAdapterTest extends TestCase
             sprintf(
                 'SELECT description FROM pg_description JOIN pg_class ON pg_description.objoid = ' .
                 "pg_class.oid WHERE relname = '%s'",
-                'ntable'
-            )
+                'ntable',
+            ),
         );
 
         $this->assertEquals($tableComment, $rows[0]['description'], 'Dont set table comment correctly');
@@ -2043,7 +2043,7 @@ class PostgresAdapterTest extends TestCase
         $table->addColumn(
             'field1',
             'string',
-            ['comment' => $comment = 'Comments from column "field1"']
+            ['comment' => $comment = 'Comments from column "field1"'],
         )->save();
 
         $row = $this->adapter->fetchRow(
@@ -2054,7 +2054,7 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
-            AND cols.column_name = \'field1\''
+            AND cols.column_name = \'field1\'',
         );
 
         $this->assertEquals($comment, $row['column_comment'], 'Dont set column comment correctly');
@@ -2074,13 +2074,13 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'user\'
-            AND cols.column_name = \'index\''
+            AND cols.column_name = \'index\'',
         );
 
         $this->assertEquals(
             $comment,
             $row['column_comment'],
-            'Dont set column comment correctly for tables or columns with reserved names'
+            'Dont set column comment correctly for tables or columns with reserved names',
         );
     }
 
@@ -2094,7 +2094,7 @@ class PostgresAdapterTest extends TestCase
         $table->changeColumn(
             'field1',
             'string',
-            ['comment' => $comment = 'New Comments from column "field1"']
+            ['comment' => $comment = 'New Comments from column "field1"'],
         )->save();
 
         $row = $this->adapter->fetchRow(
@@ -2105,7 +2105,7 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
-            AND cols.column_name = \'field1\''
+            AND cols.column_name = \'field1\'',
         );
 
         $this->assertEquals($comment, $row['column_comment'], 'Dont change column comment correctly');
@@ -2129,7 +2129,7 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
-            AND cols.column_name = \'field1\''
+            AND cols.column_name = \'field1\'',
         );
 
         $this->assertEmpty($row['column_comment'], 'Dont remove column comment correctly');
@@ -2155,7 +2155,7 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
-            AND cols.column_name = \'comment1\''
+            AND cols.column_name = \'comment1\'',
         );
 
         $this->assertEquals($comment1, $row['column_comment'], 'Could not create first column comment');
@@ -2168,7 +2168,7 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'table1\'
-            AND cols.column_name = \'comment2\''
+            AND cols.column_name = \'comment2\'',
         );
 
         $this->assertEquals($comment2, $row['column_comment'], 'Could not create second column comment');
@@ -2195,7 +2195,7 @@ class PostgresAdapterTest extends TestCase
             FROM information_schema.columns cols
             WHERE cols.table_catalog=\'' . $this->config['database'] . '\'
             AND cols.table_name=\'widgets\'
-            AND cols.column_name = \'transport\''
+            AND cols.column_name = \'transport\'',
         );
 
         $this->assertEquals($comment, $row['column_comment'], 'Could not create column comment');
@@ -2215,7 +2215,7 @@ class PostgresAdapterTest extends TestCase
         $foreign = new Table(
             'sessions',
             ['id' => $sessionId],
-            $this->adapter
+            $this->adapter,
         );
         $foreign->addColumn('user', 'integer')
                 ->addForeignKey('user', 'users', $userId)
@@ -2234,14 +2234,14 @@ class PostgresAdapterTest extends TestCase
         $local = new Table(
             'schema_users.users',
             ['id' => $userId],
-            $this->adapter
+            $this->adapter,
         );
         $local->create();
 
         $foreign = new Table(
             'schema_users.sessions',
             ['id' => $sessionId],
-            $this->adapter
+            $this->adapter,
         );
         $foreign->addColumn('user', 'integer')
             ->addForeignKey('user', 'schema_users.users', $userId)
@@ -2263,14 +2263,14 @@ class PostgresAdapterTest extends TestCase
         $local = new Table(
             'schema_users.users',
             ['id' => $userId],
-            $this->adapter
+            $this->adapter,
         );
         $local->create();
 
         $foreign = new Table(
             'schema_sessions.sessions',
             ['id' => $sessionId],
-            $this->adapter
+            $this->adapter,
         );
         $foreign->addColumn('user', 'integer')
             ->addForeignKey('user', 'schema_users.users', $userId)
@@ -2620,7 +2620,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
-            'Passing the --dry-run option does not dump create table query'
+            'Passing the --dry-run option does not dump create table query',
         );
     }
 
@@ -2650,7 +2650,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
-            'Passing the --dry-run option does not dump create table query'
+            'Passing the --dry-run option does not dump create table query',
         );
     }
 
@@ -2700,7 +2700,7 @@ OUTPUT;
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
-            'Passing the --dry-run option doesn\'t dump the insert to the output'
+            'Passing the --dry-run option doesn\'t dump the insert to the output',
         );
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
@@ -2750,7 +2750,7 @@ OUTPUT;
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
-            'Passing the --dry-run option doesn\'t dump the bulkinsert to the output'
+            'Passing the --dry-run option doesn\'t dump the bulkinsert to the output',
         );
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
@@ -2822,7 +2822,7 @@ OUTPUT;
         $this->assertEquals(1, $stm->rowCount());
         $this->assertEquals(
             ['id' => 2, 'string_col' => 'value2', 'int_col' => '2'],
-            $stm->fetch('assoc')
+            $stm->fetch('assoc'),
         );
 
         $builder = $this->adapter->getDeleteBuilder();

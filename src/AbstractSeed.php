@@ -49,7 +49,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
         $this->getOutput()->writeln(
             ' ====' .
             ' <info>' . $seeder . ':</info>' .
-            ' <comment>seeding</comment>'
+            ' <comment>seeding</comment>',
         );
 
         $start = microtime(true);
@@ -60,7 +60,7 @@ abstract class AbstractSeed extends BaseAbstractSeed
             ' ====' .
             ' <info>' . $seeder . ':</info>' .
             ' <comment>seeded' .
-            ' ' . sprintf('%.4fs', $end - $start) . '</comment>'
+            ' ' . sprintf('%.4fs', $end - $start) . '</comment>',
         );
         $this->getOutput()->writeln('');
     }

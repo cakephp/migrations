@@ -178,7 +178,7 @@ class SqlserverAdapter extends AbstractAdapter
         if (!empty($primaryKey['constraint'])) {
             $sql = sprintf(
                 'DROP CONSTRAINT %s',
-                $this->quoteColumnName($primaryKey['constraint'])
+                $this->quoteColumnName($primaryKey['constraint']),
             );
             $instructions->addAlter($sql);
         }
@@ -188,7 +188,7 @@ class SqlserverAdapter extends AbstractAdapter
             $sql = sprintf(
                 'ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (',
                 $this->quoteTableName($table->getName()),
-                $this->quoteColumnName('PK_' . $table->getName())
+                $this->quoteColumnName('PK_' . $table->getName()),
             );
             if (is_string($newColumns)) { // handle primary_key => 'id'
                 $sql .= $this->quoteColumnName($newColumns);
@@ -234,7 +234,7 @@ class SqlserverAdapter extends AbstractAdapter
             $comment,
             $this->schema,
             (string)$tableName,
-            (string)$column->getName()
+            (string)$column->getName(),
         );
     }
 
@@ -247,7 +247,7 @@ class SqlserverAdapter extends AbstractAdapter
         $sql = sprintf(
             "EXEC sp_rename '%s', '%s'",
             $tableName,
-            $newTableName
+            $newTableName,
         );
 
         return new AlterInstructions([], [$sql]);
@@ -271,7 +271,7 @@ class SqlserverAdapter extends AbstractAdapter
     {
         $sql = sprintf(
             'TRUNCATE TABLE %s',
-            $this->quoteTableName($tableName)
+            $this->quoteTableName($tableName),
         );
 
         $this->execute($sql);
@@ -404,7 +404,7 @@ class SqlserverAdapter extends AbstractAdapter
             'ALTER TABLE %s ADD %s %s',
             $table->getName(),
             $this->quoteColumnName((string)$column->getName()),
-            $this->getColumnSqlDefinition($column)
+            $this->getColumnSqlDefinition($column),
         );
 
         return new AlterInstructions([], [$alter]);
@@ -434,14 +434,14 @@ SQL;
         $instructions->addPostStep(sprintf(
             $sql,
             $oldConstraintName,
-            $newConstraintName
+            $newConstraintName,
         ));
 
         $instructions->addPostStep(sprintf(
             "EXECUTE sp_rename N'%s.%s', N'%s', 'COLUMN' ",
             $tableName,
             $columnName,
-            $newColumnName
+            $newColumnName,
         ));
 
         return $instructions;
@@ -475,7 +475,7 @@ SQL;
             $this->quoteTableName($tableName),
             $constraintName,
             $default,
-            $this->quoteColumnName((string)$newColumn->getName())
+            $this->quoteColumnName((string)$newColumn->getName()),
         ));
 
         return $instructions;
@@ -495,7 +495,7 @@ SQL;
 
         if ($columnName !== $newColumn->getName()) {
             $instructions->merge(
-                $this->getRenameColumnInstructions($tableName, $columnName, (string)$newColumn->getName())
+                $this->getRenameColumnInstructions($tableName, $columnName, (string)$newColumn->getName()),
             );
         }
 
@@ -507,7 +507,7 @@ SQL;
             'ALTER TABLE %s ALTER COLUMN %s %s',
             $this->quoteTableName($tableName),
             $this->quoteColumnName((string)$newColumn->getName()),
-            $this->getColumnSqlDefinition($newColumn, false)
+            $this->getColumnSqlDefinition($newColumn, false),
         ));
         // change column comment if needed
         if ($newColumn->getComment()) {
@@ -531,7 +531,7 @@ SQL;
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s DROP COLUMN %s',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName($columnName)
+            $this->quoteColumnName($columnName),
         ));
 
         return $instructions;
@@ -693,7 +693,7 @@ ORDER BY IC.[key_ordinal]';
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s ON %s',
                     $this->quoteColumnName($indexName),
-                    $this->quoteTableName($tableName)
+                    $this->quoteTableName($tableName),
                 ));
 
                 return $instructions;
@@ -702,7 +702,7 @@ ORDER BY IC.[key_ordinal]';
 
         throw new InvalidArgumentException(sprintf(
             "The specified index on columns '%s' does not exist",
-            implode(',', $columns)
+            implode(',', $columns),
         ));
     }
 
@@ -721,7 +721,7 @@ ORDER BY IC.[key_ordinal]';
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s ON %s',
                     $this->quoteColumnName($indexName),
-                    $this->quoteTableName($tableName)
+                    $this->quoteTableName($tableName),
                 ));
 
                 return $instructions;
@@ -730,7 +730,7 @@ ORDER BY IC.[key_ordinal]';
 
         throw new InvalidArgumentException(sprintf(
             "The specified index name '%s' does not exist",
-            $indexName
+            $indexName,
         ));
     }
 
@@ -847,7 +847,7 @@ ORDER BY IC.[key_ordinal]';
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s ADD %s',
             $this->quoteTableName($table->getName()),
-            $this->getForeignKeySqlDefinition($foreignKey, $table->getName())
+            $this->getForeignKeySqlDefinition($foreignKey, $table->getName()),
         ));
 
         return $instructions;
@@ -862,7 +862,7 @@ ORDER BY IC.[key_ordinal]';
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s DROP CONSTRAINT %s',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName($constraint)
+            $this->quoteColumnName($constraint),
         ));
 
         return $instructions;
@@ -886,13 +886,13 @@ ORDER BY IC.[key_ordinal]';
         if (!$matches) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
-                implode(', ', $columns)
+                implode(', ', $columns),
             ));
         }
 
         foreach ($matches as $name) {
             $instructions->merge(
-                $this->getDropForeignKeyInstructions($tableName, $name)
+                $this->getDropForeignKeyInstructions($tableName, $name),
             );
         }
 
@@ -1036,7 +1036,7 @@ ORDER BY IC.[key_ordinal]';
         /** @var array<string, mixed> $result */
         $result = $this->query(
             'SELECT count(*) as [count] FROM master.dbo.sysdatabases WHERE [name] = ?',
-            [$name]
+            [$name],
         )->fetch('assoc');
 
         return $result['count'] > 0;
@@ -1083,7 +1083,7 @@ SQL;
                 $buffer[] = sprintf(
                     '(%s, %s)',
                     $column->getPrecision() ?: $sqlType['precision'],
-                    $column->getScale() ?: $sqlType['scale']
+                    $column->getScale() ?: $sqlType['scale'],
                 );
             } elseif (!in_array($sqlType['name'], $noLimits) && ($column->getLimit() || isset($sqlType['limit']))) {
                 $buffer[] = sprintf('(%s)', $column->getLimit() ?: $sqlType['limit']);
@@ -1153,7 +1153,7 @@ SQL;
             $this->quoteTableName($tableName),
             implode(',', $columnNames),
             $includedColumns,
-            $where
+            $where,
         );
     }
 

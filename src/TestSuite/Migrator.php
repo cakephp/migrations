@@ -54,7 +54,7 @@ class Migrator
      */
     public function run(
         array $options = [],
-        bool $truncateTables = true
+        bool $truncateTables = true,
     ): void {
         $this->runMany([$options], $truncateTables);
     }
@@ -78,7 +78,7 @@ class Migrator
      */
     public function runMany(
         array $options = [],
-        bool $truncateTables = true
+        bool $truncateTables = true,
     ): void {
         // Don't recreate schema if we are in a phpunit separate process test.
         if (isset($GLOBALS['__PHPUNIT_BOOTSTRAP'])) {
@@ -116,7 +116,7 @@ class Migrator
             try {
                 if (!$migrations->migrate($migrationSet)) {
                     throw new RuntimeException(
-                        "Unable to migrate fixtures for `{$migrationSet['connection']}`."
+                        "Unable to migrate fixtures for `{$migrationSet['connection']}`.",
                     );
                 }
             } catch (Exception $e) {
@@ -127,7 +127,7 @@ class Migrator
                     'If you are using the `skip` option and running multiple sets of migrations ' .
                     'on the same connection, you can\'t skip tables managed by CakePHP in the connection.',
                     0,
-                    $e
+                    $e,
                 );
             }
         }
@@ -208,7 +208,7 @@ class Migrator
             $output = array_merge(
                 ['Your migration status some differences with the expected state.', ''],
                 $output,
-                ['Going to drop all tables in this source, and re-apply migrations.']
+                ['Going to drop all tables in this source, and re-apply migrations.'],
             );
             Log::write('debug', implode("\n", $output));
         }

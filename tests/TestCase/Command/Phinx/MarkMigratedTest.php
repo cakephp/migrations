@@ -106,15 +106,15 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -130,15 +130,15 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Skipping migration `20150724233100` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Skipping migration `20150826191400` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
@@ -174,7 +174,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'An error occurred while marking migration `20150704160200` as migrated : Error during marking process',
-            $buggyCommandTester->getDisplay()
+            $buggyCommandTester->getDisplay(),
         );
     }
 
@@ -194,19 +194,19 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -223,19 +223,19 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Skipping migration `20150724233100` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Skipping migration `20150826191400` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
     }
 
@@ -250,7 +250,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -265,15 +265,15 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -292,7 +292,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150704160610` was not found !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
     }
 
@@ -308,7 +308,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150704160200` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -324,11 +324,11 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Skipping migration `20150704160200` (already migrated).',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -347,7 +347,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150704160610` was not found !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
     }
 
@@ -363,7 +363,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -379,7 +379,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150826191400` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -398,7 +398,7 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150704160610` was not found !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
     }
 
@@ -413,12 +413,12 @@ class MarkMigratedTest extends TestCase
 
         $this->assertStringContainsString(
             'Migration `20150724233100` successfully marked migrated !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
         $this->assertStringContainsString(
             'DEPRECATED: VERSION as argument is deprecated. Use: ' .
             '`bin/cake migrations mark_migrated --target=VERSION --only`',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
@@ -439,7 +439,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals(0, $result->fetchColumn(0));
         $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $this->commandTester->execute([
@@ -453,7 +453,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals(0, $result->fetchColumn(0));
         $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
 
         $this->commandTester->execute([
@@ -469,7 +469,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals(0, $result->fetchColumn(0));
         $this->assertStringContainsString(
             'You should use `--exclude` OR `--only` (not both) along with a `--target` !',
-            $this->commandTester->getDisplay()
+            $this->commandTester->getDisplay(),
         );
     }
 }

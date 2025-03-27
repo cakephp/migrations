@@ -194,7 +194,7 @@ class PostgresAdapter extends AbstractAdapter
             $queries[] = sprintf(
                 'COMMENT ON TABLE %s IS %s',
                 $this->quoteTableName($table->getName()),
-                $this->quoteString($options['comment'])
+                $this->quoteString($options['comment']),
             );
         }
 
@@ -221,7 +221,7 @@ class PostgresAdapter extends AbstractAdapter
         if (!empty($primaryKey['constraint'])) {
             $sql = sprintf(
                 'DROP CONSTRAINT %s',
-                $this->quoteColumnName($primaryKey['constraint'])
+                $this->quoteColumnName($primaryKey['constraint']),
             );
             $instructions->addAlter($sql);
         }
@@ -230,7 +230,7 @@ class PostgresAdapter extends AbstractAdapter
         if ($newColumns) {
             $sql = sprintf(
                 'ADD CONSTRAINT %s PRIMARY KEY (',
-                $this->quoteColumnName($parts['table'] . '_pkey')
+                $this->quoteColumnName($parts['table'] . '_pkey'),
             );
             if (is_string($newColumns)) { // handle primary_key => 'id'
                 $sql .= $this->quoteColumnName($newColumns);
@@ -258,7 +258,7 @@ class PostgresAdapter extends AbstractAdapter
         $sql = sprintf(
             'COMMENT ON TABLE %s IS %s',
             $this->quoteTableName($table->getName()),
-            $newComment
+            $newComment,
         );
         $instructions->addPostStep($sql);
 
@@ -274,7 +274,7 @@ class PostgresAdapter extends AbstractAdapter
         $sql = sprintf(
             'ALTER TABLE %s RENAME TO %s',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName($newTableName)
+            $this->quoteColumnName($newTableName),
         );
 
         return new AlterInstructions([], [$sql]);
@@ -298,7 +298,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $sql = sprintf(
             'TRUNCATE TABLE %s RESTART IDENTITY',
-            $this->quoteTableName($tableName)
+            $this->quoteTableName($tableName),
         );
 
         $this->execute($sql);
@@ -417,7 +417,7 @@ class PostgresAdapter extends AbstractAdapter
             $this->quoteColumnName((string)$column->getName()),
             $this->getColumnSqlDefinition($column),
             $column->isIdentity() && $column->getGenerated() !== null && $this->useIdentity ?
-                sprintf('GENERATED %s AS IDENTITY', (string)$column->getGenerated()) : ''
+                sprintf('GENERATED %s AS IDENTITY', (string)$column->getGenerated()) : '',
         ));
 
         if ($column->getComment()) {
@@ -435,7 +435,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getRenameColumnInstructions(
         string $tableName,
         string $columnName,
-        string $newColumnName
+        string $newColumnName,
     ): AlterInstructions {
         $parts = $this->getSchemaName($tableName);
         $sql = 'SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS column_exists
@@ -457,8 +457,8 @@ class PostgresAdapter extends AbstractAdapter
                 'ALTER TABLE %s RENAME COLUMN %s TO %s',
                 $this->quoteTableName($tableName),
                 $this->quoteColumnName($columnName),
-                $this->quoteColumnName($newColumnName)
-            )
+                $this->quoteColumnName($newColumnName),
+            ),
         );
 
         return $instructions;
@@ -470,7 +470,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getChangeColumnInstructions(
         string $tableName,
         string $columnName,
-        Column $newColumn
+        Column $newColumn,
     ): AlterInstructions {
         $quotedColumnName = $this->quoteColumnName($columnName);
         $instructions = new AlterInstructions();
@@ -481,18 +481,18 @@ class PostgresAdapter extends AbstractAdapter
         $sql = sprintf(
             'ALTER COLUMN %s TYPE %s',
             $quotedColumnName,
-            $this->getColumnSqlDefinition($newColumn)
+            $this->getColumnSqlDefinition($newColumn),
         );
         if (in_array($newColumn->getType(), ['smallinteger', 'integer', 'biginteger'], true)) {
             $sql .= sprintf(
                 ' USING (%s::bigint)',
-                $quotedColumnName
+                $quotedColumnName,
             );
         }
         if (in_array($newColumn->getType(), ['uuid', 'nativeuuid', 'binaryuuid'])) {
             $sql .= sprintf(
                 ' USING (%s::uuid)',
-                $quotedColumnName
+                $quotedColumnName,
             );
         }
         //NULL and DEFAULT cannot be set while changing column type
@@ -504,7 +504,7 @@ class PostgresAdapter extends AbstractAdapter
             $sql .= sprintf(
                 ' USING (CASE WHEN %s IS NULL THEN NULL WHEN %s::int=0 THEN FALSE ELSE TRUE END)',
                 $quotedColumnName,
-                $quotedColumnName
+                $quotedColumnName,
             );
         }
         $instructions->addAlter($sql);
@@ -516,7 +516,7 @@ class PostgresAdapter extends AbstractAdapter
             // process identity
             $sql = sprintf(
                 'ALTER COLUMN %s',
-                $quotedColumnName
+                $quotedColumnName,
             );
             if ($newColumn->isIdentity() && $newColumn->getGenerated() !== null) {
                 if ($column->isIdentity()) {
@@ -533,7 +533,7 @@ class PostgresAdapter extends AbstractAdapter
         // process null
         $sql = sprintf(
             'ALTER COLUMN %s',
-            $quotedColumnName
+            $quotedColumnName,
         );
 
         if (!$newColumn->getIdentity() && !$column->getIdentity() && $newColumn->isNull()) {
@@ -548,13 +548,13 @@ class PostgresAdapter extends AbstractAdapter
             $instructions->addAlter(sprintf(
                 'ALTER COLUMN %s SET %s',
                 $quotedColumnName,
-                $this->getDefaultValueDefinition($newColumn->getDefault(), (string)$newColumn->getType())
+                $this->getDefaultValueDefinition($newColumn->getDefault(), (string)$newColumn->getType()),
             ));
         } elseif (!$newColumn->getIdentity()) {
             //drop default
             $instructions->addAlter(sprintf(
                 'ALTER COLUMN %s DROP DEFAULT',
-                $quotedColumnName
+                $quotedColumnName,
             ));
         }
 
@@ -564,7 +564,7 @@ class PostgresAdapter extends AbstractAdapter
                 'ALTER TABLE %s RENAME COLUMN %s TO %s',
                 $this->quoteTableName($tableName),
                 $quotedColumnName,
-                $this->quoteColumnName((string)$newColumn->getName())
+                $this->quoteColumnName((string)$newColumn->getName()),
             ));
         }
 
@@ -600,7 +600,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $alter = sprintf(
             'DROP COLUMN %s',
-            $this->quoteColumnName($columnName)
+            $this->quoteColumnName($columnName),
         );
 
         return new AlterInstructions([$alter]);
@@ -701,14 +701,14 @@ class PostgresAdapter extends AbstractAdapter
             if (!$a) {
                 return new AlterInstructions([], [sprintf(
                     'DROP INDEX IF EXISTS %s',
-                    '"' . ($parts['schema'] . '".' . $this->quoteColumnName($indexName))
+                    '"' . ($parts['schema'] . '".' . $this->quoteColumnName($indexName)),
                 )]);
             }
         }
 
         throw new InvalidArgumentException(sprintf(
             "The specified index on columns '%s' does not exist",
-            implode(',', $columns)
+            implode(',', $columns),
         ));
     }
 
@@ -721,7 +721,7 @@ class PostgresAdapter extends AbstractAdapter
 
         $sql = sprintf(
             'DROP INDEX IF EXISTS %s',
-            '"' . ($parts['schema'] . '".' . $this->quoteColumnName($indexName))
+            '"' . ($parts['schema'] . '".' . $this->quoteColumnName($indexName)),
         );
 
         return new AlterInstructions([], [$sql]);
@@ -836,7 +836,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $alter = sprintf(
             'ADD %s',
-            $this->getForeignKeySqlDefinition($foreignKey, $table->getName())
+            $this->getForeignKeySqlDefinition($foreignKey, $table->getName()),
         );
 
         return new AlterInstructions([$alter]);
@@ -849,7 +849,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $alter = sprintf(
             'DROP CONSTRAINT %s',
-            $this->quoteColumnName($constraint)
+            $this->quoteColumnName($constraint),
         );
 
         return new AlterInstructions([$alter]);
@@ -873,13 +873,13 @@ class PostgresAdapter extends AbstractAdapter
         if (!$matches) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
-                implode(', ', $columns)
+                implode(', ', $columns),
             ));
         }
 
         foreach ($matches as $name) {
             $instructions->merge(
-                $this->getDropForeignKeyInstructions($tableName, $name)
+                $this->getDropForeignKeyInstructions($tableName, $name),
             );
         }
 
@@ -1023,7 +1023,7 @@ class PostgresAdapter extends AbstractAdapter
                 return static::PHINX_TYPE_MACADDR;
             default:
                 throw new UnsupportedColumnTypeException(
-                    'Column type `' . $sqlType . '` is not supported by Postgresql.'
+                    'Column type `' . $sqlType . '` is not supported by Postgresql.',
                 );
         }
     }
@@ -1091,14 +1091,14 @@ class PostgresAdapter extends AbstractAdapter
                 $buffer[] = sprintf(
                     '(%s, %s)',
                     $column->getPrecision() ?: $sqlType['precision'],
-                    $column->getScale() ?: $sqlType['scale']
+                    $column->getScale() ?: $sqlType['scale'],
                 );
             } elseif ($sqlType['name'] === self::PHINX_TYPE_GEOMETRY) {
                 // geography type must be written with geometry type and srid, like this: geography(POLYGON,4326)
                 $buffer[] = sprintf(
                     '(%s,%s)',
                     strtoupper($sqlType['type']),
-                    $column->getSrid() ?: $sqlType['srid']
+                    $column->getSrid() ?: $sqlType['srid'],
                 );
             } elseif (in_array($sqlType['name'], [self::PHINX_TYPE_TIME, self::PHINX_TYPE_TIMESTAMP], true)) {
                 if (is_numeric($column->getPrecision())) {
@@ -1153,7 +1153,7 @@ class PostgresAdapter extends AbstractAdapter
             'COMMENT ON COLUMN %s.%s IS %s;',
             $this->quoteTableName($tableName),
             $this->quoteColumnName((string)$column->getName()),
-            $comment
+            $comment,
         );
     }
 
@@ -1439,8 +1439,8 @@ class PostgresAdapter extends AbstractAdapter
         $this->execute(
             sprintf(
                 'SET search_path TO %s,"$user",public',
-                $this->quoteSchemaName($this->getGlobalSchemaName())
-            )
+                $this->quoteSchemaName($this->getGlobalSchemaName()),
+            ),
         );
     }
 
@@ -1451,7 +1451,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $sql = sprintf(
             'INSERT INTO %s ',
-            $this->quoteTableName($table->getName())
+            $this->quoteTableName($table->getName()),
         );
         $columns = array_keys($row);
         $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $columns)) . ')';
@@ -1495,7 +1495,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $sql = sprintf(
             'INSERT INTO %s ',
-            $this->quoteTableName($table->getName())
+            $this->quoteTableName($table->getName()),
         );
         $current = current($rows);
         /** @var array<string> $keys */

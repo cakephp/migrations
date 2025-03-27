@@ -141,14 +141,14 @@ class CakeManager extends Manager
 
         if ($versionToMigrate === null) {
             $this->getOutput()->writeln(
-                'No migrations to run'
+                'No migrations to run',
             );
 
             return;
         }
 
         $this->getOutput()->writeln(
-            'Migrating to version ' . $versionToMigrate
+            'Migrating to version ' . $versionToMigrate,
         );
         $this->migrate($environment, $versionToMigrate, $fake);
     }
@@ -220,7 +220,7 @@ class CakeManager extends Manager
 
         if (!$migrationFile) {
             throw new RuntimeException(
-                sprintf('A migration file matching version number `%s` could not be found', $version)
+                sprintf('A migration file matching version number `%s` could not be found', $version),
             );
         }
 
@@ -309,7 +309,7 @@ class CakeManager extends Manager
             try {
                 $this->markMigrated($version, $path);
                 $output->writeln(
-                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version)
+                    sprintf('<info>Migration `%s` successfully marked migrated !</info>', $version),
                 );
             } catch (Exception $e) {
                 $adapter->rollbackTransaction();
@@ -317,8 +317,8 @@ class CakeManager extends Manager
                     sprintf(
                         '<error>An error occurred while marking migration `%s` as migrated : %s</error>',
                         $version,
-                        $e->getMessage()
-                    )
+                        $e->getMessage(),
+                    ),
                 );
                 $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
 

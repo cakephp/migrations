@@ -64,7 +64,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
                         function ($value) {
                             return '\'' . $value . '\'';
                         },
-                        $arg
+                        $arg,
                     );
                     $outArr[] = '[' . implode(', ', $arg) . ']';
                     continue;
@@ -215,7 +215,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
                 $table->getName(),
                 $column->getName(),
                 $column->getType(),
-            ]
+            ],
         );
         $adapter->addColumn($table, $column);
         $end();

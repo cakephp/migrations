@@ -42,7 +42,7 @@ class TableTest extends TestCase
                     [$adapter[0], 'created', 'updated', 'created', 'updated', false],
                     [$adapter[0], null, 'amendment_date', 'created', 'amendment_date', true],
                     [$adapter[0], 'insertion_date', null, 'insertion_date', 'updated', true],
-                ]
+                ],
             );
         }
 
@@ -61,7 +61,7 @@ class TableTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
+                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
             );
             $this->assertStringStartsWith('An invalid column type ', $e->getMessage());
         }
@@ -90,7 +90,7 @@ class TableTest extends TestCase
             $this->assertInstanceOf(
                 'RuntimeException',
                 $e,
-                'Expected exception of type RuntimeException, got ' . get_class($e)
+                'Expected exception of type RuntimeException, got ' . get_class($e),
             );
         }
     }
@@ -146,7 +146,7 @@ class TableTest extends TestCase
                 ->setReferencedColumns(['id'])
                 ->setOnDelete('CASCADE')
                 ->setOnUpdate('CASCADE')
-                ->setName('fk_user_id')
+                ->setName('fk_user_id'),
         );
 
         $actions = $this->getPendingActions($table);
@@ -187,7 +187,7 @@ class TableTest extends TestCase
                 ->setReferencedColumns(['id'])
                 ->setOnDelete('CASCADE')
                 ->setOnUpdate('CASCADE')
-                ->setName('fk_user_id')
+                ->setName('fk_user_id'),
         );
 
         $actions = $this->getPendingActions($table);
@@ -214,7 +214,7 @@ class TableTest extends TestCase
         $updatedAtColumnName,
         $expectedCreatedAtColumnName,
         $expectedUpdatedAtColumnName,
-        $withTimezone
+        $withTimezone,
     ): void {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps($createdAtColumnName, $updatedAtColumnName, $withTimezone);
@@ -318,7 +318,7 @@ class TableTest extends TestCase
         $updatedAtColumnName,
         $expectedCreatedAtColumnName,
         $expectedUpdatedAtColumnName,
-        $withTimezone
+        $withTimezone,
     ): void {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestampsWithTimezone($createdAtColumnName, $updatedAtColumnName);

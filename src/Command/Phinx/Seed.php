@@ -48,7 +48,7 @@ class Seed extends SeedRun
                 '--seed',
                 null,
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'What is the name of the seeder?'
+                'What is the name of the seeder?',
             )
             ->addOption('--plugin', '-p', InputOption::VALUE_REQUIRED, 'The plugin containing the migrations')
             ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')

@@ -41,7 +41,7 @@ trait SchemaTrait
             $msg = sprintf(
                 'The "%s" connection is not compatible with orm caching, ' .
                 'as it does not implement a "getSchemaCollection()" method.',
-                $connectionName
+                $connectionName,
             );
             $output->writeln('<error>' . $msg . '</error>');
 

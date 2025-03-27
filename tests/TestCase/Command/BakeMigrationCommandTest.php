@@ -224,153 +224,153 @@ class BakeMigrationCommandTest extends TestCase
         $command = new BakeMigrationCommand();
         $this->assertEquals(
             ['create_table', 'groups'],
-            $command->detectAction('CreateGroups')
+            $command->detectAction('CreateGroups'),
         );
         $this->assertEquals(
             ['create_table', 'users'],
-            $command->detectAction('CreateUsers')
+            $command->detectAction('CreateUsers'),
         );
         $this->assertEquals(
             ['create_table', 'groups_users'],
-            $command->detectAction('CreateGroupsUsers')
+            $command->detectAction('CreateGroupsUsers'),
         );
         $this->assertEquals(
             ['create_table', 'articles_i18n'],
-            $command->detectAction('CreateArticlesI18n')
+            $command->detectAction('CreateArticlesI18n'),
         );
 
         $this->assertEquals(
             ['drop_table', 'groups'],
-            $command->detectAction('DropGroups')
+            $command->detectAction('DropGroups'),
         );
         $this->assertEquals(
             ['drop_table', 'users'],
-            $command->detectAction('DropUsers')
+            $command->detectAction('DropUsers'),
         );
         $this->assertEquals(
             ['drop_table', 'groups_users'],
-            $command->detectAction('DropGroupsUsers')
+            $command->detectAction('DropGroupsUsers'),
         );
         $this->assertEquals(
             ['drop_table', 'articles_i18n'],
-            $command->detectAction('DropArticlesI18n')
+            $command->detectAction('DropArticlesI18n'),
         );
 
         $this->assertEquals(
             ['add_field', 'groups'],
-            $command->detectAction('AddFieldToGroups')
+            $command->detectAction('AddFieldToGroups'),
         );
         $this->assertEquals(
             ['add_field', 'users'],
-            $command->detectAction('AddFieldToUsers')
+            $command->detectAction('AddFieldToUsers'),
         );
         $this->assertEquals(
             ['add_field', 'groups_users'],
-            $command->detectAction('AddFieldToGroupsUsers')
+            $command->detectAction('AddFieldToGroupsUsers'),
         );
         $this->assertEquals(
             ['add_field', 'groups'],
-            $command->detectAction('AddThingToGroups')
+            $command->detectAction('AddThingToGroups'),
         );
         $this->assertEquals(
             ['add_field', 'groups'],
-            $command->detectAction('AddTokenToGroups')
+            $command->detectAction('AddTokenToGroups'),
         );
         $this->assertEquals(
             ['add_field', 'users'],
-            $command->detectAction('AddAnotherFieldToUsers')
+            $command->detectAction('AddAnotherFieldToUsers'),
         );
         $this->assertEquals(
             ['add_field', 'groups_users'],
-            $command->detectAction('AddSomeFieldToGroupsUsers')
+            $command->detectAction('AddSomeFieldToGroupsUsers'),
         );
         $this->assertEquals(
             ['add_field', 'todos'],
-            $command->detectAction('AddSomeFieldToTodos')
+            $command->detectAction('AddSomeFieldToTodos'),
         );
         $this->assertEquals(
             ['add_field', 'articles_i18n'],
-            $command->detectAction('AddSomeFieldToArticlesI18n')
+            $command->detectAction('AddSomeFieldToArticlesI18n'),
         );
 
         $this->assertEquals(
             ['drop_field', 'groups'],
-            $command->detectAction('RemoveFieldsFromGroups')
+            $command->detectAction('RemoveFieldsFromGroups'),
         );
         $this->assertEquals(
             ['drop_field', 'users'],
-            $command->detectAction('RemoveFieldsFromUsers')
+            $command->detectAction('RemoveFieldsFromUsers'),
         );
         $this->assertEquals(
             ['drop_field', 'groups_users'],
-            $command->detectAction('RemoveFieldsFromGroupsUsers')
+            $command->detectAction('RemoveFieldsFromGroupsUsers'),
         );
         $this->assertEquals(
             ['drop_field', 'groups'],
-            $command->detectAction('RemoveThingFromGroups')
+            $command->detectAction('RemoveThingFromGroups'),
         );
         $this->assertEquals(
             ['drop_field', 'users'],
-            $command->detectAction('RemoveAnotherFieldFromUsers')
+            $command->detectAction('RemoveAnotherFieldFromUsers'),
         );
         $this->assertEquals(
             ['drop_field', 'groups_users'],
-            $command->detectAction('RemoveSomeFieldFromGroupsUsers')
+            $command->detectAction('RemoveSomeFieldFromGroupsUsers'),
         );
         $this->assertEquals(
             ['drop_field', 'fromages'],
-            $command->detectAction('RemoveSomeFieldFromFromages')
+            $command->detectAction('RemoveSomeFieldFromFromages'),
         );
         $this->assertEquals(
             ['drop_field', 'fromages'],
-            $command->detectAction('RemoveFromageFromFromages')
+            $command->detectAction('RemoveFromageFromFromages'),
         );
         $this->assertEquals(
             ['drop_field', 'articles_i18n'],
-            $command->detectAction('RemoveFromageFromArticlesI18n')
+            $command->detectAction('RemoveFromageFromArticlesI18n'),
         );
 
         $this->assertEquals(
             ['alter_table', 'groups'],
-            $command->detectAction('AlterGroups')
+            $command->detectAction('AlterGroups'),
         );
         $this->assertEquals(
             ['alter_table', 'users'],
-            $command->detectAction('AlterUsers')
+            $command->detectAction('AlterUsers'),
         );
         $this->assertEquals(
             ['alter_table', 'groups_users'],
-            $command->detectAction('AlterGroupsUsers')
+            $command->detectAction('AlterGroupsUsers'),
         );
         $this->assertEquals(
             ['alter_table', 'articles_i18n'],
-            $command->detectAction('AlterArticlesI18n')
+            $command->detectAction('AlterArticlesI18n'),
         );
 
         $this->assertSame(
             [],
-            $command->detectAction('ReaddColumnsToTable')
+            $command->detectAction('ReaddColumnsToTable'),
         );
 
         $this->assertEquals(
             ['alter_field', 'groups'],
-            $command->detectAction('AlterFieldOnGroups')
+            $command->detectAction('AlterFieldOnGroups'),
         );
         $this->assertEquals(
             ['alter_field', 'users'],
-            $command->detectAction('AlterFieldOnUsers')
+            $command->detectAction('AlterFieldOnUsers'),
         );
         $this->assertEquals(
             ['alter_field', 'groups_users'],
-            $command->detectAction('AlterFieldOnGroupsUsers')
+            $command->detectAction('AlterFieldOnGroupsUsers'),
         );
         $this->assertEquals(
             ['alter_field', 'todos'],
-            $command->detectAction('AlterFieldOnTodos')
+            $command->detectAction('AlterFieldOnTodos'),
         );
         $this->assertEquals(
             ['alter_field', 'articles_i18n'],
-            $command->detectAction('AlterFieldOnArticlesI18n')
+            $command->detectAction('AlterFieldOnArticlesI18n'),
         );
     }
 

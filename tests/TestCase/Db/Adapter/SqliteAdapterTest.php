@@ -92,7 +92,7 @@ class SqliteAdapterTest extends TestCase
 
         $this->assertTrue(
             $this->adapter->getConnection()->inTransaction(),
-            'Underlying PDO instance did not detect new transaction'
+            'Underlying PDO instance did not detect new transaction',
         );
     }
 
@@ -103,7 +103,7 @@ class SqliteAdapterTest extends TestCase
 
         $this->assertFalse(
             $this->adapter->getConnection()->inTransaction(),
-            'Underlying PDO instance did not detect rolled back transaction'
+            'Underlying PDO instance did not detect rolled back transaction',
         );
     }
 
@@ -114,7 +114,7 @@ class SqliteAdapterTest extends TestCase
 
         $this->assertFalse(
             $this->adapter->getConnection()->inTransaction(),
-            "Underlying PDO instance didn't detect committed transaction"
+            "Underlying PDO instance didn't detect committed transaction",
         );
     }
 
@@ -315,7 +315,7 @@ class SqliteAdapterTest extends TestCase
                 'master_id',
                 'tbl_master',
                 'id',
-                ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION', 'constraint' => 'fk_master_id']
+                ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION', 'constraint' => 'fk_master_id'],
             )
             ->create();
 
@@ -324,11 +324,11 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey('tbl_child', ['master_id']));
 
         $row = $this->adapter->fetchRow(
-            "SELECT * FROM sqlite_master WHERE `type` = 'table' AND `tbl_name` = 'tbl_child'"
+            "SELECT * FROM sqlite_master WHERE `type` = 'table' AND `tbl_name` = 'tbl_child'",
         );
         $this->assertStringContainsString(
             'CONSTRAINT "fk_master_id" FOREIGN KEY ("master_id") REFERENCES "tbl_master" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION',
-            $row['sql']
+            $row['sql'],
         );
     }
 
@@ -344,18 +344,18 @@ class SqliteAdapterTest extends TestCase
                 'master_id',
                 'tbl_master',
                 'id',
-                ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION', 'constraint' => 'fk_master_id']
+                ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION', 'constraint' => 'fk_master_id'],
             );
         $table->create();
 
         $this->assertTrue($this->adapter->hasForeignKey('tbl_child', ['master_id']));
 
         $row = $this->adapter->fetchRow(
-            "SELECT * FROM sqlite_master WHERE \"type\" = 'table' AND \"tbl_name\" = 'tbl_child'"
+            "SELECT * FROM sqlite_master WHERE \"type\" = 'table' AND \"tbl_name\" = 'tbl_child'",
         );
         $this->assertStringContainsString(
             'CONSTRAINT "fk_master_id" FOREIGN KEY ("master_id") REFERENCES "tbl_master" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION',
-            $row['sql']
+            $row['sql'],
         );
     }
 
@@ -969,7 +969,7 @@ class SqliteAdapterTest extends TestCase
             ->addColumn('indexcol', 'integer')
             ->addIndex(
                 'indexcol',
-                ['unique' => true]
+                ['unique' => true],
             )
             ->create();
 
@@ -997,7 +997,7 @@ class SqliteAdapterTest extends TestCase
         $this->adapter->execute($triggerSQL);
 
         $rows = $this->adapter->fetchAll(
-            "SELECT * FROM sqlite_master WHERE \"type\" = 'trigger' AND tbl_name = 't'"
+            "SELECT * FROM sqlite_master WHERE \"type\" = 'trigger' AND tbl_name = 't'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('trigger', $rows[0]['type']);
@@ -1007,7 +1007,7 @@ class SqliteAdapterTest extends TestCase
         $table->changeColumn('triggercol', 'integer', ['null' => false])->update();
 
         $rows = $this->adapter->fetchAll(
-            "SELECT * FROM sqlite_master WHERE \"type\" = 'trigger' AND tbl_name = 't'"
+            "SELECT * FROM sqlite_master WHERE \"type\" = 'trigger' AND tbl_name = 't'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('trigger', $rows[0]['type']);
@@ -1422,17 +1422,17 @@ class SqliteAdapterTest extends TestCase
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->addForeignKey(
                 ['ref_table_field1', 'ref_table_id'],
                 'ref_table',
-                ['field1', 'id']
+                ['field1', 'id'],
             )
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1', 'ref_table_field2'],
                 'ref_table',
-                ['id', 'field1', 'field2']
+                ['id', 'field1', 'field2'],
             )
             ->save();
 
@@ -1441,11 +1441,11 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']));
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1', 'ref_table_field2']),
-            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns'
+            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns',
         );
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']),
-            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order'
+            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order',
         );
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
@@ -1520,14 +1520,14 @@ class SqliteAdapterTest extends TestCase
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->save();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf(
             'No foreign key on column(s) `%s` exists',
-            implode(', ', $columns)
+            implode(', ', $columns),
         ));
 
         $this->adapter->dropForeignKey($table->getName(), $columns);
@@ -1638,7 +1638,7 @@ class SqliteAdapterTest extends TestCase
                 'limit' => null,
                 'scale' => null,
             ],
-            $this->adapter->getPhinxType('fake')
+            $this->adapter->getPhinxType('fake'),
         );
     }
 
@@ -1692,13 +1692,13 @@ class SqliteAdapterTest extends TestCase
                 [
                     'column1' => 'value3',
                     'column2' => 3,
-                ]
+                ],
             )
             ->insert(
                 [
                     'column1' => '\'value4\'',
                     'column2' => null,
-                ]
+                ],
             )
             ->save();
         $rows = $this->adapter->fetchAll('SELECT * FROM table1');
@@ -1763,13 +1763,13 @@ class SqliteAdapterTest extends TestCase
                 [
                     'column1' => 'value3',
                     'column2' => 3,
-                ]
+                ],
             )
             ->insert(
                 [
                     'column1' => '\'value4\'',
                     'column2' => null,
-                ]
+                ],
             )
             ->save();
 
@@ -2025,7 +2025,7 @@ OUTPUT;
         $this->assertEquals(0, $stm->rowCount());
         $this->assertEquals(
             ['id' => 2, 'string_col' => 'value2', 'int_col' => '2'],
-            $stm->fetch('assoc')
+            $stm->fetch('assoc'),
         );
 
         $builder = $this->adapter->getDeleteBuilder();

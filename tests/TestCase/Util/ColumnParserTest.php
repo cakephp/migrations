@@ -254,7 +254,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:integer:primary:ID_INDEX']));
         $this->assertEquals(
             ['id', 'name'],
-            $this->columnParser->parsePrimaryKey(['id:integer:primary', 'name:primary_key'])
+            $this->columnParser->parsePrimaryKey(['id:integer:primary', 'name:primary_key']),
         );
     }
 
@@ -262,51 +262,51 @@ class ColumnParserTest extends TestCase
     {
         $this->assertEquals(
             ['id'],
-            $this->columnParser->validArguments(['id'])
+            $this->columnParser->validArguments(['id']),
         );
         $this->assertEquals(
             ['id', 'id'],
-            $this->columnParser->validArguments(['id', 'id'])
+            $this->columnParser->validArguments(['id', 'id']),
         );
         $this->assertEquals(
             ['id:primary_key'],
-            $this->columnParser->validArguments(['id:primary_key'])
+            $this->columnParser->validArguments(['id:primary_key']),
         );
         $this->assertEquals(
             ['id:primary_key:primary'],
-            $this->columnParser->validArguments(['id:primary_key:primary'])
+            $this->columnParser->validArguments(['id:primary_key:primary']),
         );
         $this->assertEquals(
             ['id:integer:primary'],
-            $this->columnParser->validArguments(['id:integer:primary'])
+            $this->columnParser->validArguments(['id:integer:primary']),
         );
         $this->assertEquals(
             ['id:integer:primary:ID_INDEX'],
-            $this->columnParser->validArguments(['id:integer:primary:ID_INDEX'])
+            $this->columnParser->validArguments(['id:integer:primary:ID_INDEX']),
         );
         $this->assertEquals(
             ['id', 'field:string:unique'],
-            $this->columnParser->validArguments(['id', 'field:string:unique'])
+            $this->columnParser->validArguments(['id', 'field:string:unique']),
         );
         $this->assertEquals(
             ['field:fieldType:indexType:indexName'],
-            $this->columnParser->validArguments(['field:fieldType:indexType:indexName'])
+            $this->columnParser->validArguments(['field:fieldType:indexType:indexName']),
         );
         $this->assertEquals(
             ['field:fieldType[128]:indexType:indexName'],
-            $this->columnParser->validArguments(['field:fieldType[128]:indexType:indexName'])
+            $this->columnParser->validArguments(['field:fieldType[128]:indexType:indexName']),
         );
         $this->assertEquals(
             ['field:integer[9]:indexType:indexName'],
-            $this->columnParser->validArguments(['field:integer[9]:indexType:indexName'])
+            $this->columnParser->validArguments(['field:integer[9]:indexType:indexName']),
         );
         $this->assertEquals(
             ['field:string?[50]:indexType:indexName'],
-            $this->columnParser->validArguments(['field:string?[50]:indexType:indexName'])
+            $this->columnParser->validArguments(['field:string?[50]:indexType:indexName']),
         );
         $this->assertEquals(
             ['field:biginteger[18]:indexType:indexName'],
-            $this->columnParser->validArguments(['field:biginteger[18]:indexType:indexName'])
+            $this->columnParser->validArguments(['field:biginteger[18]:indexType:indexName']),
         );
     }
 

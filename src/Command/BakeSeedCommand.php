@@ -156,7 +156,7 @@ class BakeSeedCommand extends SimpleBakeCommand
         $newArgs = new Arguments(
             $args->getArguments(),
             $options,
-            ['name']
+            ['name'],
         );
         $this->_name = $name;
         parent::bake($name, $newArgs, $io);
@@ -173,7 +173,7 @@ class BakeSeedCommand extends SimpleBakeCommand
         $parser = parent::buildOptionParser($parser);
 
         $parser->setDescription(
-            'Bake seed class.'
+            'Bake seed class.',
         )->addOption('table', [
             'help' => 'The database table to use.',
         ])->addOption('data', [
