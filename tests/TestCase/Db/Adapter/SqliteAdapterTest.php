@@ -1584,7 +1584,7 @@ class SqliteAdapterTest extends TestCase
     public function testAddColumnWithComment()
     {
         $table = new Table('table1', [], $this->adapter);
-        $table->addColumn('column1', 'string', ['comment' => $comment = 'Comments from "column1"'])
+        $table->addColumn('column1', 'string', ['comment' => 'Comments from "column1"'])
             ->save();
 
         $rows = $this->adapter->fetchAll('select * from sqlite_master where "type" = \'table\'');
@@ -1881,7 +1881,7 @@ class SqliteAdapterTest extends TestCase
             ->save();
 
         $expectedOutput = <<<'OUTPUT'
-CREATE TABLE "table1" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "column1" VARCHAR NOT NULL, "column2" INTEGER NULL, "column3" VARCHAR NULL DEFAULT 'test');
+CREATE TABLE "table1" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "column1" VARCHAR NOT NULL, "column2" INTEGER, "column3" VARCHAR DEFAULT 'test');
 OUTPUT;
         $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
@@ -1981,7 +1981,7 @@ OUTPUT;
         ])->save();
 
         $expectedOutput = <<<'OUTPUT'
-CREATE TABLE "table1" ("column1" VARCHAR NOT NULL, "column2" INTEGER NULL, PRIMARY KEY ("column1"));
+CREATE TABLE "table1" ("column1" VARCHAR NOT NULL, "column2" INTEGER, PRIMARY KEY ("column1"));
 INSERT INTO "table1" ("column1", "column2") VALUES ('id1', 1);
 OUTPUT;
         $actualOutput = join("\n", $this->out->messages());

@@ -314,10 +314,11 @@ class SqliteAdapter extends AbstractAdapter
         if (isset($options['primary_key'])) {
             $options['primary_key'] = (array)$options['primary_key'];
         }
+        $dialect = $this->getSchemaDialect();
 
         foreach ($columns as $column) {
-            $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
-
+            $columnData = $column->toArray();
+            $sql .= $dialect->columnDefinitionSql($columnData) . ', ';
             if (isset($options['primary_key']) && $column->getIdentity()) {
                 //remove column from the primary key array as it is already defined as an autoincrement
                 //primary id
@@ -1499,7 +1500,7 @@ PCRE_PATTERN;
         $instructions->addPostStep(function ($state) use ($column) {
             $quotedColumn = preg_quote($column);
             $columnPattern = "`{$quotedColumn}`|\"{$quotedColumn}\"|\[{$quotedColumn}\]";
-            $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)\s+((NOT )?NULL)/";
+            $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)(\s+(NOT )?NULL)?/";
 
             $sql = $state['createSQL'];
 

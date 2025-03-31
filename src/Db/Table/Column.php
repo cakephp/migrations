@@ -19,6 +19,7 @@ use RuntimeException;
  */
 class Column
 {
+    // TODO use cakephp/database constants instead at next major.
     public const BIGINTEGER = AdapterInterface::PHINX_TYPE_BIG_INTEGER;
     public const SMALLINTEGER = AdapterInterface::PHINX_TYPE_SMALL_INTEGER;
     public const TINYINTEGER = AdapterInterface::PHINX_TYPE_TINY_INTEGER;
@@ -801,5 +802,31 @@ class Column
         }
 
         return $this;
+    }
+
+    /**
+     * Convert the column into the array shape
+     * used by cakephp/database.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->getName(),
+            'type' => $this->getType(),
+            'length' => $this->getLimit(),
+            'null' => $this->getNull(),
+            'default' => $this->getDefault(),
+            'unsigned' => $this->getSigned(),
+            'onUpdate' => $this->getUpdate(),
+            'collate' => $this->getCollation(),
+            'precision' => $this->getPrecision(),
+            'scale' => $this->getScale(),
+            'srid' => $this->getSrid(),
+            'timezone' => $this->getTimezone(),
+            'comment' => $this->getComment(),
+            'autoIncrement' => $this->getIdentity(),
+        ];
     }
 }
