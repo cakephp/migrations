@@ -1187,10 +1187,11 @@ PCRE_PATTERN;
         $instructions = $this->beginAlterByCopyTable($tableName);
 
         $newColumnName = (string)$newColumn->getName();
-        $instructions->addPostStep(function ($state) use ($columnName, $newColumn, $newColumnName) {
+        $instructions->addPostStep(function ($state) use ($columnName, $newColumn) {
+            $dialect = $this->getSchemaDialect();
             $sql = preg_replace(
                 sprintf("/%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+([,)])/", $this->quoteColumnName($columnName)),
-                sprintf('%s %s$1', $this->quoteColumnName($newColumnName), $this->getColumnSqlDefinition($newColumn)),
+                sprintf('%s$1', $dialect->columnDefinitionSql($newColumn->toArray())),
                 (string)$state['createSQL'],
                 1
             );
@@ -1771,56 +1772,6 @@ PCRE_PATTERN;
         if (file_exists($name . $this->suffix)) {
             unlink($name . $this->suffix);
         }
-    }
-
-    /**
-     * Gets the SQLite Column Definition for a Column object.
-     *
-     * @param \Migrations\Db\Table\Column $column Column
-     * @return string
-     */
-    protected function getColumnSqlDefinition(Column $column): string
-    {
-        $isLiteralType = $column->getType() instanceof Literal;
-        if ($isLiteralType) {
-            $def = (string)$column->getType();
-        } else {
-            $sqlType = $this->getSqlType($column->getType());
-            $def = strtoupper($sqlType['name']);
-
-            $limitable = in_array(strtoupper($sqlType['name']), $this->definitionsWithLimits, true);
-            if (($column->getLimit() || isset($sqlType['limit'])) && $limitable) {
-                $def .= '(' . ($column->getLimit() ?: $sqlType['limit']) . ')';
-            }
-        }
-        if ($column->getPrecision() && $column->getScale()) {
-            $def .= '(' . $column->getPrecision() . ',' . $column->getScale() . ')';
-        }
-
-        $default = $column->getDefault();
-
-        $def .= $column->isNull() ? ' NULL' : ' NOT NULL';
-        $def .= $this->getDefaultValueDefinition($default, (string)$column->getType());
-        $def .= $column->isIdentity() ? ' PRIMARY KEY AUTOINCREMENT' : '';
-
-        $def .= $this->getCommentDefinition($column);
-
-        return $def;
-    }
-
-    /**
-     * Gets the comment Definition for a Column object.
-     *
-     * @param \Migrations\Db\Table\Column $column Column
-     * @return string
-     */
-    protected function getCommentDefinition(Column $column): string
-    {
-        if ($column->getComment()) {
-            return ' /* ' . $column->getComment() . ' */ ';
-        }
-
-        return '';
     }
 
     /**
