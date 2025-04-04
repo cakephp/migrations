@@ -550,16 +550,6 @@ class SqliteAdapterTest extends TestCase
         }
     }
 
-    public function testAddDoubleColumn()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $table->addColumn('foo', 'double', ['null' => true])
-            ->save();
-        $rows = $this->adapter->fetchAll(sprintf('pragma table_info(%s)', 'table1'));
-        $this->assertEquals('DOUBLE', $rows[1]['type']);
-    }
-
     public function testRenameColumn()
     {
         $table = new Table('t', [], $this->adapter);

@@ -641,6 +641,7 @@ PCRE_PATTERN;
             // as the alternative is unwinding all possible table constraints which
             // gets messy quickly with CHECK constraints.
             $columns = $this->getColumns($tableName);
+            $dialect = $this->getSchemaDialect();
             if (!$columns) {
                 return $state;
             }
@@ -651,9 +652,8 @@ PCRE_PATTERN;
                     $this->quoteColumnName((string)$finalColumnName)
                 ),
                 sprintf(
-                    '$1, %s %s$2',
-                    $this->quoteColumnName((string)$column->getName()),
-                    $this->getColumnSqlDefinition($column)
+                    '$1, %s$2',
+                    $dialect->columnDefinitionSql($column->toArray())
                 ),
                 (string)$state['createSQL'],
                 1
