@@ -54,19 +54,19 @@ class Rollback extends RollbackCommand
                 '--dry-run',
                 '-x',
                 InputOption::VALUE_NONE,
-                'Dump queries to standard output instead of executing it'
+                'Dump queries to standard output instead of executing it',
             )
             ->addOption(
                 '--fake',
                 null,
                 InputOption::VALUE_NONE,
-                "Mark any rollbacks selected as run, but don't actually execute them"
+                "Mark any rollbacks selected as run, but don't actually execute them",
             )
             ->addOption(
                 '--no-lock',
                 null,
                 InputOption::VALUE_NONE,
-                'Whether a lock file should be generated after rolling back'
+                'Whether a lock file should be generated after rolling back',
             );
     }
 

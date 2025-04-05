@@ -106,7 +106,7 @@ trait ConfigurationTrait
             if (!Configure::read('debug')) {
                 throw new RuntimeException(sprintf(
                     'Migrations path `%s` does not exist and cannot be created because `debug` is disabled.',
-                    $migrationsPath
+                    $migrationsPath,
                 ));
             }
             mkdir($migrationsPath, 0777, true);

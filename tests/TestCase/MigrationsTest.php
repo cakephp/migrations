@@ -1092,7 +1092,7 @@ class MigrationsTest extends TestCase
 
         copy(
             $basePath . $filename . '.php',
-            $destination . $copiedFileName
+            $destination . $copiedFileName,
         );
         $this->generatedFiles[] = $destination . $copiedFileName;
 

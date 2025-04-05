@@ -73,7 +73,7 @@ class MigrationAdapter implements MigrationInterface
             if (!is_subclass_of($migrationClass, PhinxMigrationInterface::class)) {
                 throw new RuntimeException(
                     'The provided $migrationClass must be a ' .
-                    'subclass of Phinx\Migration\MigrationInterface'
+                    'subclass of Phinx\Migration\MigrationInterface',
                 );
             }
             $this->migration = new $migrationClass('default', $version);
@@ -81,7 +81,7 @@ class MigrationAdapter implements MigrationInterface
             if (!is_subclass_of($migrationClass, PhinxMigrationInterface::class)) {
                 throw new RuntimeException(
                     'The provided $migrationClass must be a ' .
-                    'subclass of Phinx\Migration\MigrationInterface'
+                    'subclass of Phinx\Migration\MigrationInterface',
                 );
             }
             $this->migration = $migrationClass;

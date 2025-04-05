@@ -299,7 +299,7 @@ class PhinxBackend implements BackendInterface
         if (!($this->manager instanceof CakeManager)) {
             if (!($config instanceof ConfigInterface)) {
                 throw new RuntimeException(
-                    'You need to pass a ConfigInterface object for your first getManager() call'
+                    'You need to pass a ConfigInterface object for your first getManager() call',
                 );
             }
 

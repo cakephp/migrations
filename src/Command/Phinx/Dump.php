@@ -53,7 +53,7 @@ class Dump extends AbstractCommand
             ->setHelp(sprintf(
                 '%sDumps the current schema of the database to be used while baking a diff%s',
                 PHP_EOL,
-                PHP_EOL
+                PHP_EOL,
             ))
             ->addOption('plugin', 'p', InputOption::VALUE_REQUIRED, 'The plugin the file should be created for')
             ->addOption('connection', 'c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
@@ -118,7 +118,7 @@ class Dump extends AbstractCommand
 
         $output->writeln(sprintf(
             '<error>An error occurred while writing dump file `%s`</error>',
-            $filePath
+            $filePath,
         ));
 
         return BaseCommand::CODE_ERROR;

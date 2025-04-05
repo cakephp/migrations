@@ -72,7 +72,7 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
             $args = new Arguments(
                 $arguments,
                 $options,
-                $parser->argumentNames()
+                $parser->argumentNames(),
             );
         } catch (ConsoleException $e) {
             $io->err('Error: ' . $e->getMessage());
@@ -114,7 +114,7 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
             $name = $args->getArgumentAt(0);
             $io->err(
                 "<error>Could not find migrations command named `$name`."
-                . ' Run `migrations --help` to get a list of commands.</error>'
+                . ' Run `migrations --help` to get a list of commands.</error>',
             );
 
             return static::CODE_ERROR;

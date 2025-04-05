@@ -50,13 +50,13 @@ class Migrate extends MigrateCommand
                 '--dry-run',
                 '-x',
                 InputOption::VALUE_NONE,
-                'Dump queries to standard output instead of executing it'
+                'Dump queries to standard output instead of executing it',
             )
             ->addOption(
                 '--plugin',
                 '-p',
                 InputOption::VALUE_REQUIRED,
-                'The plugin containing the migrations'
+                'The plugin containing the migrations',
             )
             ->addOption('--connection', '-c', InputOption::VALUE_REQUIRED, 'The datasource connection to use')
             ->addOption('--source', '-s', InputOption::VALUE_REQUIRED, 'The folder where migrations are in')
@@ -64,13 +64,13 @@ class Migrate extends MigrateCommand
                 '--fake',
                 null,
                 InputOption::VALUE_NONE,
-                "Mark any migrations selected as run, but don't actually execute them"
+                "Mark any migrations selected as run, but don't actually execute them",
             )
             ->addOption(
                 '--no-lock',
                 null,
                 InputOption::VALUE_NONE,
-                'If present, no lock file will be generated after migrating'
+                'If present, no lock file will be generated after migrating',
             );
     }
 

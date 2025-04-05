@@ -159,7 +159,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             "Bake migration snapshot class\n" .
             "\n" .
             'Migration snapshots capture the current schema of an application into a ' .
-            'migration that will reproduce the current state as accurately as possible.'
+            'migration that will reproduce the current state as accurately as possible.',
         )->addArgument('name', [
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
             'required' => true,

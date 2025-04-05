@@ -64,7 +64,7 @@ class SeedAdapter implements SeedInterface
      * @param \Phinx\Seed\SeedInterface $seed The seed being decorated
      */
     public function __construct(
-        private PhinxSeedInterface $seed
+        private PhinxSeedInterface $seed,
     ) {
     }
 

@@ -142,8 +142,8 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
                 $io->abort(
                     sprintf(
                         'A migration with the name `%s` already exists. Please use a different name.',
-                        $name
-                    )
+                        $name,
+                    ),
                 );
             }
 
@@ -220,7 +220,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $parser = $this->_setCommonOptions($parser);
 
         $parser->setDescription(
-            'Bake migration class.'
+            'Bake migration class.',
         )->addOption('no-test', [
             'boolean' => true,
             'help' => 'Do not generate a test skeleton.',

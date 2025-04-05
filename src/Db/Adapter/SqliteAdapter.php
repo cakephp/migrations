@@ -257,7 +257,7 @@ class SqliteAdapter extends AbstractAdapter
             try {
                 $result = $this->query(
                     "SELECT name FROM {$master} WHERE type = 'table' AND lower(name) = ?",
-                    [$table]
+                    [$table],
                 );
                 // null on error
                 if ($result !== null) {
@@ -373,7 +373,7 @@ class SqliteAdapter extends AbstractAdapter
         if (!empty($primaryKey)) {
             $instructions->merge(
                 // FIXME: array access is a hack to make this incomplete implementation work with a correct getPrimaryKey implementation
-                $this->getDropPrimaryKeyInstructions($table, $primaryKey[0])
+                $this->getDropPrimaryKeyInstructions($table, $primaryKey[0]),
             );
         }
 
@@ -382,12 +382,12 @@ class SqliteAdapter extends AbstractAdapter
             if (!is_string($newColumns)) {
                 throw new InvalidArgumentException(sprintf(
                     'Invalid value for primary key: %s',
-                    json_encode($newColumns)
+                    json_encode($newColumns),
                 ));
             }
 
             $instructions->merge(
-                $this->getAddPrimaryKeyInstructions($table, $newColumns)
+                $this->getAddPrimaryKeyInstructions($table, $newColumns),
             );
         }
 
@@ -415,7 +415,7 @@ class SqliteAdapter extends AbstractAdapter
         $sql = sprintf(
             'ALTER TABLE %s RENAME TO %s',
             $this->quoteTableName($tableName),
-            $this->quoteTableName($newTableName)
+            $this->quoteTableName($newTableName),
         );
 
         return new AlterInstructions([], [$sql]);
@@ -442,7 +442,7 @@ class SqliteAdapter extends AbstractAdapter
         $this->execute(sprintf(
             'DELETE FROM %s.%s',
             $this->quoteColumnName($info['schema']),
-            $this->quoteColumnName($info['table'])
+            $this->quoteColumnName($info['table']),
         ));
 
         // assuming no error occurred, reset the autoincrement (if any)
@@ -649,14 +649,14 @@ PCRE_PATTERN;
             $sql = preg_replace(
                 sprintf(
                     "/(%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+)([,)])/",
-                    $this->quoteColumnName((string)$finalColumnName)
+                    $this->quoteColumnName((string)$finalColumnName),
                 ),
                 sprintf(
                     '$1, %s$2',
-                    $dialect->columnDefinitionSql($column->toArray())
+                    $dialect->columnDefinitionSql($column->toArray()),
                 ),
                 (string)$state['createSQL'],
-                1
+                1,
             );
             $this->execute($sql);
 
@@ -700,7 +700,7 @@ PCRE_PATTERN;
                 function ($matches) use ($column) {
                     return $matches[1] . $this->quoteColumnName($column['name']) . $matches[3];
                 },
-                $sql
+                $sql,
             );
         }
 
@@ -762,7 +762,7 @@ PCRE_PATTERN;
                     AND tbl_name = ?
                     AND sql IS NOT NULL
                 ",
-                $params
+                $params,
             )->fetchAll('assoc');
             $indexes = $this->getIndexes($tableName);
 
@@ -778,7 +778,7 @@ PCRE_PATTERN;
 
                                 return strtolower($column);
                             },
-                            $info['columns']
+                            $info['columns'],
                         );
                         $hasExpressions = in_array(null, $columns, true);
 
@@ -811,7 +811,7 @@ PCRE_PATTERN;
      */
     protected function filterIndicesForRemovedColumn(
         AlterInstructions $instructions,
-        string $columnName
+        string $columnName,
     ): AlterInstructions {
         $instructions->addPostStep(function (array $state) use ($columnName): array {
             foreach ($state['indices'] as $key => $index) {
@@ -840,7 +840,7 @@ PCRE_PATTERN;
     protected function updateIndicesForRenamedColumn(
         AlterInstructions $instructions,
         string $oldColumnName,
-        string $newColumnName
+        string $newColumnName,
     ): AlterInstructions {
         $instructions->addPostStep(function (array $state) use ($oldColumnName, $newColumnName): array {
             foreach ($state['indices'] as $key => $index) {
@@ -865,7 +865,7 @@ PCRE_PATTERN;
                     $state['indices'][$key]['sql'] = preg_replace(
                         sprintf($pattern, preg_quote($oldColumnName, '/')),
                         "\\1\\2$newColumnName\\4\\5\\6",
-                        $index['sql']
+                        $index['sql'],
                     );
                 }
             }
@@ -918,7 +918,7 @@ PCRE_PATTERN;
             $otherTables = $this
                 ->query(
                     "SELECT name FROM sqlite_master WHERE type = 'table' AND name != ?",
-                    [$tableName]
+                    [$tableName],
                 )
                 ->fetchAll('assoc');
 
@@ -938,7 +938,7 @@ PCRE_PATTERN;
                 $schema = $this->getSchemaName($tableToCheck, true)['schema'];
 
                 $stmt = $this->query(
-                    sprintf('PRAGMA %sforeign_key_check(%s)', $schema, $this->quoteTableName($tableToCheck))
+                    sprintf('PRAGMA %sforeign_key_check(%s)', $schema, $this->quoteTableName($tableToCheck)),
                 );
                 $row = $stmt->fetch();
                 $stmt->closeCursor();
@@ -946,7 +946,7 @@ PCRE_PATTERN;
                 if (is_array($row)) {
                     throw new RuntimeException(sprintf(
                         'Integrity constraint violation: FOREIGN KEY constraint on `%s` failed.',
-                        $tableToCheck
+                        $tableToCheck,
                     ));
                 }
             }
@@ -973,7 +973,7 @@ PCRE_PATTERN;
             $this->quoteTableName($tableName),
             implode(', ', $writeColumns),
             implode(', ', $selectColumns),
-            $this->quoteTableName($tmpTableName)
+            $this->quoteTableName($tmpTableName),
         );
         $this->execute($sql);
     }
@@ -993,14 +993,14 @@ PCRE_PATTERN;
                 $state['tmpTableName'],
                 $tableName,
                 $state['writeColumns'],
-                $state['selectColumns']
+                $state['selectColumns'],
             );
 
             $this->execute(sprintf('DROP TABLE %s', $this->quoteTableName($tableName)));
             $this->execute(sprintf(
                 'ALTER TABLE %s RENAME TO %s',
                 $this->quoteTableName($state['tmpTableName']),
-                $this->quoteTableName($tableName)
+                $this->quoteTableName($tableName),
             ));
 
             return $state;
@@ -1048,15 +1048,15 @@ PCRE_PATTERN;
             }
         }
 
-        $selectColumns = array_filter($selectColumns, fn ($value) => $value !== '');
-        $writeColumns = array_filter($writeColumns, fn ($value) => $value !== '');
+        $selectColumns = array_filter($selectColumns, fn($value) => $value !== '');
+        $writeColumns = array_filter($writeColumns, fn($value) => $value !== '');
         $selectColumns = array_map([$this, 'quoteColumnName'], $selectColumns);
         $writeColumns = array_map([$this, 'quoteColumnName'], $writeColumns);
 
         if ($columnName && !$found) {
             throw new InvalidArgumentException(sprintf(
                 'The specified column doesn\'t exist: %s',
-                $columnName
+                $columnName,
             ));
         }
 
@@ -1087,7 +1087,7 @@ PCRE_PATTERN;
             $createSQL = preg_replace(
                 "/^CREATE TABLE .* \(/Ui",
                 '',
-                $createSQL
+                $createSQL,
             );
 
             $createSQL = "CREATE TABLE {$this->quoteTableName($tmpTableName)} ({$createSQL}";
@@ -1116,7 +1116,7 @@ PCRE_PATTERN;
         string $tableName,
         ?string $renamedOrRemovedColumnName = null,
         ?string $newColumnName = null,
-        bool $validateForeignKeys = true
+        bool $validateForeignKeys = true,
     ): AlterInstructions {
         $instructions = $this->bufferIndicesAndTriggers($instructions, $tableName);
 
@@ -1163,7 +1163,7 @@ PCRE_PATTERN;
             $sql = str_replace(
                 $this->quoteColumnName($columnName),
                 $this->quoteColumnName($newColumnName),
-                (string)$state['createSQL']
+                (string)$state['createSQL'],
             );
             $this->execute($sql);
 
@@ -1193,7 +1193,7 @@ PCRE_PATTERN;
                 sprintf("/%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+([,)])/", $this->quoteColumnName($columnName)),
                 sprintf('%s$1', $dialect->columnDefinitionSql($newColumn->toArray())),
                 (string)$state['createSQL'],
-                1
+                1,
             );
             $this->execute($sql);
 
@@ -1226,7 +1226,7 @@ PCRE_PATTERN;
             $sql = preg_replace(
                 sprintf("/%s\s%s.*(,\s(?!')|\)$)/U", preg_quote($this->quoteColumnName($columnName)), preg_quote($state['columnType'])),
                 '',
-                (string)$state['createSQL']
+                (string)$state['createSQL'],
             );
 
             if (substr($sql, -2) === ', ') {
@@ -1339,7 +1339,7 @@ PCRE_PATTERN;
             $this->getIndexSqlDefinition($table, $index),
             $this->quoteTableName($table->getName()),
             $indexColumns,
-            $where
+            $where,
         );
 
         return new AlterInstructions([], [$sql]);
@@ -1358,7 +1358,7 @@ PCRE_PATTERN;
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s%s',
                     $schema,
-                    $this->quoteColumnName($indexName)
+                    $this->quoteColumnName($indexName),
                 ));
             }
         }
@@ -1388,7 +1388,7 @@ PCRE_PATTERN;
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s%s',
                     $schema,
-                    $this->quoteColumnName($indexName)
+                    $this->quoteColumnName($indexName),
                 ));
         }
 
@@ -1444,7 +1444,7 @@ PCRE_PATTERN;
         if ($constraint !== null) {
             return preg_match(
                 "/,?\s*CONSTRAINT\s*" . $this->possiblyQuotedIdentifierRegex($constraint) . '\s*FOREIGN\s+KEY/is',
-                $this->getDeclaringSql($tableName)
+                $this->getDeclaringSql($tableName),
             ) === 1;
         }
 
@@ -1584,13 +1584,13 @@ PCRE_PATTERN;
                     $sql .= sprintf(
                         'DROP INDEX %s%s; ',
                         $schema,
-                        $this->quoteColumnName($indexName)
+                        $this->quoteColumnName($indexName),
                     );
                     $createIndexSQL = $this->getDeclaringIndexSQL($tableName, $indexName);
                     $sql .= preg_replace(
                         "/\b{$tableName}\b/",
                         $tmpTableName,
-                        $createIndexSQL
+                        $createIndexSQL,
                     );
                 }
             }
@@ -1633,7 +1633,7 @@ PCRE_PATTERN;
         if (!$this->hasForeignKey($tableName, $columns)) {
             throw new InvalidArgumentException(sprintf(
                 'No foreign key on column(s) `%s` exists',
-                implode(', ', $columns)
+                implode(', ', $columns),
             ));
         }
 
@@ -1645,9 +1645,9 @@ PCRE_PATTERN;
                 implode(
                     '\s*,\s*',
                     array_map(
-                        fn ($column) => $this->possiblyQuotedIdentifierRegex($column, false),
-                        $columns
-                    )
+                        fn($column) => $this->possiblyQuotedIdentifierRegex($column, false),
+                        $columns,
+                    ),
                 ),
             );
             $sql = preg_replace($search, '', (string)$state['createSQL']);

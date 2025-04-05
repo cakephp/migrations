@@ -24,19 +24,19 @@ class CacheBuild extends BaseCommand
             ->setName('orm-cache-build')
             ->setDescription(
                 'Build all metadata caches for the connection. ' .
-                'If a table name is provided, only that table will be cached.'
+                'If a table name is provided, only that table will be cached.',
             )
             ->addOption(
                 'connection',
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'The connection to build/clear metadata cache data for.',
-                'default'
+                'default',
             )
             ->addArgument(
                 'name',
                 InputArgument::OPTIONAL,
-                'A specific table you want to clear/refresh cached data for.'
+                'A specific table you want to clear/refresh cached data for.',
             );
     }
 

@@ -177,7 +177,7 @@ class MysqlAdapterTest extends TestCase
 
         $rows = $this->adapter->fetchAll(sprintf(
             "SELECT TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='ntable'",
-            $this->config['database']
+            $this->config['database'],
         ));
         $comment = $rows[0];
 
@@ -205,7 +205,7 @@ class MysqlAdapterTest extends TestCase
             "SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
              FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
              WHERE TABLE_SCHEMA='%s' AND REFERENCED_TABLE_NAME='ntable_tag'",
-            $this->config['database']
+            $this->config['database'],
         ));
         $foreignKey = $rows[0];
 
@@ -619,8 +619,8 @@ class MysqlAdapterTest extends TestCase
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
                 $this->config['database'],
-                'table1'
-            )
+                'table1',
+            ),
         );
         $this->assertEquals('comment1', $rows[0]['TABLE_COMMENT']);
     }
@@ -641,8 +641,8 @@ class MysqlAdapterTest extends TestCase
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
                 $this->config['database'],
-                'table1'
-            )
+                'table1',
+            ),
         );
         $this->assertEquals('comment2', $rows[0]['TABLE_COMMENT']);
     }
@@ -663,8 +663,8 @@ class MysqlAdapterTest extends TestCase
                     WHERE TABLE_SCHEMA='%s'
                         AND TABLE_NAME='%s'",
                 $this->config['database'],
-                'table1'
-            )
+                'table1',
+            ),
         );
         $this->assertEquals('', $rows[0]['TABLE_COMMENT']);
     }
@@ -911,7 +911,7 @@ class MysqlAdapterTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
+                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
             );
             $this->assertEquals('The specified column doesn\'t exist: column2', $e->getMessage());
         }
@@ -1436,7 +1436,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email"',
-            $this->config['database']
+            $this->config['database'],
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 50);
@@ -1454,13 +1454,13 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex(['email', 'username']));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "email"',
-            $this->config['database']
+            $this->config['database'],
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 3);
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "username"',
-            $this->config['database']
+            $this->config['database'],
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 2);
@@ -1478,7 +1478,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
         $index_data = $this->adapter->query(sprintf(
             'SELECT SUB_PART FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = "%s" AND TABLE_NAME = "table1" AND INDEX_NAME = "email" AND COLUMN_NAME = "email"',
-            $this->config['database']
+            $this->config['database'],
         ))->fetch(PDO::FETCH_ASSOC);
         $expected_limit = $index_data['SUB_PART'];
         $this->assertEquals($expected_limit, 3);
@@ -1639,17 +1639,17 @@ class MysqlAdapterTest extends TestCase
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->addForeignKey(
                 ['ref_table_field1', 'ref_table_id'],
                 'ref_table',
-                ['field1', 'id']
+                ['field1', 'id'],
             )
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1', 'ref_table_field2'],
                 'ref_table',
-                ['id', 'field1', 'field2']
+                ['id', 'field1', 'field2'],
             )
             ->save();
 
@@ -1658,11 +1658,11 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']));
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1', 'ref_table_field2']),
-            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns'
+            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns',
         );
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']),
-            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order'
+            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order',
         );
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
@@ -1692,7 +1692,7 @@ class MysqlAdapterTest extends TestCase
                 'ref_table_fk_2',
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->save();
 
@@ -1736,14 +1736,14 @@ class MysqlAdapterTest extends TestCase
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->save();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf(
             'No foreign key on column(s) `%s` exists',
-            implode(', ', $columns)
+            implode(', ', $columns),
         ));
 
         $this->adapter->dropForeignKey($table->getName(), $columns);
@@ -1932,7 +1932,7 @@ class MysqlAdapterTest extends TestCase
             FROM information_schema.columns
             WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='table1'
             ORDER BY ORDINAL_POSITION",
-            $this->config['database']
+            $this->config['database'],
         ));
         $columnWithComment = $rows[1];
 
@@ -2316,7 +2316,7 @@ OUTPUT;
         $this->assertEquals(1, $stm->rowCount());
         $this->assertEquals(
             ['id' => 2, 'string_col' => 'value2', 'int_col' => '2'],
-            $stm->fetch('assoc')
+            $stm->fetch('assoc'),
         );
 
         $builder = $this->adapter->getDeleteBuilder();
@@ -2514,7 +2514,7 @@ INPUT;
 
         $rows = $this->adapter->fetchAll(sprintf(
             "SELECT COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='exampleCurrentTimestamp3'",
-            $this->config['database']
+            $this->config['database'],
         ));
         $colDef = $rows[0];
         $this->assertEqualsIgnoringCase('CURRENT_TIMESTAMP(3)', $colDef['COLUMN_DEFAULT']);

@@ -533,7 +533,7 @@ WHERE t.name='ntable'");
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e)
+                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
             );
             $this->assertEquals('The specified column does not exist: column2', $e->getMessage());
         }
@@ -831,7 +831,7 @@ WHERE t.name='ntable'");
                ->addColumn('lname', 'string')
                ->addIndex(
                    ['fname', 'lname'],
-                   ['name' => 'twocolumnuniqueindex', 'unique' => true]
+                   ['name' => 'twocolumnuniqueindex', 'unique' => true],
                )
                ->save();
         $this->assertTrue($table2->hasIndex(['fname', 'lname']));
@@ -892,17 +892,17 @@ WHERE t.name='ntable'");
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->addForeignKey(
                 ['ref_table_field1', 'ref_table_id'],
                 'ref_table',
-                ['field1', 'id']
+                ['field1', 'id'],
             )
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1', 'ref_table_field2'],
                 'ref_table',
-                ['id', 'field1', 'field2']
+                ['id', 'field1', 'field2'],
             )
             ->save();
 
@@ -911,11 +911,11 @@ WHERE t.name='ntable'");
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']));
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1', 'ref_table_field2']),
-            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns'
+            'dropForeignKey() should only affect foreign keys that comprise of exactly the given columns',
         );
         $this->assertTrue(
             $this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']),
-            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order'
+            'dropForeignKey() should only affect foreign keys that comprise of columns in exactly the given order',
         );
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
@@ -945,7 +945,7 @@ WHERE t.name='ntable'");
                 'ref_table_fk_2',
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->save();
 
@@ -989,14 +989,14 @@ WHERE t.name='ntable'");
             ->addForeignKey(
                 ['ref_table_id', 'ref_table_field1'],
                 'ref_table',
-                ['id', 'field1']
+                ['id', 'field1'],
             )
             ->save();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf(
             'No foreign key on column(s) `%s` exists',
-            implode(', ', $columns)
+            implode(', ', $columns),
         ));
 
         $this->adapter->dropForeignKey($table->getName(), $columns);
@@ -1018,7 +1018,7 @@ WHERE t.name='ntable'");
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf(
             'No foreign key on column(s) `%s` exists',
-            implode(', ', ['ref_table_id'])
+            implode(', ', ['ref_table_id']),
         ));
 
         $this->adapter->dropForeignKey($table->getName(), ['ref_table_id']);
@@ -1257,7 +1257,7 @@ WHERE t.name='ntable'");
                   [
                       'column1' => 'value3',
                       'column2' => 3,
-                  ]
+                  ],
               );
         $this->adapter->bulkinsert($table->getTable(), $table->getData());
         $table->reset();
@@ -1322,7 +1322,7 @@ WHERE t.name='ntable'");
                   [
                       'column1' => 'value3',
                       'column2' => 3,
-                  ]
+                  ],
               )
               ->save();
 
@@ -1455,7 +1455,7 @@ OUTPUT;
         $this->assertEquals(1, $stm->rowCount());
         $this->assertEquals(
             ['id' => 2, 'string_col' => 'value2', 'int_col' => '2'],
-            $stm->fetch('assoc')
+            $stm->fetch('assoc'),
         );
 
         $stm->closeCursor();

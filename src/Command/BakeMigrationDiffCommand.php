@@ -274,7 +274,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                     $column['collate'],
                     $column['fixed'],
                     $oldColumn['collate'],
-                    $oldColumn['fixed']
+                    $oldColumn['fixed'],
                 );
 
                 if (
@@ -447,7 +447,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             }
             $this->templateData[$table]['indexes']['remove'] = array_merge(
                 $this->templateData[$table]['indexes']['remove'],
-                $parts
+                $parts,
             );
         }
     }
@@ -590,7 +590,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $parser->setDescription(
             'Create a migration that captures the difference between ' .
             'the migration state is expected to be and what the schema ' .
-            'reflection contains.'
+            'reflection contains.',
         )->addArgument('name', [
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
             'required' => true,

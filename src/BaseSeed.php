@@ -209,7 +209,7 @@ class BaseSeed implements SeedInterface
         $io->out(
             ' ====' .
             ' <info>' . $seeder . ':</info>' .
-            ' <comment>seeding</comment>'
+            ' <comment>seeding</comment>',
         );
 
         $start = microtime(true);
@@ -220,7 +220,7 @@ class BaseSeed implements SeedInterface
             ' ====' .
             ' <info>' . $seeder . ':</info>' .
             ' <comment>seeded' .
-            ' ' . sprintf('%.4fs', $end - $start) . '</comment>'
+            ' ' . sprintf('%.4fs', $end - $start) . '</comment>',
         );
         $io->out('');
     }

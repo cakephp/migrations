@@ -120,7 +120,7 @@ class MarkMigratedCommand extends Command
 
         if ($this->invalidOnlyOrExclude($args)) {
             $io->err(
-                '<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>'
+                '<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>',
             );
 
             return self::CODE_ERROR;
@@ -135,7 +135,7 @@ class MarkMigratedCommand extends Command
         }
 
         $output = $manager->markVersionsAsMigrated($path, $versions);
-        array_map(fn ($line) => $io->out($line), $output);
+        array_map(fn($line) => $io->out($line), $output);
 
         return self::CODE_SUCCESS;
     }

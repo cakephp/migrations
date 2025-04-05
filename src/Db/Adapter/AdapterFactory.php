@@ -77,7 +77,7 @@ class AdapterFactory
         ) {
             throw new RuntimeException(sprintf(
                 'Adapter class "%s" must implement Migrations\\Db\\Adapter\\AdapterInterface',
-                $class
+                $class,
             ));
         }
         $this->adapters[$name] = $class;
@@ -97,7 +97,7 @@ class AdapterFactory
         if (empty($this->adapters[$name])) {
             throw new RuntimeException(sprintf(
                 'Adapter "%s" has not been registered',
-                $name
+                $name,
             ));
         }
         $classOrFactory = $this->adapters[$name];
@@ -121,7 +121,7 @@ class AdapterFactory
         if (!is_subclass_of($class, WrapperInterface::class)) {
             throw new RuntimeException(sprintf(
                 'Wrapper class "%s" must implement Migrations\\Db\\Adapter\\WrapperInterface',
-                $class
+                $class,
             ));
         }
         $this->wrappers[$name] = $class;
@@ -141,7 +141,7 @@ class AdapterFactory
         if (empty($this->wrappers[$name])) {
             throw new RuntimeException(sprintf(
                 'Wrapper "%s" has not been registered',
-                $name
+                $name,
             ));
         }
 

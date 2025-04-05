@@ -93,7 +93,7 @@ class CakeAdapter extends AdapterWrapper
             Query::TYPE_UPDATE => $this->getCakeConnection()->updateQuery(),
             Query::TYPE_DELETE => $this->getCakeConnection()->deleteQuery(),
             default => throw new InvalidArgumentException(
-                'Query type must be one of: `select`, `insert`, `update`, `delete`.'
+                'Query type must be one of: `select`, `insert`, `update`, `delete`.',
             )
         };
     }
