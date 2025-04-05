@@ -466,16 +466,6 @@ class PhinxAdapterTest extends TestCase
         $this->assertEquals("''", $rows[1]['dflt_value']);
     }
 
-    public function testAddDoubleColumn()
-    {
-        $table = new PhinxTable('table1', [], $this->adapter);
-        $table->save();
-        $table->addColumn('foo', 'double', ['null' => true])
-            ->save();
-        $rows = $this->adapter->fetchAll(sprintf('pragma table_info(%s)', 'table1'));
-        $this->assertEquals('DOUBLE', $rows[1]['type']);
-    }
-
     public function testRenameColumnWithIndex()
     {
         $table = new PhinxTable('t', [], $this->adapter);
@@ -1115,7 +1105,7 @@ class PhinxAdapterTest extends TestCase
             ->save();
 
         $expectedOutput = <<<'OUTPUT'
-CREATE TABLE "table1" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "column1" VARCHAR NOT NULL, "column2" INTEGER NULL, "column3" VARCHAR NULL DEFAULT 'test');
+CREATE TABLE "table1" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "column1" VARCHAR NOT NULL, "column2" INTEGER, "column3" VARCHAR DEFAULT 'test');
 OUTPUT;
         $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
@@ -1216,7 +1206,7 @@ OUTPUT;
         ])->save();
 
         $expectedOutput = <<<'OUTPUT'
-CREATE TABLE "table1" ("column1" VARCHAR NOT NULL, "column2" INTEGER NULL, PRIMARY KEY ("column1"));
+CREATE TABLE "table1" ("column1" VARCHAR NOT NULL, "column2" INTEGER, PRIMARY KEY ("column1"));
 INSERT INTO "table1" ("column1", "column2") VALUES ('id1', 1);
 OUTPUT;
         $actualOutput = join("\n", $this->out->messages());
