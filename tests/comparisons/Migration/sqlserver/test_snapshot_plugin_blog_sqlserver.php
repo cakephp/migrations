@@ -17,6 +17,7 @@ class TestSnapshotPluginBlogSqlserver extends BaseMigration
         $this->table('articles')
             ->addColumn('title', 'string', [
                 'collation' => 'SQL_Latin1_General_CP1_CI_AS',
+                'comment' => 'Article title',
                 'default' => null,
                 'limit' => 255,
                 'null' => true,
