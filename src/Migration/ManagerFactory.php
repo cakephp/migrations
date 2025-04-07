@@ -91,6 +91,9 @@ class ManagerFactory
         if (str_contains($connectionName, '://')) {
             $connectionConfig = ConnectionManager::parseDsn($connectionName);
             $connectionName = 'tmp';
+            if (!ConnectionManager::getConfig($connectionName)) {
+                ConnectionManager::setConfig($connectionName, $connectionConfig);
+            }
         } else {
             $connectionConfig = ConnectionManager::getConfig($connectionName);
         }
@@ -99,10 +102,6 @@ class ManagerFactory
         }
         if (!isset($connectionConfig['database'])) {
             throw new RuntimeException("The `{$connectionName}` connection has no `database` key defined.");
-        }
-
-        if (!ConnectionManager::getConfig($connectionName)) {
-            ConnectionManager::setConfig($connectionName, $connectionConfig);
         }
 
         /** @var array<string, string> $connectionConfig */
