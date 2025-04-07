@@ -186,9 +186,6 @@
     <RedundantPropertyInitializationCheck>
       <code><![CDATA[isset($this->container)]]></code>
     </RedundantPropertyInitializationCheck>
-    <ReferenceReusedFromConfusingScope>
-      <code><![CDATA[$executedVersion]]></code>
-    </ReferenceReusedFromConfusingScope>
   </file>
   <file src="src/Migration/ManagerFactory.php">
     <UndefinedConstant>
