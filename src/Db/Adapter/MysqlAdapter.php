@@ -429,10 +429,10 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
+        $dialect = $this->getSchemaDialect();
         $alter = sprintf(
-            'ADD %s %s',
-            $this->quoteColumnName((string)$column->getName()),
-            $this->getColumnSqlDefinition($column),
+            'ADD %s',
+            $dialect->columnDefinitionSql($column->toArray()),
         );
 
         $alter .= $this->afterClause($column);

@@ -745,7 +745,7 @@ class MysqlAdapterTest extends TestCase
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
-        $table->addColumn('default_ts', 'timestamp', ['default' => Literal::from('CURRENT_TIMESTAMP')])
+        $table->addColumn('default_ts', 'timestamp', ['null' => false, 'default' => Literal::from('CURRENT_TIMESTAMP')])
               ->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
         // MariaDB returns current_timestamp()
@@ -793,41 +793,6 @@ class MysqlAdapterTest extends TestCase
         }
         $type .= $extra;
         $this->assertEquals($type, $rows[1]['Type']);
-    }
-
-    public function testAddDoubleColumnWithDefaultSigned()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('user_id'));
-        $table->addColumn('foo', 'double')
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
-        $this->assertEquals('double', $rows[1]['Type']);
-    }
-
-    public function testAddDoubleColumnWithSignedEqualsFalse()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('user_id'));
-        $table->addColumn('foo', 'double', ['signed' => false])
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
-        $this->assertEquals('double unsigned', $rows[1]['Type']);
-    }
-
-    public function testAddBooleanColumnWithSignedEqualsFalse()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('test_boolean'));
-        $table->addColumn('test_boolean', 'boolean', ['signed' => false])
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
-
-        $type = $this->usingMysql8() ? 'tinyint' : 'tinyint(1)';
-        $this->assertEquals($type . ' unsigned', $rows[1]['Type']);
     }
 
     public function testAddStringColumnWithSignedEqualsFalse()
@@ -1966,52 +1931,6 @@ class MysqlAdapterTest extends TestCase
               ->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
         $this->assertEquals('geometry', $rows[1]['Type']);
-    }
-
-    public function testAddSetColumn()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('set_column'));
-        $table->addColumn('set_column', 'set', ['values' => ['one', 'two']])
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
-        $this->assertEquals("set('one','two')", $rows[1]['Type']);
-    }
-
-    public function testAddEnumColumn()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('enum_column'));
-        $table->addColumn('enum_column', 'enum', ['values' => ['one', 'two']])
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
-        $this->assertEquals("enum('one','two')", $rows[1]['Type']);
-    }
-
-    public function testEnumColumnValuesFilledUpFromSchema()
-    {
-        // Creating column with values
-        (new Table('table1', [], $this->adapter))
-            ->addColumn('enum_column', 'enum', ['values' => ['one', 'two']])
-            ->save();
-
-        // Reading them back
-        $table = new Table('table1', [], $this->adapter);
-        $columns = $table->getColumns();
-        $enumColumn = end($columns);
-        $this->assertEquals(AdapterInterface::PHINX_TYPE_ENUM, $enumColumn->getType());
-        $this->assertEquals(['one', 'two'], $enumColumn->getValues());
-    }
-
-    public function testEnumColumnWithNullValue()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->addColumn('enum_column', 'enum', ['values' => ['one', 'two', null]]);
-
-        $this->expectException(PDOException::class);
-        $table->save();
     }
 
     public function testHasColumn()

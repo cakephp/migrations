@@ -812,13 +812,17 @@ class Column
      */
     public function toArray(): array
     {
+        $default = $this->getDefault();
+        if ($default instanceof Literal) {
+            $default = (string)$default;
+        }
         return [
             'name' => $this->getName(),
             'type' => $this->getType(),
             'length' => $this->getLimit(),
             'null' => $this->getNull(),
-            'default' => $this->getDefault(),
-            'unsigned' => $this->getSigned(),
+            'default' => $default,
+            'unsigned' => !$this->getSigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
             'precision' => $this->getPrecision(),
