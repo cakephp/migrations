@@ -88,12 +88,21 @@ class ManagerFactory
         $templatePath = dirname(__DIR__) . DS . 'templates' . DS;
         $connectionName = (string)$this->getOption('connection');
 
-        $connectionConfig = ConnectionManager::getConfig($connectionName);
+        if (str_contains($connectionName, '://')) {
+            $connectionConfig = ConnectionManager::parseDsn($connectionName);
+            $connectionName = 'tmp';
+        } else {
+            $connectionConfig = ConnectionManager::getConfig($connectionName);
+        }
         if (!$connectionConfig) {
             throw new RuntimeException("Could not find connection `{$connectionName}`");
         }
         if (!isset($connectionConfig['database'])) {
             throw new RuntimeException("The `{$connectionName}` connection has no `database` key defined.");
+        }
+
+        if (!ConnectionManager::getConfig($connectionName)) {
+            ConnectionManager::setConfig($connectionName, $connectionConfig);
         }
 
         /** @var array<string, string> $connectionConfig */
