@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 /**
@@ -647,6 +646,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         if ($this->isDryRunEnabled()) {
             $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ');';
+
             return $sql;
         } else {
             $values = [];
@@ -658,6 +658,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 $values[] = $placeholder;
             }
             $sql .= ' VALUES (' . implode(',', $values) . ')';
+
             return $sql;
         }
     }
@@ -733,6 +734,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $this->getConnection()->execute($sql, $vals);
         }
     }
+
     /**
      * Generates the SQL for a bulk insert.
      *
@@ -756,6 +758,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
             $sql .= implode(', ', $values) . ';';
+
             return $sql;
         } else {
             $queries = [];
@@ -772,6 +775,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 $queries[] = $query;
             }
             $sql .= implode(',', $queries);
+
             return $sql;
         }
     }
