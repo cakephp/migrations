@@ -319,7 +319,7 @@ class Column
     }
 
     /**
-     * Sets whether or not the column is an identity column.
+     * Sets whether the column is an identity column.
      *
      * @param bool $identity Identity
      * @return $this
@@ -332,7 +332,7 @@ class Column
     }
 
     /**
-     * Gets whether or not the column is an identity column.
+     * Gets whether the column is an identity column.
      *
      * @return bool
      */
@@ -771,7 +771,7 @@ class Column
     }
 
     /**
-     * Utility method that maps an array of column options to this objects methods.
+     * Utility method that maps an array of column options to this object's methods.
      *
      * @param array<string, mixed> $options Options
      * @throws \RuntimeException

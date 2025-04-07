@@ -165,7 +165,7 @@ class Table extends BaseTable
      * {@inheritDoc}
      *
      * We disable foreign key deletion for the SQLite adapter as SQLite does not support the feature natively and the
-     * process implemented by Phinx has serious side-effects (for instance it rename FK references in existing tables
+     * process implemented by Phinx has serious side-effects (for instance it renames FK references in existing tables
      * which breaks the database schema cohesion).
      *
      * @param string|array $columns Column(s)

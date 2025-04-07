@@ -39,7 +39,7 @@ class ManagerFactory
      * - source - The directory in app/config that migrations and seeds should be read from.
      * - plugin - The plugin name that migrations are being run on.
      * - connection - The connection name.
-     * - dry-run - Whether or not dry-run mode should be enabled.
+     * - dry-run - Whether dry-run mode should be enabled.
      *
      * @param array $options The command line options for creating config/manager.
      */

@@ -6,7 +6,7 @@ namespace Migrations\Migration;
 interface BackendInterface
 {
     /**
-     * Returns the status of each migrations based on the options passed
+     * Returns the status of each migration based on the options passed
      *
      * @param array<string, mixed> $options Options to pass to the command
      * Available options are :
@@ -15,7 +15,7 @@ interface BackendInterface
      * - `connection` The datasource connection to use
      * - `source` The folder where migrations are in
      * - `plugin` The plugin containing the migrations
-     * @return array The migrations list and their statuses
+     * @return array<string, string> The migrations list and their statuses
      */
     public function status(array $options = []): array;
 

@@ -203,7 +203,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     }
 
     /**
-     * This methods runs the various methods needed to calculate a diff between the current
+     * This method runs the various methods needed to calculate a diff between the current
      * state of the database and the schema dump file.
      *
      * @return void

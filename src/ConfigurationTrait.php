@@ -247,7 +247,7 @@ trait ConfigurationTrait
      * Translates driver specific connection flags (PDO attributes) to
      * Phinx compatible adapter options.
      *
-     * Currently Phinx supports of the following flags:
+     * Currently, Phinx supports of the following flags:
      *
      * - *Most* of `PDO::ATTR_*`
      * - `PDO::MYSQL_ATTR_*`

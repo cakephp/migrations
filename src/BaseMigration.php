@@ -199,7 +199,7 @@ class BaseMigration implements MigrationInterface
     /**
      * Hook method to decide if this migration should use transactions
      *
-     * By default if your driver supports transactions, a transaction will be opened
+     * By default, if your driver supports transactions, a transaction will be opened
      * before the migration begins, and commit when the migration completes.
      *
      * @return bool
@@ -253,7 +253,7 @@ class BaseMigration implements MigrationInterface
      * Returns a new Query object that can be used to build complex SELECT, UPDATE, INSERT or DELETE
      * queries and execute them against the current database.
      *
-     * Queries executed through the query builder are always sent to the database, regardless of the
+     * Queries executed through the query builder are always sent to the database, regardless of
      * the dry-run settings.
      *
      * @see https://api.cakephp.org/3.6/class-Cake.Database.Query.html
@@ -269,7 +269,7 @@ class BaseMigration implements MigrationInterface
      * Returns a new SelectQuery object that can be used to build complex
      * SELECT queries and execute them against the current database.
      *
-     * Queries executed through the query builder are always sent to the database, regardless of the
+     * Queries executed through the query builder are always sent to the database, regardless of
      * the dry-run settings.
      *
      * @return \Cake\Database\Query\SelectQuery
@@ -283,7 +283,7 @@ class BaseMigration implements MigrationInterface
      * Returns a new InsertQuery object that can be used to build complex
      * INSERT queries and execute them against the current database.
      *
-     * Queries executed through the query builder are always sent to the database, regardless of the
+     * Queries executed through the query builder are always sent to the database, regardless of
      * the dry-run settings.
      *
      * @return \Cake\Database\Query\InsertQuery
@@ -297,7 +297,7 @@ class BaseMigration implements MigrationInterface
      * Returns a new UpdateQuery object that can be used to build complex
      * UPDATE queries and execute them against the current database.
      *
-     * Queries executed through the query builder are always sent to the database, regardless of the
+     * Queries executed through the query builder are always sent to the database, regardless of
      * the dry-run settings.
      *
      * @return \Cake\Database\Query\UpdateQuery
@@ -311,7 +311,7 @@ class BaseMigration implements MigrationInterface
      * Returns a new DeleteQuery object that can be used to build complex
      * DELETE queries and execute them against the current database.
      *
-     * Queries executed through the query builder are always sent to the database, regardless of the
+     * Queries executed through the query builder are always sent to the database, regardless of
      * the dry-run settings.
      *
      * @return \Cake\Database\Query\DeleteQuery
@@ -369,7 +369,7 @@ class BaseMigration implements MigrationInterface
     /**
      * Creates schema.
      *
-     * This will thrown an error for adapters that do not support schemas.
+     * This will throw an error for adapters that do not support schemas.
      *
      * @param string $name Schema name
      * @return void
@@ -383,7 +383,7 @@ class BaseMigration implements MigrationInterface
     /**
      * Drops schema.
      *
-     * This will thrown an error for adapters that do not support schemas.
+     * This will throw an error for adapters that do not support schemas.
      *
      * @param string $name Schema name
      * @return void

@@ -23,7 +23,7 @@ use Migrations\Config\ConfigInterface;
 
 /**
  * The Migrations class is responsible for handling migrations command
- * within an none-shell application.
+ * within a non-shell application.
  *
  * @internal
  */

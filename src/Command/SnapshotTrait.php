@@ -43,7 +43,7 @@ trait SnapshotTrait
 
     /**
      * @internal
-     * @return bool Whether or not the builtin backend is active.
+     * @return bool Whether the builtin backend is active.
      */
     protected function useBuiltinBackend(): bool
     {

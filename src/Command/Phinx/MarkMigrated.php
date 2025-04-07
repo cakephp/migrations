@@ -95,7 +95,7 @@ class MarkMigrated extends AbstractCommand
     /**
      * Mark migrations as migrated
      *
-     * `bin/cake migrations mark_migrated` mark every migrations as migrated
+     * `bin/cake migrations mark_migrated` mark every migration as migrated
      * `bin/cake migrations mark_migrated all` DEPRECATED: the same effect as above
      * `bin/cake migrations mark_migrated --target=VERSION` mark migrations as migrated up to the VERSION param
      * `bin/cake migrations mark_migrated --target=20150417223600 --exclude` mark migrations as migrated up to

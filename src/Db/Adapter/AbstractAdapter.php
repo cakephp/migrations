@@ -1157,7 +1157,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Returns the instructions to drop the specified index from a database table.
      *
-     * @param string $tableName The name of of the table where the index is
+     * @param string $tableName The name of the table where the index is
      * @param string|string[] $columns Column(s)
      * @return \Migrations\Db\AlterInstructions
      */

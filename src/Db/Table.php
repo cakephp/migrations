@@ -839,7 +839,7 @@ class Table
     /**
      * Executes all the pending actions for this table
      *
-     * @param bool $exists Whether or not the table existed prior to executing this method
+     * @param bool $exists Whether the table existed prior to executing this method
      * @return void
      */
     protected function executeActions(bool $exists): void

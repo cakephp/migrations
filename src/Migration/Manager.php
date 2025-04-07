@@ -123,32 +123,8 @@ class Manager
         }
 
         ksort($migrations);
-        $migrations = array_values($migrations);
 
-        return $migrations;
-    }
-
-    /**
-     * Print Missing Version
-     *
-     * @param array $version The missing version to print (in the format returned by Environment.getVersionLog).
-     * @param int $maxNameLength The maximum migration name length.
-     * @return void
-     */
-    protected function printMissingVersion(array $version, int $maxNameLength): void
-    {
-        $io = $this->getIo();
-        $io->out(sprintf(
-            '     <error>up</error>  %14.0f  %19s  %19s  <comment>%s</comment>  <error>** MISSING MIGRATION FILE **</error>',
-            $version['version'],
-            $version['start_time'],
-            $version['end_time'],
-            str_pad($version['migration_name'], $maxNameLength, ' '),
-        ));
-
-        if ($version && $version['breakpoint']) {
-            $io->out('         <error>BREAKPOINT SET</error>');
-        }
+        return array_values($migrations);
     }
 
     /**
@@ -514,7 +490,7 @@ class Manager
      *
      * @param \Migrations\MigrationInterface $migration Migration
      * @param string $status Status of the migration
-     * @param string|null $duration Duration the migration took the be executed
+     * @param string|null $duration Duration the migration took to be executed
      * @return void
      */
     protected function printMigrationStatus(MigrationInterface $migration, string $status, ?string $duration = null): void
@@ -531,7 +507,7 @@ class Manager
      *
      * @param \Migrations\SeedInterface $seed Seed
      * @param string $status Status of the seed
-     * @param string|null $duration Duration the seed took the be executed
+     * @param string|null $duration Duration the seed took to be executed
      * @return void
      */
     protected function printSeedStatus(SeedInterface $seed, string $status, ?string $duration = null): void
@@ -548,7 +524,7 @@ class Manager
      *
      * @param string $name Name of the migration or seed
      * @param string $status Status of the migration or seed
-     * @param string|null $duration Duration the migration or seed took the be executed
+     * @param string|null $duration Duration the migration or seed took to be executed
      * @return void
      */
     protected function printStatusOutput(string $name, string $status, ?string $duration = null): void
@@ -582,7 +558,7 @@ class Manager
         $io = $this->getIo();
 
         foreach ($executedVersions as $versionCreationTime => &$executedVersion) {
-            // if we have a date (ie. the target must not match a version) and we are sorting by execution time, we
+            // if we have a date (i.e. the target must not match a version) and we are sorting by execution time, we
             // convert the version start time so we can compare directly with the target date
             if (!$this->getConfig()->isVersionOrderCreationTime() && !$targetMustMatchVersion) {
                 /** @var \DateTime $dateTime */
@@ -649,18 +625,18 @@ class Manager
             }
 
             if (in_array($migration->getVersion(), $executedVersionCreationTimes)) {
-                $executedVersion = $executedVersions[$migration->getVersion()];
+                $executedArray = $executedVersions[$migration->getVersion()];
 
                 if (!$targetMustMatchVersion) {
                     if (
-                        ($this->getConfig()->isVersionOrderCreationTime() && $executedVersion['version'] <= $target) ||
-                        (!$this->getConfig()->isVersionOrderCreationTime() && $executedVersion['start_time'] <= $target)
+                        ($this->getConfig()->isVersionOrderCreationTime() && $executedArray['version'] <= $target) ||
+                        (!$this->getConfig()->isVersionOrderCreationTime() && $executedArray['start_time'] <= $target)
                     ) {
                         break;
                     }
                 }
 
-                if ($executedVersion['breakpoint'] != 0 && !$force) {
+                if ($executedArray['breakpoint'] != 0 && !$force) {
                     $io->out('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
                     break;
                 }

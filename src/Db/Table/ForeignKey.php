@@ -260,7 +260,7 @@ class ForeignKey
     }
 
     /**
-     * Utility method that maps an array of index options to this objects methods.
+     * Utility method that maps an array of index options to this object's methods.
      *
      * @param array<string, mixed> $options Options
      * @throws \RuntimeException

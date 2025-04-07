@@ -29,7 +29,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * The Migrations class is responsible for handling migrations command
- * within an non-shell application.
+ * within a non-shell application.
  */
 class Migrations
 {
