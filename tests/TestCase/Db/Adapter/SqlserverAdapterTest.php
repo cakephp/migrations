@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
@@ -832,7 +831,7 @@ WHERE t.name='ntable'");
             ->addColumn('lname', 'string')
             ->addIndex(
                 ['fname', 'lname'],
-                ['name' => 'twocolumnuniqueindex', 'unique' => true]
+                ['name' => 'twocolumnuniqueindex', 'unique' => true],
             )
             ->save();
 
@@ -1269,7 +1268,7 @@ WHERE t.name='ntable'");
                 [
                     'column1' => 'value3',
                     'column2' => 3,
-                ]
+                ],
             );
 
         $this->adapter->bulkinsert($table->getTable(), $table->getData());
@@ -1335,7 +1334,7 @@ WHERE t.name='ntable'");
                 [
                     'column1' => 'value3',
                     'column2' => 3,
-                ]
+                ],
             )
             ->save();
 

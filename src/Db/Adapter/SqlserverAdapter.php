@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 /**
@@ -17,8 +16,8 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Migrations\MigrationInterface;
 use Migrations\Db\Table\Table as TableMetadata;
+use Migrations\MigrationInterface;
 use Phinx\Util\Literal as PhinxLiteral;
 
 /**
@@ -1315,6 +1314,7 @@ SQL;
 
         return parent::migrated($migration, $direction, $startTime, $endTime);
     }
+
     /**
      * @inheritDoc
      */
@@ -1323,7 +1323,6 @@ SQL;
         $sql = $this->generateInsertSql($table, $row);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
-
 
         if ($this->isDryRunEnabled()) {
             $this->io->out($sql);
@@ -1341,6 +1340,7 @@ SQL;
             $this->getConnection()->execute($sql, $vals);
         }
     }
+
     /**
      * @inheritDoc
      */
@@ -1372,6 +1372,7 @@ SQL;
             $this->getConnection()->execute($sql, $vals);
         }
     }
+
     /**
      * @param string $tableName Table name
      * @param string $sql SQL statement
@@ -1383,14 +1384,15 @@ SQL;
         if (isset($options['identity_insert']) && $options['identity_insert'] == true) {
             $identityInsertStart = sprintf(
                 'SET IDENTITY_INSERT %s ON',
-                $this->quoteTableName($tableName)
+                $this->quoteTableName($tableName),
             );
             $identityInsertEnd = sprintf(
                 'SET IDENTITY_INSERT %s OFF',
-                $this->quoteTableName($tableName)
+                $this->quoteTableName($tableName),
             );
             $sql = $identityInsertStart . ';' . PHP_EOL . $sql . ';' . PHP_EOL . $identityInsertEnd;
         }
+
         return $sql;
     }
 }
