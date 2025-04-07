@@ -89,6 +89,7 @@ class ManagerFactory
         $connectionName = (string)$this->getOption('connection');
 
         if (str_contains($connectionName, '://')) {
+            /** @var array<string, mixed> $connectionConfig */
             $connectionConfig = ConnectionManager::parseDsn($connectionName);
             $connectionName = 'tmp';
             if (!ConnectionManager::getConfig($connectionName)) {
