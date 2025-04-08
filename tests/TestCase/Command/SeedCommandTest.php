@@ -11,6 +11,7 @@ use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
+use Phinx\Config\FeatureFlags;
 use ReflectionProperty;
 
 class SeedCommandTest extends TestCase
@@ -141,7 +142,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(2, $query->fetchColumn(0));
     }
 
-    public function testSeederImplictAll(): void
+    public function testSeederImplicitAll(): void
     {
         $this->createTables();
         $this->exec('migrations seed -c test');
@@ -191,5 +192,59 @@ class SeedCommandTest extends TestCase
         $this->expectExceptionMessage('The seed class "LettersSeed" does not exist');
 
         $this->exec('migrations seed -c test --source NotThere --seed LettersSeed');
+    }
+
+    public function testSeederWithDateTimeFields(): void
+    {
+        FeatureFlags::$addTimestampsUseDateTime = true;
+
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed StoresSeed');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $result = $connection->selectQuery()
+            ->select(['*'])
+            ->from('stores')
+            ->orderBy('id DESC')
+            ->limit(1)
+            ->execute()->fetchAll('assoc');
+
+        $this->assertNotEmpty($result[0]);
+        $store = $result[0];
+        $this->assertEquals('foo_with_date', $store['name']);
+        $this->assertNotEmpty($store['created']);
+        $this->assertNotEmpty($store['modified']);
+    }
+
+    public function testSeederWithTimestampFields(): void
+    {
+        FeatureFlags::$addTimestampsUseDateTime = false;
+
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed StoresSeed');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $result = $connection->selectQuery()
+            ->select(['*'])
+            ->from('stores')
+            ->orderBy('id DESC')
+            ->limit(1)
+            ->execute()->fetchAll('assoc');
+
+        $this->assertNotEmpty($result[0]);
+        $store = $result[0];
+        $this->assertEquals('foo_with_date', $store['name']);
+        $this->assertNotEmpty($store['created']);
+        $this->assertNotEmpty($store['modified']);
     }
 }
