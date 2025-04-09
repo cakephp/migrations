@@ -816,16 +816,26 @@ class Column
         if ($default instanceof Literal) {
             $default = (string)$default;
         }
+
+        $type = $this->getType();
+        $precision = $this->getPrecision();
+        if ($precision !== null) {
+            if ($type === 'timestamp') {
+                $type = 'timestampfractional';
+            } elseif ($type === 'datetime') {
+                $type = 'datetimefractional';
+            }
+        }
         return [
             'name' => $this->getName(),
-            'type' => $this->getType(),
+            'type' => $type,
             'length' => $this->getLimit(),
             'null' => $this->getNull(),
             'default' => $default,
             'unsigned' => !$this->getSigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
-            'precision' => $this->getPrecision(),
+            'precision' => $precision,
             'scale' => $this->getScale(),
             'srid' => $this->getSrid(),
             'timezone' => $this->getTimezone(),

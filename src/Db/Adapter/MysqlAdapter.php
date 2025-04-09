@@ -11,6 +11,7 @@ namespace Migrations\Db\Adapter;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Exception\QueryException;
+use Cake\Database\Schema\TableSchema;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -61,6 +62,7 @@ class MysqlAdapter extends AbstractAdapter
     // to keep consistent the type hints for getSqlType and Column::$limit being integers.
     public const TEXT_TINY = 255;
     public const TEXT_SMALL = 255; /* deprecated, alias of TEXT_TINY */
+    /** @deprecated Use length of null instead **/
     public const TEXT_REGULAR = 65535;
     public const TEXT_MEDIUM = 16777215;
     public const TEXT_LONG = 2147483647;
@@ -225,10 +227,19 @@ class MysqlAdapter extends AbstractAdapter
             $optionsStr .= sprintf(' ROW_FORMAT=%s ', $options['row_format']);
         }
 
+        $dialect = $this->getSchemaDialect();
         $sql = 'CREATE TABLE ';
         $sql .= $this->quoteTableName($table->getName()) . ' (';
         foreach ($columns as $column) {
-            $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
+            $columnData = $this->mapColumnData($column->toArray());
+            $sql .= $dialect->columnDefinitionSql($columnData) . ', ';
+            // debug([
+            //     $column->toArray(),
+            //     $dialect->columnDefinitionSql($column->toArray()),
+            //     $this->getColumnSqlDefinition($column)
+            // ]);
+            // TODO update this
+            // $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
         }
 
         // set the primary key(s)
@@ -259,6 +270,51 @@ class MysqlAdapter extends AbstractAdapter
         $this->execute($sql);
 
         $this->addCreatedTable($table->getName());
+    }
+
+    /**
+     * Apply MySQL specific translations between the values using migrations constants/types
+     * and the cakephp/database constants. Over time, these can be aligned.
+     *
+     * @param array $data The raw column data.
+     * @return array Modified column data.
+     */
+    protected function mapColumnData(array $data): array
+    {
+        if ($data['type'] == 'text' && $data['length'] !== null) {
+            $data['length'] = match ($data['length']) {
+                self::TEXT_LONG => TableSchema::LENGTH_LONG,
+                self::TEXT_MEDIUM => TableSchema::LENGTH_MEDIUM,
+                self::TEXT_REGULAR => null,
+                self::TEXT_TINY => TableSchema::LENGTH_TINY,
+                default => null,
+            };
+        }
+        $binaryTypes = [self::PHINX_TYPE_BLOB, self::PHINX_TYPE_TINYBLOB, self::PHINX_TYPE_MEDIUMBLOB, self::PHINX_TYPE_LONGBLOB];
+        if (in_array($data['type'], $binaryTypes, true)) {
+            if (!isset($data['length'])) {
+                $data['length'] = match ($data['type']) {
+                    self::PHINX_TYPE_TINYBLOB => TableSchema::LENGTH_TINY,
+                    self::PHINX_TYPE_MEDIUMBLOB => TableSchema::LENGTH_MEDIUM,
+                    self::PHINX_TYPE_LONGBLOB => TableSchema::LENGTH_LONG,
+                    default => $data['length'],
+                };
+            }
+            $standardLengths = [TableSchema::LENGTH_TINY, TableSchema::LENGTH_MEDIUM, TableSchema::LENGTH_LONG];
+            if (!in_array($data['length'], $standardLengths, true)) {
+                foreach ($standardLengths as $bucket) {
+                    if ($bucket < $data['length']) {
+                        continue;
+                    }
+                    $data['length'] = $bucket;
+                    break;
+                }
+            }
+
+            $data['type'] = 'binary';
+        }
+
+        return $data;
     }
 
     /**
@@ -514,6 +570,7 @@ class MysqlAdapter extends AbstractAdapter
             'CHANGE %s %s %s%s',
             $this->quoteColumnName($columnName),
             $this->quoteColumnName((string)$newColumn->getName()),
+            // TODO
             $this->getColumnSqlDefinition($newColumn),
             $this->afterClause($newColumn),
         );

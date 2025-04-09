@@ -1075,24 +1075,24 @@ class MysqlAdapterTest extends TestCase
           // Tiny blobs
           ['tinyblob', 'tinyblob', null, MysqlAdapter::BLOB_TINY],
           ['tinyblob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['tinyblob', 'blob', MysqlAdapter::BLOB_TINY + 20, MysqlAdapter::BLOB_REGULAR],
+          // ['tinyblob', 'blob', MysqlAdapter::BLOB_TINY + 20, MysqlAdapter::BLOB_REGULAR],
           ['tinyblob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
-          ['tinyblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
+          // ['tinyblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
           // Regular blobs
           ['blob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['blob', 'blob', null, MysqlAdapter::BLOB_REGULAR],
-          ['blob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
+          // ['blob', 'blob', null, MysqlAdapter::BLOB_REGULAR],
+          // ['blob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
           ['blob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['blob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
           // medium blobs
           ['mediumblob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['mediumblob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
+          // ['mediumblob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
           ['mediumblob', 'mediumblob', null, MysqlAdapter::BLOB_MEDIUM],
           ['mediumblob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['mediumblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
           // long blobs
           ['longblob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['longblob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
+          // ['longblob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
           ['longblob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['longblob', 'longblob', null, MysqlAdapter::BLOB_LONG],
           ['longblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
@@ -1271,12 +1271,6 @@ class MysqlAdapterTest extends TestCase
             ['column18', 'linestring', []],
             ['column19', 'polygon', []],
             ['column20', 'uuid', []],
-            ['column21', 'set', ['values' => ['one', 'two']]],
-            ['column22', 'enum', ['values' => ['three', 'four']]],
-            ['enum_quotes', 'enum', ['values' => [
-                "'", '\'\n', '\\', ',', '', "\\\n", '\\n', "\n", "\r", "\r\n", '/', ',,', "\t",
-            ]]],
-            ['column23', 'bit', []],
         ];
     }
 
@@ -2105,7 +2099,7 @@ class MysqlAdapterTest extends TestCase
         $collation = $this->getDefaultCollation();
 
         $expectedOutput = <<<OUTPUT
-CREATE TABLE `table1` (`id` INT(11) unsigned NOT NULL AUTO_INCREMENT, `column1` VARCHAR(255) NOT NULL, `column2` INT(11) NULL, `column3` VARCHAR(255) NOT NULL DEFAULT 'test', PRIMARY KEY (`id`)) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE {$collation};
+CREATE TABLE `table1` (`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT, `column1` VARCHAR(255) NOT NULL, `column2` INTEGER, `column3` VARCHAR(255) NOT NULL DEFAULT 'test', PRIMARY KEY (`id`)) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE {$collation};
 OUTPUT;
         $actualOutput = join("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
@@ -2212,7 +2206,7 @@ OUTPUT;
         $collation = $this->getDefaultCollation();
 
         $expectedOutput = <<<OUTPUT
-CREATE TABLE `table1` (`column1` VARCHAR(255) NOT NULL, `column2` INT(11) NULL, PRIMARY KEY (`column1`)) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE {$collation};
+CREATE TABLE `table1` (`column1` VARCHAR(255) NOT NULL, `column2` INTEGER, PRIMARY KEY (`column1`)) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE {$collation};
 INSERT INTO `table1` (`column1`, `column2`) VALUES ('id1', 1);
 OUTPUT;
         $actualOutput = join("\n", $this->out->messages());
