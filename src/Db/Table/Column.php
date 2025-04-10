@@ -826,6 +826,8 @@ class Column
                 $type = 'datetimefractional';
             }
         }
+        $scale = $this->getScale();
+
         return [
             'name' => $this->getName(),
             'type' => $type,
@@ -835,8 +837,7 @@ class Column
             'unsigned' => !$this->getSigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
-            'precision' => $precision,
-            'scale' => $this->getScale(),
+            'precision' => $scale ?? $precision,
             'srid' => $this->getSrid(),
             'timezone' => $this->getTimezone(),
             'comment' => $this->getComment(),

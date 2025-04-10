@@ -281,7 +281,7 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function mapColumnData(array $data): array
     {
-        if ($data['type'] == 'text' && $data['length'] !== null) {
+        if ($data['type'] == self::PHINX_TYPE_TEXT && $data['length'] !== null) {
             $data['length'] = match ($data['length']) {
                 self::TEXT_LONG => TableSchema::LENGTH_LONG,
                 self::TEXT_MEDIUM => TableSchema::LENGTH_MEDIUM,
@@ -290,7 +290,14 @@ class MysqlAdapter extends AbstractAdapter
                 default => null,
             };
         }
-        $binaryTypes = [self::PHINX_TYPE_BLOB, self::PHINX_TYPE_TINYBLOB, self::PHINX_TYPE_MEDIUMBLOB, self::PHINX_TYPE_LONGBLOB];
+        $binaryTypes = [
+            self::PHINX_TYPE_BLOB,
+            self::PHINX_TYPE_TINYBLOB,
+            self::PHINX_TYPE_MEDIUMBLOB,
+            self::PHINX_TYPE_LONGBLOB,
+            self::PHINX_TYPE_VARBINARY,
+            self::PHINX_TYPE_BINARY,
+        ];
         if (in_array($data['type'], $binaryTypes, true)) {
             if (!isset($data['length'])) {
                 $data['length'] = match ($data['type']) {
@@ -312,6 +319,13 @@ class MysqlAdapter extends AbstractAdapter
             }
 
             $data['type'] = 'binary';
+        }
+        if ($data['type'] === self::PHINX_TYPE_INTEGER) {
+            if (isset($data['length']) && $data['length'] === self::INT_BIG) {
+                $data['type'] = TableSchema::TYPE_BIGINTEGER;
+                unset($data['length']);
+            }
+            unset($data['length']);
         }
 
         return $data;
