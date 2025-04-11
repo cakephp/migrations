@@ -9,6 +9,8 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Connection;
+use Cake\I18n\Date;
+use Cake\I18n\DateTime;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
@@ -1526,7 +1528,11 @@ class PostgresAdapter extends AbstractAdapter
                     }
                     $values[] = $placeholder;
                     if ($placeholder == '?') {
-                        if (is_bool($v)) {
+                        if ($v instanceof DateTime) {
+                            $vals[] = $v->toDateTimeString();
+                        } elseif ($v instanceof Date) {
+                            $vals[] = $v->toDateString();
+                        } elseif (is_bool($v)) {
                             $vals[] = $this->castToBool($v);
                         } else {
                             $vals[] = $v;

@@ -17,6 +17,8 @@ use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
 use Cake\Database\Schema\SchemaDialect;
+use Cake\I18n\Date;
+use Cake\I18n\DateTime;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Config\Config;
@@ -723,7 +725,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                         $placeholder = (string)$v;
                     }
                     if ($placeholder == '?') {
-                        if (is_bool($v)) {
+                        if ($v instanceof DateTime) {
+                            $vals[] = $v->toDateTimeString();
+                        } elseif ($v instanceof Date) {
+                            $vals[] = $v->toDateString();
+                        } elseif (is_bool($v)) {
                             $vals[] = $this->castToBool($v);
                         } else {
                             $vals[] = $v;

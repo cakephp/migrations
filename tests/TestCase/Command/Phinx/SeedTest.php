@@ -21,7 +21,6 @@ use Migrations\MigrationsDispatcher;
 use Migrations\Test\CommandTester;
 use Migrations\Test\TestCase\DriverConnectionTrait;
 use PDO;
-use Phinx\Config\FeatureFlags;
 use Phinx\Db\Adapter\WrapperInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -91,8 +90,6 @@ class SeedTest extends TestCase
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
         $this->connection->execute('DROP TABLE IF EXISTS letters');
         $this->connection->execute('DROP TABLE IF EXISTS stores');
-
-        FeatureFlags::$addTimestampsUseDateTime = false;
     }
 
     /**

@@ -12,6 +12,7 @@ use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
 use Phinx\Config\FeatureFlags;
+use ReflectionClass;
 use ReflectionProperty;
 
 class SeedCommandTest extends TestCase
@@ -39,6 +40,13 @@ class SeedCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS numbers');
         $connection->execute('DROP TABLE IF EXISTS letters');
         $connection->execute('DROP TABLE IF EXISTS stores');
+
+        if (class_exists(FeatureFlags::class)) {
+            $reflection = new ReflectionClass(FeatureFlags::class);
+            if ($reflection->hasProperty('addTimestampsUseDateTime')) {
+                FeatureFlags::$addTimestampsUseDateTime = false;
+            }
+        }
     }
 
     protected function resetOutput(): void
@@ -194,9 +202,14 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --source NotThere --seed LettersSeed');
     }
 
-    public function testSeederWithDateTimeFields(): void
+    public function testSeederWithTimestampFields(): void
     {
-        FeatureFlags::$addTimestampsUseDateTime = true;
+        if (class_exists(FeatureFlags::class)) {
+            $reflection = new ReflectionClass(FeatureFlags::class);
+            if ($reflection->hasProperty('addTimestampsUseDateTime')) {
+                FeatureFlags::$addTimestampsUseDateTime = false;
+            }
+        }
 
         $this->createTables();
         $this->exec('migrations seed -c test --seed StoresSeed');
@@ -221,9 +234,14 @@ class SeedCommandTest extends TestCase
         $this->assertNotEmpty($store['modified']);
     }
 
-    public function testSeederWithTimestampFields(): void
+    public function testSeederWithDateTimeFields(): void
     {
-        FeatureFlags::$addTimestampsUseDateTime = false;
+        $this->skipIf(!class_exists(FeatureFlags::class));
+
+        $reflection = new ReflectionClass(FeatureFlags::class);
+        $this->skipIf(!$reflection->hasProperty('addTimestampsUseDateTime'));
+
+        FeatureFlags::$addTimestampsUseDateTime = true;
 
         $this->createTables();
         $this->exec('migrations seed -c test --seed StoresSeed');
