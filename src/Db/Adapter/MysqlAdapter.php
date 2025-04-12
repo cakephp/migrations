@@ -233,6 +233,10 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($columns as $column) {
             $columnData = $this->mapColumnData($column->toArray());
             $sql .= $dialect->columnDefinitionSql($columnData) . ', ';
+            // debug([
+            //     $dialect->columnDefinitionSql($columnData),
+            //     $this->getColumnSqlDefinition($column),
+            // ]);
         }
 
         // set the primary key(s)
@@ -300,8 +304,12 @@ class MysqlAdapter extends AbstractAdapter
                     default => $data['length'],
                 };
             }
+            if ($data['length'] === self::BLOB_REGULAR) {
+                $data['type'] = TableSchema::TYPE_BINARY;
+                $data['length'] = null;
+            }
             $standardLengths = [TableSchema::LENGTH_TINY, TableSchema::LENGTH_MEDIUM, TableSchema::LENGTH_LONG];
-            if (!in_array($data['length'], $standardLengths, true)) {
+            if ($data['length'] !== null && !in_array($data['length'], $standardLengths, true)) {
                 foreach ($standardLengths as $bucket) {
                     if ($bucket < $data['length']) {
                         continue;
@@ -310,7 +318,6 @@ class MysqlAdapter extends AbstractAdapter
                     break;
                 }
             }
-
             $data['type'] = 'binary';
         }
         if ($data['type'] === self::PHINX_TYPE_INTEGER) {
@@ -459,7 +466,7 @@ class MysqlAdapter extends AbstractAdapter
                             static::PHINX_TYPE_TINYBLOB,
                             static::PHINX_TYPE_BLOB,
                             static::PHINX_TYPE_JSON,
-                            static::PHINX_TYPE_TEXT
+                            static::PHINX_TYPE_TEXT,
                         ],
                     ),
                 )
