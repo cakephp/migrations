@@ -233,13 +233,6 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($columns as $column) {
             $columnData = $this->mapColumnData($column->toArray());
             $sql .= $dialect->columnDefinitionSql($columnData) . ', ';
-            // debug([
-            //     $column->toArray(),
-            //     $dialect->columnDefinitionSql($column->toArray()),
-            //     $this->getColumnSqlDefinition($column)
-            // ]);
-            // TODO update this
-            // $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column) . ', ';
         }
 
         // set the primary key(s)
@@ -461,7 +454,13 @@ class MysqlAdapter extends AbstractAdapter
                     $column->getType(),
                     array_merge(
                         static::PHINX_TYPES_GEOSPATIAL,
-                        [static::PHINX_TYPE_BLOB, static::PHINX_TYPE_JSON, static::PHINX_TYPE_TEXT],
+                        [
+                            static::PHINX_TYPE_BINARY,
+                            static::PHINX_TYPE_TINYBLOB,
+                            static::PHINX_TYPE_BLOB,
+                            static::PHINX_TYPE_JSON,
+                            static::PHINX_TYPE_TEXT
+                        ],
                     ),
                 )
             ) {
