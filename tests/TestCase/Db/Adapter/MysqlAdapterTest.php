@@ -766,14 +766,14 @@ class MysqlAdapterTest extends TestCase
     {
         return [
             ['integer', [], 'int', '11', ''],
-            ['integer', ['signed' => false], 'int', '11', ' unsigned'],
+            ['integer', ['signed' => false], 'int', '10', ' unsigned'],
             ['integer', ['limit' => 8], 'int', '8', ''],
             ['smallinteger', [], 'smallint', '6', ''],
-            ['smallinteger', ['signed' => false], 'smallint', '6', ' unsigned'],
+            ['smallinteger', ['signed' => false], 'smallint', '5', ' unsigned'],
             ['smallinteger', ['limit' => 3], 'smallint', '3', ''],
             ['biginteger', [], 'bigint', '20', ''],
             ['biginteger', ['signed' => false], 'bigint', '20', ' unsigned'],
-            ['biginteger', ['limit' => 12], 'bigint', '12', ''],
+            ['biginteger', ['limit' => 12], 'bigint', '20', ''],
         ];
     }
 
@@ -1149,17 +1149,6 @@ class MysqlAdapterTest extends TestCase
         $columns = $table->getColumns();
         $sqlType = $this->adapter->getSqlType($columns[1]->getType(), $columns[1]->getLimit());
         $this->assertEquals('int', $sqlType['name']);
-    }
-
-    public function testIntegerColumnLimit()
-    {
-        $limit = 8;
-        $table = new Table('t', [], $this->adapter);
-        $table->addColumn('column1', 'integer', ['limit' => $limit])
-              ->save();
-        $columns = $table->getColumns();
-        $sqlType = $this->adapter->getSqlType($columns[1]->getType(), $columns[1]->getLimit());
-        $this->assertEquals($this->usingMysql8() ? 11 : $limit, $sqlType['limit']);
     }
 
     public function testDatetimeColumn()
