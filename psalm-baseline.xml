@@ -117,6 +117,10 @@
     </DeprecatedMethod>
   </file>
   <file src="src/Db/Adapter/MysqlAdapter.php">
+    <DeprecatedConstant>
+      <code><![CDATA[self::TEXT_REGULAR]]></code>
+      <code><![CDATA[static::TEXT_REGULAR]]></code>
+    </DeprecatedConstant>
     <DeprecatedMethod>
       <code><![CDATA[describeColumnSql]]></code>
       <code><![CDATA[describeForeignKeySql]]></code>
