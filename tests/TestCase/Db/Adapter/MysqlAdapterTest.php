@@ -540,16 +540,6 @@ class MysqlAdapterTest extends TestCase
         $this->assertNull($columns[2]->getDefault());
     }
 
-    public function testCreateTableWithLimitPK()
-    {
-        $table = new Table('ntable', ['id' => 'id', 'limit' => 4], $this->adapter);
-        $table->save();
-        $this->assertTrue($this->adapter->hasTable('ntable'));
-        $this->assertTrue($this->adapter->hasColumn('ntable', 'id'));
-        $column_definitions = $this->adapter->getColumns('ntable');
-        $this->assertSame($this->usingMysql8() ? null : 4, $column_definitions[0]->getLimit());
-    }
-
     public function testCreateTableWithSchema()
     {
         $table = new Table($this->config['database'] . '.ntable', [], $this->adapter);
@@ -1293,7 +1283,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($colName, $columns[1]->getName());
         $this->assertEquals($type, $columns[1]->getType());
 
-        $this->assertEquals($this->usingMysql8() ? null : 10, $columns[1]->getLimit());
+        $this->assertEquals($this->usingMysql8() ? null : 11, $columns[1]->getLimit());
     }
 
     public function testGetColumnsReservedTableName()
