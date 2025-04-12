@@ -233,10 +233,6 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($columns as $column) {
             $columnData = $this->mapColumnData($column->toArray());
             $sql .= $dialect->columnDefinitionSql($columnData) . ', ';
-            // debug([
-            //     $dialect->columnDefinitionSql($columnData),
-            //     $this->getColumnSqlDefinition($column),
-            // ]);
         }
 
         // set the primary key(s)
