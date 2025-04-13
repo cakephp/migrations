@@ -582,12 +582,12 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getChangeColumnInstructions(string $tableName, string $columnName, Column $newColumn): AlterInstructions
     {
+        $dialect = $this->getSchemaDialect();
+
         $alter = sprintf(
-            'CHANGE %s %s %s%s',
+            'CHANGE %s %s%s',
             $this->quoteColumnName($columnName),
-            $this->quoteColumnName((string)$newColumn->getName()),
-            // TODO
-            $this->getColumnSqlDefinition($newColumn),
+            $dialect->columnDefinitionSql($this->mapColumnData($newColumn->toArray())),
             $this->afterClause($newColumn),
         );
 
@@ -1307,81 +1307,6 @@ class MysqlAdapter extends AbstractAdapter
     {
         $this->execute(sprintf('DROP DATABASE IF EXISTS %s', $this->quoteTableName($name)));
         $this->createdTables = [];
-    }
-
-    /**
-     * Gets the MySQL Column Definition for a Column object.
-     *
-     * @param \Migrations\Db\Table\Column $column Column
-     * @return string
-     */
-    protected function getColumnSqlDefinition(Column $column): string
-    {
-        if ($column->getType() instanceof Literal) {
-            $def = (string)$column->getType();
-        } else {
-            $sqlType = $this->getSqlType($column->getType(), $column->getLimit());
-            $def = strtoupper($sqlType['name']);
-        }
-        if ($column->getPrecision() && $column->getScale()) {
-            $def .= '(' . $column->getPrecision() . ',' . $column->getScale() . ')';
-        } elseif (isset($sqlType['limit'])) {
-            $def .= '(' . $sqlType['limit'] . ')';
-        }
-
-        $values = $column->getValues();
-        if ($values) {
-            $def .= '(' . implode(', ', array_map(function ($value) {
-                // we special case NULL as it's not actually allowed an enum value,
-                // and we want MySQL to issue an error on the create statement, but
-                // quote coerces it to an empty string, which will not error
-                return $value === null ? 'NULL' : $this->quoteString($value);
-            }, $values)) . ')';
-        }
-
-        $def .= $column->getEncoding() ? ' CHARACTER SET ' . $column->getEncoding() : '';
-        $def .= $column->getCollation() ? ' COLLATE ' . $column->getCollation() : '';
-        $def .= !$column->isSigned() && isset($this->signedColumnTypes[(string)$column->getType()]) ? ' unsigned' : '';
-        $def .= $column->isNull() ? ' NULL' : ' NOT NULL';
-
-        $connection = $this->getConnection();
-        $version = $connection->getDriver()->version();
-        if (
-            version_compare($version, '8', '>=')
-            && in_array($column->getType(), static::PHINX_TYPES_GEOSPATIAL)
-            && !is_null($column->getSrid())
-        ) {
-            $def .= " SRID {$column->getSrid()}";
-        }
-
-        $def .= $column->isIdentity() ? ' AUTO_INCREMENT' : '';
-
-        $default = $column->getDefault();
-        // MySQL 8 supports setting default for the following tested types, but only if they are "cast as expressions"
-        if (
-            version_compare($version, '8', '>=') &&
-            is_string($default) &&
-            in_array(
-                $column->getType(),
-                array_merge(
-                    static::PHINX_TYPES_GEOSPATIAL,
-                    [static::PHINX_TYPE_BLOB, static::PHINX_TYPE_JSON, static::PHINX_TYPE_TEXT],
-                ),
-            )
-        ) {
-            $default = Literal::from('(' . $this->quoteString($column->getDefault()) . ')');
-        }
-        $def .= $this->getDefaultValueDefinition($default, (string)$column->getType());
-
-        if ($column->getComment()) {
-            $def .= ' COMMENT ' . $this->quoteString((string)$column->getComment());
-        }
-
-        if ($column->getUpdate()) {
-            $def .= ' ON UPDATE ' . $column->getUpdate();
-        }
-
-        return $def;
     }
 
     /**
