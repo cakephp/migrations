@@ -147,7 +147,7 @@ class PostgresAdapter extends AbstractAdapter
         $dialect = $this->getSchemaDialect();
         $this->columnsWithComments = [];
         foreach ($columns as $column) {
-            $sql .= $dialect->columnDefinitionSql($column->toArray());
+            $sql .= $dialect->columnDefinitionSql($this->mapColumnData($column->toArray()));
             // $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
             // debug([
             //     $dialect->columnDefinitionSql($column->toArray()),
@@ -209,6 +209,25 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         $this->addCreatedTable($table->getName());
+    }
+
+    /**
+     * Apply postgres specific translations between the values using migrations constants/types
+     * and the cakephp/database constants. Over time, these can be aligned.
+     *
+     * @param array $data The raw column data.
+     * @return array Modified column data.
+     */
+    protected function mapColumnData(array $data): array
+    {
+        if (
+            $data['type'] === self::PHINX_TYPE_TIMESTAMP &&
+            isset($data['timezone']) && $data['timezone'] === true
+        ) {
+            $data['type'] = 'timestamptimezone';
+        }
+
+        return $data;
     }
 
     /**
