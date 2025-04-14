@@ -144,13 +144,18 @@ class PostgresAdapter extends AbstractAdapter
         $sql = 'CREATE TABLE ';
         $sql .= $this->quoteTableName($table->getName()) . ' (';
 
+        $dialect = $this->getSchemaDialect();
         $this->columnsWithComments = [];
         foreach ($columns as $column) {
-            // TODO use dialect
-            $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
-            if ($this->useIdentity && $column->getIdentity() && $column->getGenerated() !== null) {
-                $sql .= sprintf(' GENERATED %s AS IDENTITY', (string)$column->getGenerated());
-            }
+            $sql .= $dialect->columnDefinitionSql($column->toArray());
+            // $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
+            // debug([
+            //     $dialect->columnDefinitionSql($column->toArray()),
+            //     $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column),
+            // ]);
+            // if ($this->useIdentity && $column->getIdentity() && $column->getGenerated() !== null) {
+                // $sql .= sprintf(' GENERATED %s AS IDENTITY', (string)$column->getGenerated());
+            // }
             $sql .= ', ';
 
             // set column comments, if needed
