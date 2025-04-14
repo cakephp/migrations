@@ -146,6 +146,7 @@ class PostgresAdapter extends AbstractAdapter
 
         $this->columnsWithComments = [];
         foreach ($columns as $column) {
+            // TODO use dialect
             $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
             if ($this->useIdentity && $column->getIdentity() && $column->getGenerated() !== null) {
                 $sql .= sprintf(' GENERATED %s AS IDENTITY', (string)$column->getGenerated());
@@ -415,6 +416,7 @@ class PostgresAdapter extends AbstractAdapter
         $instructions->addAlter(sprintf(
             'ADD %s %s %s',
             $this->quoteColumnName((string)$column->getName()),
+            // TODO use dialect
             $this->getColumnSqlDefinition($column),
             $column->isIdentity() && $column->getGenerated() !== null && $this->useIdentity ?
                 sprintf('GENERATED %s AS IDENTITY', (string)$column->getGenerated()) : '',
@@ -481,6 +483,7 @@ class PostgresAdapter extends AbstractAdapter
         $sql = sprintf(
             'ALTER COLUMN %s TYPE %s',
             $quotedColumnName,
+            // TODO use dialect. This could be tricky because the name and type need to be separated.
             $this->getColumnSqlDefinition($newColumn),
         );
         if (in_array($newColumn->getType(), ['smallinteger', 'integer', 'biginteger'], true)) {
