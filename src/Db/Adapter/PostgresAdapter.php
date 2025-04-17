@@ -147,16 +147,7 @@ class PostgresAdapter extends AbstractAdapter
         $dialect = $this->getSchemaDialect();
         $this->columnsWithComments = [];
         foreach ($columns as $column) {
-            $sql .= $dialect->columnDefinitionSql($this->mapColumnData($column->toArray()));
-            // $sql .= $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
-            // debug([
-            //     $dialect->columnDefinitionSql($column->toArray()),
-            //     $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column),
-            // ]);
-            // if ($this->useIdentity && $column->getIdentity() && $column->getGenerated() !== null) {
-                // $sql .= sprintf(' GENERATED %s AS IDENTITY', (string)$column->getGenerated());
-            // }
-            $sql .= ', ';
+            $sql .= $dialect->columnDefinitionSql($this->mapColumnData($column->toArray())) . ', ';
 
             // set column comments, if needed
             if ($column->getComment()) {
