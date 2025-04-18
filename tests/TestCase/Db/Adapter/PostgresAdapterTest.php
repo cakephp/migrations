@@ -940,6 +940,7 @@ class PostgresAdapterTest extends TestCase
     #[DataProvider('providerChangeColumnIdentity')]
     public function testChangeColumnIdentity($generated)
     {
+        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }

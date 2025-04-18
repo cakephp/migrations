@@ -211,7 +211,6 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function mapColumnData(array $data): array
     {
-        // debug($data);
         if (
             $data['type'] === self::PHINX_TYPE_TIMESTAMP &&
             isset($data['timezone']) && $data['timezone'] === true
@@ -494,11 +493,16 @@ class PostgresAdapter extends AbstractAdapter
             $sql = sprintf('ALTER COLUMN %s DROP DEFAULT', $quotedColumnName);
             $instructions->addAlter($sql);
         }
+        $dialect = $this->getSchemaDialect();
+
+        $columnSql = $dialect->columnDefinitionSql($this->mapColumnData($newColumn->toArray()));
+        // Remove the column name from $columnSql
+        $columnType = preg_replace('/^"?(?:[^"]+)"?\s+/', '', $columnSql);
+
         $sql = sprintf(
             'ALTER COLUMN %s TYPE %s',
             $quotedColumnName,
-            // TODO use dialect. This could be tricky because the name and type need to be separated.
-            $this->getColumnSqlDefinition($newColumn),
+            $columnType,
         );
         if (in_array($newColumn->getType(), ['smallinteger', 'integer', 'biginteger'], true)) {
             $sql .= sprintf(
@@ -514,7 +518,7 @@ class PostgresAdapter extends AbstractAdapter
         }
         //NULL and DEFAULT cannot be set while changing column type
         $sql = preg_replace('/ NOT NULL/', '', $sql);
-        $sql = preg_replace('/ NULL/', '', $sql);
+        $sql = preg_replace('/ DEFAULT NULL/', '', $sql);
         //If it is set, DEFAULT is the last definition
         $sql = preg_replace('/DEFAULT .*/', '', $sql);
         if ($newColumn->getType() === 'boolean') {
