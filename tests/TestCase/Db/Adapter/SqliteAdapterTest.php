@@ -524,6 +524,28 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals("''", $rows[1]['dflt_value']);
     }
 
+    public function testAddDecimalWithPrecisionAndScale()
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->save();
+        $table->addColumn('number', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->addColumn('number2', 'decimal', ['limit' => 12])
+            ->addColumn('number3', 'decimal')
+            ->save();
+        $columns = $this->adapter->getColumns('table1');
+        foreach ($columns as $column) {
+            if ($column->getName() === 'number') {
+                $this->assertEquals('10', $column->getPrecision());
+                $this->assertEquals('2', $column->getScale());
+            }
+
+            if ($column->getName() === 'number2') {
+                $this->assertEquals('12', $column->getPrecision());
+                $this->assertEquals('0', $column->getScale());
+            }
+        }
+    }
+
     public static function irregularCreateTableProvider(): array
     {
         return [
