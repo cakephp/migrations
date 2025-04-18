@@ -211,6 +211,7 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function mapColumnData(array $data): array
     {
+        // debug($data);
         if (
             $data['type'] === self::PHINX_TYPE_TIMESTAMP &&
             isset($data['timezone']) && $data['timezone'] === true
@@ -427,14 +428,12 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
+        $dialect = $this->getSchemaDialect();
+
         $instructions = new AlterInstructions();
         $instructions->addAlter(sprintf(
-            'ADD %s %s %s',
-            $this->quoteColumnName((string)$column->getName()),
-            // TODO use dialect
-            $this->getColumnSqlDefinition($column),
-            $column->isIdentity() && $column->getGenerated() !== null && $this->useIdentity ?
-                sprintf('GENERATED %s AS IDENTITY', (string)$column->getGenerated()) : '',
+            'ADD %s',
+            $dialect->columnDefinitionSql($this->mapColumnData($column->toArray())),
         ));
 
         if ($column->getComment()) {

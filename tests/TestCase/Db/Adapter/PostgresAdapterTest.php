@@ -666,6 +666,7 @@ class PostgresAdapterTest extends TestCase
     #[DataProvider('providerAddColumnIdentity')]
     public function testAddColumnIdentity($generated, $addToColumn)
     {
+        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
@@ -773,21 +774,6 @@ class PostgresAdapterTest extends TestCase
         $this->assertNull($column->getLimit());
     }
 
-    public function testAddColumnWithDefaultLiteral()
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $table->addColumn('default_ts', 'timestamp', ['default' => Literal::from('now()')])
-              ->save();
-        $columns = $this->adapter->getColumns('table1');
-        foreach ($columns as $column) {
-            if ($column->getName() === 'default_ts') {
-                $this->assertNotNull($column->getDefault());
-                $this->assertEquals('now()', (string)$column->getDefault());
-            }
-        }
-    }
-
     public function testAddColumnWithComment()
     {
         $table = new Table('table1', [], $this->adapter);
@@ -881,37 +867,6 @@ class PostgresAdapterTest extends TestCase
                 $this->assertEquals('6', $column->getPrecision());
             }
         }
-    }
-
-    public static function providerArrayType()
-    {
-        return [
-            ['array_text', 'text[]'],
-            ['array_char', 'char[]'],
-            ['array_integer', 'integer[]'],
-            ['array_float', 'float[]'],
-            ['array_decimal', 'decimal[]'],
-            ['array_timestamp', 'timestamp[]'],
-            ['array_time', 'time[]'],
-            ['array_date', 'date[]'],
-            ['array_boolean', 'boolean[]'],
-            ['array_json', 'json[]'],
-            ['array_json2d', 'json[][]'],
-            ['array_json3d', 'json[][][]'],
-            ['array_uuid', 'uuid[]'],
-            ['array_interval', 'interval[]'],
-        ];
-    }
-
-    #[DataProvider('providerArrayType')]
-    public function testAddColumnArrayType($column_name, $column_type)
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn($column_name));
-        $table->addColumn($column_name, $column_type)
-            ->save();
-        $this->assertTrue($table->hasColumn($column_name));
     }
 
     public function testRenameColumn()

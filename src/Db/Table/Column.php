@@ -818,26 +818,35 @@ class Column
         }
 
         $type = $this->getType();
+        $length = $this->getLimit();
         $precision = $this->getPrecision();
+        $scale = $this->getScale();
         if ($precision !== null) {
-            if ($type === 'timestamp') {
+            if ($type === self::TIMESTAMP) {
                 $type = 'timestampfractional';
-            } elseif ($type === 'datetime') {
+            } elseif ($type === self::DATETIME) {
                 $type = 'datetimefractional';
             }
         }
-        $scale = $this->getScale();
+        // Decimal types in cakephp/database use
+        // (length, precision) while phinx used (precision ?? length, scale)
+        if ($type === self::DECIMAL) {
+            $length = $precision ?? $length;
+            $precision = $scale;
+        } else {
+            $precision = $scale ?? $precision;
+        }
 
         return [
             'name' => $this->getName(),
             'type' => $type,
-            'length' => $this->getLimit(),
+            'length' => $length,
             'null' => $this->getNull(),
             'default' => $default,
             'unsigned' => !$this->getSigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
-            'precision' => $scale ?? $precision,
+            'precision' => $precision,
             'srid' => $this->getSrid(),
             'timezone' => $this->getTimezone(),
             'comment' => $this->getComment(),
