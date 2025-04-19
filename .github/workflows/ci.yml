@@ -27,9 +27,9 @@ jobs:
           - php-version: '8.1'
             db-type: 'sqlite'
             prefer-lowest: 'prefer-lowest'
-          - php-version: '8.1'
+          - php-version: '8.2'
             db-type: 'sqlite'
-            cake_version: 'dev-5.next as 5.1.0'
+            cake_version: 'dev-5.next as 5.3.0'
 
     services:
       postgres:
