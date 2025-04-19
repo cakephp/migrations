@@ -400,12 +400,11 @@ class SqlserverAdapter extends AbstractAdapter
      */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
-        // TODO update this
+        $dialect = $this->getSchemaDialect();
         $alter = sprintf(
-            'ALTER TABLE %s ADD %s %s',
+            'ALTER TABLE %s ADD %s',
             $table->getName(),
-            $this->quoteColumnName((string)$column->getName()),
-            $this->getColumnSqlDefinition($column),
+            $dialect->columnDefinitionSql($column->toArray()),
         );
 
         return new AlterInstructions([], [$alter]);
@@ -493,6 +492,7 @@ SQL;
             $newColumn->getType() !== $columns[$columnName]->getType();
 
         $instructions = new AlterInstructions();
+        $dialect = $this->getSchemaDialect();
 
         if ($columnName !== $newColumn->getName()) {
             $instructions->merge(
@@ -504,13 +504,18 @@ SQL;
             $instructions->merge($this->getDropDefaultConstraint($tableName, (string)$newColumn->getName()));
         }
 
-        // TODO update this
-        $instructions->addPostStep(sprintf(
-            'ALTER TABLE %s ALTER COLUMN %s %s',
+        // Sqlserver doesn't support defaults
+        $columnData = $newColumn->toArray();
+        unset($columnData['default']);
+
+        $alterColumn = sprintf(
+            'ALTER TABLE %s ALTER COLUMN %s',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName((string)$newColumn->getName()),
-            $this->getColumnSqlDefinition($newColumn, false),
-        ));
+            $dialect->columnDefinitionSql($columnData),
+        );
+        $alterColumn = preg_replace('/DEFAULT NULL/', '', $alterColumn);
+        $instructions->addPostStep($alterColumn);
+
         // change column comment if needed
         if ($newColumn->getComment()) {
             $instructions->addPostStep($this->getColumnCommentSqlDefinition($newColumn, $tableName));
