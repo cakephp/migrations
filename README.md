@@ -25,7 +25,7 @@ composer require cakephp/migrations
 You can load the plugin using the shell command:
 
 ```
-bin/cake plugin load Migrations
+bin/cake plugin load Migrations --only-cli
 ```
 
 ### Enabling the builtin backend
