@@ -115,12 +115,6 @@ parameters:
 			path: src/Db/Adapter/SqlserverAdapter.php
 
 		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 2
-			path: src/Db/Adapter/SqlserverAdapter.php
-
-		-
 			message: '#^Call to function method_exists\(\) with Migrations\\MigrationInterface and ''useTransactions'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
