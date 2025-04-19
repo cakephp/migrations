@@ -516,10 +516,10 @@ class PostgresAdapter extends AbstractAdapter
                 $quotedColumnName,
             );
         }
-        //NULL and DEFAULT cannot be set while changing column type
+        // NULL and DEFAULT cannot be set while changing column type
         $sql = preg_replace('/ NOT NULL/', '', $sql);
         $sql = preg_replace('/ DEFAULT NULL/', '', $sql);
-        //If it is set, DEFAULT is the last definition
+        // If it is set, DEFAULT is the last definition
         $sql = preg_replace('/DEFAULT .*/', '', $sql);
         if ($newColumn->getType() === 'boolean') {
             $sql .= sprintf(
