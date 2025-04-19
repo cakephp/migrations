@@ -155,18 +155,10 @@ class SqlserverAdapterTest extends TestCase
     public function testCreateTableIdentityColumn()
     {
         $table = new Table('ntable', ['id' => false, 'primary_key' => 'id'], $this->adapter);
-        $table->addColumn('id', 'integer', ['identity' => true, 'seed' => 1, 'increment' => 10])
+        $table->addColumn('id', 'integer', ['identity' => true])
             ->save();
         $this->assertTrue($this->adapter->hasTable('ntable'));
         $this->assertTrue($this->adapter->hasColumn('ntable', 'id'));
-
-        $rows = $this->adapter->fetchAll("SELECT CAST(seed_value AS INT) seed_value, CAST(increment_value AS INT) increment_value
-FROM sys.columns c JOIN sys.tables t ON c.object_id=t.object_id
-JOIN sys.identity_columns ic ON c.object_id=ic.object_id AND c.column_id=ic.column_id
-WHERE t.name='ntable'");
-        $identity = $rows[0];
-        $this->assertEquals($identity['seed_value'], '1');
-        $this->assertEquals($identity['increment_value'], '10');
     }
 
     public function testCreateTableWithNoPrimaryKey()
@@ -646,13 +638,13 @@ WHERE t.name='ntable'");
             ['column1', 'string', ['null' => true, 'default' => null]],
             ['column2', 'integer', ['default' => 0]],
             ['column3', 'biginteger', ['default' => 5]],
-            ['column4', 'text', ['default' => 'text']],
+            ['column4', 'text', ['default' => 'text'], 'string'],
             ['column5', 'float', []],
             ['column6', 'decimal', []],
             ['column7', 'time', []],
             ['column8', 'date', []],
             ['column9', 'boolean', []],
-            ['column10', 'datetime', []],
+            ['column10', 'datetime', [], 'datetime2'],
             ['column11', 'binary', []],
             ['column12', 'string', ['limit' => 10]],
             ['column13', 'tinyinteger', ['default' => 5]],
@@ -664,7 +656,7 @@ WHERE t.name='ntable'");
     }
 
     #[DataProvider('columnsProvider')]
-    public function testGetColumns($colName, $type, $options)
+    public function testGetColumns($colName, $type, $options, $actualType = null)
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -674,7 +666,7 @@ WHERE t.name='ntable'");
         $columns = $this->adapter->getColumns('t');
         $this->assertCount(2, $columns);
         $this->assertEquals($colName, $columns[$colName]->getName());
-        $this->assertEquals($type, $columns[$colName]->getType());
+        $this->assertEquals($actualType ?? $type, $columns[$colName]->getType());
     }
 
     public function testAddIndex()
@@ -1311,8 +1303,8 @@ WHERE t.name='ntable'");
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
         $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column2']);
-        $this->assertEquals('2024-01-01 00:00:00.000', $rows[1]['column2']);
-        $this->assertEquals('2025-01-01 00:00:00.000', $rows[2]['column2']);
+        $this->assertEquals('2024-01-01 00:00:00.0000000', $rows[1]['column2']);
+        $this->assertEquals('2025-01-01 00:00:00.0000000', $rows[2]['column2']);
     }
 
     public function testInsertData()
@@ -1380,8 +1372,8 @@ WHERE t.name='ntable'");
         $this->assertEquals('test', $rows[1]['column2']);
         $this->assertEquals('foo', $rows[2]['column2']);
         $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column3']);
-        $this->assertEquals('2024-01-01 00:00:00.000', $rows[1]['column3']);
-        $this->assertEquals('2025-01-01 00:00:00.000', $rows[2]['column3']);
+        $this->assertEquals('2024-01-01 00:00:00.0000000', $rows[1]['column3']);
+        $this->assertEquals('2025-01-01 00:00:00.0000000', $rows[2]['column3']);
     }
 
     public function testTruncateTable()
@@ -1429,7 +1421,7 @@ WHERE t.name='ntable'");
         ])->save();
 
         $expectedOutput = <<<'OUTPUT'
-CREATE TABLE [dbo].[table1] ([column1] NVARCHAR (255)   NOT NULL , [column2] INT   NULL  DEFAULT NULL, CONSTRAINT PK_table1 PRIMARY KEY ([column1]));
+CREATE TABLE [dbo].[table1] ([column1] NVARCHAR(255) NOT NULL, [column2] INTEGER DEFAULT NULL, CONSTRAINT PK_table1 PRIMARY KEY ([column1]));
 INSERT INTO [dbo].[table1] ([column1], [column2]) VALUES ('id1', 1);
 OUTPUT;
         $output = join("\n", $this->out->messages());

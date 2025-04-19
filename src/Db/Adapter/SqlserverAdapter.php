@@ -116,12 +116,13 @@ class SqlserverAdapter extends AbstractAdapter
             $options['primary_key'] = $options['id'];
         }
 
+        $dialect = $this->getSchemaDialect();
         $sql = 'CREATE TABLE ';
         $sql .= $this->quoteTableName($table->getName()) . ' (';
         $sqlBuffer = [];
         $columnsWithComments = [];
         foreach ($columns as $column) {
-            $sqlBuffer[] = $this->quoteColumnName((string)$column->getName()) . ' ' . $this->getColumnSqlDefinition($column);
+            $sqlBuffer[] = $dialect->columnDefinitionSql($column->toArray());
 
             // set column comments, if needed
             if ($column->getComment()) {
@@ -399,6 +400,7 @@ class SqlserverAdapter extends AbstractAdapter
      */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
+        // TODO update this
         $alter = sprintf(
             'ALTER TABLE %s ADD %s %s',
             $table->getName(),
@@ -502,6 +504,7 @@ SQL;
             $instructions->merge($this->getDropDefaultConstraint($tableName, (string)$newColumn->getName()));
         }
 
+        // TODO update this
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s ALTER COLUMN %s %s',
             $this->quoteTableName($tableName),
