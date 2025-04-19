@@ -1065,62 +1065,6 @@ SQL;
     }
 
     /**
-     * Gets the SqlServer Column Definition for a Column object.
-     *
-     * @param \Migrations\Db\Table\Column $column Column
-     * @param bool $create Create column flag
-     * @return string
-     */
-    protected function getColumnSqlDefinition(Column $column, bool $create = true): string
-    {
-        $buffer = [];
-        if ($column->getType() instanceof Literal) {
-            $buffer[] = (string)$column->getType();
-        } else {
-            $sqlType = $this->getSqlType($column->getType());
-            $buffer[] = strtoupper($sqlType['name']);
-            // integers cant have limits in SQlServer
-            $noLimits = [
-                'bigint',
-                'int',
-                'tinyint',
-                'smallint',
-            ];
-            if ($sqlType['name'] === static::PHINX_TYPE_DECIMAL && $column->getPrecision() && $column->getScale()) {
-                $buffer[] = sprintf(
-                    '(%s, %s)',
-                    $column->getPrecision() ?: $sqlType['precision'],
-                    $column->getScale() ?: $sqlType['scale'],
-                );
-            } elseif (!in_array($sqlType['name'], $noLimits) && ($column->getLimit() || isset($sqlType['limit']))) {
-                $buffer[] = sprintf('(%s)', $column->getLimit() ?: $sqlType['limit']);
-            }
-        }
-
-        $properties = $column->getProperties();
-        $buffer[] = $column->getType() === 'filestream' ? 'FILESTREAM' : '';
-        $buffer[] = isset($properties['rowguidcol']) ? 'ROWGUIDCOL' : '';
-
-        $buffer[] = $column->isNull() ? 'NULL' : 'NOT NULL';
-
-        if ($create === true) {
-            if ($column->getDefault() === null && $column->isNull()) {
-                $buffer[] = ' DEFAULT NULL';
-            } else {
-                $buffer[] = $this->getDefaultValueDefinition($column->getDefault());
-            }
-        }
-
-        if ($column->isIdentity()) {
-            $seed = $column->getSeed() ?: 1;
-            $increment = $column->getIncrement() ?: 1;
-            $buffer[] = sprintf('IDENTITY(%d,%d)', $seed, $increment);
-        }
-
-        return implode(' ', $buffer);
-    }
-
-    /**
      * Gets the SqlServer Index Definition for an Index object.
      *
      * @param \Migrations\Db\Table\Index $index Index
@@ -1174,6 +1118,7 @@ SQL;
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey, string $tableName): string
     {
         $constraintName = $foreignKey->getName() ?: $tableName . '_' . implode('_', $foreignKey->getColumns());
+
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName);
         $def .= ' FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")';
         $def .= " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable()->getName())} (\"" . implode('", "', $foreignKey->getReferencedColumns()) . '")';
