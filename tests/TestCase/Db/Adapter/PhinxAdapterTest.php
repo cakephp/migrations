@@ -1563,12 +1563,12 @@ INPUT;
     public function testGetColumns()
     {
         $conn = $this->adapter->getConnection();
-        $conn->execute('create table t(a integer, b text, c char(5), d integer(12,6), e integer not null, f integer null)');
+        $conn->execute('create table t(a integer, b text, c char(5), d decimal(12,6), e integer not null, f integer null)');
         $exp = [
             ['name' => 'a', 'type' => 'integer', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
             ['name' => 'b', 'type' => 'text', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
             ['name' => 'c', 'type' => 'char', 'null' => true, 'limit' => 5, 'precision' => 5, 'scale' => null],
-            ['name' => 'd', 'type' => 'integer', 'null' => true, 'limit' => 12, 'precision' => 12, 'scale' => 6],
+            ['name' => 'd', 'type' => 'decimal', 'null' => true, 'limit' => 12, 'precision' => 12, 'scale' => 6],
             ['name' => 'e', 'type' => 'integer', 'null' => false, 'limit' => null, 'precision' => null, 'scale' => null],
             ['name' => 'f', 'type' => 'integer', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
         ];

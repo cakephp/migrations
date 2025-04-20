@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Database\Schema\TableSchema;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Expression;
@@ -493,28 +494,26 @@ PCRE_PATTERN;
         $defaultBare = rtrim(ltrim($defaultClean, $trimChars . '('), $trimChars . ')');
 
         // match the string against one of several patterns
-        if (preg_match('/^CURRENT_(?:DATE|TIME|TIMESTAMP)$/i', $defaultBare)) {
-            // magic date or time
-            return strtoupper($defaultBare);
-        } elseif (preg_match('/^\'(?:[^\']|\'\')*\'$/i', $defaultBare)) {
+        if ($columnType === 'text' || $columnType === 'string') {
             // string literal
-            $str = str_replace("''", "'", substr($defaultBare, 1, strlen($defaultBare) - 2));
-
-            return Literal::from($str);
-        } elseif (preg_match('/^[+-]?\d+$/i', $defaultBare)) {
-            $int = (int)$defaultBare;
+            return Literal::from($default);
+        } elseif (preg_match('/^CURRENT_(?:DATE|TIME|TIMESTAMP)$/i', $default)) {
+            // magic date or time
+            return strtoupper($default);
+        } elseif (preg_match('/^[+-]?\d+$/i', $default)) {
+            $int = (int)$default;
             // integer literal
             if ($columnType === self::PHINX_TYPE_BOOLEAN && ($int === 0 || $int === 1)) {
                 return (bool)$int;
             } else {
                 return $int;
             }
-        } elseif (preg_match('/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i', $defaultBare)) {
+        } elseif (preg_match('/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i', $default)) {
             // float literal
-            return (float)$defaultBare;
-        } elseif (preg_match('/^0x[0-9a-f]+$/i', $defaultBare)) {
+            return (float)$default;
+        } elseif (preg_match('/^0x[0-9a-f]+$/i', $default)) {
             // hexadecimal literal
-            return hexdec(substr($defaultBare, 2));
+            return hexdec(substr($default, 2));
         } elseif (preg_match('/^null$/i', $defaultBare)) {
             // null literal
             return null;
@@ -523,7 +522,7 @@ PCRE_PATTERN;
             return filter_var($defaultClean, FILTER_VALIDATE_BOOLEAN);
         } else {
             // any other expression: return the expression with parentheses, but without comments
-            return Expression::from($defaultClean);
+            return Expression::from($default);
         }
     }
 
@@ -580,9 +579,7 @@ PCRE_PATTERN;
     {
         $dialect = $this->getSchemaDialect();
 
-        [$query, $params] = $dialect->describeColumnSql($tableName, []);
-
-        return $this->query($query, $params)->fetchAll('assoc');
+        return $dialect->describeColumns($tableName);
     }
 
     /**
@@ -591,21 +588,19 @@ PCRE_PATTERN;
     public function getColumns(string $tableName): array
     {
         $columns = [];
-        $identity = $this->resolveIdentity($tableName);
-
         foreach ($this->getColumnData($tableName) as $columnInfo) {
+            $default = $this->parseDefaultValue($columnInfo['default'], $columnInfo['type']);
             $column = new Column();
-            $type = $this->getPhinxType($columnInfo['type']);
-            $default = $this->parseDefaultValue($columnInfo['dflt_value'], $type['name']);
-
-            $column->setName($columnInfo['name'])
-                // SQLite on PHP 8.1 returns int for notnull, older versions return a string
-                   ->setNull((int)$columnInfo['notnull'] !== 1)
-                   ->setDefault($default)
-                   ->setType($type['name'])
-                   ->setLimit($type['limit'])
-                   ->setScale($type['scale'])
-                   ->setIdentity($columnInfo['name'] === $identity);
+            $column
+                ->setName($columnInfo['name'])
+                ->setType($columnInfo['type'])
+                ->setNull($columnInfo['null'])
+                ->setDefault($default)
+                ->setLimit($columnInfo['length'])
+                // cakephp uses precision not scale
+                ->setScale($columnInfo['precision'] ?? null)
+                ->setComment($columnInfo['comment'])
+                ->setIdentity($columnInfo['autoIncrement'] ?? false);
 
             $columns[] = $column;
         }
@@ -1047,7 +1042,6 @@ PCRE_PATTERN;
                 $writeColumns[] = $writeName;
             }
         }
-
         $selectColumns = array_filter($selectColumns, fn($value) => $value !== '');
         $writeColumns = array_filter($writeColumns, fn($value) => $value !== '');
         $selectColumns = array_map([$this, 'quoteColumnName'], $selectColumns);
@@ -1224,7 +1218,7 @@ PCRE_PATTERN;
 
         $instructions->addPostStep(function ($state) use ($columnName) {
             $sql = preg_replace(
-                sprintf("/%s\s%s.*(,\s(?!')|\)$)/U", preg_quote($this->quoteColumnName($columnName)), preg_quote($state['columnType'])),
+                sprintf("/%s\s\w+.*(,\s(?!')|\)$)/U", preg_quote($this->quoteColumnName($columnName))),
                 '',
                 (string)$state['createSQL'],
             );
@@ -1424,16 +1418,15 @@ PCRE_PATTERN;
      */
     protected function getPrimaryKey(string $tableName): array
     {
-        $primaryKey = [];
-        $rows = $this->getColumnData($tableName);
-
-        foreach ($rows as $row) {
-            if ($row['pk'] > 0) {
-                $primaryKey[$row['pk'] - 1] = $row['name'];
+        $dialect = $this->getSchemaDialect();
+        $indexes = $dialect->describeIndexes($tableName);
+        foreach ($indexes as $index) {
+            if ($index['type'] == TableSchema::CONSTRAINT_PRIMARY) {
+                return $index['columns'];
             }
         }
 
-        return $primaryKey;
+        return [];
     }
 
     /**
