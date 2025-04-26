@@ -920,7 +920,7 @@ PCRE_PATTERN;
             foreach ($otherTables as $otherTable) {
                 $foreignKeyList = $this->getForeignKeys($otherTable['name']);
                 foreach ($foreignKeyList as $foreignKey) {
-                    if (strcasecmp($foreignKey['table'], $tableName) === 0) {
+                    if (strcasecmp($foreignKey['references'][0], $tableName) === 0) {
                         $tablesToCheck[] = $otherTable['name'];
                         break;
                     }
@@ -1434,16 +1434,12 @@ PCRE_PATTERN;
      */
     public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
     {
-        if ($constraint !== null) {
-            return preg_match(
-                "/,?\s*CONSTRAINT\s*" . $this->possiblyQuotedIdentifierRegex($constraint) . '\s*FOREIGN\s+KEY/is',
-                $this->getDeclaringSql($tableName),
-            ) === 1;
-        }
-
         $columns = array_map('mb_strtolower', (array)$columns);
 
         foreach ($this->getForeignKeys($tableName) as $key) {
+            if ($constraint !== null && $key['name'] == $constraint) {
+                return true;
+            }
             if (array_map('mb_strtolower', $key['columns']) === $columns) {
                 return true;
             }
@@ -1460,25 +1456,10 @@ PCRE_PATTERN;
      */
     protected function getForeignKeys(string $tableName): array
     {
-        $foreignKeys = [];
+        $dialect = $this->getSchemaDialect();
+        $keys = $dialect->describeForeignKeys($tableName);
 
-        // Can't use the dialect here because describeForeignKeySql()
-        // doesn't fetch all metadata. If we improve the metadata query
-        // we can simplify here too.
-        $query = sprintf('PRAGMA foreign_key_list(%s)', $this->quoteTableName($tableName));
-        $rows = $this->fetchAll($query);
-
-        foreach ($rows as $row) {
-            if (!isset($foreignKeys[$row['id']])) {
-                $foreignKeys[$row['id']] = [
-                    'columns' => [],
-                    'table' => $row['table'],
-                ];
-            }
-            $foreignKeys[$row['id']]['columns'][$row['seq']] = $row['from'];
-        }
-
-        return $foreignKeys;
+        return $keys;
     }
 
     /**

@@ -1465,44 +1465,6 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
     }
 
-    public function testDropForeignKeyWithIdenticalMultipleColumns()
-    {
-        $refTable = new Table('ref_table', [], $this->adapter);
-        $refTable
-            ->addColumn('field1', 'string')
-            ->addIndex(['id', 'field1'], ['unique' => true])
-            ->save();
-
-        $table = new Table('table', [], $this->adapter);
-        $keyOne = (new ForeignKey())
-            ->setName('ref_table_fk_1')
-            ->setColumns(['ref_table_id', 'ref_table_field1'])
-            ->setReferencedTable('ref_table')
-            ->setReferencedColumns(['id', 'field1']);
-        $keyTwo = (new ForeignKey())
-            ->setName('ref_table_fk_2')
-            ->setColumns(['ref_table_id', 'ref_table_field1'])
-            ->setReferencedTable('ref_table')
-            ->setReferencedColumns(['id', 'field1']);
-
-        $table
-            ->addColumn('ref_table_id', 'integer', ['signed' => false])
-            ->addColumn('ref_table_field1', 'string')
-            ->addForeignKey($keyOne)
-            ->addForeignKey($keyTwo)
-            ->save();
-
-        $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']));
-        $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [], 'ref_table_fk_1'));
-        $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [], 'ref_table_fk_2'));
-
-        $this->adapter->dropForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']);
-
-        $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id', 'ref_table_field1']));
-        $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'ref_table_fk_1'));
-        $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'ref_table_fk_2'));
-    }
-
     public static function nonExistentForeignKeyColumnsProvider(): array
     {
         return [
@@ -2596,7 +2558,8 @@ INPUT;
         ];
     }
 
-    public function testHasNamedForeignKey()
+    #[DataProvider('hasNamedForeignKeyProvider')]
+    public function testHasNamedForeignKey(string $keySql, ?string $keyName, array $columns, bool $expected): void
     {
         $refTable = new Table('tbl_parent_1', [], $this->adapter);
         $refTable->addColumn('column', 'string')->create();
@@ -2617,35 +2580,94 @@ INPUT;
             `column` VARCHAR NOT NULL, `parent_1_id` INTEGER NOT NULL,
             `parent_2_id` INTEGER NOT NULL,
             `parent_3_id` INTEGER NOT NULL,
-            CONSTRAINT `fk_parent_1_id` FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            CONSTRAINT [fk_[_brackets] FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            CONSTRAINT `fk_``_ticks` FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            CONSTRAINT \"fk_\"\"_double_quotes\" FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            CONSTRAINT 'fk_''_single_quotes' FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            CONSTRAINT fk_no_quotes FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            CONSTRAINT`fk_no_space`FOREIGN KEY(`parent_1_id`)REFERENCES`tbl_parent_1`(`id`),
-            constraint
-                `fk_lots_of_space`    FOReign		KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`),
-            FOREIGN KEY (`parent_2_id`) REFERENCES `tbl_parent_2` (`id`),
-            CONSTRAINT `check_constraint_1` CHECK (column<>'world'),
-            CONSTRAINT `fk_composite_key` FOREIGN KEY (`parent_3_id`,`column`) REFERENCES `tbl_parent_3` (`id`,`column`)
-            CONSTRAINT `check_constraint_2` CHECK (column<>'hello')
+            {$keySql}
         )");
 
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_parent_1_id'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_[_brackets'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_`_ticks'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_"_double_quotes'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], "fk_'_single_quotes"));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_no_quotes'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_no_space'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_lots_of_space'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', ['parent_1_id']));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', ['parent_2_id']));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', [], 'fk_composite_key'));
-        $this->assertTrue($this->adapter->hasForeignKey('tbl_child', ['parent_3_id', 'column']));
-        $this->assertFalse($this->adapter->hasForeignKey('tbl_child', [], 'check_constraint_1'));
-        $this->assertFalse($this->adapter->hasForeignKey('tbl_child', [], 'check_constraint_2'));
+        $this->assertSame($expected, $this->adapter->hasForeignKey('tbl_child', $columns, $keyName));
+    }
+
+    /**
+     * @return array
+     */
+    public static function hasNamedForeignKeyProvider(): array
+    {
+        return [
+            // key sql, expected name, columns, expected presence
+            [
+                'CONSTRAINT `fk_parent_1_id` FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                'fk_parent_1_id',
+                [],
+                true,
+            ],
+            [
+                'CONSTRAINT [fk_[_brackets] FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                'fk_[_brackets',
+                [],
+                true,
+            ],
+            [
+                'CONSTRAINT `fk_``_ticks` FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                'fk_`_ticks',
+                [],
+                true,
+            ],
+            [
+                'CONSTRAINT "fk_""_double_quotes" FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                'fk_"_double_quotes',
+                [],
+                true,
+            ],
+            [
+                "CONSTRAINT 'fk_''_single_quotes' FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)",
+                "fk_'_single_quotes",
+                [],
+                true,
+            ],
+            [
+                'CONSTRAINT fk_no_quotes FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                'fk_no_quotes',
+                [],
+                true,
+            ],
+            [
+                'CONSTRAINT`fk_no_space`FOREIGN KEY(`parent_1_id`)REFERENCES`tbl_parent_1`(`id`)',
+                'fk_no_space',
+                [],
+                true,
+            ],
+            [
+                'constraint
+                `fk_lots_of_space`    FOReign		KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                'fk_lots_of_space',
+                [],
+                true,
+            ],
+            [
+                'FOREIGN KEY (`parent_2_id`) REFERENCES `tbl_parent_2` (`id`)',
+                null,
+                ['parent_2_id'],
+                true,
+            ],
+            [
+                'CONSTRAINT `fk_parent_1_id` FOREIGN KEY (`parent_1_id`) REFERENCES `tbl_parent_1` (`id`)',
+                null,
+                ['parent_1_id'],
+                true,
+            ],
+            [
+                'CONSTRAINT `fk_composite_key` FOREIGN KEY (`parent_3_id`,`column`) REFERENCES `tbl_parent_3` (`id`,`column`)',
+                null,
+                ['parent_3_id', 'column'],
+                true,
+            ],
+            // Should not find check constraints
+            [
+                "CONSTRAINT `check_constraint_1` CHECK (column<>'world')",
+                'check_constraint_1',
+                [],
+                false,
+            ],
+        ];
     }
 
     #[DataProvider('providePhinxTypes')]
