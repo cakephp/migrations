@@ -225,7 +225,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             'boolean' => true,
             'help' => 'Do not generate a test skeleton.',
         ])->addOption('force', [
-            'short' => 'f',
             'boolean' => true,
             'help' => 'Force overwriting existing file if a migration already exists with the same name.',
         ])->addOption('source', [
