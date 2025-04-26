@@ -558,13 +558,6 @@ PCRE_PATTERN;
         if ($result === null) {
             return null;
         }
-        // make sure the table does not have a PK-origin autoindex
-        // such an autoindex would indicate either that the primary key was specified as descending, or that this is a WITHOUT ROWID table
-        foreach ($this->getIndexes($tableName) as $idx) {
-            if ($idx['origin'] === 'pk') {
-                return null;
-            }
-        }
 
         return $result;
     }
@@ -759,12 +752,17 @@ PCRE_PATTERN;
                 ",
                 $params,
             )->fetchAll('assoc');
+
             $indexes = $this->getIndexes($tableName);
+            $indexMap = [];
+            foreach ($indexes as $index) {
+                $indexMap[$index['name']] = $index;
+            }
 
             foreach ($rows as $row) {
                 switch ($row['type']) {
                     case 'index':
-                        $info = $indexes[$row['name']];
+                        $info = $indexMap[$row['name']];
                         $columns = array_map(
                             function ($column) {
                                 if ($column === null) {
@@ -1244,24 +1242,7 @@ PCRE_PATTERN;
     protected function getIndexes(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-
-        [$query, $params] = $dialect->describeIndexSql($tableName, []);
-        $result = $this->query($query, $params)->fetchAll('assoc');
-
-        $indexes = [];
-        foreach ($result as $index) {
-            // We can't use the dialect here as convertIndexDescription
-            // has complicated requirements
-            $indexData = $this->fetchAll(sprintf('pragma index_info(%s)', $this->quoteColumnName($index['name'])));
-            $cols = [];
-            foreach ($indexData as $indexItem) {
-                $cols[] = $indexItem['name'];
-            }
-            $indexes[$index['name']] = [
-                'origin' => $index['origin'],
-                'columns' => $cols,
-            ];
-        }
+        $indexes = $dialect->describeIndexes($tableName);
 
         return $indexes;
     }
@@ -1279,10 +1260,10 @@ PCRE_PATTERN;
         $indexes = $this->getIndexes($tableName);
         $matches = [];
 
-        foreach ($indexes as $name => $index) {
+        foreach ($indexes as $index) {
             $indexCols = array_map('strtolower', $index['columns']);
             if ($columns == $indexCols) {
-                $matches[] = $name;
+                $matches[] = $index['name'];
             }
         }
 
@@ -1305,8 +1286,8 @@ PCRE_PATTERN;
         $indexName = strtolower($indexName);
         $indexes = $this->getIndexes($tableName);
 
-        foreach (array_keys($indexes) as $index) {
-            if ($indexName === strtolower($index)) {
+        foreach ($indexes as $index) {
+            if ($indexName === strtolower($index['name'])) {
                 return true;
             }
         }
@@ -1348,6 +1329,10 @@ PCRE_PATTERN;
         $indexNames = $this->resolveIndex($tableName, $columns);
         $schema = $this->getSchemaName($tableName, true)['schema'];
         foreach ($indexNames as $indexName) {
+            // Skip the implicit primary key that is reflected.
+            if ($indexName === 'primary') {
+                continue;
+            }
             if (strpos($indexName, 'sqlite_autoindex_') !== 0) {
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s%s',
@@ -1370,8 +1355,8 @@ PCRE_PATTERN;
         $indexes = $this->getIndexes($tableName);
 
         $found = false;
-        foreach (array_keys($indexes) as $index) {
-            if ($indexName === strtolower($index)) {
+        foreach ($indexes as $index) {
+            if ($indexName === strtolower($index['name'])) {
                 $found = true;
                 break;
             }
@@ -1379,11 +1364,11 @@ PCRE_PATTERN;
 
         if ($found) {
             $schema = $this->getSchemaName($tableName, true)['schema'];
-                $instructions->addPostStep(sprintf(
-                    'DROP INDEX %s%s',
-                    $schema,
-                    $this->quoteColumnName($indexName),
-                ));
+            $instructions->addPostStep(sprintf(
+                'DROP INDEX %s%s',
+                $schema,
+                $this->quoteColumnName($indexName),
+            ));
         }
 
         return $instructions;
@@ -1553,14 +1538,14 @@ PCRE_PATTERN;
             $schema = $this->getSchemaName($tableName, true)['schema'];
             $tmpTableName = $state['tmpTableName'];
             $indexes = $this->getIndexes($tableName);
-            foreach (array_keys($indexes) as $indexName) {
-                if (strpos($indexName, 'sqlite_autoindex_') !== 0) {
+            foreach ($indexes as $index) {
+                if (strpos($index['name'], 'sqlite_autoindex_') !== 0) {
                     $sql .= sprintf(
                         'DROP INDEX %s%s; ',
                         $schema,
-                        $this->quoteColumnName($indexName),
+                        $this->quoteColumnName($index['name']),
                     );
-                    $createIndexSQL = $this->getDeclaringIndexSQL($tableName, $indexName);
+                    $createIndexSQL = $this->getDeclaringIndexSQL($tableName, $index['name']);
                     $sql .= preg_replace(
                         "/\b{$tableName}\b/",
                         $tmpTableName,
