@@ -614,16 +614,7 @@ class MysqlAdapter extends AbstractAdapter
     protected function getIndexes(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        // TODO use dialect
-        [$query, $params] = $dialect->describeIndexSql($tableName, []);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-        $indexes = [];
-        foreach ($rows as $row) {
-            if (!isset($indexes[$row['Key_name']])) {
-                $indexes[$row['Key_name']] = ['columns' => []];
-            }
-            $indexes[$row['Key_name']]['columns'][] = strtolower($row['Column_name']);
-        }
+        $indexes = $dialect->describeIndexes($tableName);
 
         return $indexes;
     }
@@ -656,8 +647,8 @@ class MysqlAdapter extends AbstractAdapter
     {
         $indexes = $this->getIndexes($tableName);
 
-        foreach ($indexes as $name => $index) {
-            if ($name === $indexName) {
+        foreach ($indexes as $index) {
+            if ($index['name'] === $indexName) {
                 return true;
             }
         }
@@ -708,11 +699,11 @@ class MysqlAdapter extends AbstractAdapter
         $indexes = $this->getIndexes($tableName);
         $columns = array_map('strtolower', $columns);
 
-        foreach ($indexes as $indexName => $index) {
+        foreach ($indexes as $index) {
             if ($columns == $index['columns']) {
                 return new AlterInstructions([sprintf(
                     'DROP INDEX %s',
-                    $this->quoteColumnName($indexName),
+                    $this->quoteColumnName($index['name']),
                 )]);
             }
         }
@@ -732,8 +723,8 @@ class MysqlAdapter extends AbstractAdapter
     {
         $indexes = $this->getIndexes($tableName);
 
-        foreach ($indexes as $name => $index) {
-            if ($name === $indexName) {
+        foreach ($indexes as $index) {
+            if ($index['name'] === $indexName) {
                 return new AlterInstructions([sprintf(
                     'DROP INDEX %s',
                     $this->quoteColumnName($indexName),
@@ -754,17 +745,14 @@ class MysqlAdapter extends AbstractAdapter
     {
         $primaryKey = $this->getPrimaryKey($tableName);
 
-        if (empty($primaryKey['constraint'])) {
+        if (empty($primaryKey['name'])) {
             return false;
         }
 
         if ($constraint) {
-            return $primaryKey['constraint'] === $constraint;
+            return $primaryKey['name'] === $constraint;
         } else {
-            if (is_string($columns)) {
-                $columns = [$columns]; // str to array
-            }
-            $missingColumns = array_diff($columns, $primaryKey['columns']);
+            $missingColumns = array_diff($columns, (array)$primaryKey['columns']);
 
             return empty($missingColumns);
         }
@@ -780,12 +768,14 @@ class MysqlAdapter extends AbstractAdapter
     {
         $indexes = $this->getIndexes($tableName);
         $primaryKey = [
-            'constraint' => '',
+            'name' => '',
             'columns' => [],
         ];
-        foreach ($indexes as $name => $row) {
-            $primaryKey['constraint'] = $name;
-            $primaryKey['columns'] = (array)$row['columns'];
+        foreach ($indexes as $index) {
+            if ($index['type'] === TableSchema::CONSTRAINT_PRIMARY) {
+                $primaryKey = $index;
+                break;
+            }
         }
 
         return $primaryKey;
@@ -823,25 +813,6 @@ class MysqlAdapter extends AbstractAdapter
     {
         $dialect = $this->getSchemaDialect();
         $foreignKeys = $dialect->describeForeignKeys($tableName);
-
-        return $foreignKeys;
-
-        $schema = (string)$this->getOption('database');
-        if (strpos($tableName, '.') !== false) {
-            [$schema, $tableName] = explode('.', $tableName);
-        }
-        $config = ['database' => $schema];
-
-        [$query, $params] = $dialect->describeForeignKeySql($tableName, $config);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-
-        $foreignKeys = [];
-        foreach ($rows as $row) {
-            $foreignKeys[$row['CONSTRAINT_NAME']]['table'] = $row['TABLE_NAME'];
-            $foreignKeys[$row['CONSTRAINT_NAME']]['columns'][] = $row['COLUMN_NAME'];
-            $foreignKeys[$row['CONSTRAINT_NAME']]['referenced_table'] = $row['REFERENCED_TABLE_NAME'];
-            $foreignKeys[$row['CONSTRAINT_NAME']]['referenced_columns'][] = $row['REFERENCED_COLUMN_NAME'];
-        }
 
         return $foreignKeys;
     }
