@@ -422,6 +422,7 @@ class MysqlAdapter extends AbstractAdapter
     public function getColumns(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
+        // TODO use dialect
         [$query, $params] = $dialect->describeColumnSql($tableName, []);
         $rows = $this->query($query, $params)->fetchAll('assoc');
 
@@ -613,6 +614,7 @@ class MysqlAdapter extends AbstractAdapter
     protected function getIndexes(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
+        // TODO use dialect
         [$query, $params] = $dialect->describeIndexSql($tableName, []);
         $rows = $this->query($query, $params)->fetchAll('assoc');
         $indexes = [];
@@ -795,12 +797,9 @@ class MysqlAdapter extends AbstractAdapter
     public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
     {
         $foreignKeys = $this->getForeignKeys($tableName);
+        $names = array_map(fn ($key) => $key['name'], $foreignKeys);
         if ($constraint) {
-            if (isset($foreignKeys[$constraint])) {
-                return !empty($foreignKeys[$constraint]);
-            }
-
-            return false;
+            return in_array($constraint, $names, true);
         }
 
         $columns = array_map('mb_strtolower', (array)$columns);
@@ -823,6 +822,10 @@ class MysqlAdapter extends AbstractAdapter
     protected function getForeignKeys(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
+        $foreignKeys = $dialect->describeForeignKeys($tableName);
+
+        return $foreignKeys;
+
         $schema = (string)$this->getOption('database');
         if (strpos($tableName, '.') !== false) {
             [$schema, $tableName] = explode('.', $tableName);
@@ -882,9 +885,9 @@ class MysqlAdapter extends AbstractAdapter
 
         $matches = [];
         $foreignKeys = $this->getForeignKeys($tableName);
-        foreach ($foreignKeys as $name => $key) {
+        foreach ($foreignKeys as $key) {
             if (array_map('mb_strtolower', $key['columns']) === $columns) {
-                $matches[] = $name;
+                $matches[] = $key['name'];
             }
         }
 
