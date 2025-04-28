@@ -741,7 +741,7 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function hasPrimaryKey(string $tableName, $columns, ?string $constraint = null): bool
+    public function hasPrimaryKey(string $tableName, string|array $columns, ?string $constraint = null): bool
     {
         $primaryKey = $this->getPrimaryKey($tableName);
 
@@ -752,7 +752,7 @@ class MysqlAdapter extends AbstractAdapter
         if ($constraint) {
             return $primaryKey['name'] === $constraint;
         } else {
-            $missingColumns = array_diff($columns, (array)$primaryKey['columns']);
+            $missingColumns = array_diff((array)$columns, (array)$primaryKey['columns']);
 
             return empty($missingColumns);
         }
@@ -787,7 +787,7 @@ class MysqlAdapter extends AbstractAdapter
     public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
     {
         $foreignKeys = $this->getForeignKeys($tableName);
-        $names = array_map(fn ($key) => $key['name'], $foreignKeys);
+        $names = array_map(fn($key) => $key['name'], $foreignKeys);
         if ($constraint) {
             return in_array($constraint, $names, true);
         }
