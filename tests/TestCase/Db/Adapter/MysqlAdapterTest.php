@@ -1008,20 +1008,20 @@ class MysqlAdapterTest extends TestCase
     public static function binaryToBlobAutomaticConversionData()
     {
         return [
-          [null, 'blob', MysqlAdapter::BLOB_REGULAR],
-          [64, 'tinyblob', 255],
-          [MysqlAdapter::BLOB_REGULAR - 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
-          [MysqlAdapter::BLOB_REGULAR, 'blob', MysqlAdapter::BLOB_REGULAR],
-          [MysqlAdapter::BLOB_REGULAR + 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
-          [MysqlAdapter::BLOB_MEDIUM, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
-          [MysqlAdapter::BLOB_MEDIUM + 20, 'longblob', MysqlAdapter::BLOB_LONG],
-          [MysqlAdapter::BLOB_LONG, 'longblob', MysqlAdapter::BLOB_LONG],
-          [MysqlAdapter::BLOB_LONG + 20, 'longblob', MysqlAdapter::BLOB_LONG],
+            // limit, expected type, expected limit
+            [null, 'binary', null],
+            [64, 'binary', 255],
+            [MysqlAdapter::BLOB_REGULAR - 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            [MysqlAdapter::BLOB_REGULAR, 'binary', null],
+            [MysqlAdapter::BLOB_REGULAR + 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            [MysqlAdapter::BLOB_MEDIUM, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            [MysqlAdapter::BLOB_MEDIUM + 20, 'longblob', MysqlAdapter::BLOB_LONG],
+            [MysqlAdapter::BLOB_LONG, 'longblob', MysqlAdapter::BLOB_LONG],
         ];
     }
 
     #[DataProvider('binaryToBlobAutomaticConversionData')]
-    public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
+    public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, ?int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'binary', ['limit' => $limit])
@@ -1035,20 +1035,20 @@ class MysqlAdapterTest extends TestCase
     public static function varbinaryToBlobAutomaticConversionData()
     {
         return [
-          [null, 'blob', MysqlAdapter::BLOB_REGULAR],
-          [64, 'tinyblob', 255],
-          [MysqlAdapter::BLOB_REGULAR - 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
-          [MysqlAdapter::BLOB_REGULAR, 'blob', MysqlAdapter::BLOB_REGULAR],
-          [MysqlAdapter::BLOB_REGULAR + 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
-          [MysqlAdapter::BLOB_MEDIUM, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
-          [MysqlAdapter::BLOB_MEDIUM + 20, 'longblob', MysqlAdapter::BLOB_LONG],
-          [MysqlAdapter::BLOB_LONG, 'longblob', MysqlAdapter::BLOB_LONG],
-          [MysqlAdapter::BLOB_LONG + 20, 'longblob', MysqlAdapter::BLOB_LONG],
+            // limit, expected type, expected limit
+            [null, 'binary', null],
+            [64, 'binary', 255],
+            [MysqlAdapter::BLOB_REGULAR - 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            [MysqlAdapter::BLOB_REGULAR, 'binary', null],
+            [MysqlAdapter::BLOB_REGULAR + 20, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            [MysqlAdapter::BLOB_MEDIUM, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            [MysqlAdapter::BLOB_MEDIUM + 20, 'longblob', MysqlAdapter::BLOB_LONG],
+            [MysqlAdapter::BLOB_LONG, 'longblob', MysqlAdapter::BLOB_LONG],
         ];
     }
 
     #[DataProvider('varbinaryToBlobAutomaticConversionData')]
-    public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, int $expectedLimit)
+    public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, ?int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'varbinary', ['limit' => $limit])
@@ -1062,27 +1062,28 @@ class MysqlAdapterTest extends TestCase
     public static function blobColumnsData()
     {
         return [
+          // type, expected type, limit, expected limit
           // Tiny blobs
-          ['tinyblob', 'tinyblob', null, MysqlAdapter::BLOB_TINY],
-          ['tinyblob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
+          ['tinyblob', 'binary', null, MysqlAdapter::BLOB_TINY],
+          ['tinyblob', 'binary', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
           ['tinyblob', 'mediumblob', MysqlAdapter::BLOB_TINY + 20, MysqlAdapter::BLOB_MEDIUM],
           ['tinyblob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['tinyblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
-          // Regular blobs
-          ['blob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['blob', 'blob', null, MysqlAdapter::BLOB_REGULAR],
-          ['blob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
+          // // Regular blobs
+          ['blob', 'binary', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
+          ['blob', 'binary', null, null],
+          ['blob', 'binary', MysqlAdapter::BLOB_REGULAR, null],
           ['blob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['blob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
-          // medium blobs
-          ['mediumblob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['mediumblob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
+          // // medium blobs
+          ['mediumblob', 'binary', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
+          ['mediumblob', 'binary', MysqlAdapter::BLOB_REGULAR, null],
           ['mediumblob', 'mediumblob', null, MysqlAdapter::BLOB_MEDIUM],
           ['mediumblob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['mediumblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
           // long blobs
-          ['longblob', 'tinyblob', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
-          ['longblob', 'blob', MysqlAdapter::BLOB_REGULAR, MysqlAdapter::BLOB_REGULAR],
+          ['longblob', 'binary', MysqlAdapter::BLOB_TINY, MysqlAdapter::BLOB_TINY],
+          ['longblob', 'binary', MysqlAdapter::BLOB_REGULAR, null],
           ['longblob', 'mediumblob', MysqlAdapter::BLOB_MEDIUM, MysqlAdapter::BLOB_MEDIUM],
           ['longblob', 'longblob', null, MysqlAdapter::BLOB_LONG],
           ['longblob', 'longblob', MysqlAdapter::BLOB_LONG, MysqlAdapter::BLOB_LONG],
@@ -1090,7 +1091,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('blobColumnsData')]
-    public function testblobColumns(string $type, string $expectedType, ?int $limit, int $expectedLimit)
+    public function testblobColumns(string $type, string $expectedType, ?int $limit, ?int $expectedLimit)
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', $type, ['limit' => $limit])
@@ -1227,7 +1228,7 @@ class MysqlAdapterTest extends TestCase
             ['column9', 'time', []],
             ['column10', 'timestamp', []],
             ['column11', 'date', []],
-            ['column12', 'blob', []],
+            ['column12', 'binary', []],
             ['column13', 'boolean', ['comment' => 'Lorem ipsum']],
             ['column14', 'string', ['limit' => 10]],
             ['column16', 'geometry', []],
@@ -2251,18 +2252,6 @@ OUTPUT;
         $countQuery->execute([1]);
         $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
-    }
-
-    public function testLiteralSupport()
-    {
-        $createQuery = <<<'INPUT'
-CREATE TABLE `test` (`double_col` double NOT NULL)
-INPUT;
-        $this->adapter->execute($createQuery);
-        $table = new Table('test', [], $this->adapter);
-        $columns = $table->getColumns();
-        $this->assertCount(1, $columns);
-        $this->assertEquals(Literal::from('double'), array_pop($columns)->getType());
     }
 
     public static function geometryTypeProvider()

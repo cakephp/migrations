@@ -68,11 +68,11 @@ class MysqlAdapter extends AbstractAdapter
     public const TEXT_LONG = 2147483647;
 
     // According to https://dev.mysql.com/doc/refman/5.0/en/blob.html BLOB sizes are the same as TEXT
-    public const BLOB_TINY = 255;
-    public const BLOB_SMALL = 255; /* deprecated, alias of BLOB_TINY */
+    public const BLOB_TINY = TableSchema::LENGTH_TINY;
+    public const BLOB_SMALL = TableSchema::LENGTH_TINY; /* deprecated, alias of BLOB_TINY */
     public const BLOB_REGULAR = 65535;
-    public const BLOB_MEDIUM = 16777215;
-    public const BLOB_LONG = 2147483647;
+    public const BLOB_MEDIUM = TableSchema::LENGTH_MEDIUM;
+    public const BLOB_LONG = TableSchema::LENGTH_LONG;
 
     public const INT_TINY = 255;
     public const INT_SMALL = 65535;
@@ -417,64 +417,59 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
+     * Convert from cakephp/database conventions to migrations\column
+     *
+     * - converts datetimefractional -> datetime + length
+     *
+     * @param array $columnData The cakephp/database column data to transform
+     * @return array The extracted/converted type and length.
+     */
+    protected function mapColumnType(array $columnData): array
+    {
+        $type = $columnData['type'];
+        $length = $columnData['length'];
+        // Compatibility for precision
+        if ($type === TableSchema::TYPE_DATETIME_FRACTIONAL) {
+            $type = 'datetime';
+            $length = $columnData['precision'] ?? $length;
+        } else if ($type === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
+            $type = 'timestamp';
+            $length = $columnData['precision'] ?? $length;
+        }
+
+        return [$type, $length];
+    }
+
+    /**
      * @inheritDoc
      */
     public function getColumns(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        // TODO use dialect
-        [$query, $params] = $dialect->describeColumnSql($tableName, []);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-
+        $columnRecords = $dialect->describeColumns($tableName);
         $columns = [];
-        foreach ($rows as $columnInfo) {
-            $phinxType = $this->getPhinxType($columnInfo['Type']);
+        foreach ($columnRecords as $record) {
+            [$type, $length] = $this->mapColumnType($record);
 
-            $column = new Column();
-            $column->setName($columnInfo['Field'])
-                   ->setNull($columnInfo['Null'] !== 'NO')
-                   ->setType($phinxType['name'])
-                   ->setSigned(strpos($columnInfo['Type'], 'unsigned') === false)
-                   ->setLimit($phinxType['limit'])
-                   ->setScale($phinxType['scale'])
-                   ->setComment($columnInfo['Comment']);
+            $column = (new Column())
+                ->setName($record['name'])
+                ->setNull($record['null'])
+                ->setType($type)
+                ->setLimit($length)
+                ->setDefault($record['default'])
+                // cakephp uses precision not scale
+                ->setScale($record['precision'] ?? null)
+                ->setComment($record['comment']);
 
-            if ($columnInfo['Extra'] === 'auto_increment') {
+            if ($record['unsigned'] ?? false) {
+                $column->setSigned(!$record['unsigned']);
+            }
+            if ($record['autoIncrement'] ?? false) {
                 $column->setIdentity(true);
-            } elseif ($columnInfo['Extra'] === 'on update CURRENT_TIMESTAMP') {
-                $column->setUpdate('CURRENT_TIMESTAMP');
-            } elseif ($columnInfo['Extra'] === 'on update current_timestamp()') {
-                $column->setUpdate('CURRENT_TIMESTAMP');
             }
-
-            if (isset($phinxType['values'])) {
-                $column->setValues($phinxType['values']);
+            if ($record['onUpdate'] ?? false) {
+                $column->setUpdate($record['onUpdate']);
             }
-
-            $default = $columnInfo['Default'];
-            if (
-                is_string($default) &&
-                in_array(
-                    $column->getType(),
-                    array_merge(
-                        static::PHINX_TYPES_GEOSPATIAL,
-                        [
-                            static::PHINX_TYPE_BINARY,
-                            static::PHINX_TYPE_TINYBLOB,
-                            static::PHINX_TYPE_BLOB,
-                            static::PHINX_TYPE_JSON,
-                            static::PHINX_TYPE_TEXT,
-                        ],
-                    ),
-                )
-            ) {
-                // The default that comes back from MySQL for these types prefixes the collation type and
-                // surrounds the value with escaped single quotes, for example "_utf8mbf4\'abc\'", and so
-                // this converts that then down to the default value of "abc" to correspond to what the user
-                // would have specified in a migration.
-                $default = preg_replace("/^_(?:[a-zA-Z0-9]+?)\\\'(.*)\\\'$/", '\1', $default);
-            }
-            $column->setDefault($default);
 
             $columns[] = $column;
         }
