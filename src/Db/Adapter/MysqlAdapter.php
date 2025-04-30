@@ -432,7 +432,7 @@ class MysqlAdapter extends AbstractAdapter
         if ($type === TableSchema::TYPE_DATETIME_FRACTIONAL) {
             $type = 'datetime';
             $length = $columnData['precision'] ?? $length;
-        } else if ($type === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
+        } elseif ($type === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
             $type = 'timestamp';
             $length = $columnData['precision'] ?? $length;
         }
