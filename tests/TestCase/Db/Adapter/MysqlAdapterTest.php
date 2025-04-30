@@ -1284,7 +1284,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($colName, $columns[1]->getName());
         $this->assertEquals($type, $columns[1]->getType());
 
-        $this->assertEquals($this->usingMysql8() ? null : 11, $columns[1]->getLimit());
+        $this->assertNull($columns[1]->getLimit());
     }
 
     public function testGetColumnsReservedTableName()
