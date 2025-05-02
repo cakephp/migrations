@@ -638,25 +638,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getIndexes(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        $parts = $this->getSchemaName($tableName);
-
-        [$query, $params] = $dialect->describeIndexSql($parts['table'], [
-            'schema' => $parts['schema'],
-            'database' => $this->getOption('database'),
-        ]);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-
-        $indexes = [];
-        foreach ($rows as $row) {
-            if (!isset($indexes[$row['relname']])) {
-                $indexes[$row['relname']] = [
-                    'isPrimary' => false,
-                    'columns' => [],
-                ];
-            }
-            $indexes[$row['relname']]['columns'][] = $row['attname'];
-            $indexes[$row['relname']]['isPrimary'] = $row['indisprimary'];
-        }
+        $indexes = $dialect->describeIndexes($tableName);
 
         return $indexes;
     }
@@ -685,8 +667,8 @@ class PostgresAdapter extends AbstractAdapter
     public function hasIndexByName(string $tableName, string $indexName): bool
     {
         $indexes = $this->getIndexes($tableName);
-        foreach ($indexes as $name => $index) {
-            if ($name === $indexName) {
+        foreach ($indexes as $index) {
+            if ($index['name'] === $indexName) {
                 return true;
             }
         }
@@ -719,12 +701,12 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         $indexes = $this->getIndexes($tableName);
-        foreach ($indexes as $indexName => $index) {
+        foreach ($indexes as $index) {
             $a = array_diff($columns, $index['columns']);
             if (!$a) {
                 return new AlterInstructions([], [sprintf(
                     'DROP INDEX IF EXISTS %s',
-                    '"' . ($parts['schema'] . '".' . $this->quoteColumnName($indexName)),
+                    '"' . ($parts['schema'] . '".' . $this->quoteColumnName($index['name'])),
                 )]);
             }
         }
@@ -782,9 +764,9 @@ class PostgresAdapter extends AbstractAdapter
     {
         $indexes = $this->getIndexes($tableName);
 
-        foreach ($indexes as $name => $index) {
-            if ($index['isPrimary']) {
-                $index['constraint'] = $name;
+        foreach ($indexes as $index) {
+            if ($index['type'] === 'primary') {
+                $index['constraint'] = $index['name'];
 
                 return $index;
             }
