@@ -781,12 +781,9 @@ class PostgresAdapter extends AbstractAdapter
     public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
     {
         $foreignKeys = $this->getForeignKeys($tableName);
+        $names = array_column($foreignKeys, 'name');
         if ($constraint) {
-            if (isset($foreignKeys[$constraint])) {
-                return !empty($foreignKeys[$constraint]);
-            }
-
-            return false;
+            return in_array($constraint, $names);
         }
 
         if (is_string($columns)) {
@@ -810,26 +807,8 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function getForeignKeys(string $tableName): array
     {
-        $parts = $this->getSchemaName($tableName);
         $dialect = $this->getSchemaDialect();
-
-        [$query, $params] = $dialect->describeForeignKeySql($parts['table'], [
-            'schema' => $parts['schema'],
-            'database' => $this->getOption('database'),
-        ]);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-        $foreignKeys = [];
-        foreach ($rows as $row) {
-            $name = $row['name'];
-            $foreignKeys[$name]['table'] = $parts['table'];
-            $foreignKeys[$name]['columns'][] = $row['column_name'];
-            $foreignKeys[$name]['referenced_table'] = $row['references_table'];
-            $foreignKeys[$name]['referenced_columns'][] = $row['references_field'];
-        }
-        foreach ($foreignKeys as $name => $key) {
-            $foreignKeys[$name]['columns'] = array_values(array_unique($key['columns']));
-            $foreignKeys[$name]['referenced_columns'] = array_values(array_unique($key['referenced_columns']));
-        }
+        $foreignKeys = $dialect->describeForeignKeys($tableName);
 
         return $foreignKeys;
     }
@@ -869,9 +848,9 @@ class PostgresAdapter extends AbstractAdapter
 
         $matches = [];
         $foreignKeys = $this->getForeignKeys($tableName);
-        foreach ($foreignKeys as $name => $key) {
+        foreach ($foreignKeys as $key) {
             if ($key['columns'] === $columns) {
-                $matches[] = $name;
+                $matches[] = $key['name'];
             }
         }
 
