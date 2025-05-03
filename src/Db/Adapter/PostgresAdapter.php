@@ -231,7 +231,6 @@ class PostgresAdapter extends AbstractAdapter
     protected function getChangePrimaryKeyInstructions(Table $table, array|string|null $newColumns): AlterInstructions
     {
         $parts = $this->getSchemaName($table->getName());
-
         $instructions = new AlterInstructions();
 
         // Drop the existing primary key
@@ -668,7 +667,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $indexes = $this->getIndexes($tableName);
         foreach ($indexes as $index) {
-            if ($index['name'] === $indexName) {
+            if ($index['name'] === $indexName || (isset($index['constraint']) && $index['constraint'] === $indexName)) {
                 return true;
             }
         }
@@ -766,13 +765,11 @@ class PostgresAdapter extends AbstractAdapter
 
         foreach ($indexes as $index) {
             if ($index['type'] === 'primary') {
-                $index['constraint'] = $index['name'];
-
                 return $index;
             }
         }
 
-        return ['columns' => []];
+        return ['constraint' => '', 'columns' => []];
     }
 
     /**
