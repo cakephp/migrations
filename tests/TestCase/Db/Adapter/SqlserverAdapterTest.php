@@ -756,13 +756,17 @@ class SqlserverAdapterTest extends TestCase
             ->save();
 
         $indexes = $this->adapter->getIndexes('table1');
-        $this->assertArrayHasKey('PK_table1', $indexes);
-        $this->assertArrayHasKey('table1_email', $indexes);
-        $this->assertArrayHasKey('email_username', $indexes);
+        $this->assertCount(3, $indexes);
 
-        $this->assertEquals(['id'], $indexes['PK_table1']['columns']);
-        $this->assertEquals(['email'], $indexes['table1_email']['columns']);
-        $this->assertEquals(['email', 'username'], $indexes['email_username']['columns']);
+        $this->assertEquals('primary', $indexes[0]['name']);
+        $this->assertEquals('PK_table1', $indexes[0]['constraint']);
+        $this->assertEquals(['id'], $indexes[0]['columns']);
+
+        $this->assertEquals('table1_email', $indexes[1]['name']);
+        $this->assertEquals(['email'], $indexes[1]['columns']);
+
+        $this->assertEquals('email_username', $indexes[2]['name']);
+        $this->assertEquals(['email', 'username'], $indexes[2]['columns']);
     }
 
     public function testDropIndex()

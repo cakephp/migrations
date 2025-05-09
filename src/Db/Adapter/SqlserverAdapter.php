@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
+use Cake\Database\Schema\TableSchema;
 use Cake\I18n\Date;
 use Cake\I18n\DateTime;
 use InvalidArgumentException;
@@ -612,25 +613,9 @@ ORDER BY IC.[key_ordinal]';
      */
     public function getIndexes(string $tableName): array
     {
-        $parts = $this->getSchemaName($tableName);
         $dialect = $this->getSchemaDialect();
 
-        [$query, $params] = $dialect->describeIndexSql($parts['table'], ['schema' => $parts['schema']]);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-        $indexes = [];
-        foreach ($rows as $row) {
-            $name = $row['index_name'];
-            if (!isset($indexes[$name])) {
-                $indexes[$name] = [
-                    'columns' => [],
-                    'isPrimary' => false,
-                ];
-            }
-            $indexes[$name]['columns'][] = $row['column_name'];
-            $indexes[$name]['isPrimary'] = $row['is_primary_key'];
-        }
-
-        return $indexes;
+        return $dialect->describeIndexes($tableName);
     }
 
     /**
@@ -662,8 +647,8 @@ ORDER BY IC.[key_ordinal]';
     {
         $indexes = $this->getIndexes($tableName);
 
-        foreach ($indexes as $name => $index) {
-            if ($name === $indexName) {
+        foreach ($indexes as $index) {
+            if ($index['name'] === $indexName) {
                 return true;
             }
         }
@@ -696,12 +681,12 @@ ORDER BY IC.[key_ordinal]';
         $columns = array_map('strtolower', $columns);
         $instructions = new AlterInstructions();
 
-        foreach ($indexes as $indexName => $index) {
+        foreach ($indexes as $index) {
             $a = array_diff($columns, $index['columns']);
             if (!$a) {
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s ON %s',
-                    $this->quoteColumnName($indexName),
+                    $this->quoteColumnName($index['name']),
                     $this->quoteTableName($tableName),
                 ));
 
@@ -725,8 +710,8 @@ ORDER BY IC.[key_ordinal]';
         $indexes = $this->getIndexes($tableName);
         $instructions = new AlterInstructions();
 
-        foreach ($indexes as $name => $index) {
-            if ($name === $indexName) {
+        foreach ($indexes as $index) {
+            if ($index['name'] === $indexName) {
                 $instructions->addPostStep(sprintf(
                     'DROP INDEX %s ON %s',
                     $this->quoteColumnName($indexName),
@@ -772,10 +757,9 @@ ORDER BY IC.[key_ordinal]';
         $primaryKey = [
             'columns' => [],
         ];
-        foreach ($indexes as $name => $row) {
-            if ($row['isPrimary']) {
-                $primaryKey['constraint'] = $name;
-                $primaryKey['columns'] = $row['columns'];
+        foreach ($indexes as $row) {
+            if ($row['type'] == TableSchema::CONSTRAINT_PRIMARY) {
+                return $row;
             }
         }
 
@@ -821,6 +805,7 @@ ORDER BY IC.[key_ordinal]';
         $dialect = $this->getSchemaDialect();
         $foreignKeys = [];
 
+        // TODO
         [$query, $params] = $dialect->describeForeignKeySql($parts['table'], ['schema' => $parts['schema']]);
         $rows = $this->query($query, $params)->fetchAll('assoc');
 
