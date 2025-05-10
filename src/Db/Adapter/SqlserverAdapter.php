@@ -773,8 +773,10 @@ ORDER BY IC.[key_ordinal]';
     {
         $foreignKeys = $this->getForeignKeys($tableName);
         if ($constraint) {
-            if (isset($foreignKeys[$constraint])) {
-                return !empty($foreignKeys[$constraint]);
+            foreach ($foreignKeys as $key) {
+                if ($key['name'] === $constraint) {
+                    return true;
+                }
             }
 
             return false;
@@ -801,35 +803,9 @@ ORDER BY IC.[key_ordinal]';
      */
     protected function getForeignKeys(string $tableName): array
     {
-        $parts = $this->getSchemaName($tableName);
         $dialect = $this->getSchemaDialect();
-        $foreignKeys = [];
 
-        // TODO
-        [$query, $params] = $dialect->describeForeignKeySql($parts['table'], ['schema' => $parts['schema']]);
-        $rows = $this->query($query, $params)->fetchAll('assoc');
-
-        foreach ($rows as $row) {
-            $name = $row['foreign_key_name'];
-            if (!isset($foreignKeys[$name])) {
-                $foreignKeys[$name] = [
-                    'table' => '',
-                    'columns' => [],
-                    'referenced_table' => '',
-                    'referenced_columns' => [],
-                ];
-            }
-            $foreignKeys[$name]['table'] = $parts['table'];
-            $foreignKeys[$name]['columns'][] = $row['column'];
-            $foreignKeys[$name]['referenced_table'] = $row['reference_table'];
-            $foreignKeys[$name]['referenced_columns'][] = $row['reference_column'];
-        }
-        foreach ($foreignKeys as $name => $key) {
-            $foreignKeys[$name]['columns'] = array_values(array_unique($key['columns']));
-            $foreignKeys[$name]['referenced_columns'] = array_values(array_unique($key['referenced_columns']));
-        }
-
-        return $foreignKeys;
+        return $dialect->describeForeignKeys($tableName);
     }
 
     /**
@@ -871,9 +847,9 @@ ORDER BY IC.[key_ordinal]';
 
         $matches = [];
         $foreignKeys = $this->getForeignKeys($tableName);
-        foreach ($foreignKeys as $name => $key) {
+        foreach ($foreignKeys as $key) {
             if ($key['columns'] === $columns) {
-                $matches[] = $name;
+                $matches[] = $key['name'];
             }
         }
 
