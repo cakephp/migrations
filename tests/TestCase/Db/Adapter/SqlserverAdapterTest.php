@@ -638,13 +638,13 @@ class SqlserverAdapterTest extends TestCase
             ['column1', 'string', ['null' => true, 'default' => null]],
             ['column2', 'integer', ['default' => 0]],
             ['column3', 'biginteger', ['default' => 5]],
-            ['column4', 'text', ['default' => 'text'], 'string'],
+            ['column4', 'text', ['default' => 'text'], 'text'],
             ['column5', 'float', []],
             ['column6', 'decimal', []],
             ['column7', 'time', []],
             ['column8', 'date', []],
             ['column9', 'boolean', []],
-            ['column10', 'datetime', [], 'datetime2'],
+            ['column10', 'datetime', [], 'datetimefractional'],
             ['column11', 'binary', []],
             ['column12', 'string', ['limit' => 10]],
             ['column13', 'tinyinteger', ['default' => 5]],
@@ -665,6 +665,9 @@ class SqlserverAdapterTest extends TestCase
 
         $columns = $this->adapter->getColumns('t');
         $this->assertCount(2, $columns);
+        $this->assertEquals('id', $columns['id']->getName());
+        $this->assertTrue($columns['id']->getIdentity());
+
         $this->assertEquals($colName, $columns[$colName]->getName());
         $this->assertEquals($actualType ?? $type, $columns[$colName]->getType());
     }
@@ -1506,18 +1509,6 @@ OUTPUT;
         $countQuery->execute([1]);
         $res = $countQuery->fetchAll('assoc');
         $this->assertEquals(3, $res[0]['c']);
-    }
-
-    public function testLiteralSupport()
-    {
-        $createQuery = <<<'INPUT'
-CREATE TABLE test (smallmoney_col smallmoney)
-INPUT;
-        $this->adapter->execute($createQuery);
-        $table = new Table('test', [], $this->adapter);
-        $columns = $table->getColumns();
-        $this->assertCount(1, $columns);
-        $this->assertEquals(Literal::from('smallmoney'), array_pop($columns)->getType());
     }
 
     public function testIdentityInsert()

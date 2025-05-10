@@ -313,44 +313,20 @@ class SqlserverAdapter extends AbstractAdapter
      */
     public function getColumns(string $tableName): array
     {
-        // TODO we can't use cakephp/database for reflection here
-        // as we'd be missing some attributes.
-        $parts = $this->getSchemaName($tableName);
+        $dialect = $this->getSchemaDialect();
+
         $columns = [];
-        $sql = "SELECT
-            DISTINCT TABLE_SCHEMA AS [schema],
-            TABLE_NAME as [table_name],
-            COLUMN_NAME AS [name],
-            DATA_TYPE AS [type],
-            IS_NULLABLE AS [null], COLUMN_DEFAULT AS [default],
-            CHARACTER_MAXIMUM_LENGTH AS [char_length],
-            NUMERIC_PRECISION AS [precision],
-            NUMERIC_SCALE AS [scale],
-            ORDINAL_POSITION AS [ordinal_position],
-            COLUMNPROPERTY(object_id(TABLE_NAME),
-            COLUMN_NAME, 'IsIdentity') as [identity]
-        FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
-        ORDER BY ordinal_position";
-        $rows = $this->query($sql, [$parts['schema'], $parts['table']])
-            ->fetchAll('assoc');
-        foreach ($rows as $columnInfo) {
-            try {
-                $type = $this->getPhinxType($columnInfo['type']);
-            } catch (UnsupportedColumnTypeException $e) {
-                $type = Literal::from($columnInfo['type']);
-            }
-
-            $column = new Column();
-            $column->setName($columnInfo['name'])
-                ->setType($type)
-                ->setNull($columnInfo['null'] !== 'NO')
+        foreach ($dialect->describeColumns($tableName) as $columnInfo) {
+            $column = (new Column())
+                ->setName($columnInfo['name'])
+                ->setType($columnInfo['type'])
+                ->setNull($columnInfo['null'])
+                ->setLimit($columnInfo['length'])
                 ->setDefault($this->parseDefault($columnInfo['default']))
-                ->setIdentity($columnInfo['identity'] === '1')
-                ->setComment($this->getColumnComment($columnInfo['table_name'], $columnInfo['name']));
+                ->setComment($columnInfo['comment']);
 
-            if (!empty($columnInfo['char_length'])) {
-                $column->setLimit((int)$columnInfo['char_length']);
+            if ($columnInfo['autoIncrement'] ?? false) {
+                $column->setIdentity($columnInfo['autoIncrement']);
             }
 
             $columns[$columnInfo['name']] = $column;
@@ -490,6 +466,10 @@ SQL;
     protected function getChangeColumnInstructions(string $tableName, string $columnName, Column $newColumn): AlterInstructions
     {
         $columns = $this->getColumns($tableName);
+        if (!isset($columns[$columnName])) {
+            throw new InvalidArgumentException("Unknown column {$columnName} cannot be changed.");
+        }
+
         $changeDefault =
             $newColumn->getDefault() !== $columns[$columnName]->getDefault() ||
             $newColumn->getType() !== $columns[$columnName]->getType();
