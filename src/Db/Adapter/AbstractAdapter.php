@@ -683,12 +683,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if ($value instanceof Literal || $value instanceof PhinxLiteral) {
             return (string)$value;
         }
-        // TODO remove hacks like this by using cake's database layer better.
         $driver = $this->getConnection()->getDriver();
-        $method = new ReflectionMethod($driver, 'getPdo');
-        $method->setAccessible(true);
 
-        return $method->invoke($driver)->quote($value);
+        return $driver->quote($value);
     }
 
     /**
@@ -699,12 +696,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function quoteString(string $value): string
     {
-        // TODO remove hacks like this by using cake's database layer better.
         $driver = $this->getConnection()->getDriver();
-        $method = new ReflectionMethod($driver, 'getPdo');
-        $method->setAccessible(true);
 
-        return $method->invoke($driver)->quote($value);
+        return $driver->quote($value);
     }
 
     /**
