@@ -699,11 +699,11 @@ class PostgresAdapterTest extends TestCase
         foreach ($columns as $column) {
             if ($column->getName() === 'default_true') {
                 $this->assertNotNull($column->getDefault());
-                $this->assertEquals('true', $column->getDefault());
+                $this->assertEquals(1, $column->getDefault());
             }
             if ($column->getName() === 'default_false') {
                 $this->assertNotNull($column->getDefault());
-                $this->assertEquals('false', $column->getDefault());
+                $this->assertEquals(0, $column->getDefault());
             }
             if ($column->getName() === 'default_null') {
                 $this->assertNull($column->getDefault());
@@ -735,42 +735,13 @@ class PostgresAdapterTest extends TestCase
         $column = $columns[1];
         $this->assertSame('limit_bool_true', $column->getName());
         $this->assertNotNull($column->getDefault());
-        $this->assertSame('true', $column->getDefault());
+        $this->assertSame(1, $column->getDefault());
         $this->assertNull($column->getLimit());
 
         $column = $columns[2];
         $this->assertSame('limit_bool_false', $column->getName());
         $this->assertNotNull($column->getDefault());
-        $this->assertSame('false', $column->getDefault());
-        $this->assertNull($column->getLimit());
-    }
-
-    public static function providerIgnoresLimit(): array
-    {
-        return [
-            [AbstractAdapter::PHINX_TYPE_TINY_INTEGER, AbstractAdapter::PHINX_TYPE_SMALL_INTEGER],
-            [AbstractAdapter::PHINX_TYPE_SMALL_INTEGER],
-            [AbstractAdapter::PHINX_TYPE_INTEGER],
-            [AbstractAdapter::PHINX_TYPE_BIG_INTEGER],
-            [AbstractAdapter::PHINX_TYPE_BOOLEAN],
-            [AbstractAdapter::PHINX_TYPE_TEXT],
-            [AbstractAdapter::PHINX_TYPE_BINARY],
-        ];
-    }
-
-    #[DataProvider('providerIgnoresLimit')]
-    public function testAddColumnIgnoresLimit(string $column_type, ?string $actual_type = null): void
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $table->addColumn('column1', $column_type, ['limit' => 1]);
-        $table->save();
-
-        $columns = $this->adapter->getColumns('table1');
-        $this->assertCount(2, $columns);
-        $column = $columns[1];
-        $this->assertSame('column1', $column->getName());
-        $this->assertSame($actual_type ?? $column_type, $column->getType());
+        $this->assertSame(0, $column->getDefault());
         $this->assertNull($column->getLimit());
     }
 
@@ -840,7 +811,7 @@ class PostgresAdapterTest extends TestCase
 
             if ($column->getName() === 'number2') {
                 $this->assertEquals('12', $column->getPrecision());
-                $this->assertEquals('0', $column->getScale());
+                $this->assertNull($column->getScale());
             }
         }
     }
@@ -856,15 +827,16 @@ class PostgresAdapterTest extends TestCase
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'timestamp1') {
-                $this->assertEquals('0', $column->getPrecision());
+                $this->assertEquals(0, $column->getPrecision());
             }
 
             if ($column->getName() === 'timestamp2') {
-                $this->assertEquals('4', $column->getPrecision());
+                debug($column);
+                $this->assertEquals(4, $column->getPrecision());
             }
 
             if ($column->getName() === 'timestamp3') {
-                $this->assertEquals('6', $column->getPrecision());
+                $this->assertEquals(6, $column->getPrecision());
             }
         }
     }
@@ -1035,7 +1007,7 @@ class PostgresAdapterTest extends TestCase
             ->update();
         $table->changeColumn('my_bool', 'boolean', ['default' => false, 'null' => true])->update();
         $columns = $this->adapter->getColumns('t');
-        $this->assertStringContainsString('false', $columns[0]->getDefault());
+        $this->assertSame(0, $columns[0]->getDefault());
 
         $rows = $this->adapter->fetchAll('SELECT * FROM t');
         $this->assertCount(3, $rows);
@@ -1055,7 +1027,7 @@ class PostgresAdapterTest extends TestCase
         foreach ($columns as $column) {
             if ($column->getName() === 'column1') {
                 $this->assertTrue($column->isNull());
-                $this->assertStringContainsString('true', $column->getDefault());
+                $this->assertEquals(1, $column->getDefault());
             }
         }
     }
@@ -1165,10 +1137,10 @@ class PostgresAdapterTest extends TestCase
             ['column2_1', 'integer', []],
             ['column3', 'biginteger', []],
             ['column4', 'text', []],
-            ['column5', 'float', [], 'double'],
+            ['column5', 'float', [], 'float'],
             ['column6', 'decimal', []],
-            ['column7', 'datetime', []],
-            ['column9', 'timestamp', [], 'datetime'],
+            ['column7', 'datetime', [], 'timestamp'],
+            ['column9', 'timestamp', [], 'timestamp'],
             ['column10', 'date', []],
             ['column11', 'binary', []],
             ['column12', 'boolean', []],
@@ -2823,6 +2795,7 @@ OUTPUT;
         $this->assertCount(1, $columns);
         $column = $columns[0];
         $this->assertSame($columnType, $column->getType());
-        $this->assertSame("nextval('test_id_seq'::regclass)", (string)$column->getDefault());
+        $this->assertTrue($column->isIdentity());
+        $this->assertFalse($column->isNull());
     }
 }

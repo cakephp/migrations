@@ -336,7 +336,7 @@ class PostgresAdapter extends AbstractAdapter
                    ->setNull($columnInfo['null'])
                    ->setDefault($columnInfo['default'])
                    ->setLimit($columnInfo['length'])
-                   ->setScale($columnInfo['precision']);
+                   ->setScale($columnInfo['precision'] ?? null);
 
             if ($columnInfo['autoIncrement'] ?? false) {
                 $column->setIdentity(true);
