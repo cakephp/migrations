@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use Cake\Database\Connection;
+use Cake\Database\Schema\TableSchema;
 use Cake\I18n\Date;
 use Cake\I18n\DateTime;
 use InvalidArgumentException;
@@ -326,9 +327,34 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function getColumns(string $tableName): array
     {
-        $parts = $this->getSchemaName($tableName);
+        $dialect = $this->getSchemaDialect();
         $columns = [];
+        foreach ($dialect->describeColumns($tableName) as $columnInfo) {
+            $column = new Column();
+            $column->setName($columnInfo['name'])
+                   ->setType($columnInfo['type'])
+                   ->setNull($columnInfo['null'])
+                   ->setDefault($columnInfo['default'])
+                   ->setLimit($columnInfo['length'])
+                   ->setScale($columnInfo['precision']);
 
+            if ($columnInfo['autoIncrement'] ?? false) {
+                $column->setIdentity(true);
+            }
+
+            if ($this->useIdentity) {
+                $column->setGenerated($columnInfo['generated'] ?? null);
+            }
+
+            if ($columnInfo['type'] === TableSchema::TYPE_TIMESTAMP_TIMEZONE) {
+                $column->setTimezone(true);
+            }
+            $columns[] = $column;
+        }
+
+        return $columns;
+
+        // ACTUALLY DO NOW PLZ
         // TODO We can't use cakephp/database here as several attributes are missing
         // from the query cakephp prepares. We'll need to expand the cakephp/database
         // query in a future release.
