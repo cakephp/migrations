@@ -45,7 +45,6 @@ use Migrations\MigrationInterface;
 use Migrations\Shim\OutputAdapter;
 use PDOException;
 use Phinx\Util\Literal as PhinxLiteral;
-use ReflectionMethod;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
