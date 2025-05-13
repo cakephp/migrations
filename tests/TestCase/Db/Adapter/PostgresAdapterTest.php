@@ -1026,7 +1026,7 @@ class PostgresAdapterTest extends TestCase
         foreach ($columns as $column) {
             if ($column->getName() === 'column1') {
                 $this->assertTrue($column->isNull());
-                $this->assertEquals(1, $column->getDefault());
+                $this->assertSame(1, $column->getDefault());
             }
         }
     }
