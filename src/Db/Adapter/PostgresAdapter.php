@@ -346,6 +346,9 @@ class PostgresAdapter extends AbstractAdapter
                 $column->setGenerated($columnInfo['generated'] ?? null);
             }
 
+            if ($columnInfo['type'] === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
+                $column->setPrecision($columnInfo['precision'] ?? null);
+            }
             if ($columnInfo['type'] === TableSchema::TYPE_TIMESTAMP_TIMEZONE) {
                 $column->setTimezone(true);
             }

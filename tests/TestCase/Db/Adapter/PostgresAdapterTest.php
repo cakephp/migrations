@@ -831,7 +831,6 @@ class PostgresAdapterTest extends TestCase
             }
 
             if ($column->getName() === 'timestamp2') {
-                debug($column);
                 $this->assertEquals(4, $column->getPrecision());
             }
 
@@ -1139,8 +1138,8 @@ class PostgresAdapterTest extends TestCase
             ['column4', 'text', []],
             ['column5', 'float', [], 'float'],
             ['column6', 'decimal', []],
-            ['column7', 'datetime', [], 'timestamp'],
-            ['column9', 'timestamp', [], 'timestamp'],
+            ['column7', 'datetime', [], 'timestampfractional'],
+            ['column9', 'timestamp', [], 'timestampfractional'],
             ['column10', 'date', []],
             ['column11', 'binary', []],
             ['column12', 'boolean', []],
