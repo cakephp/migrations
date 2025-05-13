@@ -9,7 +9,6 @@ use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
-use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Adapter\UnsupportedColumnTypeException;
