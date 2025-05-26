@@ -785,7 +785,39 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($type, $rows[1]['Type']);
     }
 
-    public function testAddStringColumnWithSignedEqualsFalse()
+    /**
+     * Test that migrations still supports the `double` type but
+     * as an alias for a float/double column which cake/database provides.
+     */
+    public function testAddDoubleDefaultSignedCompat(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('user_id'));
+        $table->addColumn('foo', 'double')
+              ->save();
+        $rows = $this->adapter->fetchAll('SHOW FULL COLUMNS FROM table1');
+        $this->assertEquals('double', $rows[1]['Type']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    /**
+     * Test that migrations still supports the `double` type but
+     * as an alias for a float column which cake/database provides.
+     */
+    public function testAddDoubleDefaultSignedCompatWithUnsigned(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('user_id'));
+        $table->addColumn('foo', 'double', ['signed' => false])
+              ->save();
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
+        $this->assertEquals('double unsigned', $rows[1]['Type']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testAddStringColumnWithSignedEqualsFalse(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -796,7 +828,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('varchar(255)', $rows[1]['Type']);
     }
 
-    public function testAddStringColumnWithCustomCollation()
+    public function testAddStringColumnWithCustomCollation(): void
     {
         $table = new Table('table_custom_collation', ['collation' => 'utf8mb4_unicode_ci'], $this->adapter);
         $table->save();
@@ -809,7 +841,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('utf8mb4_unicode_ci', $rows[2]['Collation']);
     }
 
-    public function testRenameColumn()
+    public function testRenameColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -822,7 +854,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column2'));
     }
 
-    public function testRenameColumnPreserveComment()
+    public function testRenameColumnPreserveComment(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['comment' => 'comment1'])
@@ -841,7 +873,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('comment1', $columns[1]['Comment']);
     }
 
-    public function testRenameColumnWithDefaultGeneratedExtra()
+    public function testRenameColumnWithDefaultGeneratedExtra(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->save();

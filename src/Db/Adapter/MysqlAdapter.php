@@ -315,13 +315,15 @@ class MysqlAdapter extends AbstractAdapter
                 }
             }
             $data['type'] = 'binary';
-        }
-        if ($data['type'] === self::PHINX_TYPE_INTEGER) {
+        } elseif ($data['type'] === self::PHINX_TYPE_INTEGER) {
             if (isset($data['length']) && $data['length'] === self::INT_BIG) {
                 $data['type'] = TableSchema::TYPE_BIGINTEGER;
                 unset($data['length']);
             }
             unset($data['length']);
+        } elseif ($data['type'] == self::PHINX_TYPE_DOUBLE) {
+            $data['type'] = TableSchema::TYPE_FLOAT;
+            $data['length'] = 52;
         }
 
         return $data;
@@ -500,7 +502,7 @@ class MysqlAdapter extends AbstractAdapter
         $dialect = $this->getSchemaDialect();
         $alter = sprintf(
             'ADD %s',
-            $dialect->columnDefinitionSql($column->toArray()),
+            $dialect->columnDefinitionSql($this->mapColumnData($column->toArray())),
         );
 
         $alter .= $this->afterClause($column);
