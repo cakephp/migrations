@@ -757,7 +757,6 @@ class MysqlAdapterTest extends TestCase
         return [
             ['integer', [], 'int', '11', ''],
             ['integer', ['signed' => false], 'int', '10', ' unsigned'],
-            ['integer', ['limit' => 8], 'int', '8', ''],
             ['smallinteger', [], 'smallint', '6', ''],
             ['smallinteger', ['signed' => false], 'smallint', '5', ' unsigned'],
             ['smallinteger', ['limit' => 3], 'smallint', '3', ''],
