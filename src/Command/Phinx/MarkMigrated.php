@@ -211,7 +211,6 @@ class MarkMigrated extends AbstractCommand
     {
         $msg = 'DEPRECATED: `all` or `*` as version is deprecated. Use `bin/cake migrations mark_migrated` instead';
         $output = $this->output();
-        /** @psalm-suppress PossiblyNullReference */
         $output->writeln(sprintf('<comment>%s</comment>', $msg));
     }
 
@@ -225,7 +224,6 @@ class MarkMigrated extends AbstractCommand
         $msg = 'DEPRECATED: VERSION as argument is deprecated. Use: ' .
             '`bin/cake migrations mark_migrated --target=VERSION --only`';
         $output = $this->output();
-        /** @psalm-suppress PossiblyNullReference */
         $output->writeln(sprintf('<comment>%s</comment>', $msg));
     }
 }

@@ -141,7 +141,6 @@ class TableFinder
         if ($pluginName) {
             $path = CorePlugin::path($pluginName) . 'src' . DS . $path;
         } else {
-            /** @psalm-suppress UndefinedConstant */
             $path = APP . $path;
         }
 
@@ -184,7 +183,6 @@ class TableFinder
 
         $table = TableRegistry::getTableLocator()->get($className);
         foreach ($table->associations()->keys() as $key) {
-            /** @psalm-suppress PossiblyNullReference */
             if ($table->associations()->get($key)->type() === 'belongsToMany') {
                 /** @var \Cake\ORM\Association\BelongsToMany $belongsToMany */
                 $belongsToMany = $table->associations()->get($key);

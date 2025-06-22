@@ -302,7 +302,6 @@ class Migrations
         $connection = ConnectionManager::get($connectionName);
         assert($connection instanceof Connection, 'Connection must be an instance of \Cake\Database\Connection');
 
-        /** @psalm-suppress PossiblyNullReference */
         $env = $this->manager->getEnvironment('default');
         $adapter = $env->getAdapter();
         if (!$adapter instanceof CakeAdapter) {

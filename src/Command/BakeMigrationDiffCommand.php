@@ -269,7 +269,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             foreach ($currentColumns as $columnName) {
                 $column = $currentSchema->getColumn($columnName);
                 $oldColumn = $this->dumpSchema[$table]->getColumn($columnName);
-                /** @psalm-suppress PossiblyNullArrayAccess */
                 unset(
                     $column['collate'],
                     $column['fixed'],
@@ -281,7 +280,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                     in_array($columnName, $oldColumns, true) &&
                     $column !== $oldColumn
                 ) {
-                    /** @psalm-suppress PossiblyNullArgument */
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
 
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
@@ -290,7 +288,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                             $phinxAttributeName = 'limit';
                         }
                         if (!isset($changedAttributes[$phinxAttributeName])) {
-                            /** @psalm-suppress PossiblyNullArrayAccess */
                             $changedAttributes[$phinxAttributeName] = $column[$attribute];
                         }
                     }
@@ -357,7 +354,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 $this->templateData[$table]['constraints']['add'][$constraintName] =
                     $currentSchema->getConstraint($constraintName);
                 $constraint = $currentSchema->getConstraint($constraintName);
-                /** @psalm-suppress PossiblyNullArrayAccess */
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
                 } else {
@@ -385,7 +381,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $removedConstraints = array_diff($oldConstraints, $currentConstraints);
             foreach ($removedConstraints as $constraintName) {
                 $constraint = $this->dumpSchema[$table]->getConstraint($constraintName);
-                /** @psalm-suppress PossiblyNullArrayAccess */
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] = $constraint;
                 } else {
@@ -535,7 +530,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
                 'the `cake migrations dump` command';
-            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort($msg);
         }
 

@@ -75,8 +75,6 @@ trait CommandTrait
         if (!$manager instanceof CakeManager) {
             $this->setManager(new CakeManager($this->getConfig(), $input, $output));
         }
-        /** @var \Phinx\Migration\Manager\Environment $env */
-        /** @psalm-suppress PossiblyNullReference */
         $env = $this->getManager()->getEnvironment('default');
         $adapter = $env->getAdapter();
         if (!$adapter instanceof CakeAdapter) {

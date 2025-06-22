@@ -28,7 +28,7 @@ class MigrationsDispatcher extends Application
      * Get the map of command names to phinx commands.
      *
      * @return array<string, string>
-     * @psalm-return array<string, class-string<\Phinx\Console\Command\AbstractCommand>|class-string<\Migrations\Command\Phinx\BaseCommand>>
+     * @phpstan-return array<string, class-string<\Phinx\Console\Command\AbstractCommand>|class-string<\Migrations\Command\Phinx\BaseCommand>>
      */
     public static function getCommands(): array
     {

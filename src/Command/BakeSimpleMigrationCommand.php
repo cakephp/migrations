@@ -77,7 +77,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $timestamp = Util::getCurrentTimestamp();
         $suffix = '_' . Inflector::camelize($name) . '.php';
 
-        /** @psalm-suppress PossiblyNullArgument */
         $path = $this->getPath($this->args);
         $offset = 0;
         while (glob($path . $timestamp . '_*.php')) {
@@ -194,7 +193,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     protected function getMigrationName(?string $name = null): string
     {
         if (!$name) {
-            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort('Choose a migration name to bake in CamelCase format');
         }
 
@@ -202,7 +200,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
-            /** @psalm-suppress PossiblyNullReference */
             $this->io->abort('The className is not correct. The className can only contain "A-Z" and "0-9" and has to start with a letter.');
         }
 

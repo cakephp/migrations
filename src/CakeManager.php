@@ -341,7 +341,6 @@ class CakeManager extends Manager
         $class = ucwords($class);
         $class = str_replace(' ', '', $class);
         if (strpos($class, '.') !== false) {
-            /** @psalm-suppress PossiblyFalseArgument */
             $class = substr($class, 0, strpos($class, '.'));
         }
 

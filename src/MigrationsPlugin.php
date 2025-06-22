@@ -56,8 +56,7 @@ class MigrationsPlugin extends BasePlugin
     protected bool $routesEnabled = false;
 
     /**
-     * @var array<string>
-     * @psalm-var array<class-string<\Cake\Console\BaseCommand>>
+     * @var array<class-string<\Cake\Console\BaseCommand>>
      */
     protected array $migrationCommandsList = [
         MigrationsCommand::class,

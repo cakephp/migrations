@@ -73,28 +73,64 @@ parameters:
 			path: src/Db/Adapter/MysqlAdapter.php
 
 		-
-			message: '#^Offset 3 might not exist on array\{0\: string, 1\: non\-empty\-string, 2\?\: string, 3\?\: ''''\|numeric\-string, 4\?\: string, 5\?\: ''''\|numeric\-string, 6\?\: non\-empty\-string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Db/Adapter/MysqlAdapter.php
-
-		-
-			message: '#^Offset 5 might not exist on array\{0\: string, 1\: non\-empty\-string, 2\?\: string, 3\?\: ''''\|numeric\-string, 4\?\: string, 5\?\: ''''\|numeric\-string, 6\?\: non\-empty\-string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Db/Adapter/MysqlAdapter.php
-
-		-
-			message: '#^Offset 6 might not exist on array\{0\: string, 1\: non\-empty\-string, 2\?\: string, 3\?\: ''''\|numeric\-string, 4\?\: string, 5\?\: ''''\|numeric\-string, 6\?\: non\-empty\-string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Db/Adapter/MysqlAdapter.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: src/Db/Adapter/MysqlAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$columns of method Migrations\\Db\\Table\\Index\:\:setColumns\(\) expects array\<string\>\|string, array\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$constraint of method Migrations\\Db\\Table\\ForeignKey\:\:setConstraint\(\) expects string, array\<string\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$includedColumns of method Migrations\\Db\\Table\\Index\:\:setInclude\(\) expects array\<string\>, array\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$limit of method Migrations\\Db\\Table\\Index\:\:setLimit\(\) expects array\|int, array\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$name of method Migrations\\Db\\Table\\Index\:\:setName\(\) expects string, array\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$onDelete of method Migrations\\Db\\Table\\ForeignKey\:\:setOnDelete\(\) expects string, array\<string\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$onUpdate of method Migrations\\Db\\Table\\ForeignKey\:\:setOnUpdate\(\) expects string, array\<string\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$order of method Migrations\\Db\\Table\\Index\:\:setOrder\(\) expects array\<string\>, array\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
+
+		-
+			message: '#^Parameter \#1 \$type of method Migrations\\Db\\Table\\Index\:\:setType\(\) expects string, array\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Db/Adapter/PhinxAdapter.php
 
 		-
 			message: '#^Right side of && is always true\.$#'
@@ -121,6 +157,24 @@ parameters:
 			path: src/Db/Adapter/SqlserverAdapter.php
 
 		-
+			message: '#^Call to an undefined method Migrations\\Db\\Table\\Index\:\:setUnique\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Db/Table/Index.php
+
+		-
+			message: '#^Call to an undefined method Migrations\\MigrationInterface\:\:down\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Migration/Environment.php
+
+		-
+			message: '#^Call to an undefined method Migrations\\MigrationInterface\:\:up\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Migration/Environment.php
+
+		-
 			message: '#^Call to function method_exists\(\) with Migrations\\MigrationInterface and ''useTransactions'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -131,12 +185,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Migration/Manager.php
-
-		-
-			message: '#^PHPDoc tag @var with type array\<string, string\> is not subtype of native type mixed\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Migration/ManagerFactory.php
 
 		-
 			message: '#^Method Migrations\\Shim\\OutputAdapter\:\:getVerbosity\(\) should return 16\|32\|64\|128\|256 but returns int\.$#'

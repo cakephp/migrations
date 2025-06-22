@@ -264,7 +264,6 @@ class PhinxBackend implements BackendInterface
         // Why is this being done? Is this something we can eliminate in the new code path?
         if ($pdo !== null) {
             /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
-            /** @psalm-suppress PossiblyNullReference */
             $adapter = $this->manager->getEnvironment('default')->getAdapter();
             while ($adapter instanceof WrapperInterface) {
                 /** @var \Phinx\Db\Adapter\PdoAdapter|\Migrations\CakeAdapter $adapter */
@@ -345,7 +344,6 @@ class PhinxBackend implements BackendInterface
         $connection = ConnectionManager::get($connectionName);
         assert($connection instanceof Connection, 'Connection should be an instance of Cake\Database\Connection');
 
-        /** @psalm-suppress PossiblyNullReference */
         $env = $this->manager->getEnvironment('default');
         $adapter = $env->getAdapter();
         if (!$adapter instanceof CakeAdapter) {

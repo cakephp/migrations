@@ -682,7 +682,6 @@ class MigrationHelper extends Helper
         $indexes = $this->indexes($table);
         $foreignKeys = [];
         foreach ($constraints as $constraint) {
-            /** @psalm-suppress PossiblyNullArrayAccess */
             if ($constraint['type'] === 'foreign') {
                 $foreignKeys[] = $constraint['columns'];
             }

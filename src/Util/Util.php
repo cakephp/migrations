@@ -27,19 +27,19 @@ class Util
 
     /**
      * @var string
-     * @psalm-var non-empty-string
+     * @phpstan-var non-empty-string
      */
     protected const MIGRATION_FILE_NAME_PATTERN = '/^\d+_([a-z][a-z\d]*(?:_[a-z\d]+)*)\.php$/i';
 
     /**
      * @var string
-     * @psalm-var non-empty-string
+     * @phpstan-var non-empty-string
      */
     protected const MIGRATION_FILE_NAME_NO_NAME_PATTERN = '/^[0-9]{14}\.php$/';
 
     /**
      * @var string
-     * @psalm-var non-empty-string
+     * @phpstan-var non-empty-string
      */
     protected const SEED_FILE_NAME_PATTERN = '/^([a-z][a-z\d]*)\.php$/i';
 
