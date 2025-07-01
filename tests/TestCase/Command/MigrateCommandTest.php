@@ -62,8 +62,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test -s Missing --no-lock');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
-        $this->assertOutputContains('<info>using connection</info> test');
         $this->assertOutputContains('All Done');
 
         $table = $this->fetchTable('Phinxlog');
@@ -94,11 +92,8 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
-        $this->assertOutputContains('Dumping the current schema');
 
         $table = $this->fetchTable('Phinxlog');
         $this->assertCount(2, $table->find()->all()->toArray());
@@ -113,12 +108,9 @@ class MigrateCommandTest extends TestCase
      */
     public function testMigrateBaseMigration(): void
     {
-        $migrationPath = ROOT . DS . 'config' . DS . 'BaseMigrations';
         $this->exec('migrations migrate -v --source BaseMigrations -c test --no-lock');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('BaseMigrationTables:</info> <comment>migrated');
         $this->assertOutputContains('query=121');
         $this->assertOutputContains('fetchRow=122');
@@ -138,8 +130,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test -s ShouldExecute');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('ShouldExecuteMigration:</info> <comment>migrated');
         $this->assertOutputContains('ShouldNotExecuteMigration:</info> <comment>skipped </comment>');
         $this->assertOutputContains('All Done');
@@ -162,8 +152,6 @@ class MigrateCommandTest extends TestCase
         $this->assertExitSuccess();
 
         $this->assertOutputContains('<warning>dry-run mode enabled</warning>');
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
@@ -183,8 +171,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --date 2020-01-01');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
@@ -202,8 +188,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --date 2000-01-01');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputNotContains('MarkMigratedTest');
         $this->assertOutputContains('No migrations to run');
         $this->assertOutputContains('All Done');
@@ -222,8 +206,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --target 20150416223600');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('All Done');
@@ -242,8 +224,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --target 99');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputNotContains('MarkMigratedTest');
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('<comment>warning</comment> 99 is not a valid version');
@@ -263,8 +243,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --fake');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('warning</warning> performing fake migrations');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>migrated');
@@ -285,8 +263,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --plugin Migrator');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('Migrator:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
@@ -295,7 +271,6 @@ class MigrateCommandTest extends TestCase
         $this->assertCount(1, $table->find()->all()->toArray());
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
-        $this->assertOutputContains('Writing dump file `' . $dumpFile);
         $this->createdFiles[] = $dumpFile;
         $this->assertFileExists($dumpFile);
     }
@@ -326,8 +301,6 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --no-lock');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using connection</info> test');
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
         $this->assertOutputNotContains('Dumping');

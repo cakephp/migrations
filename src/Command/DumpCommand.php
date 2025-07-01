@@ -135,13 +135,13 @@ class DumpCommand extends Command
         }
 
         $filePath = $path . DS . 'schema-dump-' . $connectionName . '.lock';
-        $io->out("<info>Writing dump file `{$filePath}`...</info>");
+        $io->verbose("<info>Writing dump file `{$filePath}`...</info>");
         if (file_put_contents($filePath, serialize($dump))) {
-            $io->out("<info>Dump file `{$filePath}` was successfully written</info>");
+            $io->verbose("<info>Dump file `{$filePath}` was successfully written</info>");
 
             return self::CODE_SUCCESS;
         }
-        $io->out("<error>An error occurred while writing dump file `{$filePath}`</error>");
+        $io->error("An error occurred while writing dump file `{$filePath}`");
 
         return self::CODE_ERROR;
     }

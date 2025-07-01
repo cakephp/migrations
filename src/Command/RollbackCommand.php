@@ -140,9 +140,9 @@ class RollbackCommand extends Command
         $config = $manager->getConfig();
 
         $versionOrder = $config->getVersionOrder();
-        $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
-        $io->out('<info>using paths</info> ' . $config->getMigrationPath());
-        $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
+        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
+        $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         if ($dryRun) {
             $io->out('<warning>dry-run mode enabled</warning>');
@@ -176,16 +176,16 @@ class RollbackCommand extends Command
             return self::CODE_ERROR;
         }
 
-        $io->out('');
         $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+        $io->out('');
 
         $exitCode = self::CODE_SUCCESS;
 
         // Run dump command to generate lock file
         if (!$args->getOption('no-lock')) {
-            $io->out('');
-            $io->out('Dumping the current schema of the database to be used while baking a diff');
-            $io->out('');
+            $io->verbose('');
+            $io->verbose('Dumping the current schema of the database to be used while baking a diff');
+            $io->verbose('');
 
             $newArgs = DumpCommand::extractArgs($args);
             $exitCode = $this->executeCommand(DumpCommand::class, $newArgs, $io);

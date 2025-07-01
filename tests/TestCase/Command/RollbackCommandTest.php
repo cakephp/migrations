@@ -70,8 +70,6 @@ class RollbackCommandTest extends TestCase
         $this->exec('migrations rollback -c test -s Missing --no-lock');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
-        $this->assertOutputContains('<info>using connection</info> test');
         $this->assertOutputContains('No migrations to rollback');
         $this->assertOutputContains('All Done');
 
@@ -115,8 +113,6 @@ class RollbackCommandTest extends TestCase
         $this->exec('migrations rollback -c test --no-lock --dry-run');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<info>using paths</info> ' . $migrationPath);
-        $this->assertOutputContains('<info>using connection</info> test');
         $this->assertOutputContains('dry-run mode enabled');
         $this->assertOutputContains('20240309223600 MarkMigratedTestSecond:</info> <comment>reverting');
         $this->assertOutputContains('All Done');

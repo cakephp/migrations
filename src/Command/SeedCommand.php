@@ -119,9 +119,9 @@ class SeedCommand extends Command
         }
 
         $versionOrder = $config->getVersionOrder();
-        $io->out('<info>using connection</info> ' . (string)$args->getOption('connection'));
-        $io->out('<info>using paths</info> ' . $config->getMigrationPath());
-        $io->out('<info>ordering by</info> ' . $versionOrder . ' time');
+        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
+        $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         $start = microtime(true);
         if (!$seeds) {
