@@ -135,7 +135,7 @@ class MigrateCommand extends Command
 
         $versionOrder = $config->getVersionOrder();
         if ($dryRun) {
-            $io->out('<warning>dry-run mode enabled</warning>');
+            $io->warning('dry-run mode enabled');
         }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
@@ -156,17 +156,17 @@ class MigrateCommand extends Command
             $end = microtime(true);
         } catch (Exception $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->out($e->getTraceAsString(), 1, ConsoleIo::VERBOSE);
+            $io->verbose($e->getTraceAsString());
 
             return self::CODE_ERROR;
         } catch (Throwable $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->out($e->getTraceAsString(), 1, ConsoleIo::VERBOSE);
+            $io->verbose($e->getTraceAsString());
 
             return self::CODE_ERROR;
         }
 
-        $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+        $io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
         $io->out('');
 
         $exitCode = self::CODE_SUCCESS;

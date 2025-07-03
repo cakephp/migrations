@@ -145,7 +145,7 @@ class RollbackCommand extends Command
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         if ($dryRun) {
-            $io->out('<warning>dry-run mode enabled</warning>');
+            $io->warning('dry-run mode enabled');
         }
         if ($fake) {
             $io->out('<warning>warning</warning> performing fake rollbacks');
@@ -166,17 +166,17 @@ class RollbackCommand extends Command
             $end = microtime(true);
         } catch (Exception $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->out($e->getTraceAsString(), 1, ConsoleIo::VERBOSE);
+            $io->verbose($e->getTraceAsString());
 
             return self::CODE_ERROR;
         } catch (Throwable $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->out($e->getTraceAsString(), 1, ConsoleIo::VERBOSE);
+            $io->verbose($e->getTraceAsString());
 
             return self::CODE_ERROR;
         }
 
-        $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+        $io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
         $io->out('');
 
         $exitCode = self::CODE_SUCCESS;

@@ -151,7 +151,7 @@ class MigrateCommandTest extends TestCase
         $this->exec('migrations migrate -c test --dry-run');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('<warning>dry-run mode enabled</warning>');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 

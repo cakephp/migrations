@@ -113,7 +113,7 @@ class RollbackCommandTest extends TestCase
         $this->exec('migrations rollback -c test --no-lock --dry-run');
         $this->assertExitSuccess();
 
-        $this->assertOutputContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('20240309223600 MarkMigratedTestSecond:</info> <comment>reverting');
         $this->assertOutputContains('All Done');
 

@@ -135,7 +135,7 @@ class SeedCommand extends Command
         }
         $end = microtime(true);
 
-        $io->out('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+        $io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
 
         return self::CODE_SUCCESS;
     }
