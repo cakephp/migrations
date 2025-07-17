@@ -176,4 +176,40 @@ class ConfigTest extends AbstractConfigTestCase
         $config = new Config(['templates' => ['style' => $style]]);
         $this->assertSame($expected, $config->getTemplateStyle());
     }
+
+    public function testIsDryRunDefaultFalse(): void
+    {
+        $config = new Config([]);
+        $this->assertFalse($config->isDryRun());
+    }
+
+    public function testIsDryRunWhenTrue(): void
+    {
+        $config = new Config([
+            'environment' => [
+                'dryrun' => true,
+            ],
+        ]);
+        $this->assertTrue($config->isDryRun());
+    }
+
+    public function testIsDryRunWhenFalse(): void
+    {
+        $config = new Config([
+            'environment' => [
+                'dryrun' => false,
+            ],
+        ]);
+        $this->assertFalse($config->isDryRun());
+    }
+
+    public function testIsDryRunWhenNotSet(): void
+    {
+        $config = new Config([
+            'environment' => [
+                'adapter' => 'mysql',
+            ],
+        ]);
+        $this->assertFalse($config->isDryRun());
+    }
 }
