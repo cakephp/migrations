@@ -19,6 +19,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Event\EventDispatcherTrait;
+use Cake\Utility\Hash;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 
@@ -65,6 +66,10 @@ class SeedCommand extends Command
             'short' => 'c',
             'help' => 'The datasource connection to use',
             'default' => 'default',
+        ])->addOption('dry-run', [
+            'short' => 'x',
+            'help' => 'Dump queries to stdout instead of executing them',
+            'boolean' => true,
         ])->addOption('source', [
             'short' => 's',
             'default' => ConfigInterface::DEFAULT_SEED_FOLDER,
@@ -109,9 +114,11 @@ class SeedCommand extends Command
             'plugin' => $args->getOption('plugin'),
             'source' => $args->getOption('source'),
             'connection' => $args->getOption('connection'),
+            'dry-run' => $args->getOption('dry-run'),
         ]);
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
+
         if (version_compare(Configure::version(), '5.2.0', '>=')) {
             $seeds = (array)$args->getArrayOption('seed');
         } else {
@@ -119,6 +126,10 @@ class SeedCommand extends Command
         }
 
         $versionOrder = $config->getVersionOrder();
+
+        if (Hash::get($config, 'environment.dryrun') === true) {
+            $io->warning('<warning>dry-run mode enabled</warning>');
+        }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
