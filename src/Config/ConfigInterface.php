@@ -108,4 +108,11 @@ interface ConfigInterface extends ArrayAccess
      * @return string|null
      */
     public function getSeedTemplateFile(): ?string;
+
+    /**
+     * Get the dry run setting.
+     *
+     * @return void
+     */
+    public function isDryRun(): bool;
 }

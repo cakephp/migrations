@@ -179,6 +179,14 @@ class Config implements ConfigInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function isDryRun(): bool
+    {
+        return $this->values['environment']['dryrun'] ?? false;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @param mixed $offset ID
