@@ -39,7 +39,7 @@ trait SchemaTrait
 
         if (!method_exists($connection, 'getSchemaCollection')) {
             $msg = sprintf(
-                'The `%s` connection is not compatible with orm caching, ' .
+                'The `%s` connection is not compatible with ORM caching, ' .
                 'as it does not implement a `getSchemaCollection()` method.',
                 $connectionName,
             );
