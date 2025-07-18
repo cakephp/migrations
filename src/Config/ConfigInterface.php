@@ -110,7 +110,7 @@ interface ConfigInterface extends ArrayAccess
     public function getSeedTemplateFile(): ?string;
 
     /**
-     * Get the dry run setting.
+     * Should queries be sent to the database or just print to stdout?
      *
      * @return bool
      */
