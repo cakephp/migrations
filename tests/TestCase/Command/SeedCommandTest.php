@@ -69,7 +69,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed --help');
         $this->assertExitSuccess();
         $this->assertOutputContains('Seed the database with data');
-        $this->assertOutputContains('migrations seed --connection secondary --seed UserSeeder');
+        $this->assertOutputContains('migrations seed --connection secondary --seed UserSeed');
     }
 
     public function testSeederEvents(): void
