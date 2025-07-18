@@ -127,7 +127,7 @@ class SeedCommand extends Command
 
         $versionOrder = $config->getVersionOrder();
 
-        if (Hash::get($config, 'environment.dryrun') === true) {
+        if ($config->isDryRun()) {
             $io->warning('<warning>dry-run mode enabled</warning>');
         }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
