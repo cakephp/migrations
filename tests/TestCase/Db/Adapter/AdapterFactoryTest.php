@@ -51,7 +51,7 @@ class AdapterFactoryTest extends TestCase
         $adapter = static::class;
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Adapter class "Migrations\Test\Db\Adapter\AdapterFactoryTest" must implement Migrations\Db\Adapter\AdapterInterface');
+        $this->expectExceptionMessage('Adapter class `Migrations\Test\Db\Adapter\AdapterFactoryTest` must implement `Migrations\Db\Adapter\AdapterInterface`');
 
         $this->factory->registerAdapter('test', $adapter);
     }
@@ -89,7 +89,7 @@ class AdapterFactoryTest extends TestCase
         $wrapper = static::class;
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Wrapper class "Migrations\Test\Db\Adapter\AdapterFactoryTest" must implement Migrations\Db\Adapter\WrapperInterface');
+        $this->expectExceptionMessage('Wrapper class `Migrations\Test\Db\Adapter\AdapterFactoryTest` must implement `Migrations\Db\Adapter\WrapperInterface`');
 
         $this->factory->registerWrapper('test', $wrapper);
     }

@@ -1426,7 +1426,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 default:
                     throw new InvalidArgumentException(
-                        sprintf("Don't know how to execute action: '%s'", get_class($action)),
+                        sprintf("Don't know how to execute action `%s`", get_class($action)),
                     );
             }
         }

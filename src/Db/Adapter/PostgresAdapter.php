@@ -709,7 +709,7 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         throw new InvalidArgumentException(sprintf(
-            "The specified index on columns '%s' does not exist",
+            'The specified index on columns `%s` does not exist',
             implode(',', $columns),
         ));
     }

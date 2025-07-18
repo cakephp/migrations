@@ -112,7 +112,7 @@ class SeedCommandTest extends TestCase
     public function testSeederUnknown(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The seed class "NotThere" does not exist');
+        $this->expectExceptionMessage('The seed `NotThere` does not exist');
         $this->exec('migrations seed -c test --seed NotThere');
     }
 
@@ -170,7 +170,7 @@ class SeedCommandTest extends TestCase
         $this->createTables();
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The seed class "NotThere" does not exist');
+        $this->expectExceptionMessage('The seed `NotThere` does not exist');
         $this->exec('migrations seed -c test --seed NumbersSeed --seed NotThere');
     }
 
@@ -197,7 +197,7 @@ class SeedCommandTest extends TestCase
     {
         $this->createTables();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The seed class "LettersSeed" does not exist');
+        $this->expectExceptionMessage('The seed `LettersSeed` does not exist');
 
         $this->exec('migrations seed -c test --source NotThere --seed LettersSeed');
     }

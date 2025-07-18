@@ -964,6 +964,59 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
+    public function testSeedOneSeederShortName()
+    {
+        // This only works for Migrations built in.
+        $backend = 'builtin';
+        Configure::write('Migrations.backend', $backend);
+
+        $this->migrations->migrate();
+
+        $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'AnotherNumbers']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->selectQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '2',
+                'radix' => '10',
+            ],
+        ];
+        $this->assertEquals($expected, $result);
+
+        $seed = $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'NumbersAlt']);
+        $this->assertTrue($seed);
+        $result = $this->Connection->selectQuery()
+            ->select(['*'])
+            ->from('numbers')
+            ->execute()->fetchAll('assoc');
+
+        $expected = [
+            [
+                'id' => '1',
+                'number' => '2',
+                'radix' => '10',
+            ],
+            [
+                'id' => '2',
+                'number' => '5',
+                'radix' => '10',
+            ],
+        ];
+        $this->assertEquals($expected, $result);
+
+        $this->migrations->rollback(['target' => 'all']);
+    }
+
+    /**
+     * Tests seeding the database with seeder
+     *
+     * @return void
+     */
     #[DataProvider('backendProvider')]
     public function testSeedCallSeeder($backend)
     {
@@ -1034,7 +1087,12 @@ class MigrationsTest extends TestCase
         Configure::write('Migrations.backend', $backend);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The seed class "DerpSeed" does not exist');
+        if ($backend === 'builtin') {
+            $this->expectExceptionMessage('The seed `DerpSeed` does not exist');
+        } else {
+            $this->expectExceptionMessage('The seed class "DerpSeed" does not exist');
+        }
+
         $this->migrations->seed(['source' => 'AltSeeds', 'seed' => 'DerpSeed']);
     }
 

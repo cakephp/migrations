@@ -75,7 +75,7 @@ class AdapterFactory
             !($class instanceof Closure || is_subclass_of($class, AdapterInterface::class))
         ) {
             throw new RuntimeException(sprintf(
-                'Adapter class "%s" must implement Migrations\\Db\\Adapter\\AdapterInterface',
+                'Adapter class `%s` must implement `Migrations\\Db\\Adapter\\AdapterInterface`',
                 $class,
             ));
         }
@@ -119,7 +119,7 @@ class AdapterFactory
     {
         if (!is_subclass_of($class, WrapperInterface::class)) {
             throw new RuntimeException(sprintf(
-                'Wrapper class "%s" must implement Migrations\\Db\\Adapter\\WrapperInterface',
+                'Wrapper class `%s` must implement `Migrations\\Db\\Adapter\\WrapperInterface`',
                 $class,
             ));
         }

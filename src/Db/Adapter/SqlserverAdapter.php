@@ -702,7 +702,7 @@ ORDER BY IC.[key_ordinal]';
         }
 
         throw new InvalidArgumentException(sprintf(
-            "The specified index on columns '%s' does not exist",
+            'The specified index on columns `%s` does not exist',
             implode(',', $columns),
         ));
     }
@@ -730,7 +730,7 @@ ORDER BY IC.[key_ordinal]';
         }
 
         throw new InvalidArgumentException(sprintf(
-            "The specified index name '%s' does not exist",
+            'The specified index name `%s` does not exist',
             $indexName,
         ));
     }

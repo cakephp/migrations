@@ -2177,7 +2177,7 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironment($envStub);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The seed class "NonExistentSeeder" does not exist');
+        $this->expectExceptionMessage('The seed `NonExistentSeeder` does not exist');
 
         $this->manager->seed('NonExistentSeeder');
     }
