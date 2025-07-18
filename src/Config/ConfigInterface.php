@@ -112,7 +112,7 @@ interface ConfigInterface extends ArrayAccess
     /**
      * Get the dry run setting.
      *
-     * @return void
+     * @return bool
      */
     public function isDryRun(): bool;
 }
