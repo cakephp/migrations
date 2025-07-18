@@ -65,7 +65,7 @@
          * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string', [
@@ -265,7 +265,7 @@
          * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string', [
@@ -305,7 +305,7 @@
 
     class AddPriceToProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('price', 'decimal')
@@ -327,7 +327,7 @@
 
     class AddNameIndexToProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string')
@@ -353,7 +353,7 @@
 
     class AddFullDescriptionToProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('full_description', 'string', [
@@ -389,7 +389,7 @@
 
     class AlterPriceFromProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->changeColumn('name', 'float');
@@ -412,7 +412,7 @@
 
     class RemovePriceFromProducts extends AbstractMigration
     {
-        public function up()
+        public function up(): void
         {
             $table = $this->table('products');
             $table->removeColumn('price')
@@ -863,7 +863,7 @@
 
     class CreateProductsTable extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products', ['id' => false, 'primary_key' => ['id']]);
             $table
@@ -901,7 +901,7 @@
 
         public bool $autoId = false;
 
-        public function up()
+        public function up(): void
         {
             $table = $this->table('products');
             $table
@@ -941,7 +941,7 @@ unsigned или not, limit, comment и т.д.
 
     class CreateCategoriesTable extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this
                 ->table('categories', [
@@ -995,7 +995,7 @@ unsigned или not, limit, comment и т.д.
 Плагин даёт вам возможность переименовать таблицу, используя метод ``rename()``.
 В файле миграции вы можете сделать следующее::
 
-    public function up()
+    public function up(): void
     {
         $this->table('old_table_name')
             ->rename('new_table_name');

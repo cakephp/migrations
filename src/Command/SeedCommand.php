@@ -55,12 +55,12 @@ class SeedCommand extends Command
             '',
             'Runs a seeder script that can populate the database with data, or run mutations',
             '',
-            '<info>migrations seed --connection secondary --seed UserSeeder</info>',
+            '<info>migrations seed --connection secondary --seed UserSeed</info>',
             '',
-            'The `--seed` option can be supplied multiple times to run more than one seeder',
+            'The `--seed` option can be supplied multiple times to run more than one seed',
         ])->addOption('plugin', [
             'short' => 'p',
-            'help' => 'The plugin to run seeders in',
+            'help' => 'The plugin to run seeds in',
         ])->addOption('connection', [
             'short' => 'c',
             'help' => 'The datasource connection to use',
@@ -68,9 +68,9 @@ class SeedCommand extends Command
         ])->addOption('source', [
             'short' => 's',
             'default' => ConfigInterface::DEFAULT_SEED_FOLDER,
-            'help' => 'The folder where your seeders are.',
+            'help' => 'The folder where your seeds are.',
         ])->addOption('seed', [
-            'help' => 'The name of the seeder that you want to run.',
+            'help' => 'The name of the seed that you want to run.',
             'multiple' => true,
         ]);
 
@@ -97,7 +97,7 @@ class SeedCommand extends Command
     }
 
     /**
-     * Execute seeders based on console inputs.
+     * Execute seeds based on console inputs.
      *
      * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io

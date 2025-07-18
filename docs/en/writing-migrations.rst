@@ -43,7 +43,7 @@ Bake will automatically creates a skeleton migration file with a single method:
              * with the Table class.
              *
              */
-            public function change()
+            public function change(): void
             {
 
             }
@@ -69,7 +69,7 @@ down automatically for you. For example:
 
         class CreateUserLoginsTable extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 // create the table
                 $table = $this->table('user_logins');
@@ -116,7 +116,7 @@ up or down direction. For example:
 
         class CreateUserLoginsTable extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 // create the table
                 $table = $this->table('user_logins');
@@ -180,7 +180,7 @@ and if used will cause the underlying connection to use a prepared statement.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 // execute()
                 $count = $this->execute('DELETE FROM users'); // returns the number of affected rows
@@ -198,7 +198,7 @@ and if used will cause the underlying connection to use a prepared statement.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -260,7 +260,7 @@ Both methods accept raw SQL as their only parameter.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 // fetch a user
                 $row = $this->fetchRow('SELECT * FROM users');
@@ -272,7 +272,7 @@ Both methods accept raw SQL as their only parameter.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -296,7 +296,7 @@ insert methods in your migrations.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('status');
 
@@ -326,7 +326,7 @@ insert methods in your migrations.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
                 $this->execute('DELETE FROM status');
             }
@@ -356,7 +356,7 @@ your database migration.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('tableName');
             }
@@ -364,7 +364,7 @@ your database migration.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -411,7 +411,7 @@ store a collection of users.
 
         class MyNewMigration extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 $users = $this->table('users');
                 $users->addColumn('username', 'string', ['limit' => 20])
@@ -453,7 +453,7 @@ create a primary key using two columns instead:
 
         class MyNewMigration extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 $table = $this->table('followers', ['id' => false, 'primary_key' => ['user_id', 'follower_id']]);
                 $table->addColumn('user_id', 'integer')
@@ -474,7 +474,7 @@ To simply change the name of the primary key, we need to override the default ``
 
         class MyNewMigration extends BaseMigration
         {
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('followers', ['id' => 'user_id']);
                 $table->addColumn('follower_id', 'integer')
@@ -507,7 +507,7 @@ To simply set it to be signed just pass ``signed`` option with a ``true`` value:
 
         class MyNewMigration extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 $table = $this->table('followers', ['signed' => false]);
                 $table->addColumn('follower_id', 'integer')
@@ -544,7 +544,7 @@ method.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $exists = $this->hasTable('users');
                 if ($exists) {
@@ -555,7 +555,7 @@ method.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -582,7 +582,7 @@ plan migrations when more than one table is involved.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $this->table('users')->drop()->save();
             }
@@ -590,7 +590,7 @@ plan migrations when more than one table is involved.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
                 $users = $this->table('users');
                 $users->addColumn('username', 'string', ['limit' => 20])
@@ -623,7 +623,7 @@ To rename a table access an instance of the Table object then call the
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('users');
                 $table
@@ -634,7 +634,7 @@ To rename a table access an instance of the Table object then call the
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
                 $table = $this->table('legacy_users');
                 $table
@@ -661,7 +661,7 @@ Note that the mentioned columns must be added to the table, they will not be add
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $users = $this->table('users');
                 $users
@@ -678,7 +678,7 @@ Note that the mentioned columns must be added to the table, they will not be add
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -701,7 +701,7 @@ Pass in a string to set as the new table comment, or ``null`` to drop the existi
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $users = $this->table('users');
                 $users
@@ -717,7 +717,7 @@ Pass in a string to set as the new table comment, or ``null`` to drop the existi
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -842,7 +842,7 @@ have a default set to ``CURRENT_TIMESTAMP``. For MySQL only, ``updated`` column 
             /**
              * Migrate Change.
              */
-            public function change()
+            public function change(): void
             {
                 // Use defaults (without timezones)
                 $table = $this->table('users')->addTimestamps()->create();
@@ -961,7 +961,7 @@ is a function, in PostgreSQL. This method of preventing the built-in escaping is
 
         class AddSomeColumns extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 $this->table('users')
                       ->addColumn('username', Literal::from('citext'))
@@ -993,7 +993,7 @@ method. This method will return an array of Column classes with basic info. Exam
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $columns = $this->table('users')->getColumns();
                 ...
@@ -1002,7 +1002,7 @@ method. This method will return an array of Column classes with basic info. Exam
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
                 ...
             }
@@ -1025,7 +1025,7 @@ method. This method will return a Column class with basic info or NULL when the 
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $column = $this->table('users')->getColumn('email');
                 ...
@@ -1034,7 +1034,7 @@ method. This method will return a Column class with basic info or NULL when the 
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
                 ...
             }
@@ -1057,7 +1057,7 @@ You can check if a table already has a certain column by using the
             /**
              * Change Method.
              */
-            public function change()
+            public function change(): void
             {
                 $table = $this->table('user');
                 $column = $table->hasColumn('username');
@@ -1086,7 +1086,7 @@ To rename a column, access an instance of the Table object then call the
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('users');
                 $table->renameColumn('bio', 'biography')
@@ -1096,7 +1096,7 @@ To rename a column, access an instance of the Table object then call the
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
                 $table = $this->table('users');
                 $table->renameColumn('biography', 'bio')
@@ -1121,7 +1121,7 @@ where its value is the name of the column to position it after.
             /**
              * Change Method.
              */
-            public function change()
+            public function change(): void
             {
                 $table = $this->table('users');
                 $table->addColumn('city', 'string', ['after' => 'email'])
@@ -1149,7 +1149,7 @@ To drop a column, use the ``removeColumn()`` method.
             /**
              * Migrate up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('users');
                 $table->removeColumn('short_name')
@@ -1174,7 +1174,7 @@ You can limit the maximum length of a column by using the ``limit`` option.
             /**
              * Change Method.
              */
-            public function change()
+            public function change(): void
             {
                 $table = $this->table('tags');
                 $table->addColumn('short_name', 'string', ['limit' => 30])
@@ -1199,7 +1199,7 @@ See :ref:`valid-column-types` and `Valid Column Options`_ for allowed values.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $users = $this->table('users');
                 $users->changeColumn('email', 'string', ['limit' => 255])
@@ -1209,7 +1209,7 @@ See :ref:`valid-column-types` and `Valid Column Options`_ for allowed values.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -1232,7 +1232,7 @@ table object.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('users');
                 $table->addColumn('city', 'string')
@@ -1243,7 +1243,7 @@ table object.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -1264,7 +1264,7 @@ the ``order`` parameter. The order parameter takes an array of column names and 
         /**
          * Migrate Up.
          */
-        public function up()
+        public function up(): void
         {
             $table = $this->table('users');
             $table->addColumn('email', 'string')
@@ -1290,7 +1290,7 @@ define indexes::
         /**
          * Migrate Up.
          */
-        public function up()
+        public function up(): void
         {
             $table = $this->table('users');
             $table->addColumn('email', 'string')
@@ -1317,7 +1317,7 @@ ensure the table uses the ``MyISAM`` engine.
 
         class MyNewMigration extends BaseMigration
         {
-            public function change()
+            public function change(): void
             {
                 $table = $this->table('users', ['engine' => 'MyISAM']);
                 $table->addColumn('email', 'string')
@@ -1336,7 +1336,7 @@ The single column index can define its index length with or without defining col
 
     class MyNewMigration extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('users');
             $table->addColumn('email', 'string')
@@ -1356,7 +1356,7 @@ The SQL Server and PostgreSQL adapters support ``include`` (non-key) columns on 
 
     class MyNewMigration extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('users');
             $table->addColumn('email', 'string')
@@ -1376,7 +1376,7 @@ clauses for the index::
 
     class MyNewMigration extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('users');
             $table->addColumn('email', 'string')
@@ -1400,7 +1400,7 @@ during index creation::
 
     class MyNewMigration extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('users');
             $table->addColumn('email', 'string')
@@ -1422,7 +1422,7 @@ PostgreSQL adapters also supports Generalized Inverted Index ``gin`` indexes::
 
     class MyNewMigration extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('users');
             $table->addColumn('address', 'string')
@@ -1443,7 +1443,7 @@ call this method for each index::
         /**
          * Migrate Up.
          */
-        public function up()
+        public function up(): void
         {
             $table = $this->table('users');
             $table->removeIndex(['email'])
@@ -1457,7 +1457,7 @@ call this method for each index::
         /**
          * Migrate Down.
          */
-        public function down()
+        public function down(): void
         {
 
         }
@@ -1484,7 +1484,7 @@ Let's add a foreign key to an example table:
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('tags');
                 $table->addColumn('tag_name', 'string')
@@ -1500,7 +1500,7 @@ Let's add a foreign key to an example table:
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -1517,7 +1517,7 @@ tables with composite keys::
 
     class MyNewMigration extends BaseMigration
     {
-        public function up()
+        public function up(): void
         {
             $table = $this->table('follower_events');
             $table->addColumn('user_id', 'integer')
@@ -1550,7 +1550,7 @@ key::
         /**
          * Migrate Up.
          */
-        public function up()
+        public function up(): void
         {
             $table = $this->table('articles');
             $table->addForeignKey(
@@ -1581,7 +1581,7 @@ We can also easily check if a foreign key exists:
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('tag_relationships');
                 $exists = $table->hasForeignKey('tag_id');
@@ -1593,7 +1593,7 @@ We can also easily check if a foreign key exists:
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -1616,7 +1616,7 @@ plan migrations when more than one table is involved.
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $table = $this->table('tag_relationships');
                 $table->dropForeignKey('tag_id')->save();
@@ -1625,7 +1625,7 @@ plan migrations when more than one table is involved.
             /**
              * Migrate Down.
              */
-            public function down()
+            public function down(): void
             {
 
             }
@@ -1657,7 +1657,7 @@ be easy to work with as it resembles very closely plain SQL. Accesing the query 
             /**
              * Migrate Up.
              */
-            public function up()
+            public function up(): void
             {
                 $builder = $this->getQueryBuilder('select');
                 $statement = $builder->select('*')->from('users')->execute();

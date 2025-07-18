@@ -70,7 +70,7 @@ Migrations
          * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string', [
@@ -272,7 +272,7 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
          * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
          * @return void
          */
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string', [
@@ -314,7 +314,7 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
 
     class AddPriceToProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('price', 'decimal')
@@ -338,7 +338,7 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
 
     class AddNameIndexToProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string')
@@ -365,7 +365,7 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
 
     class AddFullDescriptionToProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('full_description', 'string', [
@@ -399,7 +399,7 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
 
     class AlterPriceFromProducts extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->changeColumn('name', 'float');
@@ -424,7 +424,7 @@ fieldType の後のクエスチョンマークは、ヌルを許可するカラ�
 
     class RemovePriceFromProducts extends AbstractMigration
     {
-        public function up()
+        public function up(): void
         {
             $table = $this->table('products');
             $table->removeColumn('price')
@@ -899,7 +899,7 @@ migrations プラグインのバージョン 1.2 から、非シェル環境で�
 
     class CreateProductsTable extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products', ['id' => false, 'primary_key' => ['id']]);
             $table
@@ -936,7 +936,7 @@ migrations プラグインのバージョン 1.2 から、非シェル環境で�
 
         public bool $autoId = false;
 
-        public function up()
+        public function up(): void
         {
             $table = $this->table('products');
             $table
@@ -973,7 +973,7 @@ Bake で生成されたマイグレーションファイルとスナップショ
 
     class CreateCategoriesTable extends AbstractMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this
                 ->table('categories', [
@@ -1025,7 +1025,7 @@ CakePHP コアは、この操作を行うために使用できる `スキーマ�
 プラグインは、 ``rename()`` メソッドを使用することでテーブルのリネームができます。
 あなたのマイグレーションファイルの中で、以下のように記述できます。 ::
 
-    public function up()
+    public function up(): void
     {
         $this->table('old_table_name')
             ->rename('new_table_name')

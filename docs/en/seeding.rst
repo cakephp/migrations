@@ -2,7 +2,7 @@ Database Seeding
 ################
 
 Seed classes are a great way to easily fill your database with data after
-it's created. By default they are stored in the `seeds` directory; however, this
+it's created. By default, they are stored in the `seeds` directory; however, this
 path can be changed in your configuration file.
 
 .. note::
@@ -17,37 +17,74 @@ Migrations includes a command to easily generate a new seed class:
 
 .. code-block:: bash
 
-        $ bin/cake bake seed MyNewSeeder
+        $ bin/cake bake seed MyNewSeed
 
 It is based on a skeleton template:
 
 .. code-block:: php
 
-        <?php
+    <?php
 
-        use Migrations\BaseSeed;
+    use Migrations\BaseSeed;
 
-        class MyNewSeeder extends BaseSeed
+    class MyNewSeed extends BaseSeed
+    {
+        /**
+         * Run Method.
+         *
+         * Write your database seed using this method.
+         *
+         * More information on writing seeds is available here:
+         * https://book.cakephp.org/migrations/5/en/seeding.html
+         */
+        public function run() : void
         {
-            /**
-             * Run Method.
-             *
-             * Write your database seeder using this method.
-             *
-             * More information on writing seeders is available here:
-             * https://book.cakephp.org/migrations/5/en/seeding.html
-             */
-            public function run() : void
-            {
 
-            }
         }
+    }
+
+By default, the table the seed will try to alter is the "tableized" version of the seed filename.
+
+.. code-block:: bash
+    # You specify the name of the table the seed files will alter by using the ``--table`` option
+    bin/cake bake seed Articles --table my_articles_table
+
+    # You can specify a plugin to bake into
+    bin/cake bake seed Articles --plugin PluginName
+
+    # You can specify an alternative connection when generating a seed.
+    bin/cake bake seed Articles --connection connection
+
+    # Include data from the Articles table in your seed.
+    bin/cake bake seed --data Articles
+
+By default, it will export all the rows found in your table. You can limit the
+number of rows exported by using the ``--limit`` option:
+
+.. code-block:: bash
+
+    # Will only export the first 10 rows found
+    bin/cake bake seed --data --limit 10 Articles
+
+If you only want to include a selection of fields from the table in your seed
+file, you can use the ``--fields`` option. It takes the list of fields to
+include as a comma separated value string:
+
+.. code-block:: bash
+
+    # Will only export the fields `id`, `title` and `excerpt`
+    bin/cake bake seed --data --fields id,title,excerpt Articles
+
+.. tip::
+
+    Of course you can use both the ``--limit`` and ``--fields`` options in the
+    same command call.
 
 The BaseSeed Class
-======================
+==================
 
-All Migrations seeds extend from the ``BaseSeed`` or ``AbstractSeed`` classes.
-These classes provide the necessary support to create your seed classes. Seed
+All Migrations seeds extend from the ``BaseSeed`` class.
+It provides the necessary support to create your seed classes. Seed
 classes are primarily used to insert test data.
 
 The Run Method
@@ -60,7 +97,7 @@ data.
 .. note::
 
     Unlike with migrations, seeds do not keep track of which seed classes have
-    been run. This means database seeders can be run repeatedly. Keep this in
+    been run. This means database seeds can be run repeatedly. Keep this in
     mind when developing them.
 
 The Init Method
@@ -80,38 +117,65 @@ implementation.
 Foreign Key Dependencies
 ========================
 
-Often you'll find that seeders need to run in a particular order, so they don't
+Often you'll find that seeds need to run in a particular order, so they don't
 violate foreign key constraints. To define this order, you can implement the
-``getDependencies()`` method that returns an array of seeders to run before the
-current seeder:
+``getDependencies()`` method that returns an array of seeds to run before the
+current seed:
 
 .. code-block:: php
 
-        <?php
+    <?php
 
-        use Migrations\BaseSeed;
+    use Migrations\BaseSeed;
 
-        class ShoppingCartSeeder extends BaseSeed
+    class ShoppingCartSeed extends BaseSeed
+    {
+        public function getDependencies(): array
         {
-            public function getDependencies()
-            {
-                return [
-                    'UserSeeder',
-                    'ShopItemSeeder'
-                ];
-            }
-
-            public function run() : void
-            {
-                // Seed the shopping cart  after the `UserSeeder` and
-                // `ShopItemSeeder` have been run.
-            }
+            return [
+                'UserSeed',
+                'ShopItemSeed'
+            ];
         }
+
+        public function run() : void
+        {
+            // Seed the shopping cart  after the `UserSeed` and
+            // `ShopItemSeed` have been run.
+        }
+    }
 
 .. note::
 
     Dependencies are only considered when executing all seed classes (default behavior).
     They won't be considered when running specific seed classes.
+
+
+Calling a Seed from another Seed
+================================
+
+Usually when seeding, the order in which to insert the data must be respected
+to not encounter constraints violations. Since seeds are executed in the
+alphabetical order by default, you can use the ``\Migrations\BaseSeed::call()``
+method to define your own sequence of seeds execution:
+
+.. code-block:: php
+
+    <?php
+
+    use Migrations\BaseSeed;
+
+    class DatabaseSeed extends BaseSeed
+    {
+        public function run(): void
+        {
+            $this->call('AnotherSeed');
+            $this->call('YetAnotherSeed');
+
+            // You can use the plugin dot syntax to call seeds from a plugin
+            $this->call('PluginName.FromPluginSeed');
+        }
+    }
 
 Inserting Data
 ==============
@@ -122,29 +186,29 @@ within your seed class and then use the ``insert()`` method to insert data:
 
 .. code-block:: php
 
-        <?php
+    <?php
 
-        use Migrations\BaseSeed;
+    use Migrations\BaseSeed;
 
-        class PostsSeeder extends BaseSeed
+    class PostsSeed extends BaseSeed
+    {
+        public function run() : void
         {
-            public function run() : void
-            {
-                $data = [
-                    [
-                        'body'    => 'foo',
-                        'created' => date('Y-m-d H:i:s'),
-                    ],[
-                        'body'    => 'bar',
-                        'created' => date('Y-m-d H:i:s'),
-                    ]
-                ];
+            $data = [
+                [
+                    'body'    => 'foo',
+                    'created' => date('Y-m-d H:i:s'),
+                ],[
+                    'body'    => 'bar',
+                    'created' => date('Y-m-d H:i:s'),
+                ]
+            ];
 
-                $posts = $this->table('posts');
-                $posts->insert($data)
-                      ->saveData();
-            }
+            $posts = $this->table('posts');
+            $posts->insert($data)
+                  ->saveData();
         }
+    }
 
 .. note::
 
@@ -159,33 +223,33 @@ SQL `TRUNCATE` command:
 
 .. code-block:: php
 
-        <?php
+    <?php
 
-        use Migrations\BaseSeed;
+    use Migrations\BaseSeed;
 
-        class UserSeeder extends BaseSeed
+    class UserSeed extends BaseSeed
+    {
+        public function run() : void
         {
-            public function run() : void
-            {
-                $data = [
-                    [
-                        'body'    => 'foo',
-                        'created' => date('Y-m-d H:i:s'),
-                    ],
-                    [
-                        'body'    => 'bar',
-                        'created' => date('Y-m-d H:i:s'),
-                    ]
-                ];
+            $data = [
+                [
+                    'body'    => 'foo',
+                    'created' => date('Y-m-d H:i:s'),
+                ],
+                [
+                    'body'    => 'bar',
+                    'created' => date('Y-m-d H:i:s'),
+                ]
+            ];
 
-                $posts = $this->table('posts');
-                $posts->insert($data)
-                      ->saveData();
+            $posts = $this->table('posts');
+            $posts->insert($data)
+                  ->saveData();
 
-                // empty the table
-                $posts->truncate();
-            }
+            // empty the table
+            $posts->truncate();
         }
+    }
 
 .. note::
 
@@ -207,13 +271,13 @@ run a specific class, simply pass in the name of it using the ``--seed`` paramet
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed UserSeeder
+        $ bin/cake migrations seed --seed UserSeed
 
-You can also run multiple seeders:
+You can also run multiple seeds:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed UserSeeder --seed PermissionSeeder --seed LogSeeder
+        $ bin/cake migrations seed --seed UserSeed --seed PermissionSeed --seed LogSeed
 
 You can also use the `-v` parameter for more output verbosity:
 

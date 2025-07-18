@@ -66,7 +66,7 @@ Here's an example of a migration::
          * https://book.cakephp.org/migrations/3/en/writing-migrations.html#the-change-method
          * @return void
          */
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string', [
@@ -281,7 +281,7 @@ The command line above will generate a migration file that resembles::
          * https://book.cakephp.org/migrations/3/en/writing-migrations.html#the-change-method
          * @return void
          */
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string', [
@@ -323,7 +323,7 @@ Executing the command line above will generate::
 
     class AddPriceToProducts extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('price', 'decimal', [
@@ -352,7 +352,7 @@ will generate::
 
     class AddNameIndexToProducts extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('name', 'string')
@@ -383,7 +383,7 @@ Executing the command line above will generate::
 
     class AddFullDescriptionToProducts extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->addColumn('full_description', 'string', [
@@ -418,7 +418,7 @@ will generate::
 
     class AlterPriceOnProducts extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products');
             $table->changeColumn('name', 'float');
@@ -443,7 +443,7 @@ creates the file::
 
     class RemovePriceFromProducts extends BaseMigration
     {
-        public function up()
+        public function up(): void
         {
             $table = $this->table('products');
             $table->removeColumn('price')
@@ -694,96 +694,8 @@ value. If you use it, it will mark all found migrations as migrated:
 Seed classes are a good way to populate your database with default or starter
 data. They are also a great way to generate data for development environments.
 
-By default, seed files will be looked for in the ``config/Seeds`` directory of
-your application. See the :doc:`seeding` for how to build seed classes.
-
-As for migrations, a ``bake`` interface is provided for seed files:
-
-.. code-block:: bash
-
-    # This will create a ArticlesSeed.php file in the directory config/Seeds of your application
-    # By default, the table the seed will try to alter is the "tableized" version of the seed filename
-    bin/cake bake seed Articles
-
-    # You specify the name of the table the seed files will alter by using the ``--table`` option
-    bin/cake bake seed Articles --table my_articles_table
-
-    # You can specify a plugin to bake into
-    bin/cake bake seed Articles --plugin PluginName
-
-    # You can specify an alternative connection when generating a seeder.
-    bin/cake bake seed Articles --connection connection
-
-    # Include data from the Articles table in your seed.
-    bin/cake bake seed --data Articles
-
-By default, it will export all the rows found in your table. You can limit the
-number of rows exported by using the ``--limit`` option:
-
-.. code-block:: bash
-
-    # Will only export the first 10 rows found
-    bin/cake bake seed --data --limit 10 Articles
-
-If you only want to include a selection of fields from the table in your seed
-file, you can use the ``--fields`` option. It takes the list of fields to
-include as a comma separated value string:
-
-.. code-block:: bash
-
-    # Will only export the fields `id`, `title` and `excerpt`
-    bin/cake bake seed --data --fields id,title,excerpt Articles
-
-.. tip::
-
-    Of course you can use both the ``--limit`` and ``--fields`` options in the
-    same command call.
-
-To seed your database, you can use the ``seed`` subcommand:
-
-.. code-block:: bash
-
-    # Without parameters, the seed subcommand will run all available seeders
-    # in the target directory, in alphabetical order.
-    bin/cake migrations seed
-
-    # You can specify only one seeder to be run using the `--seed` option
-    bin/cake migrations seed --seed ArticlesSeed
-
-    # You can run seeders from an alternative directory, relative to config
-    bin/cake migrations seed --source AlternativeSeeds
-
-    # You can run seeders from a plugin
-    bin/cake migrations seed --plugin PluginName
-
-    # You can run seeders from a specific connection
-    bin/cake migrations seed --connection connection
-
-Be aware that, as opposed to migrations, seeders are not tracked, which means
-that the same seeder can be applied multiple times.
-
-Calling a Seeder from another Seeder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Usually when seeding, the order in which to insert the data must be respected
-to not encounter constraints violations. Since Seeders are executed in the
-alphabetical order by default, you can use the ``\Migrations\BaseSeed::call()``
-method to define your own sequence of seeders execution::
-
-    use Migrations\BaseSeed;
-
-    class DatabaseSeed extends BaseSeed
-    {
-        public function run(): void
-        {
-            $this->call('AnotherSeed');
-            $this->call('YetAnotherSeed');
-
-            // You can use the plugin dot syntax to call seeders from a plugin
-            $this->call('PluginName.FromPluginSeed');
-        }
-    }
-
+By default, seeds will be looked for in the ``config/Seeds/`` directory of
+your application. See the :doc:`seeding` for how to build and use seed classes.
 
 ``dump`` : Generating a dump file for the diff baking feature
 -------------------------------------------------------------
@@ -984,7 +896,7 @@ adding new tables to the database, you can use the second argument of the
 
     class CreateProductsTable extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this->table('products', ['id' => false, 'primary_key' => ['id']]);
             $table
@@ -1023,7 +935,7 @@ it to the table declaration::
 
         public bool $autoId = false;
 
-        public function up()
+        public function up(): void
         {
             $table = $this->table('products');
             $table
@@ -1060,7 +972,7 @@ default one, you can define it with the ``table()`` method, as an option::
 
     class CreateCategoriesTable extends BaseMigration
     {
-        public function change()
+        public function change(): void
         {
             $table = $this
                 ->table('categories', [
@@ -1111,14 +1023,14 @@ Renaming a table
 The plugin gives you the ability to rename a table, using the ``rename()``
 method. In your migration file, you can do the following::
 
-    public function up()
+    public function up(): void
     {
         $this->table('old_table_name')
             ->rename('new_table_name')
             ->update();
     }
 
-    public function down()
+    public function down(): void
     {
         $this->table('new_table_name')
             ->rename('old_table_name')
@@ -1164,7 +1076,7 @@ to alert developers about new migrations that have not been applied::
         ->add(new PendingMigrationsMiddleware($config))
         ... // rest
 
-You can add `'app'` config key set to `false` if you are only interested in
+You can add ``'app'`` config key set to ``false`` if you are only interested in
 checking plugin migrations.
 
 You can temporarily disable the migration check by adding
