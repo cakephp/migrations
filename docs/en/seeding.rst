@@ -155,7 +155,7 @@ Calling a Seed from another Seed
 ================================
 
 Usually when seeding, the order in which to insert the data must be respected
-to not encounter constraints violations. Since seeds are executed in the
+to not encounter constraint violations. Since seeds are executed in an
 alphabetical order by default, you can use the ``\Migrations\BaseSeed::call()``
 method to define your own sequence of seeds execution:
 
