@@ -114,8 +114,9 @@ class SeedCommand extends Command
             'plugin' => $args->getOption('plugin'),
             'source' => $args->getOption('source'),
             'connection' => $args->getOption('connection'),
-            'dry-run' => $args->getOption('dry-run'),
+            'dry-run' => (bool)$args->getOption('dry-run'),
         ]);
+
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
 
