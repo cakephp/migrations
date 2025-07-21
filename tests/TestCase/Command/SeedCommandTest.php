@@ -272,7 +272,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
 
         $this->assertExitSuccess();
-        $this->assertErrorContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
@@ -283,7 +283,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --seed NumbersSeed -x');
 
         $this->assertExitSuccess();
-        $this->assertErrorContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
@@ -309,7 +309,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --source CallSeeds --seed LettersSeed --seed NumbersCallSeed --dry-run');
 
         $this->assertExitSuccess();
-        $this->assertErrorContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
         $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
@@ -323,9 +323,6 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(0, $lettersCount, 'Dry-run mode should not insert into letters table');
     }
 
-    /**
-     * TODO: Currently failing with "TypeError: PDO::quote(): Argument #1 ($string) must be of type string, Cake\I18n\Date given"
-     */
     public function testDryRunModeAllSeeds(): void
     {
         $this->createTables();
@@ -336,7 +333,7 @@ class SeedCommandTest extends TestCase
 
         $this->exec('migrations seed -c test --dry-run');
         $this->assertExitSuccess();
-        $this->assertErrorContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
@@ -357,14 +354,11 @@ class SeedCommandTest extends TestCase
         $this->createTables();
         $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
         $this->assertExitSuccess();
-        $this->assertErrorContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
 
         $this->assertSame(['Migration.beforeSeed', 'Migration.afterSeed'], $fired);
     }
 
-    /**
-     * TODO: Currently failing with "TypeError: PDO::quote(): Argument #1 ($string) must be of type string, Cake\I18n\Date given"
-     */
     public function testDryRunModeWithStoresSeed(): void
     {
         $this->createTables();
@@ -375,7 +369,7 @@ class SeedCommandTest extends TestCase
 
         $this->exec('migrations seed -c test --seed StoresSeed --dry-run');
         $this->assertExitSuccess();
-        $this->assertErrorContains('dry-run mode enabled');
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
         $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM stores')->fetchColumn(0);
