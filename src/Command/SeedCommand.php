@@ -128,7 +128,7 @@ class SeedCommand extends Command
         $versionOrder = $config->getVersionOrder();
 
         if ($config->isDryRun()) {
-            $io->warning('<warning>dry-run mode enabled</warning>');
+            $io->warning('dry-run mode enabled');
         }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
