@@ -145,7 +145,7 @@ class MigrateCommand extends Command
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         if ($fake) {
-            $io->info('<warning>warning</warning> performing fake migrations');
+            $io->out('<warning>warning</warning> performing fake migrations');
         }
 
         try {
