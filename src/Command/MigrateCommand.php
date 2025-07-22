@@ -125,19 +125,25 @@ class MigrateCommand extends Command
         $version = $args->getOption('target') !== null ? (int)$args->getOption('target') : null;
         $date = $args->getOption('date');
         $fake = (bool)$args->getOption('fake');
-        $dryRun = (bool)$args->getOption('dry-run');
+
+        $count = $args->getOption('count');
+        if ($count) {
+            $io->abort('The `--count` option is not supported yet in this command. Use `--target` instead.');
+        }
 
         $factory = new ManagerFactory([
             'plugin' => $args->getOption('plugin'),
             'source' => $args->getOption('source'),
             'connection' => $args->getOption('connection'),
-            'dry-run' => $dryRun,
+            'dry-run' => (bool)$args->getOption('dry-run'),
         ]);
+
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
 
         $versionOrder = $config->getVersionOrder();
-        if ($dryRun) {
+
+        if ($config->isDryRun()) {
             $io->info('DRY-RUN mode enabled');
         }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));

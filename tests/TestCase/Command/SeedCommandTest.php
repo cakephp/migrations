@@ -265,4 +265,114 @@ class SeedCommandTest extends TestCase
         $this->assertNotEmpty($store['created']);
         $this->assertNotEmpty($store['modified']);
     }
+
+    public function testDryRunModeWarning(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
+
+        $this->assertExitSuccess();
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+    }
+
+    public function testDryRunModeShortOption(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed NumbersSeed -x');
+
+        $this->assertExitSuccess();
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+    }
+
+    public function testDryRunModeNoDataChanges(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $initialCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
+
+        $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
+        $this->assertExitSuccess();
+
+        $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
+        $this->assertEquals($initialCount, $finalCount, 'Dry-run mode should not modify database');
+    }
+
+    public function testDryRunModeMultipleSeeds(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --source CallSeeds --seed LettersSeed --seed NumbersCallSeed --dry-run');
+
+        $this->assertExitSuccess();
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
+        $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $numbersCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
+        $lettersCount = $connection->execute('SELECT COUNT(*) FROM letters')->fetchColumn(0);
+
+        $this->assertEquals(0, $numbersCount, 'Dry-run mode should not insert into numbers table');
+        $this->assertEquals(0, $lettersCount, 'Dry-run mode should not insert into letters table');
+    }
+
+    public function testDryRunModeAllSeeds(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $initialCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
+
+        $this->exec('migrations seed -c test --dry-run');
+        $this->assertExitSuccess();
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+
+        $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
+        $this->assertEquals($initialCount, $finalCount, 'Dry-run mode should not modify database when running all seeds');
+    }
+
+    public function testDryRunModeWithEvents(): void
+    {
+        /** @var array<int, string> $fired */
+        $fired = [];
+        EventManager::instance()->on('Migration.beforeSeed', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+        EventManager::instance()->on('Migration.afterSeed', function (EventInterface $event) use (&$fired): void {
+            $fired[] = $event->getName();
+        });
+
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
+        $this->assertExitSuccess();
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+
+        $this->assertSame(['Migration.beforeSeed', 'Migration.afterSeed'], $fired);
+    }
+
+    public function testDryRunModeWithStoresSeed(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $initialCount = $connection->execute('SELECT COUNT(*) FROM stores')->fetchColumn(0);
+
+        $this->exec('migrations seed -c test --seed StoresSeed --dry-run');
+        $this->assertExitSuccess();
+        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
+
+        $finalCount = $connection->execute('SELECT COUNT(*) FROM stores')->fetchColumn(0);
+        $this->assertEquals($initialCount, $finalCount, 'Dry-run mode should not modify stores table');
+    }
 }

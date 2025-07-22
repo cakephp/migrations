@@ -679,9 +679,19 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if ($value === null) {
             return 'null';
         }
+
         if ($value instanceof Literal || $value instanceof PhinxLiteral) {
             return (string)$value;
         }
+
+        if ($value instanceof DateTime) {
+            return $value->toDateTimeString();
+        }
+
+        if ($value instanceof Date) {
+            return $value->toDateString();
+        }
+
         $driver = $this->getConnection()->getDriver();
 
         return $driver->quote($value);
