@@ -19,7 +19,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Event\EventDispatcherTrait;
-use Cake\Utility\Hash;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 
