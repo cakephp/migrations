@@ -138,14 +138,14 @@ class MigrateCommand extends Command
 
         $versionOrder = $config->getVersionOrder();
         if ($dryRun) {
-            $io->out('<warning>warning</warning> dry-run mode enabled');
+            $io->info('DRY-RUN mode enabled');
         }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         if ($fake) {
-            $io->out('<warning>warning</warning> performing fake migrations');
+            $io->info('<warning>warning</warning> performing fake migrations');
         }
 
         try {
