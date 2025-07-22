@@ -272,7 +272,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
 
         $this->assertExitSuccess();
-        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('DRY-RUN mode enabled');
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
@@ -283,7 +283,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --seed NumbersSeed -x');
 
         $this->assertExitSuccess();
-        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('DRY-RUN mode enabled');
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
@@ -309,7 +309,7 @@ class SeedCommandTest extends TestCase
         $this->exec('migrations seed -c test --source CallSeeds --seed LettersSeed --seed NumbersCallSeed --dry-run');
 
         $this->assertExitSuccess();
-        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('DRY-RUN mode enabled');
         $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
         $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
@@ -333,7 +333,7 @@ class SeedCommandTest extends TestCase
 
         $this->exec('migrations seed -c test --dry-run');
         $this->assertExitSuccess();
-        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('DRY-RUN mode enabled');
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
@@ -354,7 +354,7 @@ class SeedCommandTest extends TestCase
         $this->createTables();
         $this->exec('migrations seed -c test --seed NumbersSeed --dry-run');
         $this->assertExitSuccess();
-        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('DRY-RUN mode enabled');
 
         $this->assertSame(['Migration.beforeSeed', 'Migration.afterSeed'], $fired);
     }
@@ -369,7 +369,7 @@ class SeedCommandTest extends TestCase
 
         $this->exec('migrations seed -c test --seed StoresSeed --dry-run');
         $this->assertExitSuccess();
-        $this->assertErrorContains('<warning>dry-run mode enabled</warning>');
+        $this->assertOutputContains('DRY-RUN mode enabled');
         $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM stores')->fetchColumn(0);
