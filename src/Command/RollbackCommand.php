@@ -145,7 +145,7 @@ class RollbackCommand extends Command
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         if ($dryRun) {
-            $io->out('<warning>warning</warning> dry-runmode enabled');
+            $io->out('<warning>warning</warning> dry-run mode enabled');
         }
         if ($fake) {
             $io->out('<warning>warning</warning> performing fake rollbacks');
