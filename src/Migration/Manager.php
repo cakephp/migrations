@@ -361,13 +361,14 @@ class Manager
     }
 
     /**
-     * Migrate an environment to the specified version.
+     * Migrate an environment to the specified version or by count of migrations.
      *
      * @param int|null $version version to migrate to
      * @param bool $fake flag that if true, we just record running the migration, but not actually do the migration
+     * @param int|null $count Number of migrations to run, all migrations will be run if not set and no version is given.
      * @return void
      */
-    public function migrate(?int $version = null, bool $fake = false): void
+    public function migrate(?int $version = null, bool $fake = false, ?int $count = null): void
     {
         $migrations = $this->getMigrations();
         $env = $this->getEnvironment();
@@ -409,13 +410,15 @@ class Manager
         }
 
         ksort($migrations);
+        $done = 0;
         foreach ($migrations as $migration) {
-            if ($migration->getVersion() > $version) {
+            if ($migration->getVersion() > $version || ($count && $done >= $count)) {
                 break;
             }
 
             if (!in_array($migration->getVersion(), $versions)) {
                 $this->executeMigration($migration, MigrationInterface::UP, $fake);
+                $done++;
             }
         }
     }
@@ -533,6 +536,33 @@ class Manager
             ' <info>' . $name . ':</info>' .
             ' <comment>' . $status . ' ' . $duration . '</comment>',
         );
+    }
+
+    /**
+     * Rollback an environment by a specific count of migrations.
+     *
+     * Note: If the count is greater than the number of migrations, it will rollback all migrations.
+     *
+     * @param int $count Count
+     * @param bool $force Force
+     * @param bool $fake Flag that if true, we just record running the migration, but not actually do the migration
+     * @return void
+     */
+    public function rollbackByCount(int $count, bool $force = false, bool $fake = false): void
+    {
+        // note that the version log are also indexed by name with the proper ascending order according to the version order
+        $executedVersions = $this->getEnvironment()->getVersionLog();
+
+        $target = null;
+        $total = count($executedVersions);
+        $pos = 0;
+        while ($pos < $total && $pos <= $count) {
+            $last = array_pop($executedVersions);
+            $target = $last['version'];
+            $pos++;
+        }
+
+        $this->rollback($target, $force, false, $fake);
     }
 
     /**

@@ -20,6 +20,7 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
 use DateTime;
 use Exception;
+use LogicException;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 use Throwable;
@@ -126,9 +127,12 @@ class MigrateCommand extends Command
         $date = $args->getOption('date');
         $fake = (bool)$args->getOption('fake');
 
-        $count = $args->getOption('count');
-        if ($count) {
-            $io->abort('The `--count` option is not supported yet in this command. Use `--target` instead.');
+        $count = $args->getOption('count') !== null ? (int)$args->getOption('count') : null;
+        if ($count && $date) {
+            throw new LogicException('Can only use one of `--count` or `--date` options at a time.');
+        }
+        if ($version && $date) {
+            throw new LogicException('Can only use one of `--version` or `--date` options at a time.');
         }
 
         $factory = new ManagerFactory([
@@ -160,7 +164,7 @@ class MigrateCommand extends Command
             if ($date !== null) {
                 $manager->migrateToDateTime(new DateTime((string)$date), $fake);
             } else {
-                $manager->migrate($version, $fake);
+                $manager->migrate($version, $fake, $count);
             }
             $end = microtime(true);
         } catch (Exception $e) {

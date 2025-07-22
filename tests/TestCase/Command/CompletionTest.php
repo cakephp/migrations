@@ -103,7 +103,7 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations rollback');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = '--connection -c --date -d --dry-run -x --fake --force -f --help -h --no-lock --plugin -p';
+        $expected = '--connection -c --count -k --date -d --dry-run -x --fake --force -f --help -h --no-lock --plugin -p';
         $expected .= ' --quiet -q --source -s --target -t --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);

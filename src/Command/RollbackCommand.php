@@ -21,6 +21,7 @@ use Cake\Event\EventDispatcherTrait;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 use Throwable;
@@ -77,6 +78,9 @@ class RollbackCommand extends Command
         ])->addOption('date', [
             'short' => 'd',
             'help' => 'The date to rollback to',
+        ])->addOption('count', [
+            'short' => 'k',
+            'help' => 'The number of migrations to rollback',
         ])->addOption('fake', [
             'help' => "Mark any migrations selected as run, but don't actually execute them",
             'boolean' => true,
@@ -130,6 +134,14 @@ class RollbackCommand extends Command
         $force = (bool)$args->getOption('force');
         $dryRun = (bool)$args->getOption('dry-run');
 
+        $count = $args->getOption('count') !== null ? (int)$args->getOption('count') : null;
+        if ($count && $date) {
+            throw new LogicException('Can only use one of `--count` or `--date` options at a time.');
+        }
+        if ($version && $date) {
+            throw new LogicException('Can only use one of `--version` or `--date` options at a time.');
+        }
+
         $factory = new ManagerFactory([
             'plugin' => $args->getOption('plugin'),
             'source' => $args->getOption('source'),
@@ -162,7 +174,11 @@ class RollbackCommand extends Command
         try {
             // run the migrations
             $start = microtime(true);
-            $manager->rollback($target, $force, $targetMustMatch, $fake);
+            if ($count) {
+                $manager->rollbackByCount($count, $force, $fake);
+            } else {
+                $manager->rollback($target, $force, $targetMustMatch, $fake);
+            }
             $end = microtime(true);
         } catch (Exception $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
