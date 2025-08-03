@@ -553,7 +553,6 @@ class Manager
         // note that the version log are also indexed by name with the proper ascending order according to the version order
         $executedVersions = $this->getEnvironment()->getVersionLog();
 
-        $target = null;
         $total = count($executedVersions);
         $pos = 0;
         while ($pos < $count && $pos < $total) {
@@ -561,12 +560,10 @@ class Manager
             $pos++;
         }
 
-        // After popping, get the last remaining version as the target
-        if (!empty($executedVersions)) {
+        if ($executedVersions) {
             $last = end($executedVersions);
             $target = $last['version'];
         } else {
-            // If no versions remain, rollback everything
             $target = 0;
         }
 
