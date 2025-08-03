@@ -82,7 +82,7 @@ class Manager
         $migrations = [];
         $isJson = $format === 'json';
         $defaultMigrations = $this->getMigrations();
-        if (count($defaultMigrations)) {
+        if ($defaultMigrations) {
             $env = $this->getEnvironment();
             $versions = $env->getVersionLog();
 

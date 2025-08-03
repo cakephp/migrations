@@ -135,6 +135,9 @@ class RollbackCommand extends Command
         $dryRun = (bool)$args->getOption('dry-run');
 
         $count = $args->getOption('count') !== null ? (int)$args->getOption('count') : null;
+        if ($count !== null && $count < 1) {
+            throw new LogicException('Count must be > 0.');
+        }
         if ($count && $date) {
             throw new LogicException('Can only use one of `--count` or `--date` options at a time.');
         }

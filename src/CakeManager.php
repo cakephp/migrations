@@ -71,7 +71,7 @@ class CakeManager extends Manager
         $migrations = [];
         $isJson = $format === 'json';
         $defaultMigrations = $this->getMigrations('default');
-        if (count($defaultMigrations)) {
+        if ($defaultMigrations) {
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $this->maxNameLength = $versions ? max(array_map(function ($version) {
