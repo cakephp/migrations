@@ -556,10 +556,18 @@ class Manager
         $target = null;
         $total = count($executedVersions);
         $pos = 0;
-        while ($pos < $total && $pos <= $count) {
-            $last = array_pop($executedVersions);
-            $target = $last['version'];
+        while ($pos < $count && $pos < $total) {
+            array_pop($executedVersions);
             $pos++;
+        }
+
+        // After popping, get the last remaining version as the target
+        if (!empty($executedVersions)) {
+            $last = end($executedVersions);
+            $target = $last['version'];
+        } else {
+            // If no versions remain, rollback everything
+            $target = 0;
         }
 
         $this->rollback($target, $force, false, $fake);

@@ -16,6 +16,7 @@ use Migrations\Migration\Manager;
 use Phinx\Console\Command\AbstractCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use RuntimeException;
 
 class ManagerTest extends TestCase
@@ -679,6 +680,63 @@ class ManagerTest extends TestCase
     }
 
     /**
+     * Test that migrating by date chooses the correct
+     * migration to point to.
+     *
+     * @param string[] $availableMigrations
+     * @param int $count
+     * @param string $expectedMigration
+     * @param string $message
+     */
+    #[DataProvider('migrateByCountDataProvider')]
+    public function testMigrationsByCount(array $availableMigrations, $count, $expectedMigration, $message)
+    {
+        // stub environment
+        $envStub = $this->getMockBuilder(Environment::class)
+            ->setConstructorArgs(['mockenv', []])
+            ->getMock();
+
+        // getVersions returns already executed migrations, so it should be empty for new migrations
+        $envStub->expects($this->any())
+            ->method('getVersions')
+            ->willReturn([]);
+
+        // getCurrentVersion returns 0 when no migrations have been run
+        $envStub->expects($this->any())
+            ->method('getCurrentVersion')
+            ->willReturn(0);
+
+        // Mock getMigrations to return the available migrations
+        $migrations = [];
+        foreach ($availableMigrations as $version) {
+            $migration = $this->getMockBuilder('\Migrations\MigrationInterface')
+                ->getMock();
+            $migration->expects($this->any())
+                ->method('getVersion')
+                ->willReturn((int)$version);
+            $migration->expects($this->any())
+                ->method('getName')
+                ->willReturn('TestMigration');
+            $migrations[$version] = $migration;
+        }
+
+        // Use reflection to set the migrations property
+        $reflection = new ReflectionClass($this->manager);
+        $migrationsProperty = $reflection->getProperty('migrations');
+        $migrationsProperty->setAccessible(true);
+        $migrationsProperty->setValue($this->manager, $migrations);
+
+        $this->manager->setEnvironment($envStub);
+        $this->manager->migrate(null, false, $count);
+        $output = $this->getOutput();
+        if (is_null($expectedMigration)) {
+            $this->assertEmpty($output, $message);
+        } else {
+            $this->assertStringContainsString($expectedMigration, $output, $message);
+        }
+    }
+
+    /**
      * Test that rollbacking to version chooses the correct
      * migration to point to.
      */
@@ -727,6 +785,60 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version, false, false);
+        $output = $this->getOutput();
+        if (is_null($expectedOutput)) {
+            $output = explode("\n", $output);
+            $this->assertEquals('No migrations to rollback', array_pop($output));
+        } else {
+            if (is_string($expectedOutput)) {
+                $expectedOutput = [$expectedOutput];
+            }
+
+            foreach ($expectedOutput as $expectedLine) {
+                $this->assertStringContainsString($expectedLine, $output);
+            }
+        }
+    }
+
+    /**
+     * Test that rollbacking with count stops at the right migration.
+     */
+    #[DataProvider('rollbackByCountDataProvider')]
+    public function testRollbackByCount($availableRollbacks, $count, $expectedOutput)
+    {
+        // stub environment
+        $envStub = $this->getMockBuilder(Environment::class)
+            ->setConstructorArgs(['mockenv', []])
+            ->getMock();
+        $envStub->expects($this->any())
+            ->method('getVersionLog')
+            ->willReturn($availableRollbacks);
+
+        // Mock getMigrations to return migrations matching the version log
+        $migrations = [];
+        foreach ($availableRollbacks as $version => $details) {
+            $migration = $this->getMockBuilder('\Migrations\MigrationInterface')
+                ->getMock();
+            $migration->expects($this->any())
+                ->method('getVersion')
+                ->willReturn((int)$version);
+            $migration->expects($this->any())
+                ->method('getName')
+                ->willReturn($details['migration_name'] ?: 'TestMigration');
+            $migration->expects($this->any())
+                ->method('shouldExecute')
+                ->willReturn(true);
+            $migrations[$version] = $migration;
+        }
+
+        // Use reflection to set the migrations property
+        $reflection = new ReflectionClass($this->manager);
+        $migrationsProperty = $reflection->getProperty('migrations');
+        $migrationsProperty->setAccessible(true);
+        $migrationsProperty->setValue($this->manager, $migrations);
+
+        $this->manager->setEnvironment($envStub);
+        $this->manager->rollbackByCount($count);
         $output = $this->getOutput();
         if (is_null($expectedOutput)) {
             $output = explode("\n", $output);
@@ -1160,6 +1272,134 @@ class ManagerTest extends TestCase
                     ],
                     '20110115000000',
                     'Breakpoint reached. Further rollbacks inhibited.',
+                ],
+        ];
+    }
+
+    /**
+     * Data provider for testMigrateByCount
+     *
+     * @return array
+     */
+    public static function migrateByCountDataProvider(): array
+    {
+        return [
+            'no migrations' => [
+                [],
+                1,
+                null,
+                'No migrations should be run when no migrations are available.',
+            ],
+            'one migration' => [
+                ['20120111235330'],
+                1,
+                '20120111235330',
+                'Should run the only available migration.',
+            ],
+            'two migrations, count 1' => [
+                ['20120111235330', '20120116183504'],
+                1,
+                '20120111235330',
+                'Should run the first available migration.',
+            ],
+            'two migrations, count 2' => [
+                ['20120111235330', '20120116183504'],
+                2,
+                '20120116183504',
+                'Should run the second available migration.',
+            ],
+            'three migrations, count 2' => [
+                ['20120111235330', '20120116183504', '20200101120000'],
+                2,
+                '20120116183504',
+                'Should run the first two available migrations.',
+            ],
+        ];
+    }
+
+    /**
+     * Migration lists, version, and expected migration version to rollback to.
+     *
+     * @return array
+     */
+    public static function rollbackByCountDataProvider(): array
+    {
+        return [
+            // No breakpoints set
+            'Rollback last 1 migration - no breakpoints set' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 0],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 0],
+                    ],
+                    1,
+                    '== 20120116183504 TestMigration2: reverted',
+                ],
+            'Rollback last 2 migrations - no breakpoints set' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 0],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 0],
+                    ],
+                    2,
+                    ['== 20120116183504 TestMigration2: reverted', '== 20120111235330 TestMigration: reverted'],
+                ],
+            // Breakpoint set on first migration
+            'Rollback last 1 migration - breakpoint set on first migration' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 1],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 0],
+                    ],
+                    1,
+                    '== 20120116183504 TestMigration2: reverted',
+                ],
+            'Rollback last 2 migrations - breakpoint set on first migration' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 1],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 0],
+                    ],
+                    2,
+                    ['== 20120116183504 TestMigration2: reverted', 'Breakpoint reached. Further rollbacks inhibited.'],
+                ],
+            // Breakpoint set on last migration
+            'Rollback last 1 migration - breakpoint set on last migration' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 0],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 1],
+                    ],
+                    1,
+                    null,
+                ],
+            'Rollback last 2 migrations - breakpoint set on last migration' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 0],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 1],
+                    ],
+                    2,
+                    null,
+                ],
+            // Breakpoint set on all migrations
+            'Rollback last 1 migration - breakpoint set on all migrations' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 1],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 1],
+                    ],
+                    1,
+                    null,
+                ],
+            'Rollback last 2 migrations - breakpoint set on all migrations' =>
+                [
+                    [
+                        '20120111235330' => ['version' => '20120111235330', 'migration_name' => 'TestMigration', 'breakpoint' => 1],
+                        '20120116183504' => ['version' => '20120116183504', 'migration_name' => 'TestMigration2', 'breakpoint' => 1],
+                    ],
+                    2,
+                    null,
                 ],
         ];
     }
