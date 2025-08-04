@@ -155,7 +155,7 @@ class BakeMigrationDiffCommandTest extends TestCase
 
             // Verify that the migration was not marked as applied
             $this->exec('migrations status -c test');
-            $this->assertOutputContains("down  {$fileName}");
+            $this->assertOutputContains('<error>down</error>   | 20250804123638');
         } else {
             // No diff found, which is also valid if schemas are identical
             $this->assertOutputContains('No differences');
