@@ -201,6 +201,71 @@ class BakeMigrationDiffCommandTest extends TestCase
         $this->runDiffBakingTest('WithAutoIdIncompatibleUnsignedPrimaryKeys');
     }
 
+    /**
+     * Tests that baking a diff with --plugin option only includes tables with Table classes
+     */
+    public function testBakingDiffWithPluginOnlyIncludesTablesWithTableClasses(): void
+    {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
+        // Create some test tables in the comparison database
+        $connection = ConnectionManager::get('test_comparisons');
+
+        // Create a table that has a Table class in the TestBlog plugin
+        $connection->execute('CREATE TABLE IF NOT EXISTS articles (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255)
+        )');
+
+        // Create a table that does NOT have a Table class in the TestBlog plugin
+        $connection->execute('CREATE TABLE IF NOT EXISTS orphan_table (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255)
+        )');
+
+        // Create plugin migration history table
+        $connection->execute('CREATE TABLE IF NOT EXISTS test_blog_phinxlog (
+            version BIGINT NOT NULL,
+            migration_name VARCHAR(100) DEFAULT NULL,
+            start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            end_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            breakpoint TINYINT(1) NOT NULL DEFAULT 0,
+            PRIMARY KEY (version)
+        )');
+
+        // Create a schema dump for the initial state (empty)
+        $pluginPath = Plugin::path('TestBlog');
+        $dumpPath = $pluginPath . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
+        if (!is_dir(dirname($dumpPath))) {
+            mkdir(dirname($dumpPath), 0777, true);
+        }
+        file_put_contents($dumpPath, serialize([]));
+        $this->generatedFiles[] = $dumpPath;
+
+        // Run the diff command with --plugin option
+        $this->exec('bake migration_diff TestPluginDiff -c test_comparisons -p TestBlog');
+
+        // Find the generated migration file
+        $migrationPath = $pluginPath . 'config' . DS . 'Migrations' . DS;
+        $files = glob($migrationPath . '*_TestPluginDiff.php');
+        $this->assertNotEmpty($files, 'Migration file was not generated');
+        $this->generatedFiles[] = $files[0];
+
+        // Read the generated migration content
+        $content = file_get_contents($files[0]);
+
+        // Assert that only the articles table is included (which has ArticlesTable.php)
+        $this->assertStringContainsString('createTable(\'articles\')', $content);
+
+        // Assert that orphan_table is NOT included (no Table class)
+        $this->assertStringNotContainsString('orphan_table', $content);
+
+        // Cleanup
+        $connection->execute('DROP TABLE IF EXISTS articles');
+        $connection->execute('DROP TABLE IF EXISTS orphan_table');
+        $connection->execute('DROP TABLE IF EXISTS test_blog_phinxlog');
+    }
+
     protected function runDiffBakingTest(string $scenario): void
     {
         $this->skipIf(!env('DB_URL_COMPARE'));

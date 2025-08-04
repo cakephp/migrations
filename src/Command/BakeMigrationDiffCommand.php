@@ -26,6 +26,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Migrations\Command\Phinx\Dump;
+use Migrations\Util\TableFinder;
 use Migrations\Util\UtilTrait;
 use Symfony\Component\Console\Input\ArrayInput;
 
@@ -553,7 +554,19 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         assert($connection instanceof Connection);
         $connection->cacheMetadata(false);
         $collection = $connection->getSchemaCollection();
-        foreach ($this->tables as $table) {
+
+        // Filter tables based on plugin option
+        $tablesToDescribe = $this->tables;
+        if ($this->plugin) {
+            $tableFinder = new TableFinder($this->connection);
+            $options = [
+                'plugin' => $this->plugin,
+                'require-table' => true,
+            ];
+            $tablesToDescribe = $tableFinder->getTablesToBake($collection, $options);
+        }
+
+        foreach ($tablesToDescribe as $table) {
             if (preg_match('/^.*phinxlog$/', $table) === 1) {
                 continue;
             }
