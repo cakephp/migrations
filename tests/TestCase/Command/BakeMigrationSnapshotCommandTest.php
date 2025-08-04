@@ -112,6 +112,34 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     }
 
     /**
+     * Test baking a snapshot with --generate-only flag
+     *
+     * @return void
+     */
+    public function testSnapshotGenerateOnly()
+    {
+        if (file_exists($this->migrationPath . 'schema-dump-test.lock')) {
+            unlink($this->migrationPath . 'schema-dump-test.lock');
+        }
+
+        $bakeName = $this->getBakeName('TestGenerateOnlySnapshot');
+        $this->exec("bake migration_snapshot {$bakeName} -c test --generate-only");
+
+        $generatedMigration = glob($this->migrationPath . '*_TestGenerateOnlySnapshot*.php');
+        $this->generatedFiles = $generatedMigration;
+
+        $this->assertNotEmpty($generatedMigration, 'Migration file should be generated');
+
+        $generatedMigration = basename($generatedMigration[0]);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputNotContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputNotContains('Creating a dump of the new database state...');
+
+        // The lock file should not be created with --generate-only
+        $this->assertFalse(file_exists($this->migrationPath . 'schema-dump-test.lock'), 'Lock file should not be created with --generate-only');
+    }
+
+    /**
      * Test baking a snapshot with the phinx auto-id feature disabled
      *
      * @return void

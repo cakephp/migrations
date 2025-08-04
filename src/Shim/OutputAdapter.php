@@ -68,7 +68,8 @@ class OutputAdapter implements OutputInterface
     /**
      * Gets the current verbosity of the output.
      *
-     * @return self::VERBOSITY_*
+     * @see self::VERBOSITY_*
+     * @return int
      */
     public function getVerbosity(): int
     {

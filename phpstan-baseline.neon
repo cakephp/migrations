@@ -181,12 +181,6 @@ parameters:
 			path: src/Migration/Manager.php
 
 		-
-			message: '#^Method Migrations\\Shim\\OutputAdapter\:\:getVerbosity\(\) should return 16\|32\|64\|128\|256 but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Shim/OutputAdapter.php
-
-		-
 			message: '#^Offset 0 on non\-empty\-list\<string\> in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.offset
 			count: 2

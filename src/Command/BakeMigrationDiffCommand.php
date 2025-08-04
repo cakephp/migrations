@@ -588,6 +588,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         )->addArgument('name', [
             'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
             'required' => true,
+        ])->addOption('generate-only', [
+            'help' => 'Only generate the migration file without marking it as applied',
+            'boolean' => true,
         ]);
 
         return $parser;

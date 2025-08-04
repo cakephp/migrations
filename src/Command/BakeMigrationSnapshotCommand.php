@@ -176,6 +176,10 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
         ->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after baking',
             'boolean' => true,
+        ])
+        ->addOption('generate-only', [
+            'help' => 'Only generate the migration file without marking it as applied',
+            'boolean' => true,
         ]);
 
         return $parser;

@@ -30,7 +30,7 @@ trait SnapshotTrait
     {
         $createFile = parent::createFile($path, $contents, $args, $io);
 
-        if ($createFile) {
+        if ($createFile && !$args->getOption('generate-only')) {
             $this->markSnapshotApplied($path, $args, $io);
 
             if (!$args->getOption('no-lock')) {

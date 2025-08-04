@@ -127,6 +127,42 @@ class BakeMigrationDiffCommandTest extends TestCase
     }
 
     /**
+     * Tests baking a diff with --generate-only flag
+     *
+     * @return void
+     */
+    public function testBakeMigrationDiffGenerateOnly()
+    {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
+        // First create a snapshot to have a base for diff
+        $this->exec('bake migration_snapshot InitialSnapshot -c test');
+        $path = ROOT . DS . 'config' . DS . 'Migrations' . DS;
+        $initialSnapshot = glob($path . '*_InitialSnapshot.php');
+        $this->generatedFiles = array_merge($this->generatedFiles, $initialSnapshot);
+        $this->generatedFiles[] = $path . 'schema-dump-test.lock';
+
+        // Now test the diff with --generate-only
+        $this->exec('bake migration_diff MigrationDiffGenerateOnly -c test --generate-only');
+
+        $diffFiles = glob($path . '*_MigrationDiffGenerateOnly.php');
+        if (count($diffFiles) > 0) {
+            $this->generatedFiles = array_merge($this->generatedFiles, $diffFiles);
+
+            $fileName = pathinfo($diffFiles[0], PATHINFO_FILENAME);
+            $this->assertOutputNotContains('Marking the migration ' . $fileName . ' as migrated...');
+            $this->assertOutputNotContains('Creating a dump of the new database state...');
+
+            // Verify that the migration was not marked as applied
+            $this->exec('migrations status -c test');
+            $this->assertOutputContains("down  {$fileName}");
+        } else {
+            // No diff found, which is also valid if schemas are identical
+            $this->assertOutputContains('No differences');
+        }
+    }
+
+    /**
      * Tests baking a diff
      *
      * @return void
