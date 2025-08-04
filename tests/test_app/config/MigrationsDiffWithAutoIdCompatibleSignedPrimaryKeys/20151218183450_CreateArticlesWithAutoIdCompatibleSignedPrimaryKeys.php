@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateArticlesWithAutoIdCompatibleSignedPrimaryKeys extends AbstractMigration
+class CreateArticlesWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
 {
     public function change(): void
     {

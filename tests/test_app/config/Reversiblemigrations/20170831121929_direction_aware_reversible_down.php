@@ -1,10 +1,10 @@
 <?php
 
 use Cake\Database\Query;
-use Phinx\Db\Table\Column;
-use Phinx\Migration\AbstractMigration;
+use Migrations\Db\Table\Column;
+use Migrations\BaseMigration;
 
-class DirectionAwareReversibleDown extends AbstractMigration
+class DirectionAwareReversibleDown extends BaseMigration
 {
     public function change()
     {

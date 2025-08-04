@@ -61,7 +61,6 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->migrationPath = ROOT . DS . 'config' . DS . 'Migrations' . DS;
 
         $this->generatedFiles = [];
-        Configure::write('Migrations.backend', 'builtin');
     }
 
     /**

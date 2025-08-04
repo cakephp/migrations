@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Migrations\Config\Config;
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
 use PDOException;
-use Phinx\Config\Config;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -14,7 +14,7 @@ use RuntimeException;
 class AbstractAdapterTest extends TestCase
 {
     /**
-     * @var \Phinx\Db\Adapter\AbstractAdapter|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Migrations\Db\Adapter\AbstractAdapter|\PHPUnit\Framework\MockObject\MockObject
      */
     private $adapter;
 

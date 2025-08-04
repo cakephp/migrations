@@ -4,7 +4,6 @@
 {%         set columnsList = '[' ~ Migration.stringifyList(index['columns'], {'indent': 6}) ~ ']' %}
 {%     endif %}
             ->addIndex(
-{%     if backend == 'builtin' %}
                 $this->index({{ columnsList | raw }})
                     ->setName('{{ indexName }}')
 {%         if index['type'] == 'unique' %}
@@ -16,13 +15,4 @@
                     ->setOptions([{{ Migration.stringifyList(index['options'], {'indent': 6}) | raw }}])
 {%         endif %}
             )
-{%     else %}
-                [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}],
-{%         set params = {'name': indexName} %}
-{%         if index['type'] == 'unique' %}
-{%             set params = params|merge({'unique': true}) %}
-{%         endif %}
-                [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
-            )
-{%     endif %}
 {% endfor %}

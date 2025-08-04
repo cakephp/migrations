@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class Migrator2 extends AbstractMigration
+class Migrator2 extends BaseMigration
 {
     public function up()
     {

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\BaseCommand;
-use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Migrations\Command\BakeMigrationCommand;
@@ -115,7 +114,6 @@ class BakeMigrationCommandTest extends TestCase
      */
     public function testCreatePhinx()
     {
-        Configure::write('Migrations.backend', 'phinx');
         $this->exec('bake migration CreateUsers  name --connection test');
 
         $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
@@ -150,7 +148,6 @@ class BakeMigrationCommandTest extends TestCase
 
     public function testCreateBuiltinAlias()
     {
-        Configure::write('Migrations.backend', 'builtin');
         $this->exec('migrations create CreateUsers --connection test');
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
         $this->assertOutputRegExp('/Wrote.*?CreateUsers\.php/');

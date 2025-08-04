@@ -19,15 +19,9 @@
 <?php
 declare(strict_types=1);
 
-{% if backend == "builtin" %}
 use Migrations\BaseMigration;
 
 class {{ name }} extends BaseMigration
-{% else %}
-use Migrations\AbstractMigration;
-
-class {{ name }} extends AbstractMigration
-{% endif %}
 {
 {% if not autoId %}
     public bool $autoId = false;
@@ -37,11 +31,7 @@ class {{ name }} extends AbstractMigration
      * Up Method.
      *
      * More information on this method is available here:
-{% if backend == "builtin" %}
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-up-method
-{% else %}
-     * https://book.cakephp.org/phinx/0/en/migrations.html#the-up-method
-{% endif %}
      * @return void
      */
     public function up(): void
@@ -99,7 +89,7 @@ not empty %}
 {{                Migration.element('Migrations.add-columns', {'columns': tableDiff['columns']['add']}) | raw -}}
 {%            endif -%}
 {%            if tableDiff['indexes']['add'] is not empty %}
-{{                Migration.element('Migrations.add-indexes', {'backend': backend, 'indexes': tableDiff['indexes']['add']}) | raw -}}
+{{                Migration.element('Migrations.add-indexes', {'indexes': tableDiff['indexes']['add']}) | raw -}}
 {%            endif -%}
 {%            if Migration.wasTableStatementGeneratedFor(tableName) %}
             ->update();
@@ -111,7 +101,7 @@ not empty %}
 
 {{ Migration.element(
                 'Migrations.add-foreign-keys',
-                {'constraints': tableDiff['constraints']['add'], 'table': tableName, 'backend': backend}
+                {'constraints': tableDiff['constraints']['add'], 'table': tableName}
             ) | raw -}}
 {%        endif -%}
 {%    endfor -%}
@@ -127,7 +117,7 @@ not empty %}
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/4/en/migrations.html#the-down-method
      * @return void
      */
     public function down(): void

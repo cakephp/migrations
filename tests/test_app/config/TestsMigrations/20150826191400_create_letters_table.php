@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateLettersTable extends AbstractMigration
+class CreateLettersTable extends BaseMigration
 {
     public bool $autoId = false;
 

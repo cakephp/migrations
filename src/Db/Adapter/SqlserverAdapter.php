@@ -21,7 +21,6 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
 use Migrations\Db\Table\Table as TableMetadata;
 use Migrations\MigrationInterface;
-use Phinx\Util\Literal as PhinxLiteral;
 
 /**
  * Migrations SqlServer Adapter.
@@ -1201,7 +1200,7 @@ SQL;
      * @param string $direction Direction
      * @param string $startTime Start Time
      * @param string $endTime End Time
-     * @return \Phinx\Db\Adapter\AdapterInterface
+     * @return \Migrations\Db\Adapter\AdapterInterface
      */
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
@@ -1226,7 +1225,7 @@ SQL;
             $vals = [];
             foreach ($row as $value) {
                 $placeholder = '?';
-                if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+                if ($value instanceof Literal) {
                     $placeholder = (string)$value;
                 }
                 if ($placeholder === '?') {
@@ -1253,7 +1252,7 @@ SQL;
             foreach ($rows as $row) {
                 foreach ($row as $v) {
                     $placeholder = '?';
-                    if ($v instanceof Literal || $v instanceof PhinxLiteral) {
+                    if ($v instanceof Literal) {
                         $placeholder = (string)$v;
                     }
                     if ($placeholder == '?') {

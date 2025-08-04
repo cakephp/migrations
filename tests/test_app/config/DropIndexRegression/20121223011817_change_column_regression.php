@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class ChangeColumnRegression extends AbstractMigration
+class ChangeColumnRegression extends BaseMigration
 {
     /**
      * Migrate Up.

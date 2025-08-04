@@ -1,10 +1,10 @@
 <?php
 
-use Phinx\Db\Table\Column;
-use Phinx\Db\Table\ForeignKey;
-use Phinx\Migration\AbstractMigration;
+use Migrations\Db\Table\Column;
+use Migrations\Db\Table\ForeignKey;
+use Migrations\BaseMigration;
 
-class AddColumnIndexFk extends AbstractMigration
+class AddColumnIndexFk extends BaseMigration
 {
     /**
      * Change Method.
@@ -12,7 +12,7 @@ class AddColumnIndexFk extends AbstractMigration
      * Write your reversible migrations using this method.
      *
      * More information on writing migrations is available here:
-     * https://book.cakephp.org/phinx/0/en/migrations.html
+     * https://book.cakephp.org/migrations/4/en/migrations.html
      *
      * The following commands can be used in this method and Phinx will
      * automatically reverse them when rolling back:

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\BaseCommand;
-use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Migrations\Test\TestCase\TestCase;
@@ -59,7 +58,6 @@ class BakeSeedCommandTest extends TestCase
      */
     public function testBasicBakingPhinx()
     {
-        Configure::write('Migrations.backend', 'phinx');
         $this->generatedFile = ROOT . DS . 'config/Seeds/ArticlesSeed.php';
         $this->exec('bake seed Articles --connection test');
 

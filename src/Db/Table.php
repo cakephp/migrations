@@ -32,7 +32,6 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table as TableValue;
 use RuntimeException;
-use function Cake\Core\deprecationWarning;
 
 /**
  * Migration Table
@@ -510,55 +509,6 @@ class Table
     }
 
     /**
-     * Add a foreign key to a database table with a given name.
-     *
-     * In $options you can specify on_delete|on_delete = cascade|no_action ..,
-     * on_update, constraint = constraint name.
-     *
-     * @param string|\Migrations\Db\Table\ForeignKey $name The constraint name or a foreign key object.
-     * @param string|string[] $columns Columns
-     * @param string|\Migrations\Db\Table\Table $referencedTable Referenced Table
-     * @param string|string[] $referencedColumns Referenced Columns
-     * @param array<string, mixed> $options Options
-     * @return $this
-     * @deprecated 4.6.0 Use addForeignKey() instead. Use `BaseMigration::foreignKey()` to get
-     *   a fluent interface for building foreign keys.
-     */
-    public function addForeignKeyWithName(
-        string|ForeignKey $name,
-        string|array|null $columns = null,
-        string|TableValue|null $referencedTable = null,
-        string|array $referencedColumns = ['id'],
-        array $options = [],
-    ) {
-        deprecationWarning(
-            '4.6.0',
-            'Use addForeignKey() instead. Use `BaseMigration::foreignKey()` to get a fluent' .
-                ' interface for building foreign keys.',
-        );
-        if (is_string($name)) {
-            if ($columns === null || $referencedTable === null) {
-                throw new InvalidArgumentException(
-                    'Columns and referencedTable are required when adding a foreign key with a name',
-                );
-            }
-            $action = AddForeignKey::build(
-                $this->table,
-                $columns,
-                $referencedTable,
-                $referencedColumns,
-                $options,
-                $name,
-            );
-        } else {
-            $action = new AddForeignKey($this->table, $name);
-        }
-        $this->actions->addAction($action);
-
-        return $this;
-    }
-
-    /**
      * Removes the given foreign key from the table.
      *
      * @param string|string[] $columns Column(s)
@@ -731,12 +681,13 @@ class Table
         }
         $primaryKey = array_flip($primaryKey);
 
+        /** @var \Cake\Collection\Collection $columnsCollection */
         $columnsCollection = (new Collection($this->actions->getActions()))
             ->filter(function ($action) {
                 return $action instanceof AddColumn;
             })
             ->map(function ($action) {
-                /** @var \Phinx\Db\Action\ChangeColumn|\Phinx\Db\Action\RenameColumn|\Phinx\Db\Action\RemoveColumn|\Phinx\Db\Action\AddColumn $action */
+                /** @var \Migrations\Db\Action\ChangeColumn|\Migrations\Db\Action\RenameColumn|\Migrations\Db\Action\RemoveColumn|\Migrations\Db\Action\AddColumn $action */
                 return $action->getColumn();
             });
         $primaryKeyColumns = $columnsCollection->filter(function (Column $columnDef, $key) use ($primaryKey) {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Core\Plugin;
 use Cake\Database\Connection;
@@ -24,7 +23,6 @@ class DumpCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Configure::write('Migrations.backend', 'builtin');
 
         /** @var \Cake\Database\Connection $this->connection */
         $this->connection = ConnectionManager::get('test');

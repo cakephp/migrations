@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class SnapshotPgsql extends AbstractMigration
+class SnapshotPgsql extends BaseMigration
 {
     public function up()
     {

@@ -6,7 +6,6 @@
 
 return [
     'Migrations' => [
-        'backend' => 'builtin',
         'unsigned_primary_keys' => null,
         'column_null_default' => null,
     ],

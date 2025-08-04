@@ -16,7 +16,6 @@ namespace Migrations;
 use Bake\Command\SimpleBakeCommand;
 use Cake\Console\CommandCollection;
 use Cake\Core\BasePlugin;
-use Cake\Core\Configure;
 use Cake\Core\PluginApplicationInterface;
 use Migrations\Command\BakeMigrationCommand;
 use Migrations\Command\BakeMigrationDiffCommand;
@@ -54,11 +53,6 @@ class MigrationsPlugin extends BasePlugin
     public function bootstrap(PluginApplicationInterface $app): void
     {
         parent::bootstrap($app);
-
-        // TODO(mark) Remove this once phinx has been removed
-        if (!Configure::check('Migrations.backend')) {
-            Configure::write('Migrations.backend', 'builtin');
-        }
     }
 
     /**

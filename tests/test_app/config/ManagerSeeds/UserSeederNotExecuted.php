@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractSeed;
+use Migrations\BaseSeed;
 
-class UserSeederNotExecuted extends AbstractSeed
+class UserSeederNotExecuted extends BaseSeed
 {
     public function run(): void
     {

@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateDropFkInitialSchema extends AbstractMigration
+class CreateDropFkInitialSchema extends BaseMigration
 {
     /**
      * Change.

@@ -1,9 +1,9 @@
 <?php
 
-use Phinx\Db\Table\Column;
-use Phinx\Migration\AbstractMigration;
+use Migrations\Db\Table\Column;
+use Migrations\BaseMigration;
 
-class CreateInitialSchema extends AbstractMigration
+class CreateInitialSchema extends BaseMigration
 {
     /**
      * Change.

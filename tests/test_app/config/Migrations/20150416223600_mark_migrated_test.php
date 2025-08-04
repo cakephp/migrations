@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class MarkMigratedTest extends AbstractMigration
+class MarkMigratedTest extends BaseMigration
 {
     public function up(): void
     {

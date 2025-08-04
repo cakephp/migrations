@@ -16,11 +16,7 @@ use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
-use Migrations\Shim\MigrationAdapter;
-use Migrations\Shim\SeedAdapter;
 use Migrations\Util\Util;
-use Phinx\Migration\MigrationInterface as PhinxMigrationInterface;
-use Phinx\Seed\SeedInterface as PhinxSeedInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 
@@ -230,15 +226,10 @@ class Manager
         }
 
         $migrationFile = $migrationFile[0];
-        /** @var class-string<\Phinx\Migration\MigrationInterface|\Migrations\MigrationInterface> $className */
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
 
-        if (is_subclass_of($className, PhinxMigrationInterface::class)) {
-            $migration = new MigrationAdapter($className, $version);
-        } else {
-            $migration = new $className($version);
-        }
+        $migration = new $className($version);
         /** @var \Migrations\MigrationInterface $migration */
         $config = $this->getConfig();
         $migration->setConfig($config);
@@ -254,7 +245,7 @@ class Manager
      * Resolves a migration class name based on $path
      *
      * @param string $path Path to the migration file of which we want the class name
-     * @return string Migration class name
+     * @return class-string<\Migrations\MigrationInterface> Migration class name
      */
     protected function getMigrationClassName(string $path): string
     {
@@ -266,6 +257,7 @@ class Manager
             $class = substr($class, 0, strpos($class, '.'));
         }
 
+        /** @var class-string<\Migrations\MigrationInterface> */
         return $class;
     }
 
@@ -870,11 +862,7 @@ class Manager
                     }
 
                     $io->verbose("Constructing <info>$class</info>.");
-                    if (is_subclass_of($class, PhinxMigrationInterface::class)) {
-                        $migration = new MigrationAdapter($class, $version);
-                    } else {
-                        $migration = new $class($version);
-                    }
+                    $migration = new $class($version);
                     /** @var \Migrations\MigrationInterface $migration */
                     $config = $this->getConfig();
                     $migration->setConfig($config);
@@ -983,6 +971,7 @@ class Manager
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidSeedFileName(basename($filePath))) {
                     // convert the filename to a class name
+                    /** @var class-string<\Migrations\SeedInterface> $class */
                     $class = pathinfo($filePath, PATHINFO_FILENAME);
                     $fileNames[$class] = basename($filePath);
 
@@ -998,16 +987,11 @@ class Manager
                     }
 
                     // instantiate it
-                    /** @var \Phinx\Seed\AbstractSeed|\Migrations\SeedInterface $seed */
+                    /** @var \Migrations\SeedInterface $seed */
                     if (isset($this->container)) {
                         $seed = $this->container->get($class);
                     } else {
                         $seed = new $class();
-                    }
-                    // Shim phinx seeds so that the rest of migrations
-                    // can be isolated from phinx.
-                    if ($seed instanceof PhinxSeedInterface) {
-                        $seed = new SeedAdapter($seed);
                     }
                     /** @var \Migrations\SeedInterface $seed */
                     $seed->setIo($io);

@@ -5,14 +5,14 @@ namespace Migrations\Test\TestCase\Migration;
 
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
+use Migrations\BaseMigration;
+use Migrations\BaseSeed;
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Migration\Environment;
+use Migrations\MigrationInterface;
 use Migrations\Shim\MigrationAdapter;
 use Migrations\Shim\SeedAdapter;
-use Phinx\Migration\AbstractMigration;
-use Phinx\Migration\MigrationInterface;
-use Phinx\Seed\AbstractSeed;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -123,7 +123,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+        $upMigration = new class ('mockenv', 20110301080000) extends BaseMigration {
             public bool $executed = false;
             public function up(): void
             {
@@ -149,7 +149,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // down
-        $downMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+        $downMigration = new class ('mockenv', 20110301080000) extends BaseMigration {
             public bool $executed = false;
             public function down(): void
             {
@@ -181,7 +181,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migrate
-        $migration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+        $migration = new class ('mockenv', 20110301080000) extends BaseMigration {
             public bool $executed = false;
             public function up(): void
             {
@@ -213,7 +213,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migrate
-        $migration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+        $migration = new class ('mockenv', 20110301080000) extends BaseMigration {
             public bool $executed = false;
 
             public function useTransactions(): bool
@@ -245,7 +245,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = new class ('mockenv', 20130301080000) extends AbstractMigration {
+        $migration = new class ('mockenv', 20130301080000) extends BaseMigration {
             public bool $executed = false;
             public function change(): void
             {
@@ -271,7 +271,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = new class ('mockenv', 20130301080000) extends AbstractMigration {
+        $migration = new class ('mockenv', 20130301080000) extends BaseMigration {
             public bool $executed = false;
             public function change(): void
             {
@@ -297,7 +297,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = new class ('mockenv', 20130301080000) extends AbstractMigration {
+        $migration = new class ('mockenv', 20130301080000) extends BaseMigration {
             public bool $executed = false;
             public function change(): void
             {
@@ -331,7 +331,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = new class ('mockenv', 20110301080000) extends AbstractMigration {
+        $upMigration = new class ('mockenv', 20110301080000) extends BaseMigration {
             public bool $initExecuted = false;
             public bool $upExecuted = false;
 
@@ -360,7 +360,7 @@ class EnvironmentTest extends TestCase
 
         $this->environment->setAdapter($adapterStub);
 
-        $seed = new class ('mockenv', 20110301080000) extends AbstractSeed {
+        $seed = new class ('mockenv', 20110301080000) extends BaseSeed {
             public bool $initExecuted = false;
             public bool $runExecuted = false;
 

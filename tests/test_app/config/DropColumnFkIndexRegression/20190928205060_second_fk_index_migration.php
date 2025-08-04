@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class SecondFkIndexMigration extends AbstractMigration
+class SecondFkIndexMigration extends BaseMigration
 {
     public function up()
     {

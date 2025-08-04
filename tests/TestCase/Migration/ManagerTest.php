@@ -13,7 +13,6 @@ use Migrations\Config\Config;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
-use Phinx\Console\Command\AbstractCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -22,7 +21,7 @@ use RuntimeException;
 class ManagerTest extends TestCase
 {
     /**
-     * @var \Phinx\Config\Config
+     * @var \Migrations\Config\Config
      */
     protected $config;
 
@@ -241,7 +240,7 @@ class ManagerTest extends TestCase
                     ],
                 );
         $this->manager->setEnvironment($envStub);
-        $return = $this->manager->printStatus(AbstractCommand::FORMAT_JSON);
+        $return = $this->manager->printStatus('json');
         $expected = [
             [
               'status' => 'up',

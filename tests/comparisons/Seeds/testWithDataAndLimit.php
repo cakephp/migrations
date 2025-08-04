@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractSeed;
+use Migrations\BaseSeed;
 
 /**
  * Events seed.
  */
-class EventsSeed extends AbstractSeed
+class EventsSeed extends BaseSeed
 {
     /**
      * Run Method.
@@ -14,7 +14,7 @@ class EventsSeed extends AbstractSeed
      * Write your database seeder using this method.
      *
      * More information on writing seeds is available here:
-     * https://book.cakephp.org/phinx/0/en/seeding.html
+     * https://book.cakephp.org/migrations/4/en/seeding.html
      *
      * @return void
      */

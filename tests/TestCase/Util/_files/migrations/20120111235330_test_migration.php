@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class TestMigration extends AbstractMigration
+class TestMigration extends BaseMigration
 {
     /**
      * Migrate Up.

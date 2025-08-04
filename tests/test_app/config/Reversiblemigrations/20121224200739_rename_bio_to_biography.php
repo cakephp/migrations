@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class RenameBioToBiography extends AbstractMigration
+class RenameBioToBiography extends BaseMigration
 {
     /**
      * Change.

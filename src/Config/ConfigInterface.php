@@ -11,7 +11,7 @@ namespace Migrations\Config;
 use ArrayAccess;
 
 /**
- * Phinx configuration interface.
+ * Configuration interface.
  *
  * @template-implemements ArrayAccess<string>
  */

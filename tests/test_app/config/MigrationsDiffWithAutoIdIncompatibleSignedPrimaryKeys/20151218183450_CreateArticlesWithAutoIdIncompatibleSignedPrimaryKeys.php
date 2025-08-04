@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateArticlesWithAutoIdIncompatibleSignedPrimaryKeys extends AbstractMigration
+class CreateArticlesWithAutoIdIncompatibleSignedPrimaryKeys extends BaseMigration
 {
     public bool $autoId = false;
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Database\Exception\DatabaseException;
 use Cake\TestSuite\TestCase;
@@ -17,7 +16,6 @@ class StatusCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Configure::write('Migrations.backend', 'builtin');
 
         $table = $this->fetchTable('Phinxlog');
         try {

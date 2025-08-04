@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
@@ -21,7 +20,6 @@ class MigrateCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Configure::write('Migrations.backend', 'builtin');
 
         try {
             $table = $this->fetchTable('Phinxlog');

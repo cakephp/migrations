@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class RenameInfoTableToStatusesTable extends AbstractMigration
+class RenameInfoTableToStatusesTable extends BaseMigration
 {
     /**
      * Change.

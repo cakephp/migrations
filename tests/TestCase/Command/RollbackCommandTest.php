@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
@@ -22,7 +21,6 @@ class RollbackCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Configure::write('Migrations.backend', 'builtin');
 
         try {
             $table = $this->fetchTable('Phinxlog');

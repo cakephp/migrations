@@ -44,7 +44,6 @@ use Migrations\Db\Table\Table as TableMetadata;
 use Migrations\MigrationInterface;
 use Migrations\Shim\OutputAdapter;
 use PDOException;
-use Phinx\Util\Literal as PhinxLiteral;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -612,7 +611,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $vals = [];
             foreach ($row as $value) {
                 $placeholder = '?';
-                if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+                if ($value instanceof Literal) {
                     $placeholder = (string)$value;
                 }
                 if ($placeholder === '?') {
@@ -653,7 +652,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $values = [];
             foreach ($row as $value) {
                 $placeholder = '?';
-                if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+                if ($value instanceof Literal) {
                     $placeholder = (string)$value;
                 }
                 $values[] = $placeholder;
@@ -680,7 +679,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             return 'null';
         }
 
-        if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+        if ($value instanceof Literal) {
             return (string)$value;
         }
 
@@ -724,10 +723,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             foreach ($rows as $row) {
                 foreach ($row as $v) {
                     $placeholder = '?';
-                    if ($v instanceof Literal || $v instanceof PhinxLiteral) {
+                    if ($v instanceof Literal) {
                         $placeholder = (string)$v;
                     }
-                    if ($placeholder == '?') {
+                    if ($placeholder === '?') {
                         if ($v instanceof DateTime) {
                             $vals[] = $v->toDateTimeString();
                         } elseif ($v instanceof Date) {
@@ -775,7 +774,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 $values = [];
                 foreach ($row as $v) {
                     $placeholder = '?';
-                    if ($v instanceof Literal || $v instanceof PhinxLiteral) {
+                    if ($v instanceof Literal) {
                         $placeholder = (string)$v;
                     }
                     $values[] = $placeholder;
@@ -1371,7 +1370,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     ));
                     break;
 
-                case $action instanceof DropIndex && $action->getIndex()->getName() == null:
+                case $action instanceof DropIndex && $action->getIndex()->getName() === null:
                     /** @var \Migrations\Db\Action\DropIndex $action */
                     $instructions->merge($this->getDropIndexByColumnsInstructions(
                         $table->getName(),

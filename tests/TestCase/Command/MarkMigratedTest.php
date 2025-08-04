@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -41,7 +40,6 @@ class MarkMigratedTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Configure::write('Migrations.backend', 'builtin');
 
         $this->connection = ConnectionManager::get('test');
         $this->connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');

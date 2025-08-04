@@ -13,12 +13,8 @@ declare(strict_types=1);
  */
 namespace Migrations;
 
-use Cake\Core\Configure;
-use InvalidArgumentException;
 use Migrations\Migration\BackendInterface;
 use Migrations\Migration\BuiltinBackend;
-use Phinx\Config\ConfigInterface;
-use RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
@@ -37,13 +33,6 @@ class Migrations
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected OutputInterface $output;
-
-    /**
-     * CakeManager instance
-     *
-     * @var \Migrations\CakeManager|null
-     */
-    protected ?CakeManager $manager = null;
 
     /**
      * Default options to use
@@ -89,35 +78,6 @@ class Migrations
     }
 
     /**
-     * Sets the command
-     *
-     * TODO(mark) Remove as part of phinx removal
-     *
-     * @param string $command Command name to store.
-     * @return $this
-     */
-    public function setCommand(string $command)
-    {
-        $this->command = $command;
-
-        return $this;
-    }
-
-    /**
-     * Sets the input object that should be used for the command class. This object
-     * is used to inspect the extra options that are needed for CakePHP apps.
-     *
-     * TODO(mark) Remove as part of phinx removal
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input the input object
-     * @return void
-     */
-    public function setInput(InputInterface $input): void
-    {
-        // $this->input = $input;
-    }
-
-    /**
      * Gets the command
      *
      * @return string Command name
@@ -128,19 +88,13 @@ class Migrations
     }
 
     /**
-     * Get the Migrations interface backend based on configuration data.
+     * Get the Migrations interface backend.
      *
      * @return \Migrations\Migration\BackendInterface
      */
     protected function getBackend(): BackendInterface
     {
-        // TODO(mark) Always return `BuiltinBackend` in the future, or remove this method.
-        $backend = (string)(Configure::read('Migrations.backend') ?? 'builtin');
-        if ($backend === 'builtin') {
-            return new BuiltinBackend($this->default);
-        }
-
-        throw new RuntimeException("Unknown `Migrations.backend` of `{$backend}`");
+        return new BuiltinBackend($this->default);
     }
 
     /**
@@ -243,48 +197,6 @@ class Migrations
     }
 
     /**
-     * Returns an instance of CakeManager
-     *
-     * TODO(mark) Remove as part of phinx removal
-     *
-     * @param \Phinx\Config\ConfigInterface|null $config ConfigInterface the Manager needs to run
-     * @return \Migrations\CakeManager Instance of CakeManager
-     */
-    public function getManager(?ConfigInterface $config = null): CakeManager
-    {
-        if (!($this->manager instanceof CakeManager)) {
-            if (!($config instanceof ConfigInterface)) {
-                throw new RuntimeException(
-                    'You need to pass a ConfigInterface object for your first getManager() call',
-                );
-            }
-
-            // $input = $this->input ?: $this->stubInput;
-            // $this->manager = new CakeManager($config, $input, $this->output);
-        } elseif ($config !== null) {
-            $defaultEnvironment = $config->getEnvironment('default');
-            try {
-                $environment = $this->manager->getEnvironment('default');
-                $oldConfig = $environment->getOptions();
-                unset($oldConfig['connection']);
-                if ($oldConfig === $defaultEnvironment) {
-                    $defaultEnvironment['connection'] = $environment
-                        ->getAdapter()
-                        ->getConnection();
-                }
-            } catch (InvalidArgumentException $e) {
-            }
-            $config['environments'] = ['default' => $defaultEnvironment];
-            $this->manager->setEnvironments([]);
-            $this->manager->setConfig($config);
-        }
-
-        // $this->setAdapter();
-
-        return $this->manager;
-    }
-
-    /**
      * Get the input needed for each commands to be run
      *
      * TODO(mark) Remove as part of phinx removal
@@ -299,7 +211,7 @@ class Migrations
      */
     public function getInput(string $command, array $arguments, array $options): InputInterface
     {
-        $className = 'Migrations\Command\Phinx\\' . $command;
+        $className = 'Migrations\Command\\' . $command;
         $options = $arguments + $this->prepareOptions($options);
         /** @var \Symfony\Component\Console\Command\Command $command */
         $command = new $className();

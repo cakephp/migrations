@@ -98,7 +98,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
                 'tables' => [],
                 'action' => null,
                 'name' => $className,
-                'backend' => Configure::read('Migrations.backend', 'builtin'),
+                'backend' => 'builtin',
             ];
         }
 
@@ -120,7 +120,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
                 'primaryKey' => $primaryKey,
             ],
             'name' => $className,
-            'backend' => Configure::read('Migrations.backend', 'builtin'),
+            'backend' => 'builtin',
         ];
     }
 

@@ -1,9 +1,9 @@
 <?php
 
-use Phinx\Db\Table\Column;
-use Phinx\Migration\AbstractMigration;
+use Migrations\Db\Table\Column;
+use Migrations\BaseMigration;
 
-class UpdateInfoTable extends AbstractMigration
+class UpdateInfoTable extends BaseMigration
 {
     /**
      * Change.

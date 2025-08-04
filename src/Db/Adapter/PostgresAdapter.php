@@ -19,7 +19,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
-use Phinx\Util\Literal as PhinxLiteral;
 
 class PostgresAdapter extends AbstractAdapter
 {
@@ -1337,7 +1336,7 @@ class PostgresAdapter extends AbstractAdapter
             $vals = [];
             foreach ($row as $value) {
                 $placeholder = '?';
-                if ($value instanceof Literal || $value instanceof PhinxLiteral) {
+                if ($value instanceof Literal) {
                     $placeholder = (string)$value;
                 }
                 $values[] = $placeholder;
@@ -1383,11 +1382,11 @@ class PostgresAdapter extends AbstractAdapter
                 $values = [];
                 foreach ($row as $v) {
                     $placeholder = '?';
-                    if ($v instanceof Literal || $v instanceof PhinxLiteral) {
+                    if ($v instanceof Literal) {
                         $placeholder = (string)$v;
                     }
                     $values[] = $placeholder;
-                    if ($placeholder == '?') {
+                    if ($placeholder === '?') {
                         if ($v instanceof DateTime) {
                             $vals[] = $v->toDateTimeString();
                         } elseif ($v instanceof Date) {

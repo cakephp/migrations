@@ -1,9 +1,9 @@
 <?php
 
-use Phinx\Db\Table\Column;
-use Phinx\Migration\AbstractMigration;
+use Migrations\Db\Table\Column;
+use Migrations\BaseMigration;
 
-class DirectionAwareReversibleUp extends AbstractMigration
+class DirectionAwareReversibleUp extends BaseMigration
 {
     public function change()
     {

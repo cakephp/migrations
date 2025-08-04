@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateArticlesDefault extends AbstractMigration
+class CreateArticlesDefault extends BaseMigration
 {
     public function change(): void
     {

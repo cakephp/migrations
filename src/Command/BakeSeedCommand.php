@@ -142,7 +142,7 @@ class BakeSeedCommand extends SimpleBakeCommand
             'namespace' => $namespace,
             'records' => $records,
             'table' => $table,
-            'backend' => Configure::read('Migrations.backend', 'builtin'),
+            'backend' => 'builtin',
         ];
     }
 

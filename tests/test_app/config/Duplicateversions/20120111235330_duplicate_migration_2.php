@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class DuplicateMigration2 extends AbstractMigration
+class DuplicateMigration2 extends BaseMigration
 {
     /**
      * Migrate Up.

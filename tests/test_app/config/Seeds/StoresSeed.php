@@ -2,12 +2,12 @@
 
 use Cake\I18n\Date;
 use Cake\I18n\DateTime;
-use Migrations\AbstractSeed;
+use Migrations\BaseSeed;
 
 /**
  * NumbersSeed seed.
  */
-class StoresSeed extends AbstractSeed
+class StoresSeed extends BaseSeed
 {
     /**
      * Run Method.

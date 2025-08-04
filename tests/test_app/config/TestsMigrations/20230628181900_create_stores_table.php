@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateStoresTable extends AbstractMigration
+class CreateStoresTable extends BaseMigration
 {
     public function change(): void
     {

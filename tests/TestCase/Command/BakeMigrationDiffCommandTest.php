@@ -46,7 +46,6 @@ class BakeMigrationDiffCommandTest extends TestCase
         parent::setUp();
 
         $this->generatedFiles = [];
-        Configure::write('Migrations.backend', 'builtin');
     }
 
     public function tearDown(): void

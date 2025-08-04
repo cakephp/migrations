@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractSeed;
+use Migrations\BaseSeed;
 
-class PostSeeder extends AbstractSeed
+class PostSeeder extends BaseSeed
 {
     public function run(): void
     {

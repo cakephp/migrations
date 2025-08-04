@@ -24,7 +24,7 @@ class TheDiffWithAutoIdCompatibleSignedPrimaryKeysMysql extends BaseMigration
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/4/en/migrations.html#the-down-method
      * @return void
      */
     public function down(): void

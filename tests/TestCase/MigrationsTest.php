@@ -107,14 +107,6 @@ class MigrationsTest extends TestCase
         }
     }
 
-    public static function backendProvider(): array
-    {
-        return [
-            ['builtin'],
-            ['phinx'],
-        ];
-    }
-
     /**
      * Tests the status method
      *
@@ -1023,21 +1015,6 @@ class MigrationsTest extends TestCase
     }
 
     /**
-     * Tests migrating the baked snapshots with builtin backend
-     *
-     * @param string $basePath Snapshot file path
-     * @param string $filename Snapshot file name
-     * @param array $flags Feature flags
-     * @return void
-     */
-    #[DataProvider('snapshotMigrationsProvider')]
-    public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
-    {
-        Configure::write('Migrations.backend', 'builtin');
-        $this->runMigrateSnapshots($basePath, $filename, $flags);
-    }
-
-    /**
      * Tests migrating the baked snapshots
      *
      * @param string $basePath Snapshot file path
@@ -1046,12 +1023,7 @@ class MigrationsTest extends TestCase
      * @return void
      */
     #[DataProvider('snapshotMigrationsProvider')]
-    public function testMigrateSnapshotsPhinx(string $basePath, string $filename, array $flags = []): void
-    {
-        $this->runMigrateSnapshots($basePath, $filename, $flags);
-    }
-
-    protected function runMigrateSnapshots(string $basePath, string $filename, array $flags): void
+    public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
     {
         if ($this->Connection->getDriver() instanceof Sqlserver) {
             // TODO once migrations is using the inlined sqlserver adapter, this skip should
@@ -1083,7 +1055,7 @@ class MigrationsTest extends TestCase
         // change class name to avoid conflict with other classes
         // to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
         $content = file_get_contents($destination . $copiedFileName);
-        $patterns = [' extends AbstractMigration', ' extends BaseMigration'];
+        $patterns = [' extends BaseMigration', ' extends BaseMigration'];
         foreach ($patterns as $pattern) {
             $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
         }

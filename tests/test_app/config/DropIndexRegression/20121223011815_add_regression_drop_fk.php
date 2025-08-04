@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class AddRegressionDropFk extends AbstractMigration
+class AddRegressionDropFk extends BaseMigration
 {
     /**
      * Change.

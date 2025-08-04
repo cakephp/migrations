@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class SecondDropFkMigration extends AbstractMigration
+class SecondDropFkMigration extends BaseMigration
 {
     public function change()
     {

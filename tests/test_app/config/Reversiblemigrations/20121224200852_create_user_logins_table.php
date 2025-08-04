@@ -1,9 +1,9 @@
 <?php
 
-use Phinx\Db\Table\Column;
-use Phinx\Migration\AbstractMigration;
+use Migrations\Db\Table\Column;
+use Migrations\BaseMigration;
 
-class CreateUserLoginsTable extends AbstractMigration
+class CreateUserLoginsTable extends BaseMigration
 {
     /**
      * Change.

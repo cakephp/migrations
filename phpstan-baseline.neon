@@ -55,60 +55,6 @@ parameters:
 			path: src/Db/Adapter/MysqlAdapter.php
 
 		-
-			message: '#^Parameter \#1 \$columns of method Migrations\\Db\\Table\\Index\:\:setColumns\(\) expects array\<string\>\|string, array\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$constraint of method Migrations\\Db\\Table\\ForeignKey\:\:setConstraint\(\) expects string, array\<string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$includedColumns of method Migrations\\Db\\Table\\Index\:\:setInclude\(\) expects array\<string\>, array\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$limit of method Migrations\\Db\\Table\\Index\:\:setLimit\(\) expects array\|int, array\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$name of method Migrations\\Db\\Table\\Index\:\:setName\(\) expects string, array\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$onDelete of method Migrations\\Db\\Table\\ForeignKey\:\:setOnDelete\(\) expects string, array\<string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$onUpdate of method Migrations\\Db\\Table\\ForeignKey\:\:setOnUpdate\(\) expects string, array\<string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Migrations\\Db\\Table\\Index\:\:setOrder\(\) expects array\<string\>, array\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
-			message: '#^Parameter \#1 \$type of method Migrations\\Db\\Table\\Index\:\:setType\(\) expects string, array\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/PhinxAdapter.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
@@ -119,12 +65,6 @@ parameters:
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: src/Db/Adapter/SqliteAdapter.php
-
-		-
-			message: '#^PHPDoc tag @return with type Phinx\\Db\\Adapter\\AdapterInterface is not subtype of native type Migrations\\Db\\Adapter\\AdapterInterface\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: src/Db/Adapter/SqlserverAdapter.php
 
 		-
 			message: '#^Call to an undefined method Migrations\\Db\\Table\\Index\:\:setUnique\(\)\.$#'

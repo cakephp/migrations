@@ -10,7 +10,6 @@ namespace Migrations\Db\Table;
 
 use InvalidArgumentException;
 use RuntimeException;
-use function Cake\Core\deprecationWarning;
 
 /**
  * Foreign key value object
@@ -209,32 +208,6 @@ class ForeignKey
      */
     public function getName(): ?string
     {
-        return $this->name;
-    }
-
-    /**
-     * Sets constraint for the foreign key.
-     *
-     * @param string $constraint Constraint
-     * @return $this
-     */
-    public function setConstraint(string $constraint)
-    {
-        deprecationWarning('4.6.0', 'setConstraint() is deprecated. Use setName() instead.');
-        $this->name = $constraint;
-
-        return $this;
-    }
-
-    /**
-     * Gets constraint name for the foreign key.
-     *
-     * @return string|null
-     */
-    public function getConstraint(): ?string
-    {
-        deprecationWarning('4.6.0', 'getConstraint() is deprecated. Use getName() instead.');
-
         return $this->name;
     }
 

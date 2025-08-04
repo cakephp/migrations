@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class ShouldNotExecuteMigration extends AbstractMigration
+class ShouldNotExecuteMigration extends BaseMigration
 {
     public function change()
     {

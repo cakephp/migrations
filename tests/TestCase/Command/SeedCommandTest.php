@@ -4,15 +4,12 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Core\Configure;
 use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
-use Phinx\Config\FeatureFlags;
-use ReflectionClass;
 use ReflectionProperty;
 
 class SeedCommandTest extends TestCase
@@ -22,7 +19,6 @@ class SeedCommandTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Configure::write('Migrations.backend', 'builtin');
 
         $table = $this->fetchTable('Phinxlog');
         try {
@@ -40,13 +36,6 @@ class SeedCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS numbers');
         $connection->execute('DROP TABLE IF EXISTS letters');
         $connection->execute('DROP TABLE IF EXISTS stores');
-
-        if (class_exists(FeatureFlags::class)) {
-            $reflection = new ReflectionClass(FeatureFlags::class);
-            if ($reflection->hasProperty('addTimestampsUseDateTime')) {
-                FeatureFlags::$addTimestampsUseDateTime = false;
-            }
-        }
     }
 
     protected function resetOutput(): void
@@ -204,13 +193,6 @@ class SeedCommandTest extends TestCase
 
     public function testSeederWithTimestampFields(): void
     {
-        if (class_exists(FeatureFlags::class)) {
-            $reflection = new ReflectionClass(FeatureFlags::class);
-            if ($reflection->hasProperty('addTimestampsUseDateTime')) {
-                FeatureFlags::$addTimestampsUseDateTime = false;
-            }
-        }
-
         $this->createTables();
         $this->exec('migrations seed -c test --seed StoresSeed');
 
@@ -236,12 +218,9 @@ class SeedCommandTest extends TestCase
 
     public function testSeederWithDateTimeFields(): void
     {
-        $this->skipIf(!class_exists(FeatureFlags::class));
+        $this->markTestSkipped('FeatureFlags test no longer needed without Phinx.');
 
-        $reflection = new ReflectionClass(FeatureFlags::class);
-        $this->skipIf(!$reflection->hasProperty('addTimestampsUseDateTime'));
-
-        FeatureFlags::$addTimestampsUseDateTime = true;
+        return;
 
         $this->createTables();
         $this->exec('migrations seed -c test --seed StoresSeed');

@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateNumbersTable extends AbstractMigration
+class CreateNumbersTable extends BaseMigration
 {
     public function change(): void
     {

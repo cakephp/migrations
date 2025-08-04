@@ -867,7 +867,7 @@ pass them to the method::
 Feature Flags
 =============
 
-Migrations offers a few feature flags to compatibility with phinx. These features are disabled by default but can be enabled if required:
+Migrations offers a few feature flags for compatibility. These features are disabled by default but can be enabled if required:
 
 * ``unsigned_primary_keys``: Should Migrations create primary keys as unsigned integers? (default: ``false``)
 * ``column_null_default``: Should Migrations create columns as null by default? (default: ``false``)
