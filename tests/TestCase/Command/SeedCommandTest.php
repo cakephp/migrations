@@ -213,7 +213,7 @@ class SeedCommandTest extends TestCase
         $store = $result[0];
         $this->assertEquals('foo_with_date', $store['name']);
         $this->assertNotEmpty($store['created']);
-        $this->assertNotEmpty($store['modified']);
+        $this->assertNotEmpty($store['updated']);
     }
 
     public function testSeederWithDateTimeFields(): void

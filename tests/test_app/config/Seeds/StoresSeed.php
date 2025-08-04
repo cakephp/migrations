@@ -18,12 +18,12 @@ class StoresSeed extends BaseSeed
             [
                 'name' => 'foo',
                 'created' => new Date(),
-                'modified' => new Date(),
+                'updated' => new Date(),
             ],
             [
                 'name' => 'foo_with_date',
                 'created' => new DateTime(),
-                'modified' => new DateTime(),
+                'updated' => new DateTime(),
             ],
         ];
 

@@ -102,7 +102,7 @@ class MigrateCommandTest extends TestCase
     }
 
     /**
-     * Integration test for BaseMigration with built-in backend.
+     * Integration test for BaseMigration.
      */
     public function testMigrateBaseMigration(): void
     {

@@ -54,6 +54,12 @@ class AddForeignKey extends Action
             $referencedTable = new Table($referencedTable);
         }
 
+        // Shimming old 4.x
+        if (isset($options['constraint'])) {
+            $options['name'] = $options['constraint'];
+            unset($options['constraint']);
+        }
+
         $fk = new ForeignKey();
         $fk->setReferencedTable($referencedTable)
            ->setColumns($columns)

@@ -146,7 +146,7 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertOutputRegExp('/Wrote.*?PrefixNew\.php/');
     }
 
-    public function testCreateBuiltinAlias()
+    public function testCreateBuiltInAlias()
     {
         $this->exec('migrations create CreateUsers --connection test');
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);

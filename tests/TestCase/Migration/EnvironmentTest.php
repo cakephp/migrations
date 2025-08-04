@@ -123,7 +123,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = new class ('mockenv', 20110301080000) extends BaseMigration {
+        $upMigration = new class (20110301080000) extends BaseMigration {
             public bool $executed = false;
             public function up(): void
             {
@@ -149,7 +149,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // down
-        $downMigration = new class ('mockenv', 20110301080000) extends BaseMigration {
+        $downMigration = new class (20110301080000) extends BaseMigration {
             public bool $executed = false;
             public function down(): void
             {
@@ -181,7 +181,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migrate
-        $migration = new class ('mockenv', 20110301080000) extends BaseMigration {
+        $migration = new class (20110301080000) extends BaseMigration {
             public bool $executed = false;
             public function up(): void
             {
@@ -213,7 +213,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migrate
-        $migration = new class ('mockenv', 20110301080000) extends BaseMigration {
+        $migration = new class (20110301080000) extends BaseMigration {
             public bool $executed = false;
 
             public function useTransactions(): bool
@@ -245,7 +245,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = new class ('mockenv', 20130301080000) extends BaseMigration {
+        $migration = new class (20130301080000) extends BaseMigration {
             public bool $executed = false;
             public function change(): void
             {
@@ -271,7 +271,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = new class ('mockenv', 20130301080000) extends BaseMigration {
+        $migration = new class (20130301080000) extends BaseMigration {
             public bool $executed = false;
             public function change(): void
             {
@@ -279,6 +279,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
+        //FIXME
         $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
         $this->environment->executeMigration($migrationWrapper, MigrationInterface::DOWN);
         $this->assertTrue($migration->executed);
@@ -297,7 +298,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // migration
-        $migration = new class ('mockenv', 20130301080000) extends BaseMigration {
+        $migration = new class (20130301080000) extends BaseMigration {
             public bool $executed = false;
             public function change(): void
             {
@@ -331,7 +332,7 @@ class EnvironmentTest extends TestCase
         $this->environment->setAdapter($adapterStub);
 
         // up
-        $upMigration = new class ('mockenv', 20110301080000) extends BaseMigration {
+        $upMigration = new class (20110301080000) extends BaseMigration {
             public bool $initExecuted = false;
             public bool $upExecuted = false;
 
@@ -360,7 +361,7 @@ class EnvironmentTest extends TestCase
 
         $this->environment->setAdapter($adapterStub);
 
-        $seed = new class ('mockenv', 20110301080000) extends BaseSeed {
+        $seed = new class (20110301080000) extends BaseSeed {
             public bool $initExecuted = false;
             public bool $runExecuted = false;
 

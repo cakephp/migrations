@@ -201,7 +201,7 @@ class MigrationsTest extends TestCase
 
         $storesTable = $this->getTableLocator()->get('Stores', ['connection' => $this->Connection]);
         $columns = $storesTable->getSchema()->columns();
-        $expected = ['id', 'name', 'created', 'modified'];
+        $expected = ['id', 'name', 'created', 'updated'];
         $this->assertEquals($expected, $columns);
         $createdColumn = $storesTable->getSchema()->getColumn('created');
         $expected = 'CURRENT_TIMESTAMP';
@@ -1023,7 +1023,7 @@ class MigrationsTest extends TestCase
      * @return void
      */
     #[DataProvider('snapshotMigrationsProvider')]
-    public function testMigrateSnapshotsBuiltin(string $basePath, string $filename, array $flags = []): void
+    public function testMigrateSnapshots(string $basePath, string $filename, array $flags = []): void
     {
         if ($this->Connection->getDriver() instanceof Sqlserver) {
             // TODO once migrations is using the inlined sqlserver adapter, this skip should
