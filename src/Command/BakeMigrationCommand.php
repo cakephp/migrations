@@ -87,7 +87,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
         $action = $this->detectAction($className);
 
         if (!$action && count($fields)) {
-            $this->io->abort('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`. See: https://book.cakephp.org/migrations/4/en/index.html#migrations-file-name');
+            $this->io->abort('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`. See: https://book.cakephp.org/migrations/5/en/index.html#migrations-file-name');
         }
 
         if (!$action) {
@@ -98,7 +98,6 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
                 'tables' => [],
                 'action' => null,
                 'name' => $className,
-                'backend' => 'builtin',
             ];
         }
 
@@ -120,7 +119,6 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
                 'primaryKey' => $primaryKey,
             ],
             'name' => $className,
-            'backend' => 'builtin',
         ];
     }
 

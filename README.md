@@ -35,4 +35,4 @@ bin/cake plugin load Migrations
 
 ## Documentation
 
-Full documentation of the plugin can be found on the [CakePHP Cookbook](https://book.cakephp.org/migrations/4/).
+Full documentation of the plugin can be found on the [CakePHP Cookbook](https://book.cakephp.org/migrations/5/).

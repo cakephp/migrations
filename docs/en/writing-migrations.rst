@@ -37,7 +37,7 @@ Bake will automatically creates a skeleton migration file with a single method:
              * Write your reversible migrations using this method.
              *
              * More information on writing migrations is available here:
-             * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+             * https://book.cakephp.org/migrations/5/en/migrations.html#the-change-method
              *
              * Remember to call "create()" or "update()" and NOT "save()" when working
              * with the Table class.

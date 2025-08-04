@@ -196,7 +196,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             'data' => $this->templateData,
             'dumpSchema' => $this->dumpSchema,
             'currentSchema' => $this->currentSchema,
-            'backend' => 'builtin',
         ];
     }
 

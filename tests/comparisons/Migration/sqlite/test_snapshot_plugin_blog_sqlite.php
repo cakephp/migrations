@@ -9,7 +9,7 @@ class TestSnapshotPluginBlogSqlite extends BaseMigration
      * Up Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/4/en/migrations.html#the-up-method
+     * https://book.cakephp.org/migrations/5/en/migrations.html#the-up-method
      * @return void
      */
     public function up(): void
@@ -123,7 +123,7 @@ class TestSnapshotPluginBlogSqlite extends BaseMigration
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/4/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/5/en/migrations.html#the-down-method
      * @return void
      */
     public function down(): void

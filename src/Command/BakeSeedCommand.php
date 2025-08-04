@@ -142,7 +142,6 @@ class BakeSeedCommand extends SimpleBakeCommand
             'namespace' => $namespace,
             'records' => $records,
             'table' => $table,
-            'backend' => 'builtin',
         ];
     }
 
