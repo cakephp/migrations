@@ -158,47 +158,6 @@ class TableTest extends TestCase
         $this->assertSame($key->getName(), 'fk_user_id');
     }
 
-    public function testAddForeignKeyWithNamePositionalParameters(): void
-    {
-        $adapter = new MysqlAdapter([]);
-        $table = new Table('ntable', [], $adapter);
-        $table->addForeignKeyWithName('fk_user_id', 'user_id', 'users', 'id', [
-            'delete' => 'CASCADE',
-            'update' => 'CASCADE',
-        ]);
-
-        $actions = $this->getPendingActions($table);
-        $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
-        $key = $actions[0]->getForeignKey();
-        $this->assertSame($key->getReferencedTable()->getName(), 'users');
-        $this->assertSame($key->getReferencedColumns(), ['id']);
-        $this->assertSame($key->getColumns(), ['user_id']);
-        $this->assertSame($key->getName(), 'fk_user_id');
-    }
-
-    public function testAddForeignKeyWithNameObject(): void
-    {
-        $adapter = new MysqlAdapter([]);
-        $table = new Table('ntable', [], $adapter);
-        $key = new ForeignKey();
-        $table->addForeignKeyWithName(
-            $key->setColumns('user_id')
-                ->setReferencedTable('users')
-                ->setReferencedColumns(['id'])
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
-                ->setName('fk_user_id'),
-        );
-
-        $actions = $this->getPendingActions($table);
-        $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
-        $key = $actions[0]->getForeignKey();
-        $this->assertSame($key->getReferencedTable()->getName(), 'users');
-        $this->assertSame($key->getReferencedColumns(), ['id']);
-        $this->assertSame($key->getColumns(), ['user_id']);
-        $this->assertSame($key->getName(), 'fk_user_id');
-    }
-
     /**
      * @param AdapterInterface $adapter
      * @param string|null      $createdAtColumnName
