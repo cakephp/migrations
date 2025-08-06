@@ -131,8 +131,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $migrationWrapper = new MigrationAdapter($upMigration, $upMigration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
+        $this->environment->executeMigration($upMigration, MigrationInterface::UP);
         $this->assertTrue($upMigration->executed);
     }
 
@@ -157,8 +156,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $migrationWrapper = new MigrationAdapter($downMigration, $downMigration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::DOWN);
+        $this->environment->executeMigration($downMigration, MigrationInterface::DOWN);
         $this->assertTrue($downMigration->executed);
     }
 
@@ -189,8 +187,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
         $this->assertTrue($migration->executed);
     }
 
@@ -227,8 +224,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
         $this->assertTrue($migration->executed);
     }
 
@@ -253,8 +249,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
         $this->assertTrue($migration->executed);
     }
 
@@ -279,9 +274,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        //FIXME
-        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::DOWN);
+        $this->environment->executeMigration($migration, MigrationInterface::DOWN);
         $this->assertTrue($migration->executed);
     }
 
@@ -306,8 +299,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $migrationWrapper = new MigrationAdapter($migration, $migration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP, true);
+        $this->environment->executeMigration($migration, MigrationInterface::UP, true);
         $this->assertFalse($migration->executed);
     }
 
@@ -346,8 +338,7 @@ class EnvironmentTest extends TestCase
                 $this->upExecuted = true;
             }
         };
-        $migrationWrapper = new MigrationAdapter($upMigration, $upMigration->getVersion());
-        $this->environment->executeMigration($migrationWrapper, MigrationInterface::UP);
+        $this->environment->executeMigration($upMigration, MigrationInterface::UP);
         $this->assertTrue($upMigration->initExecuted);
         $this->assertTrue($upMigration->upExecuted);
     }
@@ -376,8 +367,7 @@ class EnvironmentTest extends TestCase
             }
         };
 
-        $seedWrapper = new SeedAdapter($seed);
-        $this->environment->executeSeed($seedWrapper);
+        $this->environment->executeSeed($seed);
 
         $this->assertTrue($seed->initExecuted);
         $this->assertTrue($seed->runExecuted);
