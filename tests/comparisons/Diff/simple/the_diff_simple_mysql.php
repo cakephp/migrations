@@ -30,6 +30,14 @@ class TheDiffSimpleMysql extends BaseMigration
                 'null' => false,
             ])
             ->update();
+        $this->table('tags')
+            ->addColumn('name', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => false,
+            ])
+            ->create();
+
         $this->table('users')
             ->addColumn('username', 'string', [
                 'default' => null,
@@ -102,6 +110,7 @@ class TheDiffSimpleMysql extends BaseMigration
             ->removeColumn('user_id')
             ->update();
 
+        $this->table('tags')->drop()->save();
         $this->table('users')->drop()->save();
     }
 }

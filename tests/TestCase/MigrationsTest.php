@@ -1055,7 +1055,7 @@ class MigrationsTest extends TestCase
         // change class name to avoid conflict with other classes
         // to avoid 'Fatal error: Cannot declare class Test...., because the name is already in use'
         $content = file_get_contents($destination . $copiedFileName);
-        $patterns = [' extends BaseMigration', ' extends BaseMigration'];
+        $patterns = [' extends BaseMigration'];
         foreach ($patterns as $pattern) {
             $content = str_replace($pattern, 'NewSuffix' . $pattern, $content);
         }
