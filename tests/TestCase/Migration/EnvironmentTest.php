@@ -11,8 +11,6 @@ use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\Migration\Environment;
 use Migrations\MigrationInterface;
-use Migrations\Shim\MigrationAdapter;
-use Migrations\Shim\SeedAdapter;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
