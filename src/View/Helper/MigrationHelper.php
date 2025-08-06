@@ -24,6 +24,7 @@ use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
+use Migrations\Db\Table\ForeignKey;
 
 /**
  * Migration Helper class for output of field data in migration files.
@@ -264,7 +265,7 @@ class MigrationHelper extends Helper
      */
     public function formatConstraintAction(string $constraint): string
     {
-        if (defined('\Phinx\Db\Table\ForeignKey::' . $constraint)) {
+        if (defined(ForeignKey::class . '::' . $constraint)) {
             return $constraint;
         }
 
