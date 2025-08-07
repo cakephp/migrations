@@ -28,9 +28,6 @@ class Config implements ConfigInterface
      */
     public const VERSION_ORDER_EXECUTION_TIME = 'execution';
 
-    public const TEMPLATE_STYLE_CHANGE = 'change';
-    public const TEMPLATE_STYLE_UP_DOWN = 'up_down';
-
     /**
      * @var array
      */
@@ -93,67 +90,9 @@ class Config implements ConfigInterface
     /**
      * @inheritdoc
      */
-    public function getMigrationBaseClassName(bool $dropNamespace = true): string
-    {
-        /** @var string $className */
-        $className = !isset($this->values['migration_base_class']) ? 'Phinx\Migration\AbstractMigration' : $this->values['migration_base_class'];
-
-        return $dropNamespace ? (substr((string)strrchr($className, '\\'), 1) ?: $className) : $className;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getSeedBaseClassName(bool $dropNamespace = true): string
-    {
-        /** @var string $className */
-        $className = !isset($this->values['seed_base_class']) ? 'Phinx\Seed\AbstractSeed' : $this->values['seed_base_class'];
-
-        return $dropNamespace ? substr((string)strrchr($className, '\\'), 1) : $className;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getConnection(): string|false
     {
         return $this->values['environment']['connection'] ?? false;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTemplateFile(): string|false
-    {
-        if (!isset($this->values['templates']['file'])) {
-            return false;
-        }
-
-        return $this->values['templates']['file'];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTemplateClass(): string|false
-    {
-        if (!isset($this->values['templates']['class'])) {
-            return false;
-        }
-
-        return $this->values['templates']['class'];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTemplateStyle(): string
-    {
-        if (!isset($this->values['templates']['style'])) {
-            return self::TEMPLATE_STYLE_CHANGE;
-        }
-
-        return $this->values['templates']['style'] === self::TEMPLATE_STYLE_UP_DOWN ? self::TEMPLATE_STYLE_UP_DOWN : self::TEMPLATE_STYLE_CHANGE;
     }
 
     /**
@@ -235,13 +174,5 @@ class Config implements ConfigInterface
     public function offsetUnset($offset): void
     {
         unset($this->values[$offset]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getSeedTemplateFile(): ?string
-    {
-        return $this->values['templates']['seedFile'] ?? null;
     }
 }

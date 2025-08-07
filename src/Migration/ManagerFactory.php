@@ -120,10 +120,6 @@ class ManagerFactory
                 'migrations' => $dir,
                 'seeds' => $dir,
             ],
-            'templates' => [
-                'file' => $templatePath . 'Phinx/create.php.template',
-            ],
-            'migration_base_class' => 'Migrations\AbstractMigration',
             'environment' => $adapterConfig,
             'plugin' => $plugin,
             'source' => $folder,

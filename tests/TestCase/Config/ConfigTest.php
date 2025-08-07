@@ -48,37 +48,6 @@ class ConfigTest extends AbstractConfigTestCase
         $config['foo'];
     }
 
-    public function testGetMigrationBaseClassNameGetsDefaultBaseClass()
-    {
-        $config = new Config([]);
-        $this->assertEquals('AbstractMigration', $config->getMigrationBaseClassName());
-    }
-
-    public function testGetMigrationBaseClassNameGetsDefaultBaseClassWithNamespace()
-    {
-        $config = new Config([]);
-        $this->assertEquals('Phinx\Migration\AbstractMigration', $config->getMigrationBaseClassName(false));
-    }
-
-    public function testGetMigrationBaseClassNameGetsAlternativeBaseClass()
-    {
-        $config = new Config(['migration_base_class' => 'Phinx\Migration\AlternativeAbstractMigration']);
-        $this->assertEquals('AlternativeAbstractMigration', $config->getMigrationBaseClassName());
-    }
-
-    public function testGetMigrationBaseClassNameGetsAlternativeBaseClassWithNamespace()
-    {
-        $config = new Config(['migration_base_class' => 'Phinx\Migration\AlternativeAbstractMigration']);
-        $this->assertEquals('Phinx\Migration\AlternativeAbstractMigration', $config->getMigrationBaseClassName(false));
-    }
-
-    public function testGetTemplateValuesFalseOnEmpty()
-    {
-        $config = new Config([]);
-        $this->assertFalse($config->getTemplateFile());
-        $this->assertFalse($config->getTemplateClass());
-    }
-
     public function testGetSeedPath()
     {
         $config = new Config(['paths' => ['seeds' => 'db/seeds']]);
@@ -96,26 +65,6 @@ class ConfigTest extends AbstractConfigTestCase
         $this->expectExceptionMessage('Seeds path missing from config file');
 
         $config->getSeedPath();
-    }
-
-    /**
-     * Checks if base class is returned correctly when specified without
-     * a namespace.
-     */
-    public function testGetMigrationBaseClassNameNoNamespace()
-    {
-        $config = new Config(['migration_base_class' => 'BaseMigration']);
-        $this->assertEquals('BaseMigration', $config->getMigrationBaseClassName());
-    }
-
-    /**
-     * Checks if base class is returned correctly when specified without
-     * a namespace.
-     */
-    public function testGetMigrationBaseClassNameNoNamespaceNoDrop()
-    {
-        $config = new Config(['migration_base_class' => 'BaseMigration']);
-        $this->assertEquals('BaseMigration', $config->getMigrationBaseClassName(false));
     }
 
     public function testGetVersionOrder()
@@ -153,28 +102,6 @@ class ConfigTest extends AbstractConfigTestCase
                 Config::VERSION_ORDER_EXECUTION_TIME, false,
             ],
         ];
-    }
-
-    public function testDefaultTemplateStyle(): void
-    {
-        $config = new Config([]);
-        $this->assertSame('change', $config->getTemplateStyle());
-    }
-
-    public static function templateStyleDataProvider(): array
-    {
-        return [
-            ['change', 'change'],
-            ['up_down', 'up_down'],
-            ['foo', 'change'],
-        ];
-    }
-
-    #[DataProvider('templateStyleDataProvider')]
-    public function testTemplateStyle(string $style, string $expected): void
-    {
-        $config = new Config(['templates' => ['style' => $style]]);
-        $this->assertSame($expected, $config->getTemplateStyle());
     }
 
     public function testIsDryRunDefaultFalse(): void

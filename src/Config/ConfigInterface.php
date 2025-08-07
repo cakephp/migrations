@@ -52,27 +52,6 @@ interface ConfigInterface extends ArrayAccess
     public function getConnection(): string|false;
 
     /**
-     * Get the template file name.
-     *
-     * @return string|false
-     */
-    public function getTemplateFile(): string|false;
-
-    /**
-     * Get the template class name.
-     *
-     * @return string|false
-     */
-    public function getTemplateClass(): string|false;
-
-    /**
-     * Get the template style to use, either change or up_down.
-     *
-     * @return string
-     */
-    public function getTemplateStyle(): string;
-
-    /**
      * Get the version order.
      *
      * @return string
@@ -85,29 +64,6 @@ interface ConfigInterface extends ArrayAccess
      * @return bool
      */
     public function isVersionOrderCreationTime(): bool;
-
-    /**
-     * Gets the base class name for migrations.
-     *
-     * @param bool $dropNamespace Return the base migration class name without the namespace.
-     * @return string
-     */
-    public function getMigrationBaseClassName(bool $dropNamespace = true): string;
-
-    /**
-     * Gets the base class name for seeds.
-     *
-     * @param bool $dropNamespace Return the base seed class name without the namespace.
-     * @return string
-     */
-    public function getSeedBaseClassName(bool $dropNamespace = true): string;
-
-    /**
-     * Get the seeder template file name or null if not set.
-     *
-     * @return string|null
-     */
-    public function getSeedTemplateFile(): ?string;
 
     /**
      * Should queries be sent to the database or just print to stdout?

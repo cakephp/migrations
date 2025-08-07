@@ -73,8 +73,6 @@ class Environment
 
         $startTime = time();
 
-        // Use an adapter shim to bridge between the new migrations
-        // engine and the Phinx compatible interface
         $adapter = $this->getAdapter();
         $migration->setAdapter($adapter);
 

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Migrations\Test\TestCase\Phinx\Db\Table;
+namespace Migrations\Test\TestCase\Db\Table;
 
 use InvalidArgumentException;
 use Migrations\Db\Table\ForeignKey;

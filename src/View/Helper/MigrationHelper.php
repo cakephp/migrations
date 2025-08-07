@@ -258,7 +258,7 @@ class MigrationHelper extends Helper
     }
 
     /**
-     * Format a constraint action if it is not already in the format expected by Phinx
+     * Format a constraint action if it is not already in the format expected by migrations
      *
      * @param string $constraint Constraint action name
      * @return string Constraint action name altered if needed.
@@ -359,6 +359,7 @@ class MigrationHelper extends Helper
     {
         $columnType = $tableSchema->getColumnType($column);
 
+        // TODO Remove this when we align with cakephp/database more.
         // Phinx doesn't understand timestampfractional or datetimefractional types
         if ($columnType === 'timestampfractional' || $columnType === 'datetimefractional') {
             $columnType = 'timestamp';
@@ -413,7 +414,8 @@ class MigrationHelper extends Helper
         }
 
         if (($isMysql || $isSqlserver) && !empty($columnOptions['collate'])) {
-            // due to Phinx using different naming for the collation
+            // TODO fix this when migrations is aligned with cakephp/database
+            // Change keys due to Phinx using different naming for the collation
             $columnOptions['collation'] = $columnOptions['collate'];
             unset($columnOptions['collate']);
         }
