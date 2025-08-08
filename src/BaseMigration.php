@@ -85,12 +85,14 @@ class BaseMigration implements MigrationInterface
     /**
      * Constructor
      *
-     * @param int $version The version this migration is
+     * @param int|null $version The version this migration is (null for anonymous migrations)
      */
-    public function __construct(int $version)
+    public function __construct(?int $version = null)
     {
-        $this->validateVersion($version);
-        $this->version = $version;
+        if ($version !== null) {
+            $this->validateVersion($version);
+            $this->version = $version;
+        }
     }
 
     /**

@@ -236,18 +236,8 @@ class Manager
             require_once $migrationFile;
         }
 
-        // Check if the file returns an anonymous class instance or a closure
-        if (is_callable($migrationInstance)) {
-            // It's a closure that creates the migration with version
-            $migration = $migrationInstance($version);
-            if (!($migration instanceof MigrationInterface)) {
-                throw new InvalidArgumentException(sprintf(
-                    'The closure in file "%s" must return an instance of MigrationInterface',
-                    $migrationFile,
-                ));
-            }
-        } elseif (is_object($migrationInstance) && $migrationInstance instanceof MigrationInterface) {
-            // Direct instance (legacy support)
+        // Check if the file returns an anonymous class instance
+        if (is_object($migrationInstance) && $migrationInstance instanceof MigrationInterface) {
             $migration = $migrationInstance;
             $migration->setVersion($version);
         } elseif (class_exists($className)) {
@@ -890,20 +880,8 @@ class Manager
 
                     ini_set('display_errors', $orig_display_errors_setting);
 
-                    // Check if the file returns an anonymous class instance or a closure
-                    if (is_callable($migrationInstance)) {
-                        // It's a closure that creates the migration with version
-                        $migration = $migrationInstance($version);
-                        if ($migration instanceof MigrationInterface) {
-                            $io->verbose("Using anonymous class from <info>$filePath</info>.");
-                        } else {
-                            throw new InvalidArgumentException(sprintf(
-                                'The closure in file "%s" must return an instance of MigrationInterface',
-                                $filePath,
-                            ));
-                        }
-                    } elseif (is_object($migrationInstance) && $migrationInstance instanceof MigrationInterface) {
-                        // Direct instance (legacy support)
+                    // Check if the file returns an anonymous class instance
+                    if (is_object($migrationInstance) && $migrationInstance instanceof MigrationInterface) {
                         $io->verbose("Using anonymous class from <info>$filePath</info>.");
                         $migration = $migrationInstance;
                         $migration->setVersion($version);
@@ -913,7 +891,7 @@ class Manager
                         $migration = new $class($version);
                     } else {
                         throw new InvalidArgumentException(sprintf(
-                            'Could not find class `%s` in file `%s` and file did not return a callable or migration instance',
+                            'Could not find class `%s` in file `%s` and file did not return a migration instance',
                             $class,
                             $filePath,
                         ));

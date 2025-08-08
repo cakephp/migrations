@@ -413,10 +413,10 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
         $result = file_get_contents($filePath);
 
-        // Check that it returns a closure that creates an anonymous class
-        $this->assertStringContainsString('return function (int $version)', $result);
-        $this->assertStringContainsString('return new class($version) extends BaseMigration', $result);
+        // Check that it returns an anonymous class directly
+        $this->assertStringContainsString('return new class extends BaseMigration', $result);
         $this->assertStringNotContainsString('class CreateUsers extends', $result);
+        $this->assertStringNotContainsString('function (int $version)', $result);
     }
 
     public function testBakeMigrationWithoutBake()
