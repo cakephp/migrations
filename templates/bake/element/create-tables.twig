@@ -41,14 +41,12 @@
 {%             if constraint['type'] == 'unique' %}
 {{                 element('Migrations.add-indexes', {
                      indexes: {(name): constraint},
-                     backend: backend,
                   }) -}}
 {%             endif %}
 {%         endfor %}
 {%     endif %}
 {{-     element('Migrations.add-indexes', {
            indexes: createData.tables[table].indexes,
-           backend: backend,
 }) }}            ->create();
 {% endfor -%}
 {% if createData.constraints %}
@@ -56,7 +54,6 @@
 {{-     element('Migrations.add-foreign-keys', {
          constraints: tableConstraints,
          table: table,
-         backend: backend,
        })
 -}}
 {%   endfor -%}
