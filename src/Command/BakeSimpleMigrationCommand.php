@@ -20,8 +20,11 @@ use Bake\Utility\TemplateRenderer;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Utility\Inflector;
+use DateTime;
+use DateTimeZone;
 use Migrations\Util\Util;
 
 /**
@@ -74,6 +77,32 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     public function fileName($name): string
     {
         $name = $this->getMigrationName($name);
+        $style = $this->args->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
+
+        if ($style === 'anonymous') {
+            // Use readable format: 2024_12_08_120000_CamelCaseName.php
+            $timestamp = Util::getCurrentTimestamp();
+            $dt = new DateTime();
+            $dt->setTimestamp((int)substr($timestamp, 0, 10));
+            $dt->setTimezone(new DateTimeZone('UTC'));
+
+            $readableDate = $dt->format('Y_m_d');
+            $time = substr($timestamp, 8);
+            $camelName = Inflector::camelize($name);
+
+            $path = $this->getPath($this->args);
+            $offset = 0;
+            while (glob($path . $readableDate . '_' . $time . '_*.php')) {
+                $timestamp = Util::getCurrentTimestamp(++$offset);
+                $dt->setTimestamp((int)substr($timestamp, 0, 10));
+                $readableDate = $dt->format('Y_m_d');
+                $time = substr($timestamp, 8);
+            }
+
+            return $readableDate . '_' . $time . '_' . $camelName . '.php';
+        }
+
+        // Traditional format
         $timestamp = Util::getCurrentTimestamp();
         $suffix = '_' . Inflector::camelize($name) . '.php';
 

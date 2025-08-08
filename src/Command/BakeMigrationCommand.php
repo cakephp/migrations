@@ -60,6 +60,11 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
      */
     public function template(): string
     {
+        $style = $this->args->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
+        if ($style === 'anonymous') {
+            return 'Migrations.config/skeleton-anonymous';
+        }
+
         return 'Migrations.config/skeleton';
     }
 
@@ -196,9 +201,38 @@ table.
 Create a migration that adds (<warning>name VARCHAR(128)</warning> and a <warning>UNIQUE<.warning index)
 to the <warning>projects</warning> table.
 
+<info>Migration Styles</info>
+
+You can generate migrations in different styles:
+
+<warning>bin/cake bake migration --style=anonymous CreatePosts</warning>
+Creates an anonymous class migration with readable file naming (2024_12_08_120000_CreatePosts.php)
+
+<warning>bin/cake bake migration --style=traditional CreatePosts</warning>  
+Creates a traditional class-based migration (20241208120000_create_posts.php)
+
+You can set the default style in your configuration:
+<warning>Configure::write('Migrations.style', 'anonymous');</warning>
+
 TEXT;
 
         $parser->setDescription($text);
+
+        return $parser;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    {
+        $parser = parent::buildOptionParser($parser);
+
+        $parser->addOption('style', [
+            'help' => 'Migration style to use (traditional or anonymous).',
+            'default' => 'traditional',
+            'choices' => ['traditional', 'anonymous'],
+        ]);
 
         return $parser;
     }

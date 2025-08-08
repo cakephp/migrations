@@ -57,6 +57,13 @@ class UtilTest extends TestCase
         $this->assertSame(20221130101652, Util::getVersionFromFileName('20221130101652_test.php'));
     }
 
+    public function testGetVersionFromReadableFileName(): void
+    {
+        // Test readable format: 2024_12_08_120000_CreateUsersTable.php
+        $this->assertSame(20241208120000, Util::getVersionFromFileName('2024_12_08_120000_CreateUsersTable.php'));
+        $this->assertSame(20231225235959, Util::getVersionFromFileName('2023_12_25_235959_AddFieldToProducts.php'));
+    }
+
     public function testGetVersionFromFileNameErrorNoVersion(): void
     {
         $this->expectException(RuntimeException::class);
@@ -102,6 +109,14 @@ class UtilTest extends TestCase
         $this->assertEquals($className, Util::mapFileNameToClassName($fileName));
     }
 
+    public function testMapReadableFileNameToClassName(): void
+    {
+        // Test readable format: 2024_12_08_120000_CreateUsersTable.php
+        $this->assertEquals('CreateUsersTable', Util::mapFileNameToClassName('2024_12_08_120000_CreateUsersTable.php'));
+        $this->assertEquals('AddFieldToProducts', Util::mapFileNameToClassName('2023_12_25_235959_AddFieldToProducts.php'));
+        $this->assertEquals('DropOrdersTable', Util::mapFileNameToClassName('2024_01_01_000000_DropOrdersTable.php'));
+    }
+
     public function testGlobPath()
     {
         $files = Util::glob(__DIR__ . '/_files/migrations/empty.txt');
@@ -142,5 +157,23 @@ class UtilTest extends TestCase
         $this->assertEquals('20120116183504_test_migration_2.php', basename($files[1]));
         $this->assertEquals('not_a_migration.php', basename($files[2]));
         $this->assertEquals('foobar.php', basename($files[3]));
+    }
+
+    public function testIsValidMigrationFileName(): void
+    {
+        // Traditional format
+        $this->assertTrue(Util::isValidMigrationFileName('20221130101652_create_users_table.php'));
+        $this->assertTrue(Util::isValidMigrationFileName('20120111235330_test_migration.php'));
+
+        // No name format
+        $this->assertTrue(Util::isValidMigrationFileName('20221130101652.php'));
+
+        // Readable format
+        $this->assertTrue(Util::isValidMigrationFileName('2024_12_08_120000_CreateUsersTable.php'));
+        $this->assertTrue(Util::isValidMigrationFileName('2023_12_25_235959_AddFieldToProducts.php'));
+
+        // Invalid formats
+        $this->assertFalse(Util::isValidMigrationFileName('not_a_migration.php'));
+        $this->assertFalse(Util::isValidMigrationFileName('2024_12_08_120000_camelCaseShouldStartWithCapital.php'));
     }
 }

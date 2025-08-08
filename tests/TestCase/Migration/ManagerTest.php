@@ -635,6 +635,26 @@ class ManagerTest extends TestCase
         $manager->getMigrations();
     }
 
+    public function testGetMigrationsWithAnonymousClass()
+    {
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/AnonymousMigrations']]);
+        $manager = new Manager($config, $this->io);
+
+        $migrations = $manager->getMigrations();
+
+        // Should have one migration
+        $this->assertCount(1, $migrations);
+
+        // Get the migration
+        $migration = reset($migrations);
+
+        // Check that it's a valid migration object
+        $this->assertInstanceOf('\Migrations\MigrationInterface', $migration);
+
+        // Check the version was set correctly (2024_12_08_150000 => 20241208150000)
+        $this->assertEquals(20241208150000, $migration->getVersion());
+    }
+
     public function testGettingAValidEnvironment()
     {
         $this->assertInstanceOf(

@@ -49,6 +49,14 @@ class BakeMigrationCommandTest extends TestCase
             }
         }
 
+        // Also clean up readable format files
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '????_??_??_??????_*Users.php');
+        if ($files) {
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
+
         $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_PrefixNew.php');
         if ($files) {
             foreach ($files as $file) {
@@ -382,6 +390,33 @@ class BakeMigrationCommandTest extends TestCase
 
         $this->assertExitCode(BaseCommand::CODE_ERROR);
         $this->assertErrorContains('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`.');
+    }
+
+    /**
+     * Test creating migrations with anonymous style
+     *
+     * @return void
+     */
+    public function testCreateAnonymousStyle()
+    {
+        $this->exec('bake migration CreateUsers name:string --style=anonymous --connection test');
+
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '????_??_??_??????_CreateUsers.php');
+        $this->assertCount(1, $files);
+
+        $filePath = current($files);
+        $fileName = basename($filePath);
+
+        // Check the file name format
+        $this->assertMatchesRegularExpression('/^\d{4}_\d{2}_\d{2}_\d{6}_CreateUsers\.php$/', $fileName);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+
+        // Check that it returns a closure that creates an anonymous class
+        $this->assertStringContainsString('return function (int $version)', $result);
+        $this->assertStringContainsString('return new class($version) extends BaseMigration', $result);
+        $this->assertStringNotContainsString('class CreateUsers extends', $result);
     }
 
     public function testBakeMigrationWithoutBake()

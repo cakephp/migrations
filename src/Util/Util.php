@@ -38,6 +38,15 @@ class Util
     protected const MIGRATION_FILE_NAME_NO_NAME_PATTERN = '/^[0-9]{14}\.php$/';
 
     /**
+     * Enhanced migration file name pattern with readable timestamp and CamelCase
+     * Example: 2024_12_08_120000_CreateUsersTable.php
+     *
+     * @var string
+     * @phpstan-var non-empty-string
+     */
+    protected const READABLE_MIGRATION_FILE_NAME_PATTERN = '/^(\d{4})_(\d{2})_(\d{2})_(\d{6})_([A-Z][a-zA-Z\d]*)\.php$/';
+
+    /**
      * @var string
      * @phpstan-var non-empty-string
      */
@@ -95,7 +104,16 @@ class Util
     public static function getVersionFromFileName(string $fileName): int
     {
         $matches = [];
-        preg_match('/^[0-9]+/', basename($fileName), $matches);
+        $baseName = basename($fileName);
+
+        // Check for readable format: 2024_12_08_120000_CreateUsersTable.php
+        if (preg_match(static::READABLE_MIGRATION_FILE_NAME_PATTERN, $baseName, $matches)) {
+            // Convert to standard format: 20241208120000
+            return (int)($matches[1] . $matches[2] . $matches[3] . $matches[4]);
+        }
+
+        // Standard format
+        preg_match('/^[0-9]+/', $baseName, $matches);
         $value = (int)($matches[0] ?? null);
         if (!$value) {
             throw new RuntimeException(sprintf('Cannot get a valid version from filename `%s`', $fileName));
@@ -135,6 +153,12 @@ class Util
     public static function mapFileNameToClassName(string $fileName): string
     {
         $matches = [];
+
+        // Check for readable format first: 2024_12_08_120000_CreateUsersTable.php
+        if (preg_match(static::READABLE_MIGRATION_FILE_NAME_PATTERN, $fileName, $matches)) {
+            return $matches[5]; // Return the CamelCase class name directly
+        }
+
         if (preg_match(static::MIGRATION_FILE_NAME_PATTERN, $fileName, $matches)) {
             $fileName = $matches[1];
         } elseif (preg_match(static::MIGRATION_FILE_NAME_NO_NAME_PATTERN, $fileName)) {
@@ -153,7 +177,8 @@ class Util
     public static function isValidMigrationFileName(string $fileName): bool
     {
         return (bool)preg_match(static::MIGRATION_FILE_NAME_PATTERN, $fileName)
-            || (bool)preg_match(static::MIGRATION_FILE_NAME_NO_NAME_PATTERN, $fileName);
+            || (bool)preg_match(static::MIGRATION_FILE_NAME_NO_NAME_PATTERN, $fileName)
+            || (bool)preg_match(static::READABLE_MIGRATION_FILE_NAME_PATTERN, $fileName);
     }
 
     /**
