@@ -146,20 +146,21 @@ class BakeMigrationDiffCommandTest extends TestCase
         $this->exec('bake migration_diff MigrationDiffGenerateOnly -c test --generate-only');
 
         $diffFiles = glob($path . '*_MigrationDiffGenerateOnly.php');
-        if (count($diffFiles) > 0) {
-            $this->generatedFiles = array_merge($this->generatedFiles, $diffFiles);
 
-            $fileName = pathinfo($diffFiles[0], PATHINFO_FILENAME);
-            $this->assertOutputNotContains('Marking the migration ' . $fileName . ' as migrated...');
-            $this->assertOutputNotContains('Creating a dump of the new database state...');
+        // A migration file should always be generated when using bake migration_diff
+        $this->assertNotEmpty($diffFiles, 'A migration file should be generated');
+        $this->generatedFiles = array_merge($this->generatedFiles, $diffFiles);
 
-            // Verify that the migration was not marked as applied
-            $this->exec('migrations status -c test');
-            $this->assertOutputContains('<error>down</error>   | 20250804123638');
-        } else {
-            // No diff found, which is also valid if schemas are identical
-            $this->assertOutputContains('No differences');
-        }
+        $fileName = pathinfo($diffFiles[0], PATHINFO_FILENAME);
+
+        // With --generate-only, the migration should NOT be marked as applied
+        $this->assertOutputNotContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputNotContains('Creating a dump of the new database state...');
+
+        // Verify that the migration was not marked as applied
+        $this->exec('migrations status -c test');
+        $this->assertOutputContains($fileName);
+        $this->assertOutputContains('down');
     }
 
     /**
