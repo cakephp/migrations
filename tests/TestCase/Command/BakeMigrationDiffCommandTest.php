@@ -133,7 +133,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakeMigrationDiffGenerateOnly()
     {
-        $this->skipIf(!env('DB_URL_COMPARE'));
+        //$this->skipIf(!env('DB_URL_COMPARE'));
 
         // First create a snapshot to have a base for diff
         $this->exec('bake migration_snapshot InitialSnapshot -c test');
@@ -159,7 +159,9 @@ class BakeMigrationDiffCommandTest extends TestCase
 
         // Verify that the migration was not marked as applied
         $this->exec('migrations status -c test');
-        $this->assertOutputContains($fileName);
+        // The status command outputs the migration ID (timestamp) only
+        $migrationId = preg_replace('/_.*$/', '', $fileName);
+        $this->assertOutputContains($migrationId);
         $this->assertOutputContains('down');
     }
 
