@@ -1157,36 +1157,6 @@ class SqlserverAdapterTest extends TestCase
         $this->adapter->getSqlType('idontexist');
     }
 
-    public function testGetPhinxType()
-    {
-        $this->assertEquals('integer', $this->adapter->getPhinxType('int'));
-        $this->assertEquals('integer', $this->adapter->getPhinxType('integer'));
-
-        $this->assertEquals('tinyinteger', $this->adapter->getPhinxType('tinyint'));
-        $this->assertEquals('smallinteger', $this->adapter->getPhinxType('smallint'));
-        $this->assertEquals('biginteger', $this->adapter->getPhinxType('bigint'));
-
-        $this->assertEquals('decimal', $this->adapter->getPhinxType('decimal'));
-        $this->assertEquals('decimal', $this->adapter->getPhinxType('numeric'));
-
-        $this->assertEquals('float', $this->adapter->getPhinxType('real'));
-
-        $this->assertEquals('boolean', $this->adapter->getPhinxType('bit'));
-
-        $this->assertEquals('string', $this->adapter->getPhinxType('varchar'));
-        $this->assertEquals('string', $this->adapter->getPhinxType('nvarchar'));
-        $this->assertEquals('char', $this->adapter->getPhinxType('char'));
-        $this->assertEquals('char', $this->adapter->getPhinxType('nchar'));
-
-        $this->assertEquals('text', $this->adapter->getPhinxType('text'));
-
-        $this->assertEquals('datetime', $this->adapter->getPhinxType('timestamp'));
-
-        $this->assertEquals('date', $this->adapter->getPhinxType('date'));
-
-        $this->assertEquals('datetime', $this->adapter->getPhinxType('datetime'));
-    }
-
     public function testAddColumnComment()
     {
         $table = new Table('table1', [], $this->adapter);

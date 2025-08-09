@@ -907,64 +907,6 @@ ORDER BY IC.[key_ordinal]';
     }
 
     /**
-     * Returns Phinx type by SQL type
-     *
-     * @internal param string $sqlType SQL type
-     * @param string $sqlType SQL Type definition
-     * @throws \Migrations\Db\Adapter\UnsupportedColumnTypeException
-     * @return string Phinx type
-     */
-    public function getPhinxType(string $sqlType): string
-    {
-        switch ($sqlType) {
-            case 'nvarchar':
-            case 'varchar':
-                return static::PHINX_TYPE_STRING;
-            case 'char':
-            case 'nchar':
-                return static::PHINX_TYPE_CHAR;
-            case 'text':
-            case 'ntext':
-                return static::PHINX_TYPE_TEXT;
-            case 'int':
-            case 'integer':
-                return static::PHINX_TYPE_INTEGER;
-            case 'decimal':
-            case 'numeric':
-            case 'money':
-                return static::PHINX_TYPE_DECIMAL;
-            case 'tinyint':
-                return static::PHINX_TYPE_TINY_INTEGER;
-            case 'smallint':
-                return static::PHINX_TYPE_SMALL_INTEGER;
-            case 'bigint':
-                return static::PHINX_TYPE_BIG_INTEGER;
-            case 'real':
-            case 'float':
-                return static::PHINX_TYPE_FLOAT;
-            case 'binary':
-            case 'image':
-            case 'varbinary':
-                return static::PHINX_TYPE_BINARY;
-            case 'time':
-                return static::PHINX_TYPE_TIME;
-            case 'date':
-                return static::PHINX_TYPE_DATE;
-            case 'datetime':
-            case 'timestamp':
-                return static::PHINX_TYPE_DATETIME;
-            case 'bit':
-                return static::PHINX_TYPE_BOOLEAN;
-            case 'uniqueidentifier':
-                return static::PHINX_TYPE_UUID;
-            case 'filestream':
-                return static::PHINX_TYPE_FILESTREAM;
-            default:
-                throw new UnsupportedColumnTypeException('Column type "' . $sqlType . '" is not supported by SqlServer.');
-        }
-    }
-
-    /**
      * @inheritDoc
      */
     public function createDatabase(string $name, array $options = []): void

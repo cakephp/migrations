@@ -1870,46 +1870,6 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->getSqlType('idontexist');
     }
 
-    public function testGetPhinxType()
-    {
-        $this->assertEquals('integer', $this->adapter->getPhinxType('int'));
-        $this->assertEquals('integer', $this->adapter->getPhinxType('int4'));
-        $this->assertEquals('integer', $this->adapter->getPhinxType('integer'));
-
-        $this->assertEquals('biginteger', $this->adapter->getPhinxType('bigint'));
-        $this->assertEquals('biginteger', $this->adapter->getPhinxType('int8'));
-
-        $this->assertEquals('decimal', $this->adapter->getPhinxType('decimal'));
-        $this->assertEquals('decimal', $this->adapter->getPhinxType('numeric'));
-
-        $this->assertEquals('float', $this->adapter->getPhinxType('real'));
-        $this->assertEquals('float', $this->adapter->getPhinxType('float4'));
-
-        $this->assertEquals('double', $this->adapter->getPhinxType('double precision'));
-
-        $this->assertEquals('boolean', $this->adapter->getPhinxType('bool'));
-        $this->assertEquals('boolean', $this->adapter->getPhinxType('boolean'));
-
-        $this->assertEquals('string', $this->adapter->getPhinxType('character varying'));
-        $this->assertEquals('string', $this->adapter->getPhinxType('varchar'));
-
-        $this->assertEquals('text', $this->adapter->getPhinxType('text'));
-
-        $this->assertEquals('time', $this->adapter->getPhinxType('time'));
-        $this->assertEquals('time', $this->adapter->getPhinxType('timetz'));
-        $this->assertEquals('time', $this->adapter->getPhinxType('time with time zone'));
-        $this->assertEquals('time', $this->adapter->getPhinxType('time without time zone'));
-
-        $this->assertEquals('datetime', $this->adapter->getPhinxType('timestamp'));
-        $this->assertEquals('datetime', $this->adapter->getPhinxType('timestamptz'));
-        $this->assertEquals('datetime', $this->adapter->getPhinxType('timestamp with time zone'));
-        $this->assertEquals('datetime', $this->adapter->getPhinxType('timestamp without time zone'));
-
-        $this->assertEquals('uuid', $this->adapter->getPhinxType('uuid'));
-
-        $this->assertEquals('interval', $this->adapter->getPhinxType('interval'));
-    }
-
     public function testCreateTableWithComment()
     {
         $tableComment = 'Table comment';

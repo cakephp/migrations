@@ -1652,57 +1652,6 @@ PCRE_PATTERN;
     }
 
     /**
-     * Returns Phinx type by SQL type
-     *
-     * @param string|null $sqlTypeDef SQL Type definition
-     * @return array
-     */
-    public function getPhinxType(?string $sqlTypeDef): array
-    {
-        $limit = null;
-        $scale = null;
-        if ($sqlTypeDef === null) {
-            // in SQLite columns can legitimately have null as a type, which is distinct from the empty string
-            $name = null;
-        } else {
-            if (!preg_match('/^([a-z]+)(_(?:integer|float|text|blob))?(?:\((\d+)(?:,(\d+))?\))?$/i', $sqlTypeDef, $match)) {
-                // doesn't match the pattern of a type we'd know about
-                $name = Literal::from($sqlTypeDef);
-            } else {
-                // possibly a known type
-                $type = $match[1];
-                $typeLC = strtolower($type);
-                $affinity = $match[2] ?? '';
-                $limit = isset($match[3]) && strlen($match[3]) ? (int)$match[3] : null;
-                $scale = isset($match[4]) && strlen($match[4]) ? (int)$match[4] : null;
-                if (in_array($typeLC, ['tinyint', 'tinyinteger'], true) && $limit === 1) {
-                    // the type is a MySQL-style boolean
-                    $name = static::PHINX_TYPE_BOOLEAN;
-                    $limit = null;
-                } elseif (isset(static::$supportedColumnTypes[$typeLC])) {
-                    // the type is an explicitly supported type
-                    $name = $typeLC;
-                } elseif (isset(static::$supportedColumnTypeAliases[$typeLC])) {
-                    // the type is an alias for a supported type
-                    $name = static::$supportedColumnTypeAliases[$typeLC];
-                } elseif (in_array($typeLC, static::$unsupportedColumnTypes, true)) {
-                    // unsupported but known types are passed through lowercased, and without appended affinity
-                    $name = Literal::from($typeLC);
-                } else {
-                    // unknown types are passed through as-is
-                    $name = Literal::from($type . $affinity);
-                }
-            }
-        }
-
-        return [
-            'name' => $name,
-            'limit' => $limit,
-            'scale' => $scale,
-        ];
-    }
-
-    /**
      * @inheritDoc
      */
     public function createDatabase(string $name, array $options = []): void
