@@ -49,18 +49,6 @@ parameters:
 			path: src/Db/Adapter/MysqlAdapter.php
 
 		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: src/Db/Adapter/MysqlAdapter.php
-
-		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: src/Db/Adapter/SqliteAdapter.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between Cake\\Database\\StatementInterface and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
