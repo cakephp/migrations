@@ -103,7 +103,8 @@ class PendingMigrationsMiddlewareTest extends TestCase
         $handler = new TestRequestHandler(function ($req) {
             return new Response();
         });
-        $middleware->process($request, $handler);
+        $response = $middleware->process($request, $handler);
+        $this->assertNotEmpty($response);
     }
 
     /**
@@ -160,6 +161,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
             return new Response();
         });
 
-        $middleware->process($request, $handler);
+        $response = $middleware->process($request, $handler);
+        $this->assertNotEmpty($response);
     }
 }
