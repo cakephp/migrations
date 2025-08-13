@@ -15,6 +15,7 @@ use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
+use Cake\Database\Schema\TableSchemaInterface;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Table;
@@ -25,41 +26,61 @@ use Migrations\MigrationInterface;
  */
 interface AdapterInterface
 {
-    public const PHINX_TYPE_STRING = 'string';
-    public const PHINX_TYPE_CHAR = 'char';
-    public const PHINX_TYPE_TEXT = 'text';
-    public const PHINX_TYPE_INTEGER = 'integer';
-    public const PHINX_TYPE_TINY_INTEGER = 'tinyinteger';
-    public const PHINX_TYPE_SMALL_INTEGER = 'smallinteger';
-    public const PHINX_TYPE_BIG_INTEGER = 'biginteger';
+    public const PHINX_TYPE_STRING = TableSchemaInterface::TYPE_STRING;
+    public const PHINX_TYPE_CHAR = TableSchemaInterface::TYPE_CHAR;
+    public const PHINX_TYPE_TEXT = TableSchemaInterface::TYPE_TEXT;
+    public const PHINX_TYPE_INTEGER = TableSchemaInterface::TYPE_INTEGER;
+    public const PHINX_TYPE_TINY_INTEGER = TableSchemaInterface::TYPE_TINYINTEGER;
+    public const PHINX_TYPE_SMALL_INTEGER = TableSchemaInterface::TYPE_SMALLINTEGER;
+    public const PHINX_TYPE_BIG_INTEGER = TableSchemaInterface::TYPE_BIGINTEGER;
+
+    /** @deprecated Use smallinteger or boolean instead */
     public const PHINX_TYPE_BIT = 'bit';
-    public const PHINX_TYPE_FLOAT = 'float';
-    public const PHINX_TYPE_DECIMAL = 'decimal';
+
+    public const PHINX_TYPE_FLOAT = TableSchemaInterface::TYPE_FLOAT;
+    public const PHINX_TYPE_DECIMAL = TableSchemaInterface::TYPE_DECIMAL;
+
+    /** @deprecated Use float instead */
     public const PHINX_TYPE_DOUBLE = 'double';
-    public const PHINX_TYPE_DATETIME = 'datetime';
-    public const PHINX_TYPE_TIMESTAMP = 'timestamp';
-    public const PHINX_TYPE_TIME = 'time';
-    public const PHINX_TYPE_DATE = 'date';
-    public const PHINX_TYPE_BINARY = 'binary';
+
+    public const PHINX_TYPE_DATETIME = TableSchemaInterface::TYPE_DATETIME;
+    public const PHINX_TYPE_TIMESTAMP = TableSchemaInterface::TYPE_TIMESTAMP;
+    public const PHINX_TYPE_TIME = TableSchemaInterface::TYPE_TIME;
+    public const PHINX_TYPE_DATE = TableSchemaInterface::TYPE_DATE;
+    public const PHINX_TYPE_BINARY = TableSchemaInterface::TYPE_BINARY;
+
+    /** @deprecated Use binary instead */
     public const PHINX_TYPE_VARBINARY = 'varbinary';
-    public const PHINX_TYPE_BINARYUUID = 'binaryuuid';
+
+    public const PHINX_TYPE_BINARYUUID = TableSchemaInterface::TYPE_BINARY_UUID;
+
+    /** @deprecated Use binary instead */
     public const PHINX_TYPE_BLOB = 'blob';
+
+    /** @deprecated Use binary with length instead */
     public const PHINX_TYPE_TINYBLOB = 'tinyblob'; // Specific to Mysql.
+
+    /** @deprecated Use binary with length instead */
     public const PHINX_TYPE_MEDIUMBLOB = 'mediumblob'; // Specific to Mysql
+
+    /** @deprecated Use binary with length instead */
     public const PHINX_TYPE_LONGBLOB = 'longblob'; // Specific to Mysql
-    public const PHINX_TYPE_BOOLEAN = 'boolean';
-    public const PHINX_TYPE_JSON = 'json';
+    public const PHINX_TYPE_BOOLEAN = TableSchemaInterface::TYPE_BOOLEAN;
+    public const PHINX_TYPE_JSON = TableSchemaInterface::TYPE_JSON;
+    public const PHINX_TYPE_UUID = TableSchemaInterface::TYPE_UUID;
+    public const PHINX_TYPE_NATIVEUUID = TableSchemaInterface::TYPE_NATIVE_UUID;
+    /** @deprecated Use json instead */
     public const PHINX_TYPE_JSONB = 'jsonb';
-    public const PHINX_TYPE_UUID = 'uuid';
-    public const PHINX_TYPE_NATIVEUUID = 'nativeuuid';
+    /** @deprecated Use blob instead */
     public const PHINX_TYPE_FILESTREAM = 'filestream';
 
     // Geospatial database types
-    public const PHINX_TYPE_GEOMETRY = 'geometry';
+    public const PHINX_TYPE_GEOMETRY = TableSchemaInterface::TYPE_GEOMETRY;
+    public const PHINX_TYPE_POINT = TableSchemaInterface::TYPE_POINT;
+    public const PHINX_TYPE_LINESTRING = TableSchemaInterface::TYPE_LINESTRING;
+    public const PHINX_TYPE_POLYGON = TableSchemaInterface::TYPE_POLYGON;
+    /** @deprecated Will be removed in 5.x */
     public const PHINX_TYPE_GEOGRAPHY = 'geography';
-    public const PHINX_TYPE_POINT = 'point';
-    public const PHINX_TYPE_LINESTRING = 'linestring';
-    public const PHINX_TYPE_POLYGON = 'polygon';
 
     public const PHINX_TYPES_GEOSPATIAL = [
         self::PHINX_TYPE_GEOMETRY,
@@ -69,12 +90,21 @@ interface AdapterInterface
     ];
 
     // only for mysql so far
+    /** @deprecated Will be removed in 5.x */
     public const PHINX_TYPE_MEDIUM_INTEGER = 'mediuminteger';
+
+    /** @deprecated Will be removed in 5.x */
     public const PHINX_TYPE_ENUM = 'enum';
+
+    /** @deprecated Will be removed in 5.x */
     public const PHINX_TYPE_SET = 'set';
+
+    // only for mysql so far
+    // TODO This can be aliased to TableSchema constants with cakephp 5.3
     public const PHINX_TYPE_YEAR = 'year';
 
     // only for postgresql so far
+    // TODO These can be aliased to TableSchema constants with cakephp 5.3
     public const PHINX_TYPE_CIDR = 'cidr';
     public const PHINX_TYPE_INET = 'inet';
     public const PHINX_TYPE_MACADDR = 'macaddr';

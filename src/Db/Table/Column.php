@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Table;
 
 use Cake\Core\Configure;
+use Cake\Database\Schema\TableSchemaInterface;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Literal;
@@ -19,25 +20,24 @@ use RuntimeException;
  */
 class Column
 {
-    // TODO use cakephp/database constants instead at next major.
-    public const BIGINTEGER = AdapterInterface::PHINX_TYPE_BIG_INTEGER;
-    public const SMALLINTEGER = AdapterInterface::PHINX_TYPE_SMALL_INTEGER;
-    public const TINYINTEGER = AdapterInterface::PHINX_TYPE_TINY_INTEGER;
-    public const BINARY = AdapterInterface::PHINX_TYPE_BINARY;
-    public const BOOLEAN = AdapterInterface::PHINX_TYPE_BOOLEAN;
-    public const CHAR = AdapterInterface::PHINX_TYPE_CHAR;
-    public const DATE = AdapterInterface::PHINX_TYPE_DATE;
-    public const DATETIME = AdapterInterface::PHINX_TYPE_DATETIME;
-    public const DECIMAL = AdapterInterface::PHINX_TYPE_DECIMAL;
-    public const FLOAT = AdapterInterface::PHINX_TYPE_FLOAT;
-    public const INTEGER = AdapterInterface::PHINX_TYPE_INTEGER;
-    public const STRING = AdapterInterface::PHINX_TYPE_STRING;
-    public const TEXT = AdapterInterface::PHINX_TYPE_TEXT;
-    public const TIME = AdapterInterface::PHINX_TYPE_TIME;
-    public const TIMESTAMP = AdapterInterface::PHINX_TYPE_TIMESTAMP;
-    public const UUID = AdapterInterface::PHINX_TYPE_UUID;
-    public const BINARYUUID = AdapterInterface::PHINX_TYPE_BINARYUUID;
-    public const NATIVEUUID = AdapterInterface::PHINX_TYPE_NATIVEUUID;
+    public const BIGINTEGER = TableSchemaInterface::TYPE_BIGINTEGER;
+    public const SMALLINTEGER = TableSchemaInterface::TYPE_SMALLINTEGER;
+    public const TINYINTEGER = TableSchemaInterface::TYPE_TINYINTEGER;
+    public const BINARY = TableSchemaInterface::TYPE_BINARY;
+    public const BOOLEAN = TableSchemaInterface::TYPE_BOOLEAN;
+    public const CHAR = TableSchemaInterface::TYPE_CHAR;
+    public const DATE = TableSchemaInterface::TYPE_DATE;
+    public const DATETIME = TableSchemaInterface::TYPE_DATETIME;
+    public const DECIMAL = TableSchemaInterface::TYPE_DECIMAL;
+    public const FLOAT = TableSchemaInterface::TYPE_FLOAT;
+    public const INTEGER = TableSchemaInterface::TYPE_INTEGER;
+    public const STRING = TableSchemaInterface::TYPE_STRING;
+    public const TEXT = TableSchemaInterface::TYPE_TEXT;
+    public const TIME = TableSchemaInterface::TYPE_TIME;
+    public const TIMESTAMP = TableSchemaInterface::TYPE_TIMESTAMP;
+    public const UUID = TableSchemaInterface::TYPE_UUID;
+    public const BINARYUUID = TableSchemaInterface::TYPE_BINARY_UUID;
+    public const NATIVEUUID = TableSchemaInterface::TYPE_NATIVE_UUID;
     /** MySQL-only column type */
     public const MEDIUMINTEGER = AdapterInterface::PHINX_TYPE_MEDIUM_INTEGER;
     /** MySQL-only column type */
@@ -49,7 +49,7 @@ class Column
     /** MySQL-only column type */
     public const YEAR = AdapterInterface::PHINX_TYPE_YEAR;
     /** MySQL/Postgres-only column type */
-    public const JSON = AdapterInterface::PHINX_TYPE_JSON;
+    public const JSON = TableSchemaInterface::TYPE_JSON;
     /** Postgres-only column type */
     public const JSONB = AdapterInterface::PHINX_TYPE_JSONB;
     /** Postgres-only column type */
