@@ -2110,7 +2110,6 @@ OUTPUT;
     public static function defaultsCastAsExpressions()
     {
         return [
-            [MysqlAdapter::PHINX_TYPE_BLOB, 'abc'],
             [MysqlAdapter::PHINX_TYPE_JSON, '{"a": true}'],
             [MysqlAdapter::PHINX_TYPE_TEXT, 'abc'],
             [MysqlAdapter::PHINX_TYPE_GEOMETRY, 'POINT(0 0)'],

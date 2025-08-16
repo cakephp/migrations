@@ -39,17 +39,14 @@ class SqliteAdapter extends AbstractAdapter
         self::PHINX_TYPE_BIG_INTEGER => 'biginteger',
         self::PHINX_TYPE_BINARY => 'binary_blob',
         self::PHINX_TYPE_BINARYUUID => 'uuid_blob',
-        self::PHINX_TYPE_BLOB => 'blob',
         self::PHINX_TYPE_BOOLEAN => 'boolean_integer',
         self::PHINX_TYPE_CHAR => 'char',
         self::PHINX_TYPE_DATE => 'date_text',
         self::PHINX_TYPE_DATETIME => 'datetime_text',
         self::PHINX_TYPE_DECIMAL => 'decimal',
-        self::PHINX_TYPE_DOUBLE => 'double',
         self::PHINX_TYPE_FLOAT => 'float',
         self::PHINX_TYPE_INTEGER => 'integer',
         self::PHINX_TYPE_JSON => 'json_text',
-        self::PHINX_TYPE_JSONB => 'jsonb_text',
         self::PHINX_TYPE_SMALL_INTEGER => 'smallinteger',
         self::PHINX_TYPE_STRING => 'varchar',
         self::PHINX_TYPE_TEXT => 'text',
@@ -57,7 +54,6 @@ class SqliteAdapter extends AbstractAdapter
         self::PHINX_TYPE_TIMESTAMP => 'timestamp_text',
         self::PHINX_TYPE_TINY_INTEGER => 'tinyinteger',
         self::PHINX_TYPE_UUID => 'uuid_text',
-        self::PHINX_TYPE_VARBINARY => 'varbinary_blob',
     ];
 
     /**

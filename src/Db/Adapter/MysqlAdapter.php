@@ -28,15 +28,9 @@ class MysqlAdapter extends AbstractAdapter
      * @var string[]
      */
     protected static array $specificColumnTypes = [
-        self::PHINX_TYPE_ENUM,
-        self::PHINX_TYPE_SET,
         self::PHINX_TYPE_YEAR,
         self::PHINX_TYPE_JSON,
         self::PHINX_TYPE_BINARYUUID,
-        self::PHINX_TYPE_TINYBLOB,
-        self::PHINX_TYPE_MEDIUMBLOB,
-        self::PHINX_TYPE_LONGBLOB,
-        self::PHINX_TYPE_MEDIUM_INTEGER,
     ];
 
     // These constants roughly correspond to the maximum allowed value for each field,
@@ -267,23 +261,7 @@ class MysqlAdapter extends AbstractAdapter
                 default => null,
             };
         }
-        $binaryTypes = [
-            self::PHINX_TYPE_BLOB,
-            self::PHINX_TYPE_TINYBLOB,
-            self::PHINX_TYPE_MEDIUMBLOB,
-            self::PHINX_TYPE_LONGBLOB,
-            self::PHINX_TYPE_VARBINARY,
-            self::PHINX_TYPE_BINARY,
-        ];
-        if (in_array($data['type'], $binaryTypes, true)) {
-            if (!isset($data['length'])) {
-                $data['length'] = match ($data['type']) {
-                    self::PHINX_TYPE_TINYBLOB => TableSchema::LENGTH_TINY,
-                    self::PHINX_TYPE_MEDIUMBLOB => TableSchema::LENGTH_MEDIUM,
-                    self::PHINX_TYPE_LONGBLOB => TableSchema::LENGTH_LONG,
-                    default => $data['length'],
-                };
-            }
+        if ($data['type'] === self::PHINX_TYPE_BINARY) {
             if ($data['length'] === self::BLOB_REGULAR) {
                 $data['type'] = TableSchema::TYPE_BINARY;
                 $data['length'] = null;
@@ -305,9 +283,6 @@ class MysqlAdapter extends AbstractAdapter
                 unset($data['length']);
             }
             unset($data['length']);
-        } elseif ($data['type'] == self::PHINX_TYPE_DOUBLE) {
-            $data['type'] = TableSchema::TYPE_FLOAT;
-            $data['length'] = 52;
         }
 
         return $data;

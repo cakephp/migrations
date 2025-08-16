@@ -39,19 +39,9 @@ class Column
     public const BINARYUUID = TableSchemaInterface::TYPE_BINARY_UUID;
     public const NATIVEUUID = TableSchemaInterface::TYPE_NATIVE_UUID;
     /** MySQL-only column type */
-    public const MEDIUMINTEGER = AdapterInterface::PHINX_TYPE_MEDIUM_INTEGER;
-    /** MySQL-only column type */
-    public const ENUM = AdapterInterface::PHINX_TYPE_ENUM;
-    /** MySQL-only column type */
-    public const SET = AdapterInterface::PHINX_TYPE_STRING;
-    /** MySQL-only column type */
-    public const BLOB = AdapterInterface::PHINX_TYPE_BLOB;
-    /** MySQL-only column type */
     public const YEAR = AdapterInterface::PHINX_TYPE_YEAR;
     /** MySQL/Postgres-only column type */
     public const JSON = TableSchemaInterface::TYPE_JSON;
-    /** Postgres-only column type */
-    public const JSONB = AdapterInterface::PHINX_TYPE_JSONB;
     /** Postgres-only column type */
     public const CIDR = AdapterInterface::PHINX_TYPE_CIDR;
     /** Postgres-only column type */

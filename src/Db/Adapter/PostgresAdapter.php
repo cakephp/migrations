@@ -35,7 +35,6 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected static array $specificColumnTypes = [
         self::PHINX_TYPE_JSON,
-        self::PHINX_TYPE_JSONB,
         self::PHINX_TYPE_CIDR,
         self::PHINX_TYPE_INET,
         self::PHINX_TYPE_MACADDR,
