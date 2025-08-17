@@ -10,7 +10,6 @@ use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
-use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
@@ -21,7 +20,6 @@ use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 class MysqlAdapterTest extends TestCase
 {
