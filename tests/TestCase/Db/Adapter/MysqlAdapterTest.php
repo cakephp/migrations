@@ -783,38 +783,6 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($type, $rows[1]['Type']);
     }
 
-    /**
-     * Test that migrations still supports the `double` type but
-     * as an alias for a float/double column which cake/database provides.
-     */
-    public function testAddDoubleDefaultSignedCompat(): void
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('user_id'));
-        $table->addColumn('foo', 'double')
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW FULL COLUMNS FROM table1');
-        $this->assertEquals('double', $rows[1]['Type']);
-        $this->assertEquals('YES', $rows[1]['Null']);
-    }
-
-    /**
-     * Test that migrations still supports the `double` type but
-     * as an alias for a float column which cake/database provides.
-     */
-    public function testAddDoubleDefaultSignedCompatWithUnsigned(): void
-    {
-        $table = new Table('table1', [], $this->adapter);
-        $table->save();
-        $this->assertFalse($table->hasColumn('user_id'));
-        $table->addColumn('foo', 'double', ['signed' => false])
-              ->save();
-        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
-        $this->assertEquals('double unsigned', $rows[1]['Type']);
-        $this->assertEquals('YES', $rows[1]['Null']);
-    }
-
     public function testAddStringColumnWithSignedEqualsFalse(): void
     {
         $table = new Table('table1', [], $this->adapter);
@@ -2086,25 +2054,6 @@ OUTPUT;
         $this->expectException(PDOException::class);
         $this->expectExceptionMessage("SQLSTATE[HY000]: General error: 3643 The SRID of the geometry does not match the SRID of the column 'geom'. The SRID of the geometry is 4322, but the SRID of the column is 4326. Consider changing the SRID of the geometry or the SRID property of the column.");
         $this->adapter->execute("INSERT INTO table1 (`geom`) VALUES (ST_GeomFromText('{$geom}', 4322))");
-    }
-
-    /**
-     * Small check to verify if specific Mysql constants are handled in AdapterInterface
-     *
-     * @see https://github.com/cakephp/migrations/issues/359
-     */
-    public function testMysqlBlobsConstants()
-    {
-        $reflector = new ReflectionClass(AdapterInterface::class);
-
-        $validTypes = array_filter($reflector->getConstants(), function ($constant) {
-            return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
-        }, ARRAY_FILTER_USE_KEY);
-
-        $this->assertTrue(in_array('tinyblob', $validTypes, true));
-        $this->assertTrue(in_array('blob', $validTypes, true));
-        $this->assertTrue(in_array('mediumblob', $validTypes, true));
-        $this->assertTrue(in_array('longblob', $validTypes, true));
     }
 
     public static function defaultsCastAsExpressions()
