@@ -15,10 +15,6 @@ namespace Migrations;
 
 use Migrations\Migration\BackendInterface;
 use Migrations\Migration\BuiltinBackend;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * The Migrations class is responsible for handling migrations command
@@ -26,14 +22,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Migrations
 {
-    /**
-     * The OutputInterface.
-     * Should be a \Symfony\Component\Console\Output\NullOutput instance
-     *
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected OutputInterface $output;
-
     /**
      * Default options to use
      *
@@ -51,14 +39,6 @@ class Migrations
     protected string $command;
 
     /**
-     * Stub input to feed the manager class since we might not have an input ready when we get the Manager using
-     * the `getManager()` method
-     *
-     * @var \Symfony\Component\Console\Input\ArrayInput
-     */
-    protected ArrayInput $stubInput;
-
-    /**
      * Constructor
      *
      * @param array<string, mixed> $default Default option to be used when calling a method.
@@ -69,9 +49,6 @@ class Migrations
      */
     public function __construct(array $default = [])
     {
-        $this->output = new NullOutput();
-        $this->stubInput = new ArrayInput([]);
-
         if ($default) {
             $this->default = $default;
         }
@@ -194,52 +171,5 @@ class Migrations
         $backend = $this->getBackend();
 
         return $backend->seed($options);
-    }
-
-    /**
-     * Get the input needed for each commands to be run
-     *
-     * TODO(mark) Remove as part of phinx removal
-     *
-     * @param string $command Command name for which we need the InputInterface
-     * @param array<string, mixed> $arguments Simple key/values array representing the command arguments
-     * to pass to the InputInterface
-     * @param array<string, mixed> $options Simple key/values array representing the command options
-     * to pass to the InputInterface
-     * @return \Symfony\Component\Console\Input\InputInterface InputInterface needed for the
-     * Manager to properly run
-     */
-    public function getInput(string $command, array $arguments, array $options): InputInterface
-    {
-        $className = 'Migrations\Command\\' . $command;
-        $options = $arguments + $this->prepareOptions($options);
-        /** @var \Symfony\Component\Console\Command\Command $command */
-        $command = new $className();
-        $definition = $command->getDefinition();
-
-        return new ArrayInput($options, $definition);
-    }
-
-    /**
-     * Prepares the option to pass on to the InputInterface
-     *
-     * TODO(mark) Remove as part of phinx removal
-     *
-     * @param array<string, mixed> $options Simple key-values array to pass to the InputInterface
-     * @return array<string, mixed> Prepared $options
-     */
-    protected function prepareOptions(array $options = []): array
-    {
-        $options += $this->default;
-        if (!$options) {
-            return $options;
-        }
-
-        foreach ($options as $name => $value) {
-            $options['--' . $name] = $value;
-            unset($options[$name]);
-        }
-
-        return $options;
     }
 }

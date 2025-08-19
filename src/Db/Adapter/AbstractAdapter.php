@@ -42,11 +42,8 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table as TableMetadata;
 use Migrations\MigrationInterface;
-use Migrations\Shim\OutputAdapter;
 use PDOException;
 use RuntimeException;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Base Abstract Database Adapter.
@@ -298,38 +295,6 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         $io->out($message);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setInput(InputInterface $input): AdapterInterface
-    {
-        throw new RuntimeException('Using setInput() interface is not supported.');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInput(): ?InputInterface
-    {
-        throw new RuntimeException('Using getInput() interface is not supported.');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setOutput(OutputInterface $output): AdapterInterface
-    {
-        throw new RuntimeException('Using setInput() method is not supported');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getOutput(): OutputInterface
-    {
-        return new OutputAdapter($this->io);
     }
 
     /**

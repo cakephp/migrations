@@ -13,28 +13,13 @@ declare(strict_types=1);
  */
 namespace Migrations\Util;
 
-use Cake\Core\Plugin as CorePlugin;
 use Cake\Utility\Inflector;
-use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * Trait gathering useful methods needed in various places of the plugin
  */
 trait UtilTrait
 {
-    /**
-     * Get the plugin name based on the current InputInterface
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input of the current command.
-     * @return string|null
-     */
-    protected function getPlugin(InputInterface $input): ?string
-    {
-        $plugin = $input->getOption('plugin') ?: null;
-
-        return $plugin;
-    }
-
     /**
      * Get the phinx table name used to store migrations data
      *
@@ -53,31 +38,5 @@ trait UtilTrait
         $plugin = str_replace(['\\', '/', '.'], '_', $plugin);
 
         return $plugin . $table;
-    }
-
-    /**
-     * Get the migrations or seeds files path based on the current InputInterface
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Input of the current command.
-     * @param string $default Default folder to set if no source option is found in the $input param
-     * @return string
-     */
-    protected function getOperationsPath(InputInterface $input, string $default = 'Migrations'): string
-    {
-        $folder = $input->getOption('source') ?: $default;
-
-        $dir = ROOT . DS . 'config' . DS . $folder;
-
-        if (defined('CONFIG')) {
-            $dir = CONFIG . $folder;
-        }
-
-        $plugin = $this->getPlugin($input);
-
-        if ($plugin !== null) {
-            $dir = CorePlugin::path($plugin) . 'config' . DS . $folder;
-        }
-
-        return $dir;
     }
 }
