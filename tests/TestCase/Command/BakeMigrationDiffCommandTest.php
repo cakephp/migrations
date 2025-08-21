@@ -60,7 +60,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         if (env('DB_URL_COMPARE')) {
             // Clean up the comparison database each time. Table order is important.
             $connection = ConnectionManager::get('test_comparisons');
-            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags'];
+            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog'];
             foreach ($tables as $table) {
                 $connection->execute("DROP TABLE IF EXISTS $table");
             }
