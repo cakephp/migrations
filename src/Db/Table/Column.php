@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Table;
 
 use Cake\Core\Configure;
+use Cake\Database\Expression\QueryExpression;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Literal;
@@ -814,7 +815,7 @@ class Column
     {
         $default = $this->getDefault();
         if ($default instanceof Literal) {
-            $default = (string)$default;
+            $default = new QueryExpression((string)$default);
         }
 
         $type = $this->getType();

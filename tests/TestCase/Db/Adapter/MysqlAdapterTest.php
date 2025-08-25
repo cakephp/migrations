@@ -735,11 +735,14 @@ class MysqlAdapterTest extends TestCase
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
-        $table->addColumn('default_ts', 'timestamp', ['null' => false, 'default' => Literal::from('CURRENT_TIMESTAMP')])
-              ->save();
+        $table
+            ->addColumn('default_ts', 'timestamp', ['null' => false, 'default' => Literal::from('CURRENT_TIMESTAMP')])
+            ->addColumn('char_default', 'string', ['null' => false, 'default' => Literal::from('"oh hi"')])
+            ->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
         // MariaDB returns current_timestamp()
-        $this->assertTrue($rows[1]['Default'] === 'CURRENT_TIMESTAMP' || $rows[1]['Default'] === 'current_timestamp()');
+        $this->assertContains($rows[1]['Default'], ['CURRENT_TIMESTAMP', 'current_timestamp()']);
+        $this->assertTrue($rows[2]['Default'] === 'oh hi');
     }
 
     public function testAddColumnFirst()

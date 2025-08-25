@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Db\Table;
 
 use Cake\Core\Configure;
+use Cake\Database\Expression\QueryExpression;
+use Cake\Database\ValueBinder;
+use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
@@ -41,5 +44,16 @@ class ColumnTest extends TestCase
         Configure::write('Migrations.column_null_default', false);
         $column = new Column();
         $this->assertFalse($column->isNull());
+    }
+
+    public function testToArrayDefaultLiteralValue(): void
+    {
+        $column = new Column();
+        $column->setName('created')
+            ->setType('datetime')
+            ->setDefault(new Literal('CURRENT_TIMESTAMP'));
+        $result = $column->toArray();
+        $this->assertInstanceOf(QueryExpression::class, $result['default']);
+        $this->assertEquals('CURRENT_TIMESTAMP', $result['default']->sql(new ValueBinder()));
     }
 }
