@@ -491,6 +491,17 @@ When using the ``--require-table`` flag, the shell will look through your
 application ``Table`` classes and will only add the model tables in the snapshot
 .
 
+If you want to generate a snapshot without marking it as migrated (for example,
+for use in unit tests), you can use the ``--generate-only`` flag:
+
+.. code-block:: bash
+
+    bin/cake bake migration_snapshot Initial --generate-only
+
+This will create the migration file but will not add an entry to the phinxlog
+table, allowing you to move the file to a different location without causing
+"MISSING" status issues.
+
 The same logic will be applied implicitly if you wish to bake a snapshot for a
 plugin. To do so, you need to use the ``--plugin`` option:
 
@@ -674,6 +685,8 @@ just like for the ``migrate`` command.
 
     When you bake a snapshot with the ``cake bake migration_snapshot``
     command, the created migration will automatically be marked as migrated.
+    To prevent this behavior (e.g., for unit test migrations), use the
+    ``--generate-only`` flag.
 
 This command expects the migration version number as argument:
 
