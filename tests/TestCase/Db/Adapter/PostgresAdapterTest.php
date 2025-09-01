@@ -637,7 +637,6 @@ class PostgresAdapterTest extends TestCase
 
     public function testAddColumnWithAutoIdentity()
     {
-        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
@@ -677,7 +676,6 @@ class PostgresAdapterTest extends TestCase
     #[DataProvider('providerAddColumnIdentity')]
     public function testAddColumnIdentity($generated, $addToColumn)
     {
-        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }

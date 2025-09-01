@@ -834,6 +834,7 @@ class Column
             'length' => $length,
             'null' => $this->getNull(),
             'default' => $default,
+            'generated' => $this->getGenerated(),
             'unsigned' => !$this->getSigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
