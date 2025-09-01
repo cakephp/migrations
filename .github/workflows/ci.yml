@@ -105,7 +105,7 @@ jobs:
       - name: Composer install
         run: |
           if [[ ${{ matrix.php-version }} == '8.2' || ${{ matrix.php-version }} == '8.3' || ${{ matrix.php-version }} == '8.4' ]]; then
-            composer install --ignore-platform-req=php
+            composer install
           elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
             composer update --prefer-lowest --prefer-stable
           else
