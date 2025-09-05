@@ -1,28 +1,28 @@
 {% for indexName, index in indexes %}
-{%     set columnsList = '\'' ~ index['columns'][0] ~ '\'' %}
-{%     if index['columns']|length > 1 %}
-{%         set columnsList = '[' ~ Migration.stringifyList(index['columns'], {'indent': 6}) ~ ']' %}
-{%     endif %}
+    {%~ set columnsList = '\'' ~ index['columns'][0] ~ '\'' %}
+    {%~ if index['columns']|length > 1 %}
+        {%~ set columnsList = '[' ~ Migration.stringifyList(index['columns'], {'indent': 6}) ~ ']' %}
+    {%~ endif %}
             ->addIndex(
-{%     if backend == 'builtin' %}
+    {%~ if backend == 'builtin' %}
                 $this->index({{ columnsList | raw }})
                     ->setName('{{ indexName }}')
-{%         if index['type'] == 'unique' %}
+        {%~ if index['type'] == 'unique' %}
                     ->setType('unique')
-{%         elseif index['type'] == 'fulltext' %}
+        {%~ elseif index['type'] == 'fulltext' %}
                     ->setType('fulltext')
-{%         endif %}
-{%         if index['options'] %}
+        {%~ endif %}
+        {%~ if index['options'] %}
                     ->setOptions([{{ Migration.stringifyList(index['options'], {'indent': 6}) | raw }}])
-{%         endif %}
+        {%~ endif %}
             )
-{%     else %}
+    {%~ else %}
                 [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}],
-{%         set params = {'name': indexName} %}
-{%         if index['type'] == 'unique' %}
-{%             set params = params|merge({'unique': true}) %}
-{%         endif %}
+        {%~ set params = {'name': indexName} %}
+        {%~ if index['type'] == 'unique' %}
+            {%~ set params = params|merge({'unique': true}) %}
+        {%~ endif %}
                 [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
             )
-{%     endif %}
+    {%~ endif %}
 {% endfor %}
