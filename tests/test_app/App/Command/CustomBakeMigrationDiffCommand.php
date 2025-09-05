@@ -63,6 +63,6 @@ class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . $comparison . DS;
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
-        return unserialize(file_get_contents($diffDumpPath));
+        return unserialize(trim(file_get_contents($diffDumpPath)));
     }
 }
