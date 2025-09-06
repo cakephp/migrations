@@ -46,18 +46,18 @@
             {%~ endif %}
         {%~ endfor %}
     {%~ endif %}
-    {{-     element('Migrations.add-indexes', {
-               indexes: createData.tables[table].indexes,
-               backend: backend,
+    {{- element('Migrations.add-indexes', {
+            indexes: createData.tables[table].indexes,
+            backend: backend,
     }) }}            ->create();
 {% endfor -%}
 {% if createData.constraints %}
     {%~ for table, tableConstraints in createData.constraints %}
-        {{-     element('Migrations.add-foreign-keys', {
-                 constraints: tableConstraints,
-                 table: table,
-                 backend: backend,
-               })
+        {{- element('Migrations.add-foreign-keys', {
+                constraints: tableConstraints,
+                table: table,
+                backend: backend,
+            })
         -}}
     {%~ endfor %}
 {% endif -%}
