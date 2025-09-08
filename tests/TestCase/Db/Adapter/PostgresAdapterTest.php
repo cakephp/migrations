@@ -669,7 +669,7 @@ class PostgresAdapterTest extends TestCase
         return [
             [PostgresAdapter::GENERATED_ALWAYS, true], //testAddColumnWithIdentityAlways
             [PostgresAdapter::GENERATED_BY_DEFAULT, false], //testAddColumnWithIdentityDefault
-            [null, true], //testAddColumnWithoutIdentity
+            [PostgresAdapter::GENERATED_BY_DEFAULT, true],
         ];
     }
 
@@ -690,8 +690,8 @@ class PostgresAdapterTest extends TestCase
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'id') {
-                $this->assertEquals((bool)$generated, $column->getIdentity());
-                $this->assertEquals($generated, $column->getGenerated());
+                $this->assertEquals((bool)$generated, $column->getIdentity(), 'identity value does not match');
+                $this->assertEquals($generated, $column->getGenerated(), 'generated value does not match');
             }
         }
     }
@@ -920,7 +920,6 @@ class PostgresAdapterTest extends TestCase
     #[DataProvider('providerChangeColumnIdentity')]
     public function testChangeColumnIdentity($generated)
     {
-        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
@@ -941,7 +940,6 @@ class PostgresAdapterTest extends TestCase
 
     public function testChangeColumnDropIdentity()
     {
-        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
@@ -959,7 +957,6 @@ class PostgresAdapterTest extends TestCase
 
     public function testChangeColumnChangeIdentity()
     {
-        $this->markTestIncomplete('Requires cakephp/database to use identity columns');
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
