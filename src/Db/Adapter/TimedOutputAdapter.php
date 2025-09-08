@@ -44,7 +44,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     }
 
     /**
-     * Write a Phinx command to the output.
+     * Write a command to the output.
      *
      * @param string $command Command Name
      * @param array $args Command Args

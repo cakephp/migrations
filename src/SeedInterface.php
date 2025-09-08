@@ -15,8 +15,6 @@ use Migrations\Db\Table;
 
 /**
  * Seed interface
- *
- * Implements the same API as Phinx's SeedInterface does but with migrations classes.
  */
 interface SeedInterface
 {

@@ -11,7 +11,7 @@ namespace Migrations\Db\Adapter;
 use RuntimeException;
 
 /**
- * Exception thrown when a column type doesn't match a Phinx type.
+ * Exception thrown when a column type doesn't match a known type.
  */
 class UnsupportedColumnTypeException extends RuntimeException
 {

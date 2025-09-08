@@ -20,7 +20,7 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Table;
 
 /**
- * Phinx MySQL Adapter.
+ * MySQL Adapter.
  */
 class MysqlAdapter extends AbstractAdapter
 {

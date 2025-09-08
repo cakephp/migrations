@@ -52,21 +52,6 @@ class BakeSeedCommandTest extends TestCase
     }
 
     /**
-     * Test empty migration with phinx base class.
-     *
-     * @return void
-     */
-    public function testBasicBakingPhinx()
-    {
-        $this->generatedFile = ROOT . DS . 'config/Seeds/ArticlesSeed.php';
-        $this->exec('bake seed Articles --connection test');
-
-        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
-        $result = file_get_contents($this->generatedFile);
-        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
-    }
-
-    /**
      * Test empty migration.
      *
      * @return void

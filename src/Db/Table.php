@@ -664,8 +664,8 @@ class Table
      * This method is called in case a primary key was defined using the addPrimaryKey() method.
      * It currently does something only if using SQLite.
      * If a column is an auto-increment key in SQLite, it has to be a primary key and it has to defined
-     * when defining the column. Phinx takes care of that so we have to make sure columns defined as autoincrement were
-     * not added with the addPrimaryKey method, otherwise, SQL queries will be wrong.
+     * when defining the column. Migrations takes care of that so we have to make sure columns defined as autoincrement
+     * were not added with the addPrimaryKey method, otherwise, SQL queries will be wrong.
      *
      * @return void
      */

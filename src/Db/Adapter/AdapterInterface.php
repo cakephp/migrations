@@ -425,7 +425,7 @@ interface AdapterInterface
     public function hasForeignKey(string $tableName, string|array $columns, ?string $constraint = null): bool;
 
     /**
-     * Returns an array of the supported Phinx column types.
+     * Returns an array of the supported column types.
      *
      * @return string[]
      */

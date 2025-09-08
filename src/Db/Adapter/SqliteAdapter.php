@@ -30,7 +30,7 @@ class SqliteAdapter extends AbstractAdapter
     public const MEMORY = ':memory:';
 
     /**
-     * List of supported Phinx column types with their SQL equivalents
+     * List of supported column types with their SQL equivalents
      * some types have an affinity appended to ensure they do not receive NUMERIC affinity
      *
      * @var string[]
@@ -401,7 +401,7 @@ class SqliteAdapter extends AbstractAdapter
      * a string value, a string representing an expression, or some other scalar
      *
      * @param mixed $default The default-value expression to interpret
-     * @param string $columnType The Phinx type of the column
+     * @param string $columnType The type of the column
      * @return mixed
      */
     protected function parseDefaultValue(mixed $default, string $columnType): mixed

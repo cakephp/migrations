@@ -13,7 +13,7 @@ class CreateTestIndexLimitSpecifierTable extends BaseMigration
      * More information on writing migrations is available here:
      * https://book.cakephp.org/migrations/5/en/migrations.html
      *
-     * The following commands can be used in this method and Phinx will
+     * The following commands can be used in this method and Migrations will
      * automatically reverse them when rolling back:
      *
      *    createTable

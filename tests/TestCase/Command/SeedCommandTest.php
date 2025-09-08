@@ -216,35 +216,6 @@ class SeedCommandTest extends TestCase
         $this->assertNotEmpty($store['updated']);
     }
 
-    public function testSeederWithDateTimeFields(): void
-    {
-        $this->markTestSkipped('FeatureFlags test no longer needed without Phinx.');
-
-        return;
-
-        $this->createTables();
-        $this->exec('migrations seed -c test --seed StoresSeed');
-
-        $this->assertExitSuccess();
-        $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
-        $this->assertOutputContains('All Done');
-
-        /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get('test');
-        $result = $connection->selectQuery()
-            ->select(['*'])
-            ->from('stores')
-            ->orderBy('id DESC')
-            ->limit(1)
-            ->execute()->fetchAll('assoc');
-
-        $this->assertNotEmpty($result[0]);
-        $store = $result[0];
-        $this->assertEquals('foo_with_date', $store['name']);
-        $this->assertNotEmpty($store['created']);
-        $this->assertNotEmpty($store['modified']);
-    }
-
     public function testDryRunModeWarning(): void
     {
         $this->createTables();
