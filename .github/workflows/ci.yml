@@ -146,11 +146,11 @@ jobs:
 
   testsuite-windows:
     runs-on: windows-2022
-    name: Windows - PHP 8.1 & SQL Server
+    name: Windows - PHP 8.2 & SQL Server
 
     env:
       EXTENSIONS: mbstring, intl, pdo_sqlsrv
-      PHP_VERSION: '8.1'
+      PHP_VERSION: '8.2'
 
     steps:
     - uses: actions/checkout@v5

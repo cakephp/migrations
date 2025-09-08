@@ -42,6 +42,10 @@ interface AdapterInterface
     public const PHINX_TYPE_BINARYUUID = TableSchemaInterface::TYPE_BINARY_UUID;
     public const PHINX_TYPE_BOOLEAN = TableSchemaInterface::TYPE_BOOLEAN;
     public const PHINX_TYPE_JSON = TableSchemaInterface::TYPE_JSON;
+    /**
+     * @deprecated 5.0.0 Use TableSchemaInterface::TYPE_JSON instead.
+     */
+    public const PHINX_TYPE_JSONB = 'jsonb';
     public const PHINX_TYPE_UUID = TableSchemaInterface::TYPE_UUID;
     public const PHINX_TYPE_NATIVEUUID = TableSchemaInterface::TYPE_NATIVE_UUID;
 
