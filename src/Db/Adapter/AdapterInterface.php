@@ -45,7 +45,7 @@ interface AdapterInterface
     /**
      * @deprecated 5.0.0 Use TableSchemaInterface::TYPE_JSON instead.
      */
-    public const PHINX_TYPE_JSONB = TableSchemaInterface::TYPE_JSON;
+    public const PHINX_TYPE_JSONB = 'jsonb';
     public const PHINX_TYPE_UUID = TableSchemaInterface::TYPE_UUID;
     public const PHINX_TYPE_NATIVEUUID = TableSchemaInterface::TYPE_NATIVE_UUID;
 
