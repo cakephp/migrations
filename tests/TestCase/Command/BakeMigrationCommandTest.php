@@ -108,7 +108,7 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertSameAsFile(__FUNCTION__ . $fileSuffix, $result);
     }
 
-/**
+    /**
      * Tests that baking a migration with the name as another will throw an exception.
      */
     public function testCreateDuplicateName()
