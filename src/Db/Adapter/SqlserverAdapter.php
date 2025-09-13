@@ -69,15 +69,10 @@ class SqlserverAdapter extends AbstractAdapter
         if ($this->hasCreatedTable($tableName)) {
             return true;
         }
+        $parts = $this->getSchemaName($tableName);
         $dialect = $this->getSchemaDialect();
 
-        $parts = $this->getSchemaName($tableName);
-        [$query, $params] = $dialect->listTablesSql(['schema' => $parts['schema']]);
-
-        $rows = $this->query($query, $params)->fetchAll();
-        $tables = array_column($rows, 0);
-
-        return in_array($parts['table'], $tables, true);
+        return $dialect->hasTable($tableName, $parts['schema']);
     }
 
     /**
@@ -591,21 +586,9 @@ ORDER BY IC.[key_ordinal]';
      */
     public function hasIndex(string $tableName, string|array $columns): bool
     {
-        if (is_string($columns)) {
-            $columns = [$columns]; // str to array
-        }
+        $dialect = $this->getSchemaDialect();
 
-        $columns = array_map('strtolower', $columns);
-        $indexes = $this->getIndexes($tableName);
-
-        foreach ($indexes as $index) {
-            $a = array_diff($columns, $index['columns']);
-            if (!$a) {
-                return true;
-            }
-        }
-
-        return false;
+        return $dialect->hasIndex($tableName, $columns);
     }
 
     /**
@@ -613,15 +596,9 @@ ORDER BY IC.[key_ordinal]';
      */
     public function hasIndexByName(string $tableName, string $indexName): bool
     {
-        $indexes = $this->getIndexes($tableName);
+        $dialect = $this->getSchemaDialect();
 
-        foreach ($indexes as $index) {
-            if ($index['name'] === $indexName) {
-                return true;
-            }
-        }
-
-        return false;
+        return $dialect->hasIndex($tableName, [], $indexName);
     }
 
     /**
@@ -739,28 +716,9 @@ ORDER BY IC.[key_ordinal]';
      */
     public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
     {
-        $foreignKeys = $this->getForeignKeys($tableName);
-        if ($constraint) {
-            foreach ($foreignKeys as $key) {
-                if ($key['name'] === $constraint) {
-                    return true;
-                }
-            }
+        $dialect = $this->getSchemaDialect();
 
-            return false;
-        }
-
-        if (is_string($columns)) {
-            $columns = [$columns];
-        }
-
-        foreach ($foreignKeys as $key) {
-            if ($key['columns'] === $columns) {
-                return true;
-            }
-        }
-
-        return false;
+        return $dialect->hasForeignKey($tableName, $columns, $constraint);
     }
 
     /**

@@ -596,6 +596,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function generateInsertSql(TableMetadata $table, array $row): string
     {
+        // TODO use cakephp/database InsertQuery here.
         $sql = sprintf(
             'INSERT INTO %s ',
             $this->quoteTableName($table->getName()),
@@ -649,11 +650,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         if ($value instanceof DateTime) {
-            return $value->toDateTimeString();
-        }
-
-        if ($value instanceof Date) {
-            return $value->toDateString();
+            $value = $value->toDateTimeString();
+        } elseif ($value instanceof Date) {
+            $value = $value->toDateString();
         }
 
         $driver = $this->getConnection()->getDriver();
@@ -717,6 +716,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function generateBulkInsertSql(TableMetadata $table, array $rows): string
     {
+        // TODO use cakephp/database InsertQuery here.
         $sql = sprintf(
             'INSERT INTO %s ',
             $this->quoteTableName($table->getName()),
@@ -772,6 +772,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     {
         $result = [];
 
+        // TODO use cakephp/database SelectQuery here.
         switch ($this->options['version_order']) {
             case Config::VERSION_ORDER_CREATION_TIME:
                 $orderBy = 'version ASC';
@@ -807,6 +808,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
         if (strcasecmp($direction, MigrationInterface::UP) === 0) {
+            // TODO use cakephp/database InsertQuery here.
             // up
             $sql = sprintf(
                 'INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?);',
@@ -827,6 +829,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
             $this->execute($sql, $params);
         } else {
+            // TODO use cakephp/database DeleteQuery here.
             // down
             $sql = sprintf(
                 'DELETE FROM %s WHERE %s = ?',
@@ -868,6 +871,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function resetAllBreakpoints(): int
     {
+        // TODO use cakephp/database UpdateQuery here.
         return $this->execute(
             sprintf(
                 'UPDATE %1$s SET %2$s = %3$s, %4$s = %4$s WHERE %2$s <> %3$s;',
@@ -912,6 +916,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $this->castToBool($state),
             $migration->getVersion(),
         ];
+        // TODO use cakephp/database UpdateQuery here.
         $this->query(
             sprintf(
                 'UPDATE %1$s SET %2$s = ?, %3$s = %3$s WHERE %4$s = ?;',
