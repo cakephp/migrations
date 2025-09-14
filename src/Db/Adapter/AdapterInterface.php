@@ -63,15 +63,13 @@ interface AdapterInterface
     ];
 
     // only for mysql so far
-    // TODO This can be aliased to TableSchema constants with cakephp 5.3
-    public const PHINX_TYPE_YEAR = 'year';
+    public const PHINX_TYPE_YEAR = TableSchemaInterface::TYPE_YEAR;
 
     // only for postgresql so far
-    // TODO These can be aliased to TableSchema constants with cakephp 5.3
-    public const PHINX_TYPE_CIDR = 'cidr';
-    public const PHINX_TYPE_INET = 'inet';
-    public const PHINX_TYPE_MACADDR = 'macaddr';
-    public const PHINX_TYPE_INTERVAL = 'interval';
+    public const PHINX_TYPE_CIDR = TableSchemaInterface::TYPE_CIDR;
+    public const PHINX_TYPE_INET = TableSchemaInterface::TYPE_INET;
+    public const PHINX_TYPE_MACADDR = TableSchemaInterface::TYPE_MACADDR;
+    public const PHINX_TYPE_INTERVAL = TableSchemaInterface::TYPE_INTERVAL;
 
     /**
      * Get all migrated version numbers.

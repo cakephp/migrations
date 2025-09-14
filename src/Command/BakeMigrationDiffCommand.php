@@ -483,8 +483,6 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $newArgs[] = $name;
 
         $newArgs = array_merge($newArgs, $this->parseOptions($args));
-
-        // TODO(mark) This nested command call always uses phinx backend.
         $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs, $io);
 
         if ($exitCode === 1) {
