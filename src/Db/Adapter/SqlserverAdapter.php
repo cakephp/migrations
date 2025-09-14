@@ -345,21 +345,6 @@ class SqlserverAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function hasColumn(string $tableName, string $columnName): bool
-    {
-        $parts = $this->getSchemaName($tableName);
-        $sql = "SELECT count(*) as [count]
-             FROM INFORMATION_SCHEMA.COLUMNS
-             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?";
-        /** @var array<string, mixed> $result */
-        $result = $this->query($sql, [$parts['schema'], $parts['table'], $columnName])->fetch('assoc');
-
-        return $result['count'] > 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
         $dialect = $this->getSchemaDialect();
@@ -584,26 +569,6 @@ ORDER BY IC.[key_ordinal]';
     /**
      * @inheritDoc
      */
-    public function hasIndex(string $tableName, string|array $columns): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasIndex($tableName, $columns);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasIndexByName(string $tableName, string $indexName): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasIndex($tableName, [], $indexName);
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
     {
         $sql = $this->getIndexSqlDefinition($index, $table->getName());
@@ -709,16 +674,6 @@ ORDER BY IC.[key_ordinal]';
         }
 
         return $primaryKey;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasForeignKey($tableName, $columns, $constraint);
     }
 
     /**

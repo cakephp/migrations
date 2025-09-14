@@ -1068,6 +1068,7 @@ class SqlserverAdapterTest extends TestCase
             ['create table t(a int, b int, foreign key(a,b) references other(a,b))', ['b', 'a'], false],
             ['create table t(a int, [B] int, foreign key(a,[B]) references other(a,b))', ['a', 'b'], false],
             ['create table t(a int, b int, foreign key(a,b) references other(a,b))', ['a', 'B'], false],
+            ['create table t(a int, b int, foreign key(a,b) references other(a,b))', ['a', 'b'], true],
             ['create table t(a int, b int, c int, foreign key(a,b,c) references other(a,b,c))', ['a', 'b'], false],
             ['create table t(a int, foreign key(a) references other(a))', ['a', 'b'], false],
             ['create table t(a int, b int, foreign key(a) references other(a), foreign key(b) references other(b))', ['a', 'b'], false],
