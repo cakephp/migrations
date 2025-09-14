@@ -1160,6 +1160,27 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     abstract protected function getDropIndexByNameInstructions(string $tableName, string $indexName): AlterInstructions;
 
     /**
+     * @inheritDoc
+     */
+    public function hasIndex(string $tableName, string|array $columns): bool
+    {
+        $dialect = $this->getSchemaDialect();
+        $columns = is_array($columns) ? $columns : [$columns];
+
+        return $dialect->hasIndex($tableName, $columns);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasIndexByName(string $tableName, string $indexName): bool
+    {
+        $dialect = $this->getSchemaDialect();
+
+        return $dialect->hasIndex($tableName, [], $indexName);
+    }
+
+    /**
      * @inheritdoc
      */
     public function addForeignKey(TableMetadata $table, ForeignKey $foreignKey): void
@@ -1208,6 +1229,17 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @return \Migrations\Db\AlterInstructions
      */
     abstract protected function getDropForeignKeyByColumnsInstructions(string $tableName, array $columns): AlterInstructions;
+
+    /**
+     * @inheritDoc
+     */
+    public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
+    {
+        $dialect = $this->getSchemaDialect();
+        $columns = is_array($columns) ? $columns : [$columns];
+
+        return $dialect->hasForeignKey($tableName, $columns, $constraint);
+    }
 
     /**
      * @inheritdoc

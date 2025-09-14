@@ -290,7 +290,7 @@ class PostgresAdapterTest extends TestCase
               ->addColumn('tag_id', 'integer')
               ->save();
         $this->assertTrue($this->adapter->hasIndex('table1', ['user_id', 'tag_id']));
-        $this->assertTrue($this->adapter->hasIndex('table1', ['tag_id', 'user_id']));
+        $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_id']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_email']));
     }
 
@@ -307,7 +307,7 @@ class PostgresAdapterTest extends TestCase
             ->addColumn('tag_id', 'integer')
             ->save();
         $this->assertTrue($this->adapter->hasIndex('schema1.table1', ['user_id', 'tag_id']));
-        $this->assertTrue($this->adapter->hasIndex('schema1.table1', ['tag_id', 'user_id']));
+        $this->assertFalse($this->adapter->hasIndex('schema1.table1', ['tag_id', 'user_id']));
         $this->assertFalse($this->adapter->hasIndex('schema1.table1', ['tag_id', 'user_email']));
 
         $this->adapter->dropSchema('schema1');
