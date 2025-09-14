@@ -213,7 +213,8 @@ class SqliteAdapterTest extends TestCase
             ->addColumn('tag_id', 'integer')
             ->save();
         $this->assertTrue($this->adapter->hasIndex('table1', ['user_id', 'tag_id']));
-        $this->assertTrue($this->adapter->hasIndex('table1', ['USER_ID', 'tag_id']));
+        $this->assertFalse($this->adapter->hasIndex('table1', ['USER_ID', 'tag_id']));
+        $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_id']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'USER_ID']));
         $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_email']));
     }
@@ -1518,7 +1519,7 @@ class SqliteAdapterTest extends TestCase
             ->addForeignKey(['ref_table_id'], 'ref_table', ['id'])
             ->save();
 
-        $this->adapter->dropForeignKey($table->getName(), ['REF_TABLE_ID']);
+        $this->adapter->dropForeignKey($table->getName(), ['ref_table_id']);
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
@@ -2383,9 +2384,10 @@ INPUT;
             ['create table t(a text, b text); create index test on t(a,b)', ['b', 'a'], false],
             ['create table t(a text, b text); create index test on t(a,b)', ['a'], false],
             ['create table t(a text, b text); create index test on t(a)', ['a', 'b'], false],
-            ['create table t(a text, b text); create index test on t(a,b)', ['A', 'B'], true],
-            ['create table t("A" text, "B" text); create index test on t("A","B")', ['a', 'b'], true],
-            ['create table not_t(a text, b text, unique(a,b))', ['A', 'B'], false], // test checks table t which does not exist
+            ['create table t(a text, b text); create index test on t(a,b)', ['A', 'B'], false],
+            ['create table t(a text, b text); create index test on t(a,b)', ['a', 'b'], true],
+            ['create table t("A" text, "B" text); create index test on t("A","B")', ['A', 'B'], true],
+            ['create table not_t(a text, b text, unique(a,b))', ['a', 'b'], false], // test checks table t which does not exist
             ['create table t(a text, b text); create index test on t(a)', ['a', 'a'], false],
             ['create table t(a text unique); create temp table t(a text)', 'a', false],
         ];
@@ -2413,8 +2415,9 @@ INPUT;
         return [
             ['create table t(a text)', 'test', false],
             ['create table t(a text); create index test on t(a)', 'test', true],
-            ['create table t(a text); create index test on t(a)', 'TEST', true],
-            ['create table t(a text); create index "TEST" on t(a)', 'test', true],
+            ['create table t(a text); create index test on t(a)', 'TEST', false],
+            ['create table t(a text); create index "TEST" on t(a)', 'test', false],
+            ['create table t(a text); create index "TEST" on t(a)', 'TEST', true],
             ['create table t(a text unique)', 'sqlite_autoindex_t_1', true],
             ['create table t(a text primary key)', 'sqlite_autoindex_t_1', true],
             ['create table not_t(a text); create index test on not_t(a)', 'test', false], // test checks table t which does not exist
@@ -2522,8 +2525,9 @@ INPUT;
             ['create table t(a integer, b integer, foreign key(a,b) references other(a,b))', 'a', false],
             ['create table t(a integer, b integer, foreign key(a,b) references other(a,b))', ['a', 'b'], true],
             ['create table t(a integer, b integer, foreign key(a,b) references other(a,b))', ['b', 'a'], false],
-            ['create table t(a integer, "B" integer, foreign key(a,"B") references other(a,b))', ['a', 'b'], true],
-            ['create table t(a integer, b integer, foreign key(a,b) references other(a,b))', ['a', 'B'], true],
+            ['create table t(a integer, "B" integer, foreign key(a,"B") references other(a,b))', ['a', 'B'], true],
+            ['create table t(a integer, b integer, foreign key(a,b) references other(a,b))', ['a', 'b'], true],
+            ['create table t(a integer, b integer, foreign key(a,b) references other(a,b))', ['a', 'B'], false],
             ['create table t(a integer, b integer, c integer, foreign key(a,b,c) references other(a,b,c))', ['a', 'b'], false],
             ['create table t(a integer, foreign key(a) references other(a))', ['a', 'b'], false],
             ['create table t(a integer references other(a), b integer references other(b))', ['a', 'b'], false],
@@ -2728,12 +2732,13 @@ INPUT;
     {
         return [
             ['create table t(a text)', 'a', true],
-            ['create table t(A text)', 'a', true],
+            ['create table t(A text)', 'a', false],
+            ['create table t(A text)', 'A', true],
             ['create table t("a" text)', 'a', true],
             ['create table t([a] text)', 'a', true],
             ['create table t(\'a\' text)', 'a', true],
-            ['create table t("A" text)', 'a', true],
-            ['create table t(a text)', 'A', true],
+            ['create table t("A" text)', 'A', true],
+            ['create table t(a text)', 'a', true],
             ['create table t(b text)', 'a', false],
             ['create table t(b text, a text)', 'a', true],
             ['create table t("0" text)', '0', true],

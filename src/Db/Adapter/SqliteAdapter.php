@@ -544,16 +544,6 @@ PCRE_PATTERN;
     /**
      * @inheritDoc
      */
-    public function hasColumn(string $tableName, string $columnName): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasColumn($tableName, $columnName);
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
         $tableName = $table->getName();
@@ -1210,26 +1200,6 @@ PCRE_PATTERN;
     /**
      * @inheritDoc
      */
-    public function hasIndex(string $tableName, string|array $columns): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasIndex($tableName, $columns);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasIndexByName(string $tableName, string $indexName): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasIndex($tableName, [], $indexName);
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
     {
         $indexColumnArray = [];
@@ -1344,16 +1314,6 @@ PCRE_PATTERN;
         }
 
         return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasForeignKey($tableName, $columns, $constraint);
     }
 
     /**
