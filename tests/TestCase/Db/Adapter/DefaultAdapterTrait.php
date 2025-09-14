@@ -76,7 +76,7 @@ trait DefaultAdapterTrait
         return false;
     }
 
-    public function hasForeignKey(string $tableName, array|string $columns, ?string $constraint = null): bool
+    public function hasForeignKey(string $tableName, $columns, ?string $constraint = null): bool
     {
         return false;
     }
