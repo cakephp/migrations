@@ -360,16 +360,6 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function hasColumn(string $tableName, string $columnName): bool
-    {
-        $dialect = $this->getSchemaDialect();
-
-        return $dialect->hasColumn($tableName, $columnName);
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
     {
         $dialect = $this->getSchemaDialect();

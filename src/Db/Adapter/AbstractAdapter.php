@@ -335,6 +335,16 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
     /**
      * @inheritDoc
+     */
+    public function hasColumn(string $tableName, string $columnName): bool
+    {
+        $dialect = $this->getSchemaDialect();
+
+        return $dialect->hasColumn($tableName, $columnName);
+    }
+
+    /**
+     * @inheritDoc
      * @throws \InvalidArgumentException
      * @return void
      */
