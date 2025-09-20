@@ -25,6 +25,7 @@ use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
 use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Plan\Intent;
 use Migrations\Db\Plan\Plan;
 use Migrations\Db\Table\Column;
@@ -637,19 +638,10 @@ class Table
         }
 
         $adapter = $this->getAdapter();
-        if ($adapter->getAdapterType() === 'mysql' && empty($options['collation'])) {
-            // TODO this should be a method on the MySQL adapter.
-            // It could be a hook method on the adapter?
-            $encodingRequest = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
-                FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname';
-
-            $connection = $adapter->getConnection();
-            $connectionConfig = $connection->config();
-
-            $statement = $connection->execute($encodingRequest, ['dbname' => $connectionConfig['database']]);
-            $defaultEncoding = $statement->fetch('assoc');
-            if (!empty($defaultEncoding['DEFAULT_COLLATION_NAME'])) {
-                $options['collation'] = $defaultEncoding['DEFAULT_COLLATION_NAME'];
+        if ($adapter instanceof MysqlAdapter && empty($options['collation'])) {
+            $collation = $adapter->getDefaultCollation();
+            if ($collation) {
+                $options['collation'] = $collation;
             }
         }
 

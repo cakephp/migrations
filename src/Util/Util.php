@@ -114,8 +114,6 @@ class Util
      */
     public static function mapClassNameToFileName(string $className): string
     {
-        // TODO it would be nice to replace this with Inflector::underscore
-        // but it will break compatibility for little end user gain.
         $snake = function ($matches) {
             return '_' . strtolower($matches[0]);
         };

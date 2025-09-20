@@ -408,12 +408,13 @@ class MigrationHelper extends Helper
         }
 
         if (($isMysql || $isSqlserver) && !empty($columnOptions['collate'])) {
-            // TODO fix this when migrations is aligned with cakephp/database
+            // TODO deprecate this in 5.x
             // Change keys due to Phinx using different naming for the collation
             $columnOptions['collation'] = $columnOptions['collate'];
             unset($columnOptions['collate']);
         }
 
+        // TODO deprecate precision/scale and align with cakephp/database in 5.x
         // TODO this can be cleaned up when we stop using phinx data structures for column definitions
         if (!isset($columnOptions['precision']) || $columnOptions['precision'] == null) {
             unset($columnOptions['precision']);

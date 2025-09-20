@@ -920,6 +920,25 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
+     * Get the default encoding for the current database.
+     *
+     * @return string The default encoding
+     */
+    public function getDefaultCollation(): string
+    {
+        $encodingRequest = 'SELECT DEFAULT_COLLATION_NAME
+            FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname';
+
+        $connection = $this->getConnection();
+        $connectionConfig = $connection->config();
+
+        $statement = $connection->execute($encodingRequest, ['dbname' => $connectionConfig['database']]);
+        $row = $statement->fetch('assoc');
+
+        return $row['DEFAULT_COLLATION_NAME'] ?? '';
+    }
+
+    /**
      * Whether the server has a native uuid type.
      * (MariaDB 10.7.0+)
      *
