@@ -47,14 +47,14 @@ class TestSnapshotPluginBlogPgsql extends BaseMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -83,14 +83,14 @@ class TestSnapshotPluginBlogPgsql extends BaseMigration
                 'limit' => 100,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,

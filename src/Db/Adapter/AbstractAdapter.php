@@ -982,6 +982,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             'double',
             'datetime',
             'timestamp',
+            'timestampfractional',
             'time',
             'date',
             'blob',

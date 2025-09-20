@@ -56,14 +56,14 @@ class TestSnapshotAutoIdDisabledPgsql extends BaseMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -99,14 +99,14 @@ class TestSnapshotAutoIdDisabledPgsql extends BaseMigration
                 'limit' => 100,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -229,14 +229,14 @@ class TestSnapshotAutoIdDisabledPgsql extends BaseMigration
                 'limit' => 10,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -304,7 +304,7 @@ class TestSnapshotAutoIdDisabledPgsql extends BaseMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('highlighted_time', 'timestamp', [
+            ->addColumn('highlighted_time', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -349,14 +349,14 @@ class TestSnapshotAutoIdDisabledPgsql extends BaseMigration
                 'limit' => 256,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('updated', 'timestamp', [
+            ->addColumn('updated', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,

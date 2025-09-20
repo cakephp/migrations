@@ -110,6 +110,9 @@ class MigrationHelperTest extends TestCase
                 'comment' => null,
                 'precision' => 6,
             ];
+            $this->types = [
+                'timestamp' => 'timestampfractional',
+            ];
         }
 
         if (getenv('DB') === 'sqlserver') {

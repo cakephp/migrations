@@ -2504,8 +2504,8 @@ class PostgresAdapterTest extends TestCase
 
     /**
      * Creates the table "table1".
-     * Then sets phinx to dry run mode and inserts a record.
-     * Asserts that phinx outputs the insert statement and doesn't insert a record.
+     * Then enables dry run mode and inserts a record.
+     * Asserts that output contains the insert statement and doesn't insert a record.
      */
     public function testDumpInsert()
     {
@@ -2559,8 +2559,8 @@ OUTPUT;
 
     /**
      * Creates the table "table1".
-     * Then sets phinx to dry run mode and inserts some records.
-     * Asserts that phinx outputs the insert statement and doesn't insert any record.
+     * Then enables dry run mode and inserts some records.
+     * Asserts that output contains the insert statement and doesn't insert any record.
      */
     public function testDumpBulkinsert()
     {

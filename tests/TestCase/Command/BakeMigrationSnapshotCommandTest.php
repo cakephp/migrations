@@ -139,7 +139,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     }
 
     /**
-     * Test baking a snapshot with the phinx auto-id feature disabled
+     * Test baking a snapshot with the auto-id feature disabled
      *
      * @return void
      */

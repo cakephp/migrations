@@ -359,12 +359,6 @@ class MigrationHelper extends Helper
     {
         $columnType = $tableSchema->getColumnType($column);
 
-        // TODO Remove this when we align with cakephp/database more.
-        // Phinx doesn't understand timestampfractional or datetimefractional types
-        if ($columnType === 'timestampfractional' || $columnType === 'datetimefractional') {
-            $columnType = 'timestamp';
-        }
-
         return [
             'columnType' => $columnType,
             'options' => $this->attributes($tableSchema, $column),
