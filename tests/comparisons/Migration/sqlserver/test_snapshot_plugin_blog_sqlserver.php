@@ -49,14 +49,14 @@ class TestSnapshotPluginBlogSqlserver extends BaseMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'datetimefractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 7,
                 'scale' => 7,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'datetimefractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -87,14 +87,14 @@ class TestSnapshotPluginBlogSqlserver extends BaseMigration
                 'limit' => 100,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'datetimefractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 7,
                 'scale' => 7,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'datetimefractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
