@@ -123,6 +123,9 @@ class MigrationHelperTest extends TestCase
                 'comment' => null,
                 'precision' => 7,
             ];
+            $this->types = [
+                'timestamp' => 'datetimefractional',
+            ];
         }
     }
 
