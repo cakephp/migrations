@@ -48,6 +48,7 @@ use Phinx\Util\Literal as PhinxLiteral;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function Cake\Core\deprecationWarning;
 
 /**
  * Base Abstract Database Adapter.
@@ -208,12 +209,16 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Backwards compatibility shim for migrations 3.x
      *
-     * TODO add deprecation for this. Use getConnection() instead.
-     *
      * @return \Cake\Database\Connection
+     * @deprecated 4.8.0 Use getConnection() instead.
      */
     public function getDecoratedConnection(): Connection
     {
+        deprecationWarning(
+            '4.8.0',
+            'Using getDecoratedConnection() is deprecated. Use getConnection() instead.',
+        );
+
         return $this->getConnection();
     }
 

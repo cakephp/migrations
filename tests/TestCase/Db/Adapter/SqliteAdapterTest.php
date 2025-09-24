@@ -9,6 +9,7 @@ use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
+use Cake\TestSuite\TestCase;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\SqliteAdapter;
@@ -21,7 +22,6 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use RuntimeException;
 
@@ -81,9 +81,12 @@ class SqliteAdapterTest extends TestCase
 
     public function testGetConnection()
     {
-        $connection = $this->adapter->getConnection();
-        $this->assertInstanceOf(Connection::class, $connection);
-        $this->assertSame($connection, $this->adapter->getDecoratedConnection());
+        error_reporting(E_ALL);
+        $this->deprecated(function () {
+            $connection = $this->adapter->getConnection();
+            $this->assertInstanceOf(Connection::class, $connection);
+            $this->assertSame($connection, $this->adapter->getDecoratedConnection());
+        });
     }
 
     public function testBeginTransaction()
