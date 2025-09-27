@@ -9,7 +9,6 @@ use Migrations\Config\Config;
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
 use PDOException;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
