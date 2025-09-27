@@ -788,11 +788,12 @@ class MysqlAdapter extends AbstractAdapter
      */
     public function hasDatabase(string $name): bool
     {
-        $rows = $this->query(
-            'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?',
-            [$name],
-        )->fetchAll('assoc');
+        $query = $this->getSelectBuilder()
+            ->select(['SCHEMA_NAME'])
+            ->from('INFORMATION_SCHEMA.SCHEMATA')
+            ->where(['SCHEMA_NAME' => $name]);
 
+        $rows = $query->execute()->fetchAll('assoc');
         foreach ($rows as $row) {
             if ($row) {
                 return true;
@@ -926,14 +927,14 @@ class MysqlAdapter extends AbstractAdapter
      */
     public function getDefaultCollation(): string
     {
-        $encodingRequest = 'SELECT DEFAULT_COLLATION_NAME
-            FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname';
-
         $connection = $this->getConnection();
         $connectionConfig = $connection->config();
 
-        $statement = $connection->execute($encodingRequest, ['dbname' => $connectionConfig['database']]);
-        $row = $statement->fetch('assoc');
+        $query = $this->getSelectBuilder()
+            ->select(['DEFAULT_COLLATION_NAME'])
+            ->from('INFORMATION_SCHEMA.SCHEMATA')
+            ->where(['SCHEMA_NAME' => $connectionConfig['database']]);
+        $row = $query->execute()->fetch('assoc');
 
         return $row['DEFAULT_COLLATION_NAME'] ?? '';
     }

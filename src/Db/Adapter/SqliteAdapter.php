@@ -667,18 +667,15 @@ PCRE_PATTERN;
             $state['indices'] = [];
             $state['triggers'] = [];
 
-            $params = [$tableName];
-            // TODO use cakephp/database SelectQuery here
-            $rows = $this->query(
-                "SELECT *
-                FROM sqlite_master
-                WHERE
-                    (\"type\" = 'index' OR \"type\" = 'trigger')
-                    AND tbl_name = ?
-                    AND sql IS NOT NULL
-                ",
-                $params,
-            )->fetchAll('assoc');
+            $query = $this->getSelectBuilder()
+                ->select('*')
+                ->from('sqlite_master')
+                ->where([
+                    'type IN' => ['index', 'trigger'],
+                    'tbl_name' => $tableName,
+                    'sql IS NOT' => null,
+                ]);
+            $rows = $query->execute()->fetchAll('assoc');
 
             $indexes = $this->getIndexes($tableName);
             $indexMap = [];

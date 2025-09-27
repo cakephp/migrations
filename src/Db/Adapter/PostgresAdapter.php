@@ -760,8 +760,11 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function hasDatabase(string $name): bool
     {
-        $sql = sprintf("SELECT count(*) FROM pg_database WHERE datname = '%s'", $name);
-        $result = $this->fetchRow($sql);
+        $query = $this->getSelectBuilder();
+        $query->select([$query->func()->count('*')])
+            ->from('pg_database')
+            ->where(['datname' => $name]);
+        $result = $query->execute()->fetch('assoc');
         if (!$result) {
             return false;
         }
@@ -944,8 +947,12 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function hasSchema(string $schemaName): bool
     {
-        $sql = 'SELECT count(*) FROM pg_namespace WHERE nspname = ?';
-        $result = $this->query($sql, [$schemaName])->fetch('assoc');
+        $query = $this->getSelectBuilder();
+        $query->select([$query->func()->count('*')])
+            ->from('pg_namespace')
+            ->where(['nspname' => $schemaName]);
+
+        $result = $query->execute()->fetch('assoc');
         if (!$result) {
             return false;
         }
@@ -990,10 +997,14 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function getAllSchemas(): array
     {
-        $sql = "SELECT schema_name
-                FROM information_schema.schemata
-                WHERE schema_name <> 'information_schema' AND schema_name !~ '^pg_'";
-        $items = $this->fetchAll($sql);
+        $query = $this->getSelectBuilder();
+        $query->select(['schema_name'])
+            ->from('information_schema.schemata')
+            ->where([
+                ['schema_name !=' => 'information_schema'],
+                ['schema_name !~' => '^pg_'],
+            ]);
+        $items = $query->execute()->fetchAll('assoc');
         $schemaNames = [];
         foreach ($items as $item) {
             $schemaNames[] = $item['schema_name'];
