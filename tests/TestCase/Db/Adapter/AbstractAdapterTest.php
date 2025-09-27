@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Cake\Database\Connection;
+use Cake\Datasource\ConnectionManager;
 use Migrations\Config\Config;
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
@@ -51,64 +53,6 @@ class AbstractAdapterTest extends TestCase
         $this->assertEquals('schema_table_test', $this->adapter->getSchemaTableName());
     }
 
-    #[DataProvider('getVersionLogDataProvider')]
-    public function testGetVersionLog($versionOrder, $expectedOrderBy)
-    {
-        $adapter = new class (['version_order' => $versionOrder]) extends AbstractAdapter {
-            use DefaultAdapterTrait;
-
-            public function getSchemaTableName(): string
-            {
-                return 'log';
-            }
-
-            public function quoteTableName(string $tableName): string
-            {
-                return "'$tableName'";
-            }
-
-            public function fetchAll(string $sql): array
-            {
-                return [
-                    [
-                        'version' => '20120508120534',
-                        'key' => 'value',
-                    ],
-                    [
-                        'version' => '20130508120534',
-                        'key' => 'value',
-                    ],
-                ];
-            }
-        };
-
-        // we expect the mock rows but indexed by version creation time
-        $expected = [
-            '20120508120534' => [
-                'version' => '20120508120534',
-                'key' => 'value',
-            ],
-            '20130508120534' => [
-                'version' => '20130508120534',
-                'key' => 'value',
-            ],
-        ];
-
-        $this->assertEquals($expected, $adapter->getVersionLog());
-    }
-
-    public static function getVersionLogDataProvider()
-    {
-        return [
-            'With Creation Time Version Order' => [
-                Config::VERSION_ORDER_CREATION_TIME, 'version ASC',
-            ],
-            'With Execution Time Version Order' => [
-                Config::VERSION_ORDER_EXECUTION_TIME, 'start_time ASC, version ASC',
-            ],
-        ];
-    }
-
     public function testGetVersionLogInvalidVersionOrderKO()
     {
         $this->expectExceptionMessage('Invalid version_order configuration option');
@@ -125,6 +69,11 @@ class AbstractAdapterTest extends TestCase
     {
         $adapter = new class (['version_order' => Config::VERSION_ORDER_CREATION_TIME]) extends AbstractAdapter {
             use DefaultAdapterTrait;
+
+            public function getConnection(): Connection
+            {
+                return ConnectionManager::get('test');
+            }
 
             public function isDryRunEnabled(): bool
             {
