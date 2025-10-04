@@ -8,21 +8,21 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Action;
 
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 abstract class Action
 {
     /**
-     * @var \Migrations\Db\Table\Table
+     * @var \Migrations\Db\Table\TableMetadata
      */
-    protected Table $table;
+    protected TableMetadata $table;
 
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table the Table to apply the action to
+     * @param \Migrations\Db\Table\TableMetadata $table the Table to apply the action to
      */
-    public function __construct(Table $table)
+    public function __construct(TableMetadata $table)
     {
         $this->table = $table;
     }
@@ -30,9 +30,9 @@ abstract class Action
     /**
      * The table this action will be applied to
      *
-     * @return \Migrations\Db\Table\Table
+     * @return \Migrations\Db\Table\TableMetadata
      */
-    public function getTable(): Table
+    public function getTable(): TableMetadata
     {
         return $this->table;
     }

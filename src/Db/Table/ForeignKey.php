@@ -40,9 +40,9 @@ class ForeignKey
     protected array $columns = [];
 
     /**
-     * @var \Migrations\Db\Table\Table
+     * @var \Migrations\Db\Table\TableMetadata
      */
-    protected Table $referencedTable;
+    protected TableMetadata $referencedTable;
 
     /**
      * @var string[]
@@ -95,13 +95,13 @@ class ForeignKey
     /**
      * Sets the foreign key referenced table.
      *
-     * @param \Migrations\Db\Table\Table|string $table The table this KEY is pointing to
+     * @param \Migrations\Db\Table\TableMetadata|string $table The table this KEY is pointing to
      * @return $this
      */
-    public function setReferencedTable(Table|string $table)
+    public function setReferencedTable(TableMetadata|string $table)
     {
         if (is_string($table)) {
-            $table = new Table($table);
+            $table = new TableMetadata($table);
         }
         $this->referencedTable = $table;
 
@@ -111,9 +111,9 @@ class ForeignKey
     /**
      * Gets the foreign key referenced table.
      *
-     * @return \Migrations\Db\Table\Table
+     * @return \Migrations\Db\Table\TableMetadata
      */
-    public function getReferencedTable(): Table
+    public function getReferencedTable(): TableMetadata
     {
         return $this->referencedTable;
     }

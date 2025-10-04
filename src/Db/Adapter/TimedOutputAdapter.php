@@ -13,7 +13,7 @@ use Cake\Console\ConsoleIo;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 /**
  * Wraps any adapter to record the time spend executing its commands
@@ -83,7 +83,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     /**
      * @inheritDoc
      */
-    public function insert(Table $table, array $row): void
+    public function insert(TableMetadata $table, array $row): void
     {
         $end = $this->startCommandTimer();
         $this->writeCommand('insert', [$table->getName()]);
@@ -94,7 +94,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     /**
      * @inheritDoc
      */
-    public function bulkinsert(Table $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows): void
     {
         $end = $this->startCommandTimer();
         $this->writeCommand('bulkinsert', [$table->getName()]);
@@ -105,7 +105,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         $end = $this->startCommandTimer();
         $this->writeCommand('createTable', [$table->getName()]);
@@ -119,7 +119,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      * @throws \BadMethodCallException
      * @return void
      */
-    public function changePrimaryKey(Table $table, $newColumns): void
+    public function changePrimaryKey(TableMetadata $table, $newColumns): void
     {
         $adapter = $this->getAdapter();
         if (!$adapter instanceof DirectActionInterface) {
@@ -137,7 +137,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      * @throws \BadMethodCallException
      * @return void
      */
-    public function changeComment(Table $table, ?string $newComment): void
+    public function changeComment(TableMetadata $table, ?string $newComment): void
     {
         $adapter = $this->getAdapter();
         if (!$adapter instanceof DirectActionInterface) {
@@ -202,7 +202,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      * @throws \BadMethodCallException
      * @return void
      */
-    public function addColumn(Table $table, Column $column): void
+    public function addColumn(TableMetadata $table, Column $column): void
     {
         $adapter = $this->getAdapter();
         if (!$adapter instanceof DirectActionInterface) {
@@ -281,7 +281,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      * @throws \BadMethodCallException
      * @return void
      */
-    public function addIndex(Table $table, Index $index): void
+    public function addIndex(TableMetadata $table, Index $index): void
     {
         $adapter = $this->getAdapter();
         if (!$adapter instanceof DirectActionInterface) {
@@ -335,7 +335,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
      * @throws \BadMethodCallException
      * @return void
      */
-    public function addForeignKey(Table $table, ForeignKey $foreignKey): void
+    public function addForeignKey(TableMetadata $table, ForeignKey $foreignKey): void
     {
         $adapter = $this->getAdapter();
         if (!$adapter instanceof DirectActionInterface) {
@@ -412,7 +412,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     /**
      * @inheritDoc
      */
-    public function executeActions(Table $table, array $actions): void
+    public function executeActions(TableMetadata $table, array $actions): void
     {
         $end = $this->startCommandTimer();
         $this->writeCommand(sprintf('Altering table %s', $table->getName()));

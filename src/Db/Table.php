@@ -31,7 +31,7 @@ use Migrations\Db\Plan\Plan;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table as TableValue;
+use Migrations\Db\Table\TableMetadata;
 use RuntimeException;
 
 /**
@@ -47,9 +47,9 @@ use RuntimeException;
 class Table
 {
     /**
-     * @var \Migrations\Db\Table\Table
+     * @var \Migrations\Db\Table\TableMetadata
      */
-    protected TableValue $table;
+    protected TableMetadata $table;
 
     /**
      * @var \Migrations\Db\Adapter\AdapterInterface|null
@@ -82,7 +82,7 @@ class Table
      */
     public function __construct(string $name, array $options = [], ?AdapterInterface $adapter = null)
     {
-        $this->table = new TableValue($name, $options);
+        $this->table = new TableMetadata($name, $options);
         $this->actions = new Intent();
 
         if ($adapter !== null) {
@@ -113,9 +113,9 @@ class Table
     /**
      * Gets the table name and options as an object
      *
-     * @return \Migrations\Db\Table\Table
+     * @return \Migrations\Db\Table\TableMetadata
      */
-    public function getTable(): TableValue
+    public function getTable(): TableMetadata
     {
         return $this->table;
     }
@@ -489,12 +489,12 @@ class Table
      * on_update, constraint = constraint name.
      *
      * @param string|string[]|\Migrations\Db\Table\ForeignKey $columns Columns
-     * @param string|\Migrations\Db\Table\Table $referencedTable Referenced Table
+     * @param string|\Migrations\Db\Table\TableMetadata $referencedTable Referenced Table
      * @param string|string[] $referencedColumns Referenced Columns
      * @param array<string, mixed> $options Options
      * @return $this
      */
-    public function addForeignKey(string|array|ForeignKey $columns, string|TableValue|null $referencedTable = null, string|array $referencedColumns = ['id'], array $options = [])
+    public function addForeignKey(string|array|ForeignKey $columns, string|TableMetadata|null $referencedTable = null, string|array $referencedColumns = ['id'], array $options = [])
     {
         if ($columns instanceof ForeignKey) {
             $action = new AddForeignKey($this->table, $columns);

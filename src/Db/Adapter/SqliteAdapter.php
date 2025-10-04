@@ -17,7 +17,7 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 use PDOException;
 use RuntimeException;
 use const FILTER_VALIDATE_BOOLEAN;
@@ -232,7 +232,7 @@ class SqliteAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         // Add the default primary key
         $options = $table->getOptions();
@@ -305,7 +305,7 @@ class SqliteAdapter extends AbstractAdapter
      *
      * @throws \InvalidArgumentException
      */
-    protected function getChangePrimaryKeyInstructions(Table $table, $newColumns): AlterInstructions
+    protected function getChangePrimaryKeyInstructions(TableMetadata $table, $newColumns): AlterInstructions
     {
         $instructions = new AlterInstructions();
 
@@ -342,7 +342,7 @@ class SqliteAdapter extends AbstractAdapter
      *
      * @throws \BadMethodCallException
      */
-    protected function getChangeCommentInstructions(Table $table, $newComment): AlterInstructions
+    protected function getChangeCommentInstructions(TableMetadata $table, $newComment): AlterInstructions
     {
         throw new BadMethodCallException('SQLite does not have table comments');
     }
@@ -544,7 +544,7 @@ PCRE_PATTERN;
     /**
      * @inheritDoc
      */
-    protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
+    protected function getAddColumnInstructions(TableMetadata $table, Column $column): AlterInstructions
     {
         $tableName = $table->getName();
 
@@ -1197,7 +1197,7 @@ PCRE_PATTERN;
     /**
      * @inheritDoc
      */
-    protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
+    protected function getAddIndexInstructions(TableMetadata $table, Index $index): AlterInstructions
     {
         $indexColumnArray = [];
         foreach ((array)$index->getColumns() as $column) {
@@ -1328,11 +1328,11 @@ PCRE_PATTERN;
     }
 
     /**
-     * @param \Migrations\Db\Table\Table $table The Table
+     * @param \Migrations\Db\Table\TableMetadata $table The Table
      * @param string $column Column Name
      * @return \Migrations\Db\AlterInstructions
      */
-    protected function getAddPrimaryKeyInstructions(Table $table, string $column): AlterInstructions
+    protected function getAddPrimaryKeyInstructions(TableMetadata $table, string $column): AlterInstructions
     {
         $instructions = $this->beginAlterByCopyTable($table->getName());
 
@@ -1373,11 +1373,11 @@ PCRE_PATTERN;
     }
 
     /**
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param string $column Column Name
      * @return \Migrations\Db\AlterInstructions
      */
-    protected function getDropPrimaryKeyInstructions(Table $table, string $column): AlterInstructions
+    protected function getDropPrimaryKeyInstructions(TableMetadata $table, string $column): AlterInstructions
     {
         $tableName = $table->getName();
         $instructions = $this->beginAlterByCopyTable($tableName);
@@ -1405,7 +1405,7 @@ PCRE_PATTERN;
     /**
      * @inheritDoc
      */
-    protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey): AlterInstructions
+    protected function getAddForeignKeyInstructions(TableMetadata $table, ForeignKey $foreignKey): AlterInstructions
     {
         $instructions = $this->beginAlterByCopyTable($table->getName());
 
@@ -1541,11 +1541,11 @@ PCRE_PATTERN;
     /**
      * Gets the SQLite Index Definition for an Index object.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param \Migrations\Db\Table\Index $index Index
      * @return string
      */
-    protected function getIndexSqlDefinition(Table $table, Index $index): string
+    protected function getIndexSqlDefinition(TableMetadata $table, Index $index): string
     {
         if ($index->getType() === Index::UNIQUE) {
             $def = 'UNIQUE INDEX';

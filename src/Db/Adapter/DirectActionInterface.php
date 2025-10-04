@@ -11,7 +11,7 @@ namespace Migrations\Db\Adapter;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 /**
  * Represents an adapter that is capable of directly executing alter
@@ -39,29 +39,29 @@ interface DirectActionInterface
     /**
      * Changes the primary key of the specified database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param string|string[]|null $newColumns Column name(s) to belong to the primary key, or null to drop the key
      * @return void
      */
-    public function changePrimaryKey(Table $table, string|array|null $newColumns): void;
+    public function changePrimaryKey(TableMetadata $table, string|array|null $newColumns): void;
 
     /**
      * Changes the comment of the specified database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param string|null $newComment New comment string, or null to drop the comment
      * @return void
      */
-    public function changeComment(Table $table, ?string $newComment): void;
+    public function changeComment(TableMetadata $table, ?string $newComment): void;
 
     /**
      * Adds the specified column to a database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param \Migrations\Db\Table\Column $column Column
      * @return void
      */
-    public function addColumn(Table $table, Column $column): void;
+    public function addColumn(TableMetadata $table, Column $column): void;
 
     /**
      * Renames the specified column.
@@ -95,11 +95,11 @@ interface DirectActionInterface
     /**
      * Adds the specified index to a database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param \Migrations\Db\Table\Index $index Index
      * @return void
      */
-    public function addIndex(Table $table, Index $index): void;
+    public function addIndex(TableMetadata $table, Index $index): void;
 
     /**
      * Drops the specified index from a database table.
@@ -122,11 +122,11 @@ interface DirectActionInterface
     /**
      * Adds the specified foreign key to a database table.
      *
-     * @param \Migrations\Db\Table\Table $table The table to add the foreign key to
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the foreign key to
      * @param \Migrations\Db\Table\ForeignKey $foreignKey The foreign key to add
      * @return void
      */
-    public function addForeignKey(Table $table, ForeignKey $foreignKey): void;
+    public function addForeignKey(TableMetadata $table, ForeignKey $foreignKey): void;
 
     /**
      * Drops the specified foreign key from a database table.

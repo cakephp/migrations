@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Action;
 
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class ChangePrimaryKey extends Action
 {
@@ -22,10 +22,10 @@ class ChangePrimaryKey extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to be changed
+     * @param \Migrations\Db\Table\TableMetadata $table The table to be changed
      * @param string|string[]|null $newColumns The new columns for the primary key
      */
-    public function __construct(Table $table, string|array|null $newColumns)
+    public function __construct(TableMetadata $table, string|array|null $newColumns)
     {
         parent::__construct($table);
         $this->newColumns = $newColumns;

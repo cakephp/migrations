@@ -24,7 +24,7 @@ use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Plan\Solver\ActionSplitter;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 /**
  * A Plan takes an Intent and transforms int into a sequence of
@@ -235,11 +235,11 @@ class Plan
      * Deletes all actions related to the given table and keeps the
      * rest
      *
-     * @param \Migrations\Db\Table\Table $table The table to find in the list of actions
+     * @param \Migrations\Db\Table\TableMetadata $table The table to find in the list of actions
      * @param \Migrations\Db\Plan\AlterTable[] $actions The actions to transform
      * @return \Migrations\Db\Plan\AlterTable[] The list of actions without actions for the given table
      */
-    protected function forgetTable(Table $table, array $actions): array
+    protected function forgetTable(TableMetadata $table, array $actions): array
     {
         $result = [];
         foreach ($actions as $action) {
@@ -285,13 +285,13 @@ class Plan
     /**
      * Deletes any DropIndex actions for the given table and exact columns
      *
-     * @param \Migrations\Db\Table\Table $table The table to find in the list of actions
+     * @param \Migrations\Db\Table\TableMetadata $table The table to find in the list of actions
      * @param string[] $columns The column names to match
      * @param \Migrations\Db\Plan\AlterTable[] $actions The actions to transform
      * @return array A tuple containing the list of actions without actions for dropping the index
      * and a list of drop index actions that were removed.
      */
-    protected function forgetDropIndex(Table $table, array $columns, array $actions): array
+    protected function forgetDropIndex(TableMetadata $table, array $columns, array $actions): array
     {
         $dropIndexActions = new ArrayObject();
         $indexes = array_map(function ($alter) use ($table, $columns, $dropIndexActions) {
@@ -317,13 +317,13 @@ class Plan
     /**
      * Deletes any RemoveColumn actions for the given table and exact columns
      *
-     * @param \Migrations\Db\Table\Table $table The table to find in the list of actions
+     * @param \Migrations\Db\Table\TableMetadata $table The table to find in the list of actions
      * @param string[] $columns The column names to match
      * @param \Migrations\Db\Plan\AlterTable[] $actions The actions to transform
      * @return array A tuple containing the list of actions without actions for removing the column
      * and a list of remove column actions that were removed.
      */
-    protected function forgetRemoveColumn(Table $table, array $columns, array $actions): array
+    protected function forgetRemoveColumn(TableMetadata $table, array $columns, array $actions): array
     {
         $removeColumnActions = new ArrayObject();
         $indexes = array_map(function ($alter) use ($table, $columns, $removeColumnActions) {

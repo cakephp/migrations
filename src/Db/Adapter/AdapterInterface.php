@@ -17,7 +17,7 @@ use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
 use Cake\Database\Schema\TableSchemaInterface;
 use Migrations\Db\Table\Column;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 
 /**
@@ -238,11 +238,11 @@ interface AdapterInterface
     /**
      * Executes a list of migration actions for the given table
      *
-     * @param \Migrations\Db\Table\Table $table The table to execute the actions for
+     * @param \Migrations\Db\Table\TableMetadata $table The table to execute the actions for
      * @param \Migrations\Db\Action\Action[] $actions The table to execute the actions for
      * @return void
      */
-    public function executeActions(Table $table, array $actions): void;
+    public function executeActions(TableMetadata $table, array $actions): void;
 
     /**
      * Returns a new Query object
@@ -310,20 +310,20 @@ interface AdapterInterface
     /**
      * Inserts data into a table.
      *
-     * @param \Migrations\Db\Table\Table $table Table where to insert data
+     * @param \Migrations\Db\Table\TableMetadata $table Table where to insert data
      * @param array $row Row
      * @return void
      */
-    public function insert(Table $table, array $row): void;
+    public function insert(TableMetadata $table, array $row): void;
 
     /**
      * Inserts data into a table in a bulk.
      *
-     * @param \Migrations\Db\Table\Table $table Table where to insert data
+     * @param \Migrations\Db\Table\TableMetadata $table Table where to insert data
      * @param array $rows Rows
      * @return void
      */
-    public function bulkinsert(Table $table, array $rows): void;
+    public function bulkinsert(TableMetadata $table, array $rows): void;
 
     /**
      * Quotes a table name for use in a query.
@@ -352,12 +352,12 @@ interface AdapterInterface
     /**
      * Creates the specified database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param \Migrations\Db\Table\Column[] $columns List of columns in the table
      * @param \Migrations\Db\Table\Index[] $indexes List of indexes for the table
      * @return void
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void;
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void;
 
     /**
      * Truncates the specified table

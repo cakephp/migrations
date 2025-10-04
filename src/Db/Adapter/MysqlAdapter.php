@@ -17,7 +17,7 @@ use Migrations\Db\AlterInstructions;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 /**
  * MySQL Adapter.
@@ -132,7 +132,7 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         // This method is based on the MySQL docs here: https://dev.mysql.com/doc/refman/5.1/en/create-index.html
         $defaultOptions = [
@@ -286,7 +286,7 @@ class MysqlAdapter extends AbstractAdapter
      *
      * @throws \InvalidArgumentException
      */
-    protected function getChangePrimaryKeyInstructions(Table $table, $newColumns): AlterInstructions
+    protected function getChangePrimaryKeyInstructions(TableMetadata $table, $newColumns): AlterInstructions
     {
         $instructions = new AlterInstructions();
 
@@ -319,7 +319,7 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getChangeCommentInstructions(Table $table, ?string $newComment): AlterInstructions
+    protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions
     {
         $instructions = new AlterInstructions();
 
@@ -444,7 +444,7 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
+    protected function getAddColumnInstructions(TableMetadata $table, Column $column): AlterInstructions
     {
         $dialect = $this->getSchemaDialect();
         $alter = sprintf(
@@ -566,7 +566,7 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
+    protected function getAddIndexInstructions(TableMetadata $table, Index $index): AlterInstructions
     {
         $instructions = new AlterInstructions();
 
@@ -705,7 +705,7 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey): AlterInstructions
+    protected function getAddForeignKeyInstructions(TableMetadata $table, ForeignKey $foreignKey): AlterInstructions
     {
         $alter = sprintf(
             'ADD %s',

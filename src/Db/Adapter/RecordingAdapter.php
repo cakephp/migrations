@@ -20,7 +20,7 @@ use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
 use Migrations\Db\Plan\Intent;
 use Migrations\Db\Plan\Plan;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 use Migrations\Migration\IrreversibleMigrationException;
 
 /**
@@ -46,7 +46,7 @@ class RecordingAdapter extends AdapterWrapper
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         $this->commands[] = new CreateTable($table);
     }
@@ -54,7 +54,7 @@ class RecordingAdapter extends AdapterWrapper
     /**
      * @inheritDoc
      */
-    public function executeActions(Table $table, array $actions): void
+    public function executeActions(TableMetadata $table, array $actions): void
     {
         $this->commands = array_merge($this->commands, $actions);
     }
@@ -78,7 +78,7 @@ class RecordingAdapter extends AdapterWrapper
 
                 case $command instanceof RenameTable:
                     /** @var \Migrations\Db\Action\RenameTable $command */
-                    $inverted->addAction(new RenameTable(new Table($command->getNewName()), $command->getTable()->getName()));
+                    $inverted->addAction(new RenameTable(new TableMetadata($command->getNewName()), $command->getTable()->getName()));
                     break;
 
                 case $command instanceof AddColumn:

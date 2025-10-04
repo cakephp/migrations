@@ -10,7 +10,7 @@ namespace Migrations\Db\Plan;
 
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 /**
  * Represents the collection of actions for creating a new table
@@ -20,9 +20,9 @@ class NewTable
     /**
      * The table to create
      *
-     * @var \Migrations\Db\Table\Table
+     * @var \Migrations\Db\Table\TableMetadata
      */
-    protected Table $table;
+    protected TableMetadata $table;
 
     /**
      * The list of columns to add
@@ -41,9 +41,9 @@ class NewTable
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to create
+     * @param \Migrations\Db\Table\TableMetadata $table The table to create
      */
-    public function __construct(Table $table)
+    public function __construct(TableMetadata $table)
     {
         $this->table = $table;
     }
@@ -73,9 +73,9 @@ class NewTable
     /**
      * Returns the table object associated to this collection
      *
-     * @return \Migrations\Db\Table\Table
+     * @return \Migrations\Db\Table\TableMetadata
      */
-    public function getTable(): Table
+    public function getTable(): TableMetadata
     {
         return $this->table;
     }

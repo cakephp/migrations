@@ -12,9 +12,8 @@ use InvalidArgumentException;
 
 /**
  * @internal
- * @TODO rename this to `TableMetadata` having two classes with very similar names is confusing.
  */
-class Table
+class TableMetadata
 {
     /**
      * @var string

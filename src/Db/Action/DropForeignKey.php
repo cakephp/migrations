@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Action;
 
 use Migrations\Db\Table\ForeignKey;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class DropForeignKey extends Action
 {
@@ -23,10 +23,10 @@ class DropForeignKey extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to remove the constraint from
+     * @param \Migrations\Db\Table\TableMetadata $table The table to remove the constraint from
      * @param \Migrations\Db\Table\ForeignKey $foreignKey The foreign key to remove
      */
-    public function __construct(Table $table, ForeignKey $foreignKey)
+    public function __construct(TableMetadata $table, ForeignKey $foreignKey)
     {
         parent::__construct($table);
         $this->foreignKey = $foreignKey;
@@ -36,12 +36,12 @@ class DropForeignKey extends Action
      * Creates a new DropForeignKey object after building the ForeignKey
      * definition out of the passed arguments.
      *
-     * @param \Migrations\Db\Table\Table $table The table to delete the foreign key from
+     * @param \Migrations\Db\Table\TableMetadata $table The table to delete the foreign key from
      * @param string|string[] $columns The columns participating in the foreign key
      * @param string|null $constraint The constraint name
      * @return self
      */
-    public static function build(Table $table, string|array $columns, ?string $constraint = null): self
+    public static function build(TableMetadata $table, string|array $columns, ?string $constraint = null): self
     {
         if (is_string($columns)) {
             $columns = [$columns];

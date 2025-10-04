@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Action;
 
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class ChangeComment extends Action
 {
@@ -22,10 +22,10 @@ class ChangeComment extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to be changed
+     * @param \Migrations\Db\Table\TableMetadata $table The table to be changed
      * @param string|null $newComment The new comment for the table
      */
-    public function __construct(Table $table, ?string $newComment)
+    public function __construct(TableMetadata $table, ?string $newComment)
     {
         parent::__construct($table);
         $this->newComment = $newComment;

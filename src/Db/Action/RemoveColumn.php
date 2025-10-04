@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Action;
 
 use Migrations\Db\Table\Column;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class RemoveColumn extends Action
 {
@@ -23,10 +23,10 @@ class RemoveColumn extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table where the column is
+     * @param \Migrations\Db\Table\TableMetadata $table The table where the column is
      * @param \Migrations\Db\Table\Column $column The column to be removed
      */
-    public function __construct(Table $table, Column $column)
+    public function __construct(TableMetadata $table, Column $column)
     {
         parent::__construct($table);
         $this->column = $column;
@@ -36,11 +36,11 @@ class RemoveColumn extends Action
      * Creates a new RemoveColumn object after assembling the
      * passed arguments.
      *
-     * @param \Migrations\Db\Table\Table $table The table where the column is
+     * @param \Migrations\Db\Table\TableMetadata $table The table where the column is
      * @param string $columnName The name of the column to drop
      * @return self
      */
-    public static function build(Table $table, string $columnName): self
+    public static function build(TableMetadata $table, string $columnName): self
     {
         $column = new Column();
         $column->setName($columnName);

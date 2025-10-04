@@ -40,7 +40,7 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table as TableMetadata;
+use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 use PDOException;
 use RuntimeException;
@@ -623,7 +623,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Generates the SQL for an insert.
      *
-     * @param \Migrations\Db\Table\Table $table The table to insert into
+     * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
      * @param array $row The row to insert
      * @return string
      */
@@ -742,7 +742,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Generates the SQL for a bulk insert.
      *
-     * @param \Migrations\Db\Table\Table $table The table to insert into
+     * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
      * @param array $rows The rows to insert
      * @return string
      */
@@ -1060,7 +1060,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Returns the instructions to add the specified column to a database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param \Migrations\Db\Table\Column $column Column
      * @return \Migrations\Db\AlterInstructions
      */
@@ -1134,7 +1134,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Returns the instructions to add the specified index to a database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param \Migrations\Db\Table\Index $index Index
      * @return \Migrations\Db\AlterInstructions
      */
@@ -1209,7 +1209,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Returns the instructions to adds the specified foreign key to a database table.
      *
-     * @param \Migrations\Db\Table\Table $table The table to add the constraint to
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the constraint to
      * @param \Migrations\Db\Table\ForeignKey $foreignKey The foreign key to add
      * @return \Migrations\Db\AlterInstructions
      */
@@ -1305,7 +1305,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Returns the instructions to change the primary key for the specified database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param string|string[]|null $newColumns Column name(s) to belong to the primary key, or null to drop the key
      * @return \Migrations\Db\AlterInstructions
      */
@@ -1323,7 +1323,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Returns the instruction to change the comment for the specified database table.
      *
-     * @param \Migrations\Db\Table\Table $table Table
+     * @param \Migrations\Db\Table\TableMetadata $table Table
      * @param string|null $newComment New comment string, or null to drop the comment
      * @return \Migrations\Db\AlterInstructions
      */

@@ -10,7 +10,7 @@ namespace Migrations\Db\Action;
 
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class AddColumn extends Action
 {
@@ -24,10 +24,10 @@ class AddColumn extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to add the column to
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the column to
      * @param \Migrations\Db\Table\Column $column The column to add
      */
-    public function __construct(Table $table, Column $column)
+    public function __construct(TableMetadata $table, Column $column)
     {
         parent::__construct($table);
         $this->column = $column;
@@ -36,13 +36,13 @@ class AddColumn extends Action
     /**
      * Returns a new AddColumn object after assembling the given commands
      *
-     * @param \Migrations\Db\Table\Table $table The table to add the column to
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the column to
      * @param string $columnName The column name
      * @param string|\Migrations\Db\Literal $type The column type
      * @param array<string, mixed> $options The column options
      * @return self
      */
-    public static function build(Table $table, string $columnName, string|Literal $type, array $options = []): self
+    public static function build(TableMetadata $table, string $columnName, string|Literal $type, array $options = []): self
     {
         $column = new Column();
         $column->setName($columnName);

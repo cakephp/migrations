@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Action;
 
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class DropIndex extends Action
 {
@@ -23,10 +23,10 @@ class DropIndex extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table owning the index
+     * @param \Migrations\Db\Table\TableMetadata $table The table owning the index
      * @param \Migrations\Db\Table\Index $index The index to be dropped
      */
-    public function __construct(Table $table, Index $index)
+    public function __construct(TableMetadata $table, Index $index)
     {
         parent::__construct($table);
         $this->index = $index;
@@ -36,11 +36,11 @@ class DropIndex extends Action
      * Creates a new DropIndex object after assembling the passed
      * arguments.
      *
-     * @param \Migrations\Db\Table\Table $table The table where the index is
+     * @param \Migrations\Db\Table\TableMetadata $table The table where the index is
      * @param string[] $columns the indexed columns
      * @return self
      */
-    public static function build(Table $table, array $columns = []): self
+    public static function build(TableMetadata $table, array $columns = []): self
     {
         $index = new Index();
         $index->setColumns($columns);
@@ -52,11 +52,11 @@ class DropIndex extends Action
      * Creates a new DropIndex when the name of the index to drop
      * is known.
      *
-     * @param \Migrations\Db\Table\Table $table The table where the index is
+     * @param \Migrations\Db\Table\TableMetadata $table The table where the index is
      * @param string $name The name of the index
      * @return self
      */
-    public static function buildFromName(Table $table, string $name): self
+    public static function buildFromName(TableMetadata $table, string $name): self
     {
         $index = new Index();
         $index->setName($name);

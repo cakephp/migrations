@@ -16,7 +16,7 @@ use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
 use Migrations\Db\Table\Column;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 
 /**
@@ -135,7 +135,7 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function insert(Table $table, array $row): void
+    public function insert(TableMetadata $table, array $row): void
     {
         $this->getAdapter()->insert($table, $row);
     }
@@ -143,7 +143,7 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function bulkinsert(Table $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows): void
     {
         $this->getAdapter()->bulkinsert($table, $rows);
     }
@@ -311,7 +311,7 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         $this->getAdapter()->createTable($table, $columns, $indexes);
     }
@@ -431,7 +431,7 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function executeActions(Table $table, array $actions): void
+    public function executeActions(TableMetadata $table, array $actions): void
     {
         $this->getAdapter()->executeActions($table, $actions);
     }

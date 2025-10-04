@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Action;
 
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class AddIndex extends Action
 {
@@ -23,10 +23,10 @@ class AddIndex extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to add the index to
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the index to
      * @param \Migrations\Db\Table\Index $index The index to be added
      */
-    public function __construct(Table $table, Index $index)
+    public function __construct(TableMetadata $table, Index $index)
     {
         parent::__construct($table);
         $this->index = $index;
@@ -36,12 +36,12 @@ class AddIndex extends Action
      * Creates a new AddIndex object after building the index object with the
      * provided arguments
      *
-     * @param \Migrations\Db\Table\Table $table The table to add the index to
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the index to
      * @param string|string[]|\Migrations\Db\Table\Index $columns The columns to index
      * @param array<string, mixed> $options Additional options for the index creation
      * @return self
      */
-    public static function build(Table $table, string|array|Index $columns, array $options = []): self
+    public static function build(TableMetadata $table, string|array|Index $columns, array $options = []): self
     {
         // create a new index object if strings or an array of strings were supplied
         if (!($columns instanceof Index)) {

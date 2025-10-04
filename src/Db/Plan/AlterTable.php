@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Plan;
 
 use Migrations\Db\Action\Action;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 /**
  * A collection of ALTER actions for a single table
@@ -19,9 +19,9 @@ class AlterTable
     /**
      * The table
      *
-     * @var \Migrations\Db\Table\Table
+     * @var \Migrations\Db\Table\TableMetadata
      */
-    protected Table $table;
+    protected TableMetadata $table;
 
     /**
      * The list of actions to execute
@@ -33,9 +33,9 @@ class AlterTable
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table to change
+     * @param \Migrations\Db\Table\TableMetadata $table The table to change
      */
-    public function __construct(Table $table)
+    public function __construct(TableMetadata $table)
     {
         $this->table = $table;
     }
@@ -54,9 +54,9 @@ class AlterTable
     /**
      * Returns the table associated to this collection
      *
-     * @return \Migrations\Db\Table\Table
+     * @return \Migrations\Db\Table\TableMetadata
      */
-    public function getTable(): Table
+    public function getTable(): TableMetadata
     {
         return $this->table;
     }

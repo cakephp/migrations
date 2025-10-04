@@ -7,7 +7,7 @@ use Migrations\Db\AlterInstructions;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 trait DefaultAdapterTrait
 {
@@ -43,7 +43,7 @@ trait DefaultAdapterTrait
         return false;
     }
 
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
     }
 
@@ -102,7 +102,7 @@ trait DefaultAdapterTrait
     {
     }
 
-    protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
+    protected function getAddColumnInstructions(TableMetadata $table, Column $column): AlterInstructions
     {
         return new AlterInstructions();
     }
@@ -122,7 +122,7 @@ trait DefaultAdapterTrait
         return new AlterInstructions();
     }
 
-    protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
+    protected function getAddIndexInstructions(TableMetadata $table, Index $index): AlterInstructions
     {
         return new AlterInstructions();
     }
@@ -137,7 +137,7 @@ trait DefaultAdapterTrait
         return new AlterInstructions();
     }
 
-    protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey): AlterInstructions
+    protected function getAddForeignKeyInstructions(TableMetadata $table, ForeignKey $foreignKey): AlterInstructions
     {
         return new AlterInstructions();
     }
@@ -162,12 +162,12 @@ trait DefaultAdapterTrait
         return new AlterInstructions();
     }
 
-    protected function getChangePrimaryKeyInstructions(Table $table, array|string|null $newColumns): AlterInstructions
+    protected function getChangePrimaryKeyInstructions(TableMetadata $table, array|string|null $newColumns): AlterInstructions
     {
         return new AlterInstructions();
     }
 
-    protected function getChangeCommentInstructions(Table $table, ?string $newComment): AlterInstructions
+    protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions
     {
         return new AlterInstructions();
     }

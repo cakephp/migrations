@@ -18,7 +18,7 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class PostgresAdapter extends AbstractAdapter
 {
@@ -112,7 +112,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         $queries = [];
 
@@ -228,7 +228,7 @@ class PostgresAdapter extends AbstractAdapter
      *
      * @throws \InvalidArgumentException
      */
-    protected function getChangePrimaryKeyInstructions(Table $table, array|string|null $newColumns): AlterInstructions
+    protected function getChangePrimaryKeyInstructions(TableMetadata $table, array|string|null $newColumns): AlterInstructions
     {
         $parts = $this->getSchemaName($table->getName());
         $instructions = new AlterInstructions();
@@ -264,7 +264,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getChangeCommentInstructions(Table $table, ?string $newComment): AlterInstructions
+    protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions
     {
         $instructions = new AlterInstructions();
 
@@ -360,7 +360,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
+    protected function getAddColumnInstructions(TableMetadata $table, Column $column): AlterInstructions
     {
         $dialect = $this->getSchemaDialect();
 
@@ -581,7 +581,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
+    protected function getAddIndexInstructions(TableMetadata $table, Index $index): AlterInstructions
     {
         $instructions = new AlterInstructions();
         $instructions->addPostStep($this->getIndexSqlDefinition($index, $table->getName()));
@@ -692,7 +692,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey): AlterInstructions
+    protected function getAddForeignKeyInstructions(TableMetadata $table, ForeignKey $foreignKey): AlterInstructions
     {
         $alter = sprintf(
             'ADD %s',
@@ -1104,7 +1104,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function insert(Table $table, array $row): void
+    public function insert(TableMetadata $table, array $row): void
     {
         $sql = sprintf(
             'INSERT INTO %s ',
@@ -1148,7 +1148,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function bulkinsert(Table $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows): void
     {
         $sql = sprintf(
             'INSERT INTO %s ',

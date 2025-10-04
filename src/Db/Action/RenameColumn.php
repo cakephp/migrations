@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Action;
 
 use Migrations\Db\Table\Column;
-use Migrations\Db\Table\Table;
+use Migrations\Db\Table\TableMetadata;
 
 class RenameColumn extends Action
 {
@@ -30,11 +30,11 @@ class RenameColumn extends Action
     /**
      * Constructor
      *
-     * @param \Migrations\Db\Table\Table $table The table where the column is
+     * @param \Migrations\Db\Table\TableMetadata $table The table where the column is
      * @param \Migrations\Db\Table\Column $column The column to be renamed
      * @param string $newName The new name for the column
      */
-    public function __construct(Table $table, Column $column, string $newName)
+    public function __construct(TableMetadata $table, Column $column, string $newName)
     {
         parent::__construct($table);
         $this->newName = $newName;
@@ -45,12 +45,12 @@ class RenameColumn extends Action
      * Creates a new RenameColumn object after building the passed
      * arguments
      *
-     * @param \Migrations\Db\Table\Table $table The table where the column is
+     * @param \Migrations\Db\Table\TableMetadata $table The table where the column is
      * @param string $columnName The name of the column to be changed
      * @param string $newName The new name for the column
      * @return self
      */
-    public static function build(Table $table, string $columnName, string $newName): self
+    public static function build(TableMetadata $table, string $columnName, string $newName): self
     {
         $column = new Column();
         $column->setName($columnName);

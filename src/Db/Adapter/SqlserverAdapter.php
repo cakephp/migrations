@@ -18,8 +18,7 @@ use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
-use Migrations\Db\Table\Table;
-use Migrations\Db\Table\Table as TableMetadata;
+use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 
 /**
@@ -78,7 +77,7 @@ class SqlserverAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function createTable(Table $table, array $columns = [], array $indexes = []): void
+    public function createTable(TableMetadata $table, array $columns = [], array $indexes = []): void
     {
         $options = $table->getOptions();
         $parts = $this->getSchemaName($table->getName());
@@ -155,7 +154,7 @@ class SqlserverAdapter extends AbstractAdapter
      *
      * @throws \InvalidArgumentException
      */
-    protected function getChangePrimaryKeyInstructions(Table $table, $newColumns): AlterInstructions
+    protected function getChangePrimaryKeyInstructions(TableMetadata $table, $newColumns): AlterInstructions
     {
         $instructions = new AlterInstructions();
 
@@ -194,7 +193,7 @@ class SqlserverAdapter extends AbstractAdapter
      * SqlServer does not implement this functionality, and so will always throw an exception if used.
      * @throws \BadMethodCallException
      */
-    protected function getChangeCommentInstructions(Table $table, ?string $newComment): AlterInstructions
+    protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions
     {
         throw new BadMethodCallException('SqlServer does not have table comments');
     }
@@ -345,7 +344,7 @@ class SqlserverAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function getAddColumnInstructions(Table $table, Column $column): AlterInstructions
+    protected function getAddColumnInstructions(TableMetadata $table, Column $column): AlterInstructions
     {
         $dialect = $this->getSchemaDialect();
         $alter = sprintf(
@@ -569,7 +568,7 @@ ORDER BY IC.[key_ordinal]';
     /**
      * @inheritDoc
      */
-    protected function getAddIndexInstructions(Table $table, Index $index): AlterInstructions
+    protected function getAddIndexInstructions(TableMetadata $table, Index $index): AlterInstructions
     {
         $sql = $this->getIndexSqlDefinition($index, $table->getName());
 
@@ -692,7 +691,7 @@ ORDER BY IC.[key_ordinal]';
     /**
      * @inheritDoc
      */
-    protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey): AlterInstructions
+    protected function getAddForeignKeyInstructions(TableMetadata $table, ForeignKey $foreignKey): AlterInstructions
     {
         $instructions = new AlterInstructions();
         $instructions->addPostStep(sprintf(
