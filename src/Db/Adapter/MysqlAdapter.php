@@ -469,6 +469,25 @@ class MysqlAdapter extends AbstractAdapter
         } elseif ($type === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
             $type = 'timestamp';
             $length = $columnData['precision'] ?? $length;
+        } elseif ($type === TableSchema::TYPE_BINARY || $type === 'binary') {
+            // CakePHP returns BLOB columns as 'binary' with specific lengths
+            // Map them back to the appropriate BLOB types
+            if ($length === null) {
+                // Regular BLOB with no explicit length
+                $type = static::PHINX_TYPE_BLOB;
+                $length = static::BLOB_REGULAR;
+            } elseif ($length === TableSchema::LENGTH_TINY) {
+                $type = static::PHINX_TYPE_TINYBLOB;
+            } elseif ($length === TableSchema::LENGTH_MEDIUM) {
+                $type = static::PHINX_TYPE_MEDIUMBLOB;
+            } elseif ($length === TableSchema::LENGTH_LONG) {
+                $type = static::PHINX_TYPE_LONGBLOB;
+            } elseif ($length > 255) {
+                // For other lengths > 255, use blob
+                $type = static::PHINX_TYPE_BLOB;
+                $length = static::BLOB_REGULAR;
+            }
+            // else: keep as binary for lengths <= 255
         }
 
         return [$type, $length];

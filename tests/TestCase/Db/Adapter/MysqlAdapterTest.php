@@ -1163,6 +1163,58 @@ class MysqlAdapterTest extends TestCase
         $this->assertSame($expectedLimit, $columns[1]->getLimit());
     }
 
+    public static function blobRoundTripData()
+    {
+        return [
+            // type, limit, expected type after round-trip, expected limit after round-trip
+            ['blob', null, 'blob', MysqlAdapter::BLOB_REGULAR],
+            ['blob', MysqlAdapter::BLOB_REGULAR, 'blob', MysqlAdapter::BLOB_REGULAR],
+            ['tinyblob', null, 'tinyblob', MysqlAdapter::BLOB_TINY],
+            ['mediumblob', null, 'mediumblob', MysqlAdapter::BLOB_MEDIUM],
+            ['longblob', null, 'longblob', MysqlAdapter::BLOB_LONG],
+        ];
+    }
+
+    #[DataProvider('blobRoundTripData')]
+    public function testBlobRoundTrip(string $type, ?int $limit, string $expectedType, int $expectedLimit)
+    {
+        // Create a table with a BLOB column
+        $table = new Table('blob_round_trip_test', [], $this->adapter);
+        $table->addColumn('blob_col', $type, ['limit' => $limit])
+              ->save();
+
+        // Read the column back from the database
+        $columns = $this->adapter->getColumns('blob_round_trip_test');
+
+        // Find our blob column (skip the id column)
+        $blobColumn = null;
+        foreach ($columns as $column) {
+            if ($column->getName() === 'blob_col') {
+                $blobColumn = $column;
+                break;
+            }
+        }
+
+        $this->assertNotNull($blobColumn, 'BLOB column not found');
+        $this->assertSame($expectedType, $blobColumn->getType(), 'Type mismatch after round-trip');
+        $this->assertSame($expectedLimit, $blobColumn->getLimit(), 'Limit mismatch after round-trip');
+
+        // Verify that the SQL type is correct
+        $sqlType = $this->adapter->getSqlType($blobColumn->getType(), $blobColumn->getLimit());
+        if ($type === 'blob') {
+            $this->assertSame('blob', $sqlType['name'], 'SQL type should be blob');
+        } elseif ($type === 'tinyblob') {
+            $this->assertSame('binary', $sqlType['name'], 'SQL type should be binary for tinyblob');
+        } elseif ($type === 'mediumblob') {
+            $this->assertSame('mediumblob', $sqlType['name'], 'SQL type should be mediumblob');
+        } elseif ($type === 'longblob') {
+            $this->assertSame('longblob', $sqlType['name'], 'SQL type should be longblob');
+        }
+
+        // Clean up
+        $this->adapter->dropTable('blob_round_trip_test');
+    }
+
     public function testBigIntegerColumn()
     {
         $table = new Table('t', [], $this->adapter);
