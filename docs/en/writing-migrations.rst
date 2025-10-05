@@ -781,15 +781,33 @@ after   specify the column that a new column should be placed after, or use ``\M
 comment set a text comment on the column
 ======= ===========
 
-For ``decimal`` columns:
+For ``decimal`` and ``float`` columns:
 
 ========= ===========
 Option    Description
 ========= ===========
-precision combine with ``scale`` set to set decimal accuracy
-scale     combine with ``precision`` to set decimal accuracy
+precision total number of digits (e.g., 10 in ``DECIMAL(10,2)``)
+scale     number of digits after the decimal point (e.g., 2 in ``DECIMAL(10,2)``)
 signed    enable or disable the ``unsigned`` option *(only applies to MySQL)*
 ========= ===========
+
+.. note::
+
+    **Precision and Scale Terminology**
+
+    Migrations follows the SQL standard where ``precision`` represents the total number of digits,
+    and ``scale`` represents digits after the decimal point. For example, to create ``DECIMAL(10,2)``
+    (10 total digits with 2 decimal places):
+
+    .. code-block:: php
+
+        $table->addColumn('price', 'decimal', [
+            'precision' => 10,  // Total digits
+            'scale' => 2,       // Decimal places
+        ]);
+
+    This differs from CakePHP's TableSchema which uses ``length`` for total digits and
+    ``precision`` for decimal places. The migration adapter handles this conversion automatically.
 
 For ``enum`` and ``set`` columns:
 
@@ -923,6 +941,35 @@ INT_BIG      BIGINT
 ============ ==============
 
 For ``binary`` or ``varbinary`` types, if limit is set greater than allowed 255 bytes, the type will be changed to the best matching blob type given the length.
+
+.. note::
+
+    **Binary to BLOB Automatic Conversion**
+
+    When you specify a ``binary`` or ``varbinary`` column with a ``limit`` exceeding 255 bytes,
+    MySQL cannot create a standard binary column (which has a 255 byte maximum). The migration
+    adapter automatically converts the type to the appropriate BLOB subtype:
+
+    .. code-block:: php
+
+        // This will automatically become LONGBLOB
+        $table->addColumn('file_content', 'binary', [
+            'limit' => MysqlAdapter::BLOB_LONG  // 4294967295 bytes
+        ]);
+
+        // This will automatically become MEDIUMBLOB
+        $table->addColumn('image_data', 'binary', [
+            'limit' => MysqlAdapter::BLOB_MEDIUM  // 16777215 bytes
+        ]);
+
+    Alternatively, you can use the blob types directly:
+
+    .. code-block:: php
+
+        $table->addColumn('file_content', 'longblob');
+        $table->addColumn('medium_data', 'mediumblob');
+        $table->addColumn('small_data', 'blob');
+        $table->addColumn('tiny_data', 'tinyblob');
 
 .. code-block:: php
 
