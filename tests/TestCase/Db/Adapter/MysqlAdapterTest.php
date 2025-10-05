@@ -1204,7 +1204,7 @@ class MysqlAdapterTest extends TestCase
         if ($type === 'blob') {
             $this->assertSame('blob', $sqlType['name'], 'SQL type should be blob');
         } elseif ($type === 'tinyblob') {
-            $this->assertSame('binary', $sqlType['name'], 'SQL type should be binary for tinyblob');
+            $this->assertSame('tinyblob', $sqlType['name'], 'SQL type should be tinyblob');
         } elseif ($type === 'mediumblob') {
             $this->assertSame('mediumblob', $sqlType['name'], 'SQL type should be mediumblob');
         } elseif ($type === 'longblob') {
