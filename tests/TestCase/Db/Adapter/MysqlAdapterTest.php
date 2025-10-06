@@ -1204,15 +1204,7 @@ class MysqlAdapterTest extends TestCase
 
         // Verify that the SQL type is correct
         $sqlType = $this->adapter->getSqlType($blobColumn->getType(), $blobColumn->getLimit());
-        if ($type === 'blob') {
-            $this->assertSame('blob', $sqlType['name'], 'SQL type should be blob');
-        } elseif ($type === 'tinyblob') {
-            $this->assertSame('tinyblob', $sqlType['name'], 'SQL type should be tinyblob');
-        } elseif ($type === 'mediumblob') {
-            $this->assertSame('mediumblob', $sqlType['name'], 'SQL type should be mediumblob');
-        } elseif ($type === 'longblob') {
-            $this->assertSame('longblob', $sqlType['name'], 'SQL type should be longblob');
-        }
+        $this->assertSame($type, $sqlType['name']);
 
         // Clean up
         $this->adapter->dropTable('blob_round_trip_test');
