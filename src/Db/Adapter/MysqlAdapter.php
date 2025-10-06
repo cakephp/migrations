@@ -469,25 +469,28 @@ class MysqlAdapter extends AbstractAdapter
         } elseif ($type === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
             $type = 'timestamp';
             $length = $columnData['precision'] ?? $length;
-        } elseif ($type === TableSchema::TYPE_BINARY || $type === 'binary') {
+        } elseif ($type === TableSchema::TYPE_BINARY) {
             // CakePHP returns BLOB columns as 'binary' with specific lengths
-            // Map them back to the appropriate BLOB types
-            if ($length === null) {
-                // Regular BLOB with no explicit length
-                $type = static::PHINX_TYPE_BLOB;
-                $length = static::BLOB_REGULAR;
-            } elseif ($length === TableSchema::LENGTH_TINY) {
-                $type = static::PHINX_TYPE_TINYBLOB;
-            } elseif ($length === TableSchema::LENGTH_MEDIUM) {
-                $type = static::PHINX_TYPE_MEDIUMBLOB;
-            } elseif ($length === TableSchema::LENGTH_LONG) {
-                $type = static::PHINX_TYPE_LONGBLOB;
-            } elseif ($length > 255) {
-                // For other lengths > 255, use blob
-                $type = static::PHINX_TYPE_BLOB;
-                $length = static::BLOB_REGULAR;
+            // Check the raw MySQL type to distinguish BLOB from BINARY columns
+            $rawType = $columnData['rawType'] ?? '';
+            if (str_contains($rawType, 'blob')) {
+                // Map BLOB columns back to the appropriate BLOB types
+                if (str_contains($rawType, 'tinyblob')) {
+                    $type = static::PHINX_TYPE_TINYBLOB;
+                    $length = static::BLOB_TINY;
+                } elseif (str_contains($rawType, 'mediumblob')) {
+                    $type = static::PHINX_TYPE_MEDIUMBLOB;
+                    $length = static::BLOB_MEDIUM;
+                } elseif (str_contains($rawType, 'longblob')) {
+                    $type = static::PHINX_TYPE_LONGBLOB;
+                    $length = static::BLOB_LONG;
+                } else {
+                    // Regular BLOB
+                    $type = static::PHINX_TYPE_BLOB;
+                    $length = static::BLOB_REGULAR;
+                }
             }
-            // else: keep as binary for lengths <= 255
+            // else: keep as binary or varbinary (actual BINARY/VARBINARY column)
         }
 
         return [$type, $length];
@@ -500,8 +503,17 @@ class MysqlAdapter extends AbstractAdapter
     {
         $dialect = $this->getSchemaDialect();
         $columnRecords = $dialect->describeColumns($tableName);
+
+        // Fetch raw column types to distinguish BLOB from BINARY columns
+        $rawTypes = [];
+        $rows = $this->fetchAll(sprintf('SHOW COLUMNS FROM %s', $this->quoteTableName($tableName)));
+        foreach ($rows as $row) {
+            $rawTypes[$row['Field']] = strtolower($row['Type']);
+        }
+
         $columns = [];
         foreach ($columnRecords as $record) {
+            $record['rawType'] = $rawTypes[$record['name']] ?? null;
             [$type, $length] = $this->mapColumnType($record);
 
             $column = (new Column())
