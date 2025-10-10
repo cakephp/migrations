@@ -42,15 +42,7 @@ class BakeMigrationCommandTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
-        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Users.php');
-        if ($files) {
-            foreach ($files as $file) {
-                unlink($file);
-            }
-        }
-
-        // Also clean up readable format files
-        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '????_??_??_??????_*Users.php');
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*Users.php');
         if ($files) {
             foreach ($files as $file) {
                 unlink($file);

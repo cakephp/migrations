@@ -108,11 +108,11 @@ class Util
 
         // Check for readable format: 2024_12_08_120000_CreateUsersTable.php
         if (preg_match(static::READABLE_MIGRATION_FILE_NAME_PATTERN, $baseName, $matches)) {
-            // Convert to standard format: 20241208120000
+            // Convert to traditional format: 20241208120000
             return (int)($matches[1] . $matches[2] . $matches[3] . $matches[4]);
         }
 
-        // Standard format
+        // Traditional format
         preg_match('/^[0-9]+/', $baseName, $matches);
         $value = (int)($matches[0] ?? null);
         if (!$value) {

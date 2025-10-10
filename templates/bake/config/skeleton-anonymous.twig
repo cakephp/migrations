@@ -46,7 +46,7 @@ return new class extends BaseMigration
 {% endfor %}
 {% for column, config in columns['indexes'] %}
             $table->{{ indexMethod }}([{{
-                Migration.stringifyList(config['columns'])  | raw
+                Migration.stringifyList(config['columns']) | raw
             }}]);
 {% endfor %}
 {% else %}
