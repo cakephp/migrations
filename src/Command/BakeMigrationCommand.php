@@ -208,7 +208,7 @@ You can generate migrations in different styles:
 <warning>bin/cake bake migration --style=anonymous CreatePosts</warning>
 Creates an anonymous class migration with readable file naming (2024_12_08_120000_CreatePosts.php)
 
-<warning>bin/cake bake migration --style=traditional CreatePosts</warning>  
+<warning>bin/cake bake migration --style=traditional CreatePosts</warning>
 Creates a traditional class-based migration (20241208120000_create_posts.php)
 
 You can set the default style in your configuration:
@@ -230,7 +230,7 @@ TEXT;
 
         $parser->addOption('style', [
             'help' => 'Migration style to use (traditional or anonymous).',
-            'default' => 'traditional',
+            'default' => null,
             'choices' => ['traditional', 'anonymous'],
         ]);
 
