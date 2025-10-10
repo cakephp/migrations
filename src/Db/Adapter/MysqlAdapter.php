@@ -454,6 +454,7 @@ class MysqlAdapter extends AbstractAdapter
      * Convert from cakephp/database conventions to migrations\column
      *
      * - converts datetimefractional -> datetime + length
+     * - converts binary types to mysql blob type constants.
      *
      * @param array $columnData The cakephp/database column data to transform
      * @return array The extracted/converted type and length.

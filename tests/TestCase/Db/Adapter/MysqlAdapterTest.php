@@ -1189,15 +1189,7 @@ class MysqlAdapterTest extends TestCase
         // Read the column back from the database
         $columns = $this->adapter->getColumns('blob_round_trip_test');
 
-        // Find our blob column (skip the id column)
-        $blobColumn = null;
-        foreach ($columns as $column) {
-            if ($column->getName() === 'blob_col') {
-                $blobColumn = $column;
-                break;
-            }
-        }
-
+        $blobColumn = $columns[1];
         $this->assertNotNull($blobColumn, 'BLOB column not found');
         $this->assertSame($expectedType, $blobColumn->getType(), 'Type mismatch after round-trip');
         $this->assertSame($expectedLimit, $blobColumn->getLimit(), 'Limit mismatch after round-trip');
