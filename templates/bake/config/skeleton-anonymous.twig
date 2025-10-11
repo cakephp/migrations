@@ -37,39 +37,11 @@ return new class extends BaseMigration
          */
         public function change(): void
         {
-{% for table in tables %}
-            $table = $this->table('{{ table }}');
-{% if tableMethod != 'drop' %}
-{% if columnMethod == 'removeColumn' %}
-{% for column, config in columns['fields'] %}
-            $table->{{ columnMethod }}('{{ column }}');
-{% endfor %}
-{% for column, config in columns['indexes'] %}
-            $table->{{ indexMethod }}([{{
-                Migration.stringifyList(config['columns']) | raw
-            }}]);
-{% endfor %}
-{% else %}
-{% for column, config in columns['fields'] %}
-            $table->{{ columnMethod }}('{{ column }}', '{{ config['columnType'] }}', [{{
-                Migration.stringifyList(config['options'], {'indent': 3}, wantedOptions) | raw
-            }}]);
-{% endfor %}
-{% for column, config in columns['indexes'] %}
-            $table->{{ indexMethod }}([{{
-                 Migration.stringifyList(config['columns'], {'indent': 3}) | raw }}
-                ], [{{
-                    Migration.stringifyList(config['options'], {'indent': 3})  | raw
-            }}]);
-{% endfor %}
-{% if tableMethod == 'create' and columns['primaryKey'] is not empty %}
-            $table->addPrimaryKey([{{
-                Migration.stringifyList(columns['primaryKey'], {'indent': 3}) | raw
-            }}]);
-{% endif %}
-{% endif %}
-{% endif %}
-            $table->{{ tableMethod }}(){% if tableMethod == 'drop' %}->save(){% endif %};
-{% endfor %}
+{{ element('Migrations.change-method-body', {
+    columnMethod: columnMethod,
+    indexMethod: indexMethod,
+    tableMethod: tableMethod,
+    wantedOptions: wantedOptions,
+}) }}
         }
 };
