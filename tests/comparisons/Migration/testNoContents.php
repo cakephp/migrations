@@ -15,5 +15,6 @@ class NoContents extends BaseMigration
      */
     public function change(): void
     {
+
     }
 }

@@ -46,4 +46,4 @@
     {%~ endif %}
 {% endif %}
         $table->{{ tableMethod }}(){% if tableMethod == 'drop' %}->save(){% endif %};
-{% endfor %}
+{%- endfor -%}
