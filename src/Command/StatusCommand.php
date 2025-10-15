@@ -116,7 +116,7 @@ class StatusCommand extends Command
             if ($removed === 0) {
                 $io->out('<info>No missing migrations to clean up.</info>');
             } else {
-                $io->out(sprintf('<info>Removed %d missing migration(s) from the phinxlog table.</info>', $removed));
+                $io->out(sprintf('<info>Removed %d missing migration(s) from migration log.</info>', $removed));
             }
 
             return Command::CODE_SUCCESS;
