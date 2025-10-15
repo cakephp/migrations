@@ -1214,14 +1214,10 @@ class Manager
         // Remove missing migrations from phinxlog
         $adapter->beginTransaction();
         try {
-            foreach ($missingVersions as $version) {
-                $sql = sprintf(
-                    'DELETE FROM %s WHERE %s = ?',
-                    $adapter->quoteTableName($env->getSchemaTableName()),
-                    $adapter->quoteColumnName('version'),
-                );
-                $adapter->execute($sql, [$version]);
-            }
+            $delete = $adapter->getDeleteBuilder()
+                ->from($env->getSchemaTableName())
+                ->where(['version IN' => $missingVersions]);
+            $delete->execute();
             $adapter->commitTransaction();
         } catch (Exception $e) {
             $adapter->rollbackTransaction();
