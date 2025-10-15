@@ -81,9 +81,9 @@ class StatusCommandTest extends TestCase
 
     public function testCleanNoMissingMigrations(): void
     {
-        $this->exec('migrations status -c test --clean');
+        $this->exec('migrations status -c test --cleanup');
         $this->assertExitSuccess();
-        $this->assertOutputContains('No missing migrations to clean.');
+        $this->assertOutputContains('No missing migrations to clean up.');
     }
 
     public function testCleanWithMissingMigrations(): void
@@ -104,7 +104,7 @@ class StatusCommandTest extends TestCase
         $this->assertEquals(1, $count);
 
         // Run the clean command
-        $this->exec('migrations status -c test --clean');
+        $this->exec('migrations status -c test --cleanup');
         $this->assertExitSuccess();
         $this->assertOutputContains('Removed 1 missing migration(s) from the phinxlog table.');
 
@@ -117,7 +117,7 @@ class StatusCommandTest extends TestCase
     {
         $this->exec('migrations status --help');
         $this->assertExitSuccess();
-        $this->assertOutputContains('--clean');
+        $this->assertOutputContains('--cleanup');
         $this->assertOutputContains('Remove MISSING migrations from the phinxlog table');
     }
 }
