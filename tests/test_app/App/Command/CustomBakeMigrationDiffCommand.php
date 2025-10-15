@@ -8,6 +8,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
 use Migrations\Command\BakeMigrationDiffCommand;
+use RuntimeException;
 use function Cake\Core\env;
 
 class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
@@ -63,6 +64,11 @@ class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . $comparison . DS;
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
 
-        return unserialize(trim(file_get_contents($diffDumpPath)));
+        $contents = file_get_contents($diffDumpPath);
+        if ($contents === false) {
+            throw new RuntimeException("Unable to read dump file: {$diffDumpPath}");
+        }
+
+        return unserialize(trim($contents));
     }
 }

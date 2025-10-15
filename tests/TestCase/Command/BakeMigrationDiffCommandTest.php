@@ -242,6 +242,19 @@ class BakeMigrationDiffCommandTest extends TestCase
     }
 
     /**
+     * Tests that baking a diff with decimal column changes includes precision
+     * This is a regression test for the fix that ensures precision is included for decimal/float columns
+     *
+     * @return void
+     */
+    public function testBakingDiffDecimalChange()
+    {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
+        $this->runDiffBakingTest('DecimalChange');
+    }
+
+    /**
      * Tests that baking a diff with --plugin option only includes tables with Table classes
      */
     public function testBakingDiffWithPluginOnlyIncludesTablesWithTableClasses(): void

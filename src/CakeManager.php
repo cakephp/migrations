@@ -228,7 +228,13 @@ class CakeManager extends Manager
         /** @var class-string<\Phinx\Migration\MigrationInterface> $className */
         $className = $this->getMigrationClassName($migrationFile);
         require_once $migrationFile;
-        $Migration = new $className('default', $version);
+
+        // BaseMigration uses different constructor signature than Phinx AbstractMigration
+        if (is_subclass_of($className, BaseMigration::class)) {
+            $Migration = new $className($version);
+        } else {
+            $Migration = new $className('default', $version);
+        }
 
         $time = date('Y-m-d H:i:s', time());
 
@@ -358,6 +364,118 @@ class CakeManager extends Manager
         $this->input = $input;
 
         return $this;
+    }
+
+    /**
+     * Gets an array of the database migrations, indexed by migration name (aka creation time) and sorted in ascending
+     * order
+     *
+     * Overrides parent to handle both Phinx AbstractMigration and CakePHP BaseMigration constructors
+     *
+     * @param string $environment Environment
+     * @throws \InvalidArgumentException
+     * @return \Phinx\Migration\MigrationInterface[]
+     */
+    public function getMigrations(string $environment): array
+    {
+        if ($this->migrations === null) {
+            $phpFiles = $this->getMigrationFiles();
+
+            if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
+                $this->getOutput()->writeln('Migration file');
+                $this->getOutput()->writeln(
+                    array_map(
+                        function ($phpFile) {
+                            return "    <info>{$phpFile}</info>";
+                        },
+                        $phpFiles,
+                    ),
+                );
+            }
+
+            // filter the files to only get the ones that match our naming scheme
+            $fileNames = [];
+            /** @var \Phinx\Migration\MigrationInterface[] $versions */
+            $versions = [];
+
+            foreach ($phpFiles as $filePath) {
+                if (\Phinx\Util\Util::isValidMigrationFileName(basename($filePath))) {
+                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
+                        $this->getOutput()->writeln("Valid migration file <info>{$filePath}</info>.");
+                    }
+
+                    $version = \Phinx\Util\Util::getVersionFromFileName(basename($filePath));
+
+                    if (isset($versions[$version])) {
+                        throw new InvalidArgumentException(sprintf('Duplicate migration - "%s" has the same version as "%s"', $filePath, $versions[$version]->getVersion()));
+                    }
+
+                    $config = $this->getConfig();
+                    $namespace = $config instanceof \Phinx\Config\NamespaceAwareInterface ? $config->getMigrationNamespaceByPath(dirname($filePath)) : null;
+
+                    // convert the filename to a class name
+                    $class = ($namespace === null ? '' : $namespace . '\\') . \Phinx\Util\Util::mapFileNameToClassName(basename($filePath));
+
+                    if (isset($fileNames[$class])) {
+                        throw new InvalidArgumentException(sprintf(
+                            'Migration "%s" has the same name as "%s"',
+                            basename($filePath),
+                            $fileNames[$class],
+                        ));
+                    }
+
+                    $fileNames[$class] = basename($filePath);
+
+                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
+                        $this->getOutput()->writeln("Loading class <info>$class</info> from <info>$filePath</info>.");
+                    }
+
+                    // load the migration file
+                    $orig_display_errors_setting = ini_get('display_errors');
+                    ini_set('display_errors', 'On');
+                    /** @noinspection PhpIncludeInspection */
+                    require_once $filePath;
+                    ini_set('display_errors', $orig_display_errors_setting);
+                    if (!class_exists($class)) {
+                        throw new InvalidArgumentException(sprintf(
+                            'Could not find class "%s" in file "%s"',
+                            $class,
+                            $filePath,
+                        ));
+                    }
+
+                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
+                        $this->getOutput()->writeln("Running <info>$class</info>.");
+                    }
+
+                    // instantiate it - BaseMigration uses different constructor than Phinx AbstractMigration
+                    if (is_subclass_of($class, BaseMigration::class)) {
+                        $migration = new $class($version);
+                    } else {
+                        $migration = new $class($environment, $version, $this->getInput(), $this->getOutput());
+                    }
+
+                    if (!($migration instanceof \Phinx\Migration\MigrationInterface)) {
+                        throw new InvalidArgumentException(sprintf(
+                            'The class "%s" in file "%s" must implement \Phinx\Migration\MigrationInterface',
+                            $class,
+                            $filePath,
+                        ));
+                    }
+
+                    $versions[$version] = $migration;
+                } else {
+                    if ($this->getOutput()->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
+                        $this->getOutput()->writeln("Invalid migration file <error>{$filePath}</error>.");
+                    }
+                }
+            }
+
+            ksort($versions);
+            $this->setMigrations($versions);
+        }
+
+        return $this->migrations;
     }
 
     /**

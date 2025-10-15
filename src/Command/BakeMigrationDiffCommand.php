@@ -311,6 +311,16 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                         unset($changedAttributes['length']);
                     }
 
+                    // For decimal columns, ensure precision (scale) is included for proper conversion
+                    if (
+                        isset($column['type']) &&
+                        ($column['type'] === 'decimal' || $column['type'] === 'float') &&
+                        !isset($changedAttributes['precision']) &&
+                        isset($column['precision'])
+                    ) {
+                        $changedAttributes['precision'] = $column['precision'];
+                    }
+
                     $this->templateData[$table]['columns']['changed'][$columnName] = $changedAttributes;
                 }
             }
