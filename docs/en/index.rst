@@ -550,6 +550,21 @@ You can also output the results as a JSON formatted string using the
 You can also use the ``--source``, ``--connection`` and ``--plugin`` options
 just like for the ``migrate`` command.
 
+Cleaning up missing migrations
+-------------------------------
+
+Sometimes migration files may be deleted from the filesystem but still exist
+in the phinxlog table. These migrations will be marked as **MISSING** in the
+status output. You can remove these entries from the phinxlog table using the
+``--cleanup`` option:
+
+.. code-block:: bash
+
+    bin/cake migrations status --cleanup
+
+This will remove all migration entries from the phinxlog table that no longer
+have corresponding migration files in the filesystem.
+
 Marking a migration as migrated
 ===============================
 
