@@ -78,4 +78,46 @@ class StatusCommandTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->exec('migrations status -c lolnope');
     }
+
+    public function testCleanNoMissingMigrations(): void
+    {
+        $this->exec('migrations status -c test --clean');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('No missing migrations to clean.');
+    }
+
+    public function testCleanWithMissingMigrations(): void
+    {
+        // First, insert a fake migration entry that doesn't exist in filesystem
+        $table = $this->fetchTable('Phinxlog');
+        $entity = $table->newEntity([
+            'version' => 99999999999999,
+            'migration_name' => 'FakeMissingMigration',
+            'start_time' => '2024-01-01 00:00:00',
+            'end_time' => '2024-01-01 00:00:01',
+            'breakpoint' => false,
+        ]);
+        $table->save($entity);
+
+        // Verify the fake migration is in the table
+        $count = $table->find()->where(['version' => 99999999999999])->count();
+        $this->assertEquals(1, $count);
+
+        // Run the clean command
+        $this->exec('migrations status -c test --clean');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('Removed 1 missing migration(s) from the phinxlog table.');
+
+        // Verify the fake migration was removed
+        $count = $table->find()->where(['version' => 99999999999999])->count();
+        $this->assertEquals(0, $count);
+    }
+
+    public function testCleanHelp(): void
+    {
+        $this->exec('migrations status --help');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('--clean');
+        $this->assertOutputContains('Remove MISSING migrations from the phinxlog table');
+    }
 }

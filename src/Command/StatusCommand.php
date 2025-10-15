@@ -63,6 +63,8 @@ class StatusCommand extends Command
             '',
             '<info>migrations status -c secondary</info>',
             '<info>migrations status -c secondary  -f json</info>',
+            '<info>migrations status --cleanup</info>',
+            'Remove *MISSING* migrations from the phinxlog table',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
@@ -79,6 +81,10 @@ class StatusCommand extends Command
             'help' => 'The output format: text or json. Defaults to text.',
             'choices' => ['text', 'json'],
             'default' => 'text',
+        ])->addOption('cleanup', [
+            'help' => 'Remove MISSING migrations from the phinxlog table',
+            'boolean' => true,
+            'default' => false,
         ]);
 
         return $parser;
@@ -95,6 +101,7 @@ class StatusCommand extends Command
     {
         /** @var string|null $format */
         $format = $args->getOption('format');
+        $clean = $args->getOption('cleanup');
 
         $factory = new ManagerFactory([
             'plugin' => $args->getOption('plugin'),
@@ -103,6 +110,18 @@ class StatusCommand extends Command
             'dry-run' => $args->getOption('dry-run'),
         ]);
         $manager = $factory->createManager($io);
+
+        if ($clean) {
+            $removed = $manager->cleanupMissingMigrations();
+            if ($removed === 0) {
+                $io->out('<info>No missing migrations to clean up.</info>');
+            } else {
+                $io->out(sprintf('<info>Removed %d missing migration(s) from the phinxlog table.</info>', $removed));
+            }
+
+            return Command::CODE_SUCCESS;
+        }
+
         $migrations = $manager->printStatus($format);
 
         switch ($format) {
