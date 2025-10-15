@@ -43,6 +43,13 @@ class BakeSeedCommand extends SimpleBakeCommand
     protected string $_name;
 
     /**
+     * Arguments
+     *
+     * @var \Cake\Console\Arguments|null
+     */
+    protected ?Arguments $args = null;
+
+    /**
      * @inheritDoc
      */
     public static function defaultName(): string
@@ -84,6 +91,11 @@ class BakeSeedCommand extends SimpleBakeCommand
      */
     public function template(): string
     {
+        $style = $this->args?->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
+        if ($style === 'anonymous') {
+            return 'Migrations.Seed/seed-anonymous';
+        }
+
         return 'Migrations.Seed/seed';
     }
 
@@ -150,6 +162,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      */
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
+        $this->args = $args;
         /** @var array<string, bool|string|null> $options */
         $options = array_merge($args->getOptions(), ['no-test' => true]);
         $newArgs = new Arguments(
@@ -184,6 +197,10 @@ class BakeSeedCommand extends SimpleBakeCommand
         ])->addOption('limit', [
             'short' => 'l',
             'help' => 'If including data, max number of rows to select',
+        ])->addOption('style', [
+            'help' => 'Seed style to use (traditional or anonymous).',
+            'default' => null,
+            'choices' => ['traditional', 'anonymous'],
         ]);
 
         return $parser;

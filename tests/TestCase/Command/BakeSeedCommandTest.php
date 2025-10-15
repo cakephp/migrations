@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\BaseCommand;
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\TestSuite\StringCompareTrait;
 use Migrations\Test\TestCase\TestCase;
@@ -159,5 +160,25 @@ class BakeSeedCommandTest extends TestCase
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
         $result = file_get_contents($this->generatedFile);
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    /**
+     * Test baking anonymous seed with Configure
+     *
+     * @return void
+     */
+    public function testAnonymousStyleWithConfigure()
+    {
+        Configure::write('Migrations.style', 'anonymous');
+
+        $this->generatedFile = ROOT . DS . 'config/Seeds/ArticlesSeed.php';
+        $this->exec('bake seed Articles --connection test');
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($this->generatedFile);
+
+        // Check that it returns an anonymous class
+        $this->assertStringContainsString('return new class extends BaseSeed', $result);
+        $this->assertStringNotContainsString('class ArticlesSeed extends', $result);
     }
 }

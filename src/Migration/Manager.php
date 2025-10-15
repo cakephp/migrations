@@ -1010,22 +1010,37 @@ class Manager
                     $fileNames[$class] = basename($filePath);
 
                     // load the seed file
-                    require_once $filePath;
+                    // For anonymous classes, we need to use require instead of require_once
+                    // to get the returned instance
+                    $seedInstance = null;
                     if (!class_exists($class)) {
+                        $seedInstance = require $filePath;
+                    } else {
+                        require_once $filePath;
+                    }
+
+                    // Check if the file returns an anonymous class instance
+                    if (is_object($seedInstance) && $seedInstance instanceof SeedInterface) {
+                        $io->verbose("Using anonymous class from <info>$filePath</info>.");
+                        $seed = $seedInstance;
+                    } elseif (class_exists($class)) {
+                        // Fall back to traditional class-based seed
+                        $io->verbose("Instantiating <info>$class</info>.");
+                        // instantiate it
+                        /** @var \Migrations\SeedInterface $seed */
+                        if (isset($this->container)) {
+                            $seed = $this->container->get($class);
+                        } else {
+                            $seed = new $class();
+                        }
+                    } else {
                         throw new InvalidArgumentException(sprintf(
-                            'Could not find class `%s` in file `%s`',
+                            'Could not find class `%s` in file `%s` and file did not return a seed instance',
                             $class,
                             $filePath,
                         ));
                     }
 
-                    // instantiate it
-                    /** @var \Migrations\SeedInterface $seed */
-                    if (isset($this->container)) {
-                        $seed = $this->container->get($class);
-                    } else {
-                        $seed = new $class();
-                    }
                     /** @var \Migrations\SeedInterface $seed */
                     $seed->setIo($io);
                     $seed->setConfig($config);
