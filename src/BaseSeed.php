@@ -129,7 +129,14 @@ class BaseSeed implements SeedInterface
      */
     public function getName(): string
     {
-        return static::class;
+        $name = static::class;
+        if (str_starts_with($name, 'Migrations\BaseSeed@anonymous')) {
+            [, $path] = explode('/', $name, 2);
+            [$path, ] = explode(':', $path, 2);
+            $name = basename($path, '.php');
+        }
+
+        return $name;
     }
 
     /**

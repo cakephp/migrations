@@ -36,7 +36,6 @@ class SeedCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS numbers');
         $connection->execute('DROP TABLE IF EXISTS letters');
         $connection->execute('DROP TABLE IF EXISTS stores');
-        $connection->execute('DROP TABLE IF EXISTS products');
     }
 
     protected function resetOutput(): void
@@ -330,23 +329,19 @@ class SeedCommandTest extends TestCase
     public function testSeederAnonymousClass(): void
     {
         $this->createTables();
-
-        // Create products table for the test
-        /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get('test');
-        $connection->execute('CREATE TABLE products (id INT PRIMARY KEY, name VARCHAR(255))');
-
-        $this->exec('migrations seed -c test --seed ProductsSeed');
+        $this->exec('migrations seed -c test --seed AnonymousStoreSeed');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('ProductsSeed:</info> <comment>seeding');
+        $this->assertOutputContains('AnonymousStoreSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
-        $query = $connection->execute('SELECT COUNT(*) FROM products');
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM stores');
         $this->assertEquals(2, $query->fetchColumn(0));
 
-        $result = $connection->execute('SELECT * FROM products ORDER BY id')->fetchAll('assoc');
-        $this->assertEquals('Product 1', $result[0]['name']);
-        $this->assertEquals('Product 2', $result[1]['name']);
+        $result = $connection->execute('SELECT * FROM stores ORDER BY id')->fetchAll('assoc');
+        $this->assertEquals('anonymous_store', $result[0]['name']);
+        $this->assertEquals('other_store', $result[1]['name']);
     }
 }

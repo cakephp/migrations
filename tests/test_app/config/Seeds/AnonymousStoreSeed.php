@@ -19,16 +19,14 @@ return new class extends BaseSeed
     {
         $data = [
             [
-                'id' => '1',
-                'name' => 'Product 1',
+                'name' => 'anonymous_store',
             ],
             [
-                'id' => '2',
-                'name' => 'Product 2',
+                'name' => 'other_store',
             ],
         ];
 
-        $table = $this->table('products');
+        $table = $this->table('stores');
         $table->insert($data)->save();
     }
 };
