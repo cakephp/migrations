@@ -106,7 +106,7 @@ class StatusCommandTest extends TestCase
         // Run the clean command
         $this->exec('migrations status -c test --cleanup');
         $this->assertExitSuccess();
-        $this->assertOutputContains('Removed 1 missing migration(s) from the phinxlog table.');
+        $this->assertOutputContains('Removed 1 missing migration(s) from migration log.');
 
         // Verify the fake migration was removed
         $count = $table->find()->where(['version' => 99999999999999])->count();
