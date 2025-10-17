@@ -3147,10 +3147,10 @@ INPUT;
             'Integer 3' => ['create table t(a integer default +1)', 1],
             'Integer 4' => ['create table t(a integer default 2112)', 2112],
             'Integer 5' => ['create table t(a integer default 002112)', 2112],
-            'Integer boolean 1' => ['create table t(a boolean default 1)', true],
-            'Integer boolean 2' => ['create table t(a boolean default 0)', false],
-            'Integer boolean 3' => ['create table t(a boolean default -1)', -1],
-            'Integer boolean 4' => ['create table t(a boolean default 2)', 2],
+            'Integer boolean 1' => ['create table t(a boolean default 1)', 1],
+            'Integer boolean 2' => ['create table t(a boolean default 0)', 0],
+            'Integer boolean 3' => ['create table t(a boolean default -1)', 0],
+            'Integer boolean 4' => ['create table t(a boolean default 2)', 0],
             'Float 1' => ['create table t(a float default 1.0)', 1.0],
             'Float 2' => ['create table t(a float default +1.0)', 1.0],
             'Float 3' => ['create table t(a float default -1.0)', -1.0],
@@ -3184,12 +3184,12 @@ INPUT;
     public static function provideBooleanDefaultValues()
     {
         return [
-            'True LC' => ['create table t(a boolean default true)', true],
-            'True UC' => ['create table t(a boolean default TRUE)', true],
-            'True MC' => ['create table t(a boolean default TRue)', true],
-            'False LC' => ['create table t(a boolean default false)', false],
-            'False UC' => ['create table t(a boolean default FALSE)', false],
-            'False MC' => ['create table t(a boolean default FALse)', false],
+            'True LC' => ['create table t(a boolean default true)', 1],
+            'True UC' => ['create table t(a boolean default TRUE)', 1],
+            'True MC' => ['create table t(a boolean default TRue)', 1],
+            'False LC' => ['create table t(a boolean default false)', 0],
+            'False UC' => ['create table t(a boolean default FALSE)', 0],
+            'False MC' => ['create table t(a boolean default FALse)', 0],
         ];
     }
 
