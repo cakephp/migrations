@@ -149,6 +149,16 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     }
 
     /**
+     * Test baking a snapshot with the change() method
+     *
+     * @return void
+     */
+    public function testSnapshotWithChange()
+    {
+        $this->runSnapshotTest('WithChange', '--change');
+    }
+
+    /**
      * Tests that baking a diff with signed primary keys is auto-id compatible
      * when `Migrations.unsigned_primary_keys` is disabled.
      */

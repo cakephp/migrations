@@ -106,6 +106,8 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             $autoId = !$arguments->getOption('disable-autoid');
         }
 
+        $useChange = (bool)$arguments->getOption('change');
+
         return [
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
@@ -115,6 +117,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
             'action' => 'create_table',
             'name' => $this->_name,
             'autoId' => $autoId,
+            'useChange' => $useChange,
         ];
     }
 
@@ -179,6 +182,11 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
         ->addOption('generate-only', [
             'help' => 'Only generate the migration file without marking it as applied',
             'boolean' => true,
+        ])
+        ->addOption('change', [
+            'help' => 'Use change() method instead of up()/down() methods',
+            'boolean' => true,
+            'default' => false,
         ]);
 
         return $parser;

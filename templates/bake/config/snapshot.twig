@@ -30,6 +30,24 @@ class {{ name }} extends BaseMigration
     public bool $autoId = false;
 
 {% endif %}
+{% if useChange %}
+    /**
+     * Change Method.
+     *
+     * More information on this method is available here:
+     * https://book.cakephp.org/migrations/5/en/migrations.html#the-change-method
+     *
+     * @return void
+     */
+    public function change(): void
+    {
+{{~ element('Migrations.create-tables', {
+    tables: tables,
+    autoId: autoId,
+    useSchema: false
+})
+}}    }
+{% else %}
     /**
      * Up Method.
      *
@@ -74,4 +92,5 @@ class {{ name }} extends BaseMigration
         $this->table('{{ table }}')->drop()->save();
 {% endfor %}
     }
+{% endif %}
 }
