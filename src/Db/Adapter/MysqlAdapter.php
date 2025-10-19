@@ -624,7 +624,8 @@ class MysqlAdapter extends AbstractAdapter
                 $extra = ' ' . implode(' ', $extras);
 
                 if (($row['Default'] !== null)) {
-                    $extra .= $this->getDefaultValueDefinition($row['Default']);
+                    $phinxTypeInfo = $this->getPhinxType($row['Type']);
+                    $extra .= $this->getDefaultValueDefinition($row['Default'], $phinxTypeInfo['name']);
                 }
                 $definition = $row['Type'] . ' ' . $null . $extra . $comment;
 
