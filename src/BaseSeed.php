@@ -131,6 +131,7 @@ class BaseSeed implements SeedInterface
     {
         $name = static::class;
         if (str_starts_with($name, 'Migrations\BaseSeed@anonymous')) {
+            debug($name);
             [, $path] = explode(DIRECTORY_SEPARATOR, $name, 2);
             [$path, ] = explode(':', $path, 2);
             $name = basename($path, '.php');
