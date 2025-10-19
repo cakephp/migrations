@@ -714,11 +714,9 @@ class Manager
             }
         } else {
             // run only one seeder
-            if (array_key_exists($seed . 'Seed', $seeds)) {
-                $seed = $seed . 'Seed';
-                $this->executeSeed($seeds[$seed]);
-            } elseif (array_key_exists($seed, $seeds)) {
-                $this->executeSeed($seeds[$seed]);
+            $normalizedName = $this->normalizeSeedName($seed);
+            if ($normalizedName !== null) {
+                $this->executeSeed($seeds[$normalizedName]);
             } else {
                 throw new InvalidArgumentException(sprintf('The seed `%s` does not exist', $seed));
             }
@@ -939,6 +937,29 @@ class Manager
     }
 
     /**
+     * Normalize a seed name by trying with and without the 'Seed' suffix.
+     *
+     * @param string $name Seed name to normalize
+     * @return string|null The normalized seed name, or null if not found
+     */
+    protected function normalizeSeedName(string $name): ?string
+    {
+        $seeds = $this->getSeeds();
+
+        // Try with 'Seed' suffix first
+        if (array_key_exists($name . 'Seed', $seeds)) {
+            return $name . 'Seed';
+        }
+
+        // Try exact name
+        if (array_key_exists($name, $seeds)) {
+            return $name;
+        }
+
+        return null;
+    }
+
+    /**
      * Get seed dependencies instances from seed dependency array
      *
      * @param \Migrations\SeedInterface $seed Seed
@@ -950,11 +971,9 @@ class Manager
         $dependencies = $seed->getDependencies();
         if ($dependencies && $this->seeds) {
             foreach ($dependencies as $dependency) {
-                foreach ($this->seeds as $seed) {
-                    $name = $seed->getName();
-                    if ($name === $dependency) {
-                        $dependenciesInstances[$name] = $seed;
-                    }
+                $normalizedName = $this->normalizeSeedName($dependency);
+                if ($normalizedName !== null) {
+                    $dependenciesInstances[$normalizedName] = $this->seeds[$normalizedName];
                 }
             }
         }

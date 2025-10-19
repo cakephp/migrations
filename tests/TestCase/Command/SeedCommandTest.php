@@ -344,4 +344,53 @@ class SeedCommandTest extends TestCase
         $this->assertEquals('anonymous_store', $result[0]['name']);
         $this->assertEquals('other_store', $result[1]['name']);
     }
+
+    public function testSeederShortName(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed Numbers');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(1, $query->fetchColumn(0));
+    }
+
+    public function testSeederShortNameMultiple(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --source CallSeeds --seed Letters --seed NumbersCall');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
+        $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(1, $query->fetchColumn(0));
+
+        $query = $connection->execute('SELECT COUNT(*) FROM letters');
+        $this->assertEquals(2, $query->fetchColumn(0));
+    }
+
+    public function testSeederShortNameAnonymous(): void
+    {
+        $this->createTables();
+        $this->exec('migrations seed -c test --seed AnonymousStore');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('AnonymousStoreSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM stores');
+        $this->assertEquals(2, $query->fetchColumn(0));
+    }
 }

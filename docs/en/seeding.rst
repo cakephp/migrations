@@ -45,6 +45,22 @@ By default, it generates a traditional seed class with a named class:
 
 By default, the table the seed will try to alter is the "tableized" version of the seed filename.
 
+Seed Naming
+-----------
+
+When referencing seeds in your code or via the command line, you can use either:
+
+- The short name without the ``Seed`` suffix (e.g., ``Articles``, ``Users``)
+- The full name with the ``Seed`` suffix (e.g., ``ArticlesSeed``, ``UsersSeed``)
+
+Both forms work identically in:
+
+- Command line: ``--seed Articles`` or ``--seed ArticlesSeed``
+- Dependencies: ``return ['User', 'ShopItem'];`` or ``return ['UserSeed', 'ShopItemSeed'];``
+- Calling seeds: ``$this->call('Articles');`` or ``$this->call('ArticlesSeed');``
+
+Using the short name is recommended for cleaner, more concise code.
+
 Anonymous Seed Classes
 ----------------------
 
@@ -207,17 +223,28 @@ current seed:
         public function getDependencies(): array
         {
             return [
-                'UserSeed',
-                'ShopItemSeed'
+                'User',      // Short name without 'Seed' suffix
+                'ShopItem',  // Short name without 'Seed' suffix
             ];
         }
 
         public function run() : void
         {
-            // Seed the shopping cart  after the `UserSeed` and
+            // Seed the shopping cart after the `UserSeed` and
             // `ShopItemSeed` have been run.
         }
     }
+
+You can also use the full seed name including the ``Seed`` suffix:
+
+.. code-block:: php
+
+    return [
+        'UserSeed',
+        'ShopItemSeed',
+    ];
+
+Both forms are supported and work identically.
 
 .. note::
 
@@ -243,13 +270,23 @@ method to define your own sequence of seeds execution:
     {
         public function run(): void
         {
-            $this->call('AnotherSeed');
-            $this->call('YetAnotherSeed');
+            $this->call('Another');      // Short name without 'Seed' suffix
+            $this->call('YetAnother');   // Short name without 'Seed' suffix
 
             // You can use the plugin dot syntax to call seeds from a plugin
-            $this->call('PluginName.FromPluginSeed');
+            $this->call('PluginName.FromPlugin');
         }
     }
+
+You can also use the full seed name including the ``Seed`` suffix:
+
+.. code-block:: php
+
+    $this->call('AnotherSeed');
+    $this->call('YetAnotherSeed');
+    $this->call('PluginName.FromPluginSeed');
+
+Both forms are supported and work identically.
 
 Inserting Data
 ==============
@@ -341,16 +378,23 @@ This is the easy part. To seed your database, simply use the ``migrations seed``
         $ bin/cake migrations seed
 
 By default, Migrations will execute all available seed classes. If you would like to
-run a specific class, simply pass in the name of it using the ``--seed`` parameter:
+run a specific class, simply pass in the name of it using the ``--seed`` parameter.
+You can use either the short name (without the ``Seed`` suffix) or the full name:
 
 .. code-block:: bash
 
+        $ bin/cake migrations seed --seed User
+        # or
         $ bin/cake migrations seed --seed UserSeed
+
+Both commands work identically.
 
 You can also run multiple seeds:
 
 .. code-block:: bash
 
+        $ bin/cake migrations seed --seed User --seed Permission --seed Log
+        # or with full names
         $ bin/cake migrations seed --seed UserSeed --seed PermissionSeed --seed LogSeed
 
 You can also use the `-v` parameter for more output verbosity:
