@@ -18,11 +18,12 @@ Migrations includes a command to easily generate a new seed class:
 
         $ bin/cake bake seed MyNewSeed
 
-It is based on a skeleton template:
+By default, it generates a traditional seed class with a named class:
 
 .. code-block:: php
 
     <?php
+    declare(strict_types=1);
 
     use Migrations\BaseSeed;
 
@@ -43,6 +44,62 @@ It is based on a skeleton template:
     }
 
 By default, the table the seed will try to alter is the "tableized" version of the seed filename.
+
+Anonymous Seed Classes
+----------------------
+
+Migrations also supports generating anonymous seed classes, which use PHP's
+anonymous class feature instead of named classes. This style is useful for:
+
+- Avoiding namespace declarations
+- Better PHPCS compatibility (no class name to filename matching required)
+- Simpler file structure without named class constraints
+
+To generate an anonymous seed class, use the ``--style anonymous`` option:
+
+.. code-block:: bash
+
+    $ bin/cake bake seed MyNewSeed --style anonymous
+
+This generates a seed file using an anonymous class:
+
+.. code-block:: php
+
+    <?php
+    declare(strict_types=1);
+
+    use Migrations\BaseSeed;
+
+    return new class extends BaseSeed
+    {
+        /**
+         * Run Method.
+         *
+         * Write your database seeder using this method.
+         *
+         * More information on writing seeds is available here:
+         * https://book.cakephp.org/migrations/5/en/seeding.html
+         */
+        public function run(): void
+        {
+
+        }
+    };
+
+Both traditional and anonymous seed classes work identically at runtime and can
+be used interchangeably within the same project.
+
+You can set the default seed style globally in your application configuration:
+
+.. code-block:: php
+
+    // In config/app.php or config/app_local.php
+    'Migrations' => [
+        'style' => 'anonymous',  // or 'traditional'
+    ],
+
+Seed Options
+------------
 
 .. code-block:: bash
     # You specify the name of the table the seed files will alter by using the ``--table`` option
@@ -92,8 +149,10 @@ migrations should be on one of the following paths:
 - ``ROOT/templates/plugin/Migrations/bake/``
 - ``ROOT/templates/bake/``
 
-For example the seed template is ``Seed/seed.twig`` and its full path would be
-**ROOT/templates/plugin/Migrations/bake/Seed/seed.twig**
+For example, the seed templates are:
+
+- Traditional: ``Seed/seed.twig`` at **ROOT/templates/plugin/Migrations/bake/Seed/seed.twig**
+- Anonymous: ``Seed/seed-anonymous.twig`` at **ROOT/templates/plugin/Migrations/bake/Seed/seed-anonymous.twig**
 
 The BaseSeed Class
 ==================
