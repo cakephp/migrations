@@ -17,7 +17,7 @@ class ShortNameCallSeed extends BaseSeed
      */
     public function run(): void
     {
-        $this->call('NumbersCall');  // Short name without 'Seed' suffix
-        $this->call('Letters');       // Short name without 'Seed' suffix
+        $this->call('NumbersCall');
+        $this->call('Letters');
     }
 }
