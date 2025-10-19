@@ -714,7 +714,7 @@ class Manager
             }
         } else {
             // run only one seeder
-            $normalizedName = $this->normalizeSeedName($seed);
+            $normalizedName = $this->normalizeSeedName($seed, $seeds);
             if ($normalizedName !== null) {
                 $this->executeSeed($seeds[$normalizedName]);
             } else {
@@ -940,12 +940,11 @@ class Manager
      * Normalize a seed name by trying with and without the 'Seed' suffix.
      *
      * @param string $name Seed name to normalize
+     * @param array<string, \Migrations\SeedInterface> $seeds Seeds array to search in
      * @return string|null The normalized seed name, or null if not found
      */
-    protected function normalizeSeedName(string $name): ?string
+    protected function normalizeSeedName(string $name, array $seeds): ?string
     {
-        $seeds = $this->getSeeds();
-
         // Try with 'Seed' suffix first
         if (array_key_exists($name . 'Seed', $seeds)) {
             return $name . 'Seed';
@@ -971,7 +970,7 @@ class Manager
         $dependencies = $seed->getDependencies();
         if ($dependencies && $this->seeds) {
             foreach ($dependencies as $dependency) {
-                $normalizedName = $this->normalizeSeedName($dependency);
+                $normalizedName = $this->normalizeSeedName($dependency, $this->seeds);
                 if ($normalizedName !== null) {
                     $dependenciesInstances[$normalizedName] = $this->seeds[$normalizedName];
                 }
