@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Db\Adapter;
 
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -168,6 +169,21 @@ trait DefaultAdapterTrait
     }
 
     protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions
+    {
+        return new AlterInstructions();
+    }
+
+    protected function getCheckConstraints(string $tableName): array
+    {
+        return [];
+    }
+
+    protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
+    {
+        return new AlterInstructions();
+    }
+
+    protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
     {
         return new AlterInstructions();
     }

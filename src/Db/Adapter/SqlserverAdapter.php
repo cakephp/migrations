@@ -15,6 +15,7 @@ use Cake\I18n\DateTime;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -1078,5 +1079,30 @@ SQL;
         }
 
         return $sql;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getCheckConstraints(string $tableName): array
+    {
+        // TODO: Implement check constraints for SQL Server
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
+    {
+        throw new BadMethodCallException('Check constraints are not yet implemented for SQL Server adapter');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
+    {
+        throw new BadMethodCallException('Check constraints are not yet implemented for SQL Server adapter');
     }
 }

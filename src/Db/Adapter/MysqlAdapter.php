@@ -15,6 +15,7 @@ use Cake\Database\Schema\SchemaDialect;
 use Cake\Database\Schema\TableSchema;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -886,6 +887,81 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
+     * Get an array of check constraints from a particular table.
+     *
+     * @param string $tableName Table name
+     * @return array
+     */
+    protected function getCheckConstraints(string $tableName): array
+    {
+        $database = (string)$this->getOption('database');
+        $query = $this->getSelectBuilder()
+            ->select(['cc.CONSTRAINT_NAME', 'cc.CHECK_CLAUSE'])
+            ->from(['cc' => 'INFORMATION_SCHEMA.CHECK_CONSTRAINTS'])
+            ->innerJoin(
+                ['tc' => 'INFORMATION_SCHEMA.TABLE_CONSTRAINTS'],
+                [
+                    'tc.CONSTRAINT_SCHEMA = cc.CONSTRAINT_SCHEMA',
+                    'tc.CONSTRAINT_NAME = cc.CONSTRAINT_NAME',
+                ],
+            )
+            ->where([
+                'tc.CONSTRAINT_SCHEMA' => $database,
+                'tc.TABLE_NAME' => $tableName,
+                'tc.CONSTRAINT_TYPE' => 'CHECK',
+            ]);
+
+        $rows = $query->execute()->fetchAll('assoc');
+        $constraints = [];
+
+        foreach ($rows as $row) {
+            $constraints[] = [
+                'name' => $row['CONSTRAINT_NAME'],
+                'expression' => $row['CHECK_CLAUSE'],
+            ];
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
+    {
+        $constraintName = $checkConstraint->getName();
+        if ($constraintName === null) {
+            // Auto-generate constraint name if not provided
+            $constraintName = $table->getName() . '_chk_' . substr(md5($checkConstraint->getExpression()), 0, 8);
+        }
+
+        $alter = sprintf(
+            'ADD CONSTRAINT %s CHECK (%s)',
+            $this->quoteColumnName($constraintName),
+            $checkConstraint->getExpression(),
+        );
+
+        return new AlterInstructions([$alter]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
+    {
+        // MariaDB uses DROP CONSTRAINT, MySQL uses DROP CHECK
+        $keyword = $this->isMariaDb() ? 'CONSTRAINT' : 'CHECK';
+
+        $alter = sprintf(
+            'DROP %s %s',
+            $keyword,
+            $this->quoteColumnName($constraintName),
+        );
+
+        return new AlterInstructions([$alter]);
+    }
+
+    /**
      * @inheritDoc
      */
     public function createDatabase(string $name, array $options = []): void
@@ -1077,5 +1153,22 @@ class MysqlAdapter extends AbstractAdapter
         $version = $connection->getDriver()->version();
 
         return version_compare($version, '10.7', '>=');
+    }
+
+    /**
+     * Whether the server is MariaDB (as opposed to MySQL).
+     *
+     * @return bool
+     */
+    protected function isMariaDb(): bool
+    {
+        // Prevent infinite connect() loop when MysqlAdapter is used as a stub.
+        if ($this->connection === null || !$this->getOption('connection')) {
+            return false;
+        }
+        $connection = $this->getConnection();
+        $version = $connection->getDriver()->version();
+
+        return stripos($version, 'mariadb') !== false;
     }
 }

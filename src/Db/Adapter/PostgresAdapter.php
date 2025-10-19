@@ -15,6 +15,7 @@ use Cake\I18n\DateTime;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -744,6 +745,81 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         return $instructions;
+    }
+
+    /**
+     * Get an array of check constraints from a particular table.
+     *
+     * @param string $tableName Table name
+     * @return array
+     */
+    protected function getCheckConstraints(string $tableName): array
+    {
+        $parts = $this->getSchemaName($tableName);
+        $query = $this->getSelectBuilder()
+            ->select(['con.conname', 'pg_get_constraintdef(con.oid)'])
+            ->from(['con' => 'pg_constraint'])
+            ->innerJoin(['ns' => 'pg_namespace'], ['ns.oid = con.connamespace'])
+            ->innerJoin(['cls' => 'pg_class'], ['cls.oid = con.conrelid'])
+            ->where([
+                'ns.nspname' => $parts['schema'],
+                'cls.relname' => $parts['table'],
+                'con.contype' => 'c',
+            ]);
+
+        $rows = $query->execute()->fetchAll('assoc');
+        $constraints = [];
+
+        foreach ($rows as $row) {
+            // Extract the expression from the constraint definition (remove "CHECK (" and trailing ")")
+            $definition = $row['pg_get_constraintdef'];
+            if (preg_match('/^CHECK \((.+)\)$/s', $definition, $matches)) {
+                $expression = $matches[1];
+            } else {
+                $expression = $definition;
+            }
+
+            $constraints[] = [
+                'name' => $row['conname'],
+                'expression' => $expression,
+            ];
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
+    {
+        $constraintName = $checkConstraint->getName();
+        if ($constraintName === null) {
+            // Auto-generate constraint name if not provided
+            $parts = $this->getSchemaName($table->getName());
+            $constraintName = $parts['table'] . '_chk_' . substr(md5($checkConstraint->getExpression()), 0, 8);
+        }
+
+        $alter = sprintf(
+            'ADD CONSTRAINT %s CHECK (%s)',
+            $this->quoteColumnName($constraintName),
+            $checkConstraint->getExpression(),
+        );
+
+        return new AlterInstructions([$alter]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
+    {
+        $alter = sprintf(
+            'DROP CONSTRAINT %s',
+            $this->quoteColumnName($constraintName),
+        );
+
+        return new AlterInstructions([$alter]);
     }
 
     /**

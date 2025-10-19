@@ -15,6 +15,7 @@ use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
@@ -474,6 +475,30 @@ abstract class AdapterWrapper implements WrapperInterface
     public function getDeleteBuilder(): DeleteQuery
     {
         return $this->getAdapter()->getDeleteBuilder();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasCheckConstraint(string $tableName, string $constraintName): bool
+    {
+        return $this->getAdapter()->hasCheckConstraint($tableName, $constraintName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addCheckConstraint(TableMetadata $table, CheckConstraint $checkConstraint): void
+    {
+        $this->getAdapter()->addCheckConstraint($table, $checkConstraint);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function dropCheckConstraint(string $tableName, string $constraintName): void
+    {
+        $this->getAdapter()->dropCheckConstraint($tableName, $constraintName);
     }
 
     /**

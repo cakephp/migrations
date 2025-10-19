@@ -88,6 +88,7 @@ Migrations, and will be automatically reversed:
 - Renaming a column
 - Adding an index
 - Adding a foreign key
+- Adding a check constraint
 
 If a command cannot be reversed then Migrations will throw an
 ``IrreversibleMigrationException`` when it's migrating down. If you wish to
@@ -1158,6 +1159,232 @@ involved::
 
         }
     }
+
+Working With Check Constraints
+-------------------------------
+
+.. versionadded:: 5.0.0
+    Check constraints were added in 5.0.0.
+
+Check constraints allow you to enforce data validation rules at the database level.
+They are particularly useful for ensuring data integrity across your application.
+
+.. note::
+
+    Check constraints are supported by MySQL 8.0.16+, PostgreSQL, and SQLite.
+    SQL Server support is planned for a future release.
+
+Adding a Check Constraint
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can add a check constraint to a table using the ``addCheckConstraint()`` method::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $table = $this->table('products');
+            $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
+                  ->addCheckConstraint('price_positive', 'price > 0')
+                  ->save();
+        }
+
+        /**
+         * Migrate Down.
+         */
+        public function down(): void
+        {
+            $table = $this->table('products');
+            $table->dropCheckConstraint('price_positive')
+                  ->save();
+        }
+    }
+
+The first argument is the constraint name, and the second is the SQL expression
+that defines the constraint. The expression should evaluate to a boolean value.
+
+Using the CheckConstraint Fluent Builder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For more complex scenarios, you can use the ``checkConstraint()`` method to get
+a fluent builder::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $table = $this->table('users');
+            $table->addColumn('age', 'integer')
+                  ->addColumn('status', 'string', ['limit' => 20])
+                  ->addCheckConstraint(
+                      $this->checkConstraint()
+                          ->setName('age_valid')
+                          ->setExpression('age >= 18 AND age <= 120')
+                  )
+                  ->addCheckConstraint(
+                      $this->checkConstraint()
+                          ->setName('status_valid')
+                          ->setExpression("status IN ('active', 'inactive', 'pending')")
+                  )
+                  ->save();
+        }
+    }
+
+Auto-Generated Constraint Names
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you don't specify a constraint name, one will be automatically generated based
+on the table name and expression hash::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $table = $this->table('inventory');
+            $table->addColumn('quantity', 'integer')
+                  // Name will be auto-generated like 'inventory_chk_a1b2c3d4'
+                  ->addCheckConstraint(
+                      $this->checkConstraint()
+                          ->setExpression('quantity >= 0')
+                  )
+                  ->save();
+        }
+    }
+
+Complex Check Constraints
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Check constraints can reference multiple columns and use complex SQL expressions::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $table = $this->table('date_ranges');
+            $table->addColumn('start_date', 'date')
+                  ->addColumn('end_date', 'date')
+                  ->addColumn('discount', 'decimal', ['precision' => 5, 'scale' => 2])
+                  ->addCheckConstraint('valid_date_range', 'end_date >= start_date')
+                  ->addCheckConstraint('valid_discount', 'discount BETWEEN 0 AND 100')
+                  ->save();
+        }
+    }
+
+Checking if a Check Constraint Exists
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can verify if a check constraint exists using the ``hasCheckConstraint()`` method::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $table = $this->table('products');
+            $exists = $table->hasCheckConstraint('price_positive');
+            if ($exists) {
+                // do something
+            } else {
+                $table->addCheckConstraint('price_positive', 'price > 0')
+                      ->save();
+            }
+        }
+    }
+
+Dropping a Check Constraint
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To remove a check constraint, use the ``dropCheckConstraint()`` method with the
+constraint name::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $table = $this->table('products');
+            $table->dropCheckConstraint('price_positive')
+                  ->save();
+        }
+
+        /**
+         * Migrate Down.
+         */
+        public function down(): void
+        {
+            $table = $this->table('products');
+            $table->addCheckConstraint('price_positive', 'price > 0')
+                  ->save();
+        }
+    }
+
+.. note::
+
+    Like other table operations, ``dropCheckConstraint()`` requires ``save()``
+    to be called to execute the change.
+
+Database-Specific Behavior
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**MySQL (8.0.16+)**
+
+Check constraints are fully supported. MySQL stores constraint metadata in the
+``INFORMATION_SCHEMA.CHECK_CONSTRAINTS`` table.
+
+**PostgreSQL**
+
+Check constraints are fully supported and stored in the ``pg_constraint`` catalog.
+PostgreSQL allows the most flexible expressions in check constraints.
+
+**SQLite**
+
+Check constraints are supported but with some limitations. SQLite does not support
+``ALTER TABLE`` operations for check constraints, so adding or dropping constraints
+requires recreating the entire table. This is handled automatically by the adapter.
+
+**SQL Server**
+
+Check constraint support for SQL Server is planned for a future release.
 
 Determining Whether a Table Exists
 ----------------------------------

@@ -37,6 +37,7 @@ use Migrations\Db\Action\RenameTable;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -1257,6 +1258,66 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         return $dialect->hasForeignKey($tableName, $columns, $constraint);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasCheckConstraint(string $tableName, string $constraintName): bool
+    {
+        $constraints = $this->getCheckConstraints($tableName);
+
+        foreach ($constraints as $constraint) {
+            if ($constraint['name'] === $constraintName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get check constraints for a table.
+     *
+     * @param string $tableName Table name
+     * @return array
+     */
+    abstract protected function getCheckConstraints(string $tableName): array;
+
+    /**
+     * @inheritDoc
+     */
+    public function addCheckConstraint(TableMetadata $table, CheckConstraint $checkConstraint): void
+    {
+        $instructions = $this->getAddCheckConstraintInstructions($table, $checkConstraint);
+        $this->executeAlterSteps($table->getName(), $instructions);
+    }
+
+    /**
+     * Returns the instructions to add the specified check constraint to a database table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table to add the constraint to
+     * @param \Migrations\Db\Table\CheckConstraint $checkConstraint The check constraint
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions;
+
+    /**
+     * @inheritDoc
+     */
+    public function dropCheckConstraint(string $tableName, string $constraintName): void
+    {
+        $instructions = $this->getDropCheckConstraintInstructions($tableName, $constraintName);
+        $this->executeAlterSteps($tableName, $instructions);
+    }
+
+    /**
+     * Returns the instructions to drop the specified check constraint from a database table.
+     *
+     * @param string $tableName The table name
+     * @param string $constraintName The constraint name
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions;
 
     /**
      * @inheritdoc

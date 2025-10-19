@@ -16,6 +16,7 @@ use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
 use Cake\Database\Schema\TableSchemaInterface;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
@@ -421,6 +422,33 @@ interface AdapterInterface
      * @return bool
      */
     public function hasForeignKey(string $tableName, string|array $columns, ?string $constraint = null): bool;
+
+    /**
+     * Checks to see if a check constraint exists.
+     *
+     * @param string $tableName Table name
+     * @param string $constraintName Constraint name
+     * @return bool
+     */
+    public function hasCheckConstraint(string $tableName, string $constraintName): bool;
+
+    /**
+     * Adds a check constraint to a database table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table Table
+     * @param \Migrations\Db\Table\CheckConstraint $checkConstraint Check constraint
+     * @return void
+     */
+    public function addCheckConstraint(TableMetadata $table, CheckConstraint $checkConstraint): void;
+
+    /**
+     * Drops a check constraint from a database table.
+     *
+     * @param string $tableName Table name
+     * @param string $constraintName Constraint name
+     * @return void
+     */
+    public function dropCheckConstraint(string $tableName, string $constraintName): void;
 
     /**
      * Returns an array of the supported column types.
