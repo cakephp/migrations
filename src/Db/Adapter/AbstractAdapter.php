@@ -1040,10 +1040,22 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function getDefaultValueDefinition(mixed $default, ?string $columnType = null): string
     {
+        $datetimeTypes = [
+            static::PHINX_TYPE_DATETIME,
+            static::PHINX_TYPE_TIMESTAMP,
+            static::PHINX_TYPE_TIME,
+            static::PHINX_TYPE_DATE,
+        ];
+
         if ($default instanceof Literal) {
             $default = (string)$default;
-        } elseif (is_string($default) && stripos($default, 'CURRENT_TIMESTAMP') !== 0) {
-            // Ensure a defaults of CURRENT_TIMESTAMP(3) is not quoted.
+        } elseif (is_string($default) && stripos($default, 'CURRENT_TIMESTAMP') === 0) {
+            // Only skip quoting CURRENT_TIMESTAMP for datetime-related column types.
+            // For other types (like string), it should be quoted as a literal string value.
+            if (!in_array($columnType, $datetimeTypes, true)) {
+                $default = $this->quoteString($default);
+            }
+        } elseif (is_string($default)) {
             $default = $this->quoteString($default);
         } elseif (is_bool($default)) {
             $default = $this->castToBool($default);
