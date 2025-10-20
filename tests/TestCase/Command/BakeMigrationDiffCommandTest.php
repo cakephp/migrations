@@ -60,7 +60,7 @@ class BakeMigrationDiffCommandTest extends TestCase
         if (env('DB_URL_COMPARE')) {
             // Clean up the comparison database each time. Table order is important.
             $connection = ConnectionManager::get('test_comparisons');
-            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog'];
+            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog', 'products'];
             foreach ($tables as $table) {
                 $connection->execute("DROP TABLE IF EXISTS $table");
             }
@@ -238,6 +238,20 @@ class BakeMigrationDiffCommandTest extends TestCase
         Configure::write('Migrations.unsigned_primary_keys', false);
 
         $this->runDiffBakingTest('WithAutoIdIncompatibleUnsignedPrimaryKeys');
+    }
+
+    /**
+     * Tests that baking a diff with decimal column changes uses precision and scale
+     *
+     * Regression test for https://github.com/cakephp/migrations/issues/659
+     *
+     * @return void
+     */
+    public function testBakingDiffDecimalColumn(): void
+    {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
+        $this->runDiffBakingTest('DecimalColumn');
     }
 
     /**

@@ -280,13 +280,15 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 ) {
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
 
+                    $isDecimal = isset($column['type']) && $column['type'] === 'decimal';
+
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
-                        $phinxAttributeName = $attribute;
-                        if ($attribute === 'length') {
-                            $phinxAttributeName = 'limit';
+                        $migrationAttributeName = $attribute;
+                        if ($attribute === 'length' && !$isDecimal) {
+                            $migrationAttributeName = 'limit';
                         }
-                        if (!isset($changedAttributes[$phinxAttributeName])) {
-                            $changedAttributes[$phinxAttributeName] = $column[$attribute];
+                        if (!isset($changedAttributes[$migrationAttributeName])) {
+                            $changedAttributes[$migrationAttributeName] = $column[$attribute];
                         }
                     }
 
@@ -300,12 +302,39 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                         }
                     }
 
-                    if (isset($changedAttributes['length'])) {
-                        if (!isset($changedAttributes['limit'])) {
-                            $changedAttributes['limit'] = $changedAttributes['length'];
+                    // For decimal columns, CakePHP schema uses (length, precision) but migrations use (precision, scale)
+                    // where CakePHP schema's length = migration's precision and CakePHP schema's precision = migration's scale
+                    if ($isDecimal) {
+                        // Track if precision was changed in the original diff (before we rename length)
+                        $precisionChanged = isset($changedAttributes['precision']);
+
+                        // Convert CakePHP schema's length to migration's precision
+                        if (isset($changedAttributes['length'])) {
+                            $changedAttributes['precision'] = $changedAttributes['length'];
+                            unset($changedAttributes['length']);
                         }
 
-                        unset($changedAttributes['length']);
+                        // Convert CakePHP schema's precision to migration's scale
+                        if ($precisionChanged) {
+                            $changedAttributes['scale'] = $column['precision'];
+                            unset($changedAttributes['precision']);
+                        }
+
+                        // Ensure both precision and scale are set for decimal columns
+                        if (isset($column['length']) && !isset($changedAttributes['precision'])) {
+                            $changedAttributes['precision'] = $column['length'];
+                        }
+                        if (isset($column['precision']) && !isset($changedAttributes['scale'])) {
+                            $changedAttributes['scale'] = $column['precision'];
+                        }
+                    } else {
+                        if (isset($changedAttributes['length'])) {
+                            if (!isset($changedAttributes['limit'])) {
+                                $changedAttributes['limit'] = $changedAttributes['length'];
+                            }
+
+                            unset($changedAttributes['length']);
+                        }
                     }
 
                     $this->templateData[$table]['columns']['changed'][$columnName] = $changedAttributes;
