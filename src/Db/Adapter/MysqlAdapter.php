@@ -642,7 +642,10 @@ class MysqlAdapter extends AbstractAdapter
                 $extra = ' ' . implode(' ', $extras);
 
                 if (($row['Default'] !== null)) {
-                    $extra .= $this->getDefaultValueDefinition($row['Default'], $targetColumn->getType());
+                    $columnType = $targetColumn->getType();
+                    // Column::getType() can return string|Literal, but getDefaultValueDefinition expects string|null
+                    $columnTypeName = is_string($columnType) ? $columnType : null;
+                    $extra .= $this->getDefaultValueDefinition($row['Default'], $columnTypeName);
                 }
                 $definition = $row['Type'] . ' ' . $null . $extra . $comment;
 
