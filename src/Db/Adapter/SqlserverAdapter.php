@@ -442,7 +442,7 @@ SQL;
         if ($default === null) {
             $default = 'DEFAULT NULL';
         } else {
-            $default = ltrim($this->getDefaultValueDefinition($default));
+            $default = ltrim($this->getDefaultValueDefinition($default, (string)$newColumn->getType()));
         }
 
         if (!$default) {
