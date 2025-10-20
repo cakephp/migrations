@@ -607,6 +607,24 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getRenameColumnInstructions(string $tableName, string $columnName, string $newColumnName): AlterInstructions
     {
+        $columns = $this->getColumns($tableName);
+        $targetColumn = null;
+
+        foreach ($columns as $column) {
+            if (strcasecmp($column->getName(), $columnName) === 0) {
+                $targetColumn = $column;
+                break;
+            }
+        }
+
+        if ($targetColumn === null) {
+            throw new InvalidArgumentException(sprintf(
+                "The specified column doesn't exist: %s",
+                $columnName,
+            ));
+        }
+
+        // Fetch raw MySQL column info for the full definition string
         $rows = $this->fetchAll(sprintf('SHOW FULL COLUMNS FROM %s', $this->quoteTableName($tableName)));
 
         foreach ($rows as $row) {
@@ -624,8 +642,7 @@ class MysqlAdapter extends AbstractAdapter
                 $extra = ' ' . implode(' ', $extras);
 
                 if (($row['Default'] !== null)) {
-                    $columnTypeInfo = $this->getColumnType($row['Type']);
-                    $extra .= $this->getDefaultValueDefinition($row['Default'], $columnTypeInfo['name']);
+                    $extra .= $this->getDefaultValueDefinition($row['Default'], $targetColumn->getType());
                 }
                 $definition = $row['Type'] . ' ' . $null . $extra . $comment;
 
@@ -1171,66 +1188,5 @@ class MysqlAdapter extends AbstractAdapter
         $version = $connection->getDriver()->version();
 
         return stripos($version, 'mariadb') !== false;
-    }
-
-    /**
-     * Converts a MySQL type string to a Phinx type.
-     *
-     * @param string $mysqlType The MySQL column type string (e.g., 'varchar(255)', 'int(11)', 'datetime')
-     * @return array Array with 'name' key containing the Phinx type name
-     */
-    protected function getColumnType(string $mysqlType): array
-    {
-        // Extract the base type from strings like 'varchar(255)' or 'int(11) unsigned'
-        $mysqlType = strtolower($mysqlType);
-
-        // Remove size/length specifications and attributes
-        $baseType = preg_replace('/\(.*?\)/', '', $mysqlType);
-        $baseType = trim(preg_replace('/\s+(unsigned|signed|zerofill).*/', '', $baseType));
-
-        // Map MySQL types to Phinx types
-        $typeMap = [
-            'tinyint' => static::PHINX_TYPE_TINY_INTEGER,
-            'smallint' => static::PHINX_TYPE_SMALL_INTEGER,
-            'mediumint' => static::PHINX_TYPE_INTEGER,
-            'int' => static::PHINX_TYPE_INTEGER,
-            'integer' => static::PHINX_TYPE_INTEGER,
-            'bigint' => static::PHINX_TYPE_BIG_INTEGER,
-            'decimal' => static::PHINX_TYPE_DECIMAL,
-            'float' => static::PHINX_TYPE_FLOAT,
-            'double' => static::PHINX_TYPE_FLOAT,
-            'real' => static::PHINX_TYPE_FLOAT,
-            'bit' => 'bit',
-            'boolean' => static::PHINX_TYPE_BOOLEAN,
-            'char' => static::PHINX_TYPE_CHAR,
-            'varchar' => static::PHINX_TYPE_STRING,
-            'tinytext' => static::PHINX_TYPE_TEXT,
-            'text' => static::PHINX_TYPE_TEXT,
-            'mediumtext' => static::PHINX_TYPE_TEXT,
-            'longtext' => static::PHINX_TYPE_TEXT,
-            'binary' => static::PHINX_TYPE_BINARY,
-            'varbinary' => static::PHINX_TYPE_VARBINARY,
-            'tinyblob' => static::PHINX_TYPE_TINYBLOB,
-            'blob' => static::PHINX_TYPE_BLOB,
-            'mediumblob' => static::PHINX_TYPE_MEDIUMBLOB,
-            'longblob' => static::PHINX_TYPE_LONGBLOB,
-            'date' => static::PHINX_TYPE_DATE,
-            'datetime' => static::PHINX_TYPE_DATETIME,
-            'timestamp' => static::PHINX_TYPE_TIMESTAMP,
-            'time' => static::PHINX_TYPE_TIME,
-            'year' => static::PHINX_TYPE_YEAR,
-            'enum' => static::PHINX_TYPE_ENUM,
-            'set' => static::PHINX_TYPE_SET,
-            'json' => static::PHINX_TYPE_JSON,
-            'geometry' => static::PHINX_TYPE_GEOMETRY,
-            'point' => static::PHINX_TYPE_POINT,
-            'linestring' => static::PHINX_TYPE_LINESTRING,
-            'polygon' => static::PHINX_TYPE_POLYGON,
-            'uuid' => static::PHINX_TYPE_UUID,
-        ];
-
-        $phinxType = $typeMap[$baseType] ?? static::PHINX_TYPE_STRING;
-
-        return ['name' => $phinxType];
     }
 }
