@@ -85,12 +85,25 @@ class BaseMigration implements MigrationInterface
     /**
      * Constructor
      *
-     * @param int $version The version this migration is
+     * Supports both BaseMigration and Phinx AbstractMigration constructor signatures for compatibility.
+     *
+     * @param string|int $version The migration version (int) or environment name (string, ignored)
+     * @param int|null $versionNumber The migration version number when $version is environment name
+     * @param \Symfony\Component\Console\Input\InputInterface|null $input Input interface (ignored)
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output Output interface (ignored)
+     * @phpstan-param mixed $input
+     * @phpstan-param mixed $output
      */
-    public function __construct(int $version)
+    /** @phpstan-ignore-next-line constructor.unusedParameter */
+    public function __construct($version, ?int $versionNumber = null, $input = null, $output = null)
     {
-        $this->validateVersion($version);
-        $this->version = $version;
+        // Support both BaseMigration($version) and AbstractMigration($env, $version, $input, $output) signatures
+        $actualVersion = is_int($version) ? $version : $versionNumber;
+        if ($actualVersion === null) {
+            throw new \InvalidArgumentException('Migration version must be provided');
+        }
+        $this->validateVersion($actualVersion);
+        $this->version = $actualVersion;
     }
 
     /**
