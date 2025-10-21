@@ -472,6 +472,7 @@ class CakeManager extends Manager
             }
 
             ksort($versions);
+            /** @phpstan-ignore-next-line argument.type */
             $this->setMigrations($versions);
         }
 
