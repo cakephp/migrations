@@ -16,13 +16,14 @@ class TheDiffDecimalChangeMysql extends BaseMigration
     public function up(): void
     {
         $this->table('products')
-            ->addColumn('price', 'decimal', [
+            ->changeColumn('price', 'decimal', [
                 'default' => null,
+                'limit' => null,
                 'null' => false,
                 'precision' => 10,
                 'scale' => 2,
             ])
-            ->create();
+            ->update();
     }
 
     /**
@@ -35,6 +36,13 @@ class TheDiffDecimalChangeMysql extends BaseMigration
      */
     public function down(): void
     {
-        $this->table('products')->drop()->save();
+        $this->table('products')
+            ->changeColumn('price', 'decimal', [
+                'default' => null,
+                'null' => false,
+                'precision' => 8,
+                'scale' => 2,
+            ])
+            ->update();
     }
 }
