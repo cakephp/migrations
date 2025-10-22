@@ -1126,6 +1126,7 @@ class MysqlAdapterTest extends TestCase
             ['column6', 'float', []],
             ['column7', 'decimal', []],
             ['decimal_precision_scale', 'decimal', ['precision' => 10, 'scale' => 2]],
+            ['decimal_precision_scale_zero', 'decimal', ['precision' => 65, 'scale' => 0]],
             ['decimal_limit', 'decimal', ['limit' => 10]],
             ['decimal_precision', 'decimal', ['precision' => 10]],
             ['column8', 'datetime', []],
@@ -2409,5 +2410,49 @@ OUTPUT;
         $quotedTableName = $this->adapter->getConnection()->getDriver()->quoteIdentifier('check_table5');
         $this->expectException(PDOException::class);
         $this->adapter->execute("INSERT INTO {$quotedTableName} (email, status) VALUES ('test@example.com', 'invalid')");
+    }
+
+    /**
+     * Test that DECIMAL columns with scale=0 work correctly.
+     *
+     * This tests the fix for https://github.com/cakephp/phinx/pull/2377
+     * In phinx, the boolean check `$column->getPrecision() && $column->getScale()`
+     * would fail when scale is 0 because 0 is falsy in PHP.
+     *
+     * The 5.x branch uses CakePHP's database layer instead of phinx,
+     * so we need to verify it handles scale=0 correctly.
+     */
+    public function testDecimalWithScaleZero()
+    {
+        // Create table with DECIMAL(65,0)
+        $table = new Table('decimal_scale_zero_test', [], $this->adapter);
+        $table->addColumn('amount', 'decimal', ['precision' => 65, 'scale' => 0])
+            ->create();
+
+        // Verify the column was created with correct precision and scale
+        $columns = $this->adapter->getColumns('decimal_scale_zero_test');
+        $amountColumn = null;
+        foreach ($columns as $column) {
+            if ($column->getName() === 'amount') {
+                $amountColumn = $column;
+                break;
+            }
+        }
+
+        $this->assertNotNull($amountColumn, 'Amount column should exist');
+        $this->assertEquals('decimal', $amountColumn->getType());
+        $this->assertEquals(65, $amountColumn->getPrecision());
+        $this->assertEquals(0, $amountColumn->getScale(), 'Scale should be 0, not null');
+
+        // Verify the actual MySQL column definition
+        $result = $this->adapter->fetchRow('SHOW CREATE TABLE `decimal_scale_zero_test`');
+        $createTableSql = $result['Create Table'];
+
+        // The CREATE TABLE should contain DECIMAL(65,0) - case insensitive
+        $this->assertMatchesRegularExpression(
+            '/decimal\(65,0\)/i',
+            $createTableSql,
+            'CREATE TABLE should contain DECIMAL(65,0) with scale=0 properly defined'
+        );
     }
 }
