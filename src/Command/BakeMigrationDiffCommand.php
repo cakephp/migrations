@@ -303,30 +303,25 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                     }
 
                     // For decimal columns, CakePHP schema uses (length, precision) but migrations use (precision, scale)
-                    // where CakePHP schema's length = migration's precision and CakePHP schema's precision = migration's scale
+                    // Mapping: CakePHP 'length' → migration 'precision' (total digits)
+                    //          CakePHP 'precision' → migration 'scale' (decimal places)
+                    // Example: DECIMAL(6,2) in DB = CakePHP ['length' => 6, 'precision' => 2]
+                    //                               = Migration ['precision' => 6, 'scale' => 2]
                     if ($isDecimal) {
-                        // Track if precision was changed in the original diff (before we rename length)
-                        $precisionChanged = isset($changedAttributes['precision']);
+                        $decimalAttributes = [];
 
-                        // Convert CakePHP schema's length to migration's precision
-                        if (isset($changedAttributes['length'])) {
-                            $changedAttributes['precision'] = $changedAttributes['length'];
-                            unset($changedAttributes['length']);
-                        }
-
-                        // Convert CakePHP schema's precision to migration's scale
-                        if ($precisionChanged) {
-                            $changedAttributes['scale'] = $column['precision'];
-                            unset($changedAttributes['precision']);
+                        // Copy all non-decimal-specific attributes (type, null, default, etc.)
+                        foreach ($changedAttributes as $key => $value) {
+                            if ($key !== 'length' && $key !== 'precision') {
+                                $decimalAttributes[$key] = $value;
+                            }
                         }
 
-                        // Ensure both precision and scale are set for decimal columns
-                        if (isset($column['length']) && !isset($changedAttributes['precision'])) {
-                            $changedAttributes['precision'] = $column['length'];
-                        }
-                        if (isset($column['precision']) && !isset($changedAttributes['scale'])) {
-                            $changedAttributes['scale'] = $column['precision'];
-                        }
+                        // Always set both precision and scale for decimal columns
+                        $decimalAttributes['precision'] = $column['length'];
+                        $decimalAttributes['scale'] = $column['precision'];
+
+                        $changedAttributes = $decimalAttributes;
                     } else {
                         if (isset($changedAttributes['length'])) {
                             if (!isset($changedAttributes['limit'])) {
