@@ -607,6 +607,24 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getRenameColumnInstructions(string $tableName, string $columnName, string $newColumnName): AlterInstructions
     {
+        $columns = $this->getColumns($tableName);
+        $targetColumn = null;
+
+        foreach ($columns as $column) {
+            if (strcasecmp($column->getName(), $columnName) === 0) {
+                $targetColumn = $column;
+                break;
+            }
+        }
+
+        if ($targetColumn === null) {
+            throw new InvalidArgumentException(sprintf(
+                "The specified column doesn't exist: %s",
+                $columnName,
+            ));
+        }
+
+        // Fetch raw MySQL column info for the full definition string
         $rows = $this->fetchAll(sprintf('SHOW FULL COLUMNS FROM %s', $this->quoteTableName($tableName)));
 
         foreach ($rows as $row) {
@@ -624,8 +642,10 @@ class MysqlAdapter extends AbstractAdapter
                 $extra = ' ' . implode(' ', $extras);
 
                 if (($row['Default'] !== null)) {
-                    $phinxTypeInfo = $this->getPhinxType($row['Type']);
-                    $extra .= $this->getDefaultValueDefinition($row['Default'], $phinxTypeInfo['name']);
+                    $columnType = $targetColumn->getType();
+                    // Column::getType() can return string|Literal, but getDefaultValueDefinition expects string|null
+                    $columnTypeName = is_string($columnType) ? $columnType : null;
+                    $extra .= $this->getDefaultValueDefinition($row['Default'], $columnTypeName);
                 }
                 $definition = $row['Type'] . ' ' . $null . $extra . $comment;
 
