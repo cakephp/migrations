@@ -2452,7 +2452,7 @@ OUTPUT;
         $this->assertMatchesRegularExpression(
             '/decimal\(65,0\)/i',
             $createTableSql,
-            'CREATE TABLE should contain DECIMAL(65,0) with scale=0 properly defined'
+            'CREATE TABLE should contain DECIMAL(65,0) with scale=0 properly defined',
         );
     }
 }
