@@ -755,35 +755,8 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function getCheckConstraints(string $tableName): array
     {
-        $parts = $this->getSchemaName($tableName);
-        $query = $this->getSelectBuilder()
-            ->select(['con.conname', 'pg_get_constraintdef(con.oid)'])
-            ->from(['con' => 'pg_constraint'])
-            ->innerJoin(['ns' => 'pg_namespace'], ['ns.oid = con.connamespace'])
-            ->innerJoin(['cls' => 'pg_class'], ['cls.oid = con.conrelid'])
-            ->where([
-                'ns.nspname' => $parts['schema'],
-                'cls.relname' => $parts['table'],
-                'con.contype' => 'c',
-            ]);
-
-        $rows = $query->execute()->fetchAll('assoc');
-        $constraints = [];
-
-        foreach ($rows as $row) {
-            // Extract the expression from the constraint definition (remove "CHECK (" and trailing ")")
-            $definition = $row['pg_get_constraintdef'];
-            if (preg_match('/^CHECK \((.+)\)$/s', $definition, $matches)) {
-                $expression = $matches[1];
-            } else {
-                $expression = $definition;
-            }
-
-            $constraints[] = [
-                'name' => $row['conname'],
-                'expression' => $expression,
-            ];
-        }
+        $dialect = $this->getSchemaDialect();
+        $constraints = $dialect->describeCheckConstraints($tableName);
 
         return $constraints;
     }

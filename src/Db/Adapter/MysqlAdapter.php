@@ -915,34 +915,9 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getCheckConstraints(string $tableName): array
     {
-        $database = (string)$this->getOption('database');
-        $query = $this->getSelectBuilder()
-            ->select(['cc.CONSTRAINT_NAME', 'cc.CHECK_CLAUSE'])
-            ->from(['cc' => 'INFORMATION_SCHEMA.CHECK_CONSTRAINTS'])
-            ->innerJoin(
-                ['tc' => 'INFORMATION_SCHEMA.TABLE_CONSTRAINTS'],
-                [
-                    'tc.CONSTRAINT_SCHEMA = cc.CONSTRAINT_SCHEMA',
-                    'tc.CONSTRAINT_NAME = cc.CONSTRAINT_NAME',
-                ],
-            )
-            ->where([
-                'tc.CONSTRAINT_SCHEMA' => $database,
-                'tc.TABLE_NAME' => $tableName,
-                'tc.CONSTRAINT_TYPE' => 'CHECK',
-            ]);
+        $dialect = $this->getSchemaDialect();
 
-        $rows = $query->execute()->fetchAll('assoc');
-        $constraints = [];
-
-        foreach ($rows as $row) {
-            $constraints[] = [
-                'name' => $row['CONSTRAINT_NAME'],
-                'expression' => $row['CHECK_CLAUSE'],
-            ];
-        }
-
-        return $constraints;
+        return $dialect->describeCheckConstraints($tableName);
     }
 
     /**
