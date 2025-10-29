@@ -15,6 +15,7 @@ use Migrations\Db\Adapter\SqliteAdapter;
 use Migrations\Db\Expression;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -3086,5 +3087,65 @@ INPUT;
         $this->expectException(PDOException::class);
         $table = new Table('non_existing_table', [], $this->adapter);
         $table->addColumn('column', 'string')->update();
+    }
+
+    public function testAddCheckConstraint()
+    {
+        $table = new Table('check_table', [], $this->adapter);
+        $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
+              ->create();
+
+        $checkConstraint = new CheckConstraint('price_positive', 'price > 0');
+        $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
+
+        $this->assertTrue($this->adapter->hasCheckConstraint('check_table', 'price_positive'));
+    }
+
+    public function testHasCheckConstraint()
+    {
+        $table = new Table('check_table3', [], $this->adapter);
+        $table->addColumn('quantity', 'integer')
+              ->create();
+
+        $checkConstraint = new CheckConstraint('quantity_positive', 'quantity > 0');
+        $this->assertFalse($this->adapter->hasCheckConstraint('check_table3', 'quantity_positive'));
+
+        $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
+
+        $this->assertTrue($this->adapter->hasCheckConstraint('check_table3', 'quantity_positive'));
+    }
+
+    public function testDropCheckConstraint()
+    {
+        $table = new Table('check_table4', [], $this->adapter);
+        $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
+              ->create();
+
+        $checkConstraint = new CheckConstraint('price_check', 'price BETWEEN 0 AND 1000');
+        $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
+        $this->assertTrue($this->adapter->hasCheckConstraint('check_table4', 'price_check'));
+
+        $this->adapter->dropCheckConstraint('check_table4', 'price_check');
+        $this->assertFalse($this->adapter->hasCheckConstraint('check_table4', 'price_check'));
+    }
+
+    public function testCheckConstraintWithComplexExpression()
+    {
+        $table = new Table('check_table5', [], $this->adapter);
+        $table->addColumn('email', 'string', ['limit' => 255])
+              ->addColumn('status', 'string', ['limit' => 20])
+              ->create();
+
+        $checkConstraint = new CheckConstraint(
+            'status_valid',
+            "status IN ('active', 'inactive', 'pending')",
+        );
+        $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
+        $this->assertTrue($this->adapter->hasCheckConstraint('check_table5', 'status_valid'));
+
+        // Verify the constraint is actually enforced
+        $quotedTableName = $this->adapter->getConnection()->getDriver()->quoteIdentifier('check_table5');
+        $this->expectException(PDOException::class);
+        $this->adapter->execute("INSERT INTO {$quotedTableName} (email, status) VALUES ('test@example.com', 'invalid')");
     }
 }

@@ -2327,10 +2327,7 @@ OUTPUT;
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
               ->create();
 
-        $checkConstraint = new CheckConstraint();
-        $checkConstraint->setName('price_positive')
-                       ->setExpression('price > 0');
-
+        $checkConstraint = new CheckConstraint('price_positive', 'price > 0');
         $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
 
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table', 'price_positive'));
@@ -2342,8 +2339,7 @@ OUTPUT;
         $table->addColumn('age', 'integer')
               ->create();
 
-        $checkConstraint = new CheckConstraint();
-        $checkConstraint->setExpression('age >= 18');
+        $checkConstraint = new CheckConstraint('', 'age >= 18');
 
         $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
 
@@ -2363,10 +2359,7 @@ OUTPUT;
         $table->addColumn('quantity', 'integer')
               ->create();
 
-        $checkConstraint = new CheckConstraint();
-        $checkConstraint->setName('quantity_positive')
-                       ->setExpression('quantity > 0');
-
+        $checkConstraint = new CheckConstraint('quantity_positive', 'quantity > 0');
         $this->assertFalse($this->adapter->hasCheckConstraint('check_table3', 'quantity_positive'));
 
         $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
@@ -2380,10 +2373,7 @@ OUTPUT;
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
               ->create();
 
-        $checkConstraint = new CheckConstraint();
-        $checkConstraint->setName('price_check')
-                       ->setExpression('price BETWEEN 0 AND 1000');
-
+        $checkConstraint = new CheckConstraint('price_check', 'price BETWEEN 0 AND 1000');
         $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table4', 'price_check'));
 
@@ -2398,10 +2388,10 @@ OUTPUT;
               ->addColumn('status', 'string', ['limit' => 20])
               ->create();
 
-        $checkConstraint = new CheckConstraint();
-        $checkConstraint->setName('status_valid')
-                       ->setExpression("status IN ('active', 'inactive', 'pending')");
-
+        $checkConstraint = new CheckConstraint(
+            'status_valid',
+            "status IN ('active', 'inactive', 'pending')",
+        );
         $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table5', 'status_valid'));
 

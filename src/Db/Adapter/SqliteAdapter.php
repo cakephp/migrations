@@ -1588,11 +1588,10 @@ PCRE_PATTERN;
         $instructions->addPostStep(function ($state) use ($constraintName) {
             // Remove the check constraint from the CREATE TABLE statement
             // Match CONSTRAINT name CHECK (expression) or just CHECK (expression)
-            $quotedName = preg_quote($this->possiblyQuotedIdentifierRegex($constraintName, false), '/');
+            $quotedName = $this->possiblyQuotedIdentifierRegex($constraintName, false);
             $pattern = "/,?\s*CONSTRAINT\s+{$quotedName}\s+CHECK\s*\([^)]+(?:\([^)]*\)[^)]*)*\)/is";
 
             $sql = preg_replace($pattern, '', (string)$state['createSQL'], 1);
-
             if ($sql) {
                 $this->execute($sql);
             }
