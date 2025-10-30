@@ -96,6 +96,8 @@ class Dump extends AbstractCommand
         ];
         $tables = $this->getTablesToBake($collection, $options);
 
+        sort($tables);
+
         $dump = [];
         if ($tables) {
             foreach ($tables as $table) {
