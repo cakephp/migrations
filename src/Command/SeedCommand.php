@@ -17,8 +17,8 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Core\Configure;
 use Cake\Event\EventDispatcherTrait;
+use Exception;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 
@@ -50,33 +50,45 @@ class SeedCommand extends Command
      */
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
-        $parser->setDescription([
+        $description = [
             'Seed the database with data',
             '',
-            'Runs a seeder script that can populate the database with data, or run mutations',
+            'Runs a seeder script that can populate the database with data, or run mutations:',
             '',
-            '<info>migrations seed --connection secondary --seed UserSeed</info>',
+            '<info>migrations seed Posts</info>',
+            '<info>migrations seed Users,Posts</info>',
+            '<info>migrations seed --plugin Demo</info>',
+            '<info>migrations seed --connection secondary</info>',
+            '<info>migrations seed -q</info> (skip confirmation prompt)',
             '',
-            'The `--seed` option can be supplied multiple times to run more than one seed',
-        ])->addOption('plugin', [
-            'short' => 'p',
-            'help' => 'The plugin to run seeds in',
-        ])->addOption('connection', [
-            'short' => 'c',
-            'help' => 'The datasource connection to use',
-            'default' => 'default',
-        ])->addOption('dry-run', [
-            'short' => 'x',
-            'help' => 'Dump queries to stdout instead of executing them',
-            'boolean' => true,
-        ])->addOption('source', [
-            'short' => 's',
-            'default' => ConfigInterface::DEFAULT_SEED_FOLDER,
-            'help' => 'The folder where your seeds are.',
-        ])->addOption('seed', [
-            'help' => 'The name of the seed that you want to run.',
-            'multiple' => true,
-        ]);
+            'Runs all seeds if no seed names are specified. When running all seeds,',
+            'a confirmation prompt is shown unless in quiet mode (-q).',
+        ];
+
+        $parser->setDescription($description)
+            ->addArgument('seed', [
+                'help' => 'The name(s) of the seed(s) to run (comma-separated for multiple). Run all seeds if not specified.',
+                'required' => false,
+            ])
+            ->addOption('plugin', [
+                'short' => 'p',
+                'help' => 'The plugin to run seeds in',
+            ])
+            ->addOption('connection', [
+                'short' => 'c',
+                'help' => 'The datasource connection to use',
+                'default' => 'default',
+            ])
+            ->addOption('dry-run', [
+                'short' => 'd',
+                'help' => 'Dump queries to stdout instead of executing them',
+                'boolean' => true,
+            ])
+            ->addOption('source', [
+                'short' => 's',
+                'default' => ConfigInterface::DEFAULT_SEED_FOLDER,
+                'help' => 'The folder where your seeds are.',
+            ]);
 
         return $parser;
     }
@@ -119,10 +131,20 @@ class SeedCommand extends Command
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
 
-        if (version_compare(Configure::version(), '5.2.0', '>=')) {
-            $seeds = (array)$args->getArrayOption('seed');
-        } else {
-            $seeds = (array)$args->getMultipleOption('seed');
+        // Get seed names from arguments
+        $seeds = [];
+        if ($args->hasArgument('seed')) {
+            $seedArg = $args->getArgument('seed');
+            if ($seedArg !== null) {
+                // Split by comma to support comma-separated list
+                $seedList = explode(',', $seedArg);
+                foreach ($seedList as $seed) {
+                    $trimmed = trim($seed);
+                    if ($trimmed !== '') {
+                        $seeds[] = $trimmed;
+                    }
+                }
+            }
         }
 
         $versionOrder = $config->getVersionOrder();
@@ -136,10 +158,53 @@ class SeedCommand extends Command
 
         $start = microtime(true);
         if (!$seeds) {
+            // Get all available seeds and ask for confirmation
+            try {
+                $availableSeeds = $manager->getSeeds();
+            } catch (Exception $e) {
+                $io->error('Failed to load seeds: ' . $e->getMessage());
+
+                return static::CODE_ERROR;
+            }
+
+            if (!$availableSeeds) {
+                $io->warning('No seeds found.');
+
+                return self::CODE_SUCCESS;
+            }
+
+            // Display the seeds that will be run and ask for confirmation
+            // Skip confirmation in quiet mode
+            if ($io->level() > ConsoleIo::QUIET) {
+                $io->out('');
+                $io->out('<info>The following seeds will be executed:</info>');
+                foreach ($availableSeeds as $seed) {
+                    $seedName = $seed->getName();
+                    // Remove 'Seed' suffix for display
+                    if (str_ends_with($seedName, 'Seed')) {
+                        $seedName = substr($seedName, 0, -4);
+                    }
+                    $io->out('  - ' . $seedName);
+                }
+                $io->out('');
+                $io->out('<warning>Note:</warning> Seeds do not track execution state. They will run');
+                $io->out('regardless of whether they have been executed before. Ensure your');
+                $io->out('seeds are idempotent or manually verify they should be (re)run.');
+                $io->out('');
+
+                // Ask for confirmation
+                $continue = $io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
+                if ($continue !== 'y') {
+                    $io->warning('Seed operation aborted.');
+
+                    return self::CODE_SUCCESS;
+                }
+            }
+
             // run all the seed(ers)
             $manager->seed();
         } else {
-            // run seed(ers) specified in a comma-separated list of classes
+            // run seed(ers) specified as arguments
             foreach ($seeds as $seed) {
                 $manager->seed(trim($seed));
             }
