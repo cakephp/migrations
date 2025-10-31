@@ -59,10 +59,9 @@ class SeedCommand extends Command
             '<info>migrations seed Users,Posts</info>',
             '<info>migrations seed --plugin Demo</info>',
             '<info>migrations seed --connection secondary</info>',
-            '<info>migrations seed -q</info> (skip confirmation prompt)',
             '',
-            'Runs all seeds if no seed names are specified. When running all seeds,',
-            'a confirmation prompt is shown unless in quiet mode (-q).',
+            'Runs all seeds if no seed names are specified. When running all seeds',
+            'in an interactive terminal, a confirmation prompt is shown.',
         ];
 
         $parser->setDescription($description)
@@ -174,8 +173,9 @@ class SeedCommand extends Command
             }
 
             // Display the seeds that will be run and ask for confirmation
-            // Skip confirmation in quiet mode
-            if ($io->level() > ConsoleIo::QUIET) {
+            // Skip confirmation in quiet mode or non-interactive environments
+            $isInteractive = function_exists('posix_isatty') && @posix_isatty(STDIN);
+            if ($io->level() > ConsoleIo::QUIET && $isInteractive) {
                 $io->out('');
                 $io->out('<info>The following seeds will be executed:</info>');
                 foreach ($availableSeeds as $seed) {
