@@ -8,6 +8,7 @@ use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
+use Cake\Database\Driver\Mysql;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\MysqlAdapter;
@@ -2343,14 +2344,14 @@ OUTPUT;
 
         $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
 
-        // The constraint should exist with an auto-generated name
-        $constraints = $this->adapter->fetchAll(sprintf(
-            "SELECT cc.CONSTRAINT_NAME FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS cc INNER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON cc.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA AND cc.CONSTRAINT_NAME = tc.CONSTRAINT_NAME WHERE tc.CONSTRAINT_SCHEMA = '%s' AND tc.TABLE_NAME = 'check_table2'",
-            $this->config['database'],
-        ));
+        $driver = $this->adapter->getConnection()->getDriver();
+        assert($driver instanceof Mysql);
 
+        $dialect = $driver->schemaDialect();
+        $constraints = $dialect->describeCheckConstraints('check_table2');
         $this->assertCount(1, $constraints);
-        $this->assertStringContainsString('check_table2_chk_', $constraints[0]['CONSTRAINT_NAME']);
+        $expected = $driver->isMariaDb() ? 'CONSTRAINT_1' : 'check_table2_chk_';
+        $this->assertStringContainsString($expected, $constraints[0]['name']);
     }
 
     public function testHasCheckConstraint()
