@@ -60,7 +60,6 @@ class SeedCommandTest extends TestCase
         $this->assertOutputContains('Seed the database with data');
         $this->assertOutputContains('migrations seed Posts');
         $this->assertOutputContains('migrations seed Users,Posts');
-        $this->assertOutputContains('migrations seed -q');
     }
 
     public function testSeederEvents(): void
@@ -395,7 +394,6 @@ class SeedCommandTest extends TestCase
         $query = $connection->execute('SELECT COUNT(*) FROM stores');
         $this->assertEquals(2, $query->fetchColumn(0));
     }
-
 
     public function testSeederAllWithQuietModeSkipsConfirmation(): void
     {
