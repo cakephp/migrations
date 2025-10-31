@@ -1085,7 +1085,7 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($foreignKey->getReferencedColumns() as $column) {
             $refColumnNames[] = $this->quoteColumnName($column);
         }
-        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()->getName()) . ' (' . implode(',', $refColumnNames) . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
         $onDelete = $foreignKey->getOnDelete();
         if ($onDelete) {
             $def .= ' ON DELETE ' . $onDelete;

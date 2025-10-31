@@ -1676,7 +1676,7 @@ PCRE_PATTERN;
         foreach ($foreignKey->getReferencedColumns() as $column) {
             $refColumnNames[] = $this->quoteColumnName($column);
         }
-        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()->getName()) . ' (' . implode(',', $refColumnNames) . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= ' ON DELETE ' . $foreignKey->getOnDelete();
         }

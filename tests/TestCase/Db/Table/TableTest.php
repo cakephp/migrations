@@ -129,7 +129,7 @@ class TableTest extends TestCase
         $actions = $this->getPendingActions($table);
         $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
         $key = $actions[0]->getForeignKey();
-        $this->assertSame($key->getReferencedTable()->getName(), 'users');
+        $this->assertSame($key->getReferencedTable(), 'users');
         $this->assertSame($key->getReferencedColumns(), ['id']);
         $this->assertSame($key->getColumns(), ['user_id']);
         $this->assertSame($key->getName(), 'fk_user_id');
@@ -152,7 +152,7 @@ class TableTest extends TestCase
         $actions = $this->getPendingActions($table);
         $this->assertInstanceOf(AddForeignKey::class, $actions[0]);
         $key = $actions[0]->getForeignKey();
-        $this->assertSame($key->getReferencedTable()->getName(), 'users');
+        $this->assertSame($key->getReferencedTable(), 'users');
         $this->assertSame($key->getReferencedColumns(), ['id']);
         $this->assertSame($key->getColumns(), ['user_id']);
         $this->assertSame($key->getName(), 'fk_user_id');

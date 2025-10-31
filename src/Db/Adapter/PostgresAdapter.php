@@ -925,7 +925,7 @@ class PostgresAdapter extends AbstractAdapter
         );
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName) .
         ' FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")' .
-        " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable()->getName())} (\"" .
+        " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable())} (\"" .
         implode('", "', $foreignKey->getReferencedColumns()) . '")';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";

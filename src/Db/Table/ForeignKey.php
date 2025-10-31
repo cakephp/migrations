@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Table;
 
+use Cake\Database\Schema\ForeignKey as DatabaseForeignKey;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -19,7 +20,7 @@ use RuntimeException;
  * @see \Migrations\BaseMigration::foreignKey()
  * @see \Migrations\Db\Table::addForeignKey()
  */
-class ForeignKey
+class ForeignKey extends DatabaseForeignKey
 {
     public const CASCADE = 'CASCADE';
     public const RESTRICT = 'RESTRICT';
@@ -30,206 +31,59 @@ class ForeignKey
     public const NOT_DEFERRED = 'NOT DEFERRABLE';
 
     /**
+     * An allow list of valid actions
+     *
+     * Both the constant values from CakePHP and backwards compatibility with migrations
+     * are supported.
+     *
+     * @var array<string>
+     */
+    protected array $validActions = [
+        DatabaseForeignKey::CASCADE,
+        DatabaseForeignKey::RESTRICT,
+        DatabaseForeignKey::SET_NULL,
+        DatabaseForeignKey::NO_ACTION,
+        DatabaseForeignKey::SET_DEFAULT,
+        self::CASCADE,
+        self::RESTRICT,
+        self::SET_NULL,
+        self::NO_ACTION,
+        self::SET_DEFAULT,
+        'NO_ACTION',
+        'SET_DEFAULT',
+        'SET_NULL',
+    ];
+
+    /**
      * @var array<string>
      */
     protected static array $validOptions = ['delete', 'update', 'constraint', 'name', 'deferrable'];
 
     /**
-     * @var string[]
-     */
-    protected array $columns = [];
-
-    /**
-     * @var \Migrations\Db\Table\TableMetadata
-     */
-    protected TableMetadata $referencedTable;
-
-    /**
-     * @var string[]
-     */
-    protected array $referencedColumns = [];
-
-    /**
-     * @var string|null
-     */
-    protected ?string $onDelete = null;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $onUpdate = null;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $name = null;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $deferrableMode = null;
-
-    /**
-     * Sets the foreign key columns.
+     * Constructor
      *
-     * @param string[]|string $columns Columns
-     * @return $this
+     * @param string $name The name of the index.
+     * @param array<string> $columns The columns to index.
+     * @param ?string $referencedTable The columns to index.
+     * @param array<string> $referencedColumns The columns in $referencedTable that this key references.
+     * @param ?string $delete The action to take when the referenced row is deleted.
+     * @param ?string $update The action to take when the referenced row is updated.
      */
-    public function setColumns(array|string $columns)
-    {
-        $this->columns = is_string($columns) ? [$columns] : $columns;
-
-        return $this;
-    }
-
-    /**
-     * Gets the foreign key columns.
-     *
-     * @return string[]
-     */
-    public function getColumns(): array
-    {
-        return $this->columns;
-    }
-
-    /**
-     * Sets the foreign key referenced table.
-     *
-     * @param \Migrations\Db\Table\TableMetadata|string $table The table this KEY is pointing to
-     * @return $this
-     */
-    public function setReferencedTable(TableMetadata|string $table)
-    {
-        if (is_string($table)) {
-            $table = new TableMetadata($table);
+    public function __construct(
+        protected string $name = '',
+        protected array $columns = [],
+        protected ?string $referencedTable = null,
+        protected array $referencedColumns = [],
+        ?string $delete = null,
+        ?string $update = null,
+        ?string $deferrable = null,
+    ) {
+        $this->type = self::FOREIGN;
+        $this->delete = $this->normalizeAction($delete ?? self::NO_ACTION);
+        $this->update = $this->normalizeAction($update ?? self::NO_ACTION);
+        if ($deferrable) {
+            $this->deferrable = $this->normalizeDeferrable($deferrable);
         }
-        $this->referencedTable = $table;
-
-        return $this;
-    }
-
-    /**
-     * Gets the foreign key referenced table.
-     *
-     * @return \Migrations\Db\Table\TableMetadata
-     */
-    public function getReferencedTable(): TableMetadata
-    {
-        return $this->referencedTable;
-    }
-
-    /**
-     * Sets the foreign key referenced columns.
-     *
-     * @param string|string[] $referencedColumns Referenced columns
-     * @return $this
-     */
-    public function setReferencedColumns(array|string $referencedColumns)
-    {
-        $referencedColumns = is_string($referencedColumns) ? [$referencedColumns] : $referencedColumns;
-        $this->referencedColumns = $referencedColumns;
-
-        return $this;
-    }
-
-    /**
-     * Gets the foreign key referenced columns.
-     *
-     * @return string[]
-     */
-    public function getReferencedColumns(): array
-    {
-        return $this->referencedColumns;
-    }
-
-    /**
-     * Sets ON DELETE action for the foreign key.
-     *
-     * @param string $onDelete On Delete
-     * @return $this
-     */
-    public function setOnDelete(string $onDelete)
-    {
-        $this->onDelete = $this->normalizeAction($onDelete);
-
-        return $this;
-    }
-
-    /**
-     * Gets ON DELETE action for the foreign key.
-     *
-     * @return string|null
-     */
-    public function getOnDelete(): ?string
-    {
-        return $this->onDelete;
-    }
-
-    /**
-     * Gets ON UPDATE action for the foreign key.
-     *
-     * @return string|null
-     */
-    public function getOnUpdate(): ?string
-    {
-        return $this->onUpdate;
-    }
-
-    /**
-     * Sets ON UPDATE action for the foreign key.
-     *
-     * @param string $onUpdate On Update
-     * @return $this
-     */
-    public function setOnUpdate(string $onUpdate)
-    {
-        $this->onUpdate = $this->normalizeAction($onUpdate);
-
-        return $this;
-    }
-
-    /**
-     * Set the constraint name for the foreign key.
-     *
-     * @param string $name Constraint name
-     * @return $this
-     */
-    public function setName(string $name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get the constraint name if set.
-     *
-     * @return string|null
-     */
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Sets deferrable mode for the foreign key.
-     *
-     * @param string $deferrableMode Constraint
-     * @return $this
-     */
-    public function setDeferrableMode(string $deferrableMode)
-    {
-        $this->deferrableMode = $this->normalizeDeferrable($deferrableMode);
-
-        return $this;
-    }
-
-    /**
-     * Gets deferrable mode for the foreign key.
-     */
-    public function getDeferrableMode(): ?string
-    {
-        return $this->deferrableMode;
     }
 
     /**
@@ -263,44 +117,155 @@ class ForeignKey
     }
 
     /**
-     * From passed value checks if it's correct and fixes if needed
+     * Convert from migrations sql snippet to cakephp/database constant names.
      *
-     * @param string $action Action
-     * @throws \InvalidArgumentException
+     * @param string $action The action to normalize
      * @return string
      */
     protected function normalizeAction(string $action): string
     {
-        $constantName = 'static::' . str_replace(' ', '_', strtoupper(trim($action)));
-        if (!defined($constantName)) {
-            throw new InvalidArgumentException('Unknown action passed: ' . $action);
-        }
+        $result = parent::normalizeAction($action);
 
-        return constant($constantName);
+        return match ($result) {
+            self::CASCADE => DatabaseForeignKey::CASCADE,
+            self::RESTRICT => DatabaseForeignKey::RESTRICT,
+            self::SET_NULL => DatabaseForeignKey::SET_NULL,
+            self::NO_ACTION => DatabaseForeignKey::NO_ACTION,
+            self::SET_DEFAULT => DatabaseForeignKey::SET_DEFAULT,
+            'NO_ACTION' => DatabaseForeignKey::NO_ACTION,
+            'SET_NULL' => DatabaseForeignKey::SET_NULL,
+            'SET_DEFAULT' => DatabaseForeignKey::SET_DEFAULT,
+            default => throw new InvalidArgumentException(sprintf('Invalid foreign key action: %s', $action)),
+        };
     }
 
     /**
-     * From passed value checks if it's correct and fixes if needed
+     * Map between cakephp/database constant names and
+     * migrations sql snippets.
      *
-     * @param string $deferrable Deferrable
-     * @throws \InvalidArgumentException
+     * These constants are different for backwards compatibility reasons.
+     * Longer term, there should probably be a public API in cakephp/database
+     * for converting between constants and sql.
+     *
+     * @param string $action The action to map
      * @return string
      */
-    protected function normalizeDeferrable(string $deferrable): string
+    protected function mapAction(string $action): string
     {
-        $mapping = [
-            'DEFERRED' => ForeignKey::DEFERRED,
-            'IMMEDIATE' => ForeignKey::IMMEDIATE,
-            'NOT DEFERRED' => ForeignKey::NOT_DEFERRED,
-            ForeignKey::DEFERRED => ForeignKey::DEFERRED,
-            ForeignKey::IMMEDIATE => ForeignKey::IMMEDIATE,
-            ForeignKey::NOT_DEFERRED => ForeignKey::NOT_DEFERRED,
-        ];
-        $normalized = strtoupper(str_replace('_', ' ', $deferrable));
-        if (array_key_exists($normalized, $mapping)) {
-            return $mapping[$normalized];
-        }
+        return match ($action) {
+            DatabaseForeignKey::CASCADE => self::CASCADE,
+            DatabaseForeignKey::RESTRICT => self::RESTRICT,
+            DatabaseForeignKey::SET_NULL => self::SET_NULL,
+            DatabaseForeignKey::NO_ACTION => self::NO_ACTION,
+            default => $action,
+        };
+    }
 
-        throw new InvalidArgumentException('Unknown deferrable passed: ' . $deferrable);
+    /**
+     * Sets deferrable mode for the foreign key.
+     *
+     * @param string $deferrableMode Constraint
+     * @return $this
+     */
+    public function setDeferrableMode(string $deferrableMode)
+    {
+        $this->deferrable = $this->normalizeDeferrable($deferrableMode);
+
+        return $this;
+    }
+
+    /**
+     * Gets deferrable mode for the foreign key.
+     */
+    public function getDeferrableMode(): ?string
+    {
+        return $this->mapDeferrable($this->deferrable);
+    }
+
+    /**
+     * Convert from migrations sql snippet to cakephp/database constant names.
+     *
+     * @param string $action The action to normalize
+     * @return string
+     */
+    protected function normalizeDeferrable(string $action): string
+    {
+        $result = parent::normalizeDeferrable($action);
+
+        return match ($result) {
+            self::DEFERRED => DatabaseForeignKey::DEFERRED,
+            self::IMMEDIATE => DatabaseForeignKey::IMMEDIATE,
+            self::NOT_DEFERRED => DatabaseForeignKey::NOT_DEFERRED,
+            'NOT_DEFERRED' => DatabaseForeignKey::NOT_DEFERRED,
+            default => throw new InvalidArgumentException(sprintf('Invalid foreign key deferrable: %s', $action)),
+        };
+    }
+
+    /**
+     * Map between cakephp/database constant names and
+     * migrations sql snippets.
+     *
+     * These constants are different for backwards compatibility reasons.
+     * Longer term, there should probably be a public API in cakephp/database
+     * for converting between constants and sql.
+     *
+     * @param string $action The action to map
+     * @return ?string
+     */
+    protected function mapDeferrable(?string $action): ?string
+    {
+        return match ($action) {
+            DatabaseForeignKey::DEFERRED => self::DEFERRED,
+            DatabaseForeignKey::IMMEDIATE => self::IMMEDIATE,
+            DatabaseForeignKey::NOT_DEFERRED => self::NOT_DEFERRED,
+            null => null,
+            default => $action,
+        };
+    }
+
+    /**
+     * Sets ON DELETE action for the foreign key.
+     *
+     * @param string $onDelete On Delete
+     * @return $this
+     */
+    public function setOnDelete(string $onDelete)
+    {
+        $this->delete = $this->normalizeAction($onDelete);
+
+        return $this;
+    }
+
+    /**
+     * Gets ON DELETE action for the foreign key.
+     *
+     * @return string|null
+     */
+    public function getOnDelete(): ?string
+    {
+        return $this->mapAction($this->getDelete());
+    }
+
+    /**
+     * Sets ON UPDATE action for the foreign key.
+     *
+     * @param string $onDelete On Delete
+     * @return $this
+     */
+    public function setOnUpdate(string $onUpdate)
+    {
+        $this->update = $this->normalizeAction($onUpdate);
+
+        return $this;
+    }
+
+    /**
+     * Gets ON UPDATE action for the foreign key.
+     *
+     * @return string|null
+     */
+    public function getOnUpdate(): ?string
+    {
+        return $this->mapAction($this->getUpdate());
     }
 }

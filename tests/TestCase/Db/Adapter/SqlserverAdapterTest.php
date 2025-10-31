@@ -847,7 +847,7 @@ class SqlserverAdapterTest extends TestCase
         $table->addColumn('ref_table_id', 'integer')->save();
 
         $fk = new ForeignKey();
-        $fk->setReferencedTable($refTable->getTable())
+        $fk->setReferencedTable($refTable->getTable()->getName())
             ->setColumns(['ref_table_id'])
             ->setReferencedColumns(['id'])
             ->setName('fk1');

@@ -56,8 +56,8 @@ class AddForeignKey extends Action
             $referencedColumns = [$referencedColumns]; // str to array
         }
 
-        if (is_string($referencedTable)) {
-            $referencedTable = new TableMetadata($referencedTable);
+        if ($referencedTable instanceof TableMetadata) {
+            $referencedTable = $referencedTable->getName();
         }
 
         // Shimming old 4.x
@@ -66,15 +66,13 @@ class AddForeignKey extends Action
             unset($options['constraint']);
         }
 
-        $fk = new ForeignKey();
-        $fk->setReferencedTable($referencedTable)
-           ->setColumns($columns)
-           ->setReferencedColumns($referencedColumns)
-           ->setOptions($options);
-
-        if ($name !== null) {
-            $fk->setName($name);
-        }
+        $fk = new ForeignKey(
+            name: $name ?? '',
+            columns: (array)$columns,
+            referencedTable: $referencedTable,
+            referencedColumns: $referencedColumns,
+        );
+        $fk->setOptions($options);
 
         return new AddForeignKey($table, $fk);
     }
