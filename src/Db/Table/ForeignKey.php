@@ -250,7 +250,7 @@ class ForeignKey extends DatabaseForeignKey
     /**
      * Sets ON UPDATE action for the foreign key.
      *
-     * @param string $onUpd On update action
+     * @param string $onUpdate On update action
      * @return $this
      */
     public function setOnUpdate(string $onUpdate)
