@@ -867,9 +867,8 @@ class PostgresAdapter extends AbstractAdapter
         $parts = $this->getSchemaName($tableName);
         $columnNames = (array)$index->getColumns();
 
-        if (is_string($index->getName())) {
-            $indexName = $index->getName();
-        } else {
+        $indexName = $index->getName();
+        if ($indexName === null || strlen($indexName) === 0) {
             $indexName = sprintf('%s_%s', $parts['table'], implode('_', $columnNames));
         }
 

@@ -1454,7 +1454,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     ));
                     break;
 
-                case $action instanceof DropIndex && $action->getIndex()->getName() !== null:
+                case $action instanceof DropIndex && $action->getIndex()->getName():
                     /** @var \Migrations\Db\Action\DropIndex $action */
                     $instructions->merge($this->getDropIndexByNameInstructions(
                         $table->getName(),
@@ -1462,7 +1462,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     ));
                     break;
 
-                case $action instanceof DropIndex && $action->getIndex()->getName() === null:
+                case $action instanceof DropIndex && !$action->getIndex()->getName():
                     /** @var \Migrations\Db\Action\DropIndex $action */
                     $instructions->merge($this->getDropIndexByColumnsInstructions(
                         $table->getName(),

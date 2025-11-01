@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Table;
 
+use Cake\Database\Schema\Index as DatabaseIndex;
 use RuntimeException;
 
 /**
@@ -18,7 +19,7 @@ use RuntimeException;
  * @see \Migrations\BaseMigration::index()
  * @see \Migrations\Db\Table::addIndex()
  */
-class Index
+class Index extends DatabaseIndex
 {
     /**
      * @var string
@@ -36,44 +37,28 @@ class Index
     public const FULLTEXT = 'fulltext';
 
     /**
-     * @var string[]|null
+     * Constructor
+     *
+     * @param string $name The name of the index.
+     * @param array<string> $columns The columns to index.
+     * @param string $type The type of index, e.g. 'index', 'fulltext'.
+     * @param array<string, int>|int|null $length The length of the index.
+     * @param array<string>|null $order The sort order of the index columns.
+     * @param array<string>|null $include The included columns for covering indexes.
+     * @param ?string $where The where clause for partial indexes.
+     * @param ?string $concurrent Whether to create the index concurrently.
      */
-    protected ?array $columns = null;
-
-    /**
-     * @var string
-     */
-    protected string $type = self::INDEX;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $name = null;
-
-    /**
-     * @var int|array|null
-     */
-    protected int|array|null $limit = null;
-
-    /**
-     * @var string[]|null
-     */
-    protected ?array $order = null;
-
-    /**
-     * @var string[]|null
-     */
-    protected ?array $includedColumns = null;
-
-    /**
-     * @var bool
-     */
-    protected bool $concurrent = false;
-
-    /**
-     * @var string|null The where clause for partial indexes.
-     */
-    protected ?string $where = null;
+    public function __construct(
+        protected string $name = '',
+        protected array $columns = [],
+        protected string $type = self::INDEX,
+        protected array|int|null $length = null,
+        protected ?array $order = null,
+        protected ?array $include = null,
+        protected ?string $where = null,
+        protected bool $concurrent = false,
+    ) {
+    }
 
     /**
      * Sets the index columns.
@@ -86,16 +71,6 @@ class Index
         $this->columns = is_string($columns) ? [$columns] : $columns;
 
         return $this;
-    }
-
-    /**
-     * Gets the index columns.
-     *
-     * @return string[]|null
-     */
-    public function getColumns(): ?array
-    {
-        return $this->columns;
     }
 
     /**
@@ -122,29 +97,6 @@ class Index
     }
 
     /**
-     * Sets the index name.
-     *
-     * @param string $name Name
-     * @return $this
-     */
-    public function setName(string $name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Gets the index name.
-     *
-     * @return string|null
-     */
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    /**
      * Sets the index limit.
      *
      * In MySQL indexes can have limit clauses to control the number of
@@ -152,10 +104,11 @@ class Index
      *
      * @param int|array $limit limit value or array of limit value
      * @return $this
+     * @deprecated 5.0 Use setLength() instead.
      */
     public function setLimit(int|array $limit)
     {
-        $this->limit = $limit;
+        $this->setLength($limit);
 
         return $this;
     }
@@ -164,61 +117,11 @@ class Index
      * Gets the index limit.
      *
      * @return int|array|null
+     * @deprecated 5.0 Use getLength() instead.
      */
     public function getLimit(): int|array|null
     {
-        return $this->limit;
-    }
-
-    /**
-     * Sets the index columns sort order.
-     *
-     * @param string[] $order column name sort order key value pair
-     * @return $this
-     */
-    public function setOrder(array $order)
-    {
-        $this->order = $order;
-
-        return $this;
-    }
-
-    /**
-     * Gets the index columns sort order.
-     *
-     * @return string[]|null
-     */
-    public function getOrder(): ?array
-    {
-        return $this->order;
-    }
-
-    /**
-     * Sets the index included columns for a 'covering index'.
-     *
-     * In postgres and sqlserver, indexes can define additional non-key
-     * columns to build 'covering indexes'. This feature allows you to
-     * further optimize well-crafted queries that leverage specific
-     * indexes by reading all data from the index.
-     *
-     * @param string[] $includedColumns Columns
-     * @return $this
-     */
-    public function setInclude(array $includedColumns)
-    {
-        $this->includedColumns = $includedColumns;
-
-        return $this;
-    }
-
-    /**
-     * Gets the index included columns.
-     *
-     * @return string[]|null
-     */
-    public function getInclude(): ?array
-    {
-        return $this->includedColumns;
+        return $this->getLength();
     }
 
     /**
@@ -244,29 +147,6 @@ class Index
     public function getConcurrently(): bool
     {
         return $this->concurrent;
-    }
-
-    /**
-     * Set the where clause for partial indexes.
-     *
-     * @param ?string $where The where clause for partial indexes.
-     * @return $this
-     */
-    public function setWhere(?string $where)
-    {
-        $this->where = $where;
-
-        return $this;
-    }
-
-    /**
-     * Get the where clause for partial indexes.
-     *
-     * @return ?string
-     */
-    public function getWhere(): ?string
-    {
-        return $this->where;
     }
 
     /**

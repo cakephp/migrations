@@ -1635,7 +1635,7 @@ PCRE_PATTERN;
             $def = 'INDEX';
         }
         $indexName = $index->getName();
-        if (!is_string($indexName)) {
+        if ($indexName === null || strlen($indexName) === 0) {
             $indexName = $table->getName() . '_';
             foreach ((array)$index->getColumns() as $column) {
                 $indexName .= $column . '_';
