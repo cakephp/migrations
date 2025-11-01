@@ -229,6 +229,7 @@ class ForeignKey extends DatabaseForeignKey
      *
      * @param string $onDelete On Delete action
      * @return $this
+     * @deprecated 5.0 Use setDelete() instead.
      */
     public function setOnDelete(string $onDelete)
     {
@@ -241,6 +242,7 @@ class ForeignKey extends DatabaseForeignKey
      * Gets ON DELETE action for the foreign key.
      *
      * @return string|null
+     * @deprecated 5.0 Use getDelete() instead.
      */
     public function getOnDelete(): ?string
     {
@@ -252,6 +254,7 @@ class ForeignKey extends DatabaseForeignKey
      *
      * @param string $onUpdate On update action
      * @return $this
+     * @deprecated 5.0 Use setUpdate() instead.
      */
     public function setOnUpdate(string $onUpdate)
     {
@@ -264,6 +267,7 @@ class ForeignKey extends DatabaseForeignKey
      * Gets ON UPDATE action for the foreign key.
      *
      * @return string|null
+     * @deprecated 5.0 Use getUpdate() instead.
      */
     public function getOnUpdate(): ?string
     {
