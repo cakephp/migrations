@@ -23,7 +23,7 @@ class ForeignKeyTest extends TestCase
 
     public function testName(): void
     {
-        $this->assertNull($this->fk->getName());
+        $this->assertSame('', $this->fk->getName());
         $this->assertSame($this->fk, $this->fk->setName('fk_name'));
         $this->assertEquals('fk_name', $this->fk->getName());
     }
@@ -48,8 +48,8 @@ class ForeignKeyTest extends TestCase
 
     public function testInitiallyActionsEmpty()
     {
-        $this->assertNull($this->fk->getOnDelete());
-        $this->assertNull($this->fk->getOnUpdate());
+        $this->assertSame(ForeignKey::NO_ACTION, $this->fk->getOnDelete());
+        $this->assertSame(ForeignKey::NO_ACTION, $this->fk->getOnUpdate());
     }
 
     /**

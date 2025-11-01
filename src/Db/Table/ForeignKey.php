@@ -124,6 +124,7 @@ class ForeignKey extends DatabaseForeignKey
      */
     protected function normalizeAction(string $action): string
     {
+        $action = str_replace(' ', '_', strtoupper(trim($action)));
         $result = parent::normalizeAction($action);
 
         return match ($result) {
