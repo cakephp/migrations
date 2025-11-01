@@ -227,7 +227,7 @@ class ForeignKey extends DatabaseForeignKey
     /**
      * Sets ON DELETE action for the foreign key.
      *
-     * @param string $onDelete On Delete
+     * @param string $onDelete On Delete action
      * @return $this
      */
     public function setOnDelete(string $onDelete)
@@ -250,7 +250,7 @@ class ForeignKey extends DatabaseForeignKey
     /**
      * Sets ON UPDATE action for the foreign key.
      *
-     * @param string $onDelete On Delete
+     * @param string $onUpd On update action
      * @return $this
      */
     public function setOnUpdate(string $onUpdate)
