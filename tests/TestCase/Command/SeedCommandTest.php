@@ -143,11 +143,11 @@ class SeedCommandTest extends TestCase
     public function testSeederImplicitAll(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test');
+        $this->exec('migrations seed -c test -q');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
-        $this->assertOutputContains('All Done');
+        $this->assertOutputNotContains('The following seeds will be executed:');
+        $this->assertOutputNotContains('Do you want to continue?');
 
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test');
@@ -282,10 +282,8 @@ class SeedCommandTest extends TestCase
         $connection = ConnectionManager::get('test');
         $initialCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
 
-        $this->exec('migrations seed -c test --dry-run');
+        $this->exec('migrations seed -c test --dry-run -q');
         $this->assertExitSuccess();
-        $this->assertOutputContains('DRY-RUN mode enabled');
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
         $this->assertEquals($initialCount, $finalCount, 'Dry-run mode should not modify database when running all seeds');
@@ -398,15 +396,12 @@ class SeedCommandTest extends TestCase
     public function testSeederAllWithQuietModeSkipsConfirmation(): void
     {
         $this->createTables();
-        // In test environment (non-TTY), confirmation is automatically skipped
-        // This test verifies that seeds run without prompting
-        $this->exec('migrations seed -c test');
+        // Quiet mode should skip confirmation prompt
+        $this->exec('migrations seed -c test -q');
 
         $this->assertExitSuccess();
         $this->assertOutputNotContains('The following seeds will be executed:');
         $this->assertOutputNotContains('Do you want to continue?');
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
-        $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test');

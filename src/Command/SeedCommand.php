@@ -172,15 +172,12 @@ class SeedCommand extends Command
                 return self::CODE_SUCCESS;
             }
 
-            // Display the seeds that will be run and ask for confirmation
-            // Skip confirmation in quiet mode or non-interactive environments
-            $isInteractive = function_exists('posix_isatty') && @posix_isatty(STDIN);
-            if ($io->level() > ConsoleIo::QUIET && $isInteractive) {
+            // Skip confirmation in quiet mode
+            if ($io->level() > ConsoleIo::QUIET) {
                 $io->out('');
                 $io->out('<info>The following seeds will be executed:</info>');
                 foreach ($availableSeeds as $seed) {
                     $seedName = $seed->getName();
-                    // Remove 'Seed' suffix for display
                     if (str_ends_with($seedName, 'Seed')) {
                         $seedName = substr($seedName, 0, -4);
                     }
