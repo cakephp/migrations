@@ -46,7 +46,7 @@ class Index extends DatabaseIndex
      * @param array<string>|null $order The sort order of the index columns.
      * @param array<string>|null $include The included columns for covering indexes.
      * @param ?string $where The where clause for partial indexes.
-     * @param ?string $concurrent Whether to create the index concurrently.
+     * @param bool $concurrent Whether to create the index concurrently.
      */
     public function __construct(
         protected string $name = '',

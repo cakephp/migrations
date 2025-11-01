@@ -805,7 +805,7 @@ SQL;
         $columnNames = (array)$index->getColumns();
 
         $indexName = $index->getName();
-        if ($indexName === null || strlen($indexName) === 0) {
+        if ($indexName == '') {
             $indexName = sprintf('%s_%s', $parts['table'], implode('_', $columnNames));
         }
         $order = $index->getOrder() ?? [];
