@@ -10,7 +10,6 @@ use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
-use ReflectionProperty;
 
 class SeedCommandTest extends TestCase
 {
