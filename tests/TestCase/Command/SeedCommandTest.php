@@ -38,19 +38,11 @@ class SeedCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS stores');
     }
 
-    protected function resetOutput(): void
-    {
-        if ($this->_out) {
-            $property = new ReflectionProperty($this->_out, '_out');
-            $property->setValue($this->_out, []);
-        }
-    }
-
     protected function createTables(): void
     {
         $this->exec('migrations migrate -c test -s TestsMigrations --no-lock');
         $this->assertExitSuccess();
-        $this->resetOutput();
+        $this->_in = null;
     }
 
     public function testHelp(): void
@@ -402,6 +394,22 @@ class SeedCommandTest extends TestCase
         $this->assertExitSuccess();
         $this->assertOutputNotContains('The following seeds will be executed:');
         $this->assertOutputNotContains('Do you want to continue?');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(1, $query->fetchColumn(0));
+    }
+
+    public function testSeederAllHasConfirmation(): void
+    {
+        $this->createTables();
+        // Confirm run all.
+        $this->exec('migrations seed -c test', ['y']);
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('The following seeds will be executed:');
+        $this->assertOutputContains('Do you want to continue?');
 
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test');
