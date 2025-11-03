@@ -150,9 +150,10 @@ class BuiltinBackend implements BackendInterface
     {
         $options['source'] ??= ConfigInterface::DEFAULT_SEED_FOLDER;
         $seed = $options['seed'] ?? null;
+        $force = $options['force'] ?? false;
 
         $manager = $this->getManager($options);
-        $manager->seed($seed);
+        $manager->seed($seed, $force);
 
         return true;
     }

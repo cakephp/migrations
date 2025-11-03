@@ -87,6 +87,13 @@ class MigrationsTest extends TestCase
                 $connection->execute($stmt);
             }
         }
+        if (in_array('cake_seeds', $allTables)) {
+            $ormTable = $this->getTableLocator()->get('cake_seeds', ['connection' => $this->Connection]);
+            $query = $connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
+            foreach ($query as $stmt) {
+                $connection->execute($stmt);
+            }
+        }
         $this->Connection = $connection;
     }
 
@@ -790,7 +797,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $seed = $this->migrations->seed(['source' => 'Seeds']);
+        $seed = $this->migrations->seed(['source' => 'Seeds', 'force' => true]);
         $this->assertTrue($seed);
         $result = $this->Connection->selectQuery()
             ->select(['*'])
@@ -810,7 +817,7 @@ class MigrationsTest extends TestCase
         ];
         $this->assertEquals($expected, $result);
 
-        $seed = $this->migrations->seed(['source' => 'AltSeeds']);
+        $seed = $this->migrations->seed(['source' => 'AltSeeds', 'force' => true]);
         $this->assertTrue($seed);
         $result = $this->Connection->selectQuery()
             ->select(['*'])

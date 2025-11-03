@@ -518,7 +518,7 @@ class SeedCommandTest extends TestCase
         // Reset the seed
         $this->exec('seeds reset -c test', ['y']);
         $this->assertExitSuccess();
-        $this->assertOutputContains('Reset all seeds');
+        $this->assertOutputContains('All seeds will be reset:');
 
         // Verify seed can be run again without --force
         $this->exec('seeds run -c test NumbersSeed');
