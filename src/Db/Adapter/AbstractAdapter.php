@@ -43,6 +43,7 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
+use Migrations\SeedInterface;
 use PDOException;
 use RuntimeException;
 use function Cake\Core\deprecationWarning;
@@ -71,6 +72,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @var string
      */
     protected string $schemaTableName = 'phinxlog';
+
+    /**
+     * @var string
+     */
+    protected string $seedSchemaTableName = 'cake_seeds';
 
     /**
      * @var array
@@ -327,6 +333,29 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * Gets the seed schema table name.
+     *
+     * @return string
+     */
+    public function getSeedSchemaTableName(): string
+    {
+        return $this->seedSchemaTableName;
+    }
+
+    /**
+     * Sets the seed schema table name.
+     *
+     * @param string $seedSchemaTableName Seed Schema Table Name
+     * @return $this
+     */
+    public function setSeedSchemaTableName(string $seedSchemaTableName)
+    {
+        $this->seedSchemaTableName = $seedSchemaTableName;
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getColumnForType(string $columnName, string $type, array $options): Column
@@ -372,6 +401,26 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         } catch (Exception $exception) {
             throw new InvalidArgumentException(
                 'There was a problem creating the schema table: ' . $exception->getMessage(),
+                (int)$exception->getCode(),
+                $exception,
+            );
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createSeedSchemaTable(): void
+    {
+        try {
+            $table = new Table($this->getSeedSchemaTableName(), [], $this);
+            $table->addColumn('plugin', 'string', ['limit' => 100, 'default' => null, 'null' => true])
+                ->addColumn('seed_name', 'string', ['limit' => 100, 'null' => false])
+                ->addColumn('executed_at', 'timestamp', ['default' => null, 'null' => true])
+                ->save();
+        } catch (Exception $exception) {
+            throw new InvalidArgumentException(
+                'There was a problem creating the seed schema table: ' . $exception->getMessage(),
                 (int)$exception->getCode(),
                 $exception,
             );
@@ -942,6 +991,87 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             ])
             ->where([
                 'version' => $migration->getVersion(),
+            ]);
+        $this->executeQuery($query);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSeedLog(): array
+    {
+        $query = $this->getSelectBuilder();
+        $query->select('*')
+            ->from($this->getSeedSchemaTableName())
+            ->orderBy(['executed_at' => 'ASC', 'id' => 'ASC']);
+
+        try {
+            $rows = $query->execute()->fetchAll('assoc');
+        } catch (PDOException $e) {
+            if (!$this->isDryRunEnabled()) {
+                throw $e;
+            }
+            $rows = [];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function seedExecuted(SeedInterface $seed, string $executedTime): AdapterInterface
+    {
+        $plugin = null;
+        $className = get_class($seed);
+
+        if (str_contains($className, '\\')) {
+            $parts = explode('\\', $className);
+            if (count($parts) > 1 && $parts[0] !== 'App') {
+                $plugin = $parts[0];
+            }
+        }
+
+        $seedName = substr($seed->getName(), 0, 100);
+
+        $query = $this->getInsertBuilder();
+        $query->insert(['plugin', 'seed_name', 'executed_at'])
+            ->into($this->getSeedSchemaTableName())
+            ->values([
+                'plugin' => $plugin,
+                'seed_name' => $seedName,
+                'executed_at' => $executedTime,
+            ]);
+        $this->executeQuery($query);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeSeedFromLog(SeedInterface $seed): AdapterInterface
+    {
+        $plugin = null;
+        $className = get_class($seed);
+
+        if (str_contains($className, '\\')) {
+            $parts = explode('\\', $className);
+            if (count($parts) > 1 && $parts[0] !== 'App') {
+                $plugin = $parts[0];
+            }
+        }
+
+        $seedName = $seed->getName();
+
+        $query = $this->getDeleteBuilder();
+        $query->delete()
+            ->from($this->getSeedSchemaTableName())
+            ->where([
+                'seed_name' => $seedName,
+                'plugin IS' => $plugin,
             ]);
         $this->executeQuery($query);
 

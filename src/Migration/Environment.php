@@ -150,6 +150,10 @@ class Environment
         // Run the seeder
         $seed->{SeedInterface::RUN}();
 
+        // Record the seed execution
+        $executedTime = date('Y-m-d H:i:s');
+        $adapter->seedExecuted($seed, $executedTime);
+
         // commit the transaction if the adapter supports it
         if ($atomic) {
             $adapter->commitTransaction();

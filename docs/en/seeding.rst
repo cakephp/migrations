@@ -184,11 +184,41 @@ The run method is automatically invoked by Migrations when you execute the
 ``cake migration seed`` command. You should use this method to insert your test
 data.
 
+Seed Execution Tracking
+========================
+
+Seeds track their execution state in the ``cake_seeds`` database table. By default,
+a seed will only run once. If you attempt to run a seed that has already been
+executed, it will be skipped with an "already executed" message.
+
+To re-run a seed that has already been executed, use the ``--force`` flag:
+
+.. code-block:: bash
+
+    bin/cake migrations seed UserSeeder --force
+
+You can check which seeds have been executed using the status command:
+
+.. code-block:: bash
+
+    bin/cake migrations seed:status
+
+To reset a seed's execution state (allowing it to run again without ``--force``):
+
+.. code-block:: bash
+
+    bin/cake migrations seed:reset UserSeeder
+
+    # Reset multiple seeds
+    bin/cake migrations seed:reset UserSeeder,PostSeeder
+
+    # Reset all seeds
+    bin/cake migrations seed:reset --all
+
 .. note::
 
-    Unlike with migrations, seeds do not keep track of which seed classes have
-    been run. This means database seeds can be run repeatedly. Keep this in
-    mind when developing them.
+    When re-running seeds with ``--force``, be careful to ensure your seeds are
+    idempotent (safe to run multiple times) or they may create duplicate data.
 
 The Init Method
 ===============
@@ -246,10 +276,28 @@ You can also use the full seed name including the ``Seed`` suffix:
 
 Both forms are supported and work identically.
 
+Automatic Dependency Execution
+-------------------------------
+
+When you run a seed that has dependencies, the system will automatically check if
+those dependencies have been executed. If any dependencies haven't run yet, they
+will be executed automatically before the current seed runs. This ensures proper
+execution order and prevents foreign key constraint violations.
+
+For example, if you run:
+
+.. code-block:: bash
+
+    bin/cake migrations seed ShoppingCartSeed
+
+And ``ShoppingCartSeed`` depends on ``UserSeed`` and ``ShopItemSeed``, the system
+will automatically execute those dependencies first if they haven't been run yet.
+
 .. note::
 
-    Dependencies are only considered when executing all seed classes (default behavior).
-    They won't be considered when running specific seed classes.
+    Dependencies that have already been executed (according to the ``cake_seeds``
+    table) will be skipped, unless you use the ``--force`` flag which will
+    re-execute all seeds including dependencies.
 
 
 Calling a Seed from another Seed

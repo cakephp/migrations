@@ -20,6 +20,7 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
+use Migrations\SeedInterface;
 
 /**
  * Adapter Interface.
@@ -176,6 +177,44 @@ interface AdapterInterface
      * @return void
      */
     public function createSchemaTable(): void;
+
+    /**
+     * Creates the seed schema table.
+     *
+     * @return void
+     */
+    public function createSeedSchemaTable(): void;
+
+    /**
+     * Gets the seed schema table name.
+     *
+     * @return string
+     */
+    public function getSeedSchemaTableName(): string;
+
+    /**
+     * Get all seed log entries.
+     *
+     * @return array<int, mixed>
+     */
+    public function getSeedLog(): array;
+
+    /**
+     * Records a seed being executed.
+     *
+     * @param \Migrations\SeedInterface $seed Seed
+     * @param string $executedTime Executed Time
+     * @return $this
+     */
+    public function seedExecuted(SeedInterface $seed, string $executedTime);
+
+    /**
+     * Removes a seed from the log.
+     *
+     * @param \Migrations\SeedInterface $seed Seed
+     * @return $this
+     */
+    public function removeSeedFromLog(SeedInterface $seed);
 
     /**
      * Returns the adapter type.

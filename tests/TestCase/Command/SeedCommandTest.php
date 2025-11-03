@@ -35,6 +35,7 @@ class SeedCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS numbers');
         $connection->execute('DROP TABLE IF EXISTS letters');
         $connection->execute('DROP TABLE IF EXISTS stores');
+        $connection->execute('DROP TABLE IF EXISTS cake_seeds');
     }
 
     protected function createTables(): void
@@ -445,5 +446,85 @@ class SeedCommandTest extends TestCase
 
         $query = $connection->execute('SELECT COUNT(*) FROM letters');
         $this->assertEquals(2, $query->fetchColumn(0));
+    }
+
+    public function testSeedStateTracking(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+
+        // First run should execute the seed
+        $this->exec('migrations seed -c test NumbersSeed');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('All Done');
+
+        // Verify data was inserted
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(1, $query->fetchColumn(0));
+
+        // Second run should skip the seed (already executed)
+        $this->exec('migrations seed -c test NumbersSeed');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('NumbersSeed:</info> <comment>already executed');
+        $this->assertOutputNotContains('seeding');
+
+        // Verify no additional data was inserted
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(1, $query->fetchColumn(0));
+
+        // Run with --force should re-execute
+        $this->exec('migrations seed -c test NumbersSeed --force');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+
+        // Verify data was inserted again (now 2 records)
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(2, $query->fetchColumn(0));
+    }
+
+    public function testSeedStatusCommand(): void
+    {
+        $this->createTables();
+
+        // Check status before running seeds
+        $this->exec('migrations seed:status -c test');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('Current seed execution status:');
+        $this->assertOutputContains('pending');
+
+        // Run a seed
+        $this->exec('migrations seed -c test NumbersSeed');
+        $this->assertExitSuccess();
+
+        // Check status after running seed
+        $this->exec('migrations seed:status -c test');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('executed');
+        $this->assertOutputContains('NumbersSeed');
+    }
+
+    public function testSeedResetCommand(): void
+    {
+        $this->createTables();
+
+        // Run a seed
+        $this->exec('migrations seed -c test NumbersSeed');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
+
+        // Reset the seed
+        $this->_in = ['y'];
+        $this->exec('migrations seed:reset -c test NumbersSeed');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('Reset: NumbersSeed');
+
+        // Verify seed can be run again without --force
+        $this->exec('migrations seed -c test NumbersSeed');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
+        $this->assertOutputNotContains('already executed');
     }
 }
