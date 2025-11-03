@@ -1499,4 +1499,19 @@ OUTPUT;
         $this->assertEquals(20, $res[0]['id']);
         $this->assertEquals(50, $res[1]['id']);
     }
+
+    public function testInsertOrSkipThrowsException()
+    {
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('email', 'string', ['limit' => 255])
+            ->addColumn('name', 'string')
+            ->create();
+
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessage('INSERT IGNORE is not supported for SQL Server');
+
+        $table->insertOrSkip([
+            ['email' => 'test@example.com', 'name' => 'John'],
+        ])->save();
+    }
 }

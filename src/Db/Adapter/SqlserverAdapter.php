@@ -14,6 +14,7 @@ use Cake\I18n\Date;
 use Cake\I18n\DateTime;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
@@ -999,9 +1000,9 @@ SQL;
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row): void
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
     {
-        $sql = $this->generateInsertSql($table, $row);
+        $sql = $this->generateInsertSql($table, $row, $mode);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
 
@@ -1025,9 +1026,9 @@ SQL;
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
     {
-        $sql = $this->generateBulkInsertSql($table, $rows);
+        $sql = $this->generateBulkInsertSql($table, $rows, $mode);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
 
@@ -1104,5 +1105,17 @@ SQL;
     protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
     {
         throw new BadMethodCallException('Check constraints are not yet implemented for SQL Server adapter');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getInsertPrefix(?InsertMode $mode = null): string
+    {
+        if ($mode === InsertMode::IGNORE) {
+            throw new BadMethodCallException('INSERT IGNORE is not supported for SQL Server. Use a MERGE statement or check for existence before inserting.');
+        }
+
+        return parent::getInsertPrefix($mode);
     }
 }

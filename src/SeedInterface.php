@@ -143,6 +143,19 @@ interface SeedInterface
     public function insert(string $tableName, array $data): void;
 
     /**
+     * Insert data into a table, skipping rows that would cause duplicate key conflicts.
+     *
+     * This method is idempotent and safe to run multiple times.
+     * Uses INSERT IGNORE (MySQL), ON CONFLICT DO NOTHING (PostgreSQL),
+     * or INSERT OR IGNORE (SQLite).
+     *
+     * @param string $tableName Table name
+     * @param array $data Data
+     * @return void
+     */
+    public function insertOrSkip(string $tableName, array $data): void;
+
+    /**
      * Checks to see if a table exists.
      *
      * @param string $tableName Table name

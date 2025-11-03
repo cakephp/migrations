@@ -184,6 +184,16 @@ class BaseSeed implements SeedInterface
     /**
      * {@inheritDoc}
      */
+    public function insertOrSkip(string $tableName, array $data): void
+    {
+        // convert to table object
+        $table = new Table($tableName, [], $this->getAdapter());
+        $table->insertOrSkip($data)->save();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function hasTable(string $tableName): bool
     {
         return $this->getAdapter()->hasTable($tableName);

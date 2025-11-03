@@ -15,6 +15,7 @@ use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
@@ -136,17 +137,17 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row): void
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
     {
-        $this->getAdapter()->insert($table, $row);
+        $this->getAdapter()->insert($table, $row, $mode);
     }
 
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
     {
-        $this->getAdapter()->bulkinsert($table, $rows);
+        $this->getAdapter()->bulkinsert($table, $rows, $mode);
     }
 
     /**

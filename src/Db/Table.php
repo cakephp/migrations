@@ -67,6 +67,13 @@ class Table
     protected array $data = [];
 
     /**
+     * Insert mode for data operations
+     *
+     * @var \Migrations\Db\InsertMode|null
+     */
+    protected ?InsertMode $insertMode = null;
+
+    /**
      * Primary key for this table.
      * Can either be a string or an array in case of composite
      * primary key.
@@ -262,7 +269,7 @@ class Table
     /**
      * Sets an array of data to be inserted.
      *
-     * @param array $data Data
+     * @param array<string, mixed> $data Data
      * @return $this
      */
     public function setData(array $data)
@@ -625,6 +632,21 @@ class Table
     }
 
     /**
+     * Insert data into the table, skipping rows that would cause duplicate key conflicts.
+     *
+     * This method is idempotent and safe to run multiple times.
+     *
+     * @param array $data array of data in the same format as insert()
+     * @return $this
+     */
+    public function insertOrSkip(array $data)
+    {
+        $this->insertMode = InsertMode::IGNORE;
+
+        return $this->insert($data);
+    }
+
+    /**
      * Creates a table from the object instance.
      *
      * @return void
@@ -743,10 +765,10 @@ class Table
         }
 
         if ($bulk) {
-            $this->getAdapter()->bulkinsert($this->table, $this->getData());
+            $this->getAdapter()->bulkinsert($this->table, $this->getData(), $this->insertMode);
         } else {
             foreach ($this->getData() as $row) {
-                $this->getAdapter()->insert($this->table, $row);
+                $this->getAdapter()->insert($this->table, $row, $this->insertMode);
             }
         }
 

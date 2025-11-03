@@ -14,6 +14,7 @@ use Cake\I18n\Date;
 use Cake\I18n\DateTime;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
@@ -205,8 +206,8 @@ class PostgresAdapter extends AbstractAdapter
      * Apply postgres specific translations between the values using migrations constants/types
      * and the cakephp/database constants. Over time, these can be aligned.
      *
-     * @param array $data The raw column data.
-     * @return array Modified column data.
+     * @param array<string, mixed> $data The raw column data.
+     * @return array<string, mixed> Modified column data.
      */
     protected function mapColumnData(array $data): array
     {
@@ -1152,7 +1153,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row): void
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
     {
         $sql = sprintf(
             'INSERT INTO %s ',
@@ -1172,8 +1173,10 @@ class PostgresAdapter extends AbstractAdapter
             $override = self::OVERRIDE_SYSTEM_VALUE . ' ';
         }
 
+        $conflictClause = $this->getConflictClause($mode);
+
         if ($this->isDryRunEnabled()) {
-            $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ');';
+            $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $conflictClause . ';';
             $this->io->out($sql);
         } else {
             $values = [];
@@ -1188,7 +1191,7 @@ class PostgresAdapter extends AbstractAdapter
                     $vals[] = $value;
                 }
             }
-            $sql .= ' ' . $override . 'VALUES (' . implode(',', $values) . ')';
+            $sql .= ' ' . $override . 'VALUES (' . implode(',', $values) . ')' . $conflictClause;
             $this->getConnection()->execute($sql, $vals);
         }
     }
@@ -1196,7 +1199,7 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
     {
         $sql = sprintf(
             'INSERT INTO %s ',
@@ -1213,11 +1216,13 @@ class PostgresAdapter extends AbstractAdapter
 
         $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $keys)) . ') ' . $override . 'VALUES ';
 
+        $conflictClause = $this->getConflictClause($mode);
+
         if ($this->isDryRunEnabled()) {
             $values = array_map(function ($row) {
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
-            $sql .= implode(', ', $values) . ';';
+            $sql .= implode(', ', $values) . $conflictClause . ';';
             $this->io->out($sql);
         } else {
             $vals = [];
@@ -1245,9 +1250,24 @@ class PostgresAdapter extends AbstractAdapter
                 $query = '(' . implode(', ', $values) . ')';
                 $queries[] = $query;
             }
-            $sql .= implode(',', $queries);
+            $sql .= implode(',', $queries) . $conflictClause;
             $this->getConnection()->execute($sql, $vals);
         }
+    }
+
+    /**
+     * Get the ON CONFLICT clause based on insert mode.
+     *
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @return string
+     */
+    protected function getConflictClause(?InsertMode $mode = null): string
+    {
+        if ($mode === InsertMode::IGNORE) {
+            return ' ON CONFLICT DO NOTHING';
+        }
+
+        return '';
     }
 
     /**

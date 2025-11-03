@@ -16,6 +16,7 @@ use Cake\Database\Query\InsertQuery;
 use Cake\Database\Query\SelectQuery;
 use Cake\Database\Query\UpdateQuery;
 use Cake\Database\Schema\TableSchemaInterface;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
@@ -313,18 +314,20 @@ interface AdapterInterface
      *
      * @param \Migrations\Db\Table\TableMetadata $table Table where to insert data
      * @param array $row Row
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @return void
      */
-    public function insert(TableMetadata $table, array $row): void;
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void;
 
     /**
      * Inserts data into a table in a bulk.
      *
      * @param \Migrations\Db\Table\TableMetadata $table Table where to insert data
      * @param array $rows Rows
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @return void
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void;
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void;
 
     /**
      * Quotes a table name for use in a query.
