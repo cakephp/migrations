@@ -208,6 +208,14 @@ class BaseSeed implements SeedInterface
     /**
      * {@inheritDoc}
      */
+    public function isIdempotent(): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function call(string $seeder, array $options = []): void
     {
         $io = $this->getIo();

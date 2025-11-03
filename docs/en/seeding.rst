@@ -214,6 +214,72 @@ To reset all seeds' execution state (allowing them to run again without ``--forc
     When re-running seeds with ``--force``, be careful to ensure your seeds are
     idempotent (safe to run multiple times) or they may create duplicate data.
 
+Idempotent Seeds
+================
+
+Some seeds are designed to be run multiple times safely (idempotent), such as seeds
+that update configuration or reference data. For these seeds, you can override the
+``isIdempotent()`` method to skip tracking entirely:
+
+.. code-block:: php
+
+    <?php
+    declare(strict_types=1);
+
+    use Migrations\BaseSeed;
+
+    class ConfigSeed extends BaseSeed
+    {
+        /**
+         * Mark this seed as idempotent.
+         * It will run every time without being tracked.
+         */
+        public function isIdempotent(): bool
+        {
+            return true;
+        }
+
+        public function run(): void
+        {
+            // This seed will run every time, so make it safe to run multiple times
+            $this->execute("
+                INSERT INTO settings (setting_key, setting_value)
+                VALUES ('app_version', '2.0.0')
+                ON DUPLICATE KEY UPDATE setting_value = '2.0.0'
+            ");
+
+            // Or check before inserting
+            $exists = $this->fetchRow(
+                "SELECT COUNT(*) as count FROM settings WHERE setting_key = 'maintenance_mode'"
+            );
+
+            if ($exists['count'] == 0) {
+                $this->table('settings')->insert([
+                    'setting_key' => 'maintenance_mode',
+                    'setting_value' => 'false',
+                ])->save();
+            }
+        }
+    }
+
+When ``isIdempotent()`` returns ``true``:
+
+- The seed will **not** be tracked in the ``cake_seeds`` table
+- The seed will run **every time** you execute ``seeds run``
+- You must ensure the seed's ``run()`` method handles duplicate executions safely
+
+This is useful for:
+
+- Configuration seeds that should always reflect current values
+- Reference data that may need periodic updates
+- Seeds that use ``INSERT ... ON DUPLICATE KEY UPDATE`` or similar patterns
+- Development/testing seeds that need to run repeatedly
+
+.. warning::
+
+    Only mark a seed as idempotent if you've verified it's safe to run multiple times.
+    Otherwise, you may create duplicate data or other unexpected behavior.
+
 The Init Method
 ===============
 

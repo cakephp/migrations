@@ -551,8 +551,8 @@ class Manager
             return;
         }
 
-        // Check if seed has already been executed
-        if (!$force && $this->isSeedExecuted($seed)) {
+        // Check if seed has already been executed (skip for idempotent seeds)
+        if (!$force && !$seed->isIdempotent() && $this->isSeedExecuted($seed)) {
             $this->printSeedStatus($seed, 'already executed');
 
             return;
