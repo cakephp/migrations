@@ -516,8 +516,7 @@ class SeedCommandTest extends TestCase
         $this->assertOutputContains('seeding');
 
         // Reset the seed
-        $this->_in = ['y'];
-        $this->exec('seeds reset -c test');
+        $this->exec('seeds reset -c test', ['y']);
         $this->assertExitSuccess();
         $this->assertOutputContains('Reset all seeds');
 

@@ -215,6 +215,12 @@ class Manager
     public function isSeedExecuted(SeedInterface $seed): bool
     {
         $adapter = $this->getEnvironment()->getAdapter();
+
+        // Ensure seed schema table exists
+        if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
+            return false;
+        }
+
         $seedLog = $adapter->getSeedLog();
 
         $plugin = null;

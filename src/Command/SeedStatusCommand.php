@@ -94,6 +94,12 @@ class SeedStatusCommand extends Command
 
         $seeds = $manager->getSeeds();
         $adapter = $manager->getEnvironment()->getAdapter();
+
+        // Ensure seed schema table exists
+        if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
+            $adapter->createSeedSchemaTable();
+        }
+
         $seedLog = $adapter->getSeedLog();
 
         // Build status list
