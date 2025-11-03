@@ -300,11 +300,38 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                         }
                     }
 
-                    if (isset($changedAttributes['length'])) {
+                    // For decimal columns, handle CakePHP schema -> migration attribute mapping
+                    if ($column['type'] === 'decimal') {
+                        // In CakePHP schema: 'length' = precision, 'precision' = scale
+                        // In migrations: 'precision' = precision, 'scale' = scale
+
+                        // Convert CakePHP schema's 'precision' (which is scale) to migration's 'scale'
+                        if (isset($changedAttributes['precision'])) {
+                            $changedAttributes['scale'] = $changedAttributes['precision'];
+                            unset($changedAttributes['precision']);
+                        }
+
+                        // Convert CakePHP schema's 'length' (which is precision) to migration's 'precision'
+                        if (isset($changedAttributes['length'])) {
+                            $changedAttributes['precision'] = $changedAttributes['length'];
+                            unset($changedAttributes['length']);
+                        }
+
+                        // Ensure both precision and scale are always set for decimal columns
+                        if (!isset($changedAttributes['precision']) && isset($column['length'])) {
+                            $changedAttributes['precision'] = $column['length'];
+                        }
+                        if (!isset($changedAttributes['scale']) && isset($column['precision'])) {
+                            $changedAttributes['scale'] = $column['precision'];
+                        }
+
+                        // Remove 'limit' for decimal columns as they use precision/scale instead
+                        unset($changedAttributes['limit']);
+                    } elseif (isset($changedAttributes['length'])) {
+                        // For non-decimal columns, convert 'length' to 'limit'
                         if (!isset($changedAttributes['limit'])) {
                             $changedAttributes['limit'] = $changedAttributes['length'];
                         }
-
                         unset($changedAttributes['length']);
                     }
 
