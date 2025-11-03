@@ -22,6 +22,7 @@ use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class MysqlAdapterTest extends TestCase
 {
@@ -952,6 +953,133 @@ class MysqlAdapterTest extends TestCase
         $table->changeColumn('column1', $newColumn1)->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
         $this->assertNull($rows[1]['Default']);
+    }
+
+    public function testChangeColumnPreservesDefaultValue()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'original_default', 'null' => false, 'limit' => 100])
+              ->save();
+
+        // Use updateColumn which preserves by default
+        $table->updateColumn('column1', 'string', ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('original_default', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+    }
+
+    public function testChangeColumnPreservesDefaultValueWithDifferentType()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'integer', ['default' => 42, 'null' => false])
+              ->save();
+
+        // Use updateColumn to preserve default when changing type
+        $table->updateColumn('column1', 'biginteger', [])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('42', $rows[1]['Default']);
+        $this->assertEquals('NO', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnCanExplicitlyOverrideDefault()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'original_default'])
+              ->save();
+
+        // Explicitly change the default
+        $table->changeColumn('column1', 'string', ['default' => 'new_default'])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('new_default', $rows[1]['Default']);
+    }
+
+    public function testChangeColumnCanDisablePreserveUnspecified()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'original_default', 'limit' => 100])
+              ->save();
+
+        // Disable preservation, default should be removed
+        $table->changeColumn('column1', 'string', ['null' => true, 'preserveUnspecified' => false])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertNull($rows[1]['Default']);
+    }
+
+    public function testChangeColumnWithNullTypePreservesType()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // Use updateColumn with null type to preserve everything
+        $table->updateColumn('column1', null, ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnWithNullTypeOnNonExistentColumnThrows()
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Cannot preserve column type for 'nonexistent'");
+
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string')->save();
+
+        // Try to use null type on non-existent column
+        $table->changeColumn('nonexistent', null, ['null' => true])->save();
+    }
+
+    public function testUpdateColumnPreservesAttributes()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100, 'null' => false])
+              ->save();
+
+        // updateColumn should preserve by default
+        $table->updateColumn('column1', null, ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnDoesNotPreserveByDefault()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // changeColumn should NOT preserve by default (backwards compatible)
+        $table->changeColumn('column1', 'string', ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Default should be lost
+        $this->assertNull($rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnWithPreserveUnspecifiedTrue()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // changeColumn with explicit preserveUnspecified => true
+        $table->changeColumn('column1', 'string', ['null' => true, 'preserveUnspecified' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Default should be preserved
+        $this->assertEquals('test', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
     }
 
     public function testChangeColumnEnum()
