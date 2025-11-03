@@ -32,7 +32,7 @@ class SeedResetCommand extends Command
      */
     public static function defaultName(): string
     {
-        return 'migrations seed:reset';
+        return 'seeds reset';
     }
 
     /**
@@ -44,19 +44,12 @@ class SeedResetCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
-            'The <info>seed:reset</info> command removes seed execution records from the log',
+            'The <info>reset</info> command removes seed execution records from the log',
             'allowing seeds to be re-run without the --force flag.',
             '',
-            '<info>migrations seed:reset Posts</info>',
-            '<info>migrations seed:reset Users,Posts</info>',
-            '<info>migrations seed:reset --all</info>',
-            '<info>migrations seed:reset --plugin Demo</info>',
-        ])->addArgument('seed', [
-            'help' => 'The name(s) of the seed(s) to reset (comma-separated for multiple).',
-            'required' => false,
-        ])->addOption('all', [
-            'help' => 'Reset all seeds',
-            'boolean' => true,
+            '<info>seeds reset</info>',
+            '<info>seeds reset --plugin Demo</info>',
+            '<info>seeds reset -c secondary</info>',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to reset seeds for',
@@ -106,35 +99,8 @@ class SeedResetCommand extends Command
         $seeds = $manager->getSeeds();
         $adapter = $manager->getEnvironment()->getAdapter();
 
-        // Determine which seeds to reset
-        $seedsToReset = [];
-        $resetAll = (bool)$args->getOption('all');
-
-        if ($resetAll) {
-            $seedsToReset = $seeds;
-        } elseif ($args->hasArgument('seed')) {
-            $seedArg = $args->getArgument('seed');
-            if ($seedArg !== null) {
-                $seedList = explode(',', $seedArg);
-                foreach ($seedList as $seedName) {
-                    $trimmed = trim($seedName);
-                    if ($trimmed !== '') {
-                        $normalizedName = $manager->normalizeSeedName($trimmed, $seeds);
-                        if ($normalizedName !== null && isset($seeds[$normalizedName])) {
-                            $seedsToReset[] = $seeds[$normalizedName];
-                        } else {
-                            $io->error("Seed '{$trimmed}' not found.");
-
-                            return self::CODE_ERROR;
-                        }
-                    }
-                }
-            }
-        } else {
-            $io->error('Please specify seed name(s) or use --all to reset all seeds.');
-
-            return self::CODE_ERROR;
-        }
+        // Reset all seeds
+        $seedsToReset = $seeds;
 
         if (empty($seedsToReset)) {
             $io->warning('No seeds to reset.');
@@ -144,7 +110,7 @@ class SeedResetCommand extends Command
 
         // Show what will be reset and ask for confirmation
         $io->out('');
-        $io->out('<info>The following seeds will be reset:</info>');
+        $io->out('<info>All seeds will be reset:</info>');
         foreach ($seedsToReset as $seed) {
             $seedName = $seed->getName();
             if (str_ends_with($seedName, 'Seed')) {

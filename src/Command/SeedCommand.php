@@ -39,7 +39,7 @@ class SeedCommand extends Command
      */
     public static function defaultName(): string
     {
-        return 'migrations seed';
+        return 'seeds run';
     }
 
     /**
@@ -55,10 +55,10 @@ class SeedCommand extends Command
             '',
             'Runs a seeder script that can populate the database with data, or run mutations:',
             '',
-            '<info>migrations seed Posts</info>',
-            '<info>migrations seed Users,Posts</info>',
-            '<info>migrations seed --plugin Demo</info>',
-            '<info>migrations seed --connection secondary</info>',
+            '<info>seeds run Posts</info>',
+            '<info>seeds run Users,Posts</info>',
+            '<info>seeds run --plugin Demo</info>',
+            '<info>seeds run --connection secondary</info>',
             '',
             'Runs all seeds if no seed names are specified. When running all seeds',
             'in an interactive terminal, a confirmation prompt is shown.',

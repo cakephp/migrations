@@ -181,7 +181,7 @@ The Run Method
 ==============
 
 The run method is automatically invoked by Migrations when you execute the
-``cake migration seed`` command. You should use this method to insert your test
+``seeds run`` command. You should use this method to insert your test
 data.
 
 Seed Execution Tracking
@@ -195,25 +195,19 @@ To re-run a seed that has already been executed, use the ``--force`` flag:
 
 .. code-block:: bash
 
-    bin/cake migrations seed UserSeeder --force
+    bin/cake seeds run Users --force
 
 You can check which seeds have been executed using the status command:
 
 .. code-block:: bash
 
-    bin/cake migrations seed:status
+    bin/cake seeds status
 
-To reset a seed's execution state (allowing it to run again without ``--force``):
+To reset all seeds' execution state (allowing them to run again without ``--force``):
 
 .. code-block:: bash
 
-    bin/cake migrations seed:reset UserSeeder
-
-    # Reset multiple seeds
-    bin/cake migrations seed:reset UserSeeder,PostSeeder
-
-    # Reset all seeds
-    bin/cake migrations seed:reset --all
+    bin/cake seeds reset
 
 .. note::
 
@@ -288,7 +282,7 @@ For example, if you run:
 
 .. code-block:: bash
 
-    bin/cake migrations seed ShoppingCartSeed
+    bin/cake seeds run ShoppingCartSeed
 
 And ``ShoppingCartSeed`` depends on ``UserSeed`` and ``ShopItemSeed``, the system
 will automatically execute those dependencies first if they haven't been run yet.
@@ -419,37 +413,37 @@ SQL `TRUNCATE` command:
 Executing Seed Classes
 ======================
 
-This is the easy part. To seed your database, simply use the ``migrations seed`` command:
+This is the easy part. To seed your database, simply use the ``seeds run`` command:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed
+        $ bin/cake seeds run
 
 By default, Migrations will execute all available seed classes. If you would like to
-run a specific class, simply pass in the name of it using the ``--seed`` parameter.
+run a specific seed, simply pass in the seed name as an argument.
 You can use either the short name (without the ``Seed`` suffix) or the full name:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed User
+        $ bin/cake seeds run User
         # or
-        $ bin/cake migrations seed --seed UserSeed
+        $ bin/cake seeds run UserSeed
 
 Both commands work identically.
 
-You can also run multiple seeds:
+You can also run multiple seeds by separating them with commas:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed User --seed Permission --seed Log
+        $ bin/cake seeds run User,Permission,Log
         # or with full names
-        $ bin/cake migrations seed --seed UserSeed --seed PermissionSeed --seed LogSeed
+        $ bin/cake seeds run UserSeed,PermissionSeed,LogSeed
 
 You can also use the `-v` parameter for more output verbosity:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed -v
+        $ bin/cake seeds run -v
 
 The Migrations seed functionality provides a simple mechanism to easily and repeatably
 insert test data into your database, this is great for development environment

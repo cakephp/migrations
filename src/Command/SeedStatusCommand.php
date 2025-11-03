@@ -32,7 +32,7 @@ class SeedStatusCommand extends Command
      */
     public static function defaultName(): string
     {
-        return 'migrations seed:status';
+        return 'seeds status';
     }
 
     /**
@@ -44,12 +44,12 @@ class SeedStatusCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
-            'The <info>seed:status</info> command prints a list of all seeds, along with their execution status',
+            'The <info>status</info> command prints a list of all seeds, along with their execution status',
             '',
-            '<info>migrations seed:status</info>',
-            '<info>migrations seed:status --plugin Demo</info>',
-            '<info>migrations seed:status -c secondary</info>',
-            '<info>migrations seed:status -f json</info>',
+            '<info>seeds status</info>',
+            '<info>seeds status --plugin Demo</info>',
+            '<info>seeds status -c secondary</info>',
+            '<info>seeds status -f json</info>',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to check seed status for',

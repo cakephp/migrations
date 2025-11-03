@@ -47,11 +47,11 @@ class SeedCommandTest extends TestCase
 
     public function testHelp(): void
     {
-        $this->exec('migrations seed --help');
+        $this->exec('seeds run --help');
         $this->assertExitSuccess();
         $this->assertOutputContains('Seed the database with data');
-        $this->assertOutputContains('migrations seed Posts');
-        $this->assertOutputContains('migrations seed Users,Posts');
+        $this->assertOutputContains('seeds run Posts');
+        $this->assertOutputContains('seeds run Users,Posts');
     }
 
     public function testSeederEvents(): void
@@ -66,7 +66,7 @@ class SeedCommandTest extends TestCase
         });
 
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
 
         $this->assertSame(['Migration.beforeSeed', 'Migration.afterSeed'], $fired);
@@ -85,7 +85,7 @@ class SeedCommandTest extends TestCase
         });
 
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitError();
 
         $this->assertSame(['Migration.beforeSeed'], $fired);
@@ -95,13 +95,13 @@ class SeedCommandTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed `NotThere` does not exist');
-        $this->exec('migrations seed -c test NotThere');
+        $this->exec('seeds run -c test NotThere');
     }
 
     public function testSeederOne(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
@@ -116,7 +116,7 @@ class SeedCommandTest extends TestCase
     public function testSeederBaseSeed(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test --source BaseSeeds MigrationSeedNumbers');
+        $this->exec('seeds run -c test --source BaseSeeds MigrationSeedNumbers');
         $this->assertExitSuccess();
         $this->assertOutputContains('MigrationSeedNumbers:</info> <comment>seeding');
         $this->assertOutputContains('AnotherNumbersSeed:</info> <comment>seeding');
@@ -135,7 +135,7 @@ class SeedCommandTest extends TestCase
     public function testSeederImplicitAll(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test -q');
+        $this->exec('seeds run -c test -q');
 
         $this->assertExitSuccess();
         $this->assertOutputNotContains('The following seeds will be executed:');
@@ -153,13 +153,13 @@ class SeedCommandTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed `NotThere` does not exist');
-        $this->exec('migrations seed -c test NumbersSeed,NotThere');
+        $this->exec('seeds run -c test NumbersSeed,NotThere');
     }
 
     public function testSeederMultiple(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test --source CallSeeds LettersSeed,NumbersCallSeed');
+        $this->exec('seeds run -c test --source CallSeeds LettersSeed,NumbersCallSeed');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
@@ -181,13 +181,13 @@ class SeedCommandTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed `LettersSeed` does not exist');
 
-        $this->exec('migrations seed -c test --source NotThere LettersSeed');
+        $this->exec('seeds run -c test --source NotThere LettersSeed');
     }
 
     public function testSeederWithTimestampFields(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test StoresSeed');
+        $this->exec('seeds run -c test StoresSeed');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
@@ -212,7 +212,7 @@ class SeedCommandTest extends TestCase
     public function testDryRunModeWarning(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed --dry-run');
+        $this->exec('seeds run -c test NumbersSeed --dry-run');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
@@ -223,7 +223,7 @@ class SeedCommandTest extends TestCase
     public function testDryRunModeShortOption(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed -d');
+        $this->exec('seeds run -c test NumbersSeed -d');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
@@ -239,7 +239,7 @@ class SeedCommandTest extends TestCase
         $connection = ConnectionManager::get('test');
         $initialCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
 
-        $this->exec('migrations seed -c test NumbersSeed --dry-run');
+        $this->exec('seeds run -c test NumbersSeed --dry-run');
         $this->assertExitSuccess();
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
@@ -249,7 +249,7 @@ class SeedCommandTest extends TestCase
     public function testDryRunModeMultipleSeeds(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test --source CallSeeds LettersSeed,NumbersCallSeed --dry-run');
+        $this->exec('seeds run -c test --source CallSeeds LettersSeed,NumbersCallSeed --dry-run');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
@@ -274,7 +274,7 @@ class SeedCommandTest extends TestCase
         $connection = ConnectionManager::get('test');
         $initialCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
 
-        $this->exec('migrations seed -c test --dry-run -q');
+        $this->exec('seeds run -c test --dry-run -q');
         $this->assertExitSuccess();
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0);
@@ -293,7 +293,7 @@ class SeedCommandTest extends TestCase
         });
 
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed --dry-run');
+        $this->exec('seeds run -c test NumbersSeed --dry-run');
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
 
@@ -308,7 +308,7 @@ class SeedCommandTest extends TestCase
         $connection = ConnectionManager::get('test');
         $initialCount = $connection->execute('SELECT COUNT(*) FROM stores')->fetchColumn(0);
 
-        $this->exec('migrations seed -c test StoresSeed --dry-run');
+        $this->exec('seeds run -c test StoresSeed --dry-run');
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
         $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
@@ -320,7 +320,7 @@ class SeedCommandTest extends TestCase
     public function testSeederAnonymousClass(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test AnonymousStoreSeed');
+        $this->exec('seeds run -c test AnonymousStoreSeed');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('AnonymousStoreSeed:</info> <comment>seeding');
@@ -339,7 +339,7 @@ class SeedCommandTest extends TestCase
     public function testSeederShortName(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test Numbers');
+        $this->exec('seeds run -c test Numbers');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
@@ -354,7 +354,7 @@ class SeedCommandTest extends TestCase
     public function testSeederShortNameMultiple(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test --source CallSeeds Letters,NumbersCall');
+        $this->exec('seeds run -c test --source CallSeeds Letters,NumbersCall');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
@@ -373,7 +373,7 @@ class SeedCommandTest extends TestCase
     public function testSeederShortNameAnonymous(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test AnonymousStore');
+        $this->exec('seeds run -c test AnonymousStore');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('AnonymousStoreSeed:</info> <comment>seeding');
@@ -389,7 +389,7 @@ class SeedCommandTest extends TestCase
     {
         $this->createTables();
         // Quiet mode should skip confirmation prompt
-        $this->exec('migrations seed -c test -q');
+        $this->exec('seeds run -c test -q');
 
         $this->assertExitSuccess();
         $this->assertOutputNotContains('The following seeds will be executed:');
@@ -405,7 +405,7 @@ class SeedCommandTest extends TestCase
     {
         $this->createTables();
         // Confirm run all.
-        $this->exec('migrations seed -c test', ['y']);
+        $this->exec('seeds run -c test', ['y']);
 
         $this->assertExitSuccess();
         $this->assertOutputContains('The following seeds will be executed:');
@@ -420,7 +420,7 @@ class SeedCommandTest extends TestCase
     public function testSeederSpecificSeedSkipsConfirmation(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
 
         $this->assertExitSuccess();
         $this->assertOutputNotContains('The following seeds will be executed:');
@@ -432,7 +432,7 @@ class SeedCommandTest extends TestCase
     public function testSeederCommaSeparated(): void
     {
         $this->createTables();
-        $this->exec('migrations seed -c test --source CallSeeds Letters,NumbersCall');
+        $this->exec('seeds run -c test --source CallSeeds Letters,NumbersCall');
 
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
@@ -456,7 +456,7 @@ class SeedCommandTest extends TestCase
         $connection = ConnectionManager::get('test');
 
         // First run should execute the seed
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
@@ -466,7 +466,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(1, $query->fetchColumn(0));
 
         // Second run should skip the seed (already executed)
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersSeed:</info> <comment>already executed');
         $this->assertOutputNotContains('seeding');
@@ -476,7 +476,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(1, $query->fetchColumn(0));
 
         // Run with --force should re-execute
-        $this->exec('migrations seed -c test NumbersSeed --force');
+        $this->exec('seeds run -c test NumbersSeed --force');
         $this->assertExitSuccess();
         $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
 
@@ -490,17 +490,17 @@ class SeedCommandTest extends TestCase
         $this->createTables();
 
         // Check status before running seeds
-        $this->exec('migrations seed:status -c test');
+        $this->exec('seeds status -c test');
         $this->assertExitSuccess();
         $this->assertOutputContains('Current seed execution status:');
         $this->assertOutputContains('pending');
 
         // Run a seed
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
 
         // Check status after running seed
-        $this->exec('migrations seed:status -c test');
+        $this->exec('seeds status -c test');
         $this->assertExitSuccess();
         $this->assertOutputContains('executed');
         $this->assertOutputContains('NumbersSeed');
@@ -511,18 +511,18 @@ class SeedCommandTest extends TestCase
         $this->createTables();
 
         // Run a seed
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
         $this->assertOutputContains('seeding');
 
         // Reset the seed
         $this->_in = ['y'];
-        $this->exec('migrations seed:reset -c test NumbersSeed');
+        $this->exec('seeds reset -c test');
         $this->assertExitSuccess();
-        $this->assertOutputContains('Reset: NumbersSeed');
+        $this->assertOutputContains('Reset all seeds');
 
         // Verify seed can be run again without --force
-        $this->exec('migrations seed -c test NumbersSeed');
+        $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
         $this->assertOutputContains('seeding');
         $this->assertOutputNotContains('already executed');
