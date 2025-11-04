@@ -1113,7 +1113,7 @@ SQL;
     protected function getInsertPrefix(?InsertMode $mode = null): string
     {
         if ($mode === InsertMode::IGNORE) {
-            throw new BadMethodCallException('INSERT IGNORE is not supported for SQL Server. Use a MERGE statement or check for existence before inserting.');
+            throw new BadMethodCallException('INSERT IGNORE is not supported for SQL Server');
         }
 
         return parent::getInsertPrefix($mode);
