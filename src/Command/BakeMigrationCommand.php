@@ -200,7 +200,7 @@ Create a migration that adds (<warning>name VARCHAR(128)</warning>) to the <warn
 table.
 
 <warning>bin/cake bake migration AddSlugToProjects name:string[128]:unique</warning>
-Create a migration that adds (<warning>name VARCHAR(128)</warning> and a <warning>UNIQUE<.warning index)
+Create a migration that adds (<warning>name VARCHAR(128)</warning> and a <warning>UNIQUE</warning> index)
 to the <warning>projects</warning> table.
 
 <warning>bin/cake bake migration CreatePosts title:string user_id:references</warning>
