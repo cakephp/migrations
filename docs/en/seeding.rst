@@ -16,7 +16,7 @@ Migrations includes a command to easily generate a new seed class:
 
 .. code-block:: bash
 
-    $ bin/cake bake seed MyNewSeed
+    bin/cake bake seed MyNewSeed
 
 By default, it generates a traditional seed class with a named class:
 
@@ -75,7 +75,7 @@ To generate an anonymous seed class, use the ``--style anonymous`` option:
 
 .. code-block:: bash
 
-    $ bin/cake bake seed MyNewSeed --style anonymous
+    bin/cake bake seed MyNewSeed --style anonymous
 
 This generates a seed file using an anonymous class:
 
@@ -376,7 +376,7 @@ This is the easy part. To seed your database, simply use the ``migrations seed``
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed
+    bin/cake migrations seed
 
 By default, Migrations will execute all available seed classes. If you would like to
 run a specific class, simply pass in the name of it using the ``--seed`` parameter.
@@ -384,9 +384,10 @@ You can use either the short name (without the ``Seed`` suffix) or the full name
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed User
-        # or
-        $ bin/cake migrations seed --seed UserSeed
+    # One of
+    bin/cake migrations seed --seed User
+    bin/cake migrations seed --seed UserSeed
+    bin/cake migrations seed User
 
 Both commands work identically.
 
@@ -394,15 +395,18 @@ You can also run multiple seeds:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed User --seed Permission --seed Log
-        # or with full names
-        $ bin/cake migrations seed --seed UserSeed --seed PermissionSeed --seed LogSeed
+    # Multiple --seed options
+    bin/cake migrations seed --seed User --seed Permission --seed Log
+    # or with full names
+    bin/cake migrations seed --seed UserSeed --seed PermissionSeed --seed LogSeed
+    # Or an interactive prompt for all
 
-You can also use the `-v` parameter for more output verbosity:
+
+You can also use the ``-v`` parameter for more output verbosity:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed -v
+    bin/cake migrations seed -v
 
 The Migrations seed functionality provides a simple mechanism to easily and repeatably
 insert test data into your database, this is great for development environment
