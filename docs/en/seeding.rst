@@ -16,7 +16,7 @@ Migrations includes a command to easily generate a new seed class:
 
 .. code-block:: bash
 
-        $ bin/cake bake seed MyNewSeed
+    $ bin/cake bake seed MyNewSeed
 
 By default, it generates a traditional seed class with a named class:
 
@@ -114,10 +114,11 @@ You can set the default seed style globally in your application configuration:
         'style' => 'anonymous',  // or 'traditional'
     ],
 
-Seed Options
-------------
+Additional option
+-----------------
 
 .. code-block:: bash
+
     # You specify the name of the table the seed files will alter by using the ``--table`` option
     bin/cake bake seed Articles --table my_articles_table
 
@@ -155,7 +156,7 @@ include as a comma separated value string:
 .. _custom-seed-migration-templates:
 
 Customizing Seed and Migration templates
-----------------------------------------
+========================================
 
 Because migrations uses `bake <https://book.cakephp.org/bake>`__ under the hood
 you can customize the templates that migrations uses for creating seeds and
@@ -178,7 +179,7 @@ It provides the necessary support to create your seed classes. Seed
 classes are primarily used to insert test data.
 
 The Run Method
-==============
+--------------
 
 The run method is automatically invoked by Migrations when you execute the
 ``cake migration seed`` command. You should use this method to insert your test
@@ -191,13 +192,13 @@ data.
     mind when developing them.
 
 The Init Method
-===============
+---------------
 
 The ``init()`` method is run by Migrations before the run method if it exists. This
 can be used to initialize properties of the Seed class before using run.
 
 The Should Execute Method
-=========================
+-------------------------
 
 The ``shouldExecute()`` method is run by Migrations before executing the seed.
 This can be used to prevent the seed from being executed at this time. It always
@@ -205,7 +206,7 @@ returns true by default. You can override it in your custom ``BaseSeed``
 implementation.
 
 Foreign Key Dependencies
-========================
+------------------------
 
 Often you'll find that seeds need to run in a particular order, so they don't
 violate foreign key constraints. To define this order, you can implement the
