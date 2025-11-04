@@ -244,7 +244,8 @@ class MigrationsTest extends TestCase
         // Tests that if a collation is defined, it is used
         $numbersTable = $this->getTableLocator()->get('Numbers', ['connection' => $this->Connection]);
         $options = $numbersTable->getSchema()->getOptions();
-        $this->assertSame('utf8mb3_bin', $options['collation']);
+        // MySQL 8.0.30+ normalizes utf8mb3 to utf8
+        $this->assertContains($options['collation'], ['utf8mb3_bin', 'utf8_bin']);
 
         // Tests that if a collation is not defined, it will use the database default one
         $lettersTable = $this->getTableLocator()->get('Letters', ['connection' => $this->Connection]);
