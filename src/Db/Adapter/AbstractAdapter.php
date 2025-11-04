@@ -768,9 +768,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function generateBulkInsertSql(TableMetadata $table, array $rows, ?InsertMode $mode = null): string
     {
-        $sql = $this->getInsertPrefix($mode);
-        $sql .= sprintf(
-            ' INTO %s ',
+        $sql = sprintf(
+            '%s INTO %s ',
+            $this->getInsertPrefix($mode),
             $this->quoteTableName($table->getName()),
         );
         $current = current($rows);
