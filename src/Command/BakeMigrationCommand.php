@@ -177,12 +177,12 @@ All sections other than name are optional.
 
 * The types are the abstract database column types in CakePHP.
 * The <warning>?</warning> value indicates if a column is nullable.
-  e.x. <warning>role:string?</warning>.
+  e.g. <warning>role:string?</warning>.
 * Length option must be enclosed in <warning>[]</warning>, for example: <warning>name:string?[100]</warning>.
 * The <warning>index</warning> attribute can define the column as having a unique
   key with <warning>unique</warning> or a primary key with <warning>primary</warning>.
 * Use <warning>references</warning> type to create a foreign key constraint.
-  e.x. <warning>category_id:references</warning> (auto-infers table as 'categories')
+  e.g. <warning>category_id:references</warning> (auto-infers table as 'categories')
   or <warning>category_id:references:custom_table</warning> to specify the referenced table.
 
 <info>Examples</info>
