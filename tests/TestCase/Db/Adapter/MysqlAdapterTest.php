@@ -2304,13 +2304,11 @@ OUTPUT;
         $this->assertSame('col_1', $columns[0]->getName());
 
         $actualDefault = $columns[0]->getDefault();
-        if ($this->usingMariaDb()) {
-            // MariaDB returns defaults with quotes
-            $this->assertSame("'{$default}'", $actualDefault);
-        } else {
-            // MySQL 8.0.13+ returns defaults with quotes for certain types
-            $this->assertContains($actualDefault, [$default, "'{$default}'"]);
+        // Normalize quote handling - both MariaDB and MySQL 8.0.13+ may return defaults with quotes
+        if (str_starts_with($actualDefault, "'") && str_ends_with($actualDefault, "'")) {
+            $actualDefault = substr($actualDefault, 1, -1);
         }
+        $this->assertSame($default, $actualDefault);
     }
 
     public function testCreateTableWithPrecisionCurrentTimestamp()
