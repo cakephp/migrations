@@ -53,8 +53,16 @@ class BakeMigrationDiffCommandTest extends TestCase
         $configPath = ROOT . DS . 'config' . DS;
         $directories = glob($configPath . '*', GLOB_ONLYDIR) ?: [];
         foreach ($directories as $dir) {
+            // Clean up TheDiff migration files
             $migrationFiles = glob($dir . DS . '*TheDiff*.php') ?: [];
             foreach ($migrationFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+            // Clean up Initial migration files
+            $initialMigrationFiles = glob($dir . DS . '*Initial*.php') ?: [];
+            foreach ($initialMigrationFiles as $file) {
                 if (file_exists($file)) {
                     unlink($file);
                 }
