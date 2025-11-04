@@ -181,7 +181,7 @@ The Run Method
 ==============
 
 The run method is automatically invoked by Migrations when you execute the
-``seeds run`` command. You should use this method to insert your test
+``cake seeds run`` command. You should use this method to insert your test
 data.
 
 Seed Execution Tracking
