@@ -632,9 +632,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function generateInsertSql(TableMetadata $table, array $row, ?InsertMode $mode = null): string
     {
-        $sql = $this->getInsertPrefix($mode);
-        $sql .= sprintf(
-            ' INTO %s ',
+        $sql = sprintf(
+            '%s INTO %s ',
+            $this->getInsertPrefix($mode),
             $this->quoteTableName($table->getName()),
         );
         $columns = array_keys($row);
