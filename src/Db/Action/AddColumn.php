@@ -38,11 +38,11 @@ class AddColumn extends Action
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table to add the column to
      * @param string $columnName The column name
-     * @param string|\Migrations\Db\Literal $type The column type
+     * @param string $type The column type
      * @param array<string, mixed> $options The column options
      * @return self
      */
-    public static function build(TableMetadata $table, string $columnName, string|Literal $type, array $options = []): self
+    public static function build(TableMetadata $table, string $columnName, string $type, array $options = []): self
     {
         $column = new Column();
         $column->setName($columnName);

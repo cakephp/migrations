@@ -391,7 +391,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function isValidColumnType(Column $column): bool
     {
-        return $column->getType() instanceof Literal || in_array($column->getType(), $this->getColumnTypes(), true);
+        return in_array($column->getType(), $this->getColumnTypes(), true);
     }
 
     /**

@@ -53,11 +53,11 @@ class ChangeColumn extends Action
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table to alter
      * @param string $columnName The name of the column to change
-     * @param string|\Migrations\Db\Literal $type The type of the column
+     * @param string $type The type of the column
      * @param array<string, mixed> $options Additional options for the column
      * @return self
      */
-    public static function build(TableMetadata $table, string $columnName, string|Literal $type, array $options = []): self
+    public static function build(TableMetadata $table, string $columnName, string $type, array $options = []): self
     {
         $column = new Column();
         $column->setName($columnName);
