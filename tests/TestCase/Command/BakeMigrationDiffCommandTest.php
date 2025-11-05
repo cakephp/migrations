@@ -99,6 +99,12 @@ class BakeMigrationDiffCommandTest extends TestCase
                     unlink($file);
                 }
             }
+            $initialMigrationFiles = glob($dir . DS . '*Initial*.php') ?: [];
+            foreach ($initialMigrationFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
         }
 
         if (env('DB_URL_COMPARE')) {
