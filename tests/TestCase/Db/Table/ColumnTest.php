@@ -14,6 +14,22 @@ use RuntimeException;
 
 class ColumnTest extends TestCase
 {
+    public function testNullConstructorParameter()
+    {
+        $column = new Column(name: 'title');
+        $this->assertTrue($column->isNull());
+
+        $column = new Column(name: 'title', null: true);
+        $this->assertTrue($column->isNull());
+
+        $column = new Column(name: 'title', null: false);
+        $this->assertFalse($column->isNull());
+
+        Configure::write('Migrations.column_null_default', true);
+        $column = new Column(name: 'title');
+        $this->assertTrue($column->isNull());
+    }
+
     public function testSetOptionThrowsExceptionIfOptionIsNotString()
     {
         $column = new Column();

@@ -127,9 +127,8 @@ class Column extends DatabaseColumn
         protected ?int $srid = null,
         protected ?string $encoding = null,
         protected ?string $baseType = null,
-    )
-    {
-        $this->null = (bool)Configure::read('Migrations.column_null_default');
+    ) {
+        $this->null = $null ?? (bool)Configure::read('Migrations.column_null_default');
     }
 
     /**
