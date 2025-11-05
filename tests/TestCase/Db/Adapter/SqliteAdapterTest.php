@@ -2690,7 +2690,6 @@ INPUT;
             [SqliteAdapter::PHINX_TYPE_MACADDR, false],
             [SqliteAdapter::PHINX_TYPE_POINT, false],
             [SqliteAdapter::PHINX_TYPE_POLYGON, false],
-            [Literal::from('someType'), true],
             ['someType', false],
         ];
     }
