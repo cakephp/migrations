@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Action;
 
-use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
 

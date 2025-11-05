@@ -325,18 +325,16 @@ class Table
      * Valid options can be: limit, default, null, precision or scale.
      *
      * @param string|\Migrations\Db\Table\Column $columnName Column Name
-     * @param string|\Migrations\Db\Literal|null $type Column Type
+     * @param string|null $type Column Type
      * @param array<string, mixed> $options Column Options
      * @throws \InvalidArgumentException
      * @return $this
      */
-    public function addColumn(string|Column $columnName, string|Literal|null $type = null, array $options = [])
+    public function addColumn(string|Column $columnName, ?string $type = null, array $options = [])
     {
         assert($columnName instanceof Column || $type !== null);
         if ($columnName instanceof Column) {
             $action = new AddColumn($this->table, $columnName);
-        } elseif ($type instanceof Literal) {
-            $action = AddColumn::build($this->table, $columnName, $type, $options);
         } else {
             $action = new AddColumn($this->table, $this->getAdapter()->getColumnForType($columnName, $type, $options));
         }
@@ -388,11 +386,11 @@ class Table
      * Change a table column type.
      *
      * @param string $columnName Column Name
-     * @param string|\Migrations\Db\Table\Column|\Migrations\Db\Literal $newColumnType New Column Type
+     * @param string|\Migrations\Db\Table\Column $newColumnType New Column Type
      * @param array<string, mixed> $options Options
      * @return $this
      */
-    public function changeColumn(string $columnName, string|Column|Literal $newColumnType, array $options = [])
+    public function changeColumn(string $columnName, string|Column $newColumnType, array $options = [])
     {
         if ($newColumnType instanceof Column) {
             $action = new ChangeColumn($this->table, $columnName, $newColumnType);
