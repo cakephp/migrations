@@ -2857,7 +2857,7 @@ OUTPUT;
         ])->save();
 
         // Now use regular insert with duplicate - should throw exception
-        $this->expectException(\PDOException::class);
+        $this->expectException(PDOException::class);
         $table->insert([
             ['email' => 'test@example.com', 'name' => 'Jane'],
         ])->save();
