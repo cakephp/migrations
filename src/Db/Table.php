@@ -773,6 +773,7 @@ class Table
         }
 
         $this->resetData();
+        $this->insertMode = null;
     }
 
     /**

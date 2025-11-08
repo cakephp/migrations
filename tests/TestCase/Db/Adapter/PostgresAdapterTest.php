@@ -2843,6 +2843,26 @@ OUTPUT;
         $this->assertEquals('John', $rows[0]['name']);
     }
 
+    public function testInsertModeResetsAfterInsertOrSkip()
+    {
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('email', 'string', ['limit' => 255])
+            ->addColumn('name', 'string')
+            ->addIndex('email', ['unique' => true])
+            ->create();
+
+        // First insert with insertOrSkip
+        $table->insertOrSkip([
+            ['email' => 'test@example.com', 'name' => 'John'],
+        ])->save();
+
+        // Now use regular insert with duplicate - should throw exception
+        $this->expectException(\PDOException::class);
+        $table->insert([
+            ['email' => 'test@example.com', 'name' => 'Jane'],
+        ])->save();
+    }
+
     public function testBulkinsertOrSkipWithDuplicates()
     {
         $table = new Table('products', [], $this->adapter);
