@@ -1082,6 +1082,43 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('YES', $rows[1]['Null']);
     }
 
+    public function testUpdateColumnWithColumnObject()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100, 'null' => false])
+              ->save();
+
+        // Use updateColumn with a Column object
+        $newColumn = new Column();
+        $newColumn->setName('column1')
+                  ->setType('string')
+                  ->setLimit(255)
+                  ->setNull(true);
+        $table->updateColumn('column1', $newColumn)->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(255)', $rows[1]['Type']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testUpdateColumnWithColumnObjectAndOptionsThrows()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot specify options array when passing a Column object');
+
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // Passing both Column object and options array should throw an exception
+        $newColumn = new Column();
+        $newColumn->setName('column1')
+                  ->setType('string')
+                  ->setLimit(200);
+
+        $table->updateColumn('column1', $newColumn, ['limit' => 500]);
+    }
+
     public function testChangeColumnEnum()
     {
         $table = new Table('t', [], $this->adapter);

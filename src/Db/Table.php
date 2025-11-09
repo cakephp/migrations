@@ -423,6 +423,15 @@ class Table
     public function changeColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
     {
         if ($newColumnType instanceof Column) {
+            // Remove preserveUnspecified flag before checking if options are present
+            unset($options['preserveUnspecified']);
+
+            if ($options) {
+                throw new InvalidArgumentException(
+                    'Cannot specify options array when passing a Column object. ' .
+                    'Set all properties directly on the Column object instead.',
+                );
+            }
             $action = new ChangeColumn($this->table, $columnName, $newColumnType);
         } else {
             // Check if we should preserve existing column attributes
@@ -960,13 +969,7 @@ class Table
             }
         }
 
-        // Preserve values (for enum/set) if not explicitly set
-        if (!isset($options['values'])) {
-            $values = $existingColumn->getValues();
-            if ($values !== null) {
-                $existingOptions['values'] = $values;
-            }
-        }
+        // Note: enum/set values are not preserved as schema reflection doesn't populate them
 
         // New options override existing ones
         return array_merge($existingOptions, $options);
