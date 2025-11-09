@@ -129,21 +129,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if (!$this->hasTable($this->getSchemaTableName())) {
             $this->createSchemaTable();
         } else {
-            $table = new Table($this->getSchemaTableName(), [], $this);
-            if (!$table->hasColumn('migration_name')) {
-                $table
-                    ->addColumn(
-                        'migration_name',
-                        'string',
-                        ['limit' => 100, 'after' => 'version', 'default' => null, 'null' => true],
-                    )
-                    ->save();
-            }
-            if (!$table->hasColumn('breakpoint')) {
-                $table
-                    ->addColumn('breakpoint', 'boolean', ['default' => false, 'null' => false])
-                    ->save();
-            }
+            $this->migrationsTable()->upgradeTable();
         }
 
         return $this;
@@ -357,26 +343,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function createSchemaTable(): void
     {
-        try {
-            $options = [
-                'id' => false,
-                'primary_key' => 'version',
-            ];
-
-            $table = new Table($this->getSchemaTableName(), $options, $this);
-            $table->addColumn('version', 'biginteger', ['null' => false])
-                ->addColumn('migration_name', 'string', ['limit' => 100, 'default' => null, 'null' => true])
-                ->addColumn('start_time', 'timestamp', ['default' => null, 'null' => true])
-                ->addColumn('end_time', 'timestamp', ['default' => null, 'null' => true])
-                ->addColumn('breakpoint', 'boolean', ['default' => false, 'null' => false])
-                ->save();
-        } catch (Exception $exception) {
-            throw new InvalidArgumentException(
-                'There was a problem creating the schema table: ' . $exception->getMessage(),
-                (int)$exception->getCode(),
-                $exception,
-            );
-        }
+        $this->migrationsTable()->createTable();
     }
 
     /**
@@ -816,6 +783,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * Get the migrations table storage implementation.
+     *
+     * @return \Migrations\Db\Adapter\MigrationsTableStorage
+     * @internal
+     */
+    protected function migrationsTable(): MigrationsTableStorage
+    {
+        // TODO Use configure/auto-detect which implmentation to use.
+        return new MigrationsTableStorage($this, $this->getSchemaTableName());
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @throws \RuntimeException
@@ -832,10 +811,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             default:
                 throw new RuntimeException('Invalid version_order configuration option');
         }
-        $query = $this->getSelectBuilder();
-        $query->select('*')
-            ->from($this->getSchemaTableName())
-            ->orderBy($orderBy);
+        $query = $this->migrationsTable()->getVersions($orderBy);
 
         // This will throw an exception if doing a --dry-run without any migrations as phinxlog
         // does not exist, so in that case, we can just expect to trivially return empty set
@@ -862,24 +838,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
         if (strcasecmp($direction, MigrationInterface::UP) === 0) {
-            $query = $this->getInsertBuilder();
-            $query->insert(['version', 'migration_name', 'start_time', 'end_time', 'breakpoint'])
-                ->into($this->getSchemaTableName())
-                ->values([
-                    'version' => (string)$migration->getVersion(),
-                    'migration_name' => substr($migration->getName(), 0, 100),
-                    'start_time' => $startTime,
-                    'end_time' => $endTime,
-                    'breakpoint' => 0,
-                ]);
-            $this->executeQuery($query);
+            $this->migrationsTable()->recordUp($migration, $startTime, $endTime);
         } else {
             // down
-            $query = $this->getDeleteBuilder();
-            $query->delete()
-                ->from($this->getSchemaTableName())
-                ->where(['version' => $migration->getVersion()]);
-            $this->executeQuery($query);
+            $this->migrationsTable()->recordDown($migration);
         }
 
         return $this;
@@ -890,19 +852,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function toggleBreakpoint(MigrationInterface $migration): AdapterInterface
     {
-        $params = [
-            $migration->getVersion(),
-        ];
-        $this->query(
-            sprintf(
-                'UPDATE %1$s SET %2$s = CASE %2$s WHEN true THEN false ELSE true END, %4$s = %4$s WHERE %3$s = ?;',
-                $this->quoteTableName($this->getSchemaTableName()),
-                $this->quoteColumnName('breakpoint'),
-                $this->quoteColumnName('version'),
-                $this->quoteColumnName('start_time'),
-            ),
-            $params,
-        );
+        $this->migrationsTable()->toggleBreakpoint($migration);
 
         return $this;
     }
@@ -912,17 +862,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function resetAllBreakpoints(): int
     {
-        $query = $this->getUpdateBuilder();
-        $query->update($this->getSchemaTableName())
-            ->set([
-                'breakpoint' => 0,
-                'start_time' => $query->identifier('start_time'),
-            ])
-            ->where([
-                'breakpoint !=' => 0,
-            ]);
-
-        return $this->executeQuery($query);
+        return $this->migrationsTable()->resetAllBreakpoints();
     }
 
     /**
@@ -954,16 +894,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function markBreakpoint(MigrationInterface $migration, bool $state): AdapterInterface
     {
-        $query = $this->getUpdateBuilder();
-        $query->update($this->getSchemaTableName())
-            ->set([
-                'breakpoint' => (int)$state,
-                'start_time' => $query->identifier('start_time'),
-            ])
-            ->where([
-                'version' => $migration->getVersion(),
-            ]);
-        $this->executeQuery($query);
+        $this->migrationsTable()->markBreakpoint($migration, $state);
 
         return $this;
     }

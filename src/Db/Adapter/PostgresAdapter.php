@@ -945,7 +945,6 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function createSchemaTable(): void
     {
-        // Create the public/custom schema if it doesn't already exist
         if ($this->hasSchema($this->getGlobalSchemaName()) === false) {
             $this->createSchema($this->getGlobalSchemaName());
         }
