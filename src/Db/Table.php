@@ -403,8 +403,9 @@ class Table
      */
     public function updateColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
     {
-        // Force preservation for updateColumn
-        $options['preserveUnspecified'] = true;
+        if (!($newColumnType instanceof Column)) {
+            $options['preserveUnspecified'] = true;
+        }
 
         return $this->changeColumn($columnName, $newColumnType, $options);
     }
@@ -423,9 +424,6 @@ class Table
     public function changeColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
     {
         if ($newColumnType instanceof Column) {
-            // Remove preserveUnspecified flag before checking if options are present
-            unset($options['preserveUnspecified']);
-
             if ($options) {
                 throw new InvalidArgumentException(
                     'Cannot specify options array when passing a Column object. ' .
