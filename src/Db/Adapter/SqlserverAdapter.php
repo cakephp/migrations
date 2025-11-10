@@ -435,13 +435,20 @@ SQL;
     protected function getChangeColumnInstructions(string $tableName, string $columnName, Column $newColumn): AlterInstructions
     {
         $columns = $this->getColumns($tableName);
-        if (!isset($columns[$columnName])) {
+        $oldColumn = null;
+        foreach ($columns as $column) {
+            if ($column->getName() === $columnName) {
+                $oldColumn = $column;
+                break;
+            }
+        }
+        if ($oldColumn === null) {
             throw new InvalidArgumentException("Unknown column {$columnName} cannot be changed.");
         }
 
         $changeDefault =
-            $newColumn->getDefault() !== $columns[$columnName]->getDefault() ||
-            $newColumn->getType() !== $columns[$columnName]->getType();
+            $newColumn->getDefault() !== $oldColumn->getDefault() ||
+            $newColumn->getType() !== $oldColumn->getType();
 
         $instructions = new AlterInstructions();
         $dialect = $this->getSchemaDialect();
