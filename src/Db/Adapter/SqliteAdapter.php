@@ -1343,14 +1343,21 @@ PCRE_PATTERN;
         $instructions->addPostStep(function ($state) use ($column) {
             $quotedColumn = preg_quote($column);
             $columnPattern = "`{$quotedColumn}`|\"{$quotedColumn}\"|\[{$quotedColumn}\]";
-            $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)(\s+(NOT )?NULL)?/";
+            // Extended pattern to capture AUTOINCREMENT if present
+            $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)(\s+(NOT )?NULL)?(\s+(?:PRIMARY KEY\s+)?AUTOINCREMENT)?/i";
 
             $sql = $state['createSQL'];
 
             if (preg_match($matchPattern, $state['createSQL'], $matches)) {
                 if (isset($matches[2])) {
-                    if ($matches[2] === 'INTEGER') {
+                    $hasAutoIncrement = isset($matches[6]) && stripos($matches[6], 'AUTOINCREMENT') !== false;
+
+                    if ($matches[2] === 'INTEGER' && $hasAutoIncrement) {
+                        // Only add AUTOINCREMENT if the column already had it
                         $replace = '$1 INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT';
+                    } elseif ($matches[2] === 'INTEGER') {
+                        // INTEGER column without AUTOINCREMENT should stay that way
+                        $replace = '$1 INTEGER NOT NULL PRIMARY KEY';
                     } else {
                         $replace = '$1 $2 NOT NULL PRIMARY KEY';
                     }
