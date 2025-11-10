@@ -313,7 +313,7 @@ class SqlserverAdapter extends AbstractAdapter
                 $column->setIdentity($columnInfo['autoIncrement']);
             }
 
-            $columns[$columnInfo['name']] = $column;
+            $columns[] = $column;
         }
 
         return $columns;

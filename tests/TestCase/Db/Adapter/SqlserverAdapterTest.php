@@ -474,10 +474,10 @@ class SqlserverAdapterTest extends TestCase
 
         $columns = $this->adapter->getColumns('table1');
         $this->assertCount(2, $columns);
-        $this->assertArrayHasKey('id', $columns);
-        $this->assertArrayHasKey('col', $columns);
-        $this->assertFalse($columns['col']->isNull());
-        $this->assertNull($columns['col']->getDefault());
+        $this->assertEquals('id', $columns[0]->getName());
+        $this->assertEquals('col', $columns[1]->getName());
+        $this->assertFalse($columns[1]->isNull());
+        $this->assertNull($columns[1]->getDefault());
     }
 
     public function testAddColumnWithDefaultBool()
@@ -577,7 +577,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column1'));
 
         $columns = $this->adapter->getColumns('t');
-        $this->assertSame('test', $columns['column1']->getDefault());
+        $this->assertSame('test', $columns[1]->getDefault());
 
         $newColumn1 = new Column();
         $newColumn1
@@ -588,7 +588,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column1'));
 
         $columns = $this->adapter->getColumns('t');
-        $this->assertSame('another test', $columns['column1']->getDefault());
+        $this->assertSame('another test', $columns[1]->getDefault());
     }
 
     public function testChangeColumnDefaultToNull()
@@ -603,7 +603,7 @@ class SqlserverAdapterTest extends TestCase
             ->setDefault(null);
         $table->changeColumn('column1', $newColumn1)->save();
         $columns = $this->adapter->getColumns('t');
-        $this->assertNull($columns['column1']->getDefault());
+        $this->assertNull($columns[1]->getDefault());
     }
 
     public function testChangeColumnDefaultToZero()
@@ -618,7 +618,7 @@ class SqlserverAdapterTest extends TestCase
             ->setDefault(0);
         $table->changeColumn('column1', $newColumn1)->save();
         $columns = $this->adapter->getColumns('t');
-        $this->assertSame(0, $columns['column1']->getDefault());
+        $this->assertSame(0, $columns[1]->getDefault());
     }
 
     public function testDropColumn()
@@ -664,11 +664,11 @@ class SqlserverAdapterTest extends TestCase
 
         $columns = $this->adapter->getColumns('t');
         $this->assertCount(2, $columns);
-        $this->assertEquals('id', $columns['id']->getName());
-        $this->assertTrue($columns['id']->getIdentity());
+        $this->assertEquals('id', $columns[0]->getName());
+        $this->assertTrue($columns[0]->getIdentity());
 
-        $this->assertEquals($colName, $columns[$colName]->getName());
-        $this->assertEquals($actualType ?? $type, $columns[$colName]->getType());
+        $this->assertEquals($colName, $columns[1]->getName());
+        $this->assertEquals($actualType ?? $type, $columns[1]->getType());
     }
 
     public function testAddIndex()
