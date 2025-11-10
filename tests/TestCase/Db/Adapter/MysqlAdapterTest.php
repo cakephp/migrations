@@ -2560,11 +2560,12 @@ OUTPUT;
         $table->addColumn('name', 'string')
             ->create();
 
+        // Use ALGORITHM=INPLACE with LOCK=NONE (INSTANT can't have explicit locks)
         $table->addColumn('price', 'decimal', [
             'precision' => 10,
             'scale' => 2,
             'null' => true,
-            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
             'lock' => MysqlAdapter::LOCK_NONE,
         ])->update();
 
@@ -2642,10 +2643,12 @@ OUTPUT;
 
         $table->addColumn('col2', 'string', [
             'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
             'lock' => MysqlAdapter::LOCK_NONE,
         ])
         ->addColumn('col3', 'string', [
             'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
             'lock' => MysqlAdapter::LOCK_SHARED,
         ])
         ->update();
@@ -2679,6 +2682,22 @@ OUTPUT;
         ])->update();
     }
 
+    public function testAlgorithmInstantWithExplicitLockThrowsException()
+    {
+        $table = new Table('instant_lock_test', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ALGORITHM=INSTANT cannot be combined with LOCK=NONE');
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+    }
+
     public function testAlgorithmConstantsAreDefined()
     {
         $this->assertEquals('DEFAULT', MysqlAdapter::ALGORITHM_DEFAULT);
@@ -2701,10 +2720,10 @@ OUTPUT;
         $table->addColumn('col1', 'string')
             ->create();
 
-        // Should work with lowercase
+        // Should work with lowercase (use INPLACE with LOCK, not INSTANT)
         $table->addColumn('col2', 'string', [
             'null' => true,
-            'algorithm' => 'instant',
+            'algorithm' => 'inplace',
             'lock' => 'none',
         ])->update();
 

@@ -132,17 +132,29 @@ class MysqlAdapter extends AbstractAdapter
      * ```php
      * use Migrations\Db\Adapter\MysqlAdapter;
      *
+     * // ALGORITHM=INSTANT alone (recommended)
      * $table->addColumn('status', 'string', [
+     *     'null' => true,
      *     'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+     * ]);
+     *
+     * // Or with ALGORITHM=INPLACE and explicit LOCK
+     * $table->addColumn('status', 'string', [
+     *     'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
      *     'lock' => MysqlAdapter::LOCK_NONE,
      * ]);
      * ```
+     *
+     * Important: ALGORITHM=INSTANT cannot be combined with LOCK=NONE, LOCK=SHARED,
+     * or LOCK=EXCLUSIVE (MySQL restriction). Use ALGORITHM=INSTANT alone or with
+     * LOCK=DEFAULT only.
      *
      * Note: ALGORITHM_INSTANT requires MySQL 8.0+ or MariaDB 10.3+ and only works for
      * compatible operations (adding nullable columns, dropping columns, etc.).
      * If the operation cannot be performed instantly, MySQL will return an error.
      *
      * @see https://dev.mysql.com/doc/refman/8.0/en/alter-table.html
+     * @see https://dev.mysql.com/doc/refman/8.0/en/innodb-online-ddl-operations.html
      * @see https://mariadb.com/kb/en/alter-table/#algorithm
      */
     public const ALGORITHM_DEFAULT = 'DEFAULT';
@@ -647,7 +659,6 @@ class MysqlAdapter extends AbstractAdapter
         );
 
         $alter .= $this->afterClause($column);
-        $alter .= $this->algorithmClause($column);
 
         return new AlterInstructions([$alter]);
     }
@@ -670,62 +681,6 @@ class MysqlAdapter extends AbstractAdapter
         }
 
         return ' AFTER ' . $this->quoteColumnName($after);
-    }
-
-    /**
-     * Generates the ALGORITHM and LOCK clauses for MySQL ALTER TABLE statements.
-     *
-     * @param \Migrations\Db\Table\Column $column The column being altered.
-     * @return string The appropriate SQL fragment.
-     * @throws \InvalidArgumentException If an invalid algorithm or lock value is provided.
-     */
-    protected function algorithmClause(Column $column): string
-    {
-        $clause = '';
-        $algorithm = $column->getAlgorithm();
-        $lock = $column->getLock();
-
-        if ($algorithm !== null) {
-            $validAlgorithms = [
-                self::ALGORITHM_DEFAULT,
-                self::ALGORITHM_INSTANT,
-                self::ALGORITHM_INPLACE,
-                self::ALGORITHM_COPY,
-            ];
-            $upperAlgorithm = strtoupper($algorithm);
-
-            if (!in_array($upperAlgorithm, $validAlgorithms, true)) {
-                throw new InvalidArgumentException(sprintf(
-                    'Invalid algorithm "%s". Valid options: %s',
-                    $algorithm,
-                    implode(', ', $validAlgorithms),
-                ));
-            }
-
-            $clause .= ', ALGORITHM=' . $upperAlgorithm;
-        }
-
-        if ($lock !== null) {
-            $validLocks = [
-                self::LOCK_DEFAULT,
-                self::LOCK_NONE,
-                self::LOCK_SHARED,
-                self::LOCK_EXCLUSIVE,
-            ];
-            $upperLock = strtoupper($lock);
-
-            if (!in_array($upperLock, $validLocks, true)) {
-                throw new InvalidArgumentException(sprintf(
-                    'Invalid lock "%s". Valid options: %s',
-                    $lock,
-                    implode(', ', $validLocks),
-                ));
-            }
-
-            $clause .= ', LOCK=' . $upperLock;
-        }
-
-        return $clause;
     }
 
     /**
@@ -799,11 +754,10 @@ class MysqlAdapter extends AbstractAdapter
         $dialect = $this->getSchemaDialect();
 
         $alter = sprintf(
-            'CHANGE %s %s%s%s',
+            'CHANGE %s %s%s',
             $this->quoteColumnName($columnName),
             $this->columnDefinitionSql($dialect, $newColumn),
             $this->afterClause($newColumn),
-            $this->algorithmClause($newColumn),
         );
 
         return new AlterInstructions([$alter]);
@@ -1478,6 +1432,9 @@ class MysqlAdapter extends AbstractAdapter
 
         // Add algorithm and lock clauses
         $algorithmLockClause = '';
+        $upperAlgorithm = null;
+        $upperLock = null;
+
         if ($algorithm !== null) {
             $upperAlgorithm = strtoupper($algorithm);
             $validAlgorithms = [
@@ -1512,6 +1469,15 @@ class MysqlAdapter extends AbstractAdapter
                 ));
             }
             $algorithmLockClause .= ', LOCK=' . $upperLock;
+        }
+
+        // MySQL restriction: ALGORITHM=INSTANT cannot be combined with explicit LOCK modes
+        // except LOCK=DEFAULT. See: https://dev.mysql.com/doc/refman/8.0/en/innodb-online-ddl-operations.html
+        if ($upperAlgorithm === self::ALGORITHM_INSTANT && $upperLock !== null && $upperLock !== self::LOCK_DEFAULT) {
+            throw new InvalidArgumentException(
+                'ALGORITHM=INSTANT cannot be combined with LOCK=NONE, LOCK=SHARED, or LOCK=EXCLUSIVE. ' .
+                'Either use ALGORITHM=INSTANT alone, or use ALGORITHM=INSTANT with LOCK=DEFAULT.',
+            );
         }
 
         // Execute with custom template
