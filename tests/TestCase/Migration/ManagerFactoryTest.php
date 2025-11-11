@@ -14,11 +14,11 @@ class ManagerFactoryTest extends TestCase
 {
     public function testConnection(): void
     {
-        $this->out = new StubConsoleOutput();
-        $this->out->setOutputAs(StubConsoleOutput::PLAIN);
-        $this->in = new StubConsoleInput([]);
+        $out = new StubConsoleOutput();
+        $out->setOutputAs(StubConsoleOutput::PLAIN);
+        $in = new StubConsoleInput([]);
 
-        $io = new ConsoleIo($this->out, $this->out, $this->in);
+        $io = new ConsoleIo($out, $out, $in);
 
         $factory = new ManagerFactory(['connection' => 'test']);
         $result = $factory->createManager($io);
@@ -28,11 +28,11 @@ class ManagerFactoryTest extends TestCase
 
     public function testDsnConnection(): void
     {
-        $this->out = new StubConsoleOutput();
-        $this->out->setOutputAs(StubConsoleOutput::PLAIN);
-        $this->in = new StubConsoleInput([]);
+        $out = new StubConsoleOutput();
+        $out->setOutputAs(StubConsoleOutput::PLAIN);
+        $in = new StubConsoleInput([]);
 
-        $io = new ConsoleIo($this->out, $this->out, $this->in);
+        $io = new ConsoleIo($out, $out, $in);
 
         $factory = new ManagerFactory(['connection' => 'mysql://root@127.0.0.1/db_tmp']);
         $result = $factory->createManager($io);

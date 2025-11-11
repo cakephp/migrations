@@ -269,6 +269,34 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     }
 
     /**
+     * Override to normalize collation names for MySQL version compatibility
+     *
+     * @param string $path Path to comparison file
+     * @param string $result Actual result
+     * @return void
+     */
+    public function assertSameAsFile(string $path, string $result): void
+    {
+        if (!file_exists($path)) {
+            $path = $this->_compareBasePath . $path;
+        }
+
+        $this->_updateComparisons ??= (bool)env('UPDATE_TEST_COMPARISON_FILES');
+
+        if ($this->_updateComparisons) {
+            file_put_contents($path, $result);
+        }
+
+        $expected = file_get_contents($path);
+
+        // Normalize utf8mb3 to utf8 for MySQL 8.0.30+ compatibility
+        $expected = str_replace('utf8mb3_', 'utf8_', $expected);
+        $result = str_replace('utf8mb3_', 'utf8_', $result);
+
+        $this->assertTextEquals($expected, $result, 'Content does not match file ' . $path);
+    }
+
+    /**
      * Assert that the $result matches the content of the baked file
      *
      * @param string $bakeName Name of the file to compare to the test
