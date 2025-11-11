@@ -499,6 +499,66 @@ class BaseMigration implements MigrationInterface
     }
 
     /**
+     * Creates a view.
+     *
+     * This is a convenience method that creates a dummy table to associate the view with.
+     * Views are not directly associated with tables, but the Table class is used to
+     * manage the migration actions.
+     *
+     * @param string $viewName View name
+     * @param string $definition SQL SELECT statement for the view
+     * @param array<string, mixed> $options View options
+     * @return void
+     */
+    public function createView(string $viewName, string $definition, array $options = []): void
+    {
+        $table = $this->table($viewName);
+        $table->createView($viewName, $definition, $options)->create();
+    }
+
+    /**
+     * Drops a view.
+     *
+     * @param string $viewName View name
+     * @param array<string, mixed> $options View options
+     * @return void
+     */
+    public function dropView(string $viewName, array $options = []): void
+    {
+        $table = $this->table($viewName);
+        $table->dropView($viewName, $options)->save();
+    }
+
+    /**
+     * Creates a trigger on a table.
+     *
+     * @param string $tableName Table name
+     * @param string $triggerName Trigger name
+     * @param string|array<string> $event Event(s) that fire the trigger (INSERT, UPDATE, DELETE)
+     * @param string $definition Trigger body/definition
+     * @param array<string, mixed> $options Trigger options
+     * @return void
+     */
+    public function createTrigger(string $tableName, string $triggerName, string|array $event, string $definition, array $options = []): void
+    {
+        $table = $this->table($tableName);
+        $table->createTrigger($triggerName, $event, $definition, $options)->save();
+    }
+
+    /**
+     * Drops a trigger from a table.
+     *
+     * @param string $tableName Table name
+     * @param string $triggerName Trigger name
+     * @return void
+     */
+    public function dropTrigger(string $tableName, string $triggerName): void
+    {
+        $table = $this->table($tableName);
+        $table->dropTrigger($triggerName)->save();
+    }
+
+    /**
      * Makes sure the version int is within range for valid datetime.
      * This is required to have a meaningful order in the overview.
      *

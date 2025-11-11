@@ -21,6 +21,8 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use PDOException;
 use RuntimeException;
 use const FILTER_VALIDATE_BOOLEAN;
@@ -1732,5 +1734,68 @@ PCRE_PATTERN;
         }
 
         return ' ON CONFLICT (' . implode(', ', $quotedConflictColumns) . ') DO UPDATE SET ' . implode(', ', $updates);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateViewInstructions(View $view): AlterInstructions
+    {
+        $sql = sprintf(
+            'CREATE VIEW IF NOT EXISTS %s AS %s',
+            $this->quoteTableName($view->getName()),
+            $view->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions
+    {
+        $sql = sprintf(
+            'DROP VIEW IF EXISTS %s',
+            $this->quoteTableName($viewName),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions
+    {
+        $events = is_array($trigger->getEvent()) ? $trigger->getEvent() : [$trigger->getEvent()];
+        $eventStr = implode(' OR ', $events);
+
+        $forEach = $trigger->getForEach() ? 'FOR EACH ROW' : '';
+
+        $sql = sprintf(
+            'CREATE TRIGGER %s %s %s ON %s %s BEGIN %s END',
+            $this->quoteColumnName($trigger->getName()),
+            $trigger->getTiming(),
+            $eventStr,
+            $this->quoteTableName($tableName),
+            $forEach,
+            $trigger->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions
+    {
+        $sql = sprintf(
+            'DROP TRIGGER IF EXISTS %s',
+            $this->quoteColumnName($triggerName),
+        );
+
+        return new AlterInstructions([], [$sql]);
     }
 }

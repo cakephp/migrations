@@ -998,6 +998,87 @@ class Table
     }
 
     /**
+     * Creates a view.
+     *
+     * @param string $viewName View name
+     * @param string $definition SQL SELECT statement for the view
+     * @param array<string, mixed> $options View options
+     * @return $this
+     */
+    public function createView(string $viewName, string $definition, array $options = [])
+    {
+        $view = new Table\View(
+            $viewName,
+            $definition,
+            $options['replace'] ?? false,
+            $options['materialized'] ?? false,
+        );
+
+        $action = new Action\CreateView($this->table, $view);
+        $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    /**
+     * Drops a view.
+     *
+     * @param string $viewName View name
+     * @param array<string, mixed> $options View options
+     * @return $this
+     */
+    public function dropView(string $viewName, array $options = [])
+    {
+        $action = new Action\DropView(
+            $this->table,
+            $viewName,
+            $options['materialized'] ?? false,
+        );
+        $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    /**
+     * Creates a trigger on this table.
+     *
+     * @param string $triggerName Trigger name
+     * @param string|array<string> $event Event(s) that fire the trigger (INSERT, UPDATE, DELETE)
+     * @param string $definition Trigger body/definition
+     * @param array<string, mixed> $options Trigger options
+     * @return $this
+     */
+    public function createTrigger(string $triggerName, string|array $event, string $definition, array $options = [])
+    {
+        $trigger = new Table\Trigger(
+            $triggerName,
+            $options['timing'] ?? Table\Trigger::BEFORE,
+            $event,
+            $definition,
+            $options['forEach'] ?? true,
+        );
+
+        $action = new Action\CreateTrigger($this->table, $trigger);
+        $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    /**
+     * Drops a trigger from this table.
+     *
+     * @param string $triggerName Trigger name
+     * @return $this
+     */
+    public function dropTrigger(string $triggerName)
+    {
+        $action = new Action\DropTrigger($this->table, $triggerName);
+        $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    /**
      * Executes all the pending actions for this table
      *
      * @param bool $exists Whether the table existed prior to executing this method

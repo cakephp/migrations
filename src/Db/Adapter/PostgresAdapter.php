@@ -23,6 +23,8 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Partition;
 use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use RuntimeException;
 
 class PostgresAdapter extends AbstractAdapter
@@ -1514,5 +1516,80 @@ class PostgresAdapter extends AbstractAdapter
         // names which is postgres, but pgsql is required for
         // compatibility.
         return 'pgsql';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateViewInstructions(View $view): AlterInstructions
+    {
+        $viewType = $view->getMaterialized() ? 'MATERIALIZED VIEW' : 'VIEW';
+        $replace = '';
+
+        if ($view->getReplace() && !$view->getMaterialized()) {
+            $replace = 'OR REPLACE ';
+        }
+
+        $sql = sprintf(
+            'CREATE %s%s %s AS %s',
+            $replace,
+            $viewType,
+            $this->quoteTableName($view->getName()),
+            $view->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions
+    {
+        $viewType = $materialized ? 'MATERIALIZED VIEW' : 'VIEW';
+        $sql = sprintf(
+            'DROP %s IF EXISTS %s',
+            $viewType,
+            $this->quoteTableName($viewName),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions
+    {
+        $events = is_array($trigger->getEvent()) ? $trigger->getEvent() : [$trigger->getEvent()];
+        $eventStr = implode(' OR ', $events);
+
+        $forEach = $trigger->getForEach() ? 'FOR EACH ROW' : 'FOR EACH STATEMENT';
+
+        $sql = sprintf(
+            'CREATE TRIGGER %s %s %s ON %s %s EXECUTE FUNCTION %s',
+            $this->quoteColumnName($trigger->getName()),
+            $trigger->getTiming(),
+            $eventStr,
+            $this->quoteTableName($tableName),
+            $forEach,
+            $trigger->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions
+    {
+        $sql = sprintf(
+            'DROP TRIGGER IF EXISTS %s ON %s',
+            $this->quoteColumnName($triggerName),
+            $this->quoteTableName($tableName),
+        );
+
+        return new AlterInstructions([], [$sql]);
     }
 }

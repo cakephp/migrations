@@ -21,6 +21,8 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use Migrations\MigrationInterface;
 
 /**
@@ -1138,5 +1140,77 @@ SQL;
         }
 
         return parent::getInsertPrefix($mode);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateViewInstructions(View $view): AlterInstructions
+    {
+        $drop = '';
+        if ($view->getReplace()) {
+            $drop = sprintf(
+                "IF OBJECT_ID('%s', 'V') IS NOT NULL DROP VIEW %s; ",
+                $view->getName(),
+                $this->quoteTableName($view->getName()),
+            );
+        }
+
+        $sql = sprintf(
+            '%sCREATE VIEW %s AS %s',
+            $drop,
+            $this->quoteTableName($view->getName()),
+            $view->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions
+    {
+        $sql = sprintf(
+            "IF OBJECT_ID('%s', 'V') IS NOT NULL DROP VIEW %s",
+            $viewName,
+            $this->quoteTableName($viewName),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions
+    {
+        $events = is_array($trigger->getEvent()) ? $trigger->getEvent() : [$trigger->getEvent()];
+        $eventStr = implode(', ', $events);
+
+        $sql = sprintf(
+            'CREATE TRIGGER %s ON %s %s %s AS %s',
+            $this->quoteColumnName($trigger->getName()),
+            $this->quoteTableName($tableName),
+            $trigger->getTiming(),
+            $eventStr,
+            $trigger->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions
+    {
+        $sql = sprintf(
+            "IF OBJECT_ID('%s', 'TR') IS NOT NULL DROP TRIGGER %s",
+            $triggerName,
+            $this->quoteColumnName($triggerName),
+        );
+
+        return new AlterInstructions([], [$sql]);
     }
 }

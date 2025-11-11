@@ -30,10 +30,14 @@ use Migrations\Db\Action\AddPartition;
 use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
+use Migrations\Db\Action\CreateTrigger;
+use Migrations\Db\Action\CreateView;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
+use Migrations\Db\Action\DropTrigger;
+use Migrations\Db\Action\DropView;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
@@ -47,6 +51,8 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
 use PDOException;
@@ -1647,6 +1653,41 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     abstract protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions;
 
     /**
+     * Returns the instructions to create a view.
+     *
+     * @param \Migrations\Db\Table\View $view The view to create
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getCreateViewInstructions(View $view): AlterInstructions;
+
+    /**
+     * Returns the instructions to drop a view.
+     *
+     * @param string $viewName The name of the view to drop
+     * @param bool $materialized Whether this is a materialized view (PostgreSQL only)
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions;
+
+    /**
+     * Returns the instructions to create a trigger.
+     *
+     * @param string $tableName The name of the table for the trigger
+     * @param \Migrations\Db\Table\Trigger $trigger The trigger to create
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions;
+
+    /**
+     * Returns the instructions to drop a trigger.
+     *
+     * @param string $tableName The name of the table for the trigger
+     * @param string $triggerName The name of the trigger to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions;
+
+    /**
      * {@inheritDoc}
      *
      * @throws \InvalidArgumentException
@@ -1775,6 +1816,35 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     $instructions->merge($this->getDropPartitionInstructions(
                         $table->getName(),
                         $action->getPartitionName(),
+                    ));
+                    break;
+
+                case $action instanceof CreateView:
+                    /** @var \Migrations\Db\Action\CreateView $action */
+                    $instructions->merge($this->getCreateViewInstructions($action->getView()));
+                    break;
+
+                case $action instanceof DropView:
+                    /** @var \Migrations\Db\Action\DropView $action */
+                    $instructions->merge($this->getDropViewInstructions(
+                        $action->getViewName(),
+                        $action->getMaterialized(),
+                    ));
+                    break;
+
+                case $action instanceof CreateTrigger:
+                    /** @var \Migrations\Db\Action\CreateTrigger $action */
+                    $instructions->merge($this->getCreateTriggerInstructions(
+                        $table->getName(),
+                        $action->getTrigger(),
+                    ));
+                    break;
+
+                case $action instanceof DropTrigger:
+                    /** @var \Migrations\Db\Action\DropTrigger $action */
+                    $instructions->merge($this->getDropTriggerInstructions(
+                        $table->getName(),
+                        $action->getTriggerName(),
                     ));
                     break;
 
