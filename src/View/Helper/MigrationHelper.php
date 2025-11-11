@@ -387,6 +387,7 @@ class MigrationHelper extends Helper
             'comment',
             'autoIncrement',
             'precision',
+            'scale',
             'after',
             'collate',
         ]);
@@ -420,7 +421,10 @@ class MigrationHelper extends Helper
             unset($columnOptions['precision']);
         } else {
             // due to Phinx using different naming for the precision and scale to CakePHP
-            $columnOptions['scale'] = $columnOptions['precision'];
+            // Only convert precision to scale if scale is not already set (for decimal columns from diff)
+            if (!isset($columnOptions['scale'])) {
+                $columnOptions['scale'] = $columnOptions['precision'];
+            }
 
             if (isset($columnOptions['limit'])) {
                 $columnOptions['precision'] = $columnOptions['limit'];

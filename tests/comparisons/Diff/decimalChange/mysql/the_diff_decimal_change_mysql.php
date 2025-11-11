@@ -28,7 +28,7 @@ class TheDiffDecimalChangeMysql extends BaseMigration
                 'default' => null,
                 'null' => false,
                 'precision' => 5,
-                'scale' => 5,
+                'scale' => 2,
             ])
             ->update();
     }
