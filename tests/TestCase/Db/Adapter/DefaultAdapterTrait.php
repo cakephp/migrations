@@ -9,6 +9,8 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 
 trait DefaultAdapterTrait
 {
@@ -184,6 +186,26 @@ trait DefaultAdapterTrait
     }
 
     protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
+    {
+        return new AlterInstructions();
+    }
+
+    protected function getCreateViewInstructions(View $view): AlterInstructions
+    {
+        return new AlterInstructions();
+    }
+
+    protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions
+    {
+        return new AlterInstructions();
+    }
+
+    protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions
+    {
+        return new AlterInstructions();
+    }
+
+    protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions
     {
         return new AlterInstructions();
     }
