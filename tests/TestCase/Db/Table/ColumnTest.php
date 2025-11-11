@@ -72,4 +72,111 @@ class ColumnTest extends TestCase
         $this->assertInstanceOf(QueryExpression::class, $result['default']);
         $this->assertEquals('CURRENT_TIMESTAMP', $result['default']->sql(new ValueBinder()));
     }
+
+    public function testIntegerColumnDefaultsToUnsigned(): void
+    {
+        $column = new Column();
+        $column->setName('user_id')->setType('integer');
+
+        $this->assertTrue($column->isUnsigned());
+        $this->assertFalse($column->isSigned());
+        $this->assertNull($column->getUnsigned());
+    }
+
+    public function testBigIntegerColumnDefaultsToUnsigned(): void
+    {
+        $column = new Column();
+        $column->setName('big_id')->setType('biginteger');
+
+        $this->assertTrue($column->isUnsigned());
+        $this->assertFalse($column->isSigned());
+        $this->assertNull($column->getUnsigned());
+    }
+
+    public function testSmallIntegerColumnDefaultsToUnsigned(): void
+    {
+        $column = new Column();
+        $column->setName('small_id')->setType('smallinteger');
+
+        $this->assertTrue($column->isUnsigned());
+        $this->assertFalse($column->isSigned());
+        $this->assertNull($column->getUnsigned());
+    }
+
+    public function testTinyIntegerColumnDefaultsToUnsigned(): void
+    {
+        $column = new Column();
+        $column->setName('tiny_id')->setType('tinyinteger');
+
+        $this->assertTrue($column->isUnsigned());
+        $this->assertFalse($column->isSigned());
+        $this->assertNull($column->getUnsigned());
+    }
+
+    public function testNonIntegerColumnDoesNotDefaultToUnsigned(): void
+    {
+        $stringColumn = new Column();
+        $stringColumn->setName('name')->setType('string');
+        $this->assertNull($stringColumn->getUnsigned());
+        $this->assertFalse($stringColumn->isUnsigned());
+
+        $dateColumn = new Column();
+        $dateColumn->setName('created')->setType('datetime');
+        $this->assertNull($dateColumn->getUnsigned());
+        $this->assertFalse($dateColumn->isUnsigned());
+
+        $decimalColumn = new Column();
+        $decimalColumn->setName('price')->setType('decimal');
+        $this->assertNull($decimalColumn->getUnsigned());
+        $this->assertFalse($decimalColumn->isUnsigned());
+    }
+
+    public function testExplicitSignedOverridesDefault(): void
+    {
+        $column = new Column();
+        $column->setName('counter')->setType('integer')->setSigned(true);
+
+        $this->assertFalse($column->isUnsigned());
+        $this->assertTrue($column->isSigned());
+        $this->assertFalse($column->getUnsigned());
+    }
+
+    public function testExplicitUnsignedIsPreserved(): void
+    {
+        $column = new Column();
+        $column->setName('age')->setType('integer')->setUnsigned(true);
+
+        $this->assertTrue($column->isUnsigned());
+        $this->assertFalse($column->isSigned());
+        $this->assertTrue($column->getUnsigned());
+    }
+
+    public function testToArrayReturnsNullUnsignedForIntegersByDefault(): void
+    {
+        $column = new Column();
+        $column->setName('user_id')->setType('integer');
+
+        $result = $column->toArray();
+        // getUnsigned() returns null for integer types to maintain compatibility
+        // with database dialects that don't support UNSIGNED keyword
+        $this->assertNull($result['unsigned']);
+    }
+
+    public function testToArrayReturnsNullForNonIntegerTypes(): void
+    {
+        $column = new Column();
+        $column->setName('title')->setType('string');
+
+        $result = $column->toArray();
+        $this->assertNull($result['unsigned']);
+    }
+
+    public function testToArrayRespectsExplicitSigned(): void
+    {
+        $column = new Column();
+        $column->setName('offset')->setType('integer')->setSigned(true);
+
+        $result = $column->toArray();
+        $this->assertFalse($result['unsigned']);
+    }
 }

@@ -484,6 +484,56 @@ class Column extends DatabaseColumn
     }
 
     /**
+     * Gets whether field should be unsigned.
+     *
+     * Returns the explicit unsigned setting, or null if not set.
+     * This preserves compatibility with database dialects that don't support
+     * the UNSIGNED keyword (e.g., SQLite, PostgreSQL).
+     *
+     * @return bool|null
+     */
+    public function getUnsigned(): ?bool
+    {
+        return $this->unsigned;
+    }
+
+    /**
+     * Should the column be unsigned?
+     *
+     * Integer types (integer, biginteger, smallinteger, tinyinteger) default to unsigned
+     * when the unsigned property is not explicitly set.
+     *
+     * @return bool
+     */
+    public function isUnsigned(): bool
+    {
+        // If explicitly set, use that value
+        if ($this->unsigned !== null) {
+            return $this->unsigned;
+        }
+
+        // Default integer types to unsigned
+        $integerTypes = [
+            self::INTEGER,
+            self::BIGINTEGER,
+            self::SMALLINTEGER,
+            self::TINYINTEGER,
+        ];
+
+        return in_array($this->type, $integerTypes, true);
+    }
+
+    /**
+     * Should the column be signed?
+     *
+     * @return bool
+     */
+    public function isSigned(): bool
+    {
+        return !$this->isUnsigned();
+    }
+
+    /**
      * Sets whether field should be signed.
      *
      * @param bool $signed Signed
@@ -505,18 +555,7 @@ class Column extends DatabaseColumn
      */
     public function getSigned(): bool
     {
-        return $this->unsigned === null ? true : !$this->unsigned;
-    }
-
-    /**
-     * Should the column be signed?
-     *
-     * @return bool
-     * @deprecated 5.0 Use isUnsigned() instead.
-     */
-    public function isSigned(): bool
-    {
-        return $this->getSigned();
+        return !$this->isUnsigned();
     }
 
     /**
@@ -768,7 +807,7 @@ class Column extends DatabaseColumn
             'null' => $this->getNull(),
             'default' => $default,
             'generated' => $this->getGenerated(),
-            'unsigned' => !$this->getSigned(),
+            'unsigned' => $this->getUnsigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
             'precision' => $precision,
