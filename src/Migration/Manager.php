@@ -10,6 +10,7 @@ namespace Migrations\Migration;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
+use Cake\Core\Configure;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -228,7 +229,8 @@ class Manager
 
         if (str_contains($className, '\\')) {
             $parts = explode('\\', $className);
-            if (count($parts) > 1 && $parts[0] !== 'App') {
+            $appNamespace = Configure::read('App.namespace', 'App');
+            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
                 $plugin = $parts[0];
             }
         }

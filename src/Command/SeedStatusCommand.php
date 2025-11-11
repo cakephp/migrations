@@ -17,6 +17,7 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Configure;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 
@@ -104,13 +105,14 @@ class SeedStatusCommand extends Command
 
         // Build status list
         $statuses = [];
+        $appNamespace = Configure::read('App.namespace', 'App');
         foreach ($seeds as $seed) {
             $plugin = null;
             $className = get_class($seed);
 
             if (str_contains($className, '\\')) {
                 $parts = explode('\\', $className);
-                if (count($parts) > 1 && $parts[0] !== 'App') {
+                if (count($parts) > 1 && $parts[0] !== $appNamespace) {
                     $plugin = $parts[0];
                 }
             }
@@ -128,10 +130,10 @@ class SeedStatusCommand extends Command
             }
 
             $statuses[] = [
-                'seed_name' => $seedName,
+                'seedName' => $seedName,
                 'plugin' => $plugin,
                 'status' => $executed ? 'executed' : 'pending',
-                'executed_at' => $executedAt,
+                'executedAt' => $executedAt,
             ];
         }
 
@@ -156,16 +158,16 @@ class SeedStatusCommand extends Command
         $io->out('<info>Current seed execution status:</info>');
         $io->out('');
 
-        $maxNameLength = max(array_map(fn($s) => strlen($s['seed_name']), $statuses));
+        $maxNameLength = max(array_map(fn($s) => strlen($s['seedName']), $statuses));
         $maxPluginLength = max(array_map(fn($s) => strlen($s['plugin'] ?? ''), $statuses));
 
         foreach ($statuses as $status) {
-            $seedName = str_pad($status['seed_name'], $maxNameLength);
+            $seedName = str_pad($status['seedName'], $maxNameLength);
             $plugin = $status['plugin'] ? str_pad($status['plugin'], $maxPluginLength) : str_repeat(' ', $maxPluginLength);
 
             if ($status['status'] === 'executed') {
                 $statusText = '<info>executed</info>';
-                $date = $status['executed_at'] ? ' (' . $status['executed_at'] . ')' : '';
+                $date = $status['executedAt'] ? ' (' . $status['executedAt'] . ')' : '';
                 $io->out("  {$statusText} {$plugin}  {$seedName}{$date}");
             } else {
                 $statusText = '<comment>pending</comment> ';

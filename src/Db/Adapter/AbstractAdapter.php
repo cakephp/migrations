@@ -10,6 +10,7 @@ namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
 use Cake\Console\ConsoleIo;
+use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
@@ -111,6 +112,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         if (isset($options['migration_table'])) {
             $this->setSchemaTableName($options['migration_table']);
+        }
+
+        if (isset($options['seed_table'])) {
+            $this->setSeedSchemaTableName($options['seed_table']);
         }
 
         if (isset($options['connection']) && $options['connection'] instanceof Connection) {
@@ -1029,7 +1034,8 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         if (str_contains($className, '\\')) {
             $parts = explode('\\', $className);
-            if (count($parts) > 1 && $parts[0] !== 'App') {
+            $appNamespace = Configure::read('App.namespace', 'App');
+            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
                 $plugin = $parts[0];
             }
         }
@@ -1059,7 +1065,8 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         if (str_contains($className, '\\')) {
             $parts = explode('\\', $className);
-            if (count($parts) > 1 && $parts[0] !== 'App') {
+            $appNamespace = Configure::read('App.namespace', 'App');
+            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
                 $plugin = $parts[0];
             }
         }

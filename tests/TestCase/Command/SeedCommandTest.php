@@ -531,72 +531,29 @@ class SeedCommandTest extends TestCase
     {
         $this->createTables();
 
-        // Create an idempotent seed file
-        $seedPath = ROOT . DS . 'config' . DS . 'TestSeeds';
-        if (!is_dir($seedPath)) {
-            mkdir($seedPath, 0777, true);
-        }
+        // First run - should insert data
+        $this->exec('seeds run -c test IdempotentTest');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
 
-        $seedFile = $seedPath . DS . 'IdempotentTestSeed.php';
-        $seedContent = <<<'PHP'
-<?php
-declare(strict_types=1);
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers WHERE number = 99');
+        $this->assertEquals(1, $query->fetchColumn(0));
 
-use Migrations\BaseSeed;
+        // Second run - should run again (not skip) and insert another row
+        $this->exec('seeds run -c test IdempotentTest');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
+        $this->assertOutputNotContains('already executed');
 
-class IdempotentTestSeed extends BaseSeed
-{
-    public function isIdempotent(): bool
-    {
-        return true;
-    }
+        // Verify it ran again and inserted another row
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers WHERE number = 99');
+        $this->assertEquals(2, $query->fetchColumn(0));
 
-    public function run(): void
-    {
-        $this->table('numbers')
-            ->insert([
-                'number' => '99',
-                'radix' => '10',
-            ])
-            ->save();
-    }
-}
-PHP;
-        file_put_contents($seedFile, $seedContent);
-
-        try {
-            // First run - should insert data
-            $this->exec('seeds run -c test -s TestSeeds IdempotentTest');
-            $this->assertExitSuccess();
-            $this->assertOutputContains('seeding');
-
-            /** @var \Cake\Database\Connection $connection */
-            $connection = ConnectionManager::get('test');
-            $query = $connection->execute('SELECT COUNT(*) FROM numbers WHERE number = 99');
-            $this->assertEquals(1, $query->fetchColumn(0));
-
-            // Second run - should run again (not skip) and insert another row
-            $this->exec('seeds run -c test -s TestSeeds IdempotentTest');
-            $this->assertExitSuccess();
-            $this->assertOutputContains('seeding');
-            $this->assertOutputNotContains('already executed');
-
-            // Verify it ran again and inserted another row
-            $query = $connection->execute('SELECT COUNT(*) FROM numbers WHERE number = 99');
-            $this->assertEquals(2, $query->fetchColumn(0));
-
-            // Verify the seed was NOT tracked in cake_seeds table
-            $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
-            $this->assertEquals(0, $seedLog->fetchColumn(0), 'Idempotent seeds should not be tracked');
-        } finally {
-            // Cleanup
-            if (file_exists($seedFile)) {
-                unlink($seedFile);
-            }
-            if (is_dir($seedPath)) {
-                rmdir($seedPath);
-            }
-        }
+        // Verify the seed was NOT tracked in cake_seeds table
+        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
+        $this->assertEquals(0, $seedLog->fetchColumn(0), 'Idempotent seeds should not be tracked');
     }
 
     public function testNonIdempotentSeedIsTracked(): void
