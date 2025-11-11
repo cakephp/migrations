@@ -1343,7 +1343,6 @@ PCRE_PATTERN;
         $instructions->addPostStep(function ($state) use ($column) {
             $quotedColumn = preg_quote($column);
             $columnPattern = "`{$quotedColumn}`|\"{$quotedColumn}\"|\[{$quotedColumn}\]";
-            // Extended pattern to capture AUTOINCREMENT if present
             $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)(\s+(NOT )?NULL)?(\s+(?:PRIMARY KEY\s+)?AUTOINCREMENT)?/i";
 
             $sql = $state['createSQL'];
