@@ -214,6 +214,22 @@ To reset all seeds' execution state (allowing them to run again without ``--forc
     When re-running seeds with ``--force``, be careful to ensure your seeds are
     idempotent (safe to run multiple times) or they may create duplicate data.
 
+Customizing the Seed Tracking Table
+------------------------------------
+
+By default, seed execution is tracked in a table named ``cake_seeds``. You can
+customize this table name by configuring it in your ``config/app.php`` or
+``config/app_local.php``:
+
+.. code-block:: php
+
+    'Migrations' => [
+        'seed_table' => 'my_custom_seeds_table',
+    ],
+
+This is useful if you need to avoid table name conflicts or want to follow
+a specific naming convention in your database.
+
 Idempotent Seeds
 ================
 
