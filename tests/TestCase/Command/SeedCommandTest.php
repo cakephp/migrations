@@ -532,7 +532,7 @@ class SeedCommandTest extends TestCase
         $this->createTables();
 
         // First run - should insert data
-        $this->exec('seeds run -c test IdempotentTest');
+        $this->exec('seeds run -c test -s TestSeeds IdempotentTest');
         $this->assertExitSuccess();
         $this->assertOutputContains('seeding');
 
@@ -542,7 +542,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(1, $query->fetchColumn(0));
 
         // Second run - should run again (not skip) and insert another row
-        $this->exec('seeds run -c test IdempotentTest');
+        $this->exec('seeds run -c test -s TestSeeds IdempotentTest');
         $this->assertExitSuccess();
         $this->assertOutputContains('seeding');
         $this->assertOutputNotContains('already executed');
