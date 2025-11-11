@@ -18,6 +18,9 @@ use Cake\Console\BaseCommand;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Driver\Mysql;
+use Cake\Database\Driver\Postgres;
+use Cake\Database\Driver\Sqlite;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
@@ -391,18 +394,21 @@ class Initial extends BaseMigration
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
+        // Detect database type from connection if DB env is not set
+        $db = env('DB') ?: $this->getDbType();
+
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
         // DecimalChange uses 'initial_' prefix to avoid class name conflicts
         $prefix = $scenario === 'DecimalChange' ? 'initial_' : 'the_diff_';
         $classPrefix = $scenario === 'DecimalChange' ? 'Initial' : 'TheDiff';
 
-        $diffMigrationsPath = $diffConfigFolder . $prefix . Inflector::underscore($scenario) . '_' . env('DB') . '.php';
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+        $diffMigrationsPath = $diffConfigFolder . $prefix . Inflector::underscore($scenario) . '_' . $db . '.php';
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . $db . '.lock';
 
         $destinationConfigDir = ROOT . DS . 'config' . DS . "MigrationsDiff{$scenario}" . DS;
-        $destination = $destinationConfigDir . "20160415220805_{$classPrefix}{$scenario}" . ucfirst(env('DB')) . '.php';
-        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+        $destination = $destinationConfigDir . "20160415220805_{$classPrefix}{$scenario}" . ucfirst($db) . '.php';
+        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . $db . '.lock';
         copy($diffMigrationsPath, $destination);
 
         $this->generatedFiles = [
@@ -454,6 +460,29 @@ class Initial extends BaseMigration
     }
 
     /**
+     * Detect database type from connection
+     *
+     * @return string Database type (mysql, pgsql, sqlite, sqlserver)
+     */
+    protected function getDbType(): string
+    {
+        $connection = ConnectionManager::get('test_comparisons');
+        $driver = $connection->getDriver();
+
+        if ($driver instanceof Mysql) {
+            return 'mysql';
+        } elseif ($driver instanceof Postgres) {
+            return 'pgsql';
+        } elseif ($driver instanceof Sqlite) {
+            return 'sqlite';
+        } elseif ($driver instanceof Sqlserver) {
+            return 'sqlserver';
+        }
+
+        return 'mysql'; // Default fallback
+    }
+
+    /**
      * Get the baked filename based on the current db environment
      *
      * @param string $name Name of the baked file, unaware of the DB environment
@@ -461,7 +490,11 @@ class Initial extends BaseMigration
      */
     public function getBakeName($name)
     {
-        $name .= ucfirst(getenv('DB'));
+        $db = getenv('DB');
+        if (!$db) {
+            $db = $this->getDbType();
+        }
+        $name .= ucfirst($db);
 
         return $name;
     }
@@ -494,6 +527,9 @@ class Initial extends BaseMigration
     public function assertCorrectSnapshot($bakeName, $result)
     {
         $dbenv = getenv('DB');
+        if (!$dbenv) {
+            $dbenv = $this->getDbType();
+        }
         $bakeName = Inflector::underscore($bakeName);
         if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);
