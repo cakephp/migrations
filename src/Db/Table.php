@@ -909,7 +909,7 @@ class Table
         $existingOptions = [];
 
         // Only preserve limit if type is not changing or limit is not explicitly set
-        if (!$typeChanging && !isset($options['limit']) && !isset($options['length'])) {
+        if (!$typeChanging && !array_key_exists('limit', $options) && !array_key_exists('length', $options)) {
             $limit = $existingColumn->getLimit();
             if ($limit !== null) {
                 $existingOptions['limit'] = $limit;
@@ -927,7 +927,7 @@ class Table
         }
 
         // Preserve scale/precision if not explicitly set
-        if (!isset($options['scale']) && !isset($options['precision'])) {
+        if (!array_key_exists('scale', $options) && !array_key_exists('precision', $options)) {
             $scale = $existingColumn->getScale();
             if ($scale !== null) {
                 $existingOptions['scale'] = $scale;
@@ -939,7 +939,7 @@ class Table
         }
 
         // Preserve comment if not explicitly set
-        if (!isset($options['comment'])) {
+        if (!array_key_exists('comment', $options)) {
             $comment = $existingColumn->getComment();
             if ($comment !== null) {
                 $existingOptions['comment'] = $comment;

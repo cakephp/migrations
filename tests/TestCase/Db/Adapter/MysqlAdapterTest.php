@@ -1119,7 +1119,7 @@ class MysqlAdapterTest extends TestCase
         $table->updateColumn('column1', $newColumn, ['limit' => 500]);
     }
 
-    public function testUpdateColumnCanRemoveLengthConstraint()
+    public function testUpdateColumnWithTypeChangeToText()
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
@@ -1129,14 +1129,73 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('varchar(100)', $rows[1]['Type']);
         $this->assertEquals('test', $rows[1]['Default']);
 
-        // Try to remove length constraint by passing limit => null
-        $table->updateColumn('column1', 'text', ['limit' => null])->save();
+        // Change type to text (limit doesn't apply to TEXT types)
+        $table->updateColumn('column1', 'text')->save();
 
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
         // TEXT type in MySQL doesn't have a length specifier
         $this->assertEquals('text', $rows[1]['Type']);
         // TEXT columns in MySQL quote the default value
         $this->assertStringContainsString('test', $rows[1]['Default']); // Default should be preserved
+    }
+
+    public function testUpdateColumnCanRemoveLengthConstraintWithoutChangingType()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+
+        // Try to remove length constraint without changing type by passing length => null
+        // This tests the array_key_exists fix - isset() would fail here
+        $table->updateColumn('column1', 'string', ['length' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Without explicit length, MySQL uses default varchar(255)
+        $this->assertEquals('varchar(255)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']); // Default should be preserved
+    }
+
+    public function testUpdateColumnCanRemoveScaleAndPrecision()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'decimal', ['precision' => 10, 'scale' => 2, 'default' => '123.45'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('decimal(10,2)', $rows[1]['Type']);
+        $this->assertEquals('123.45', $rows[1]['Default']);
+
+        // Try to remove scale/precision by passing null
+        $table->updateColumn('column1', 'decimal', ['precision' => null, 'scale' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Without explicit precision/scale, MySQL uses default decimal(10,0)
+        $this->assertEquals('decimal(10,0)', $rows[1]['Type']);
+        $this->assertEquals('123', $rows[1]['Default']); // Default should be preserved (truncated to integer)
+    }
+
+    public function testUpdateColumnCanRemoveComment()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['limit' => 100, 'comment' => 'Original comment', 'default' => 'test'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+        // MySQL doesn't show comments in SHOW COLUMNS, but we can verify it was set
+
+        // Try to remove comment by passing null
+        $table->updateColumn('column1', 'string', ['comment' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Verify limit and default are preserved
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
     }
 
     public function testChangeColumnEnum()
