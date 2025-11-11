@@ -647,7 +647,7 @@ class MigrationHelper extends Helper
      * Render an element.
      *
      * @param string $name The name of the element to render.
-     * @param array $data Additional data for the element.
+     * @param array<string, mixed> $data Additional data for the element.
      * @return ?string
      */
     public function element(string $name, array $data): ?string

@@ -35,6 +35,7 @@ use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
 use Migrations\Db\Table\CheckConstraint;
@@ -391,7 +392,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function isValidColumnType(Column $column): bool
     {
-        return $column->getType() instanceof Literal || in_array($column->getType(), $this->getColumnTypes(), true);
+        return in_array($column->getType(), $this->getColumnTypes(), true);
     }
 
     /**
@@ -600,9 +601,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row): void
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
     {
-        $sql = $this->generateInsertSql($table, $row);
+        $sql = $this->generateInsertSql($table, $row, $mode);
 
         if ($this->isDryRunEnabled()) {
             $this->io->out($sql);
@@ -626,12 +627,14 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
      * @param array $row The row to insert
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @return string
      */
-    protected function generateInsertSql(TableMetadata $table, array $row): string
+    protected function generateInsertSql(TableMetadata $table, array $row, ?InsertMode $mode = null): string
     {
         $sql = sprintf(
-            'INSERT INTO %s ',
+            '%s INTO %s ',
+            $this->getInsertPrefix($mode),
             $this->quoteTableName($table->getName()),
         );
         $columns = array_keys($row);
@@ -660,6 +663,21 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
             return $sql;
         }
+    }
+
+    /**
+     * Get the INSERT prefix based on insert mode and database type.
+     *
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @return string
+     */
+    protected function getInsertPrefix(?InsertMode $mode = null): string
+    {
+        if ($mode === InsertMode::IGNORE) {
+            return 'INSERT IGNORE';
+        }
+
+        return 'INSERT';
     }
 
     /**
@@ -709,9 +727,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
     {
-        $sql = $this->generateBulkInsertSql($table, $rows);
+        $sql = $this->generateBulkInsertSql($table, $rows, $mode);
 
         if ($this->isDryRunEnabled()) {
             $this->io->out($sql);
@@ -745,12 +763,14 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
      * @param array $rows The rows to insert
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @return string
      */
-    protected function generateBulkInsertSql(TableMetadata $table, array $rows): string
+    protected function generateBulkInsertSql(TableMetadata $table, array $rows, ?InsertMode $mode = null): string
     {
         $sql = sprintf(
-            'INSERT INTO %s ',
+            '%s INTO %s ',
+            $this->getInsertPrefix($mode),
             $this->quoteTableName($table->getName()),
         );
         $current = current($rows);

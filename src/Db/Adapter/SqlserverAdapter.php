@@ -14,6 +14,7 @@ use Cake\I18n\Date;
 use Cake\I18n\DateTime;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
@@ -312,7 +313,7 @@ class SqlserverAdapter extends AbstractAdapter
                 $column->setIdentity($columnInfo['autoIncrement']);
             }
 
-            $columns[$columnInfo['name']] = $column;
+            $columns[] = $column;
         }
 
         return $columns;
@@ -434,13 +435,20 @@ SQL;
     protected function getChangeColumnInstructions(string $tableName, string $columnName, Column $newColumn): AlterInstructions
     {
         $columns = $this->getColumns($tableName);
-        if (!isset($columns[$columnName])) {
+        $oldColumn = null;
+        foreach ($columns as $column) {
+            if ($column->getName() === $columnName) {
+                $oldColumn = $column;
+                break;
+            }
+        }
+        if ($oldColumn === null) {
             throw new InvalidArgumentException("Unknown column {$columnName} cannot be changed.");
         }
 
         $changeDefault =
-            $newColumn->getDefault() !== $columns[$columnName]->getDefault() ||
-            $newColumn->getType() !== $columns[$columnName]->getType();
+            $newColumn->getDefault() !== $oldColumn->getDefault() ||
+            $newColumn->getType() !== $oldColumn->getType();
 
         $instructions = new AlterInstructions();
         $dialect = $this->getSchemaDialect();
@@ -999,9 +1007,9 @@ SQL;
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row): void
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
     {
-        $sql = $this->generateInsertSql($table, $row);
+        $sql = $this->generateInsertSql($table, $row, $mode);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
 
@@ -1025,9 +1033,9 @@ SQL;
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
     {
-        $sql = $this->generateBulkInsertSql($table, $rows);
+        $sql = $this->generateBulkInsertSql($table, $rows, $mode);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
 
@@ -1104,5 +1112,17 @@ SQL;
     protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
     {
         throw new BadMethodCallException('Check constraints are not yet implemented for SQL Server adapter');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getInsertPrefix(?InsertMode $mode = null): string
+    {
+        if ($mode === InsertMode::IGNORE) {
+            throw new BadMethodCallException('INSERT IGNORE is not supported for SQL Server');
+        }
+
+        return parent::getInsertPrefix($mode);
     }
 }

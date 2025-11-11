@@ -10,6 +10,7 @@ namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
 use Cake\Console\ConsoleIo;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -83,22 +84,22 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row): void
+    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
     {
         $end = $this->startCommandTimer();
         $this->writeCommand('insert', [$table->getName()]);
-        parent::insert($table, $row);
+        parent::insert($table, $row, $mode);
         $end();
     }
 
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows): void
+    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
     {
         $end = $this->startCommandTimer();
         $this->writeCommand('bulkinsert', [$table->getName()]);
-        parent::bulkinsert($table, $rows);
+        parent::bulkinsert($table, $rows, $mode);
         $end();
     }
 

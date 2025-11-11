@@ -14,6 +14,7 @@ use Cake\Database\Schema\TableSchemaInterface;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Expression;
+use Migrations\Db\InsertMode;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
@@ -1685,5 +1686,17 @@ PCRE_PATTERN;
         }
 
         return $def;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getInsertPrefix(?InsertMode $mode = null): string
+    {
+        if ($mode === InsertMode::IGNORE) {
+            return 'INSERT OR IGNORE';
+        }
+
+        return 'INSERT';
     }
 }

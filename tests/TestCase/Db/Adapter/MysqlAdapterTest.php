@@ -2453,4 +2453,90 @@ OUTPUT;
             'CREATE TABLE should contain DECIMAL(65,0) with scale=0 properly defined',
         );
     }
+
+    public function testInsertOrSkipWithDuplicates()
+    {
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('email', 'string', ['limit' => 255])
+            ->addColumn('name', 'string')
+            ->addIndex('email', ['unique' => true])
+            ->create();
+
+        // First insert
+        $table->insertOrSkip([
+            ['email' => 'test@example.com', 'name' => 'John'],
+        ])->save();
+
+        // Duplicate - should be skipped
+        $table->insertOrSkip([
+            ['email' => 'test@example.com', 'name' => 'Jane'],
+        ])->save();
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM users');
+        $this->assertCount(1, $rows);
+        $this->assertEquals('John', $rows[0]['name']);
+    }
+
+    public function testInsertModeResetsAfterInsertOrSkip()
+    {
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('email', 'string', ['limit' => 255])
+            ->addColumn('name', 'string')
+            ->addIndex('email', ['unique' => true])
+            ->create();
+
+        // First insert with insertOrSkip
+        $table->insertOrSkip([
+            ['email' => 'test@example.com', 'name' => 'John'],
+        ])->save();
+
+        // Now use regular insert with duplicate - should throw exception
+        $this->expectException(PDOException::class);
+        $table->insert([
+            ['email' => 'test@example.com', 'name' => 'Jane'],
+        ])->save();
+    }
+
+    public function testBulkinsertOrSkipWithDuplicates()
+    {
+        $table = new Table('products', [], $this->adapter);
+        $table->addColumn('sku', 'string', ['limit' => 50])
+            ->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->addIndex('sku', ['unique' => true])
+            ->create();
+
+        // First bulk insert
+        $table->insertOrSkip([
+            ['sku' => 'ABC123', 'price' => 10.50],
+            ['sku' => 'DEF456', 'price' => 20.00],
+        ])->save();
+
+        // Mix of new and duplicate - duplicates should be skipped
+        $table->insertOrSkip([
+            ['sku' => 'ABC123', 'price' => 99.99], // Duplicate
+            ['sku' => 'GHI789', 'price' => 30.00], // New
+        ])->save();
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM products ORDER BY sku');
+        $this->assertCount(3, $rows);
+        $this->assertEquals('10.50', $rows[0]['price']); // Original price preserved
+        $this->assertEquals('20.00', $rows[1]['price']);
+        $this->assertEquals('30.00', $rows[2]['price']);
+    }
+
+    public function testInsertOrSkipWithoutDuplicates()
+    {
+        $table = new Table('categories', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->create();
+
+        // Should work like normal insert
+        $table->insertOrSkip([
+            ['name' => 'Category 1'],
+            ['name' => 'Category 2'],
+        ])->save();
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM categories');
+        $this->assertCount(2, $rows);
+    }
 }

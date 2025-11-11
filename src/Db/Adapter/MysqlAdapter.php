@@ -276,8 +276,8 @@ class MysqlAdapter extends AbstractAdapter
      * Apply MySQL specific translations between the values using migrations constants/types
      * and the cakephp/database constants. Over time, these can be aligned.
      *
-     * @param array $data The raw column data.
-     * @return array Modified column data.
+     * @param array<string, mixed> $data The raw column data.
+     * @return array<string, mixed> Modified column data.
      */
     protected function mapColumnData(array $data): array
     {
@@ -642,10 +642,7 @@ class MysqlAdapter extends AbstractAdapter
                 $extra = ' ' . implode(' ', $extras);
 
                 if (($row['Default'] !== null)) {
-                    $columnType = $targetColumn->getType();
-                    // Column::getType() can return string|Literal, but getDefaultValueDefinition expects string|null
-                    $columnTypeName = is_string($columnType) ? $columnType : null;
-                    $extra .= $this->getDefaultValueDefinition($row['Default'], $columnTypeName);
+                    $extra .= $this->getDefaultValueDefinition($row['Default'], $targetColumn->getType());
                 }
                 $definition = $row['Type'] . ' ' . $null . $extra . $comment;
 
