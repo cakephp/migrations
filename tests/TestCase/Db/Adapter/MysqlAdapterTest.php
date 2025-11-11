@@ -1119,6 +1119,26 @@ class MysqlAdapterTest extends TestCase
         $table->updateColumn('column1', $newColumn, ['limit' => 500]);
     }
 
+    public function testUpdateColumnCanRemoveLengthConstraint()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+
+        // Try to remove length constraint by passing limit => null
+        $table->updateColumn('column1', 'text', ['limit' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // TEXT type in MySQL doesn't have a length specifier
+        $this->assertEquals('text', $rows[1]['Type']);
+        // TEXT columns in MySQL quote the default value
+        $this->assertStringContainsString('test', $rows[1]['Default']); // Default should be preserved
+    }
+
     public function testChangeColumnEnum()
     {
         $table = new Table('t', [], $this->adapter);
