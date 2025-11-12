@@ -367,4 +367,116 @@ class ColumnParserTest extends TestCase
         $this->assertSame('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, false));
         $this->assertSame('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, true));
     }
+
+    public function testParseFieldsWithReferences()
+    {
+        // Test basic references - should convert to integer
+        $expected = [
+            'user_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['user_id:references']);
+        $this->assertEquals($expected, $actual);
+
+        // Test nullable references
+        $expected = [
+            'category_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => true,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['category_id:references?']);
+        $this->assertEquals($expected, $actual);
+
+        // Test references with explicit table name
+        $expected = [
+            'category_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['category_id:references:categories']);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testParseForeignKeys()
+    {
+        // Test basic reference - infer table name from field
+        $expected = [
+            'fk_user_id' => [
+                'type' => 'foreign',
+                'columns' => ['user_id'],
+                'references' => ['users', 'id'],
+                'update' => 'CASCADE',
+                'delete' => 'CASCADE',
+            ],
+        ];
+        $actual = $this->columnParser->parseForeignKeys(['user_id:references']);
+        $this->assertEquals($expected, $actual);
+
+        // Test reference with explicit table name
+        $expected = [
+            'fk_category_id' => [
+                'type' => 'foreign',
+                'columns' => ['category_id'],
+                'references' => ['custom_categories', 'id'],
+                'update' => 'CASCADE',
+                'delete' => 'CASCADE',
+            ],
+        ];
+        $actual = $this->columnParser->parseForeignKeys(['category_id:references:custom_categories']);
+        $this->assertEquals($expected, $actual);
+
+        // Test reference with custom constraint name
+        $expected = [
+            'custom_fk' => [
+                'type' => 'foreign',
+                'columns' => ['author_id'],
+                'references' => ['authors', 'id'],
+                'update' => 'CASCADE',
+                'delete' => 'CASCADE',
+            ],
+        ];
+        $actual = $this->columnParser->parseForeignKeys(['author_id:references:authors:custom_fk']);
+        $this->assertEquals($expected, $actual);
+
+        // Test multiple foreign keys
+        $expected = [
+            'fk_user_id' => [
+                'type' => 'foreign',
+                'columns' => ['user_id'],
+                'references' => ['users', 'id'],
+                'update' => 'CASCADE',
+                'delete' => 'CASCADE',
+            ],
+            'fk_category_id' => [
+                'type' => 'foreign',
+                'columns' => ['category_id'],
+                'references' => ['categories', 'id'],
+                'update' => 'CASCADE',
+                'delete' => 'CASCADE',
+            ],
+        ];
+        $actual = $this->columnParser->parseForeignKeys(['user_id:references', 'category_id:references']);
+        $this->assertEquals($expected, $actual);
+
+        // Test that non-reference fields are ignored
+        $expected = [];
+        $actual = $this->columnParser->parseForeignKeys(['name:string', 'age:integer']);
+        $this->assertEquals($expected, $actual);
+    }
 }
