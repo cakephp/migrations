@@ -233,7 +233,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $bakeName = $this->getBakeName('TestSnapshotPluginCustomConnection');
         $this->exec("bake migration_snapshot {$bakeName} -c test -p SimpleSnapshot");
 
-        $generatedMigration = glob($this->migrationPath . "*_TestSnapshotPluginCustomConnection*.php");
+        $generatedMigration = glob($this->migrationPath . '*_TestSnapshotPluginCustomConnection*.php');
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
 
