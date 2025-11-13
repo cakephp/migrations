@@ -19,10 +19,14 @@ use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\CreateTable;
+use Migrations\Db\Action\CreateTrigger;
+use Migrations\Db\Action\CreateView;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
+use Migrations\Db\Action\DropTrigger;
+use Migrations\Db\Action\DropView;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
@@ -1099,9 +1103,29 @@ class Table
         }
 
         // If the table does not exist, the last command in the chain needs to be
-        // a CreateTable action.
+        // a CreateTable action - unless we're ONLY creating views/triggers.
         if (!$exists) {
-            $this->actions->addAction(new CreateTable($this->table));
+            $actions = $this->actions->getActions();
+            $hasTableActions = false;
+            $hasViewOrTriggerActions = false;
+
+            foreach ($actions as $action) {
+                if (
+                    $action instanceof CreateView
+                    || $action instanceof DropView
+                    || $action instanceof CreateTrigger
+                    || $action instanceof DropTrigger
+                ) {
+                    $hasViewOrTriggerActions = true;
+                } else {
+                    $hasTableActions = true;
+                }
+            }
+
+            // Only skip CreateTable if we have ONLY view/trigger actions (and at least one)
+            if (!$hasViewOrTriggerActions || $hasTableActions || count($actions) === 0) {
+                $this->actions->addAction(new CreateTable($this->table));
+            }
         }
 
         $plan = new Plan($this->actions);
