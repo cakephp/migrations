@@ -513,7 +513,7 @@ class BaseMigration implements MigrationInterface
     public function createView(string $viewName, string $definition, array $options = []): void
     {
         $table = $this->table($viewName);
-        $table->createView($viewName, $definition, $options)->create();
+        $table->createView($viewName, $definition, $options)->save();
     }
 
     /**

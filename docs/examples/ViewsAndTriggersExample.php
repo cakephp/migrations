@@ -46,7 +46,7 @@ class ViewsAndTriggersExample extends BaseMigration
             'SELECT u.id, u.username, u.email, COUNT(p.id) as post_count
              FROM users u
              LEFT JOIN posts p ON u.id = p.user_id
-             WHERE u.status = "active"
+             WHERE u.status = \'active\'
              GROUP BY u.id, u.username, u.email'
         );
 
