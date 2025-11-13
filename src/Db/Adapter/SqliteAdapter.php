@@ -1354,9 +1354,6 @@ PCRE_PATTERN;
                     if ($matches[2] === 'INTEGER' && $hasAutoIncrement) {
                         // Only add AUTOINCREMENT if the column already had it
                         $replace = '$1 INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT';
-                    } elseif ($matches[2] === 'INTEGER') {
-                        // INTEGER column without AUTOINCREMENT should stay that way
-                        $replace = '$1 INTEGER NOT NULL PRIMARY KEY';
                     } else {
                         $replace = '$1 $2 NOT NULL PRIMARY KEY';
                     }
