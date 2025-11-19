@@ -14,18 +14,6 @@ use Cake\Database\Exception\QueryException;
 use Cake\Database\Schema\SchemaDialect;
 use Cake\Database\Schema\TableSchema;
 use InvalidArgumentException;
-use Migrations\Db\Action\AddColumn;
-use Migrations\Db\Action\AddForeignKey;
-use Migrations\Db\Action\AddIndex;
-use Migrations\Db\Action\ChangeColumn;
-use Migrations\Db\Action\ChangeComment;
-use Migrations\Db\Action\ChangePrimaryKey;
-use Migrations\Db\Action\DropForeignKey;
-use Migrations\Db\Action\DropIndex;
-use Migrations\Db\Action\DropTable;
-use Migrations\Db\Action\RemoveColumn;
-use Migrations\Db\Action\RenameColumn;
-use Migrations\Db\Action\RenameTable;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
@@ -660,7 +648,16 @@ class MysqlAdapter extends AbstractAdapter
 
         $alter .= $this->afterClause($column);
 
-        return new AlterInstructions([$alter]);
+        $instructions = new AlterInstructions([$alter]);
+
+        if ($column->getAlgorithm() !== null) {
+            $instructions->setAlgorithm($column->getAlgorithm());
+        }
+        if ($column->getLock() !== null) {
+            $instructions->setLock($column->getLock());
+        }
+
+        return $instructions;
     }
 
     /**
@@ -760,7 +757,16 @@ class MysqlAdapter extends AbstractAdapter
             $this->afterClause($newColumn),
         );
 
-        return new AlterInstructions([$alter]);
+        $instructions = new AlterInstructions([$alter]);
+
+        if ($newColumn->getAlgorithm() !== null) {
+            $instructions->setAlgorithm($newColumn->getAlgorithm());
+        }
+        if ($newColumn->getLock() !== null) {
+            $instructions->setLock($newColumn->getLock());
+        }
+
+        return $instructions;
     }
 
     /**
@@ -1251,186 +1257,24 @@ class MysqlAdapter extends AbstractAdapter
     /**
      * {@inheritDoc}
      *
-     * Overridden to support ALGORITHM and LOCK clauses for MySQL ALTER TABLE operations.
+     * Overridden to support ALGORITHM and LOCK clauses from AlterInstructions.
      *
+     * @param string $tableName The table name
+     * @param \Migrations\Db\AlterInstructions $instructions The alter instructions
      * @throws \InvalidArgumentException
      * @return void
      */
-    public function executeActions(TableMetadata $table, array $actions): void
+    protected function executeAlterSteps(string $tableName, AlterInstructions $instructions): void
     {
-        // Extract algorithm and lock specifications from all actions
-        $algorithm = null;
-        $lock = null;
+        $algorithm = $instructions->getAlgorithm();
+        $lock = $instructions->getLock();
 
-        foreach ($actions as $action) {
-            if (!method_exists($action, 'getColumn')) {
-                continue;
-            }
-
-            $column = $action->getColumn();
-            if (!($column instanceof Column)) {
-                continue;
-            }
-
-            $colAlgorithm = $column->getAlgorithm();
-            $colLock = $column->getLock();
-
-            if ($colAlgorithm !== null) {
-                if ($algorithm !== null && $algorithm !== $colAlgorithm) {
-                    throw new InvalidArgumentException(sprintf(
-                        'Conflicting algorithm specifications in batched operations: "%s" and "%s". ' .
-                        'All operations in a batch must use the same algorithm, or specify it on only one operation.',
-                        $algorithm,
-                        $colAlgorithm,
-                    ));
-                }
-                $algorithm = $colAlgorithm;
-            }
-
-            if ($colLock !== null) {
-                if ($lock !== null && $lock !== $colLock) {
-                    throw new InvalidArgumentException(sprintf(
-                        'Conflicting lock specifications in batched operations: "%s" and "%s". ' .
-                        'All operations in a batch must use the same lock mode, or specify it on only one operation.',
-                        $lock,
-                        $colLock,
-                    ));
-                }
-                $lock = $colLock;
-            }
-        }
-
-        // If no algorithm/lock specified, use parent implementation
         if ($algorithm === null && $lock === null) {
-            parent::executeActions($table, $actions);
+            parent::executeAlterSteps($tableName, $instructions);
 
             return;
         }
 
-        // Otherwise, execute with custom algorithm/lock support
-        $this->executeActionsWithAlgorithmAndLock($table, $actions, $algorithm, $lock);
-    }
-
-    /**
-     * Executes actions with ALGORITHM and LOCK clauses.
-     *
-     * @param \Migrations\Db\Table\TableMetadata $table The table metadata
-     * @param array $actions The actions to execute
-     * @param string|null $algorithm The algorithm to use
-     * @param string|null $lock The lock mode to use
-     * @throws \InvalidArgumentException
-     * @return void
-     */
-    protected function executeActionsWithAlgorithmAndLock(
-        TableMetadata $table,
-        array $actions,
-        ?string $algorithm,
-        ?string $lock,
-    ): void {
-        $instructions = new AlterInstructions();
-
-        // Build instructions (copied from AbstractAdapter::executeActions)
-        foreach ($actions as $action) {
-            switch (true) {
-                case $action instanceof AddColumn:
-                    $instructions->merge($this->getAddColumnInstructions($table, $action->getColumn()));
-                    break;
-
-                case $action instanceof AddIndex:
-                    $instructions->merge($this->getAddIndexInstructions($table, $action->getIndex()));
-                    break;
-
-                case $action instanceof AddForeignKey:
-                    $instructions->merge($this->getAddForeignKeyInstructions($table, $action->getForeignKey()));
-                    break;
-
-                case $action instanceof ChangeColumn:
-                    $instructions->merge($this->getChangeColumnInstructions(
-                        $table->getName(),
-                        $action->getColumnName(),
-                        $action->getColumn(),
-                    ));
-                    break;
-
-                case $action instanceof DropForeignKey && !$action->getForeignKey()->getName():
-                    $instructions->merge($this->getDropForeignKeyByColumnsInstructions(
-                        $table->getName(),
-                        $action->getForeignKey()->getColumns(),
-                    ));
-                    break;
-
-                case $action instanceof DropForeignKey && $action->getForeignKey()->getName():
-                    $instructions->merge($this->getDropForeignKeyInstructions(
-                        $table->getName(),
-                        (string)$action->getForeignKey()->getName(),
-                    ));
-                    break;
-
-                case $action instanceof DropIndex && $action->getIndex()->getName():
-                    $instructions->merge($this->getDropIndexByNameInstructions(
-                        $table->getName(),
-                        (string)$action->getIndex()->getName(),
-                    ));
-                    break;
-
-                case $action instanceof DropIndex && !$action->getIndex()->getName():
-                    $instructions->merge($this->getDropIndexByColumnsInstructions(
-                        $table->getName(),
-                        (array)$action->getIndex()->getColumns(),
-                    ));
-                    break;
-
-                case $action instanceof DropTable:
-                    $instructions->merge($this->getDropTableInstructions($table->getName()));
-                    break;
-
-                case $action instanceof RemoveColumn:
-                    $instructions->merge($this->getDropColumnInstructions(
-                        $table->getName(),
-                        (string)$action->getColumn()->getName(),
-                    ));
-                    break;
-
-                case $action instanceof RenameColumn:
-                    $instructions->merge($this->getRenameColumnInstructions(
-                        $table->getName(),
-                        (string)$action->getColumn()->getName(),
-                        $action->getNewName(),
-                    ));
-                    break;
-
-                case $action instanceof RenameTable:
-                    $instructions->merge($this->getRenameTableInstructions(
-                        $table->getName(),
-                        $action->getNewName(),
-                    ));
-                    break;
-
-                case $action instanceof ChangePrimaryKey:
-                    $instructions->merge($this->getChangePrimaryKeyInstructions(
-                        $table,
-                        $action->getNewColumns(),
-                    ));
-                    break;
-
-                case $action instanceof ChangeComment:
-                    $instructions->merge($this->getChangeCommentInstructions(
-                        $table,
-                        $action->getNewComment(),
-                    ));
-                    break;
-
-                default:
-                    throw new InvalidArgumentException(
-                        sprintf("Don't know how to execute action `%s`", get_class($action)),
-                    );
-            }
-        }
-
-        // Build ALTER TABLE template with algorithm and lock
-        $alterTemplate = sprintf('ALTER TABLE %s %%s', $this->quoteTableName($table->getName()));
-
-        // Add algorithm and lock clauses
         $algorithmLockClause = '';
         $upperAlgorithm = null;
         $upperLock = null;
@@ -1471,8 +1315,6 @@ class MysqlAdapter extends AbstractAdapter
             $algorithmLockClause .= ', LOCK=' . $upperLock;
         }
 
-        // MySQL restriction: ALGORITHM=INSTANT cannot be combined with explicit LOCK modes
-        // except LOCK=DEFAULT. See: https://dev.mysql.com/doc/refman/8.0/en/innodb-online-ddl-operations.html
         if ($upperAlgorithm === self::ALGORITHM_INSTANT && $upperLock !== null && $upperLock !== self::LOCK_DEFAULT) {
             throw new InvalidArgumentException(
                 'ALGORITHM=INSTANT cannot be combined with LOCK=NONE, LOCK=SHARED, or LOCK=EXCLUSIVE. ' .
@@ -1480,13 +1322,13 @@ class MysqlAdapter extends AbstractAdapter
             );
         }
 
-        // Execute with custom template
+        $alterTemplate = sprintf('ALTER TABLE %s %%s', $this->quoteTableName($tableName));
+
         if ($instructions->getAlterParts()) {
             $alter = sprintf($alterTemplate, implode(', ', $instructions->getAlterParts()) . $algorithmLockClause);
             $this->execute($alter);
         }
 
-        // Execute post-steps
         $state = [];
         foreach ($instructions->getPostSteps() as $instruction) {
             if (is_callable($instruction)) {
