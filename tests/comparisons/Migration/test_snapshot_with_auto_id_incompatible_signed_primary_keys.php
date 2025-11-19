@@ -23,7 +23,6 @@ class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [

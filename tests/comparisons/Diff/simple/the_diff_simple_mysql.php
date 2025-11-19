@@ -22,7 +22,6 @@ class TheDiffSimpleMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->changeColumn('rating', 'integer', [
                 'default' => null,

@@ -548,6 +548,19 @@ class Column extends DatabaseColumn
     }
 
     /**
+     * Sets whether field should be unsigned.
+     *
+     * @param bool $unsigned Unsigned
+     * @return $this
+     */
+    public function setUnsigned(bool $unsigned)
+    {
+        $this->unsigned = $unsigned;
+
+        return $this;
+    }
+
+    /**
      * Sets whether field should be signed.
      *
      * @param bool $signed Signed

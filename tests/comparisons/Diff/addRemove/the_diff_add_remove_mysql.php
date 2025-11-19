@@ -23,7 +23,6 @@ class TheDiffAddRemoveMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->update();
 

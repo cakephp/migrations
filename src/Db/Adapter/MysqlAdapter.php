@@ -538,9 +538,8 @@ class MysqlAdapter extends AbstractAdapter
                 ->setScale($record['precision'] ?? null)
                 ->setComment($record['comment']);
 
-            if ($record['unsigned'] ?? false) {
-                $column->setSigned(!$record['unsigned']);
-            }
+            // Always set unsigned property based on unsigned flag
+            $column->setUnsigned($record['unsigned'] ?? false);
             if ($record['autoIncrement'] ?? false) {
                 $column->setIdentity(true);
             }

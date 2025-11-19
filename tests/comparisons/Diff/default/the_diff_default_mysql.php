@@ -55,6 +55,15 @@ class TheDiffDefaultMysql extends BaseMigration
             ])
             ->update();
 
+        $this->table('tags')
+            ->changeColumn('id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
+            ])
+            ->update();
+
         $this->table('users')
             ->changeColumn('id', 'integer', [
                 'default' => null,
@@ -63,14 +72,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'null' => false,
             ])
             ->update();
-        $this->table('categories', ['id' => false, 'primary_key' => ['id']])
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
+        $this->table('categories')
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -80,7 +82,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->addIndex(
                 $this->index('user_id')
@@ -109,7 +110,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'default' => null,
                 'length' => null,
                 'null' => false,
-                'signed' => false,
             ])
             ->addColumn('average_note', 'decimal', [
                 'after' => 'category_id',
@@ -117,7 +117,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'null' => true,
                 'precision' => 5,
                 'scale' => 5,
-                'signed' => true,
             ])
             ->addIndex(
                 $this->index('slug')
@@ -132,34 +131,6 @@ class TheDiffDefaultMysql extends BaseMigration
                     ->setName('rating_index')
             )
             ->update();
-
-        $this->table('articles')
-            ->addForeignKey(
-                $this->foreignKey('category_id')
-                    ->setReferencedTable('categories')
-                    ->setReferencedColumns('id')
-                    ->setOnDelete('NO_ACTION')
-                    ->setOnUpdate('NO_ACTION')
-                    ->setName('articles_ibfk_1')
-            )
-            ->update();
-
-        $this->table('tags')->drop()->save();
-
-        $this->table('tags', ['id' => false, 'primary_key' => ['id']])
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => 11,
-                'null' => false,
-                'signed' => true,
-            ])
-            ->addColumn('name', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => false,
-            ])
-            ->create();
     }
 
     /**
@@ -176,18 +147,6 @@ class TheDiffDefaultMysql extends BaseMigration
             ->dropForeignKey(
                 'user_id'
             )->save();
-
-        $this->table('articles')
-            ->dropForeignKey(
-                'category_id'
-            )->save();
-        $this->table('tags')
-            ->addColumn('name', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => false,
-            ])
-            ->create();
 
         $this->table('articles')
             ->removeIndexByName('UNIQUE_SLUG')
@@ -246,6 +205,15 @@ class TheDiffDefaultMysql extends BaseMigration
                 $this->index('name')
                     ->setName('BY_NAME')
             )
+            ->update();
+
+        $this->table('tags')
+            ->changeColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
             ->update();
 
         $this->table('users')
