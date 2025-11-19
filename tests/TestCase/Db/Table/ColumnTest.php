@@ -80,7 +80,7 @@ class ColumnTest extends TestCase
 
         $this->assertFalse($column->isUnsigned());
         $this->assertTrue($column->isSigned());
-        $this->assertNull($column->getUnsigned());
+        $this->assertFalse($column->getUnsigned());
     }
 
     public function testBigIntegerColumnDefaultsToSigned(): void
@@ -90,7 +90,7 @@ class ColumnTest extends TestCase
 
         $this->assertFalse($column->isUnsigned());
         $this->assertTrue($column->isSigned());
-        $this->assertNull($column->getUnsigned());
+        $this->assertFalse($column->getUnsigned());
     }
 
     public function testSmallIntegerColumnDefaultsToSigned(): void
@@ -100,7 +100,7 @@ class ColumnTest extends TestCase
 
         $this->assertFalse($column->isUnsigned());
         $this->assertTrue($column->isSigned());
-        $this->assertNull($column->getUnsigned());
+        $this->assertFalse($column->getUnsigned());
     }
 
     public function testTinyIntegerColumnDefaultsToSigned(): void
@@ -110,24 +110,24 @@ class ColumnTest extends TestCase
 
         $this->assertFalse($column->isUnsigned());
         $this->assertTrue($column->isSigned());
-        $this->assertNull($column->getUnsigned());
+        $this->assertFalse($column->getUnsigned());
     }
 
     public function testNonIntegerColumnDoesNotDefaultToUnsigned(): void
     {
         $stringColumn = new Column();
         $stringColumn->setName('name')->setType('string');
-        $this->assertNull($stringColumn->getUnsigned());
+        $this->assertFalse($stringColumn->getUnsigned());
         $this->assertFalse($stringColumn->isUnsigned());
 
         $dateColumn = new Column();
         $dateColumn->setName('created')->setType('datetime');
-        $this->assertNull($dateColumn->getUnsigned());
+        $this->assertFalse($dateColumn->getUnsigned());
         $this->assertFalse($dateColumn->isUnsigned());
 
         $decimalColumn = new Column();
         $decimalColumn->setName('price')->setType('decimal');
-        $this->assertNull($decimalColumn->getUnsigned());
+        $this->assertFalse($decimalColumn->getUnsigned());
         $this->assertFalse($decimalColumn->isUnsigned());
     }
 
@@ -151,24 +151,23 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->getUnsigned());
     }
 
-    public function testToArrayReturnsNullUnsignedForIntegersByDefault(): void
+    public function testToArrayReturnsFalseForIntegersByDefault(): void
     {
         $column = new Column();
         $column->setName('user_id')->setType('integer');
 
         $result = $column->toArray();
-        // getUnsigned() returns null for integer types to maintain compatibility
-        // with database dialects that don't support UNSIGNED keyword
-        $this->assertNull($result['unsigned']);
+        // getUnsigned() returns false for integer types by default (signed)
+        $this->assertFalse($result['unsigned']);
     }
 
-    public function testToArrayReturnsNullForNonIntegerTypes(): void
+    public function testToArrayReturnsFalseForNonIntegerTypes(): void
     {
         $column = new Column();
         $column->setName('title')->setType('string');
 
         $result = $column->toArray();
-        $this->assertNull($result['unsigned']);
+        $this->assertFalse($result['unsigned']);
     }
 
     public function testToArrayRespectsExplicitSigned(): void
@@ -184,7 +183,7 @@ class ColumnTest extends TestCase
     public function testUnsignedIntsConfiguration(): void
     {
         // Without configuration, integers default to signed
-        Configure::write('Migrations.unsigned_ints', false);
+        Configure::delete('Migrations.unsigned_ints');
         $column = new Column();
         $column->setName('count')->setType('integer');
         $this->assertFalse($column->isUnsigned());
@@ -208,7 +207,7 @@ class ColumnTest extends TestCase
     public function testUnsignedPrimaryKeysConfiguration(): void
     {
         // Without configuration, identity columns default to signed
-        Configure::write('Migrations.unsigned_primary_keys', false);
+        Configure::delete('Migrations.unsigned_primary_keys');
         $column = new Column();
         $column->setName('id')->setType('integer')->setIdentity(true);
         $this->assertFalse($column->isUnsigned());

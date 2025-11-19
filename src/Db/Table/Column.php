@@ -506,20 +506,6 @@ class Column extends DatabaseColumn
     /**
      * Gets whether field should be unsigned.
      *
-     * Returns the explicit unsigned setting, or null if not set.
-     * This preserves compatibility with database dialects that don't support
-     * the UNSIGNED keyword (e.g., SQLite, PostgreSQL).
-     *
-     * @return bool|null
-     */
-    public function getUnsigned(): ?bool
-    {
-        return $this->unsigned;
-    }
-
-    /**
-     * Should the column be unsigned?
-     *
      * Checks configuration options to determine unsigned behavior:
      * - If explicitly set via setUnsigned/setSigned, uses that value
      * - If identity column and Migrations.unsigned_primary_keys is true, returns true
@@ -528,7 +514,7 @@ class Column extends DatabaseColumn
      *
      * @return bool
      */
-    public function isUnsigned(): bool
+    public function getUnsigned(): bool
     {
         // If explicitly set, use that value
         if ($this->unsigned !== null) {
@@ -559,16 +545,6 @@ class Column extends DatabaseColumn
 
         // Default to signed for backward compatibility
         return false;
-    }
-
-    /**
-     * Should the column be signed?
-     *
-     * @return bool
-     */
-    public function isSigned(): bool
-    {
-        return !$this->isUnsigned();
     }
 
     /**
