@@ -18,6 +18,26 @@ use RuntimeException;
 
 /**
  * This object is based loosely on: https://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/Table.html.
+ *
+ * ## Configuration
+ *
+ * The following configuration options can be set in your application's config:
+ *
+ * - `Migrations.unsigned_primary_keys` (bool): When true, identity columns default to unsigned.
+ *   Default: false
+ *
+ * - `Migrations.unsigned_ints` (bool): When true, all integer columns default to unsigned.
+ *   Default: false
+ *
+ * Example configuration in config/app.php:
+ * ```php
+ * 'Migrations' => [
+ *     'unsigned_primary_keys' => true,
+ *     'unsigned_ints' => true,
+ * ]
+ * ```
+ *
+ * Note: Explicitly calling setUnsigned() or setSigned() on a column will override these defaults.
  */
 class Column extends DatabaseColumn
 {
@@ -500,8 +520,11 @@ class Column extends DatabaseColumn
     /**
      * Should the column be unsigned?
      *
-     * Integer types (integer, biginteger, smallinteger, tinyinteger) default to unsigned
-     * when the unsigned property is not explicitly set.
+     * Checks configuration options to determine unsigned behavior:
+     * - If explicitly set via setUnsigned/setSigned, uses that value
+     * - If identity column and Migrations.unsigned_primary_keys is true, returns true
+     * - If integer type and Migrations.unsigned_ints is true, returns true
+     * - Otherwise defaults to false (signed)
      *
      * @return bool
      */
@@ -512,7 +535,6 @@ class Column extends DatabaseColumn
             return $this->unsigned;
         }
 
-        // Default integer types to unsigned
         $integerTypes = [
             self::INTEGER,
             self::BIGINTEGER,
@@ -520,7 +542,23 @@ class Column extends DatabaseColumn
             self::TINYINTEGER,
         ];
 
-        return in_array($this->type, $integerTypes, true);
+        // Only apply configuration to integer types
+        if (!in_array($this->type, $integerTypes, true)) {
+            return false;
+        }
+
+        // Check if this is a primary key/identity column
+        if ($this->identity && Configure::read('Migrations.unsigned_primary_keys')) {
+            return true;
+        }
+
+        // Check general integer configuration
+        if (Configure::read('Migrations.unsigned_ints')) {
+            return true;
+        }
+
+        // Default to signed for backward compatibility
+        return false;
     }
 
     /**
