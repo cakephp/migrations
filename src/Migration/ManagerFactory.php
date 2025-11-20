@@ -112,6 +112,7 @@ class ManagerFactory
             'database' => $connectionConfig['database'],
             'migration_table' => $table,
             'dryrun' => $this->getOption('dry-run'),
+            'plugin' => $plugin,
         ];
 
         $configData = [
