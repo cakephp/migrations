@@ -789,7 +789,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     protected function migrationsTable(): MigrationsTableStorage
     {
         // TODO Use configure/auto-detect which implmentation to use.
-        return new MigrationsTableStorage($this, $this->getSchemaTableName());
+        return new MigrationsTableStorage(
+            $this,
+            $this->getSchemaTableName(),
+            $this->getOption('plugin'),
+        );
     }
 
     /**

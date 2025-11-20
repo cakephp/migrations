@@ -34,21 +34,13 @@ class MigrationsTableStorage
      *
      * @param \Migrations\Db\Adapter\AbstractAdapter $adapter The database adapter.
      * @param string $schemaTableName The schema table name.
+     * @param string|null $plugin The plugin name.
      */
     public function __construct(
         protected AbstractAdapter $adapter,
         protected string $schemaTableName = 'phinxlog',
+        protected ?string $plugin = null,
     ) {
-    }
-
-    /**
-     * Gets the schema table name.
-     *
-     * @return string
-     */
-    public function getSchemaTableName(): string
-    {
-        return $this->schemaTableName;
     }
 
     /**
@@ -61,7 +53,7 @@ class MigrationsTableStorage
     {
         $query = $this->adapter->getSelectBuilder();
         $query->select('*')
-            ->from($this->getSchemaTableName())
+            ->from($this->schemaTableName)
             ->orderBy($orderBy);
 
         return $query;
@@ -79,7 +71,7 @@ class MigrationsTableStorage
     {
         $query = $this->adapter->getInsertBuilder();
         $query->insert(['version', 'migration_name', 'start_time', 'end_time', 'breakpoint'])
-            ->into($this->getSchemaTableName())
+            ->into($this->schemaTableName)
             ->values([
                 'version' => (string)$migration->getVersion(),
                 'migration_name' => substr($migration->getName(), 0, 100),
@@ -100,7 +92,7 @@ class MigrationsTableStorage
     {
         $query = $this->adapter->getDeleteBuilder();
         $query->delete()
-            ->from($this->getSchemaTableName())
+            ->from($this->schemaTableName)
             ->where(['version' => (string)$migration->getVersion()]);
         $this->adapter->executeQuery($query);
     }
@@ -119,7 +111,7 @@ class MigrationsTableStorage
         $this->adapter->query(
             sprintf(
                 'UPDATE %1$s SET %2$s = CASE %2$s WHEN true THEN false ELSE true END, %4$s = %4$s WHERE %3$s = ?;',
-                $this->adapter->quoteTableName($this->getSchemaTableName()),
+                $this->adapter->quoteTableName($this->schemaTableName),
                 $this->adapter->quoteColumnName('breakpoint'),
                 $this->adapter->quoteColumnName('version'),
                 $this->adapter->quoteColumnName('start_time'),
@@ -136,7 +128,7 @@ class MigrationsTableStorage
     public function resetAllBreakpoints(): int
     {
         $query = $this->adapter->getUpdateBuilder();
-        $query->update($this->getSchemaTableName())
+        $query->update($this->schemaTableName)
             ->set([
                 'breakpoint' => 0,
                 'start_time' => $query->identifier('start_time'),
@@ -158,7 +150,7 @@ class MigrationsTableStorage
     public function markBreakpoint(MigrationInterface $migration, bool $state): void
     {
         $query = $this->adapter->getUpdateBuilder();
-        $query->update($this->getSchemaTableName())
+        $query->update($this->schemaTableName)
             ->set([
                 'breakpoint' => (int)$state,
                 'start_time' => $query->identifier('start_time'),
@@ -183,7 +175,7 @@ class MigrationsTableStorage
                 'primary_key' => 'version',
             ];
 
-            $table = new Table($this->getSchemaTableName(), $options, $this->adapter);
+            $table = new Table($this->schemaTableName, $options, $this->adapter);
             $table->addColumn('version', 'biginteger', ['null' => false])
                 ->addColumn('migration_name', 'string', ['limit' => 100, 'default' => null, 'null' => true])
                 ->addColumn('start_time', 'timestamp', ['default' => null, 'null' => true])
@@ -206,7 +198,7 @@ class MigrationsTableStorage
      */
     public function upgradeTable(): void
     {
-        $table = new Table($this->getSchemaTableName(), [], $this->adapter);
+        $table = new Table($this->schemaTableName, [], $this->adapter);
         if (!$table->hasColumn('migration_name')) {
             $table
                 ->addColumn(
