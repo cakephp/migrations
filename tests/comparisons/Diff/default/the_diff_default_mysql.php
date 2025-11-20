@@ -29,6 +29,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->changeColumn('title', 'text', [
                 'default' => null,
@@ -52,6 +53,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->update();
 
@@ -61,6 +63,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->update();
 
@@ -70,6 +73,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->update();
         $this->table('categories')
@@ -82,6 +86,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->addIndex(
                 $this->index('user_id')
@@ -110,6 +115,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'default' => null,
                 'length' => null,
                 'null' => false,
+                'signed' => false,
             ])
             ->addColumn('average_note', 'decimal', [
                 'after' => 'category_id',

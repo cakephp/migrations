@@ -174,8 +174,8 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
-        // TODO: Fix FK constraint issue with signed/unsigned column compatibility
-        $this->markTestSkipped('FK constraint error - needs investigation');
+        Configure::write('Migrations.unsigned_primary_keys', true);
+        Configure::write('Migrations.unsigned_ints', true);
 
         $this->runDiffBakingTest('Default');
     }

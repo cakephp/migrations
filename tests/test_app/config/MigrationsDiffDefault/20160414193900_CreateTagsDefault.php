@@ -14,7 +14,7 @@ class CreateTagsDefault extends BaseMigration
      */
     public function change(): void
     {
-        $table = $this->table('tags');
+        $table = $this->table('tags', ['signed' => false]);
         $table->addColumn('name', 'string', [
             'default' => null,
             'limit' => 255,
