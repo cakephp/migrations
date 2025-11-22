@@ -70,6 +70,8 @@ Configure::write('App', [
 Configure::write('Migrations', [
     'unsigned_primary_keys' => true,
     'column_null_default' => true,
+    // Use legacy phinxlog tables for existing tests
+    'legacyTables' => true,
 ]);
 
 Cache::setConfig([
