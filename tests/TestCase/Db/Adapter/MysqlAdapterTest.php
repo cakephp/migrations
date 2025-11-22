@@ -2790,8 +2790,111 @@ OUTPUT;
         $this->assertCount(2, $rows);
     }
 
-<<<<<<< HEAD
-    public function testAddColumnWithAlgorithmInstant()
+    public function testCreateView(): void
+    {
+        // Create a base table
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->addColumn('email', 'string')
+            ->create();
+
+        // Insert some data
+        $table->insert([
+            ['name' => 'Alice', 'email' => 'alice@example.com'],
+            ['name' => 'Bob', 'email' => 'bob@example.com'],
+        ])->save();
+
+        // Create a view
+        $viewTable = new Table('user_emails', [], $this->adapter);
+        $viewTable->createView('user_emails', 'SELECT name, email FROM users')
+            ->save();
+
+        // Query the view
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_emails');
+        $this->assertCount(2, $rows);
+        $this->assertEquals('Alice', $rows[0]['name']);
+        $this->assertEquals('alice@example.com', $rows[0]['email']);
+    }
+
+    public function testDropView(): void
+    {
+        // Create a base table
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')->create();
+
+        // Create a view
+        $viewTable = new Table('user_names', [], $this->adapter);
+        $viewTable->createView('user_names', 'SELECT name FROM users')->save();
+
+        // Verify view exists
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_names');
+        $this->assertIsArray($rows);
+
+        // Drop the view
+        $viewTable->dropView('user_names')->save();
+
+        // Verify view is dropped
+        $this->expectException(PDOException::class);
+        $this->adapter->fetchAll('SELECT * FROM user_names');
+    }
+
+    public function testCreateTrigger(): void
+    {
+        // Create tables
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->addColumn('created_count', 'integer', ['default' => 0])
+            ->create();
+
+        $logTable = new Table('user_log', [], $this->adapter);
+        $logTable->addColumn('action', 'string')->create();
+
+        // Create a trigger
+        $table->createTrigger(
+            'log_user_insert',
+            'INSERT',
+            "INSERT INTO user_log (action) VALUES ('user_created')",
+            ['timing' => 'AFTER'],
+        )->save();
+
+        // Insert data to trigger the trigger
+        $table->insert(['name' => 'Alice', 'created_count' => 0])->save();
+
+        // Verify trigger fired
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_log');
+        $this->assertCount(1, $rows);
+        $this->assertEquals('user_created', $rows[0]['action']);
+    }
+
+    public function testDropTrigger(): void
+    {
+        // Create table
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')->create();
+
+        $logTable = new Table('user_log', [], $this->adapter);
+        $logTable->addColumn('action', 'string')->create();
+
+        // Create a trigger
+        $table->createTrigger(
+            'log_user_insert',
+            'INSERT',
+            "INSERT INTO user_log (action) VALUES ('user_created')",
+            ['timing' => 'AFTER'],
+        )->save();
+
+        // Drop the trigger
+        $table->dropTrigger('log_user_insert')->save();
+
+        // Insert data - trigger should not fire
+        $table->insert(['name' => 'Bob'])->save();
+
+        // Verify trigger did not fire
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_log');
+        $this->assertCount(0, $rows);
+    }
+
+    public function testAddColumnWithAlgorithmInstant(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -2805,7 +2908,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('users', 'status'));
     }
 
-    public function testAddColumnWithAlgorithmAndLock()
+    public function testAddColumnWithAlgorithmAndLock(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('name', 'string')
@@ -2823,7 +2926,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('products', 'price'));
     }
 
-    public function testChangeColumnWithAlgorithm()
+    public function testChangeColumnWithAlgorithm(): void
     {
         $table = new Table('items', [], $this->adapter);
         $table->addColumn('description', 'string', ['limit' => 100])
@@ -2843,7 +2946,7 @@ OUTPUT;
         }
     }
 
-    public function testBatchedOperationsWithSameAlgorithm()
+    public function testBatchedOperationsWithSameAlgorithm(): void
     {
         $table = new Table('batch_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2863,7 +2966,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('batch_test', 'col3'));
     }
 
-    public function testBatchedOperationsWithConflictingAlgorithmsThrowsException()
+    public function testBatchedOperationsWithConflictingAlgorithmsThrowsException(): void
     {
         $table = new Table('conflict_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2883,7 +2986,7 @@ OUTPUT;
         ->update();
     }
 
-    public function testBatchedOperationsWithConflictingLocksThrowsException()
+    public function testBatchedOperationsWithConflictingLocksThrowsException(): void
     {
         $table = new Table('lock_conflict_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2905,7 +3008,7 @@ OUTPUT;
         ->update();
     }
 
-    public function testInvalidAlgorithmThrowsException()
+    public function testInvalidAlgorithmThrowsException(): void
     {
         $table = new Table('invalid_algo', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2919,7 +3022,7 @@ OUTPUT;
         ])->update();
     }
 
-    public function testInvalidLockThrowsException()
+    public function testInvalidLockThrowsException(): void
     {
         $table = new Table('invalid_lock', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2933,7 +3036,7 @@ OUTPUT;
         ])->update();
     }
 
-    public function testAlgorithmInstantWithExplicitLockThrowsException()
+    public function testAlgorithmInstantWithExplicitLockThrowsException(): void
     {
         $table = new Table('instant_lock_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2949,7 +3052,7 @@ OUTPUT;
         ])->update();
     }
 
-    public function testAlgorithmConstantsAreDefined()
+    public function testAlgorithmConstantsAreDefined(): void
     {
         $this->assertEquals('DEFAULT', MysqlAdapter::ALGORITHM_DEFAULT);
         $this->assertEquals('INSTANT', MysqlAdapter::ALGORITHM_INSTANT);
@@ -2957,7 +3060,7 @@ OUTPUT;
         $this->assertEquals('COPY', MysqlAdapter::ALGORITHM_COPY);
     }
 
-    public function testLockConstantsAreDefined()
+    public function testLockConstantsAreDefined(): void
     {
         $this->assertEquals('DEFAULT', MysqlAdapter::LOCK_DEFAULT);
         $this->assertEquals('NONE', MysqlAdapter::LOCK_NONE);
@@ -2965,7 +3068,7 @@ OUTPUT;
         $this->assertEquals('EXCLUSIVE', MysqlAdapter::LOCK_EXCLUSIVE);
     }
 
-    public function testAlgorithmWithMixedCase()
+    public function testAlgorithmWithMixedCase(): void
     {
         $table = new Table('mixed_case', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -3142,109 +3245,5 @@ OUTPUT;
             ->create();
 
         $this->assertTrue($this->adapter->hasTable('partitioned_events'));
-    }
-
-    public function testCreateView(): void
-    {
-        // Create a base table
-        $table = new Table('users', [], $this->adapter);
-        $table->addColumn('name', 'string')
-            ->addColumn('email', 'string')
-            ->create();
-
-        // Insert some data
-        $table->insert([
-            ['name' => 'Alice', 'email' => 'alice@example.com'],
-            ['name' => 'Bob', 'email' => 'bob@example.com'],
-        ])->save();
-
-        // Create a view
-        $viewTable = new Table('user_emails', [], $this->adapter);
-        $viewTable->createView('user_emails', 'SELECT name, email FROM users')
-            ->save();
-
-        // Query the view
-        $rows = $this->adapter->fetchAll('SELECT * FROM user_emails');
-        $this->assertCount(2, $rows);
-        $this->assertEquals('Alice', $rows[0]['name']);
-        $this->assertEquals('alice@example.com', $rows[0]['email']);
-    }
-
-    public function testDropView(): void
-    {
-        // Create a base table
-        $table = new Table('users', [], $this->adapter);
-        $table->addColumn('name', 'string')->create();
-
-        // Create a view
-        $viewTable = new Table('user_names', [], $this->adapter);
-        $viewTable->createView('user_names', 'SELECT name FROM users')->save();
-
-        // Verify view exists
-        $rows = $this->adapter->fetchAll('SELECT * FROM user_names');
-        $this->assertIsArray($rows);
-
-        // Drop the view
-        $viewTable->dropView('user_names')->save();
-
-        // Verify view is dropped
-        $this->expectException(PDOException::class);
-        $this->adapter->fetchAll('SELECT * FROM user_names');
-    }
-
-    public function testCreateTrigger(): void
-    {
-        // Create tables
-        $table = new Table('users', [], $this->adapter);
-        $table->addColumn('name', 'string')
-            ->addColumn('created_count', 'integer', ['default' => 0])
-            ->create();
-
-        $logTable = new Table('user_log', [], $this->adapter);
-        $logTable->addColumn('action', 'string')->create();
-
-        // Create a trigger
-        $table->createTrigger(
-            'log_user_insert',
-            'INSERT',
-            "INSERT INTO user_log (action) VALUES ('user_created')",
-            ['timing' => 'AFTER'],
-        )->save();
-
-        // Insert data to trigger the trigger
-        $table->insert(['name' => 'Alice', 'created_count' => 0])->save();
-
-        // Verify trigger fired
-        $rows = $this->adapter->fetchAll('SELECT * FROM user_log');
-        $this->assertCount(1, $rows);
-        $this->assertEquals('user_created', $rows[0]['action']);
-    }
-
-    public function testDropTrigger(): void
-    {
-        // Create table
-        $table = new Table('users', [], $this->adapter);
-        $table->addColumn('name', 'string')->create();
-
-        $logTable = new Table('user_log', [], $this->adapter);
-        $logTable->addColumn('action', 'string')->create();
-
-        // Create a trigger
-        $table->createTrigger(
-            'log_user_insert',
-            'INSERT',
-            "INSERT INTO user_log (action) VALUES ('user_created')",
-            ['timing' => 'AFTER'],
-        )->save();
-
-        // Drop the trigger
-        $table->dropTrigger('log_user_insert')->save();
-
-        // Insert data - trigger should not fire
-        $table->insert(['name' => 'Bob'])->save();
-
-        // Verify trigger did not fire
-        $rows = $this->adapter->fetchAll('SELECT * FROM user_log');
-        $this->assertCount(0, $rows);
     }
 }
