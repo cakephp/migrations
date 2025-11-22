@@ -1,7 +1,7 @@
 {% set statement = Migration.tableStatement(table, true) %}
 {% set hasProcessedConstraint = false %}
 {% for constraintName, constraint in constraints %}
-    {%~ set constraintColumns = constraint['columns']|sort %}
+    {%~ set constraintColumns = constraint['columns']|default([])|sort %}
     {%~ if constraint['type'] == 'foreign' %}
         {%~ set hasProcessedConstraint = true %}
         {%~ set columnsList = '\'' ~ constraint['columns'][0] ~ '\'' %}
