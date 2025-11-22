@@ -137,80 +137,80 @@ class AbstractAdapterTest extends TestCase
             // CURRENT_TIMESTAMP on datetime types should NOT be quoted
             'CURRENT_TIMESTAMP on datetime' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_DATETIME,
+                AbstractAdapter::TYPE_DATETIME,
                 ' DEFAULT CURRENT_TIMESTAMP',
             ],
             'CURRENT_TIMESTAMP on timestamp' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_TIMESTAMP,
+                AbstractAdapter::TYPE_TIMESTAMP,
                 ' DEFAULT CURRENT_TIMESTAMP',
             ],
             'CURRENT_TIMESTAMP on time' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_TIME,
+                AbstractAdapter::TYPE_TIME,
                 ' DEFAULT CURRENT_TIMESTAMP',
             ],
             'CURRENT_TIMESTAMP on date' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_DATE,
+                AbstractAdapter::TYPE_DATE,
                 ' DEFAULT CURRENT_TIMESTAMP',
             ],
             'CURRENT_TIMESTAMP(3) on datetime' => [
                 'CURRENT_TIMESTAMP(3)',
-                AbstractAdapter::PHINX_TYPE_DATETIME,
+                AbstractAdapter::TYPE_DATETIME,
                 ' DEFAULT CURRENT_TIMESTAMP(3)',
             ],
 
             // CURRENT_TIMESTAMP on non-datetime types SHOULD be quoted (bug #1891)
             'CURRENT_TIMESTAMP on string should be quoted' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_STRING,
+                AbstractAdapter::TYPE_STRING,
                 " DEFAULT 'CURRENT_TIMESTAMP'",
             ],
             'CURRENT_TIMESTAMP on text should be quoted' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_TEXT,
+                AbstractAdapter::TYPE_TEXT,
                 " DEFAULT 'CURRENT_TIMESTAMP'",
             ],
             'CURRENT_TIMESTAMP on char should be quoted' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_CHAR,
+                AbstractAdapter::TYPE_CHAR,
                 " DEFAULT 'CURRENT_TIMESTAMP'",
             ],
             'CURRENT_TIMESTAMP on integer should be quoted' => [
                 'CURRENT_TIMESTAMP',
-                AbstractAdapter::PHINX_TYPE_INTEGER,
+                AbstractAdapter::TYPE_INTEGER,
                 " DEFAULT 'CURRENT_TIMESTAMP'",
             ],
 
             // Regular string defaults should always be quoted
             'Regular string default' => [
                 'default_value',
-                AbstractAdapter::PHINX_TYPE_STRING,
+                AbstractAdapter::TYPE_STRING,
                 " DEFAULT 'default_value'",
             ],
             'Regular string on datetime' => [
                 'some_string',
-                AbstractAdapter::PHINX_TYPE_DATETIME,
+                AbstractAdapter::TYPE_DATETIME,
                 " DEFAULT 'some_string'",
             ],
 
             // Literal values should not be quoted
             'Literal value' => [
                 Literal::from('NOW()'),
-                AbstractAdapter::PHINX_TYPE_DATETIME,
+                AbstractAdapter::TYPE_DATETIME,
                 ' DEFAULT NOW()',
             ],
 
             // Boolean defaults
             'Boolean true' => [
                 true,
-                AbstractAdapter::PHINX_TYPE_BOOLEAN,
+                AbstractAdapter::TYPE_BOOLEAN,
                 ' DEFAULT 1',
             ],
             'Boolean false' => [
                 false,
-                AbstractAdapter::PHINX_TYPE_BOOLEAN,
+                AbstractAdapter::TYPE_BOOLEAN,
                 ' DEFAULT 0',
             ],
 

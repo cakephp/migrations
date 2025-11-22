@@ -26,6 +26,17 @@ class ManagerFactoryTest extends TestCase
         $this->assertSame('test', $result->getConfig()->getConnection());
     }
 
+    public function testCreateConfigPluginAdapter(): void
+    {
+        $factory = new ManagerFactory([
+            'connection' => 'test',
+            'plugin' => 'Migrator',
+        ]);
+
+        $config = $factory->createConfig();
+        $this->assertSame('Migrator', $config['environment']['plugin']);
+    }
+
     public function testDsnConnection(): void
     {
         $out = new StubConsoleOutput();

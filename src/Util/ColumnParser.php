@@ -221,7 +221,8 @@ class ColumnParser
         $collection = new Collection($reflector->getConstants());
 
         $validTypes = $collection->filter(function ($value, $constant) {
-            return substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
+            return substr($constant, 0, strlen('TYPE_')) === 'TYPE_' ||
+                   substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
         })->toArray();
         $fieldType = $type;
         if ($type === null || !in_array($type, $validTypes, true)) {

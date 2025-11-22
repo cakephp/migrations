@@ -39,7 +39,7 @@ class SeedCommand extends Command
      */
     public static function defaultName(): string
     {
-        return 'migrations seed';
+        return 'seeds run';
     }
 
     /**
@@ -55,10 +55,10 @@ class SeedCommand extends Command
             '',
             'Runs a seeder script that can populate the database with data, or run mutations:',
             '',
-            '<info>migrations seed Posts</info>',
-            '<info>migrations seed Users,Posts</info>',
-            '<info>migrations seed --plugin Demo</info>',
-            '<info>migrations seed --connection secondary</info>',
+            '<info>seeds run Posts</info>',
+            '<info>seeds run Users,Posts</info>',
+            '<info>seeds run --plugin Demo</info>',
+            '<info>seeds run --connection secondary</info>',
             '',
             'Runs all seeds if no seed names are specified. When running all seeds',
             'in an interactive terminal, a confirmation prompt is shown.',
@@ -87,6 +87,11 @@ class SeedCommand extends Command
                 'short' => 's',
                 'default' => ConfigInterface::DEFAULT_SEED_FOLDER,
                 'help' => 'The folder where your seeds are.',
+            ])
+            ->addOption('force', [
+                'short' => 'f',
+                'help' => 'Force re-running seeds that have already been executed',
+                'boolean' => true,
             ]);
 
         return $parser;
@@ -184,9 +189,13 @@ class SeedCommand extends Command
                     $io->out('  - ' . $seedName);
                 }
                 $io->out('');
-                $io->out('<warning>Note:</warning> Seeds do not track execution state. They will run');
-                $io->out('regardless of whether they have been executed before. Ensure your');
-                $io->out('seeds are idempotent or manually verify they should be (re)run.');
+                if (!(bool)$args->getOption('force')) {
+                    $io->out('<info>Note:</info> Seeds that have already been executed will be skipped.');
+                    $io->out('Use --force to re-run seeds.');
+                } else {
+                    $io->out('<warning>Warning:</warning> Running with --force will re-execute all seeds,');
+                    $io->out('potentially creating duplicate data. Ensure your seeds are idempotent.');
+                }
                 $io->out('');
 
                 // Ask for confirmation
@@ -199,11 +208,11 @@ class SeedCommand extends Command
             }
 
             // run all the seed(ers)
-            $manager->seed();
+            $manager->seed(null, (bool)$args->getOption('force'));
         } else {
             // run seed(ers) specified as arguments
             foreach ($seeds as $seed) {
-                $manager->seed(trim($seed));
+                $manager->seed(trim($seed), (bool)$args->getOption('force'));
             }
         }
         $end = microtime(true);

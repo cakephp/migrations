@@ -706,7 +706,69 @@ You can limit the maximum length of a column by using the ``limit`` option::
 Changing Column Attributes
 --------------------------
 
-To change column type or options on an existing column, use the ``changeColumn()`` method.
+There are two methods for modifying existing columns:
+
+Updating Columns (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To modify specific column attributes while preserving others, use the ``updateColumn()`` method.
+This method automatically preserves unspecified attributes like defaults, nullability, limits, etc.::
+
+    <?php
+
+    use Migrations\BaseMigration;
+
+    class MyNewMigration extends BaseMigration
+    {
+        /**
+         * Migrate Up.
+         */
+        public function up(): void
+        {
+            $users = $this->table('users');
+            // Make email nullable, preserving all other attributes
+            $users->updateColumn('email', null, ['null' => true])
+                  ->save();
+        }
+
+        /**
+         * Migrate Down.
+         */
+        public function down(): void
+        {
+            $users = $this->table('users');
+            $users->updateColumn('email', null, ['null' => false])
+                  ->save();
+        }
+    }
+
+You can pass ``null`` as the column type to preserve the existing type, or specify a new type::
+
+    // Preserve type and other attributes, only change nullability
+    $table->updateColumn('email', null, ['null' => true]);
+
+    // Change type to biginteger, preserve default and other attributes
+    $table->updateColumn('user_id', 'biginteger');
+
+    // Change default value, preserve everything else
+    $table->updateColumn('status', null, ['default' => 'active']);
+
+The following attributes are automatically preserved by ``updateColumn()``:
+
+- Default values
+- NULL/NOT NULL constraint
+- Column limit/length
+- Decimal scale/precision
+- Comments
+- Signed/unsigned (for numeric types)
+- Collation and encoding
+- Enum/set values
+
+Changing Columns (Traditional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To completely replace a column definition, use the ``changeColumn()`` method.
+This method requires you to specify all desired column attributes.
 See :ref:`valid-column-types` and `Valid Column Options`_ for allowed values::
 
     <?php
@@ -721,7 +783,12 @@ See :ref:`valid-column-types` and `Valid Column Options`_ for allowed values::
         public function up(): void
         {
             $users = $this->table('users');
-            $users->changeColumn('email', 'string', ['limit' => 255])
+            // Must specify all attributes
+            $users->changeColumn('email', 'string', [
+                      'limit' => 255,
+                      'null' => true,
+                      'default' => null,
+                  ])
                   ->save();
         }
 
@@ -733,6 +800,20 @@ See :ref:`valid-column-types` and `Valid Column Options`_ for allowed values::
 
         }
     }
+
+You can enable attribute preservation with ``changeColumn()`` by passing
+``'preserveUnspecified' => true`` in the options::
+
+    $table->changeColumn('email', 'string', [
+        'null' => true,
+        'preserveUnspecified' => true,
+    ]);
+
+.. note::
+
+    For most use cases, ``updateColumn()`` is recommended as it is safer and requires
+    less code. Use ``changeColumn()`` when you need to completely redefine a column
+    or when working with legacy code that expects the traditional behavior.
 
 Working With Indexes
 --------------------

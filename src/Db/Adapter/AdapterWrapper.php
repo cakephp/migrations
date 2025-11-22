@@ -20,6 +20,7 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
+use Migrations\SeedInterface;
 
 /**
  * Adapter Wrapper.
@@ -236,6 +237,50 @@ abstract class AdapterWrapper implements WrapperInterface
     public function createSchemaTable(): void
     {
         $this->getAdapter()->createSchemaTable();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createSeedSchemaTable(): void
+    {
+        $this->getAdapter()->createSeedSchemaTable();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSeedSchemaTableName(): string
+    {
+        return $this->getAdapter()->getSeedSchemaTableName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSeedLog(): array
+    {
+        return $this->getAdapter()->getSeedLog();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function seedExecuted(SeedInterface $seed, string $executedTime): AdapterInterface
+    {
+        $this->getAdapter()->seedExecuted($seed, $executedTime);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeSeedFromLog(SeedInterface $seed): AdapterInterface
+    {
+        $this->getAdapter()->removeSeedFromLog($seed);
+
+        return $this;
     }
 
     /**

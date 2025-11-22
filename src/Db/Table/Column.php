@@ -108,6 +108,16 @@ class Column extends DatabaseColumn
     protected ?array $values = null;
 
     /**
+     * @var string|null
+     */
+    protected ?string $algorithm = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $lock = null;
+
+    /**
      * Column constructor
      *
      * @param string $name The name of the column.
@@ -717,6 +727,52 @@ class Column extends DatabaseColumn
     }
 
     /**
+     * Sets the ALTER TABLE algorithm (MySQL-specific).
+     *
+     * @param string $algorithm Algorithm
+     * @return $this
+     */
+    public function setAlgorithm(string $algorithm)
+    {
+        $this->algorithm = $algorithm;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ALTER TABLE algorithm.
+     *
+     * @return string|null
+     */
+    public function getAlgorithm(): ?string
+    {
+        return $this->algorithm;
+    }
+
+    /**
+     * Sets the ALTER TABLE lock mode (MySQL-specific).
+     *
+     * @param string $lock Lock mode
+     * @return $this
+     */
+    public function setLock(string $lock)
+    {
+        $this->lock = $lock;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ALTER TABLE lock mode.
+     *
+     * @return string|null
+     */
+    public function getLock(): ?string
+    {
+        return $this->lock;
+    }
+
+    /**
      * Gets all allowed options. Each option must have a corresponding `setFoo` method.
      *
      * @return array
@@ -743,6 +799,8 @@ class Column extends DatabaseColumn
             'seed',
             'increment',
             'generated',
+            'algorithm',
+            'lock',
         ];
     }
 

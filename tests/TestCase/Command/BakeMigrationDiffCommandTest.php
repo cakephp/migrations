@@ -18,9 +18,13 @@ use Cake\Console\BaseCommand;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Database\Driver\Mysql;
+use Cake\Database\Driver\Postgres;
+use Cake\Database\Driver\Sqlite;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
+use Exception;
 use Migrations\Migrations;
 use Migrations\Test\TestCase\TestCase;
 use function Cake\Core\env;
@@ -47,6 +51,36 @@ class BakeMigrationDiffCommandTest extends TestCase
         parent::setUp();
 
         $this->generatedFiles = [];
+
+        // Clean up any TheDiff migration files from all directories before test starts
+        $configPath = ROOT . DS . 'config' . DS;
+        $directories = glob($configPath . '*', GLOB_ONLYDIR) ?: [];
+        foreach ($directories as $dir) {
+            // Clean up TheDiff migration files
+            $migrationFiles = glob($dir . DS . '*TheDiff*.php') ?: [];
+            foreach ($migrationFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+            // Clean up Initial migration files
+            $initialMigrationFiles = glob($dir . DS . '*Initial*.php') ?: [];
+            foreach ($initialMigrationFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+        }
+
+        // Clean up test_decimal_types table if it exists
+        if (env('DB_URL_COMPARE')) {
+            try {
+                $connection = ConnectionManager::get('test_comparisons');
+                $connection->execute('DROP TABLE IF EXISTS test_decimal_types');
+            } catch (Exception $e) {
+                // Ignore errors if connection doesn't exist yet
+            }
+        }
     }
 
     public function tearDown(): void
@@ -57,10 +91,29 @@ class BakeMigrationDiffCommandTest extends TestCase
                 unlink($file);
             }
         }
+
+        // Clean up any TheDiff migration files from all directories
+        $configPath = ROOT . DS . 'config' . DS;
+        $directories = glob($configPath . '*', GLOB_ONLYDIR) ?: [];
+        foreach ($directories as $dir) {
+            $migrationFiles = glob($dir . DS . '*TheDiff*.php') ?: [];
+            foreach ($migrationFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+            $initialMigrationFiles = glob($dir . DS . '*Initial*.php') ?: [];
+            foreach ($initialMigrationFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+        }
+
         if (env('DB_URL_COMPARE')) {
             // Clean up the comparison database each time. Table order is important.
             $connection = ConnectionManager::get('test_comparisons');
-            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog'];
+            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog', 'test_decimal_types'];
             foreach ($tables as $table) {
                 $connection->execute("DROP TABLE IF EXISTS $table");
             }
@@ -244,6 +297,17 @@ class BakeMigrationDiffCommandTest extends TestCase
     }
 
     /**
+     * Tests baking a diff with decimal column changes
+     * Regression test for issue #659
+     */
+    public function testBakingDiffDecimalChange(): void
+    {
+        $this->skipIf(!env('DB_URL_COMPARE'));
+
+        $this->runDiffBakingTest('DecimalChange');
+    }
+
+    /**
      * Tests that baking a diff with --plugin option only includes tables with Table classes
      */
     public function testBakingDiffWithPluginOnlyIncludesTablesWithTableClasses(): void
@@ -333,13 +397,21 @@ class Initial extends BaseMigration
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
+        // Detect database type from connection if DB env is not set
+        $db = env('DB') ?: $this->getDbType();
+
         $diffConfigFolder = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
-        $diffMigrationsPath = $diffConfigFolder . 'the_diff_' . Inflector::underscore($scenario) . '_' . env('DB') . '.php';
-        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+
+        // DecimalChange uses 'initial_' prefix to avoid class name conflicts
+        $prefix = $scenario === 'DecimalChange' ? 'initial_' : 'the_diff_';
+        $classPrefix = $scenario === 'DecimalChange' ? 'Initial' : 'TheDiff';
+
+        $diffMigrationsPath = $diffConfigFolder . $prefix . Inflector::underscore($scenario) . '_' . $db . '.php';
+        $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . $db . '.lock';
 
         $destinationConfigDir = ROOT . DS . 'config' . DS . "MigrationsDiff{$scenario}" . DS;
-        $destination = $destinationConfigDir . "20160415220805_TheDiff{$scenario}" . ucfirst(env('DB')) . '.php';
-        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . env('DB') . '.lock';
+        $destination = $destinationConfigDir . "20160415220805_{$classPrefix}{$scenario}" . ucfirst($db) . '.php';
+        $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . $db . '.lock';
         copy($diffMigrationsPath, $destination);
 
         $this->generatedFiles = [
@@ -391,6 +463,29 @@ class Initial extends BaseMigration
     }
 
     /**
+     * Detect database type from connection
+     *
+     * @return string Database type (mysql, pgsql, sqlite, sqlserver)
+     */
+    protected function getDbType(): string
+    {
+        $connection = ConnectionManager::get('test_comparisons');
+        $driver = $connection->getDriver();
+
+        if ($driver instanceof Mysql) {
+            return 'mysql';
+        } elseif ($driver instanceof Postgres) {
+            return 'pgsql';
+        } elseif ($driver instanceof Sqlite) {
+            return 'sqlite';
+        } elseif ($driver instanceof Sqlserver) {
+            return 'sqlserver';
+        }
+
+        return 'mysql'; // Default fallback
+    }
+
+    /**
      * Get the baked filename based on the current db environment
      *
      * @param string $name Name of the baked file, unaware of the DB environment
@@ -398,7 +493,11 @@ class Initial extends BaseMigration
      */
     public function getBakeName($name)
     {
-        $name .= ucfirst(getenv('DB'));
+        $db = getenv('DB');
+        if (!$db) {
+            $db = $this->getDbType();
+        }
+        $name .= ucfirst($db);
 
         return $name;
     }
@@ -431,6 +530,9 @@ class Initial extends BaseMigration
     public function assertCorrectSnapshot($bakeName, $result)
     {
         $dbenv = getenv('DB');
+        if (!$dbenv) {
+            $dbenv = $this->getDbType();
+        }
         $bakeName = Inflector::underscore($bakeName);
         if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);

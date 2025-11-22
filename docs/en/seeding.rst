@@ -181,14 +181,120 @@ The Run Method
 ==============
 
 The run method is automatically invoked by Migrations when you execute the
-``cake migration seed`` command. You should use this method to insert your test
+``cake seeds run`` command. You should use this method to insert your test
 data.
+
+Seed Execution Tracking
+========================
+
+Seeds track their execution state in the ``cake_seeds`` database table. By default,
+a seed will only run once. If you attempt to run a seed that has already been
+executed, it will be skipped with an "already executed" message.
+
+To re-run a seed that has already been executed, use the ``--force`` flag:
+
+.. code-block:: bash
+
+    bin/cake seeds run Users --force
+
+You can check which seeds have been executed using the status command:
+
+.. code-block:: bash
+
+    bin/cake seeds status
+
+To reset all seeds' execution state (allowing them to run again without ``--force``):
+
+.. code-block:: bash
+
+    bin/cake seeds reset
 
 .. note::
 
-    Unlike with migrations, seeds do not keep track of which seed classes have
-    been run. This means database seeds can be run repeatedly. Keep this in
-    mind when developing them.
+    When re-running seeds with ``--force``, be careful to ensure your seeds are
+    idempotent (safe to run multiple times) or they may create duplicate data.
+
+Customizing the Seed Tracking Table
+------------------------------------
+
+By default, seed execution is tracked in a table named ``cake_seeds``. You can
+customize this table name by configuring it in your ``config/app.php`` or
+``config/app_local.php``:
+
+.. code-block:: php
+
+    'Migrations' => [
+        'seed_table' => 'my_custom_seeds_table',
+    ],
+
+This is useful if you need to avoid table name conflicts or want to follow
+a specific naming convention in your database.
+
+Idempotent Seeds
+================
+
+Some seeds are designed to be run multiple times safely (idempotent), such as seeds
+that update configuration or reference data. For these seeds, you can override the
+``isIdempotent()`` method to skip tracking entirely:
+
+.. code-block:: php
+
+    <?php
+    declare(strict_types=1);
+
+    use Migrations\BaseSeed;
+
+    class ConfigSeed extends BaseSeed
+    {
+        /**
+         * Mark this seed as idempotent.
+         * It will run every time without being tracked.
+         */
+        public function isIdempotent(): bool
+        {
+            return true;
+        }
+
+        public function run(): void
+        {
+            // This seed will run every time, so make it safe to run multiple times
+            $this->execute("
+                INSERT INTO settings (setting_key, setting_value)
+                VALUES ('app_version', '2.0.0')
+                ON DUPLICATE KEY UPDATE setting_value = '2.0.0'
+            ");
+
+            // Or check before inserting
+            $exists = $this->fetchRow(
+                "SELECT COUNT(*) as count FROM settings WHERE setting_key = 'maintenance_mode'"
+            );
+
+            if ($exists['count'] == 0) {
+                $this->table('settings')->insert([
+                    'setting_key' => 'maintenance_mode',
+                    'setting_value' => 'false',
+                ])->save();
+            }
+        }
+    }
+
+When ``isIdempotent()`` returns ``true``:
+
+- The seed will **not** be tracked in the ``cake_seeds`` table
+- The seed will run **every time** you execute ``seeds run``
+- You must ensure the seed's ``run()`` method handles duplicate executions safely
+
+This is useful for:
+
+- Configuration seeds that should always reflect current values
+- Reference data that may need periodic updates
+- Seeds that use ``INSERT ... ON DUPLICATE KEY UPDATE`` or similar patterns
+- Development/testing seeds that need to run repeatedly
+
+.. warning::
+
+    Only mark a seed as idempotent if you've verified it's safe to run multiple times.
+    Otherwise, you may create duplicate data or other unexpected behavior.
 
 The Init Method
 ===============
@@ -246,10 +352,28 @@ You can also use the full seed name including the ``Seed`` suffix:
 
 Both forms are supported and work identically.
 
+Automatic Dependency Execution
+-------------------------------
+
+When you run a seed that has dependencies, the system will automatically check if
+those dependencies have been executed. If any dependencies haven't run yet, they
+will be executed automatically before the current seed runs. This ensures proper
+execution order and prevents foreign key constraint violations.
+
+For example, if you run:
+
+.. code-block:: bash
+
+    bin/cake seeds run ShoppingCartSeed
+
+And ``ShoppingCartSeed`` depends on ``UserSeed`` and ``ShopItemSeed``, the system
+will automatically execute those dependencies first if they haven't been run yet.
+
 .. note::
 
-    Dependencies are only considered when executing all seed classes (default behavior).
-    They won't be considered when running specific seed classes.
+    Dependencies that have already been executed (according to the ``cake_seeds``
+    table) will be skipped, unless you use the ``--force`` flag which will
+    re-execute all seeds including dependencies.
 
 
 Calling a Seed from another Seed
@@ -371,37 +495,37 @@ SQL `TRUNCATE` command:
 Executing Seed Classes
 ======================
 
-This is the easy part. To seed your database, simply use the ``migrations seed`` command:
+This is the easy part. To seed your database, simply use the ``seeds run`` command:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed
+        $ bin/cake seeds run
 
 By default, Migrations will execute all available seed classes. If you would like to
-run a specific class, simply pass in the name of it using the ``--seed`` parameter.
+run a specific seed, simply pass in the seed name as an argument.
 You can use either the short name (without the ``Seed`` suffix) or the full name:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed User
+        $ bin/cake seeds run User
         # or
-        $ bin/cake migrations seed --seed UserSeed
+        $ bin/cake seeds run UserSeed
 
 Both commands work identically.
 
-You can also run multiple seeds:
+You can also run multiple seeds by separating them with commas:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed --seed User --seed Permission --seed Log
+        $ bin/cake seeds run User,Permission,Log
         # or with full names
-        $ bin/cake migrations seed --seed UserSeed --seed PermissionSeed --seed LogSeed
+        $ bin/cake seeds run UserSeed,PermissionSeed,LogSeed
 
 You can also use the `-v` parameter for more output verbosity:
 
 .. code-block:: bash
 
-        $ bin/cake migrations seed -v
+        $ bin/cake seeds run -v
 
 The Migrations seed functionality provides a simple mechanism to easily and repeatably
 insert test data into your database, this is great for development environment

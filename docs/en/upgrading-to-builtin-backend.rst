@@ -18,6 +18,66 @@ changes outlined below, please open an issue.
 What is different?
 ==================
 
+Command Structure Changes
+-------------------------
+
+As of migrations 5.0, the command structure has changed. The old phinx wrapper
+commands have been removed and replaced with new command names:
+
+**Seeds:**
+
+.. code-block:: bash
+
+    # Old (4.x and earlier)
+    bin/cake migrations seed
+    bin/cake migrations seed --seed Articles
+
+    # New (5.x and later)
+    bin/cake seeds run
+    bin/cake seeds run Articles
+
+The new commands are:
+
+- ``bin/cake seeds run`` - Run seed classes
+- ``bin/cake seeds status`` - Show seed execution status
+- ``bin/cake seeds reset`` - Reset seed execution tracking
+- ``bin/cake bake seed`` - Generate new seed classes
+
+Maintaining Backward Compatibility
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you need to maintain the old command structure for existing scripts or CI/CD
+pipelines, you can add command aliases in your application. In your
+``src/Application.php`` file, add the following to the ``console()`` method:
+
+.. code-block:: php
+
+    public function console(CommandCollection $commands): CommandCollection
+    {
+        // Add your application's commands
+        $commands = $this->addConsoleCommands($commands);
+
+        // Add backward compatibility aliases for migrations 4.x commands
+        $commands->add('migrations seed', \Migrations\Command\SeedCommand::class);
+
+        return $commands;
+    }
+
+For multiple aliases, you can add them all together:
+
+.. code-block:: php
+
+    // Add multiple backward compatibility aliases
+    $commands->add('migrations seed', \Migrations\Command\SeedCommand::class);
+    $commands->add('migrations seed:run', \Migrations\Command\SeedCommand::class);
+    $commands->add('migrations seed:status', \Migrations\Command\SeedStatusCommand::class);
+
+This allows gradual migration of scripts and documentation without modifying the
+migrations plugin or creating wrapper command classes.
+
+API Changes
+-----------
+
 If your migrations are using the ``AdapterInterface`` to fetch rows or update
 rows you will need to update your code. If you use ``Adapter::query()`` to
 execute queries, the return of this method is now
@@ -45,5 +105,5 @@ Similar changes are for fetching a single row::
 Problems with the builtin backend?
 ==================================
 
-If your migrations contain errors when run with the builtin backend, please 
+If your migrations contain errors when run with the builtin backend, please
 open `an issue <https://github.com/cakephp/migrations/issues/new>`_.

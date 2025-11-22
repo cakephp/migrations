@@ -22,6 +22,7 @@ use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class MysqlAdapterTest extends TestCase
 {
@@ -952,6 +953,249 @@ class MysqlAdapterTest extends TestCase
         $table->changeColumn('column1', $newColumn1)->save();
         $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
         $this->assertNull($rows[1]['Default']);
+    }
+
+    public function testChangeColumnPreservesDefaultValue()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'original_default', 'null' => false, 'limit' => 100])
+              ->save();
+
+        // Use updateColumn which preserves by default
+        $table->updateColumn('column1', 'string', ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('original_default', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+    }
+
+    public function testChangeColumnPreservesDefaultValueWithDifferentType()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'integer', ['default' => 42, 'null' => false])
+              ->save();
+
+        // Use updateColumn to preserve default when changing type
+        $table->updateColumn('column1', 'biginteger', [])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('42', $rows[1]['Default']);
+        $this->assertEquals('NO', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnCanExplicitlyOverrideDefault()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'original_default'])
+              ->save();
+
+        // Explicitly change the default
+        $table->changeColumn('column1', 'string', ['default' => 'new_default'])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('new_default', $rows[1]['Default']);
+    }
+
+    public function testChangeColumnCanDisablePreserveUnspecified()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'original_default', 'limit' => 100])
+              ->save();
+
+        // Disable preservation, default should be removed
+        $table->changeColumn('column1', 'string', ['null' => true, 'preserveUnspecified' => false])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertNull($rows[1]['Default']);
+    }
+
+    public function testChangeColumnWithNullTypePreservesType()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // Use updateColumn with null type to preserve everything
+        $table->updateColumn('column1', null, ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnWithNullTypeOnNonExistentColumnThrows()
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Cannot preserve column type for 'nonexistent'");
+
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string')->save();
+
+        // Try to use null type on non-existent column
+        $table->changeColumn('nonexistent', null, ['null' => true])->save();
+    }
+
+    public function testUpdateColumnPreservesAttributes()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100, 'null' => false])
+              ->save();
+
+        // updateColumn should preserve by default
+        $table->updateColumn('column1', null, ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnDoesNotPreserveByDefault()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // changeColumn should NOT preserve by default (backwards compatible)
+        $table->changeColumn('column1', 'string', ['null' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Default should be lost
+        $this->assertNull($rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testChangeColumnWithPreserveUnspecifiedTrue()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // changeColumn with explicit preserveUnspecified => true
+        $table->changeColumn('column1', 'string', ['null' => true, 'preserveUnspecified' => true])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Default should be preserved
+        $this->assertEquals('test', $rows[1]['Default']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testUpdateColumnWithColumnObject()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100, 'null' => false])
+              ->save();
+
+        // Use updateColumn with a Column object
+        $newColumn = new Column();
+        $newColumn->setName('column1')
+                  ->setType('string')
+                  ->setLimit(255)
+                  ->setNull(true);
+        $table->updateColumn('column1', $newColumn)->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(255)', $rows[1]['Type']);
+        $this->assertEquals('YES', $rows[1]['Null']);
+    }
+
+    public function testUpdateColumnWithColumnObjectAndOptionsThrows()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot specify options array when passing a Column object');
+
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
+              ->save();
+
+        // Passing both Column object and options array should throw an exception
+        $newColumn = new Column();
+        $newColumn->setName('column1')
+                  ->setType('string')
+                  ->setLimit(200);
+
+        $table->updateColumn('column1', $newColumn, ['limit' => 500]);
+    }
+
+    public function testUpdateColumnWithTypeChangeToText()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+
+        // Change type to text (limit doesn't apply to TEXT types)
+        $table->updateColumn('column1', 'text')->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // TEXT type in MySQL doesn't have a length specifier
+        $this->assertEquals('text', $rows[1]['Type']);
+        // TEXT columns in MySQL quote the default value
+        $this->assertStringContainsString('test', $rows[1]['Default']); // Default should be preserved
+    }
+
+    public function testUpdateColumnCanRemoveLengthConstraintWithoutChangingType()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+
+        // Try to remove length constraint without changing type by passing length => null
+        // This tests the array_key_exists fix - isset() would fail here
+        $table->updateColumn('column1', 'string', ['length' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Without explicit length, MySQL uses default varchar(255)
+        $this->assertEquals('varchar(255)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']); // Default should be preserved
+    }
+
+    public function testUpdateColumnCanRemoveScaleAndPrecision()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'decimal', ['precision' => 10, 'scale' => 2, 'default' => '123.45'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('decimal(10,2)', $rows[1]['Type']);
+        $this->assertEquals('123.45', $rows[1]['Default']);
+
+        // Try to remove scale/precision by passing null
+        $table->updateColumn('column1', 'decimal', ['precision' => null, 'scale' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Without explicit precision/scale, MySQL uses default decimal(10,0)
+        $this->assertEquals('decimal(10,0)', $rows[1]['Type']);
+        $this->assertEquals('123', $rows[1]['Default']); // Default should be preserved (truncated to integer)
+    }
+
+    public function testUpdateColumnCanRemoveComment()
+    {
+        $table = new Table('t', [], $this->adapter);
+        $table->addColumn('column1', 'string', ['limit' => 100, 'comment' => 'Original comment', 'default' => 'test'])
+              ->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
+        // MySQL doesn't show comments in SHOW COLUMNS, but we can verify it was set
+
+        // Try to remove comment by passing null
+        $table->updateColumn('column1', 'string', ['comment' => null])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM t');
+        // Verify limit and default are preserved
+        $this->assertEquals('varchar(100)', $rows[1]['Type']);
+        $this->assertEquals('test', $rows[1]['Default']);
     }
 
     public function testChangeColumnEnum()
@@ -2202,10 +2446,10 @@ OUTPUT;
     public static function geometryTypeProvider()
     {
         return [
-            [MysqlAdapter::PHINX_TYPE_GEOMETRY, 'POINT(0 0)'],
-            [MysqlAdapter::PHINX_TYPE_POINT, 'POINT(0 0)'],
-            [MysqlAdapter::PHINX_TYPE_LINESTRING, 'LINESTRING(30 10,10 30,40 40)'],
-            [MysqlAdapter::PHINX_TYPE_POLYGON, 'POLYGON((30 10,40 40,20 40,10 20,30 10))'],
+            [MysqlAdapter::TYPE_GEOMETRY, 'POINT(0 0)'],
+            [MysqlAdapter::TYPE_POINT, 'POINT(0 0)'],
+            [MysqlAdapter::TYPE_LINESTRING, 'LINESTRING(30 10,10 30,40 40)'],
+            [MysqlAdapter::TYPE_POLYGON, 'POLYGON((30 10,40 40,20 40,10 20,30 10))'],
         ];
     }
 
@@ -2258,12 +2502,12 @@ OUTPUT;
     public static function defaultsCastAsExpressions()
     {
         return [
-            [MysqlAdapter::PHINX_TYPE_JSON, '{"a": true}'],
-            [MysqlAdapter::PHINX_TYPE_TEXT, 'abc'],
-            [MysqlAdapter::PHINX_TYPE_GEOMETRY, 'POINT(0 0)'],
-            [MysqlAdapter::PHINX_TYPE_POINT, 'POINT(0 0)'],
-            [MysqlAdapter::PHINX_TYPE_LINESTRING, 'LINESTRING(30 10,10 30,40 40)'],
-            [MysqlAdapter::PHINX_TYPE_POLYGON, 'POLYGON((30 10,40 40,20 40,10 20,30 10))'],
+            [MysqlAdapter::TYPE_JSON, '{"a": true}'],
+            [MysqlAdapter::TYPE_TEXT, 'abc'],
+            [MysqlAdapter::TYPE_GEOMETRY, 'POINT(0 0)'],
+            [MysqlAdapter::TYPE_POINT, 'POINT(0 0)'],
+            [MysqlAdapter::TYPE_LINESTRING, 'LINESTRING(30 10,10 30,40 40)'],
+            [MysqlAdapter::TYPE_POLYGON, 'POLYGON((30 10,40 40,20 40,10 20,30 10))'],
         ];
     }
 
@@ -2279,10 +2523,10 @@ OUTPUT;
     {
         if (
             $this->usingMariaDb() && in_array($type, [
-            MysqlAdapter::PHINX_TYPE_GEOMETRY,
-            MysqlAdapter::PHINX_TYPE_POINT,
-            MysqlAdapter::PHINX_TYPE_LINESTRING,
-            MysqlAdapter::PHINX_TYPE_POLYGON,
+            MysqlAdapter::TYPE_GEOMETRY,
+            MysqlAdapter::TYPE_POINT,
+            MysqlAdapter::TYPE_LINESTRING,
+            MysqlAdapter::TYPE_POLYGON,
             ])
         ) {
             $this->markTestSkipped('GIS is broken with MariaDB');
@@ -2538,5 +2782,195 @@ OUTPUT;
 
         $rows = $this->adapter->fetchAll('SELECT * FROM categories');
         $this->assertCount(2, $rows);
+    }
+
+    public function testAddColumnWithAlgorithmInstant()
+    {
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addColumn('status', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasColumn('users', 'status'));
+    }
+
+    public function testAddColumnWithAlgorithmAndLock()
+    {
+        $table = new Table('products', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->create();
+
+        // Use ALGORITHM=INPLACE with LOCK=NONE (INSTANT can't have explicit locks)
+        $table->addColumn('price', 'decimal', [
+            'precision' => 10,
+            'scale' => 2,
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasColumn('products', 'price'));
+    }
+
+    public function testChangeColumnWithAlgorithm()
+    {
+        $table = new Table('items', [], $this->adapter);
+        $table->addColumn('description', 'string', ['limit' => 100])
+            ->create();
+
+        $table->changeColumn('description', 'string', [
+            'limit' => 255,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_SHARED,
+        ])->update();
+
+        $columns = $this->adapter->getColumns('items');
+        foreach ($columns as $column) {
+            if ($column->getName() === 'description') {
+                $this->assertEquals(255, $column->getLimit());
+            }
+        }
+    }
+
+    public function testBatchedOperationsWithSameAlgorithm()
+    {
+        $table = new Table('batch_test', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+        ])
+        ->addColumn('col3', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+        ])
+        ->update();
+
+        $this->assertTrue($this->adapter->hasColumn('batch_test', 'col2'));
+        $this->assertTrue($this->adapter->hasColumn('batch_test', 'col3'));
+    }
+
+    public function testBatchedOperationsWithConflictingAlgorithmsThrowsException()
+    {
+        $table = new Table('conflict_test', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Conflicting algorithm specifications');
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+        ])
+        ->addColumn('col3', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_COPY,
+        ])
+        ->update();
+    }
+
+    public function testBatchedOperationsWithConflictingLocksThrowsException()
+    {
+        $table = new Table('lock_conflict_test', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Conflicting lock specifications');
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->addColumn('col3', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_SHARED,
+        ])
+        ->update();
+    }
+
+    public function testInvalidAlgorithmThrowsException()
+    {
+        $table = new Table('invalid_algo', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid algorithm');
+
+        $table->addColumn('col2', 'string', [
+            'algorithm' => 'INVALID',
+        ])->update();
+    }
+
+    public function testInvalidLockThrowsException()
+    {
+        $table = new Table('invalid_lock', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid lock');
+
+        $table->addColumn('col2', 'string', [
+            'lock' => 'INVALID',
+        ])->update();
+    }
+
+    public function testAlgorithmInstantWithExplicitLockThrowsException()
+    {
+        $table = new Table('instant_lock_test', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ALGORITHM=INSTANT cannot be combined with LOCK=NONE');
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+    }
+
+    public function testAlgorithmConstantsAreDefined()
+    {
+        $this->assertEquals('DEFAULT', MysqlAdapter::ALGORITHM_DEFAULT);
+        $this->assertEquals('INSTANT', MysqlAdapter::ALGORITHM_INSTANT);
+        $this->assertEquals('INPLACE', MysqlAdapter::ALGORITHM_INPLACE);
+        $this->assertEquals('COPY', MysqlAdapter::ALGORITHM_COPY);
+    }
+
+    public function testLockConstantsAreDefined()
+    {
+        $this->assertEquals('DEFAULT', MysqlAdapter::LOCK_DEFAULT);
+        $this->assertEquals('NONE', MysqlAdapter::LOCK_NONE);
+        $this->assertEquals('SHARED', MysqlAdapter::LOCK_SHARED);
+        $this->assertEquals('EXCLUSIVE', MysqlAdapter::LOCK_EXCLUSIVE);
+    }
+
+    public function testAlgorithmWithMixedCase()
+    {
+        $table = new Table('mixed_case', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        // Should work with lowercase (use INPLACE with LOCK, not INSTANT)
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => 'inplace',
+            'lock' => 'none',
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasColumn('mixed_case', 'col2'));
     }
 }

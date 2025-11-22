@@ -27,6 +27,9 @@ use Migrations\Command\MarkMigratedCommand;
 use Migrations\Command\MigrateCommand;
 use Migrations\Command\RollbackCommand;
 use Migrations\Command\SeedCommand;
+use Migrations\Command\SeedResetCommand;
+use Migrations\Command\SeedsEntryCommand;
+use Migrations\Command\SeedStatusCommand;
 use Migrations\Command\StatusCommand;
 
 /**
@@ -63,24 +66,29 @@ class MigrationsPlugin extends BasePlugin
      */
     public function console(CommandCollection $commands): CommandCollection
     {
-        $classes = [
-            DumpCommand::class,
+        $migrationClasses = [
             EntryCommand::class,
+            DumpCommand::class,
             MarkMigratedCommand::class,
             MigrateCommand::class,
             RollbackCommand::class,
-            SeedCommand::class,
             StatusCommand::class,
+        ];
+        $seedClasses = [
+            SeedsEntryCommand::class,
+            SeedCommand::class,
+            SeedResetCommand::class,
+            SeedStatusCommand::class,
         ];
         $hasBake = class_exists(SimpleBakeCommand::class);
         if ($hasBake) {
-            $classes[] = BakeMigrationCommand::class;
-            $classes[] = BakeMigrationDiffCommand::class;
-            $classes[] = BakeMigrationSnapshotCommand::class;
-            $classes[] = BakeSeedCommand::class;
+            $migrationClasses[] = BakeMigrationCommand::class;
+            $migrationClasses[] = BakeMigrationDiffCommand::class;
+            $migrationClasses[] = BakeMigrationSnapshotCommand::class;
+            $migrationClasses[] = BakeSeedCommand::class;
         }
         $found = [];
-        foreach ($classes as $class) {
+        foreach ($migrationClasses as $class) {
             $name = $class::defaultName();
             // If the short name has been used, use the full name.
             // This allows app commands to have name preference.
@@ -89,6 +97,13 @@ class MigrationsPlugin extends BasePlugin
                 $found[$name] = $class;
             }
             $found['migrations.' . $name] = $class;
+        }
+        foreach ($seedClasses as $class) {
+            $name = $class::defaultName();
+            if (!$commands->has($name)) {
+                $found[$name] = $class;
+            }
+            $found['seeds.' . $name] = $class;
         }
         if ($hasBake) {
             $found['migrations create'] = BakeMigrationCommand::class;

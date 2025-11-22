@@ -39,24 +39,24 @@ class SqliteAdapter extends AbstractAdapter
      * @var string[]
      */
     protected static array $supportedColumnTypes = [
-        self::PHINX_TYPE_BIG_INTEGER => 'biginteger',
-        self::PHINX_TYPE_BINARY => 'binary_blob',
-        self::PHINX_TYPE_BINARYUUID => 'uuid_blob',
-        self::PHINX_TYPE_BOOLEAN => 'boolean_integer',
-        self::PHINX_TYPE_CHAR => 'char',
-        self::PHINX_TYPE_DATE => 'date_text',
-        self::PHINX_TYPE_DATETIME => 'datetime_text',
-        self::PHINX_TYPE_DECIMAL => 'decimal',
-        self::PHINX_TYPE_FLOAT => 'float',
-        self::PHINX_TYPE_INTEGER => 'integer',
-        self::PHINX_TYPE_JSON => 'json_text',
-        self::PHINX_TYPE_SMALL_INTEGER => 'smallinteger',
-        self::PHINX_TYPE_STRING => 'varchar',
-        self::PHINX_TYPE_TEXT => 'text',
-        self::PHINX_TYPE_TIME => 'time_text',
-        self::PHINX_TYPE_TIMESTAMP => 'timestamp_text',
-        self::PHINX_TYPE_TINY_INTEGER => 'tinyinteger',
-        self::PHINX_TYPE_UUID => 'uuid_text',
+        self::TYPE_BIGINTEGER => 'biginteger',
+        self::TYPE_BINARY => 'binary_blob',
+        self::TYPE_BINARY_UUID => 'uuid_blob',
+        self::TYPE_BOOLEAN => 'boolean_integer',
+        self::TYPE_CHAR => 'char',
+        self::TYPE_DATE => 'date_text',
+        self::TYPE_DATETIME => 'datetime_text',
+        self::TYPE_DECIMAL => 'decimal',
+        self::TYPE_FLOAT => 'float',
+        self::TYPE_INTEGER => 'integer',
+        self::TYPE_JSON => 'json_text',
+        self::TYPE_SMALLINTEGER => 'smallinteger',
+        self::TYPE_STRING => 'varchar',
+        self::TYPE_TEXT => 'text',
+        self::TYPE_TIME => 'time_text',
+        self::TYPE_TIMESTAMP => 'timestamp_text',
+        self::TYPE_TINYINTEGER => 'tinyinteger',
+        self::TYPE_UUID => 'uuid_text',
     ];
 
     /**
@@ -449,7 +449,7 @@ PCRE_PATTERN;
         } elseif (preg_match('/^[+-]?\d+$/i', $default)) {
             $int = (int)$default;
             // integer literal
-            if ($columnType === self::PHINX_TYPE_BOOLEAN && ($int === 0 || $int === 1)) {
+            if ($columnType === self::TYPE_BOOLEAN && ($int === 0 || $int === 1)) {
                 return (bool)$int;
             } else {
                 return $int;
@@ -1343,13 +1343,16 @@ PCRE_PATTERN;
         $instructions->addPostStep(function ($state) use ($column) {
             $quotedColumn = preg_quote($column);
             $columnPattern = "`{$quotedColumn}`|\"{$quotedColumn}\"|\[{$quotedColumn}\]";
-            $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)(\s+(NOT )?NULL)?/";
+            $matchPattern = "/($columnPattern)\s+(\w+(\(\d+\))?)(\s+(NOT )?NULL)?(\s+(?:PRIMARY KEY\s+)?AUTOINCREMENT)?/i";
 
             $sql = $state['createSQL'];
 
             if (preg_match($matchPattern, $state['createSQL'], $matches)) {
                 if (isset($matches[2])) {
-                    if ($matches[2] === 'INTEGER') {
+                    $hasAutoIncrement = isset($matches[6]) && stripos($matches[6], 'AUTOINCREMENT') !== false;
+
+                    if ($matches[2] === 'INTEGER' && $hasAutoIncrement) {
+                        // Only add AUTOINCREMENT if the column already had it
                         $replace = '$1 INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT';
                     } else {
                         $replace = '$1 $2 NOT NULL PRIMARY KEY';

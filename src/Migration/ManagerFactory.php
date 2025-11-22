@@ -111,7 +111,9 @@ class ManagerFactory
             'connection' => $connectionName,
             'database' => $connectionConfig['database'],
             'migration_table' => $table,
+            'seed_table' => Configure::read('Migrations.seed_table', 'cake_seeds'),
             'dryrun' => $this->getOption('dry-run'),
+            'plugin' => $plugin,
         ];
 
         $configData = [

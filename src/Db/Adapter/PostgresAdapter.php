@@ -36,14 +36,14 @@ class PostgresAdapter extends AbstractAdapter
      * @var string[]
      */
     protected static array $specificColumnTypes = [
-        self::PHINX_TYPE_JSON,
+        self::TYPE_JSON,
         self::PHINX_TYPE_JSONB,
-        self::PHINX_TYPE_CIDR,
-        self::PHINX_TYPE_INET,
-        self::PHINX_TYPE_MACADDR,
-        self::PHINX_TYPE_INTERVAL,
-        self::PHINX_TYPE_BINARYUUID,
-        self::PHINX_TYPE_NATIVEUUID,
+        self::TYPE_CIDR,
+        self::TYPE_INET,
+        self::TYPE_MACADDR,
+        self::TYPE_INTERVAL,
+        self::TYPE_BINARY_UUID,
+        self::TYPE_NATIVE_UUID,
     ];
 
     private const GIN_INDEX_TYPE = 'gin';
@@ -212,7 +212,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function mapColumnData(array $data): array
     {
         if (
-            $data['type'] === self::PHINX_TYPE_TIMESTAMP &&
+            $data['type'] === self::TYPE_TIMESTAMP &&
             isset($data['timezone']) && $data['timezone'] === true
         ) {
             $data['type'] = 'timestamptimezone';
@@ -945,7 +945,6 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function createSchemaTable(): void
     {
-        // Create the public/custom schema if it doesn't already exist
         if ($this->hasSchema($this->getGlobalSchemaName()) === false) {
             $this->createSchema($this->getGlobalSchemaName());
         }

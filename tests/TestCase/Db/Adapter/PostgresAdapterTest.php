@@ -2740,9 +2740,9 @@ OUTPUT;
     public static function serialProvider(): array
     {
         return [
-            [AdapterInterface::PHINX_TYPE_SMALL_INTEGER],
-            [AdapterInterface::PHINX_TYPE_INTEGER],
-            [AdapterInterface::PHINX_TYPE_BIG_INTEGER],
+            [AdapterInterface::TYPE_SMALLINTEGER],
+            [AdapterInterface::TYPE_INTEGER],
+            [AdapterInterface::TYPE_BIGINTEGER],
         ];
     }
 

@@ -390,18 +390,77 @@ class Table
     }
 
     /**
-     * Change a table column type.
+     * Update a table column, preserving unspecified attributes.
+     *
+     * This is the recommended method for modifying columns as it automatically
+     * preserves existing column attributes (default, null, limit, etc.) unless
+     * explicitly overridden.
      *
      * @param string $columnName Column Name
-     * @param string|\Migrations\Db\Table\Column $newColumnType New Column Type
+     * @param string|\Migrations\Db\Table\Column|null $newColumnType New Column Type (pass null to preserve existing type)
      * @param array<string, mixed> $options Options
      * @return $this
      */
-    public function changeColumn(string $columnName, string|Column $newColumnType, array $options = [])
+    public function updateColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
+    {
+        if (!($newColumnType instanceof Column)) {
+            $options['preserveUnspecified'] = true;
+        }
+
+        return $this->changeColumn($columnName, $newColumnType, $options);
+    }
+
+    /**
+     * Change a table column type.
+     *
+     * Note: This method replaces the column definition. Consider using updateColumn()
+     * instead, which preserves unspecified attributes by default.
+     *
+     * @param string $columnName Column Name
+     * @param string|\Migrations\Db\Table\Column|null $newColumnType New Column Type (pass null to preserve existing type)
+     * @param array<string, mixed> $options Options
+     * @return $this
+     */
+    public function changeColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
     {
         if ($newColumnType instanceof Column) {
+            if ($options) {
+                throw new InvalidArgumentException(
+                    'Cannot specify options array when passing a Column object. ' .
+                    'Set all properties directly on the Column object instead.',
+                );
+            }
             $action = new ChangeColumn($this->table, $columnName, $newColumnType);
         } else {
+            // Check if we should preserve existing column attributes
+            $preserveUnspecified = $options['preserveUnspecified'] ?? false; // Default to false for BC
+            unset($options['preserveUnspecified']);
+
+            // If type is null, preserve the existing type
+            if ($newColumnType === null) {
+                if (!$this->hasColumn($columnName)) {
+                    throw new RuntimeException(
+                        "Cannot preserve column type for '$columnName' - column does not exist in table '{$this->getName()}'",
+                    );
+                }
+                $existingColumn = $this->getColumn($columnName);
+                if ($existingColumn === null) {
+                    throw new RuntimeException(
+                        "Cannot retrieve column definition for '$columnName' in table '{$this->getName()}'",
+                    );
+                }
+                $newColumnType = $existingColumn->getType();
+            }
+
+            if ($preserveUnspecified && $this->hasColumn($columnName)) {
+                // Get existing column definition
+                $existingColumn = $this->getColumn($columnName);
+                if ($existingColumn !== null) {
+                    // Merge existing attributes with new ones
+                    $options = $this->mergeColumnOptions($existingColumn, $newColumnType, $options);
+                }
+            }
+
             $action = ChangeColumn::build($this->table, $columnName, $newColumnType, $options);
         }
         $this->actions->addAction($action);
@@ -828,5 +887,89 @@ class Table
 
         $plan = new Plan($this->actions);
         $plan->execute($this->getAdapter());
+    }
+
+    /**
+     * Merges existing column options with new options.
+     * Only attributes that are explicitly specified in the new options will override existing ones.
+     *
+     * @param \Migrations\Db\Table\Column $existingColumn Existing column definition
+     * @param string $newColumnType New column type
+     * @param array<string, mixed> $options New options
+     * @return array<string, mixed> Merged options
+     */
+    protected function mergeColumnOptions(Column $existingColumn, string $newColumnType, array $options): array
+    {
+        // Determine if type is changing
+        $newTypeString = (string)$newColumnType;
+        $existingTypeString = (string)$existingColumn->getType();
+        $typeChanging = $newTypeString !== $existingTypeString;
+
+        // Build array of existing column attributes
+        $existingOptions = [];
+
+        // Only preserve limit if type is not changing or limit is not explicitly set
+        if (!$typeChanging && !array_key_exists('limit', $options) && !array_key_exists('length', $options)) {
+            $limit = $existingColumn->getLimit();
+            if ($limit !== null) {
+                $existingOptions['limit'] = $limit;
+            }
+        }
+
+        // Preserve default if not explicitly set
+        if (!array_key_exists('default', $options)) {
+            $existingOptions['default'] = $existingColumn->getDefault();
+        }
+
+        // Preserve null if not explicitly set
+        if (!isset($options['null'])) {
+            $existingOptions['null'] = $existingColumn->getNull();
+        }
+
+        // Preserve scale/precision if not explicitly set
+        if (!array_key_exists('scale', $options) && !array_key_exists('precision', $options)) {
+            $scale = $existingColumn->getScale();
+            if ($scale !== null) {
+                $existingOptions['scale'] = $scale;
+            }
+            $precision = $existingColumn->getPrecision();
+            if ($precision !== null) {
+                $existingOptions['precision'] = $precision;
+            }
+        }
+
+        // Preserve comment if not explicitly set
+        if (!array_key_exists('comment', $options)) {
+            $comment = $existingColumn->getComment();
+            if ($comment !== null) {
+                $existingOptions['comment'] = $comment;
+            }
+        }
+
+        // Preserve signed if not explicitly set (always has a value)
+        if (!isset($options['signed'])) {
+            $existingOptions['signed'] = $existingColumn->getSigned();
+        }
+
+        // Preserve collation if not explicitly set
+        if (!isset($options['collation'])) {
+            $collation = $existingColumn->getCollation();
+            if ($collation !== null) {
+                $existingOptions['collation'] = $collation;
+            }
+        }
+
+        // Preserve encoding if not explicitly set
+        if (!isset($options['encoding'])) {
+            $encoding = $existingColumn->getEncoding();
+            if ($encoding !== null) {
+                $existingOptions['encoding'] = $encoding;
+            }
+        }
+
+        // Note: enum/set values are not preserved as schema reflection doesn't populate them
+
+        // New options override existing ones
+        return array_merge($existingOptions, $options);
     }
 }

@@ -10,6 +10,7 @@ namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
 use Cake\Console\ConsoleIo;
+use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
@@ -44,6 +45,7 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
+use Migrations\SeedInterface;
 use PDOException;
 use RuntimeException;
 use function Cake\Core\deprecationWarning;
@@ -72,6 +74,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @var string
      */
     protected string $schemaTableName = 'phinxlog';
+
+    /**
+     * @var string
+     */
+    protected string $seedSchemaTableName = 'cake_seeds';
 
     /**
      * @var array
@@ -108,6 +115,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $this->setSchemaTableName($options['migration_table']);
         }
 
+        if (isset($options['seed_table'])) {
+            $this->setSeedSchemaTableName($options['seed_table']);
+        }
+
         if (isset($options['connection']) && $options['connection'] instanceof Connection) {
             $this->setConnection($options['connection']);
         }
@@ -129,21 +140,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if (!$this->hasTable($this->getSchemaTableName())) {
             $this->createSchemaTable();
         } else {
-            $table = new Table($this->getSchemaTableName(), [], $this);
-            if (!$table->hasColumn('migration_name')) {
-                $table
-                    ->addColumn(
-                        'migration_name',
-                        'string',
-                        ['limit' => 100, 'after' => 'version', 'default' => null, 'null' => true],
-                    )
-                    ->save();
-            }
-            if (!$table->hasColumn('breakpoint')) {
-                $table
-                    ->addColumn('breakpoint', 'boolean', ['default' => false, 'null' => false])
-                    ->save();
-            }
+            $this->migrationsTable()->upgradeTable();
         }
 
         return $this;
@@ -328,6 +325,29 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * Gets the seed schema table name.
+     *
+     * @return string
+     */
+    public function getSeedSchemaTableName(): string
+    {
+        return $this->seedSchemaTableName;
+    }
+
+    /**
+     * Sets the seed schema table name.
+     *
+     * @param string $seedSchemaTableName Seed Schema Table Name
+     * @return $this
+     */
+    public function setSeedSchemaTableName(string $seedSchemaTableName)
+    {
+        $this->seedSchemaTableName = $seedSchemaTableName;
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getColumnForType(string $columnName, string $type, array $options): Column
@@ -357,22 +377,23 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function createSchemaTable(): void
     {
-        try {
-            $options = [
-                'id' => false,
-                'primary_key' => 'version',
-            ];
+        $this->migrationsTable()->createTable();
+    }
 
-            $table = new Table($this->getSchemaTableName(), $options, $this);
-            $table->addColumn('version', 'biginteger', ['null' => false])
-                ->addColumn('migration_name', 'string', ['limit' => 100, 'default' => null, 'null' => true])
-                ->addColumn('start_time', 'timestamp', ['default' => null, 'null' => true])
-                ->addColumn('end_time', 'timestamp', ['default' => null, 'null' => true])
-                ->addColumn('breakpoint', 'boolean', ['default' => false, 'null' => false])
+    /**
+     * @inheritDoc
+     */
+    public function createSeedSchemaTable(): void
+    {
+        try {
+            $table = new Table($this->getSeedSchemaTableName(), [], $this);
+            $table->addColumn('plugin', 'string', ['limit' => 100, 'default' => null, 'null' => true])
+                ->addColumn('seed_name', 'string', ['limit' => 100, 'null' => false])
+                ->addColumn('executed_at', 'timestamp', ['default' => null, 'null' => true])
                 ->save();
         } catch (Exception $exception) {
             throw new InvalidArgumentException(
-                'There was a problem creating the schema table: ' . $exception->getMessage(),
+                'There was a problem creating the seed schema table: ' . $exception->getMessage(),
                 (int)$exception->getCode(),
                 $exception,
             );
@@ -816,6 +837,22 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * Get the migrations table storage implementation.
+     *
+     * @return \Migrations\Db\Adapter\MigrationsTableStorage
+     * @internal
+     */
+    protected function migrationsTable(): MigrationsTableStorage
+    {
+        // TODO Use configure/auto-detect which implmentation to use.
+        return new MigrationsTableStorage(
+            $this,
+            $this->getSchemaTableName(),
+            $this->getOption('plugin'),
+        );
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @throws \RuntimeException
@@ -832,10 +869,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             default:
                 throw new RuntimeException('Invalid version_order configuration option');
         }
-        $query = $this->getSelectBuilder();
-        $query->select('*')
-            ->from($this->getSchemaTableName())
-            ->orderBy($orderBy);
+        $query = $this->migrationsTable()->getVersions($orderBy);
 
         // This will throw an exception if doing a --dry-run without any migrations as phinxlog
         // does not exist, so in that case, we can just expect to trivially return empty set
@@ -862,24 +896,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
         if (strcasecmp($direction, MigrationInterface::UP) === 0) {
-            $query = $this->getInsertBuilder();
-            $query->insert(['version', 'migration_name', 'start_time', 'end_time', 'breakpoint'])
-                ->into($this->getSchemaTableName())
-                ->values([
-                    'version' => (string)$migration->getVersion(),
-                    'migration_name' => substr($migration->getName(), 0, 100),
-                    'start_time' => $startTime,
-                    'end_time' => $endTime,
-                    'breakpoint' => 0,
-                ]);
-            $this->executeQuery($query);
+            $this->migrationsTable()->recordUp($migration, $startTime, $endTime);
         } else {
             // down
-            $query = $this->getDeleteBuilder();
-            $query->delete()
-                ->from($this->getSchemaTableName())
-                ->where(['version' => $migration->getVersion()]);
-            $this->executeQuery($query);
+            $this->migrationsTable()->recordDown($migration);
         }
 
         return $this;
@@ -890,19 +910,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function toggleBreakpoint(MigrationInterface $migration): AdapterInterface
     {
-        $params = [
-            $migration->getVersion(),
-        ];
-        $this->query(
-            sprintf(
-                'UPDATE %1$s SET %2$s = CASE %2$s WHEN true THEN false ELSE true END, %4$s = %4$s WHERE %3$s = ?;',
-                $this->quoteTableName($this->getSchemaTableName()),
-                $this->quoteColumnName('breakpoint'),
-                $this->quoteColumnName('version'),
-                $this->quoteColumnName('start_time'),
-            ),
-            $params,
-        );
+        $this->migrationsTable()->toggleBreakpoint($migration);
 
         return $this;
     }
@@ -912,17 +920,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function resetAllBreakpoints(): int
     {
-        $query = $this->getUpdateBuilder();
-        $query->update($this->getSchemaTableName())
-            ->set([
-                'breakpoint' => 0,
-                'start_time' => $query->identifier('start_time'),
-            ])
-            ->where([
-                'breakpoint !=' => 0,
-            ]);
-
-        return $this->executeQuery($query);
+        return $this->migrationsTable()->resetAllBreakpoints();
     }
 
     /**
@@ -954,14 +952,88 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function markBreakpoint(MigrationInterface $migration, bool $state): AdapterInterface
     {
-        $query = $this->getUpdateBuilder();
-        $query->update($this->getSchemaTableName())
-            ->set([
-                'breakpoint' => (int)$state,
-                'start_time' => $query->identifier('start_time'),
-            ])
+        $this->migrationsTable()->markBreakpoint($migration, $state);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSeedLog(): array
+    {
+        $query = $this->getSelectBuilder();
+        $query->select('*')
+            ->from($this->getSeedSchemaTableName())
+            ->orderBy(['executed_at' => 'ASC', 'id' => 'ASC']);
+
+        try {
+            $rows = $query->execute()->fetchAll('assoc');
+        } catch (PDOException $e) {
+            if (!$this->isDryRunEnabled()) {
+                throw $e;
+            }
+            $rows = [];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function seedExecuted(SeedInterface $seed, string $executedTime): AdapterInterface
+    {
+        $plugin = null;
+        $className = get_class($seed);
+
+        if (str_contains($className, '\\')) {
+            $parts = explode('\\', $className);
+            $appNamespace = Configure::read('App.namespace', 'App');
+            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
+                $plugin = $parts[0];
+            }
+        }
+
+        $seedName = substr($seed->getName(), 0, 100);
+
+        $query = $this->getInsertBuilder();
+        $query->insert(['plugin', 'seed_name', 'executed_at'])
+            ->into($this->getSeedSchemaTableName())
+            ->values([
+                'plugin' => $plugin,
+                'seed_name' => $seedName,
+                'executed_at' => $executedTime,
+            ]);
+        $this->executeQuery($query);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeSeedFromLog(SeedInterface $seed): AdapterInterface
+    {
+        $plugin = null;
+        $className = get_class($seed);
+
+        if (str_contains($className, '\\')) {
+            $parts = explode('\\', $className);
+            $appNamespace = Configure::read('App.namespace', 'App');
+            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
+                $plugin = $parts[0];
+            }
+        }
+
+        $seedName = $seed->getName();
+
+        $query = $this->getDeleteBuilder();
+        $query->delete()
+            ->from($this->getSeedSchemaTableName())
             ->where([
-                'version' => $migration->getVersion(),
+                'seed_name' => $seedName,
+                'plugin IS' => $plugin,
             ]);
         $this->executeQuery($query);
 
@@ -1043,10 +1115,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     protected function getDefaultValueDefinition(mixed $default, ?string $columnType = null): string
     {
         $datetimeTypes = [
-            static::PHINX_TYPE_DATETIME,
-            static::PHINX_TYPE_TIMESTAMP,
-            static::PHINX_TYPE_TIME,
-            static::PHINX_TYPE_DATE,
+            static::TYPE_DATETIME,
+            static::TYPE_TIMESTAMP,
+            static::TYPE_TIME,
+            static::TYPE_DATE,
         ];
 
         if ($default instanceof Literal) {
@@ -1061,7 +1133,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $default = $this->quoteString($default);
         } elseif (is_bool($default)) {
             $default = $this->castToBool($default);
-        } elseif ($default !== null && $columnType === static::PHINX_TYPE_BOOLEAN) {
+        } elseif ($default !== null && $columnType === static::TYPE_BOOLEAN) {
             $default = $this->castToBool((bool)$default);
         }
 

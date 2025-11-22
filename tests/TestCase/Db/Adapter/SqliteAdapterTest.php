@@ -428,6 +428,51 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column2']));
     }
 
+    public function testChangePrimaryKeyWithoutAutoIncrement()
+    {
+        // Create table with id_1 as PK without AUTOINCREMENT keyword
+        $this->adapter->execute('CREATE TABLE table1 (id_1 INTEGER NOT NULL PRIMARY KEY, id_2 INTEGER NOT NULL)');
+
+        // Verify initial SQL does not have AUTOINCREMENT
+        $result = $this->adapter->fetchRow("SELECT sql FROM sqlite_master WHERE type='table' AND name='table1'");
+        $this->assertStringNotContainsString('AUTOINCREMENT', $result['sql']);
+
+        // Change primary key to id_2
+        $table = new Table('table1', [], $this->adapter);
+        $table->changePrimaryKey('id_2')->save();
+
+        // Verify primary key changed
+        $this->assertFalse($this->adapter->hasPrimaryKey('table1', ['id_1']));
+        $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['id_2']));
+
+        // Verify the SQL does NOT have AUTOINCREMENT added to id_2
+        $result = $this->adapter->fetchRow("SELECT sql FROM sqlite_master WHERE type='table' AND name='table1'");
+        $this->assertStringNotContainsString('AUTOINCREMENT', $result['sql'], 'AUTOINCREMENT should not be added when changing PK to a column that did not have it');
+    }
+
+    public function testChangePrimaryKeyFromAutoIncrementColumn()
+    {
+        // Create table with id_1 as PK with AUTOINCREMENT
+        $this->adapter->execute('CREATE TABLE table1 (id_1 INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id_2 INTEGER NOT NULL)');
+
+        // Verify initial SQL has AUTOINCREMENT
+        $result = $this->adapter->fetchRow("SELECT sql FROM sqlite_master WHERE type='table' AND name='table1'");
+        $this->assertStringContainsString('AUTOINCREMENT', $result['sql']);
+
+        // Change primary key to id_2 (should NOT get AUTOINCREMENT since id_2 doesn't have it)
+        $table = new Table('table1', [], $this->adapter);
+        $table->changePrimaryKey('id_2')->save();
+
+        // Verify primary key changed
+        $this->assertFalse($this->adapter->hasPrimaryKey('table1', ['id_1']));
+        $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['id_2']));
+
+        // Verify the SQL does NOT have AUTOINCREMENT on id_2
+        // (id_1 lost its AUTOINCREMENT when PK was dropped, and id_2 never had it)
+        $result = $this->adapter->fetchRow("SELECT sql FROM sqlite_master WHERE type='table' AND name='table1'");
+        $this->assertStringNotContainsString('AUTOINCREMENT', $result['sql'], 'AUTOINCREMENT should not be added when changing PK to a column that never had it');
+    }
+
     public function testDropPrimaryKey()
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
@@ -2666,30 +2711,30 @@ INPUT;
     public static function provideColumnTypesForValidation()
     {
         return [
-            [SqliteAdapter::PHINX_TYPE_BIG_INTEGER, true],
-            [SqliteAdapter::PHINX_TYPE_BINARY, true],
-            [SqliteAdapter::PHINX_TYPE_BOOLEAN, true],
-            [SqliteAdapter::PHINX_TYPE_CHAR, true],
-            [SqliteAdapter::PHINX_TYPE_DATE, true],
-            [SqliteAdapter::PHINX_TYPE_DATETIME, true],
-            [SqliteAdapter::PHINX_TYPE_FLOAT, true],
-            [SqliteAdapter::PHINX_TYPE_INTEGER, true],
-            [SqliteAdapter::PHINX_TYPE_JSON, true],
-            [SqliteAdapter::PHINX_TYPE_SMALL_INTEGER, true],
-            [SqliteAdapter::PHINX_TYPE_STRING, true],
-            [SqliteAdapter::PHINX_TYPE_TEXT, true],
-            [SqliteAdapter::PHINX_TYPE_TIME, true],
-            [SqliteAdapter::PHINX_TYPE_UUID, true],
-            [SqliteAdapter::PHINX_TYPE_TIMESTAMP, true],
-            [SqliteAdapter::PHINX_TYPE_CIDR, false],
-            [SqliteAdapter::PHINX_TYPE_DECIMAL, true],
-            [SqliteAdapter::PHINX_TYPE_GEOMETRY, false],
-            [SqliteAdapter::PHINX_TYPE_INET, false],
-            [SqliteAdapter::PHINX_TYPE_INTERVAL, false],
-            [SqliteAdapter::PHINX_TYPE_LINESTRING, false],
-            [SqliteAdapter::PHINX_TYPE_MACADDR, false],
-            [SqliteAdapter::PHINX_TYPE_POINT, false],
-            [SqliteAdapter::PHINX_TYPE_POLYGON, false],
+            [SqliteAdapter::TYPE_BIGINTEGER, true],
+            [SqliteAdapter::TYPE_BINARY, true],
+            [SqliteAdapter::TYPE_BOOLEAN, true],
+            [SqliteAdapter::TYPE_CHAR, true],
+            [SqliteAdapter::TYPE_DATE, true],
+            [SqliteAdapter::TYPE_DATETIME, true],
+            [SqliteAdapter::TYPE_FLOAT, true],
+            [SqliteAdapter::TYPE_INTEGER, true],
+            [SqliteAdapter::TYPE_JSON, true],
+            [SqliteAdapter::TYPE_SMALLINTEGER, true],
+            [SqliteAdapter::TYPE_STRING, true],
+            [SqliteAdapter::TYPE_TEXT, true],
+            [SqliteAdapter::TYPE_TIME, true],
+            [SqliteAdapter::TYPE_UUID, true],
+            [SqliteAdapter::TYPE_TIMESTAMP, true],
+            [SqliteAdapter::TYPE_CIDR, false],
+            [SqliteAdapter::TYPE_DECIMAL, true],
+            [SqliteAdapter::TYPE_GEOMETRY, false],
+            [SqliteAdapter::TYPE_INET, false],
+            [SqliteAdapter::TYPE_INTERVAL, false],
+            [SqliteAdapter::TYPE_LINESTRING, false],
+            [SqliteAdapter::TYPE_MACADDR, false],
+            [SqliteAdapter::TYPE_POINT, false],
+            [SqliteAdapter::TYPE_POLYGON, false],
             ['someType', false],
         ];
     }

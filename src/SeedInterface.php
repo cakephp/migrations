@@ -186,6 +186,19 @@ interface SeedInterface
     public function shouldExecute(): bool;
 
     /**
+     * Checks if this seed is idempotent (can run multiple times safely).
+     *
+     * Returns false by default, meaning the seed will be tracked and only run once.
+     *
+     * If you return true, the seed will NOT be tracked in the cake_seeds table,
+     * allowing it to run every time. Make sure your seed is truly idempotent
+     * (handles duplicate data safely) before returning true.
+     *
+     * @return bool
+     */
+    public function isIdempotent(): bool;
+
+    /**
      * Gives the ability to a seeder to call another seeder.
      * This is particularly useful if you need to run the seeders of your applications in a specific sequences,
      * for instance to respect foreign key constraints.

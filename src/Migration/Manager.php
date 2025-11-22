@@ -10,6 +10,7 @@ namespace Migrations\Migration;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
+use Cake\Core\Configure;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -204,6 +205,74 @@ class Manager
         $versions = array_flip($adapter->getVersions());
 
         return isset($versions[$version]);
+    }
+
+    /**
+     * Check if a seed has been executed.
+     *
+     * @param \Migrations\SeedInterface $seed Seed to check
+     * @return bool
+     */
+    public function isSeedExecuted(SeedInterface $seed): bool
+    {
+        $adapter = $this->getEnvironment()->getAdapter();
+
+        // Ensure seed schema table exists
+        if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
+            return false;
+        }
+
+        $seedLog = $adapter->getSeedLog();
+
+        $plugin = null;
+        $className = get_class($seed);
+
+        if (str_contains($className, '\\')) {
+            $parts = explode('\\', $className);
+            $appNamespace = Configure::read('App.namespace', 'App');
+            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
+                $plugin = $parts[0];
+            }
+        }
+
+        $seedName = $seed->getName();
+
+        foreach ($seedLog as $entry) {
+            if ($entry['seed_name'] === $seedName && $entry['plugin'] === $plugin) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get dependencies of a seed that have not been executed yet.
+     *
+     * @param \Migrations\SeedInterface $seed Seed to check dependencies for
+     * @return array<\Migrations\SeedInterface>
+     */
+    public function getSeedDependenciesNotExecuted(SeedInterface $seed): array
+    {
+        $dependencies = $seed->getDependencies();
+        if (!$dependencies) {
+            return [];
+        }
+
+        $seeds = $this->getSeeds();
+        $notExecuted = [];
+
+        foreach ($dependencies as $depName) {
+            $normalizedName = $this->normalizeSeedName($depName, $seeds);
+            if ($normalizedName !== null && isset($seeds[$normalizedName])) {
+                $depSeed = $seeds[$normalizedName];
+                if (!$this->isSeedExecuted($depSeed)) {
+                    $notExecuted[] = $depSeed;
+                }
+            }
+        }
+
+        return $notExecuted;
     }
 
     /**
@@ -470,9 +539,10 @@ class Manager
      * Execute a seeder against the specified environment.
      *
      * @param \Migrations\SeedInterface $seed Seed
+     * @param bool $force Force re-execution even if seed has already been executed
      * @return void
      */
-    public function executeSeed(SeedInterface $seed): void
+    public function executeSeed(SeedInterface $seed, bool $force = false): void
     {
         $this->getIo()->out('');
 
@@ -483,7 +553,32 @@ class Manager
             return;
         }
 
+        // Check if seed has already been executed (skip for idempotent seeds)
+        if (!$force && !$seed->isIdempotent() && $this->isSeedExecuted($seed)) {
+            $this->printSeedStatus($seed, 'already executed');
+
+            return;
+        }
+
+        // Auto-execute missing dependencies
+        $missingDeps = $this->getSeedDependenciesNotExecuted($seed);
+        if (!empty($missingDeps)) {
+            foreach ($missingDeps as $depSeed) {
+                $this->getIo()->verbose(sprintf(
+                    '  Auto-executing dependency: %s',
+                    $depSeed->getName(),
+                ));
+                $this->executeSeed($depSeed, $force);
+            }
+        }
+
         $this->printSeedStatus($seed, 'seeding');
+
+        // Ensure seed schema table exists
+        $adapter = $this->getEnvironment()->getAdapter();
+        if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
+            $adapter->createSeedSchemaTable();
+        }
 
         // Execute the seeder and log the time elapsed.
         $start = microtime(true);
@@ -698,10 +793,11 @@ class Manager
      * Run database seeders against an environment.
      *
      * @param string|null $seed Seeder
+     * @param bool $force Force re-execution even if seed has already been executed
      * @throws \InvalidArgumentException
      * @return void
      */
-    public function seed(?string $seed = null): void
+    public function seed(?string $seed = null, bool $force = false): void
     {
         $seeds = $this->getSeeds();
 
@@ -709,14 +805,14 @@ class Manager
             // run all seeders
             foreach ($seeds as $seeder) {
                 if (array_key_exists($seeder->getName(), $seeds)) {
-                    $this->executeSeed($seeder);
+                    $this->executeSeed($seeder, $force);
                 }
             }
         } else {
             // run only one seeder
             $normalizedName = $this->normalizeSeedName($seed, $seeds);
             if ($normalizedName !== null) {
-                $this->executeSeed($seeds[$normalizedName]);
+                $this->executeSeed($seeds[$normalizedName], $force);
             } else {
                 throw new InvalidArgumentException(sprintf('The seed `%s` does not exist', $seed));
             }
@@ -943,7 +1039,7 @@ class Manager
      * @param array<string, \Migrations\SeedInterface> $seeds Seeds array to search in
      * @return string|null The normalized seed name, or null if not found
      */
-    protected function normalizeSeedName(string $name, array $seeds): ?string
+    public function normalizeSeedName(string $name, array $seeds): ?string
     {
         // Try with 'Seed' suffix first
         if (array_key_exists($name . 'Seed', $seeds)) {
