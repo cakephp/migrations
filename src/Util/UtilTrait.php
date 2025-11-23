@@ -89,10 +89,9 @@ trait UtilTrait
      */
     protected function detectLegacyTables(Connection $connection): bool
     {
-        $schema = $connection->getSchemaCollection();
+        $dialect = $connection->getDriver()->schemaDialect();
 
-        /** @phpstan-ignore method.notFound (hasTable added in CakePHP 5.3) */
-        return $schema->hasTable('phinxlog');
+        return $dialect->hasTable('phinxlog');
     }
 
     /**

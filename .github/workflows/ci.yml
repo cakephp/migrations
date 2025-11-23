@@ -24,6 +24,7 @@ jobs:
         php-version: ['8.2', '8.5']
         db-type: [mariadb, mysql, pgsql, sqlite]
         prefer-lowest: ['']
+        legacy-tables: ['']
         include:
           - php-version: '8.2'
             db-type: 'sqlite'
@@ -32,6 +33,10 @@ jobs:
             db-type: 'mysql'
           - php-version: '8.3'
             db-type: 'pgsql'
+          # Test unified cake_migrations table (non-legacy mode)
+          - php-version: '8.3'
+            db-type: 'mysql'
+            legacy-tables: 'false'
     services:
       postgres:
         image: postgres
@@ -134,6 +139,9 @@ jobs:
             export DB='pgsql'
             export DB_URL='postgres://postgres:pg-password@127.0.0.1/cakephp_test'
             export DB_URL_SNAPSHOT='postgres://postgres:pg-password@127.0.0.1/cakephp_snapshot'
+          fi
+          if [[ -n '${{ matrix.legacy-tables }}' ]]; then
+            export LEGACY_TABLES='${{ matrix.legacy-tables }}'
           fi
           if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.db-type }} == 'mysql' ]]; then
             vendor/bin/phpunit --coverage-clover=coverage.xml
