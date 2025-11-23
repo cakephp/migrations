@@ -20,8 +20,8 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\MigrationsPlugin;
-use SimpleSnapshot\Plugin as SimpleSnapshotPlugin;
-use TestBlog\Plugin as TestBlogPlugin;
+use SimpleSnapshot\SimpleSnapshotPlugin;
+use TestBlog\TestBlogPlugin;
 use function Cake\Core\env;
 
 $findRoot = function ($root) {
