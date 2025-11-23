@@ -81,7 +81,6 @@ class StatusCommandTest extends TestCase
         // Run a migration first to ensure the schema table exists
         $this->exec('migrations migrate -c test --no-lock');
         $this->assertExitSuccess();
-        $this->resetOutput();
 
         // Insert a fake migration entry that doesn't exist in filesystem
         $this->insertMigrationRecord('test', 99999999999999, 'FakeMissingMigration');
