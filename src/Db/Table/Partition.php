@@ -100,7 +100,7 @@ class Partition
      * @param \Migrations\Db\Table\PartitionDefinition $definition The partition definition
      * @return $this
      */
-    public function addDefinition(PartitionDefinition $definition): static
+    public function addDefinition(PartitionDefinition $definition)
     {
         $this->definitions[] = $definition;
 

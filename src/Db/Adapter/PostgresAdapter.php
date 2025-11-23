@@ -1378,7 +1378,7 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         // Explicit from/to
-        $from = $value['from'] ?? 'MINVALUE';
+        $from = $value['from'];
         $to = $value['to'] ?? 'MAXVALUE';
 
         $fromSql = $from === 'MINVALUE' ? 'MINVALUE' : $this->quotePartitionValue($from);

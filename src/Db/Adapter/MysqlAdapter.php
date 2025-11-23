@@ -1350,21 +1350,17 @@ class MysqlAdapter extends AbstractAdapter
         $sql = 'ADD PARTITION (PARTITION ' . $this->quoteColumnName($partition->getName());
 
         // Detect RANGE vs LIST based on value type (simplified heuristic)
-        if ($value === 'MAXVALUE' || (is_scalar($value) && !is_array($value))) {
+        if ($value === 'MAXVALUE' || is_scalar($value)) {
             // Likely RANGE
             if ($value === 'MAXVALUE') {
                 $sql .= ' VALUES LESS THAN MAXVALUE';
             } else {
                 $sql .= ' VALUES LESS THAN (' . $this->quotePartitionValue($value) . ')';
             }
-        } else {
+        } elseif (is_array($value)) {
             // Likely LIST
             $sql .= ' VALUES IN (';
-            if (is_array($value)) {
-                $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
-            } else {
-                $sql .= $this->quotePartitionValue($value);
-            }
+            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
             $sql .= ')';
         }
 
