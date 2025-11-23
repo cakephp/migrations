@@ -894,7 +894,8 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         // Check if the main legacy phinxlog table exists
         if ($this->connection !== null) {
             $schema = $this->connection->getSchemaCollection();
-            if (in_array('phinxlog', $schema->listTables(), true)) {
+            /** @phpstan-ignore method.notFound (hasTable added in CakePHP 5.3) */
+            if ($schema->hasTable('phinxlog')) {
                 return false;
             }
         }

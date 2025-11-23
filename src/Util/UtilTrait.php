@@ -91,7 +91,8 @@ trait UtilTrait
     {
         $schema = $connection->getSchemaCollection();
 
-        return in_array('phinxlog', $schema->listTables(), true);
+        /** @phpstan-ignore method.notFound (hasTable added in CakePHP 5.3) */
+        return $schema->hasTable('phinxlog');
     }
 
     /**
