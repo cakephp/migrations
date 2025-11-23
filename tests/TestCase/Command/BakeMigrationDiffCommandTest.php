@@ -25,8 +25,10 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Exception;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Migrations;
 use Migrations\Test\TestCase\TestCase;
+use Migrations\Util\UtilTrait;
 use function Cake\Core\env;
 
 /**
@@ -35,6 +37,7 @@ use function Cake\Core\env;
 class BakeMigrationDiffCommandTest extends TestCase
 {
     use StringCompareTrait;
+    use UtilTrait;
 
     /**
      * @var string[]
@@ -112,8 +115,9 @@ class BakeMigrationDiffCommandTest extends TestCase
 
         if (env('DB_URL_COMPARE')) {
             // Clean up the comparison database each time. Table order is important.
+            // Include both legacy (phinxlog) and unified (cake_migrations) table names.
             $connection = ConnectionManager::get('test_comparisons');
-            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog', 'test_decimal_types'];
+            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'cake_migrations', 'tags', 'test_blog_phinxlog', 'test_decimal_types'];
             foreach ($tables as $table) {
                 $connection->execute("DROP TABLE IF EXISTS $table");
             }
@@ -423,8 +427,9 @@ class Initial extends BaseMigration
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
+        $schemaTable = $this->getPhinxTable(null, $connection);
         $connection->deleteQuery()
-            ->delete('phinxlog')
+            ->delete($schemaTable)
             ->where(['version' => 20160415220805])
             ->execute();
 
@@ -446,15 +451,21 @@ class Initial extends BaseMigration
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
+        $columns = ['version', 'migration_name', 'start_time', 'end_time'];
+        $values = [
+            'version' => 20160415220805,
+            'migration_name' => $versionParts[1],
+            'start_time' => '2016-05-22 16:51:46',
+            'end_time' => '2016-05-22 16:51:46',
+        ];
+        if ($schemaTable === UnifiedMigrationsTableStorage::TABLE_NAME) {
+            $columns[] = 'plugin';
+            $values['plugin'] = null;
+        }
         $connection->insertQuery()
-            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
-            ->values([
-                'version' => 20160415220805,
-                'migration_name' => $versionParts[1],
-                'start_time' => '2016-05-22 16:51:46',
-                'end_time' => '2016-05-22 16:51:46',
-            ])
+            ->insert($columns)
+            ->into($schemaTable)
+            ->values($values)
             ->execute();
         $this->getMigrations("MigrationsDiff{$scenario}")->rollback(['target' => 'all']);
     }
