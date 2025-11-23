@@ -17,9 +17,12 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\Core\Configure;
+use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase as BaseTestCase;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -125,5 +128,134 @@ abstract class TestCase extends BaseTestCase
 
         $contents = file_get_contents($path);
         $this->assertStringNotContainsString($expected, $contents, $message);
+    }
+
+    /**
+     * Check if using unified migrations table.
+     *
+     * @return bool
+     */
+    protected function isUsingUnifiedTable(): bool
+    {
+        return Configure::read('Migrations.legacyTables') === false;
+    }
+
+    /**
+     * Get the migrations schema table name.
+     *
+     * @param string|null $plugin Plugin name
+     * @return string
+     */
+    protected function getMigrationsTableName(?string $plugin = null): string
+    {
+        if ($this->isUsingUnifiedTable()) {
+            return UnifiedMigrationsTableStorage::TABLE_NAME;
+        }
+
+        if ($plugin === null) {
+            return 'phinxlog';
+        }
+
+        return strtolower($plugin) . '_phinxlog';
+    }
+
+    /**
+     * Clear migration records from the schema table.
+     *
+     * @param string $connectionName Connection name
+     * @param string|null $plugin Plugin name
+     * @return void
+     */
+    protected function clearMigrationRecords(string $connectionName = 'test', ?string $plugin = null): void
+    {
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get($connectionName);
+        $tableName = $this->getMigrationsTableName($plugin);
+
+        $dialect = $connection->getDriver()->schemaDialect();
+        if (!$dialect->hasTable($tableName)) {
+            return;
+        }
+
+        if ($this->isUsingUnifiedTable()) {
+            $query = $connection->deleteQuery()
+                ->delete($tableName)
+                ->where(['plugin IS' => $plugin]);
+        } else {
+            $query = $connection->deleteQuery()
+                ->delete($tableName);
+        }
+        $query->execute();
+    }
+
+    /**
+     * Get the count of migration records.
+     *
+     * @param string $connectionName Connection name
+     * @param string|null $plugin Plugin name
+     * @return int
+     */
+    protected function getMigrationRecordCount(string $connectionName = 'test', ?string $plugin = null): int
+    {
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get($connectionName);
+        $tableName = $this->getMigrationsTableName($plugin);
+
+        $dialect = $connection->getDriver()->schemaDialect();
+        if (!$dialect->hasTable($tableName)) {
+            return 0;
+        }
+
+        $query = $connection->selectQuery()
+            ->select(['count' => $connection->selectQuery()->func()->count('*')])
+            ->from($tableName);
+
+        if ($this->isUsingUnifiedTable()) {
+            $query->where(['plugin IS' => $plugin]);
+        }
+
+        $result = $query->execute()->fetch('assoc');
+
+        return (int)($result['count'] ?? 0);
+    }
+
+    /**
+     * Insert a migration record into the schema table.
+     *
+     * @param string $connectionName Connection name
+     * @param int $version Version number
+     * @param string $migrationName Migration name
+     * @param string|null $plugin Plugin name
+     * @return void
+     */
+    protected function insertMigrationRecord(
+        string $connectionName,
+        int $version,
+        string $migrationName,
+        ?string $plugin = null,
+    ): void {
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get($connectionName);
+        $tableName = $this->getMigrationsTableName($plugin);
+
+        $columns = ['version', 'migration_name', 'start_time', 'end_time', 'breakpoint'];
+        $values = [
+            'version' => $version,
+            'migration_name' => $migrationName,
+            'start_time' => '2024-01-01 00:00:00',
+            'end_time' => '2024-01-01 00:00:01',
+            'breakpoint' => 0,
+        ];
+
+        if ($this->isUsingUnifiedTable()) {
+            $columns[] = 'plugin';
+            $values['plugin'] = $plugin;
+        }
+
+        $connection->insertQuery()
+            ->insert($columns)
+            ->into($tableName)
+            ->values($values)
+            ->execute();
     }
 }

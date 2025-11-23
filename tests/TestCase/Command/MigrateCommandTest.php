@@ -3,35 +3,22 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Exception\MissingPluginException;
-use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
-use Cake\TestSuite\TestCase;
+use Migrations\Test\TestCase\TestCase;
 
 class MigrateCommandTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
-
     protected array $createdFiles = [];
 
     public function setUp(): void
     {
         parent::setUp();
 
-        try {
-            $table = $this->fetchTable('Phinxlog');
-            $table->deleteAll('1=1');
-        } catch (DatabaseException $e) {
-        }
-
-        try {
-            $table = $this->fetchTable('MigratorPhinxlog');
-            $table->deleteAll('1=1');
-        } catch (DatabaseException $e) {
-        }
+        $this->clearMigrationRecords('test');
+        $this->clearMigrationRecords('test', 'Migrator');
     }
 
     public function tearDown(): void
@@ -62,8 +49,8 @@ class MigrateCommandTest extends TestCase
 
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $count = $this->getMigrationRecordCount('test');
+        $this->assertEquals(0, $count);
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
