@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 
 use Bake\BakePlugin;
+use Blog\BlogPlugin;
 use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
@@ -20,7 +21,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\MigrationsPlugin;
-use Blog\BlogPlugin;
 use Migrator\MigratorPlugin;
 use function Cake\Core\env;
 
