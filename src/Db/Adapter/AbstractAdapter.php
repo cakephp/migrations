@@ -26,11 +26,13 @@ use Migrations\Config\Config;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
+use Migrations\Db\Action\AddPartition;
 use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
+use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
@@ -43,6 +45,7 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
@@ -1424,6 +1427,32 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     abstract protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions;
 
     /**
+     * Returns the instructions to add a partition to an existing partitioned table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition definition to add
+     * @throws \RuntimeException If partitioning is not supported
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
+    {
+        throw new RuntimeException('Table partitioning is not supported by this adapter');
+    }
+
+    /**
+     * Returns the instructions to drop a partition from an existing partitioned table.
+     *
+     * @param string $tableName The table name
+     * @param string $partitionName The partition name to drop
+     * @throws \RuntimeException If partitioning is not supported
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
+    {
+        throw new RuntimeException('Table partitioning is not supported by this adapter');
+    }
+
+    /**
      * @inheritdoc
      */
     public function dropTable(string $tableName): void
@@ -1607,6 +1636,22 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     $instructions->merge($this->getChangeCommentInstructions(
                         $table,
                         $action->getNewComment(),
+                    ));
+                    break;
+
+                case $action instanceof AddPartition:
+                    /** @var \Migrations\Db\Action\AddPartition $action */
+                    $instructions->merge($this->getAddPartitionInstructions(
+                        $table,
+                        $action->getPartition(),
+                    ));
+                    break;
+
+                case $action instanceof DropPartition:
+                    /** @var \Migrations\Db\Action\DropPartition $action */
+                    $instructions->merge($this->getDropPartitionInstructions(
+                        $table->getName(),
+                        $action->getPartitionName(),
                     ));
                     break;
 

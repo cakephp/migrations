@@ -14,12 +14,14 @@ use InvalidArgumentException;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
+use Migrations\Db\Action\AddPartition;
 use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\CreateTable;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
+use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
@@ -31,6 +33,8 @@ use Migrations\Db\Plan\Plan;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\Partition;
+use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
 use RuntimeException;
 
@@ -598,6 +602,84 @@ class Table
     public function hasForeignKey(string|array $columns, ?string $constraint = null): bool
     {
         return $this->getAdapter()->hasForeignKey($this->getName(), $columns, $constraint);
+    }
+
+    /**
+     * Add partitioning to the table.
+     *
+     * @param string $type Partition type (RANGE, LIST, HASH, KEY)
+     * @param string|string[]|\Migrations\Db\Literal $columns Column(s) or expression to partition by
+     * @param array<string, mixed> $options Partition options (count for HASH/KEY)
+     * @return $this
+     */
+    public function partitionBy(string $type, string|array|Literal $columns, array $options = [])
+    {
+        $partition = new Partition($type, $columns, [], $options['count'] ?? null, $options);
+        $this->table->setPartition($partition);
+
+        return $this;
+    }
+
+    /**
+     * Add a partition definition (for RANGE/LIST types).
+     *
+     * @param string $name Partition name
+     * @param mixed $value Boundary value (use 'MAXVALUE' for RANGE upper bound)
+     * @param array<string, mixed> $options Additional options (tablespace, table for PG)
+     * @return $this
+     */
+    public function addPartition(string $name, mixed $value = null, array $options = [])
+    {
+        $partition = $this->table->getPartition();
+        if ($partition === null) {
+            throw new RuntimeException('Must call partitionBy() before addPartition()');
+        }
+
+        $definition = new PartitionDefinition(
+            $name,
+            $value,
+            $options['tablespace'] ?? null,
+            $options['table'] ?? null,
+            $options['comment'] ?? null,
+        );
+        $partition->addDefinition($definition);
+
+        return $this;
+    }
+
+    /**
+     * Remove a partition from an existing table.
+     *
+     * @param string $name Partition name
+     * @return $this
+     */
+    public function dropPartition(string $name)
+    {
+        $this->actions->addAction(new DropPartition($this->table, $name));
+
+        return $this;
+    }
+
+    /**
+     * Add a partition to an existing partitioned table.
+     *
+     * @param string $name Partition name
+     * @param mixed $value Boundary value
+     * @param array<string, mixed> $options Additional options
+     * @return $this
+     */
+    public function addPartitionToExisting(string $name, mixed $value, array $options = [])
+    {
+        $definition = new PartitionDefinition(
+            $name,
+            $value,
+            $options['tablespace'] ?? null,
+            $options['table'] ?? null,
+            $options['comment'] ?? null,
+        );
+        $this->actions->addAction(new AddPartition($this->table, $definition));
+
+        return $this;
     }
 
     /**
