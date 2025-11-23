@@ -43,6 +43,29 @@
             Migration.stringifyList(columns['primaryKey'], {'indent': 3}) | raw
         }}]);
         {%~ endif %}
+        {%~ if constraints is defined and constraints is not empty %}
+            {%~ for constraintName, constraint in constraints %}
+                {%~ if constraint['type'] == 'foreign' %}
+                    {%~ set columnsList = '\'' ~ constraint['columns'][0] ~ '\'' %}
+                    {%~ if constraint['columns']|length > 1 %}
+                        {%~ set columnsList = '[' ~ Migration.stringifyList(constraint['columns'], {'indent': 3}) ~ ']' %}
+                    {%~ endif %}
+                    {%~ if constraint['references'][1] is iterable %}
+                        {%~ set columnsReference = '[' ~ Migration.stringifyList(constraint['references'][1], {'indent': 3}) ~ ']' %}
+                    {%~ else %}
+                        {%~ set columnsReference = '\'' ~ constraint['references'][1] ~ '\'' %}
+                    {%~ endif %}
+        $table->addForeignKey(
+            $this->foreignKey({{ columnsList | raw }})
+                ->setReferencedTable('{{ constraint['references'][0] }}')
+                ->setReferencedColumns({{ columnsReference | raw }})
+                ->setOnDelete('{{ Migration.formatConstraintAction(constraint['delete']) | raw }}')
+                ->setOnUpdate('{{ Migration.formatConstraintAction(constraint['update']) | raw }}')
+                ->setName('{{ constraintName }}')
+        );
+                {%~ endif %}
+            {%~ endfor %}
+        {%~ endif %}
     {%~ endif %}
 {% endif %}
         $table->{{ tableMethod }}(){% if tableMethod == 'drop' %}->save(){% endif %};

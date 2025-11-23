@@ -69,7 +69,7 @@ class TableFinder
             return $tables;
         }
 
-        if ($options['require-table'] === true || $options['plugin']) {
+        if ($options['require-table'] === true) {
             $tableNamesInPlugin = $this->getTableNames($options['plugin']);
 
             if (!$tableNamesInPlugin) {

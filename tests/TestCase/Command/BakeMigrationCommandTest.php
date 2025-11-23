@@ -56,6 +56,27 @@ class BakeMigrationCommandTest extends TestCase
                 unlink($file);
             }
         }
+
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Posts.php');
+        if ($files) {
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
+
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Articles.php');
+        if ($files) {
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
+
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_*Products.php');
+        if ($files) {
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
     }
 
     /**
@@ -423,6 +444,57 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertStringContainsString('return new class extends BaseMigration', $result);
         $this->assertStringNotContainsString('class CreateUsers extends', $result);
         $this->assertStringNotContainsString('function (int $version)', $result);
+    }
+
+    /**
+     * Test creating migration with references (foreign keys)
+     *
+     * @return void
+     */
+    public function testCreateWithReferences()
+    {
+        $this->exec('bake migration CreatePosts title:string user_id:references --connection test');
+
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreatePosts.php');
+        $filePath = current($file);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    /**
+     * Test creating migration with references to specific table
+     *
+     * @return void
+     */
+    public function testCreateWithReferencesCustomTable()
+    {
+        $this->exec('bake migration CreateArticles title:string author_id:references:authors --connection test');
+
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateArticles.php');
+        $filePath = current($file);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
+    }
+
+    /**
+     * Test adding a field with reference
+     *
+     * @return void
+     */
+    public function testAddFieldWithReference()
+    {
+        $this->exec('bake migration AddCategoryIdToProducts category_id:references --connection test');
+
+        $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_AddCategoryIdToProducts.php');
+        $filePath = current($file);
+
+        $this->assertExitCode(BaseCommand::CODE_SUCCESS);
+        $result = file_get_contents($filePath);
+        $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
     public function testBakeMigrationWithoutBake()

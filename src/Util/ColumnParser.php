@@ -5,6 +5,7 @@ namespace Migrations\Util;
 
 use Cake\Collection\Collection;
 use Cake\Utility\Hash;
+use Cake\Utility\Inflector;
 use Migrations\Db\Adapter\AdapterInterface;
 use ReflectionClass;
 
@@ -64,6 +65,13 @@ class ColumnParser
                     $type = 'primary';
                 }
             }
+
+            // Handle references - convert to integer type
+            $isReference = in_array($type, ['references', 'references?'], true);
+            if ($isReference) {
+                $type = str_contains($type, '?') ? 'integer?' : 'integer';
+            }
+
             $nullable = (bool)strpos($type, '?');
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
@@ -108,6 +116,11 @@ class ColumnParser
             $type = Hash::get($matches, 2);
             $indexType = Hash::get($matches, 3);
             $indexName = Hash::get($matches, 4);
+
+            // Skip references - they create foreign keys, not indexes
+            if ($type && str_starts_with($type, 'references')) {
+                continue;
+            }
 
             if (
                 in_array($type, ['primary', 'primary_key'], true) ||
@@ -166,6 +179,55 @@ class ColumnParser
         }
 
         return $primaryKey;
+    }
+
+    /**
+     * Parses a list of arguments into an array of foreign key constraints
+     *
+     * @param array<int, string> $arguments A list of arguments being parsed
+     * @return array<string, array>
+     */
+    public function parseForeignKeys(array $arguments): array
+    {
+        $foreignKeys = [];
+        $arguments = $this->validArguments($arguments);
+
+        foreach ($arguments as $field) {
+            preg_match($this->regexpParseColumn, $field, $matches);
+            $fieldName = $matches[1];
+            $type = Hash::get($matches, 2, '');
+            $indexType = Hash::get($matches, 3);
+            $indexName = Hash::get($matches, 4);
+
+            // Check if type is 'references' or 'references?'
+            $isReference = str_starts_with($type, 'references');
+            if (!$isReference) {
+                continue;
+            }
+
+            // Determine referenced table
+            // If indexType is provided, use it as the referenced table name
+            // Otherwise, infer from field name (e.g., category_id -> categories)
+            $referencedTable = $indexType;
+            if (!$referencedTable) {
+                // Remove common suffixes like _id and pluralize
+                $referencedTable = preg_replace('/_id$/', '', $fieldName);
+                $referencedTable = Inflector::pluralize($referencedTable);
+            }
+
+            // Generate constraint name
+            $constraintName = $indexName ?: 'fk_' . $fieldName;
+
+            $foreignKeys[$constraintName] = [
+                'type' => 'foreign',
+                'columns' => [$fieldName],
+                'references' => [$referencedTable, 'id'],
+                'update' => 'CASCADE',
+                'delete' => 'CASCADE',
+            ];
+        }
+
+        return $foreignKeys;
     }
 
     /**

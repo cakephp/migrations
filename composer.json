@@ -66,8 +66,8 @@
             "@stan",
             "@test"
         ],
-        "cs-check": "phpcs -p",
-        "cs-fix": "phpcbf -p",
+        "cs-check": "phpcs --parallel=16 -p",
+        "cs-fix": "phpcbf --parallel=16 -p",
         "phpstan": "tools/phpstan analyse",
         "stan": "@phpstan",
         "stan-baseline": "tools/phpstan --generate-baseline",
