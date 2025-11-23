@@ -20,8 +20,8 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
 use Cake\TestSuite\Fixture\SchemaLoader;
 use Migrations\MigrationsPlugin;
-use SimpleSnapshot\SimpleSnapshotPlugin;
-use TestBlog\TestBlogPlugin;
+use Blog\BlogPlugin;
+use Migrator\MigratorPlugin;
 use function Cake\Core\env;
 
 $findRoot = function ($root) {
@@ -119,8 +119,8 @@ if (getenv('DB_URL_COMPARE') !== false) {
 Plugin::getCollection()
     ->add(new MigrationsPlugin())
     ->add(new BakePlugin())
-    ->add(new SimpleSnapshotPlugin())
-    ->add(new TestBlogPlugin());
+    ->add(new BlogPlugin())
+    ->add(new MigratorPlugin());
 
 // Create test database schema
 if (env('FIXTURE_SCHEMA_METADATA')) {

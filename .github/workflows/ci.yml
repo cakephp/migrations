@@ -80,6 +80,7 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: pg-password
         run: |
+          psql -h 127.0.0.1 -c 'CREATE DATABASE "cakephp_comparisons";'
           psql -h 127.0.0.1 -c 'CREATE DATABASE "cakephp_snapshot";'
 
       - name: Setup PHP
@@ -133,6 +134,7 @@ jobs:
           if [[ ${{ matrix.db-type }} == 'pgsql' ]]; then
             export DB='pgsql'
             export DB_URL='postgres://postgres:pg-password@127.0.0.1/cakephp_test'
+            export DB_URL_COMPARE='postgres://postgres:pg-password@127.0.0.1/cakephp_comparisons'
             export DB_URL_SNAPSHOT='postgres://postgres:pg-password@127.0.0.1/cakephp_snapshot'
           fi
           if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.db-type }} == 'mysql' ]]; then
