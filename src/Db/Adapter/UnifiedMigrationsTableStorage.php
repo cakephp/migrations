@@ -57,13 +57,8 @@ class UnifiedMigrationsTableStorage
         $query = $this->adapter->getSelectBuilder();
         $query->select('*')
             ->from(self::TABLE_NAME)
+            ->where(['plugin IS' => $this->plugin])
             ->orderBy($orderBy);
-
-        if ($this->plugin === null) {
-            $query->where(['plugin IS' => null]);
-        } else {
-            $query->where(['plugin' => $this->plugin]);
-        }
 
         return $query;
     }
@@ -102,19 +97,11 @@ class UnifiedMigrationsTableStorage
     {
         $query = $this->adapter->getDeleteBuilder();
         $query->delete()
-            ->from(self::TABLE_NAME);
-
-        if ($this->plugin === null) {
-            $query->where([
+            ->from(self::TABLE_NAME)
+            ->where([
                 'version' => (string)$migration->getVersion(),
-                'plugin IS' => null,
+                'plugin IS' => $this->plugin,
             ]);
-        } else {
-            $query->where([
-                'version' => (string)$migration->getVersion(),
-                'plugin' => $this->plugin,
-            ]);
-        }
 
         $this->adapter->executeQuery($query);
     }
@@ -160,19 +147,11 @@ class UnifiedMigrationsTableStorage
             ->set([
                 'breakpoint' => 0,
                 'start_time' => $query->identifier('start_time'),
-            ]);
-
-        if ($this->plugin === null) {
-            $query->where([
+            ])
+            ->where([
                 'breakpoint !=' => 0,
-                'plugin IS' => null,
+                'plugin IS' => $this->plugin,
             ]);
-        } else {
-            $query->where([
-                'breakpoint !=' => 0,
-                'plugin' => $this->plugin,
-            ]);
-        }
 
         return $this->adapter->executeQuery($query);
     }
@@ -191,19 +170,11 @@ class UnifiedMigrationsTableStorage
             ->set([
                 'breakpoint' => (int)$state,
                 'start_time' => $query->identifier('start_time'),
-            ]);
-
-        if ($this->plugin === null) {
-            $query->where([
+            ])
+            ->where([
                 'version' => $migration->getVersion(),
-                'plugin IS' => null,
+                'plugin IS' => $this->plugin,
             ]);
-        } else {
-            $query->where([
-                'version' => $migration->getVersion(),
-                'plugin' => $this->plugin,
-            ]);
-        }
 
         $this->adapter->executeQuery($query);
     }
@@ -243,28 +214,15 @@ class UnifiedMigrationsTableStorage
     /**
      * Upgrades the migration storage table if needed.
      *
+     * Since the unified cake_migrations table is new in v5.0 and always created
+     * with all required columns, this is currently a no-op. Future schema changes
+     * would add upgrade logic here.
+     *
      * @return void
      */
     public function upgradeTable(): void
     {
-        $table = new Table(self::TABLE_NAME, [], $this->adapter);
-
-        // Add plugin column if missing (upgrade from old unified table without plugin)
-        if (!$table->hasColumn('plugin')) {
-            $table
-                ->addColumn(
-                    'plugin',
-                    'string',
-                    ['limit' => 100, 'after' => 'migration_name', 'default' => null, 'null' => true],
-                )
-                ->save();
-        }
-
-        // Ensure unique index exists
-        if (!$table->hasIndex(['version', 'plugin'])) {
-            $table
-                ->addIndex(['version', 'plugin'], ['unique' => true, 'name' => 'version_plugin_unique'])
-                ->save();
-        }
+        // No-op for new installations. Schema upgrades can be added here
+        // if the table structure changes in future versions.
     }
 }

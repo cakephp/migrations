@@ -891,19 +891,15 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         // Autodetect mode (config is null or not set)
-        // Check if any legacy phinxlog tables exist
+        // Check if the main legacy phinxlog table exists
         if ($this->connection !== null) {
             $schema = $this->connection->getSchemaCollection();
-            $tables = $schema->listTables();
-
-            foreach ($tables as $table) {
-                if ($table === 'phinxlog' || str_ends_with($table, '_phinxlog')) {
-                    return false;
-                }
+            if (in_array('phinxlog', $schema->listTables(), true)) {
+                return false;
             }
         }
 
-        // No legacy tables found - use unified table
+        // No legacy phinxlog table found - use unified table
         return true;
     }
 

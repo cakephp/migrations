@@ -24,13 +24,6 @@ use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 trait UtilTrait
 {
     /**
-     * Cache for legacy tables detection result.
-     *
-     * @var array<string, bool>
-     */
-    private static array $legacyTablesCache = [];
-
-    /**
      * Get the migrations table name used to store migrations data.
      *
      * In v5.0+, this returns either:
@@ -91,33 +84,14 @@ trait UtilTrait
     /**
      * Detect if any legacy phinxlog tables exist in the database.
      *
-     * Results are cached per connection to avoid repeated queries.
-     *
      * @param \Cake\Database\Connection $connection Database connection
      * @return bool True if legacy tables exist
      */
     protected function detectLegacyTables(Connection $connection): bool
     {
-        $cacheKey = $connection->configName();
-
-        if (isset(self::$legacyTablesCache[$cacheKey])) {
-            return self::$legacyTablesCache[$cacheKey];
-        }
-
         $schema = $connection->getSchemaCollection();
-        $tables = $schema->listTables();
 
-        foreach ($tables as $table) {
-            if ($table === 'phinxlog' || str_ends_with($table, '_phinxlog')) {
-                self::$legacyTablesCache[$cacheKey] = true;
-
-                return true;
-            }
-        }
-
-        self::$legacyTablesCache[$cacheKey] = false;
-
-        return false;
+        return in_array('phinxlog', $schema->listTables(), true);
     }
 
     /**
@@ -144,17 +118,5 @@ trait UtilTrait
         }
 
         return false;
-    }
-
-    /**
-     * Clear the legacy tables detection cache.
-     *
-     * Useful for testing or after running upgrade commands.
-     *
-     * @return void
-     */
-    public static function clearLegacyTablesCache(): void
-    {
-        self::$legacyTablesCache = [];
     }
 }
