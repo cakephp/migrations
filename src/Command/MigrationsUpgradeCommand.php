@@ -156,7 +156,7 @@ class MigrationsUpgradeCommand extends Command
             $io->out('  1. Set <info>\'Migrations\' => [\'legacyTables\' => false]</info> in your config');
             $io->out('  2. Test your application');
             if (!$dropTables) {
-                $io->out('  3. Optionally drop the empty phinxlog tables manually');
+                $io->out('  3. Optionally drop the empty phinxlog tables (re-run `bin/cake migrations upgrade --drop-tables`)');
             }
         } else {
             $io->out('');
