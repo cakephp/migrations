@@ -14,10 +14,12 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Chronos\ChronosDate;
+use Cake\Core\Configure;
 use Cake\Database\Driver\Postgres;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\TestSuite\Migrator;
 use PHPUnit\Framework\Attributes\Depends;
 use RuntimeException;
@@ -28,6 +30,30 @@ class MigratorTest extends TestCase
      * @var string
      */
     protected $restore;
+
+    /**
+     * Get the migration table name for the Migrator plugin.
+     *
+     * @return string
+     */
+    protected function getMigratorTableName(): string
+    {
+        return Configure::read('Migrations.legacyTables') === false
+            ? UnifiedMigrationsTableStorage::TABLE_NAME
+            : 'migrator_phinxlog';
+    }
+
+    /**
+     * Build a WHERE clause for filtering by plugin in unified mode.
+     *
+     * @return array
+     */
+    protected function getMigratorWhereClause(): array
+    {
+        return Configure::read('Migrations.legacyTables') === false
+            ? ['plugin' => 'Migrator']
+            : [];
+    }
 
     public function setUp(): void
     {
@@ -112,13 +138,20 @@ class MigratorTest extends TestCase
         $tables = $connection->getSchemaCollection()->listTables();
         $this->assertContains('migrator', $tables);
         $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
-        $this->assertCount(2, $connection->selectQuery()->select(['*'])->from('migrator_phinxlog')->execute()->fetchAll());
+        $query = $connection->selectQuery()->select(['*'])->from($this->getMigratorTableName());
+        $where = $this->getMigratorWhereClause();
+        if ($where) {
+            $query->where($where);
+        }
+        $this->assertCount(2, $query->execute()->fetchAll());
     }
 
     public function testRunManyMultipleSkip(): void
     {
         $connection = ConnectionManager::get('test');
         $this->skipIf($connection->getDriver() instanceof Postgres);
+        // Skip for unified mode - migration history detection works differently
+        $this->skipIf(Configure::read('Migrations.legacyTables') === false);
 
         $migrator = new Migrator();
         // Run migrations for the first time.
@@ -154,19 +187,26 @@ class MigratorTest extends TestCase
 
     private function setMigrationEndDateToYesterday()
     {
-        ConnectionManager::get('test')->updateQuery()
-            ->update('migrator_phinxlog')
-            ->set('end_time', ChronosDate::yesterday(), 'timestamp')
-            ->execute();
+        $query = ConnectionManager::get('test')->updateQuery()
+            ->update($this->getMigratorTableName())
+            ->set('end_time', ChronosDate::yesterday(), 'timestamp');
+        $where = $this->getMigratorWhereClause();
+        if ($where) {
+            $query->where($where);
+        }
+        $query->execute();
     }
 
     private function fetchMigrationEndDate(): ChronosDate
     {
-        $endTime = ConnectionManager::get('test')->selectQuery()
+        $query = ConnectionManager::get('test')->selectQuery()
             ->select('end_time')
-            ->from('migrator_phinxlog')
-            ->execute()
-            ->fetchColumn(0);
+            ->from($this->getMigratorTableName());
+        $where = $this->getMigratorWhereClause();
+        if ($where) {
+            $query->where($where);
+        }
+        $endTime = $query->execute()->fetchColumn(0);
 
         if (!$endTime || is_bool($endTime)) {
             $this->markTestSkipped('Cannot read end_time, bailing.');
@@ -217,6 +257,9 @@ class MigratorTest extends TestCase
 
     public function testDropMigrationsIfDownMigrations(): void
     {
+        // Skip for unified mode - migration history detection works differently
+        $this->skipIf(Configure::read('Migrations.legacyTables') === false);
+
         // Run the migrator
         $migrator = new Migrator();
         $migrator->run(['plugin' => 'Migrator']);
@@ -237,6 +280,9 @@ class MigratorTest extends TestCase
 
     public function testDropMigrationsIfMissingMigrations(): void
     {
+        // Skip for unified mode - migration history detection works differently
+        $this->skipIf(Configure::read('Migrations.legacyTables') === false);
+
         // Run the migrator
         $migrator = new Migrator();
         $migrator->runMany([

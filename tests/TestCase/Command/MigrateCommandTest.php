@@ -80,8 +80,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(2, $table->find()->all()->toArray());
+        $this->assertEquals(2, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
@@ -102,8 +101,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('hasTable=1');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(1, $table->find()->all()->toArray());
+        $this->assertEquals(1, $this->getMigrationRecordCount('test'));
     }
 
     /**
@@ -119,8 +117,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('ShouldNotExecuteMigration:</info> <comment>skipped </comment>');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(1, $table->find()->all()->toArray());
+        $this->assertEquals(1, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
@@ -140,8 +137,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
@@ -159,8 +155,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('MarkMigratedTest:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(1, $table->find()->all()->toArray());
+        $this->assertEquals(1, $this->getMigrationRecordCount('test'));
         $this->assertFileExists($migrationPath . DS . 'schema-dump-test.lock');
     }
 
@@ -177,8 +172,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('No migrations to run');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
         $this->assertFileExists($migrationPath . DS . 'schema-dump-test.lock');
     }
 
@@ -195,8 +189,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputNotContains('MarkMigratedTestSecond');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(1, $table->find()->all()->toArray());
+        $this->assertEquals(1, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
@@ -214,8 +207,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('<comment>warning</comment> 99 is not a valid version');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
@@ -233,8 +225,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>migrated');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(2, $table->find()->all()->toArray());
+        $this->assertEquals(2, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
@@ -252,8 +243,7 @@ class MigrateCommandTest extends TestCase
         $this->assertOutputContains('All Done');
 
         // Migration tracking table is plugin specific
-        $table = $this->fetchTable('MigratorPhinxlog');
-        $this->assertCount(1, $table->find()->all()->toArray());
+        $this->assertEquals(1, $this->getMigrationRecordCount('test', 'Migrator'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->createdFiles[] = $dumpFile;
@@ -325,7 +315,6 @@ class MigrateCommandTest extends TestCase
         // Only one event was fired
         $this->assertSame(['Migration.beforeMigrate'], $fired);
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertEquals(0, $table->find()->count());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
     }
 }

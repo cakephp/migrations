@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Config\Config;
 use Migrations\Db\Adapter\AbstractAdapter;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Db\Literal;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
 use PDOException;
@@ -42,16 +44,31 @@ class AbstractAdapterTest extends TestCase
 
     public function testOptionsSetSchemaTableName()
     {
-        $this->assertEquals('phinxlog', $this->adapter->getSchemaTableName());
+        // When unified table mode is enabled, getSchemaTableName() returns cake_migrations
+        $expectedDefault = Configure::read('Migrations.legacyTables') === false
+            ? UnifiedMigrationsTableStorage::TABLE_NAME
+            : 'phinxlog';
+        $this->assertEquals($expectedDefault, $this->adapter->getSchemaTableName());
         $this->adapter->setOptions(['migration_table' => 'schema_table_test']);
-        $this->assertEquals('schema_table_test', $this->adapter->getSchemaTableName());
+        // After explicitly setting migration_table, it should use that value in legacy mode
+        // But unified mode always returns cake_migrations
+        $expectedAfterSet = Configure::read('Migrations.legacyTables') === false
+            ? UnifiedMigrationsTableStorage::TABLE_NAME
+            : 'schema_table_test';
+        $this->assertEquals($expectedAfterSet, $this->adapter->getSchemaTableName());
     }
 
     public function testSchemaTableName()
     {
-        $this->assertEquals('phinxlog', $this->adapter->getSchemaTableName());
+        $expectedDefault = Configure::read('Migrations.legacyTables') === false
+            ? UnifiedMigrationsTableStorage::TABLE_NAME
+            : 'phinxlog';
+        $this->assertEquals($expectedDefault, $this->adapter->getSchemaTableName());
         $this->adapter->setSchemaTableName('schema_table_test');
-        $this->assertEquals('schema_table_test', $this->adapter->getSchemaTableName());
+        $expectedAfterSet = Configure::read('Migrations.legacyTables') === false
+            ? UnifiedMigrationsTableStorage::TABLE_NAME
+            : 'schema_table_test';
+        $this->assertEquals($expectedAfterSet, $this->adapter->getSchemaTableName());
     }
 
     public function testGetVersionLogInvalidVersionOrderKO()

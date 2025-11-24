@@ -54,6 +54,8 @@ class BakeMigrationDiffCommandTest extends TestCase
         parent::setUp();
 
         $this->generatedFiles = [];
+        $this->clearMigrationRecords('test');
+        $this->clearMigrationRecords('test', 'Blog');
 
         // Clean up any TheDiff migration files from all directories before test starts
         $configPath = ROOT . DS . 'config' . DS;
@@ -526,6 +528,21 @@ class Initial extends BaseMigration
         $migrations = new Migrations($params);
 
         return $migrations;
+    }
+
+    /**
+     * Override to normalize table names for comparison
+     *
+     * @param string $path Path to comparison file
+     * @param string $result Actual result
+     * @return void
+     */
+    public function assertSameAsFile(string $path, string $result): void
+    {
+        // Normalize unified table name to legacy for comparison
+        $result = str_replace("'cake_migrations'", "'phinxlog'", $result);
+
+        parent::assertSameAsFile($path, $result);
     }
 
     /**

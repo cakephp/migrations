@@ -8,9 +8,11 @@ declare(strict_types=1);
 
 namespace Migrations\Util;
 
+use Cake\Core\Configure;
 use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use RuntimeException;
 
 /**
@@ -249,6 +251,11 @@ class Util
      */
     public static function tableName(?string $plugin): string
     {
+        // When using unified table, always return the same table name
+        if (Configure::read('Migrations.legacyTables') === false) {
+            return UnifiedMigrationsTableStorage::TABLE_NAME;
+        }
+
         $table = 'phinxlog';
         if ($plugin) {
             $prefix = Inflector::underscore($plugin) . '_';

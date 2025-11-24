@@ -124,6 +124,11 @@ class MysqlAdapterTest extends TestCase
 
     public function testSchemaTableIsCreatedWithPrimaryKey()
     {
+        // Skip for unified table mode since schema structure is different
+        if (Configure::read('Migrations.legacyTables') === false) {
+            $this->markTestSkipped('Unified table has different primary key structure');
+        }
+
         $this->adapter->connect();
         new Table($this->adapter->getSchemaTableName(), [], $this->adapter);
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));

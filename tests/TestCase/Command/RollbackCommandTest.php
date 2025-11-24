@@ -58,8 +58,7 @@ class RollbackCommandTest extends TestCase
         $this->assertOutputContains('No migrations to rollback');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
