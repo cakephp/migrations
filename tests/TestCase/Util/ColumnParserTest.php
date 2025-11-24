@@ -349,16 +349,16 @@ class ColumnParserTest extends TestCase
     public function testGetTypeAndLengthReturnsIntegerTypes()
     {
         // Test that lengths are returned as integers, not strings
-        [$type, $length] = $this->columnParser->getTypeAndLength('name', 'string[128]');
+        [, $length] = $this->columnParser->getTypeAndLength('name', 'string[128]');
         $this->assertIsInt($length);
         $this->assertSame(128, $length);
 
-        [$type, $length] = $this->columnParser->getTypeAndLength('count', 'integer[9]');
+        [, $length] = $this->columnParser->getTypeAndLength('count', 'integer[9]');
         $this->assertIsInt($length);
         $this->assertSame(9, $length);
 
         // Test that precision/scale arrays contain integers
-        [$type, $length] = $this->columnParser->getTypeAndLength('amount', 'decimal[10,6]');
+        [, $length] = $this->columnParser->getTypeAndLength('amount', 'decimal[10,6]');
         $this->assertIsArray($length);
         $this->assertCount(2, $length);
         $this->assertIsInt($length[0]);
@@ -367,11 +367,11 @@ class ColumnParserTest extends TestCase
         $this->assertSame(6, $length[1]);
 
         // Test default lengths are also integers
-        [$type, $length] = $this->columnParser->getTypeAndLength('name', 'string');
+        [, $length] = $this->columnParser->getTypeAndLength('name', 'string');
         $this->assertIsInt($length);
         $this->assertSame(255, $length);
 
-        [$type, $length] = $this->columnParser->getTypeAndLength('id', 'integer');
+        [, $length] = $this->columnParser->getTypeAndLength('id', 'integer');
         $this->assertIsInt($length);
         $this->assertSame(11, $length);
     }
