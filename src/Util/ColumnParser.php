@@ -371,7 +371,7 @@ class ColumnParser
      */
     public function parseDefaultValue(?string $value, string $columnType): string|int|float|bool|null
     {
-        if ($value === null) {
+        if ($value === null || $value === '') {
             return null;
         }
 

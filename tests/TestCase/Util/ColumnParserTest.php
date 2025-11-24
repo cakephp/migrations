@@ -529,8 +529,9 @@ class ColumnParserTest extends TestCase
 
     public function testParseDefaultValue()
     {
-        // Test null values
+        // Test null and empty values
         $this->assertNull($this->columnParser->parseDefaultValue(null, 'string'));
+        $this->assertNull($this->columnParser->parseDefaultValue('', 'string'));
         $this->assertNull($this->columnParser->parseDefaultValue('null', 'string'));
         $this->assertNull($this->columnParser->parseDefaultValue('NULL', 'string'));
 
