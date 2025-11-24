@@ -82,7 +82,7 @@ class ColumnParser
                 'columnType' => $type,
                 'options' => [
                     'null' => $nullable,
-                    'default' => $this->parseDefaultValue($defaultValue, $type),
+                    'default' => $this->parseDefaultValue($defaultValue, $type ?? 'string'),
                 ],
             ];
 
@@ -252,17 +252,20 @@ class ColumnParser
      *
      * @param string $field Name of field
      * @param string|null $type User-specified type
-     * @return array<string|int|array|null> First value is the field type, second value is the field length. If no length
+     * @return array{0: string|null, 1: int|array<int>|null} First value is the field type, second value is the field length. If no length
      * can be extracted, null is returned for the second value
      */
     public function getTypeAndLength(string $field, ?string $type): array
     {
         if ($type && preg_match($this->regexpParseField, $type, $matches)) {
-            if (str_contains($matches[2], ',')) {
-                $matches[2] = explode(',', $matches[2]);
+            $length = $matches[2];
+            if (str_contains($length, ',')) {
+                $length = array_map('intval', explode(',', $length));
+            } else {
+                $length = (int)$length;
             }
 
-            return [$matches[1], $matches[2]];
+            return [$matches[1], $length];
         }
 
         /** @var string $fieldType */
