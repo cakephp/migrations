@@ -28,6 +28,7 @@ class ColumnParser
                 (?:,(?:[0-9]|[1-9][0-9]+))?
             \])?
         ))?
+        (?::default\[([^\]]+)\])?
         (?::(\w+))?
         (?::(\w+))?
         $
@@ -54,7 +55,8 @@ class ColumnParser
             preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2, '');
-            $indexType = Hash::get($matches, 3);
+            $defaultValue = Hash::get($matches, 3);
+            $indexType = Hash::get($matches, 4);
 
             $typeIsPk = in_array($type, ['primary', 'primary_key'], true);
             $isPrimaryKey = false;
@@ -80,7 +82,7 @@ class ColumnParser
                 'columnType' => $type,
                 'options' => [
                     'null' => $nullable,
-                    'default' => null,
+                    'default' => $this->parseDefaultValue($defaultValue, $type),
                 ],
             ];
 
@@ -114,8 +116,8 @@ class ColumnParser
             preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
-            $indexType = Hash::get($matches, 3);
-            $indexName = Hash::get($matches, 4);
+            $indexType = Hash::get($matches, 4);
+            $indexName = Hash::get($matches, 5);
 
             // Skip references - they create foreign keys, not indexes
             if ($type && str_starts_with($type, 'references')) {
@@ -168,7 +170,7 @@ class ColumnParser
             preg_match($this->regexpParseColumn, $field, $matches);
             $field = $matches[1];
             $type = Hash::get($matches, 2);
-            $indexType = Hash::get($matches, 3);
+            $indexType = Hash::get($matches, 4);
 
             if (
                 in_array($type, ['primary', 'primary_key'], true)
@@ -196,8 +198,8 @@ class ColumnParser
             preg_match($this->regexpParseColumn, $field, $matches);
             $fieldName = $matches[1];
             $type = Hash::get($matches, 2, '');
-            $indexType = Hash::get($matches, 3);
-            $indexName = Hash::get($matches, 4);
+            $indexType = Hash::get($matches, 4);
+            $indexName = Hash::get($matches, 5);
 
             // Check if type is 'references' or 'references?'
             $isReference = str_starts_with($type, 'references');
@@ -351,5 +353,62 @@ class ColumnParser
         }
 
         return $indexName;
+    }
+
+    /**
+     * Parses a default value string into the appropriate PHP type.
+     *
+     * Supports:
+     * - Booleans: true, false
+     * - Null: null, NULL
+     * - Integers: 123, -123
+     * - Floats: 1.5, -1.5
+     * - Strings: 'hello' (quoted) or unquoted values
+     *
+     * @param string|null $value The raw default value from the command line
+     * @param string $columnType The column type to help with type coercion
+     * @return string|int|float|bool|null The parsed default value
+     */
+    public function parseDefaultValue(?string $value, string $columnType): string|int|float|bool|null
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $lowerValue = strtolower($value);
+
+        // Handle null
+        if ($lowerValue === 'null') {
+            return null;
+        }
+
+        // Handle booleans
+        if ($lowerValue === 'true') {
+            return true;
+        }
+        if ($lowerValue === 'false') {
+            return false;
+        }
+
+        // Handle quoted strings - strip quotes
+        if (
+            (str_starts_with($value, "'") && str_ends_with($value, "'")) ||
+            (str_starts_with($value, '"') && str_ends_with($value, '"'))
+        ) {
+            return substr($value, 1, -1);
+        }
+
+        // Handle integers
+        if (preg_match('/^-?[0-9]+$/', $value)) {
+            return (int)$value;
+        }
+
+        // Handle floats
+        if (preg_match('/^-?[0-9]+\.[0-9]+$/', $value)) {
+            return (float)$value;
+        }
+
+        // Return as-is for SQL expressions like CURRENT_TIMESTAMP
+        return $value;
     }
 }

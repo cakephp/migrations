@@ -174,7 +174,7 @@ field on the users table.
 
 When describing columns you can use the following syntax:
 
-<warning>{name}:{primary}{type}{nullable}[{length}]:{index}:{indexName}</warning>
+<warning>{name}:{type}{nullable}[{length}]:default[{value}]:{index}:{indexName}</warning>
 
 All sections other than name are optional.
 
@@ -182,6 +182,9 @@ All sections other than name are optional.
 * The <warning>?</warning> value indicates if a column is nullable.
   e.g. <warning>role:string?</warning>.
 * Length option must be enclosed in <warning>[]</warning>, for example: <warning>name:string?[100]</warning>.
+* The <warning>default[value]</warning> option sets a default value for the column.
+  Supports booleans (true/false), integers, floats, strings, and null.
+  e.g. <warning>active:boolean:default[true]</warning>, <warning>count:integer:default[0]</warning>.
 * The <warning>index</warning> attribute can define the column as having a unique
   key with <warning>unique</warning> or a primary key with <warning>primary</warning>.
 * Use <warning>references</warning> type to create a foreign key constraint.
@@ -213,6 +216,12 @@ constraint on <warning>user_id</warning> referencing the <warning>users</warning
 <warning>bin/cake bake migration AddCategoryIdToArticles category_id:references:categories</warning>
 Create a migration that adds a foreign key column (<warning>category_id</warning>) to the <warning>articles</warning>
 table referencing the <warning>categories</warning> table.
+
+<warning>bin/cake bake migration AddActiveToUsers active:boolean:default[true]</warning>
+Create a migration that adds an <warning>active</warning> column with a default value of <warning>true</warning>.
+
+<warning>bin/cake bake migration AddCountToProducts count:integer:default[0]:unique</warning>
+Create a migration that adds a <warning>count</warning> column with default <warning>0</warning> and a unique index.
 
 <info>Migration Styles</info>
 
