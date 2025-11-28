@@ -1702,4 +1702,28 @@ PCRE_PATTERN;
 
         return 'INSERT';
     }
+
+    /**
+     * Get the upsert clause for SQLite (ON CONFLICT ... DO UPDATE SET).
+     *
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert
+     * @return string
+     */
+    protected function getUpsertClause(?InsertMode $mode, ?array $updateColumns, ?array $conflictColumns = null): string
+    {
+        if ($mode !== InsertMode::UPSERT || $updateColumns === null || $conflictColumns === null) {
+            return '';
+        }
+
+        $quotedConflictColumns = array_map($this->quoteColumnName(...), $conflictColumns);
+        $updates = [];
+        foreach ($updateColumns as $column) {
+            $quotedColumn = $this->quoteColumnName($column);
+            $updates[] = $quotedColumn . ' = excluded.' . $quotedColumn;
+        }
+
+        return ' ON CONFLICT (' . implode(', ', $quotedConflictColumns) . ') DO UPDATE SET ' . implode(', ', $updates);
+    }
 }

@@ -28,4 +28,13 @@ enum InsertMode: string
      * - SQLite: INSERT OR IGNORE
      */
     case IGNORE = 'ignore';
+
+    /**
+     * UPSERT - inserts or updates rows on duplicate key conflicts
+     *
+     * - MySQL: ON DUPLICATE KEY UPDATE
+     * - PostgreSQL: ON CONFLICT (...) DO UPDATE SET
+     * - SQLite: ON CONFLICT (...) DO UPDATE SET
+     */
+    case UPSERT = 'upsert';
 }

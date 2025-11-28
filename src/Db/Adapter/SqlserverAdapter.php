@@ -1007,9 +1007,14 @@ SQL;
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
-    {
-        $sql = $this->generateInsertSql($table, $row, $mode);
+    public function insert(
+        TableMetadata $table,
+        array $row,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
+        $sql = $this->generateInsertSql($table, $row, $mode, $updateColumns, $conflictColumns);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
 
@@ -1033,9 +1038,14 @@ SQL;
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
-    {
-        $sql = $this->generateBulkInsertSql($table, $rows, $mode);
+    public function bulkinsert(
+        TableMetadata $table,
+        array $rows,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
+        $sql = $this->generateBulkInsertSql($table, $rows, $mode, $updateColumns, $conflictColumns);
 
         $sql = $this->updateSQLForIdentityInsert($table->getName(), $sql);
 

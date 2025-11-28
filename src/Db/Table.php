@@ -74,6 +74,20 @@ class Table
     protected ?InsertMode $insertMode = null;
 
     /**
+     * Columns to update on upsert conflict
+     *
+     * @var array<string>|null
+     */
+    protected ?array $upsertUpdateColumns = null;
+
+    /**
+     * Columns that define uniqueness for upsert conflict detection
+     *
+     * @var array<string>|null
+     */
+    protected ?array $upsertConflictColumns = null;
+
+    /**
      * Primary key for this table.
      * Can either be a string or an array in case of composite
      * primary key.
@@ -704,6 +718,34 @@ class Table
     }
 
     /**
+     * Insert data into the table, updating specified columns on duplicate key conflicts.
+     *
+     * This method performs an "upsert" operation - inserting new rows and updating
+     * existing rows that conflict on the specified unique columns.
+     *
+     * Example:
+     * ```php
+     * $table->insertOrUpdate([
+     *     ['code' => 'USD', 'rate' => 1.0000],
+     *     ['code' => 'EUR', 'rate' => 0.9234],
+     * ], ['rate'], ['code']);
+     * ```
+     *
+     * @param array $data array of data in the same format as insert()
+     * @param array<string> $updateColumns Columns to update when a conflict occurs
+     * @param array<string> $conflictColumns Columns that define uniqueness (must have unique index)
+     * @return $this
+     */
+    public function insertOrUpdate(array $data, array $updateColumns, array $conflictColumns)
+    {
+        $this->insertMode = InsertMode::UPSERT;
+        $this->upsertUpdateColumns = $updateColumns;
+        $this->upsertConflictColumns = $conflictColumns;
+
+        return $this->insert($data);
+    }
+
+    /**
      * Creates a table from the object instance.
      *
      * @return void
@@ -822,15 +864,29 @@ class Table
         }
 
         if ($bulk) {
-            $this->getAdapter()->bulkinsert($this->table, $this->getData(), $this->insertMode);
+            $this->getAdapter()->bulkinsert(
+                $this->table,
+                $this->getData(),
+                $this->insertMode,
+                $this->upsertUpdateColumns,
+                $this->upsertConflictColumns,
+            );
         } else {
             foreach ($this->getData() as $row) {
-                $this->getAdapter()->insert($this->table, $row, $this->insertMode);
+                $this->getAdapter()->insert(
+                    $this->table,
+                    $row,
+                    $this->insertMode,
+                    $this->upsertUpdateColumns,
+                    $this->upsertConflictColumns,
+                );
             }
         }
 
         $this->resetData();
         $this->insertMode = null;
+        $this->upsertUpdateColumns = null;
+        $this->upsertConflictColumns = null;
     }
 
     /**

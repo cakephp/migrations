@@ -1152,8 +1152,13 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
-    {
+    public function insert(
+        TableMetadata $table,
+        array $row,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
         $sql = sprintf(
             'INSERT INTO %s ',
             $this->quoteTableName($table->getName()),
@@ -1172,7 +1177,7 @@ class PostgresAdapter extends AbstractAdapter
             $override = self::OVERRIDE_SYSTEM_VALUE . ' ';
         }
 
-        $conflictClause = $this->getConflictClause($mode);
+        $conflictClause = $this->getConflictClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
             $sql .= ' ' . $override . 'VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $conflictClause . ';';
@@ -1198,8 +1203,13 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
-    {
+    public function bulkinsert(
+        TableMetadata $table,
+        array $rows,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
         $sql = sprintf(
             'INSERT INTO %s ',
             $this->quoteTableName($table->getName()),
@@ -1215,7 +1225,7 @@ class PostgresAdapter extends AbstractAdapter
 
         $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $keys)) . ') ' . $override . 'VALUES ';
 
-        $conflictClause = $this->getConflictClause($mode);
+        $conflictClause = $this->getConflictClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
             $values = array_map(function ($row) {
@@ -1258,12 +1268,28 @@ class PostgresAdapter extends AbstractAdapter
      * Get the ON CONFLICT clause based on insert mode.
      *
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on upsert conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert
      * @return string
      */
-    protected function getConflictClause(?InsertMode $mode = null): string
-    {
+    protected function getConflictClause(
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): string {
         if ($mode === InsertMode::IGNORE) {
             return ' ON CONFLICT DO NOTHING';
+        }
+
+        if ($mode === InsertMode::UPSERT && $updateColumns !== null && $conflictColumns !== null) {
+            $quotedConflictColumns = array_map($this->quoteColumnName(...), $conflictColumns);
+            $updates = [];
+            foreach ($updateColumns as $column) {
+                $quotedColumn = $this->quoteColumnName($column);
+                $updates[] = $quotedColumn . ' = EXCLUDED.' . $quotedColumn;
+            }
+
+            return ' ON CONFLICT (' . implode(', ', $quotedConflictColumns) . ') DO UPDATE SET ' . implode(', ', $updates);
         }
 
         return '';

@@ -622,9 +622,14 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
-    {
-        $sql = $this->generateInsertSql($table, $row, $mode);
+    public function insert(
+        TableMetadata $table,
+        array $row,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
+        $sql = $this->generateInsertSql($table, $row, $mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
             $this->io->out($sql);
@@ -649,10 +654,17 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
      * @param array $row The row to insert
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on upsert conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert (unused in MySQL)
      * @return string
      */
-    protected function generateInsertSql(TableMetadata $table, array $row, ?InsertMode $mode = null): string
-    {
+    protected function generateInsertSql(
+        TableMetadata $table,
+        array $row,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): string {
         $sql = sprintf(
             '%s INTO %s ',
             $this->getInsertPrefix($mode),
@@ -667,8 +679,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             }
         }
 
+        $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
+
         if ($this->isDryRunEnabled()) {
-            $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ');';
+            $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $upsertClause . ';';
 
             return $sql;
         } else {
@@ -680,7 +694,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 }
                 $values[] = $placeholder;
             }
-            $sql .= ' VALUES (' . implode(',', $values) . ')';
+            $sql .= ' VALUES (' . implode(',', $values) . ')' . $upsertClause;
 
             return $sql;
         }
@@ -699,6 +713,29 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         return 'INSERT';
+    }
+
+    /**
+     * Get the upsert clause for MySQL (ON DUPLICATE KEY UPDATE).
+     *
+     * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness (unused in MySQL)
+     * @return string
+     */
+    protected function getUpsertClause(?InsertMode $mode, ?array $updateColumns, ?array $conflictColumns = null): string
+    {
+        if ($mode !== InsertMode::UPSERT || $updateColumns === null) {
+            return '';
+        }
+
+        $updates = [];
+        foreach ($updateColumns as $column) {
+            $quotedColumn = $this->quoteColumnName($column);
+            $updates[] = $quotedColumn . ' = VALUES(' . $quotedColumn . ')';
+        }
+
+        return ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updates);
     }
 
     /**
@@ -748,9 +785,14 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
-    {
-        $sql = $this->generateBulkInsertSql($table, $rows, $mode);
+    public function bulkinsert(
+        TableMetadata $table,
+        array $rows,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
+        $sql = $this->generateBulkInsertSql($table, $rows, $mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
             $this->io->out($sql);
@@ -785,10 +827,17 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
      * @param array $rows The rows to insert
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on upsert conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert (unused in MySQL)
      * @return string
      */
-    protected function generateBulkInsertSql(TableMetadata $table, array $rows, ?InsertMode $mode = null): string
-    {
+    protected function generateBulkInsertSql(
+        TableMetadata $table,
+        array $rows,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): string {
         $sql = sprintf(
             '%s INTO %s ',
             $this->getInsertPrefix($mode),
@@ -799,11 +848,13 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $keys)) . ') VALUES ';
 
+        $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
+
         if ($this->isDryRunEnabled()) {
             $values = array_map(function ($row) {
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
-            $sql .= implode(', ', $values) . ';';
+            $sql .= implode(', ', $values) . $upsertClause . ';';
 
             return $sql;
         } else {
@@ -820,7 +871,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                 $query = '(' . implode(', ', $values) . ')';
                 $queries[] = $query;
             }
-            $sql .= implode(',', $queries);
+            $sql .= implode(',', $queries) . $upsertClause;
 
             return $sql;
         }

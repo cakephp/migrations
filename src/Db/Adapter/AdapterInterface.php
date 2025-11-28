@@ -480,9 +480,17 @@ interface AdapterInterface
      * @param \Migrations\Db\Table\TableMetadata $table Table where to insert data
      * @param array $row Row
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on upsert conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert
      * @return void
      */
-    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void;
+    public function insert(
+        TableMetadata $table,
+        array $row,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void;
 
     /**
      * Inserts data into a table in a bulk.
@@ -490,9 +498,17 @@ interface AdapterInterface
      * @param \Migrations\Db\Table\TableMetadata $table Table where to insert data
      * @param array $rows Rows
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
+     * @param array<string>|null $updateColumns Columns to update on upsert conflict
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert
      * @return void
      */
-    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void;
+    public function bulkinsert(
+        TableMetadata $table,
+        array $rows,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void;
 
     /**
      * Quotes a table name for use in a query.

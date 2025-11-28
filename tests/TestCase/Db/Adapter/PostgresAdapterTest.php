@@ -2905,4 +2905,82 @@ OUTPUT;
         $rows = $this->adapter->fetchAll('SELECT * FROM categories');
         $this->assertCount(2, $rows);
     }
+
+    public function testInsertOrUpdateWithDuplicates()
+    {
+        $table = new Table('currencies', [], $this->adapter);
+        $table->addColumn('code', 'string', ['limit' => 3])
+            ->addColumn('rate', 'decimal', ['precision' => 10, 'scale' => 4])
+            ->addIndex('code', ['unique' => true])
+            ->create();
+
+        // First insert
+        $table->insertOrUpdate([
+            ['code' => 'USD', 'rate' => 1.0000],
+            ['code' => 'EUR', 'rate' => 0.9000],
+        ], ['rate'], ['code'])->save();
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM currencies ORDER BY code');
+        $this->assertCount(2, $rows);
+        $this->assertEquals('0.9000', $rows[0]['rate']); // EUR
+        $this->assertEquals('1.0000', $rows[1]['rate']); // USD
+
+        // Update rates - should update existing rows
+        $table->insertOrUpdate([
+            ['code' => 'USD', 'rate' => 1.0500],
+            ['code' => 'EUR', 'rate' => 0.9234],
+            ['code' => 'GBP', 'rate' => 0.7800], // New row
+        ], ['rate'], ['code'])->save();
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM currencies ORDER BY code');
+        $this->assertCount(3, $rows);
+        $this->assertEquals('0.9234', $rows[0]['rate']); // EUR updated
+        $this->assertEquals('0.7800', $rows[1]['rate']); // GBP new
+        $this->assertEquals('1.0500', $rows[2]['rate']); // USD updated
+    }
+
+    public function testInsertOrUpdateWithMultipleUpdateColumns()
+    {
+        $table = new Table('products', [], $this->adapter);
+        $table->addColumn('sku', 'string', ['limit' => 50])
+            ->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->addColumn('stock', 'integer')
+            ->addIndex('sku', ['unique' => true])
+            ->create();
+
+        // First insert
+        $table->insertOrUpdate([
+            ['sku' => 'ABC123', 'price' => 10.00, 'stock' => 100],
+        ], ['price', 'stock'], ['sku'])->save();
+
+        // Update both price and stock
+        $table->insertOrUpdate([
+            ['sku' => 'ABC123', 'price' => 15.00, 'stock' => 50],
+        ], ['price', 'stock'], ['sku'])->save();
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM products');
+        $this->assertCount(1, $rows);
+        $this->assertEquals('15.00', $rows[0]['price']);
+        $this->assertEquals(50, $rows[0]['stock']);
+    }
+
+    public function testInsertOrUpdateModeResetsAfterSave()
+    {
+        $table = new Table('items', [], $this->adapter);
+        $table->addColumn('code', 'string', ['limit' => 10])
+            ->addColumn('name', 'string')
+            ->addIndex('code', ['unique' => true])
+            ->create();
+
+        // Use insertOrUpdate
+        $table->insertOrUpdate([
+            ['code' => 'ITEM1', 'name' => 'Item One'],
+        ], ['name'], ['code'])->save();
+
+        // Now use regular insert with duplicate - should throw exception
+        $this->expectException(PDOException::class);
+        $table->insert([
+            ['code' => 'ITEM1', 'name' => 'Different Name'],
+        ])->save();
+    }
 }

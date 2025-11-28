@@ -156,6 +156,23 @@ interface SeedInterface
     public function insertOrSkip(string $tableName, array $data): void;
 
     /**
+     * Insert data into a table, updating specified columns on duplicate key conflicts.
+     *
+     * This method performs an "upsert" operation - inserting new rows and updating
+     * existing rows that conflict on the specified unique columns.
+     *
+     * Uses ON DUPLICATE KEY UPDATE (MySQL), or ON CONFLICT ... DO UPDATE SET
+     * (PostgreSQL/SQLite).
+     *
+     * @param string $tableName Table name
+     * @param array $data Data
+     * @param array<string> $updateColumns Columns to update when a conflict occurs
+     * @param array<string> $conflictColumns Columns that define uniqueness (must have unique index)
+     * @return void
+     */
+    public function insertOrUpdate(string $tableName, array $data, array $updateColumns, array $conflictColumns): void;
+
+    /**
      * Checks to see if a table exists.
      *
      * @param string $tableName Table name

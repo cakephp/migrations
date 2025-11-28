@@ -138,17 +138,27 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function insert(TableMetadata $table, array $row, ?InsertMode $mode = null): void
-    {
-        $this->getAdapter()->insert($table, $row, $mode);
+    public function insert(
+        TableMetadata $table,
+        array $row,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
+        $this->getAdapter()->insert($table, $row, $mode, $updateColumns, $conflictColumns);
     }
 
     /**
      * @inheritDoc
      */
-    public function bulkinsert(TableMetadata $table, array $rows, ?InsertMode $mode = null): void
-    {
-        $this->getAdapter()->bulkinsert($table, $rows, $mode);
+    public function bulkinsert(
+        TableMetadata $table,
+        array $rows,
+        ?InsertMode $mode = null,
+        ?array $updateColumns = null,
+        ?array $conflictColumns = null,
+    ): void {
+        $this->getAdapter()->bulkinsert($table, $rows, $mode, $updateColumns, $conflictColumns);
     }
 
     /**
