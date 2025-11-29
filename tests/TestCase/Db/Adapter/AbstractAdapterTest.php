@@ -192,31 +192,6 @@ class AbstractAdapterTest extends TestCase
                 " DEFAULT 'CURRENT_TIME'",
             ],
 
-            // LOCALTIME on time type should NOT be quoted
-            'LOCALTIME on time' => [
-                'LOCALTIME',
-                AbstractAdapter::TYPE_TIME,
-                ' DEFAULT LOCALTIME',
-            ],
-
-            // LOCALTIMESTAMP on datetime/timestamp should NOT be quoted
-            'LOCALTIMESTAMP on datetime' => [
-                'LOCALTIMESTAMP',
-                AbstractAdapter::TYPE_DATETIME,
-                ' DEFAULT LOCALTIMESTAMP',
-            ],
-            'LOCALTIMESTAMP on timestamp' => [
-                'LOCALTIMESTAMP',
-                AbstractAdapter::TYPE_TIMESTAMP,
-                ' DEFAULT LOCALTIMESTAMP',
-            ],
-            // LOCALTIMESTAMP on time/date SHOULD be quoted
-            'LOCALTIMESTAMP on time should be quoted' => [
-                'LOCALTIMESTAMP',
-                AbstractAdapter::TYPE_TIME,
-                " DEFAULT 'LOCALTIMESTAMP'",
-            ],
-
             // CURRENT_TIMESTAMP on non-datetime types SHOULD be quoted (bug #1891)
             'CURRENT_TIMESTAMP on string should be quoted' => [
                 'CURRENT_TIMESTAMP',

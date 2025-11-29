@@ -1117,10 +1117,8 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         // SQL functions mapped to their valid column types (ordered longest-first to avoid prefix conflicts)
         $sqlFunctionTypes = [
             'CURRENT_TIMESTAMP' => [static::TYPE_DATETIME, static::TYPE_TIMESTAMP, static::TYPE_TIME, static::TYPE_DATE],
-            'LOCALTIMESTAMP' => [static::TYPE_DATETIME, static::TYPE_TIMESTAMP],
             'CURRENT_DATE' => [static::TYPE_DATE],
             'CURRENT_TIME' => [static::TYPE_TIME],
-            'LOCALTIME' => [static::TYPE_TIME],
         ];
 
         if ($default instanceof Literal) {

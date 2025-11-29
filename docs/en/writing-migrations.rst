@@ -300,7 +300,7 @@ For ``time`` columns:
 ======== ===========
 Option   Description
 ======== ===========
-default  set default value (use with ``CURRENT_TIME`` or ``LOCALTIME``)
+default  set default value (use with ``CURRENT_TIME``)
 timezone enable or disable the ``with time zone`` option *(only applies to Postgres)*
 ======== ===========
 
@@ -309,7 +309,7 @@ For ``datetime`` columns:
 ======== ===========
 Option   Description
 ======== ===========
-default  set default value (use with ``CURRENT_TIMESTAMP`` or ``LOCALTIMESTAMP``)
+default  set default value (use with ``CURRENT_TIMESTAMP``)
 timezone enable or disable the ``with time zone`` option *(only applies to Postgres)*
 ======== ===========
 
@@ -318,7 +318,7 @@ For ``timestamp`` columns:
 ======== ===========
 Option   Description
 ======== ===========
-default  set default value (use with ``CURRENT_TIMESTAMP`` or ``LOCALTIMESTAMP``)
+default  set default value (use with ``CURRENT_TIMESTAMP``)
 update   set an action to be triggered when the row is updated (use with ``CURRENT_TIMESTAMP``) *(only applies to MySQL)*
 timezone enable or disable the ``with time zone`` option for ``time`` and ``timestamp`` columns *(only applies to Postgres)*
 ======== ===========
