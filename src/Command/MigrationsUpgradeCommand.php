@@ -107,7 +107,7 @@ class MigrationsUpgradeCommand extends Command
             return self::CODE_SUCCESS;
         }
 
-        $io->out(sprintf('Found <info>%d</info> legacy phinxlog table(s):', count($legacyTables)));
+        $io->out(sprintf('Found <info>%d</info> phinxlog table(s):', count($legacyTables)));
         foreach ($legacyTables as $table => $plugin) {
             $pluginLabel = $plugin === null ? '(app)' : "({$plugin})";
             $io->out("  - {$table} {$pluginLabel}");
