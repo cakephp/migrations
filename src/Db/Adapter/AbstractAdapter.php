@@ -306,7 +306,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      *
      * Returns the appropriate table name based on configuration:
      * - 'cake_migrations' for unified mode
-     * - Legacy phinxlog table name for legacy mode
+     * - Phinxlog table name for backwards compatibility mode
      *
      * @return string
      */
