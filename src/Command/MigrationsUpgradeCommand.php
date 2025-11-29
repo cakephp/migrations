@@ -237,7 +237,7 @@ class MigrationsUpgradeCommand extends Command
     }
 
     /**
-     * Migrate data from a legacy table to the unified table.
+     * Migrate data from a phinx table to the unified table.
      *
      * @param \Cake\Database\Connection $connection Database connection
      * @param string $tableName Legacy table name
