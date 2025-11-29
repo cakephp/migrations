@@ -175,7 +175,7 @@ To migrate from ``phinxlog`` tables to the new ``cake_migrations`` table:
 Rolling Back
 ------------
 
-If you need to revert to legacy tables after upgrading:
+If you need to revert to phinx tables after upgrading:
 
 1. Set ``'legacyTables' => true`` in your configuration.
 2. Your old ``phinxlog`` tables still exist (truncated but not dropped).
