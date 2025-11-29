@@ -102,7 +102,7 @@ class MigrationsUpgradeCommand extends Command
         $legacyTables = $this->findLegacyTables($connection);
 
         if ($legacyTables === []) {
-            $io->out('<info>No legacy phinxlog tables found. Nothing to upgrade.</info>');
+            $io->out('<info>No phinxlog tables found. Nothing to upgrade.</info>');
 
             return self::CODE_SUCCESS;
         }
