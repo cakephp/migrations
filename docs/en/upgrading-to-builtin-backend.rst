@@ -165,7 +165,7 @@ To migrate from ``phinxlog`` tables to the new ``cake_migrations`` table:
            'legacyTables' => false,
        ],
 
-4. **Optionally drop legacy tables**: The upgrade command truncates the old
+4. **Optionally drop phinx tables**: The upgrade command truncates the old
    tables by default. Use ``--drop-tables`` to remove them entirely:
 
    .. code-block:: bash
