@@ -142,7 +142,7 @@ The ``Migrations.legacyTables`` configuration option controls the behavior:
 Upgrading to the Unified Table
 ------------------------------
 
-To migrate from legacy ``phinxlog`` tables to the new ``cake_migrations`` table:
+To migrate from ``phinxlog`` tables to the new ``cake_migrations`` table:
 
 1. **Preview the upgrade** (dry run):
 
