@@ -218,7 +218,7 @@ also edit the migration after generation to add or customize the columns
 
 Columns on the command line follow the following pattern::
 
-    fieldName:fieldType?[length]:indexType:indexName
+    fieldName:fieldType?[length]:default[value]:indexType:indexName
 
 For instance, the following are all valid ways of specifying an email field:
 
@@ -237,6 +237,16 @@ and scale, separated by a comma.
 Columns with a question mark after the fieldType will make the column nullable.
 
 The ``length`` part is optional and should always be written between bracket.
+
+The ``default[value]`` part is optional and sets the default value for the column.
+Supported value types include:
+
+* Booleans: ``true`` or ``false`` - e.g., ``active:boolean:default[true]``
+* Integers: ``0``, ``123``, ``-456`` - e.g., ``count:integer:default[0]``
+* Floats: ``1.5``, ``-2.75`` - e.g., ``rate:decimal:default[1.5]``
+* Strings: ``'hello'`` or ``"world"`` (quoted) - e.g., ``status:string:default['pending']``
+* Null: ``null`` or ``NULL`` - e.g., ``description:text?:default[null]``
+* SQL expressions: ``CURRENT_TIMESTAMP`` - e.g., ``created_at:datetime:default[CURRENT_TIMESTAMP]``
 
 Fields named ``created`` and ``modified``, as well as any field with a ``_at``
 suffix, will automatically be set to the type ``datetime``.
@@ -317,6 +327,39 @@ will generate::
                   ->update();
         }
     }
+
+Adding a column with a default value
+-------------------------------------
+
+You can specify default values for columns using the ``default[value]`` syntax:
+
+.. code-block:: bash
+
+    bin/cake bake migration AddActiveToUsers active:boolean:default[true]
+
+will generate::
+
+    <?php
+    use Migrations\BaseMigration;
+
+    class AddActiveToUsers extends BaseMigration
+    {
+        public function change(): void
+        {
+            $table = $this->table('users');
+            $table->addColumn('active', 'boolean', [
+                'default' => true,
+                'null' => false,
+            ]);
+            $table->update();
+        }
+    }
+
+You can combine default values with other options like nullable and indexes:
+
+.. code-block:: bash
+
+    bin/cake bake migration AddStatusToOrders status:string:default['pending']:unique
 
 Altering a column
 -----------------

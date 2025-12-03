@@ -346,6 +346,36 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['decimal', [10, 6]], $this->columnParser->getTypeAndLength('latitude', 'decimal[10,6]'));
     }
 
+    public function testGetTypeAndLengthReturnsIntegerTypes()
+    {
+        // Test that lengths are returned as integers, not strings
+        [, $length] = $this->columnParser->getTypeAndLength('name', 'string[128]');
+        $this->assertIsInt($length);
+        $this->assertSame(128, $length);
+
+        [, $length] = $this->columnParser->getTypeAndLength('count', 'integer[9]');
+        $this->assertIsInt($length);
+        $this->assertSame(9, $length);
+
+        // Test that precision/scale arrays contain integers
+        [, $length] = $this->columnParser->getTypeAndLength('amount', 'decimal[10,6]');
+        $this->assertIsArray($length);
+        $this->assertCount(2, $length);
+        $this->assertIsInt($length[0]);
+        $this->assertIsInt($length[1]);
+        $this->assertSame(10, $length[0]);
+        $this->assertSame(6, $length[1]);
+
+        // Test default lengths are also integers
+        [, $length] = $this->columnParser->getTypeAndLength('name', 'string');
+        $this->assertIsInt($length);
+        $this->assertSame(255, $length);
+
+        [, $length] = $this->columnParser->getTypeAndLength('id', 'integer');
+        $this->assertIsInt($length);
+        $this->assertSame(11, $length);
+    }
+
     public function testGetLength()
     {
         $this->assertSame(255, $this->columnParser->getLength('string'));
@@ -411,6 +441,190 @@ class ColumnParserTest extends TestCase
         ];
         $actual = $this->columnParser->parseFields(['category_id:references:categories']);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testParseFieldsWithDefaultValues()
+    {
+        // Test boolean default true
+        $expected = [
+            'active' => [
+                'columnType' => 'boolean',
+                'options' => [
+                    'null' => false,
+                    'default' => true,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['active:boolean:default[true]']);
+        $this->assertEquals($expected, $actual);
+
+        // Test boolean default false
+        $expected = [
+            'skip_updates' => [
+                'columnType' => 'boolean',
+                'options' => [
+                    'null' => false,
+                    'default' => false,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['skip_updates:boolean:default[false]']);
+        $this->assertEquals($expected, $actual);
+
+        // Test integer default
+        $expected = [
+            'count' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => 0,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['count:integer:default[0]']);
+        $this->assertEquals($expected, $actual);
+
+        // Test string default with quotes
+        $expected = [
+            'status' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => false,
+                    'default' => 'pending',
+                    'limit' => 255,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(["status:string:default['pending']"]);
+        $this->assertEquals($expected, $actual);
+
+        // Test nullable with default
+        $expected = [
+            'role' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => true,
+                    'default' => 'user',
+                    'limit' => 255,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(["role:string?:default['user']"]);
+        $this->assertEquals($expected, $actual);
+
+        // Test default with index
+        $expected = [
+            'email' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 255,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['email:string:default[null]:unique']);
+        $this->assertEquals($expected, $actual);
+
+        // Test float default
+        $expected = [
+            'rate' => [
+                'columnType' => 'decimal',
+                'options' => [
+                    'null' => false,
+                    'default' => 1.5,
+                    'precision' => 10,
+                    'scale' => 6,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(['rate:decimal:default[1.5]']);
+        $this->assertEquals($expected, $actual);
+
+        // Test length with default
+        $expected = [
+            'code' => [
+                'columnType' => 'string',
+                'options' => [
+                    'null' => false,
+                    'default' => 'ABC',
+                    'limit' => 10,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields(["code:string[10]:default['ABC']"]);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testParseDefaultValue()
+    {
+        // Test null and empty values
+        $this->assertNull($this->columnParser->parseDefaultValue(null, 'string'));
+        $this->assertNull($this->columnParser->parseDefaultValue('', 'string'));
+        $this->assertNull($this->columnParser->parseDefaultValue('null', 'string'));
+        $this->assertNull($this->columnParser->parseDefaultValue('NULL', 'string'));
+
+        // Test boolean values
+        $this->assertTrue($this->columnParser->parseDefaultValue('true', 'boolean'));
+        $this->assertTrue($this->columnParser->parseDefaultValue('TRUE', 'boolean'));
+        $this->assertFalse($this->columnParser->parseDefaultValue('false', 'boolean'));
+        $this->assertFalse($this->columnParser->parseDefaultValue('FALSE', 'boolean'));
+
+        // Test integer values
+        $this->assertSame(0, $this->columnParser->parseDefaultValue('0', 'integer'));
+        $this->assertSame(123, $this->columnParser->parseDefaultValue('123', 'integer'));
+        $this->assertSame(-456, $this->columnParser->parseDefaultValue('-456', 'integer'));
+
+        // Test float values
+        $this->assertSame(1.5, $this->columnParser->parseDefaultValue('1.5', 'decimal'));
+        $this->assertSame(-2.75, $this->columnParser->parseDefaultValue('-2.75', 'decimal'));
+
+        // Test quoted strings
+        $this->assertSame('hello', $this->columnParser->parseDefaultValue("'hello'", 'string'));
+        $this->assertSame('world', $this->columnParser->parseDefaultValue('"world"', 'string'));
+
+        // Test SQL expressions (returned as-is)
+        $this->assertSame('CURRENT_TIMESTAMP', $this->columnParser->parseDefaultValue('CURRENT_TIMESTAMP', 'datetime'));
+    }
+
+    public function testParseIndexesWithDefaultValues()
+    {
+        // Ensure indexes still work with default values in the definition
+        $expected = [
+            'UNIQUE_EMAIL' => [
+                'columns' => ['email'],
+                'options' => ['unique' => true, 'name' => 'UNIQUE_EMAIL'],
+            ],
+        ];
+        $actual = $this->columnParser->parseIndexes(['email:string:default[null]:unique']);
+        $this->assertEquals($expected, $actual);
+
+        // Test with custom index name
+        $expected = [
+            'IDX_COUNT' => [
+                'columns' => ['count'],
+                'options' => ['unique' => false, 'name' => 'IDX_COUNT'],
+            ],
+        ];
+        $actual = $this->columnParser->parseIndexes(['count:integer:default[0]:index:IDX_COUNT']);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testValidArgumentsWithDefaultValues()
+    {
+        $this->assertEquals(
+            ['active:boolean:default[true]'],
+            $this->columnParser->validArguments(['active:boolean:default[true]']),
+        );
+        $this->assertEquals(
+            ['count:integer:default[0]:unique'],
+            $this->columnParser->validArguments(['count:integer:default[0]:unique']),
+        );
+        $this->assertEquals(
+            ["status:string:default['pending']:index:IDX_STATUS"],
+            $this->columnParser->validArguments(["status:string:default['pending']:index:IDX_STATUS"]),
+        );
     }
 
     public function testParseForeignKeys()
