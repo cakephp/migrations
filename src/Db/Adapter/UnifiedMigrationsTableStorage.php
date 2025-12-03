@@ -47,6 +47,33 @@ class UnifiedMigrationsTableStorage
     }
 
     /**
+     * Cleanup missing migrations from the phinxlog table
+     *
+     * Removes entries from the phinxlog table for migrations that no longer exist
+     * in the migrations directory (marked as MISSING in status output).
+     *
+     * @param array $missingVersions The list of missing migration versions.
+     * @return void
+     */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $this->adapter->beginTransaction();
+        try {
+            $where = ['version IN' => $missingVersions];
+            $where['plugin IS'] = $this->adapter->getOption('plugin');
+
+            $delete = $this->adapter->getDeleteBuilder()
+                ->from(self::TABLE_NAME)
+                ->where($where);
+            $delete->execute();
+            $this->adapter->commitTransaction();
+        } catch (Exception $e) {
+            $this->adapter->rollbackTransaction();
+            throw $e;
+        }
+    }
+
+    /**
      * Gets all the migration versions for the current plugin context.
      *
      * @param array<string, string> $orderBy The order by clause.

@@ -122,7 +122,7 @@ For existing applications with ``phinxlog`` tables:
 - **Automatic detection**: If any ``phinxlog`` table exists, migrations will
   continue using the legacy tables automatically.
 - **No forced migration**: Existing applications don't need to change anything.
-- **Opt-in upgrade**: You can migrate to the new table when ready.
+- **Opt-in upgrade**: You can migrate to the new table when you're ready.
 
 Configuration
 -------------
@@ -165,8 +165,9 @@ To migrate from ``phinxlog`` tables to the new ``cake_migrations`` table:
            'legacyTables' => false,
        ],
 
-4. **Optionally drop phinx tables**: The upgrade command truncates the old
-   tables by default. Use ``--drop-tables`` to remove them entirely:
+4. **Optionally drop phinx tables**: Your migration history is preserved
+   by default. Use ``--drop-tables`` to drop the ``phinxlog``tables after
+   verifying your migrations run correctly.
 
    .. code-block:: bash
 
@@ -178,8 +179,11 @@ Rolling Back
 If you need to revert to phinx tables after upgrading:
 
 1. Set ``'legacyTables' => true`` in your configuration.
-2. Your old ``phinxlog`` tables still exist (truncated but not dropped).
-3. You may need to manually restore migration records or re-run migrations.
+
+.. warning::
+
+    You cannot rollback after running ``upgrade --drop-tables``.
+
 
 New Installations
 -----------------

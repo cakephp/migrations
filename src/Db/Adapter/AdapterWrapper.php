@@ -186,6 +186,14 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $this->getAdapter()->cleanupMissing($missingVersions);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
         $this->getAdapter()->migrated($migration, $direction, $startTime, $endTime);

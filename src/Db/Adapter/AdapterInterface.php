@@ -651,6 +651,16 @@ interface AdapterInterface
     public function hasDatabase(string $name): bool;
 
     /**
+     * Cleanup missing migrations from the phinxlog table
+     *
+     * Removes entries from the phinxlog table for migrations that no longer exist
+     * in the migrations directory (marked as MISSING in status output).
+     *
+     * @return void
+     */
+    public function cleanupMissing(array $missingVersions): void;
+
+    /**
      * Drops the specified database.
      *
      * @param string $name Database Name

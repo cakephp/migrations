@@ -1360,30 +1360,7 @@ class Manager
         }
 
         // Remove missing migrations from migrations table
-        // Unwrap the adapter to get the actual adapter with schema table name
-        /** @var \Migrations\Db\Adapter\AdapterInterface $innerAdapter */
-        $innerAdapter = $adapter;
-        while ($innerAdapter instanceof AdapterWrapper) {
-            $innerAdapter = $innerAdapter->getAdapter();
-        }
-        assert($innerAdapter instanceof AbstractAdapter);
-
-        $adapter->beginTransaction();
-        try {
-            $where = ['version IN' => $missingVersions];
-            // When using unified table, filter by plugin
-            if (Configure::read('Migrations.legacyTables') === false) {
-                $where['plugin IS'] = $innerAdapter->getOption('plugin');
-            }
-            $delete = $adapter->getDeleteBuilder()
-                ->from($innerAdapter->getSchemaTableName())
-                ->where($where);
-            $delete->execute();
-            $adapter->commitTransaction();
-        } catch (Exception $e) {
-            $adapter->rollbackTransaction();
-            throw $e;
-        }
+        $adapter->cleanupMissing($missingVersions);
 
         return count($missingVersions);
     }

@@ -60,6 +60,31 @@ class MigrationsTableStorage
     }
 
     /**
+     * Cleanup missing migrations from the phinxlog table
+     *
+     * Removes entries from the phinxlog table for migrations that no longer exist
+     * in the migrations directory (marked as MISSING in status output).
+     *
+     * @param array $missingVersions The list of missing migration versions.
+     * @return void
+     */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $this->adapter->beginTransaction();
+        try {
+            $where = ['version IN' => $missingVersions];
+            $delete = $this->adapter->getDeleteBuilder()
+                ->from($this->schemaTableName)
+                ->where($where);
+            $delete->execute();
+            $this->adapter->commitTransaction();
+        } catch (Exception $e) {
+            $this->adapter->rollbackTransaction();
+            throw $e;
+        }
+    }
+
+    /**
      * Records that a migration was run in the database.
      *
      * @param \Migrations\MigrationInterface $migration Migration

@@ -845,6 +845,16 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * @inheritDoc
+     */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $storage = $this->migrationsTable();
+
+        $storage->cleanupMissing($missingVersions);
+    }
+
+    /**
      * Get the migrations table storage implementation.
      *
      * Returns either UnifiedMigrationsTableStorage (new cake_migrations table)

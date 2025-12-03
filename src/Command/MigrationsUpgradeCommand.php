@@ -18,6 +18,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
+use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
@@ -72,7 +73,7 @@ class MigrationsUpgradeCommand extends Command
             'default' => false,
         ])->addOption('drop-tables', [
             'boolean' => true,
-            'help' => 'Drop legacy phinxlog tables after migration (default: truncate only)',
+            'help' => 'Drop legacy phinxlog tables after migration',
             'default' => false,
         ]);
 
@@ -144,8 +145,7 @@ class MigrationsUpgradeCommand extends Command
                     $io->out("Dropping legacy table <info>{$tableName}</info>...");
                     $connection->execute("DROP TABLE {$connection->getDriver()->quoteIdentifier($tableName)}");
                 } else {
-                    $io->out("Truncating legacy table <info>{$tableName}</info>...");
-                    $connection->execute("TRUNCATE TABLE {$connection->getDriver()->quoteIdentifier($tableName)}");
+                    $io->out('Retaining legacy table. You should drop these tables once you have verified your upgrade.');
                 }
             }
 
@@ -174,7 +174,7 @@ class MigrationsUpgradeCommand extends Command
      */
     protected function findLegacyTables(Connection $connection): array
     {
-        $schema = $connection->getSchemaCollection();
+        $schema = $connection->getDriver()->schemaDialect();
         $tables = $schema->listTables();
         $legacyTables = [];
 
@@ -201,10 +201,9 @@ class MigrationsUpgradeCommand extends Command
      */
     protected function tableExists(Connection $connection, string $tableName): bool
     {
-        $schema = $connection->getSchemaCollection();
-        $tables = $schema->listTables();
+        $schema = $connection->getDriver()->schemaDialect();
 
-        return in_array($tableName, $tables, true);
+        return $schema->hasTable($tableName);
     }
 
     /**
@@ -215,10 +214,7 @@ class MigrationsUpgradeCommand extends Command
      */
     protected function createUnifiedTable(Connection $connection): void
     {
-        $tableName = UnifiedMigrationsTableStorage::TABLE_NAME;
         $driver = $connection->getDriver();
-
-        // Create table with auto-increment id
         $sql = sprintf(
             'CREATE TABLE %s (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -230,7 +226,7 @@ class MigrationsUpgradeCommand extends Command
                 breakpoint TINYINT(1) NOT NULL DEFAULT 0,
                 UNIQUE KEY version_plugin_unique (version, plugin)
             )',
-            $driver->quoteIdentifier($tableName),
+            $driver->quoteIdentifier(UnifiedMigrationsTableStorage::TABLE_NAME),
         );
 
         $connection->execute($sql);
@@ -271,18 +267,22 @@ class MigrationsUpgradeCommand extends Command
 
         // Insert into unified table
         foreach ($rows as $row) {
-            $insertQuery = $connection->insertQuery()
-                ->insert(['version', 'migration_name', 'plugin', 'start_time', 'end_time', 'breakpoint'])
-                ->into($unifiedTable)
-                ->values([
-                    'version' => $row['version'],
-                    'migration_name' => $row['migration_name'] ?? null,
-                    'plugin' => $plugin,
-                    'start_time' => $row['start_time'] ?? null,
-                    'end_time' => $row['end_time'] ?? null,
-                    'breakpoint' => $row['breakpoint'] ?? 0,
-                ]);
-            $insertQuery->execute();
+            try {
+                $insertQuery = $connection->insertQuery()
+                    ->insert(['version', 'migration_name', 'plugin', 'start_time', 'end_time', 'breakpoint'])
+                    ->into($unifiedTable)
+                    ->values([
+                        'version' => $row['version'],
+                        'migration_name' => $row['migration_name'] ?? null,
+                        'plugin' => $plugin,
+                        'start_time' => $row['start_time'] ?? null,
+                        'end_time' => $row['end_time'] ?? null,
+                        'breakpoint' => $row['breakpoint'] ?? 0,
+                    ]);
+                $insertQuery->execute();
+            } catch (DatabaseException $e) {
+                $io->out('Already migrated <info>' . $row['migration_name'] . '</info>.');
+            }
         }
 
         return $count;
