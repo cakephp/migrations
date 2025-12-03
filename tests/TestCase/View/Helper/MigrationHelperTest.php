@@ -397,4 +397,52 @@ class MigrationHelperTest extends TestCase
             ],
         ]));
     }
+
+    /**
+     * Test that getColumnOption removes null collate for all databases
+     *
+     * @see https://github.com/cakephp/migrations/issues/974
+     */
+    public function testGetColumnOptionRemovesNullCollate(): void
+    {
+        $options = [
+            'length' => 255,
+            'null' => true,
+            'default' => null,
+            'collate' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        // collate => null should NOT be in the output for any database
+        // because it causes "collate is not a valid column option" error
+        $this->assertArrayNotHasKey('collate', $result, 'collate => null should be removed');
+        $this->assertArrayNotHasKey('collation', $result, 'collation should not be set when collate is null');
+    }
+
+    /**
+     * Test that getColumnOption converts collate to collation for all databases
+     *
+     * Phinx uses 'collation' not 'collate', so this must be converted for any database
+     * that supports per-column collation (MySQL, SQL Server, PostgreSQL, SQLite).
+     *
+     * @see https://github.com/cakephp/migrations/issues/974
+     */
+    public function testGetColumnOptionConvertsCollateToCollation(): void
+    {
+        $options = [
+            'length' => 255,
+            'null' => true,
+            'default' => null,
+            'collate' => 'en_US.UTF-8',
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        // collate should be converted to collation for Phinx compatibility
+        // This is a bug: currently only MySQL/SQLServer convert this
+        $this->assertArrayNotHasKey('collate', $result, 'collate should be converted to collation');
+        $this->assertArrayHasKey('collation', $result, 'collation should be set from collate value');
+        $this->assertSame('en_US.UTF-8', $result['collation']);
+    }
 }
