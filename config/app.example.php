@@ -6,7 +6,8 @@
 
 return [
     'Migrations' => [
-        'unsigned_primary_keys' => null,
-        'column_null_default' => null,
+        'unsigned_primary_keys' => null, // Default false
+        'unsigned_ints' => null, // Default false, make sure this is aligned with the above config
+        'column_null_default' => null, // Default false
     ],
 ];
