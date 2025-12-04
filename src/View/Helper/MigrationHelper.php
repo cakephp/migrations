@@ -407,7 +407,7 @@ class MigrationHelper extends Helper
         if (!$isMysql) {
             unset($columnOptions['signed']);
         } elseif (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
-            // Remove 'signed' => true since signed is now the default for integer columns
+            // Remove 'signed' => true since signed is the default for integer columns
             // Only output explicit 'signed' => false for unsigned columns
             unset($columnOptions['signed']);
         }

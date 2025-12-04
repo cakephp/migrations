@@ -29,7 +29,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => false,
             ])
             ->changeColumn('title', 'text', [
                 'default' => null,
@@ -53,7 +52,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => false,
             ])
             ->update();
 
@@ -63,7 +61,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => false,
             ])
             ->update();
 
@@ -73,7 +70,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => false,
             ])
             ->update();
         $this->table('categories')
