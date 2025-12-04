@@ -15,8 +15,6 @@ use DateTime;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
-use Migrations\Db\Adapter\AbstractAdapter;
-use Migrations\Db\Adapter\AdapterWrapper;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
 use Migrations\Util\Util;

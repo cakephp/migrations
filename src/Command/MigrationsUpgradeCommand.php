@@ -18,7 +18,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
-use Cake\Database\Exception\DatabaseException;
+use Cake\Database\Exception\QueryException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
@@ -280,7 +280,7 @@ class MigrationsUpgradeCommand extends Command
                         'breakpoint' => $row['breakpoint'] ?? 0,
                     ]);
                 $insertQuery->execute();
-            } catch (DatabaseException $e) {
+            } catch (QueryException $e) {
                 $io->out('Already migrated <info>' . $row['migration_name'] . '</info>.');
             }
         }
