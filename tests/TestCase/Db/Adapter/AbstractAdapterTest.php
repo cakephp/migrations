@@ -161,6 +161,37 @@ class AbstractAdapterTest extends TestCase
                 ' DEFAULT CURRENT_TIMESTAMP(3)',
             ],
 
+            // CURRENT_DATE on date type should NOT be quoted
+            'CURRENT_DATE on date' => [
+                'CURRENT_DATE',
+                AbstractAdapter::TYPE_DATE,
+                ' DEFAULT CURRENT_DATE',
+            ],
+            // CURRENT_DATE on non-date types SHOULD be quoted
+            'CURRENT_DATE on datetime should be quoted' => [
+                'CURRENT_DATE',
+                AbstractAdapter::TYPE_DATETIME,
+                " DEFAULT 'CURRENT_DATE'",
+            ],
+            'CURRENT_DATE on string should be quoted' => [
+                'CURRENT_DATE',
+                AbstractAdapter::TYPE_STRING,
+                " DEFAULT 'CURRENT_DATE'",
+            ],
+
+            // CURRENT_TIME on time type should NOT be quoted
+            'CURRENT_TIME on time' => [
+                'CURRENT_TIME',
+                AbstractAdapter::TYPE_TIME,
+                ' DEFAULT CURRENT_TIME',
+            ],
+            // CURRENT_TIME on non-time types SHOULD be quoted
+            'CURRENT_TIME on datetime should be quoted' => [
+                'CURRENT_TIME',
+                AbstractAdapter::TYPE_DATETIME,
+                " DEFAULT 'CURRENT_TIME'",
+            ],
+
             // CURRENT_TIMESTAMP on non-datetime types SHOULD be quoted (bug #1891)
             'CURRENT_TIMESTAMP on string should be quoted' => [
                 'CURRENT_TIMESTAMP',

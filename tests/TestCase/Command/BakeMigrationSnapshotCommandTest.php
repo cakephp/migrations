@@ -226,6 +226,34 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->runSnapshotTest('PluginBlog', '-p TestBlog');
     }
 
+    /**
+     * Test baking a snapshot for a plugin with custom connection (issue #463).
+     * This tests that when using both --plugin and --connection options,
+     * the migration includes all tables from the connection, not just those
+     * with Table classes in the plugin.
+     *
+     * @return void
+     */
+    public function testPluginWithCustomConnection()
+    {
+        $this->loadPlugins(['SimpleSnapshot']);
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $bakeName = $this->getBakeName('TestSnapshotPluginCustomConnection');
+        $this->exec("bake migration_snapshot {$bakeName} -c test -p SimpleSnapshot");
+
+        $generatedMigration = glob($this->migrationPath . '*_TestSnapshotPluginCustomConnection*.php');
+        $this->generatedFiles = $generatedMigration;
+        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
+
+        $this->assertNotEmpty($generatedMigration, 'Migration file should be generated');
+
+        $content = file_get_contents($generatedMigration[0]);
+        $this->assertStringContainsString('function up()', $content);
+        $this->assertStringNotContainsString('public function up(): void {}', $content, 'up() method should not be empty');
+        $this->assertStringContainsString('->create()', $content, 'Migration should contain table creation statements');
+    }
+
     protected function runSnapshotTest(string $scenario, string $arguments = ''): void
     {
         if ($arguments) {

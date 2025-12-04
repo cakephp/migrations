@@ -287,6 +287,32 @@ appropriate for the integer size, so that ``smallinteger`` will give you
 ``smallserial``, ``integer`` gives ``serial``, and ``biginteger`` gives
 ``bigserial``.
 
+For ``date`` columns:
+
+======== ===========
+Option   Description
+======== ===========
+default  set default value (use with ``CURRENT_DATE``)
+======== ===========
+
+For ``time`` columns:
+
+======== ===========
+Option   Description
+======== ===========
+default  set default value (use with ``CURRENT_TIME``)
+timezone enable or disable the ``with time zone`` option *(only applies to Postgres)*
+======== ===========
+
+For ``datetime`` columns:
+
+======== ===========
+Option   Description
+======== ===========
+default  set default value (use with ``CURRENT_TIMESTAMP``)
+timezone enable or disable the ``with time zone`` option *(only applies to Postgres)*
+======== ===========
+
 For ``timestamp`` columns:
 
 ======== ===========

@@ -1114,19 +1114,30 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function getDefaultValueDefinition(mixed $default, ?string $columnType = null): string
     {
-        $datetimeTypes = [
-            static::TYPE_DATETIME,
-            static::TYPE_TIMESTAMP,
-            static::TYPE_TIME,
-            static::TYPE_DATE,
+        // SQL functions mapped to their valid column types (ordered longest-first to avoid prefix conflicts)
+        $sqlFunctionTypes = [
+            'CURRENT_TIMESTAMP' => [static::TYPE_DATETIME, static::TYPE_TIMESTAMP, static::TYPE_TIME, static::TYPE_DATE],
+            'CURRENT_DATE' => [static::TYPE_DATE],
+            'CURRENT_TIME' => [static::TYPE_TIME],
         ];
 
         if ($default instanceof Literal) {
             $default = (string)$default;
-        } elseif (is_string($default) && stripos($default, 'CURRENT_TIMESTAMP') === 0) {
-            // Only skip quoting CURRENT_TIMESTAMP for datetime-related column types.
-            // For other types (like string), it should be quoted as a literal string value.
-            if (!in_array($columnType, $datetimeTypes, true)) {
+        } elseif (is_string($default) && $columnType !== null) {
+            $matched = false;
+            foreach ($sqlFunctionTypes as $function => $validTypes) {
+                // Match function name at start, followed by end of string or opening parenthesis
+                $len = strlen($function);
+                if (
+                    stripos($default, $function) === 0 &&
+                    (strlen($default) === $len || $default[$len] === '(') &&
+                    in_array($columnType, $validTypes, true)
+                ) {
+                    $matched = true;
+                    break;
+                }
+            }
+            if (!$matched) {
                 $default = $this->quoteString($default);
             }
         } elseif (is_string($default)) {
