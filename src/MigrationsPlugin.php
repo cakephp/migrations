@@ -26,13 +26,13 @@ use Migrations\Command\DumpCommand;
 use Migrations\Command\EntryCommand;
 use Migrations\Command\MarkMigratedCommand;
 use Migrations\Command\MigrateCommand;
-use Migrations\Command\MigrationsUpgradeCommand;
 use Migrations\Command\RollbackCommand;
 use Migrations\Command\SeedCommand;
 use Migrations\Command\SeedResetCommand;
 use Migrations\Command\SeedsEntryCommand;
 use Migrations\Command\SeedStatusCommand;
 use Migrations\Command\StatusCommand;
+use Migrations\Command\UpgradeCommand;
 
 /**
  * Plugin class for migrations
@@ -80,7 +80,7 @@ class MigrationsPlugin extends BasePlugin
         // Only show upgrade command if not explicitly using unified table
         // (i.e., when legacyTables is null/autodetect or true)
         if (Configure::read('Migrations.legacyTables') !== false) {
-            $migrationClasses[] = MigrationsUpgradeCommand::class;
+            $migrationClasses[] = UpgradeCommand::class;
         }
         $seedClasses = [
             SeedsEntryCommand::class,

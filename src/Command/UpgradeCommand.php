@@ -22,6 +22,8 @@ use Cake\Database\Exception\QueryException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
+use Migrations\Db\Adapter\WrapperInterface;
+use Migrations\Migration\ManagerFactory;
 
 /**
  * Upgrade command to migrate from legacy phinxlog tables to unified cake_migrations table.
@@ -29,7 +31,7 @@ use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
  * This command is only visible when legacy phinxlog tables are detected
  * or when Migrations.legacyTables is set to true.
  */
-class MigrationsUpgradeCommand extends Command
+class UpgradeCommand extends Command
 {
     /**
      * The default name added to the application command list
@@ -120,7 +122,7 @@ class MigrationsUpgradeCommand extends Command
         if (!$this->tableExists($connection, $unifiedTableName)) {
             $io->out("Creating unified table <info>{$unifiedTableName}</info>...");
             if (!$dryRun) {
-                $this->createUnifiedTable($connection);
+                $this->createUnifiedTable($connection, $io);
             }
         } else {
             $io->out("Unified table <info>{$unifiedTableName}</info> already exists.");
@@ -210,26 +212,27 @@ class MigrationsUpgradeCommand extends Command
      * Create the unified migrations table.
      *
      * @param \Cake\Database\Connection $connection Database connection
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @return void
      */
-    protected function createUnifiedTable(Connection $connection): void
+    protected function createUnifiedTable(Connection $connection, ConsoleIo $io): void
     {
-        $driver = $connection->getDriver();
-        $sql = sprintf(
-            'CREATE TABLE %s (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                version BIGINT NOT NULL,
-                migration_name VARCHAR(100) NULL,
-                plugin VARCHAR(100) NULL,
-                start_time TIMESTAMP NULL,
-                end_time TIMESTAMP NULL,
-                breakpoint TINYINT(1) NOT NULL DEFAULT 0,
-                UNIQUE KEY version_plugin_unique (version, plugin)
-            )',
-            $driver->quoteIdentifier(UnifiedMigrationsTableStorage::TABLE_NAME),
-        );
+        $factory = new ManagerFactory([
+            'plugin' => null,
+            'source' => null,
+            'connection' => $connection->configName(),
+            // This doesn't follow the cli flag as this method is only called when creating the table.
+            'dry-run' => false,
+        ]);
 
-        $connection->execute($sql);
+        $manager = $factory->createManager($io);
+        $adapter = $manager->getEnvironment()->getAdapter();
+        if ($adapter instanceof WrapperInterface) {
+            $adapter = $adapter->getAdapter();
+        }
+
+        $storage = new UnifiedMigrationsTableStorage($adapter);
+        $storage->createTable();
     }
 
     /**
