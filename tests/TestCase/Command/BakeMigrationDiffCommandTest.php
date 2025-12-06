@@ -305,7 +305,6 @@ class BakeMigrationDiffCommandTest extends TestCase
      */
     public function testBakingDiffDecimalChange(): void
     {
-        $this->markTestSkipped('This test fails in CI');
         $this->skipIf(!env('DB_URL_COMPARE'));
 
         $this->runDiffBakingTest('DecimalChange');
@@ -426,9 +425,6 @@ class Initial extends BaseMigration
         $migrations = $this->getMigrations("MigrationsDiff$scenario");
         $migrations->migrate();
 
-        if (file_exists($destination)) {
-            unlink($destination);
-        }
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
