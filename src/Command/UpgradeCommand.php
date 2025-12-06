@@ -231,7 +231,7 @@ class UpgradeCommand extends Command
         if ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
-        assert($adapter instanceof AbstractAdapter, "adapter must be an AbstractAdapter");
+        assert($adapter instanceof AbstractAdapter, 'adapter must be an AbstractAdapter');
 
         $storage = new UnifiedMigrationsTableStorage($adapter);
         $storage->createTable();
