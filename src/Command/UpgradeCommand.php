@@ -21,6 +21,7 @@ use Cake\Database\Connection;
 use Cake\Database\Exception\QueryException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Inflector;
+use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Db\Adapter\WrapperInterface;
 use Migrations\Migration\ManagerFactory;
@@ -230,6 +231,7 @@ class UpgradeCommand extends Command
         if ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
         }
+        assert($adapter instanceof AbstractAdapter, "adapter must be an AbstractAdapter");
 
         $storage = new UnifiedMigrationsTableStorage($adapter);
         $storage->createTable();
