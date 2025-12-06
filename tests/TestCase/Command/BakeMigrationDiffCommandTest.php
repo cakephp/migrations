@@ -425,7 +425,9 @@ class Initial extends BaseMigration
         $migrations = $this->getMigrations("MigrationsDiff$scenario");
         $migrations->migrate();
 
-        unlink($destination);
+        if (file_exists($destination)) {
+            unlink($destination);
+        }
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
