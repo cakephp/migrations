@@ -413,6 +413,9 @@ class Initial extends BaseMigration
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . $db . '.lock';
 
         $destinationConfigDir = ROOT . DS . 'config' . DS . "MigrationsDiff{$scenario}" . DS;
+        if (!is_dir($destinationConfigDir)) {
+            mkdir($destinationConfigDir, 0777, true);
+        }
         $destination = $destinationConfigDir . "20160415220805_{$classPrefix}{$scenario}" . ucfirst($db) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . $db . '.lock';
         copy($diffMigrationsPath, $destination);
