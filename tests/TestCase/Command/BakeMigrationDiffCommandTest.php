@@ -434,6 +434,10 @@ class Initial extends BaseMigration
             ->where(['version' => 20160415220805])
             ->execute();
 
+        // Delete the migration file too - checkSync() compares the last file version
+        // against the last migrated version, so having an unmigrated file would fail
+        unlink($destination);
+
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
         $bakeName = $this->getBakeName("TheDiff{$scenario}");
