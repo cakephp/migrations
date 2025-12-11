@@ -8,12 +8,20 @@ use Cake\Database\Expression\QueryExpression;
 use Cake\Database\ValueBinder;
 use Migrations\Db\Literal;
 use Migrations\Db\Table\Column;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 class ColumnTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        // Restore bootstrap defaults
+        Configure::write('Migrations.unsigned_primary_keys', true);
+        Configure::write('Migrations.column_null_default', true);
+        Configure::delete('Migrations.unsigned_ints');
+    }
+
     public function testNullConstructorParameter()
     {
         $column = new Column(name: 'title');
@@ -51,7 +59,6 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->isIdentity());
     }
 
-    #[RunInSeparateProcess]
     public function testColumnNullFeatureFlag()
     {
         $column = new Column();
@@ -179,7 +186,6 @@ class ColumnTest extends TestCase
         $this->assertFalse($result['unsigned']);
     }
 
-    #[RunInSeparateProcess]
     public function testUnsignedIntsConfiguration(): void
     {
         // Without configuration, integers default to signed
@@ -203,7 +209,6 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->isSigned());
     }
 
-    #[RunInSeparateProcess]
     public function testUnsignedPrimaryKeysConfiguration(): void
     {
         // Without configuration, identity columns default to signed
@@ -232,7 +237,6 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->isSigned());
     }
 
-    #[RunInSeparateProcess]
     public function testBothUnsignedConfigurationsWork(): void
     {
         Configure::write('Migrations.unsigned_primary_keys', true);
@@ -254,7 +258,6 @@ class ColumnTest extends TestCase
         $this->assertFalse($stringColumn->isUnsigned());
     }
 
-    #[RunInSeparateProcess]
     public function testUnsignedConfigurationDoesNotAffectNonIntegerTypes(): void
     {
         Configure::write('Migrations.unsigned_ints', true);
