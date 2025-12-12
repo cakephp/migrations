@@ -651,9 +651,9 @@ interface AdapterInterface
     public function hasDatabase(string $name): bool;
 
     /**
-     * Cleanup missing migrations from the phinxlog table
+     * Cleanup missing migrations from the migration tracking table.
      *
-     * Removes entries from the phinxlog table for migrations that no longer exist
+     * Removes entries from the migrations table for migrations that no longer exist
      * in the migrations directory (marked as MISSING in status output).
      *
      * @return void
@@ -715,4 +715,15 @@ interface AdapterInterface
      * @return \Cake\Database\Connection The connection
      */
     public function getConnection(): Connection;
+
+    /**
+     * Gets the schema table name.
+     *
+     * Returns the table name used for migration tracking based on configuration:
+     * - 'cake_migrations' for unified mode
+     * - 'phinxlog' or '{plugin}_phinxlog' for legacy mode
+     *
+     * @return string The migration tracking table name
+     */
+    public function getSchemaTableName(): string;
 }

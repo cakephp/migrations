@@ -1331,9 +1331,23 @@ class Manager
     }
 
     /**
-     * Cleanup missing migrations from the phinxlog table
+     * Gets the schema table name being used for migration tracking.
      *
-     * Removes entries from the phinxlog table for migrations that no longer exist
+     * Returns the actual table name based on current configuration:
+     * - 'cake_migrations' for unified mode
+     * - 'phinxlog' or '{plugin}_phinxlog' for legacy mode
+     *
+     * @return string The migration tracking table name
+     */
+    public function getSchemaTableName(): string
+    {
+        return $this->getEnvironment()->getAdapter()->getSchemaTableName();
+    }
+
+    /**
+     * Cleanup missing migrations from the migration tracking table.
+     *
+     * Removes entries from the migrations table for migrations that no longer exist
      * in the migrations directory (marked as MISSING in status output).
      *
      * @return int The number of missing migrations removed
@@ -1345,7 +1359,7 @@ class Manager
         $versions = $env->getVersionLog();
         $adapter = $env->getAdapter();
 
-        // Find missing migrations (those in phinxlog but not in filesystem)
+        // Find missing migrations (those in migration table but not in filesystem)
         $missingVersions = [];
         foreach ($versions as $versionId => $versionInfo) {
             if (!isset($defaultMigrations[$versionId])) {

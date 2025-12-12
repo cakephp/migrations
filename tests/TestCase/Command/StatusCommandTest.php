@@ -28,6 +28,8 @@ class StatusCommandTest extends TestCase
     {
         $this->exec('migrations status -c test');
         $this->assertExitSuccess();
+        // Check for table name info
+        $this->assertOutputContains('using migration table');
         // Check for headers
         $this->assertOutputContains('Status');
         $this->assertOutputContains('Migration ID');

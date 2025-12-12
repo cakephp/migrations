@@ -47,9 +47,9 @@ class UnifiedMigrationsTableStorage
     }
 
     /**
-     * Cleanup missing migrations from the phinxlog table
+     * Cleanup missing migrations from the migration tracking table.
      *
-     * Removes entries from the phinxlog table for migrations that no longer exist
+     * Removes entries from the migrations table for migrations that no longer exist
      * in the migrations directory (marked as MISSING in status output).
      *
      * @param array $missingVersions The list of missing migration versions.

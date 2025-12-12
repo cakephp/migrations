@@ -572,4 +572,12 @@ abstract class AdapterWrapper implements WrapperInterface
     {
         return $this->getAdapter()->getIo();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSchemaTableName(): string
+    {
+        return $this->getAdapter()->getSchemaTableName();
+    }
 }
