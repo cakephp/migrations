@@ -87,6 +87,13 @@ class MigrationsTest extends TestCase
                 $connection->execute($stmt);
             }
         }
+        if (in_array('cake_migrations', $allTables)) {
+            $ormTable = $this->getTableLocator()->get('cake_migrations', ['connection' => $this->Connection]);
+            $query = $connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());
+            foreach ($query as $stmt) {
+                $connection->execute($stmt);
+            }
+        }
         if (in_array('cake_seeds', $allTables)) {
             $ormTable = $this->getTableLocator()->get('cake_seeds', ['connection' => $this->Connection]);
             $query = $connection->getDriver()->schemaDialect()->truncateTableSql($ormTable->getSchema());

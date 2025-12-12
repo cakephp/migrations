@@ -102,6 +102,95 @@ Similar changes are for fetching a single row::
     $stmt = $this->getAdapter()->query('SELECT * FROM articles');
     $rows = $stmt->fetch('assoc');
 
+Unified Migrations Table
+========================
+
+As of migrations 5.x, there is a new unified ``cake_migrations`` table that
+replaces the legacy ``phinxlog`` tables. This provides several benefits:
+
+- **Single table for all migrations**: Instead of separate ``phinxlog`` (app)
+  and ``{plugin}_phinxlog`` (plugins) tables, all migrations are tracked in
+  one ``cake_migrations`` table with a ``plugin`` column.
+- **Simpler database schema**: Fewer migration tracking tables to manage.
+- **Better plugin support**: Plugin migrations are properly namespaced.
+
+Backward Compatibility
+----------------------
+
+For existing applications with ``phinxlog`` tables:
+
+- **Automatic detection**: If any ``phinxlog`` table exists, migrations will
+  continue using the legacy tables automatically.
+- **No forced migration**: Existing applications don't need to change anything.
+- **Opt-in upgrade**: You can migrate to the new table when you're ready.
+
+Configuration
+-------------
+
+The ``Migrations.legacyTables`` configuration option controls the behavior:
+
+.. code-block:: php
+
+    // config/app.php or config/app_local.php
+    'Migrations' => [
+        // null (default): Autodetect - use legacy if phinxlog tables exist
+        // false: Force use of new cake_migrations table
+        // true: Force use of legacy phinxlog tables
+        'legacyTables' => null,
+    ],
+
+Upgrading to the Unified Table
+------------------------------
+
+To migrate from ``phinxlog`` tables to the new ``cake_migrations`` table:
+
+1. **Preview the upgrade** (dry run):
+
+   .. code-block:: bash
+
+       bin/cake migrations upgrade --dry-run
+
+2. **Run the upgrade**:
+
+   .. code-block:: bash
+
+       bin/cake migrations upgrade
+
+3. **Update your configuration**:
+
+   .. code-block:: php
+
+       // config/app.php
+       'Migrations' => [
+           'legacyTables' => false,
+       ],
+
+4. **Optionally drop phinx tables**: Your migration history is preserved
+   by default. Use ``--drop-tables`` to drop the ``phinxlog``tables after
+   verifying your migrations run correctly.
+
+   .. code-block:: bash
+
+       bin/cake migrations upgrade --drop-tables
+
+Rolling Back
+------------
+
+If you need to revert to phinx tables after upgrading:
+
+1. Set ``'legacyTables' => true`` in your configuration.
+
+.. warning::
+
+    You cannot rollback after running ``upgrade --drop-tables``.
+
+
+New Installations
+-----------------
+
+For new applications without any existing ``phinxlog`` tables, the unified
+``cake_migrations`` table is used automatically. No configuration is needed.
+
 Problems with the builtin backend?
 ==================================
 

@@ -1357,18 +1357,8 @@ class Manager
             return 0;
         }
 
-        // Remove missing migrations from phinxlog
-        $adapter->beginTransaction();
-        try {
-            $delete = $adapter->getDeleteBuilder()
-                ->from($env->getSchemaTableName())
-                ->where(['version IN' => $missingVersions]);
-            $delete->execute();
-            $adapter->commitTransaction();
-        } catch (Exception $e) {
-            $adapter->rollbackTransaction();
-            throw $e;
-        }
+        // Remove missing migrations from migrations table
+        $adapter->cleanupMissing($missingVersions);
 
         return count($missingVersions);
     }

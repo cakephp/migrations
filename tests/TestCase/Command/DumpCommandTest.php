@@ -3,19 +3,16 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Core\Plugin;
 use Cake\Database\Connection;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
-use Cake\TestSuite\TestCase;
+use Migrations\Test\TestCase\TestCase;
 use RuntimeException;
 
 class DumpCommandTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
-
     protected Connection $connection;
     protected string $_compareBasePath;
     protected string $dumpFile;
@@ -30,6 +27,7 @@ class DumpCommandTest extends TestCase
         $this->connection->execute('DROP TABLE IF EXISTS letters');
         $this->connection->execute('DROP TABLE IF EXISTS parts');
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS cake_migrations');
 
         $this->dumpFile = ROOT . DS . 'config/TestsMigrations/schema-dump-test.lock';
     }
@@ -42,6 +40,7 @@ class DumpCommandTest extends TestCase
         $this->connection->execute('DROP TABLE IF EXISTS letters');
         $this->connection->execute('DROP TABLE IF EXISTS parts');
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS cake_migrations');
         if (file_exists($this->dumpFile)) {
             unlink($this->dumpFile);
         }

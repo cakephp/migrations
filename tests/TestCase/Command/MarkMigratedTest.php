@@ -13,18 +13,15 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Datasource\ConnectionManager;
-use Cake\TestSuite\TestCase;
+use Migrations\Test\TestCase\TestCase;
 
 /**
  * MarkMigratedTest class
  */
 class MarkMigratedTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
-
     /**
      * Instance of a Cake Connection object
      *
@@ -42,8 +39,10 @@ class MarkMigratedTest extends TestCase
         parent::setUp();
 
         $this->connection = ConnectionManager::get('test');
+        // Drop both legacy and unified tables
         $this->connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS cake_migrations');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
     }
 
@@ -57,6 +56,7 @@ class MarkMigratedTest extends TestCase
         parent::tearDown();
         $this->connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');
         $this->connection->execute('DROP TABLE IF EXISTS phinxlog');
+        $this->connection->execute('DROP TABLE IF EXISTS cake_migrations');
         $this->connection->execute('DROP TABLE IF EXISTS numbers');
     }
 
@@ -80,7 +80,7 @@ class MarkMigratedTest extends TestCase
             'Migration `20150704160200` successfully marked migrated !',
         );
 
-        $result = $this->connection->selectQuery()->select(['*'])->from('phinxlog')->execute()->fetchAll('assoc');
+        $result = $this->connection->selectQuery()->select(['*'])->from($this->getMigrationsTableName())->execute()->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
         $this->assertEquals('20150724233100', $result[1]['version']);
         $this->assertEquals('20150826191400', $result[2]['version']);
@@ -98,7 +98,7 @@ class MarkMigratedTest extends TestCase
             'Skipping migration `20150826191400` (already migrated).',
         );
 
-        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from('phinxlog')->execute();
+        $result = $this->connection->selectQuery()->select(['COUNT(*)'])->from($this->getMigrationsTableName())->execute();
         $this->assertEquals(4, $result->fetchColumn(0));
     }
 
@@ -113,7 +113,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['*'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute()
             ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
@@ -133,7 +133,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['*'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute()
             ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
@@ -142,7 +142,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['COUNT(*)'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute();
         $this->assertEquals(3, $result->fetchColumn(0));
     }
@@ -167,7 +167,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['*'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute()
             ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
@@ -183,7 +183,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['*'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute()
             ->fetchAll('assoc');
         $this->assertEquals('20150704160200', $result[0]['version']);
@@ -191,7 +191,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['COUNT(*)'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute();
         $this->assertEquals(2, $result->fetchColumn(0));
     }
@@ -217,7 +217,7 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['*'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute()
             ->fetchAll('assoc');
         $this->assertEquals('20150724233100', $result[0]['version']);
@@ -230,14 +230,14 @@ class MarkMigratedTest extends TestCase
 
         $result = $this->connection->selectQuery()
             ->select(['*'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute()
             ->fetchAll('assoc');
         $this->assertEquals('20150826191400', $result[1]['version']);
         $this->assertEquals('20150724233100', $result[0]['version']);
         $result = $this->connection->selectQuery()
             ->select(['COUNT(*)'])
-            ->from('phinxlog')
+            ->from($this->getMigrationsTableName())
             ->execute();
         $this->assertEquals(2, $result->fetchColumn(0));
     }
@@ -306,6 +306,6 @@ class MarkMigratedTest extends TestCase
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test');
         $tables = $connection->getSchemaCollection()->listTables();
-        $this->assertContains('migrator_phinxlog', $tables);
+        $this->assertContains($this->getMigrationsTableName('Migrator'), $tables);
     }
 }

@@ -321,6 +321,9 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $expected = str_replace('utf8mb3_', 'utf8_', $expected);
         $result = str_replace('utf8mb3_', 'utf8_', $result);
 
+        // Normalize unified table name to legacy for comparison
+        $result = str_replace("'cake_migrations'", "'phinxlog'", $result);
+
         $this->assertTextEquals($expected, $result, 'Content does not match file ' . $path);
     }
 

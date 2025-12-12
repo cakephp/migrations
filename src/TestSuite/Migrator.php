@@ -264,6 +264,7 @@ class Migrator
         assert($connection instanceof Connection);
         $tables = $connection->getSchemaCollection()->listTables();
         $skip[] = '*phinxlog*';
+        $skip[] = 'cake_migrations';
 
         return array_filter($tables, function ($table) use ($skip) {
             foreach ($skip as $pattern) {

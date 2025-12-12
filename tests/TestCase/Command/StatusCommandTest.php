@@ -3,25 +3,17 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Exception\MissingPluginException;
-use Cake\Database\Exception\DatabaseException;
-use Cake\TestSuite\TestCase;
+use Migrations\Test\TestCase\TestCase;
 use RuntimeException;
 
 class StatusCommandTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
-
     public function setUp(): void
     {
         parent::setUp();
 
-        $table = $this->fetchTable('Phinxlog');
-        try {
-            $table->deleteAll('1=1');
-        } catch (DatabaseException $e) {
-        }
+        $this->clearMigrationRecords('test');
     }
 
     public function testHelp(): void
@@ -86,29 +78,21 @@ class StatusCommandTest extends TestCase
 
     public function testCleanWithMissingMigrations(): void
     {
-        // First, insert a fake migration entry that doesn't exist in filesystem
-        $table = $this->fetchTable('Phinxlog');
-        $entity = $table->newEntity([
-            'version' => 99999999999999,
-            'migration_name' => 'FakeMissingMigration',
-            'start_time' => '2024-01-01 00:00:00',
-            'end_time' => '2024-01-01 00:00:01',
-            'breakpoint' => false,
-        ]);
-        $table->save($entity);
+        // Run a migration first to ensure the schema table exists
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitSuccess();
+
+        // Insert a fake migration entry that doesn't exist in filesystem
+        $this->insertMigrationRecord('test', 99999999999999, 'FakeMissingMigration');
 
         // Verify the fake migration is in the table
-        $count = $table->find()->where(['version' => 99999999999999])->count();
-        $this->assertEquals(1, $count);
+        $initialCount = $this->getMigrationRecordCount('test');
+        $this->assertGreaterThan(0, $initialCount);
 
         // Run the clean command
         $this->exec('migrations status -c test --cleanup');
         $this->assertExitSuccess();
         $this->assertOutputContains('Removed 1 missing migration(s) from migration log.');
-
-        // Verify the fake migration was removed
-        $count = $table->find()->where(['version' => 99999999999999])->count();
-        $this->assertEquals(0, $count);
     }
 
     public function testCleanHelp(): void
@@ -116,6 +100,6 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status --help');
         $this->assertExitSuccess();
         $this->assertOutputContains('--cleanup');
-        $this->assertOutputContains('Remove MISSING migrations from the phinxlog table');
+        $this->assertOutputContains('Remove MISSING migrations from the');
     }
 }

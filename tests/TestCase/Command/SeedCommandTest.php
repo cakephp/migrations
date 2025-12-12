@@ -3,27 +3,19 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
-use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
+use Migrations\Test\TestCase\TestCase;
 
 class SeedCommandTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
-
     public function setUp(): void
     {
         parent::setUp();
 
-        $table = $this->fetchTable('Phinxlog');
-        try {
-            $table->deleteAll('1=1');
-        } catch (DatabaseException $e) {
-        }
+        $this->clearMigrationRecords('test');
     }
 
     public function tearDown(): void

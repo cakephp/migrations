@@ -30,7 +30,7 @@ class TableFinder
      *
      * @var string[]
      */
-    public array $skipTables = ['phinxlog'];
+    public array $skipTables = ['phinxlog', 'cake_migrations'];
 
     /**
      * Regex of Table name to skip

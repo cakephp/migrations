@@ -304,10 +304,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Gets the schema table name.
      *
+     * Returns the appropriate table name based on configuration:
+     * - 'cake_migrations' for unified mode
+     * - Phinxlog table name for backwards compatibility mode
+     *
      * @return string
      */
     public function getSchemaTableName(): string
     {
+        if ($this->isUsingUnifiedTable()) {
+            return UnifiedMigrationsTableStorage::TABLE_NAME;
+        }
+
         return $this->schemaTableName;
     }
 
@@ -837,19 +845,72 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * @inheritDoc
+     */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $storage = $this->migrationsTable();
+
+        $storage->cleanupMissing($missingVersions);
+    }
+
+    /**
      * Get the migrations table storage implementation.
      *
-     * @return \Migrations\Db\Adapter\MigrationsTableStorage
+     * Returns either UnifiedMigrationsTableStorage (new cake_migrations table)
+     * or MigrationsTableStorage (legacy phinxlog tables) based on configuration
+     * and autodetection.
+     *
+     * @return \Migrations\Db\Adapter\MigrationsTableStorage|\Migrations\Db\Adapter\UnifiedMigrationsTableStorage
      * @internal
      */
-    protected function migrationsTable(): MigrationsTableStorage
+    protected function migrationsTable(): MigrationsTableStorage|UnifiedMigrationsTableStorage
     {
-        // TODO Use configure/auto-detect which implmentation to use.
+        if ($this->isUsingUnifiedTable()) {
+            return new UnifiedMigrationsTableStorage(
+                $this,
+                $this->getOption('plugin'),
+            );
+        }
+
         return new MigrationsTableStorage(
             $this,
             $this->getSchemaTableName(),
             $this->getOption('plugin'),
         );
+    }
+
+    /**
+     * Determine if using the unified cake_migrations table.
+     *
+     * Checks configuration and autodetects based on existing legacy tables.
+     *
+     * @return bool True if using unified table, false for legacy phinxlog tables
+     */
+    protected function isUsingUnifiedTable(): bool
+    {
+        $config = Configure::read('Migrations.legacyTables');
+
+        // Explicit configuration takes precedence
+        if ($config === false) {
+            return true;
+        }
+
+        if ($config === true) {
+            return false;
+        }
+
+        // Autodetect mode (config is null or not set)
+        // Check if the main legacy phinxlog table exists
+        if ($this->connection !== null) {
+            $dialect = $this->connection->getDriver()->schemaDialect();
+            if ($dialect->hasTable('phinxlog')) {
+                return false;
+            }
+        }
+
+        // No legacy phinxlog table found - use unified table
+        return true;
     }
 
     /**
