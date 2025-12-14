@@ -43,6 +43,7 @@ class PostgresAdapter extends AbstractAdapter
         self::PHINX_TYPE_INTERVAL,
         self::PHINX_TYPE_BINARYUUID,
         self::PHINX_TYPE_NATIVEUUID,
+        TableSchema::TYPE_TIMESTAMP_TIMEZONE,
     ];
 
     private const GIN_INDEX_TYPE = 'gin';

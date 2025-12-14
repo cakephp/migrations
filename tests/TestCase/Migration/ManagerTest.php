@@ -2829,6 +2829,23 @@ class ManagerTest extends TestCase
         $this->assertFalse($adapter->hasTable('users'));
     }
 
+    public function testPostgresTimestamptimezone(): void
+    {
+        if ($this->getDriverType() !== 'postgres') {
+            $this->markTestSkipped('Test requires postgres');
+        }
+        $adapter = $this->prepareEnvironment([
+            'migrations' => ROOT . '/config/PostgresTimestamptimezone',
+        ]);
+        $adapter->connect();
+        // migrate to the latest version
+        $this->manager->migrate();
+
+        $this->assertTrue($adapter->hasTable('timestamp_articles'));
+
+        $this->manager->rollback('all');
+    }
+
     public function testMigrationWithDropColumnAndForeignKeyAndIndex(): void
     {
         if ($this->getDriverType() !== 'mysql') {
