@@ -139,6 +139,35 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->assertFalse(file_exists($this->migrationPath . 'schema-dump-test.lock'), 'Lock file should not be created with --generate-only');
     }
 
+    public function testSnapshotPostgresTimestampTzColumn(): void
+    {
+        $this->skipIf(env('DB') !== 'pgsql');
+
+        /** @var \Cake\Database\Connection  $connection */
+        $connection = ConnectionManager::get('test');
+        $connection->execute(
+            'CREATE TABLE IF NOT EXISTS postgres_timestamp_tz (id SERIAL PRIMARY KEY, created TIMESTAMPTZ NOT NULL)',
+        );
+
+        $scenario = 'PostgresTimestampTz';
+
+        $bakeName = $this->getBakeName("TestSnapshot{$scenario}");
+        $this->exec("bake migration_snapshot {$bakeName} -c test");
+
+        $connection->execute('DROP TABLE postgres_timestamp_tz');
+
+        $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*.php");
+        $this->generatedFiles = $generatedMigration;
+        $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
+
+        $generatedMigration = basename($generatedMigration[0]);
+        $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
+        $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
+        $this->assertOutputContains('Creating a dump of the new database state...');
+        $this->assertNotEmpty($this->generatedFiles);
+        $this->assertCorrectSnapshot($bakeName, file_get_contents($this->generatedFiles[0]));
+    }
+
     /**
      * Test baking a snapshot with the phinx auto-id feature disabled
      *
