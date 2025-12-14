@@ -17,6 +17,11 @@ class CreateTimestamptimezone extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
+            ])
+            ->addColumn('deleted_at', 'datetimefractional', [
+                'default' => null,
+                'limit' => null,
+                'null' => false,
             ]);
         $table->create();
     }
