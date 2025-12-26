@@ -41,7 +41,7 @@ class EntryCommandTest extends TestCase
         $this->exec('migrations --help');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('Available Commands');
+        $this->assertOutputContains('migrations:');
         $this->assertOutputContains('migrations migrate');
         $this->assertOutputContains('migrations status');
         $this->assertOutputContains('migrations rollback');
