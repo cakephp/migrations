@@ -2402,6 +2402,27 @@ INPUT;
         ];
     }
 
+    /**
+     * Test that hasTable() returns false after a table is dropped via execute().
+     *
+     * This verifies that hasTable() always checks the database rather than
+     * relying on an internal cache that could become stale when raw SQL is used.
+     */
+    public function testHasTableAfterExecuteDrop(): void
+    {
+        // Create table via API
+        $table = new Table('cache_test', [], $this->adapter);
+        $table->addColumn('name', 'string')
+              ->save();
+
+        $this->assertTrue($this->adapter->hasTable('cache_test'));
+
+        // Drop via execute() - hasTable() must still return false
+        $this->adapter->execute('DROP TABLE "cache_test"');
+
+        $this->assertFalse($this->adapter->hasTable('cache_test'));
+    }
+
     #[DataProvider('provideIndexColumnsToCheck')]
     public function testHasIndex($tableDef, $cols, $exp)
     {

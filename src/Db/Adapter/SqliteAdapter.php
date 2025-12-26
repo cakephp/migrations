@@ -229,7 +229,14 @@ class SqliteAdapter extends AbstractAdapter
      */
     public function hasTable(string $tableName): bool
     {
-        return $this->hasCreatedTable($tableName) || $this->resolveTable($tableName)['exists'];
+        // Only use the cache in dry-run mode where tables aren't actually created.
+        // In normal mode, always check the database to handle cases where tables
+        // are dropped via execute() which doesn't update the cache.
+        if ($this->isDryRunEnabled() && $this->hasCreatedTable($tableName)) {
+            return true;
+        }
+
+        return $this->resolveTable($tableName)['exists'];
     }
 
     /**
