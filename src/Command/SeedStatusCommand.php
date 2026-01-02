@@ -129,8 +129,14 @@ class SeedStatusCommand extends Command
                 }
             }
 
+            // Strip 'Seed' suffix for display
+            $displayName = $seedName;
+            if (str_ends_with($displayName, 'Seed')) {
+                $displayName = substr($displayName, 0, -4);
+            }
+
             $statuses[] = [
-                'seedName' => $seedName,
+                'seedName' => $displayName,
                 'plugin' => $plugin,
                 'status' => $executed ? 'executed' : 'pending',
                 'executedAt' => $executedAt,

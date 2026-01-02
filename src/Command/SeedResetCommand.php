@@ -132,14 +132,19 @@ class SeedResetCommand extends Command
         // Reset the seeds
         $count = 0;
         foreach ($seedsToReset as $seed) {
+            $seedName = $seed->getName();
+            if (str_ends_with($seedName, 'Seed')) {
+                $seedName = substr($seedName, 0, -4);
+            }
+
             if ($manager->isSeedExecuted($seed)) {
                 if (!$config->isDryRun()) {
                     $adapter->removeSeedFromLog($seed);
                 }
-                $io->info("Reset: {$seed->getName()}");
+                $io->info("Reset: {$seedName}");
                 $count++;
             } else {
-                $io->verbose("Skipped (not executed): {$seed->getName()}");
+                $io->verbose("Skipped (not executed): {$seedName}");
             }
         }
 
