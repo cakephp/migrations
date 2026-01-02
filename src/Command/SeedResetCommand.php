@@ -49,8 +49,12 @@ class SeedResetCommand extends Command
             'allowing seeds to be re-run without the --force flag.',
             '',
             '<info>seeds reset</info>',
+            '<info>seeds reset --seed Users</info>',
+            '<info>seeds reset --seed Users,Posts</info>',
             '<info>seeds reset --plugin Demo</info>',
             '<info>seeds reset -c secondary</info>',
+        ])->addOption('seed', [
+            'help' => 'Comma-separated list of specific seeds to reset. Resets all seeds if not specified.',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to reset seeds for',
@@ -100,8 +104,24 @@ class SeedResetCommand extends Command
         $seeds = $manager->getSeeds();
         $adapter = $manager->getEnvironment()->getAdapter();
 
-        // Reset all seeds
+        // Filter seeds if --seed option is specified
+        $seedOption = $args->getOption('seed');
         $seedsToReset = $seeds;
+
+        if ($seedOption) {
+            $requestedSeeds = array_map('trim', explode(',', (string)$seedOption));
+            $seedsToReset = [];
+
+            foreach ($requestedSeeds as $requestedSeed) {
+                $normalizedName = $manager->normalizeSeedName($requestedSeed, $seeds);
+                if ($normalizedName === null) {
+                    $io->error("Seed `{$requestedSeed}` does not exist.");
+
+                    return self::CODE_ERROR;
+                }
+                $seedsToReset[$normalizedName] = $seeds[$normalizedName];
+            }
+        }
 
         if (empty($seedsToReset)) {
             $io->warning('No seeds to reset.');
@@ -111,7 +131,8 @@ class SeedResetCommand extends Command
 
         // Show what will be reset and ask for confirmation
         $io->out('');
-        $io->out('<info>All seeds will be reset:</info>');
+        $resetAllMessage = $seedOption ? '<info>The following seeds will be reset:</info>' : '<info>All seeds will be reset:</info>';
+        $io->out($resetAllMessage);
         foreach ($seedsToReset as $seed) {
             $io->out('  - ' . Util::getSeedDisplayName($seed->getName()));
         }

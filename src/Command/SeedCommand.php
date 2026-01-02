@@ -93,6 +93,10 @@ class SeedCommand extends Command
                 'short' => 'f',
                 'help' => 'Force re-running seeds that have already been executed',
                 'boolean' => true,
+            ])
+            ->addOption('fake', [
+                'help' => 'Mark seeds as executed without actually running them',
+                'boolean' => true,
             ]);
 
         return $parser;
@@ -154,8 +158,13 @@ class SeedCommand extends Command
 
         $versionOrder = $config->getVersionOrder();
 
+        $fake = (bool)$args->getOption('fake');
+
         if ($config->isDryRun()) {
             $io->info('DRY-RUN mode enabled');
+        }
+        if ($fake) {
+            $io->warning('performing fake seeding');
         }
         $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
@@ -205,11 +214,11 @@ class SeedCommand extends Command
             }
 
             // run all the seed(ers)
-            $manager->seed(null, (bool)$args->getOption('force'));
+            $manager->seed(null, (bool)$args->getOption('force'), $fake);
         } else {
             // run seed(ers) specified as arguments
             foreach ($seeds as $seed) {
-                $manager->seed(trim($seed), (bool)$args->getOption('force'));
+                $manager->seed(trim($seed), (bool)$args->getOption('force'), $fake);
             }
         }
         $end = microtime(true);

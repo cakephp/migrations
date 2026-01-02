@@ -570,4 +570,125 @@ class SeedCommandTest extends TestCase
         $this->assertOutputContains('already executed');
         $this->assertOutputNotContains('seeding');
     }
+
+    public function testFakeSeedMarksAsExecuted(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+
+        // Run with --fake flag
+        $this->exec('seeds run -c test NumbersSeed --fake');
+        $this->assertExitSuccess();
+        $this->assertErrorContains('performing fake seeding');
+        $this->assertOutputContains('faking');
+        $this->assertOutputContains('faked');
+        $this->assertOutputNotContains('seeding');
+
+        // Verify NO data was inserted
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(0, $query->fetchColumn(0), 'Fake seed should not insert data');
+
+        // Verify the seed WAS tracked in cake_seeds table
+        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $this->assertEquals(1, $seedLog->fetchColumn(0), 'Fake seeds should be tracked');
+
+        // Running again should show already executed
+        $this->exec('seeds run -c test NumbersSeed');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('already executed');
+    }
+
+    public function testFakeSeedWithForce(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+
+        // Run with --fake first
+        $this->exec('seeds run -c test NumbersSeed --fake');
+        $this->assertExitSuccess();
+
+        // Verify seed is tracked
+        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $this->assertEquals(1, $seedLog->fetchColumn(0));
+
+        // Run with --force to actually execute it
+        $this->exec('seeds run -c test NumbersSeed --force');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
+
+        // Verify data was inserted
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers');
+        $this->assertEquals(1, $query->fetchColumn(0));
+    }
+
+    public function testResetSpecificSeed(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+
+        // Run two seeds
+        $this->exec('seeds run -c test NumbersSeed');
+        $this->assertExitSuccess();
+
+        $this->exec('seeds run -c test StoresSeed');
+        $this->assertExitSuccess();
+
+        // Verify both are tracked
+        $numbersLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $this->assertEquals(1, $numbersLog->fetchColumn(0));
+
+        $storesLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'StoresSeed\'');
+        $this->assertEquals(1, $storesLog->fetchColumn(0));
+
+        // Reset only Numbers seed
+        $this->exec('seeds reset -c test --seed Numbers', ['y']);
+        $this->assertExitSuccess();
+        $this->assertOutputContains('The following seeds will be reset:');
+        $this->assertOutputNotContains('All seeds will be reset:');
+
+        // Verify Numbers is reset but Stores is still tracked
+        $numbersLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $this->assertEquals(0, $numbersLog->fetchColumn(0), 'Numbers seed should be reset');
+
+        $storesLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'StoresSeed\'');
+        $this->assertEquals(1, $storesLog->fetchColumn(0), 'Stores seed should still be tracked');
+    }
+
+    public function testResetMultipleSpecificSeeds(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+
+        // Run seeds
+        $this->exec('seeds run -c test NumbersSeed');
+        $this->exec('seeds run -c test StoresSeed');
+
+        // Reset both with comma-separated list
+        $this->exec('seeds reset -c test --seed Numbers,Stores', ['y']);
+        $this->assertExitSuccess();
+
+        // Verify both are reset
+        $numbersLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $this->assertEquals(0, $numbersLog->fetchColumn(0));
+
+        $storesLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'StoresSeed\'');
+        $this->assertEquals(0, $storesLog->fetchColumn(0));
+    }
+
+    public function testResetNonExistentSeed(): void
+    {
+        $this->createTables();
+
+        $this->exec('seeds reset -c test --seed NonExistent');
+        $this->assertExitError();
+        $this->assertErrorContains('Seed `NonExistent` does not exist');
+    }
 }

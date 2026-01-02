@@ -540,9 +540,10 @@ class Manager
      *
      * @param \Migrations\SeedInterface $seed Seed
      * @param bool $force Force re-execution even if seed has already been executed
+     * @param bool $fake Record seed as executed without actually running it
      * @return void
      */
-    public function executeSeed(SeedInterface $seed, bool $force = false): void
+    public function executeSeed(SeedInterface $seed, bool $force = false, bool $fake = false): void
     {
         $this->getIo()->out('');
 
@@ -560,6 +561,26 @@ class Manager
             return;
         }
 
+        // Ensure seed schema table exists
+        $adapter = $this->getEnvironment()->getAdapter();
+        if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
+            $adapter->createSeedSchemaTable();
+        }
+
+        if ($fake) {
+            // Record seed as executed without running it
+            $this->printSeedStatus($seed, 'faking');
+
+            if (!$seed->isIdempotent()) {
+                $executedTime = date('Y-m-d H:i:s');
+                $adapter->seedExecuted($seed, $executedTime);
+            }
+
+            $this->printSeedStatus($seed, 'faked');
+
+            return;
+        }
+
         // Auto-execute missing dependencies
         $missingDeps = $this->getSeedDependenciesNotExecuted($seed);
         if (!empty($missingDeps)) {
@@ -568,17 +589,11 @@ class Manager
                     '  Auto-executing dependency: %s',
                     $depSeed->getName(),
                 ));
-                $this->executeSeed($depSeed, $force);
+                $this->executeSeed($depSeed, $force, $fake);
             }
         }
 
         $this->printSeedStatus($seed, 'seeding');
-
-        // Ensure seed schema table exists
-        $adapter = $this->getEnvironment()->getAdapter();
-        if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
-            $adapter->createSeedSchemaTable();
-        }
 
         // Execute the seeder and log the time elapsed.
         $start = microtime(true);
@@ -794,10 +809,11 @@ class Manager
      *
      * @param string|null $seed Seeder
      * @param bool $force Force re-execution even if seed has already been executed
+     * @param bool $fake Record seed as executed without actually running it
      * @throws \InvalidArgumentException
      * @return void
      */
-    public function seed(?string $seed = null, bool $force = false): void
+    public function seed(?string $seed = null, bool $force = false, bool $fake = false): void
     {
         $seeds = $this->getSeeds();
 
@@ -805,14 +821,14 @@ class Manager
             // run all seeders
             foreach ($seeds as $seeder) {
                 if (array_key_exists($seeder->getName(), $seeds)) {
-                    $this->executeSeed($seeder, $force);
+                    $this->executeSeed($seeder, $force, $fake);
                 }
             }
         } else {
             // run only one seeder
             $normalizedName = $this->normalizeSeedName($seed, $seeds);
             if ($normalizedName !== null) {
-                $this->executeSeed($seeds[$normalizedName], $force);
+                $this->executeSeed($seeds[$normalizedName], $force, $fake);
             } else {
                 throw new InvalidArgumentException(sprintf('The seed `%s` does not exist', $seed));
             }
