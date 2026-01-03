@@ -625,7 +625,7 @@ class Manager
         }
 
         $this->printStatusOutput(
-            $seedName,
+            $seedName . ' seed',
             $status,
             $duration,
         );

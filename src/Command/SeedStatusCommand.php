@@ -129,11 +129,12 @@ class SeedStatusCommand extends Command
                 }
             }
 
-            // Strip 'Seed' suffix for display
+            // Strip 'Seed' suffix for display and add ' seed' suffix
             $displayName = $seedName;
             if (str_ends_with($displayName, 'Seed')) {
                 $displayName = substr($displayName, 0, -4);
             }
+            $displayName .= ' seed';
 
             $statuses[] = [
                 'seedName' => $displayName,

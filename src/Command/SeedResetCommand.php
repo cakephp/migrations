@@ -141,10 +141,10 @@ class SeedResetCommand extends Command
                 if (!$config->isDryRun()) {
                     $adapter->removeSeedFromLog($seed);
                 }
-                $io->info("Reset: {$seedName}");
+                $io->info("Reset: {$seedName} seed");
                 $count++;
             } else {
-                $io->verbose("Skipped (not executed): {$seedName}");
+                $io->verbose("Skipped (not executed): {$seedName} seed");
             }
         }
 
