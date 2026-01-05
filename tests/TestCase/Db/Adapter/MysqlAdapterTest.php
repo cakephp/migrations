@@ -17,6 +17,7 @@ use Migrations\Db\Table;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
+use Migrations\Db\Table\Partition;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -124,6 +125,11 @@ class MysqlAdapterTest extends TestCase
 
     public function testSchemaTableIsCreatedWithPrimaryKey()
     {
+        // Skip for unified table mode since schema structure is different
+        if (Configure::read('Migrations.legacyTables') === false) {
+            $this->markTestSkipped('Unified table has different primary key structure');
+        }
+
         $this->adapter->connect();
         new Table($this->adapter->getSchemaTableName(), [], $this->adapter);
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));
@@ -3050,5 +3056,90 @@ OUTPUT;
         $table->insert([
             ['code' => 'ITEM1', 'name' => 'Different Name'],
         ])->save();
+    }
+
+    public function testCreateTableWithRangeColumnsPartitioning()
+    {
+        // MySQL requires RANGE COLUMNS for DATE columns
+        $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('order_date', 'date')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'order_date')
+            ->addPartition('p2022', '2023-01-01')
+            ->addPartition('p2023', '2024-01-01')
+            ->addPartition('pmax', 'MAXVALUE')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_orders'));
+        $this->assertTrue($this->adapter->hasColumn('partitioned_orders', 'id'));
+        $this->assertTrue($this->adapter->hasColumn('partitioned_orders', 'order_date'));
+    }
+
+    public function testCreateTableWithListColumnsPartitioning()
+    {
+        // MySQL requires LIST COLUMNS for STRING columns
+        $table = new Table('partitioned_customers', ['id' => false, 'primary_key' => ['id', 'region']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('region', 'string', ['limit' => 20])
+            ->addColumn('name', 'string')
+            ->partitionBy(Partition::TYPE_LIST_COLUMNS, 'region')
+            ->addPartition('p_americas', ['US', 'CA', 'MX'])
+            ->addPartition('p_europe', ['UK', 'DE', 'FR'])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_customers'));
+    }
+
+    public function testCreateTableWithHashPartitioning()
+    {
+        // MySQL requires partition column in primary key
+        $table = new Table('partitioned_sessions', ['id' => false, 'primary_key' => ['id', 'user_id']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('user_id', 'integer')
+            ->addColumn('data', 'text')
+            ->partitionBy(Partition::TYPE_HASH, 'user_id', ['count' => 4])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_sessions'));
+    }
+
+    public function testCreateTableWithKeyPartitioning()
+    {
+        $table = new Table('partitioned_cache', ['id' => false, 'primary_key' => ['cache_key']], $this->adapter);
+        $table->addColumn('cache_key', 'string', ['limit' => 255])
+            ->addColumn('value', 'binary')
+            ->partitionBy(Partition::TYPE_KEY, 'cache_key', ['count' => 8])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_cache'));
+    }
+
+    public function testCreateTableWithRangePartitioningByInteger()
+    {
+        $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('message', 'text')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', 1000000)
+            ->addPartition('p1', 2000000)
+            ->addPartition('pmax', 'MAXVALUE')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_logs'));
+    }
+
+    public function testCreateTableWithExpressionPartitioning()
+    {
+        $table = new Table('partitioned_events', ['id' => false, 'primary_key' => ['id', 'created_at']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('created_at', 'datetime')
+            ->partitionBy(Partition::TYPE_RANGE, Literal::from('YEAR(created_at)'))
+            ->addPartition('p2022', 2023)
+            ->addPartition('p2023', 2024)
+            ->addPartition('pmax', 'MAXVALUE')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_events'));
     }
 }

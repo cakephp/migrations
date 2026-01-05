@@ -16,6 +16,7 @@ namespace Migrations;
 use Bake\Command\SimpleBakeCommand;
 use Cake\Console\CommandCollection;
 use Cake\Core\BasePlugin;
+use Cake\Core\Configure;
 use Cake\Core\PluginApplicationInterface;
 use Migrations\Command\BakeMigrationCommand;
 use Migrations\Command\BakeMigrationDiffCommand;
@@ -31,6 +32,7 @@ use Migrations\Command\SeedResetCommand;
 use Migrations\Command\SeedsEntryCommand;
 use Migrations\Command\SeedStatusCommand;
 use Migrations\Command\StatusCommand;
+use Migrations\Command\UpgradeCommand;
 
 /**
  * Plugin class for migrations
@@ -74,6 +76,12 @@ class MigrationsPlugin extends BasePlugin
             RollbackCommand::class,
             StatusCommand::class,
         ];
+
+        // Only show upgrade command if not explicitly using unified table
+        // (i.e., when legacyTables is null/autodetect or true)
+        if (Configure::read('Migrations.legacyTables') !== false) {
+            $migrationClasses[] = UpgradeCommand::class;
+        }
         $seedClasses = [
             SeedsEntryCommand::class,
             SeedCommand::class,

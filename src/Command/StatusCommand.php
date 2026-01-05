@@ -64,7 +64,7 @@ class StatusCommand extends Command
             '<info>migrations status -c secondary</info>',
             '<info>migrations status -c secondary  -f json</info>',
             '<info>migrations status --cleanup</info>',
-            'Remove *MISSING* migrations from the phinxlog table',
+            'Remove *MISSING* migrations from the migration tracking table',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
@@ -82,7 +82,7 @@ class StatusCommand extends Command
             'choices' => ['text', 'json'],
             'default' => 'text',
         ])->addOption('cleanup', [
-            'help' => 'Remove MISSING migrations from the phinxlog table',
+            'help' => 'Remove MISSING migrations from the migration tracking table',
             'boolean' => true,
             'default' => false,
         ]);
@@ -123,6 +123,7 @@ class StatusCommand extends Command
         }
 
         $migrations = $manager->printStatus($format);
+        $tableName = $manager->getSchemaTableName();
 
         switch ($format) {
             case 'json':
@@ -134,7 +135,7 @@ class StatusCommand extends Command
                 $io->out($migrationString);
                 break;
             default:
-                $this->display($migrations, $io);
+                $this->display($migrations, $io, $tableName);
                 break;
         }
 
@@ -146,10 +147,14 @@ class StatusCommand extends Command
      *
      * @param array $migrations
      * @param \Cake\Console\ConsoleIo $io The console io
+     * @param string $tableName The migration tracking table name
      * @return void
      */
-    protected function display(array $migrations, ConsoleIo $io): void
+    protected function display(array $migrations, ConsoleIo $io, string $tableName): void
     {
+        $io->out(sprintf('using migration table <info>%s</info>', $tableName));
+        $io->out('');
+
         if ($migrations) {
             $rows = [];
             $rows[] = ['Status', 'Migration ID', 'Migration Name'];

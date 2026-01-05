@@ -196,6 +196,14 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $this->getAdapter()->cleanupMissing($missingVersions);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function migrated(MigrationInterface $migration, string $direction, string $startTime, string $endTime): AdapterInterface
     {
         $this->getAdapter()->migrated($migration, $direction, $startTime, $endTime);
@@ -573,5 +581,13 @@ abstract class AdapterWrapper implements WrapperInterface
     public function getIo(): ?ConsoleIo
     {
         return $this->getAdapter()->getIo();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSchemaTableName(): string
+    {
+        return $this->getAdapter()->getSchemaTableName();
     }
 }

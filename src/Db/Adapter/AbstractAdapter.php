@@ -26,11 +26,13 @@ use Migrations\Config\Config;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
+use Migrations\Db\Action\AddPartition;
 use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
+use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
@@ -43,6 +45,7 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
@@ -304,10 +307,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Gets the schema table name.
      *
+     * Returns the appropriate table name based on configuration:
+     * - 'cake_migrations' for unified mode
+     * - Phinxlog table name for backwards compatibility mode
+     *
      * @return string
      */
     public function getSchemaTableName(): string
     {
+        if ($this->isUsingUnifiedTable()) {
+            return UnifiedMigrationsTableStorage::TABLE_NAME;
+        }
+
         return $this->schemaTableName;
     }
 
@@ -888,19 +899,72 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     }
 
     /**
+     * @inheritDoc
+     */
+    public function cleanupMissing(array $missingVersions): void
+    {
+        $storage = $this->migrationsTable();
+
+        $storage->cleanupMissing($missingVersions);
+    }
+
+    /**
      * Get the migrations table storage implementation.
      *
-     * @return \Migrations\Db\Adapter\MigrationsTableStorage
+     * Returns either UnifiedMigrationsTableStorage (new cake_migrations table)
+     * or MigrationsTableStorage (legacy phinxlog tables) based on configuration
+     * and autodetection.
+     *
+     * @return \Migrations\Db\Adapter\MigrationsTableStorage|\Migrations\Db\Adapter\UnifiedMigrationsTableStorage
      * @internal
      */
-    protected function migrationsTable(): MigrationsTableStorage
+    protected function migrationsTable(): MigrationsTableStorage|UnifiedMigrationsTableStorage
     {
-        // TODO Use configure/auto-detect which implmentation to use.
+        if ($this->isUsingUnifiedTable()) {
+            return new UnifiedMigrationsTableStorage(
+                $this,
+                $this->getOption('plugin'),
+            );
+        }
+
         return new MigrationsTableStorage(
             $this,
             $this->getSchemaTableName(),
             $this->getOption('plugin'),
         );
+    }
+
+    /**
+     * Determine if using the unified cake_migrations table.
+     *
+     * Checks configuration and autodetects based on existing legacy tables.
+     *
+     * @return bool True if using unified table, false for legacy phinxlog tables
+     */
+    protected function isUsingUnifiedTable(): bool
+    {
+        $config = Configure::read('Migrations.legacyTables');
+
+        // Explicit configuration takes precedence
+        if ($config === false) {
+            return true;
+        }
+
+        if ($config === true) {
+            return false;
+        }
+
+        // Autodetect mode (config is null or not set)
+        // Check if the main legacy phinxlog table exists
+        if ($this->connection !== null) {
+            $dialect = $this->connection->getDriver()->schemaDialect();
+            if ($dialect->hasTable('phinxlog')) {
+                return false;
+            }
+        }
+
+        // No legacy phinxlog table found - use unified table
+        return true;
     }
 
     /**
@@ -1165,19 +1229,30 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function getDefaultValueDefinition(mixed $default, ?string $columnType = null): string
     {
-        $datetimeTypes = [
-            static::TYPE_DATETIME,
-            static::TYPE_TIMESTAMP,
-            static::TYPE_TIME,
-            static::TYPE_DATE,
+        // SQL functions mapped to their valid column types (ordered longest-first to avoid prefix conflicts)
+        $sqlFunctionTypes = [
+            'CURRENT_TIMESTAMP' => [static::TYPE_DATETIME, static::TYPE_TIMESTAMP, static::TYPE_TIME, static::TYPE_DATE],
+            'CURRENT_DATE' => [static::TYPE_DATE],
+            'CURRENT_TIME' => [static::TYPE_TIME],
         ];
 
         if ($default instanceof Literal) {
             $default = (string)$default;
-        } elseif (is_string($default) && stripos($default, 'CURRENT_TIMESTAMP') === 0) {
-            // Only skip quoting CURRENT_TIMESTAMP for datetime-related column types.
-            // For other types (like string), it should be quoted as a literal string value.
-            if (!in_array($columnType, $datetimeTypes, true)) {
+        } elseif (is_string($default) && $columnType !== null) {
+            $matched = false;
+            foreach ($sqlFunctionTypes as $function => $validTypes) {
+                // Match function name at start, followed by end of string or opening parenthesis
+                $len = strlen($function);
+                if (
+                    stripos($default, $function) === 0 &&
+                    (strlen($default) === $len || $default[$len] === '(') &&
+                    in_array($columnType, $validTypes, true)
+                ) {
+                    $matched = true;
+                    break;
+                }
+            }
+            if (!$matched) {
                 $default = $this->quoteString($default);
             }
         } elseif (is_string($default)) {
@@ -1475,6 +1550,32 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     abstract protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions;
 
     /**
+     * Returns the instructions to add a partition to an existing partitioned table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition definition to add
+     * @throws \RuntimeException If partitioning is not supported
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
+    {
+        throw new RuntimeException('Table partitioning is not supported by this adapter');
+    }
+
+    /**
+     * Returns the instructions to drop a partition from an existing partitioned table.
+     *
+     * @param string $tableName The table name
+     * @param string $partitionName The partition name to drop
+     * @throws \RuntimeException If partitioning is not supported
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
+    {
+        throw new RuntimeException('Table partitioning is not supported by this adapter');
+    }
+
+    /**
      * @inheritdoc
      */
     public function dropTable(string $tableName): void
@@ -1658,6 +1759,22 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     $instructions->merge($this->getChangeCommentInstructions(
                         $table,
                         $action->getNewComment(),
+                    ));
+                    break;
+
+                case $action instanceof AddPartition:
+                    /** @var \Migrations\Db\Action\AddPartition $action */
+                    $instructions->merge($this->getAddPartitionInstructions(
+                        $table,
+                        $action->getPartition(),
+                    ));
+                    break;
+
+                case $action instanceof DropPartition:
+                    /** @var \Migrations\Db\Action\DropPartition $action */
+                    $instructions->merge($this->getDropPartitionInstructions(
+                        $table->getName(),
+                        $action->getPartitionName(),
                     ));
                     break;
 

@@ -67,9 +67,13 @@ Configure::write('App', [
     ],
 ]);
 
+// LEGACY_TABLES env: 'true' for legacy phinxlog, 'false' for unified cake_migrations
+$legacyTables = env('LEGACY_TABLES', 'true') !== 'false';
+
 Configure::write('Migrations', [
     'unsigned_primary_keys' => true,
     'column_null_default' => true,
+    'legacyTables' => $legacyTables,
 ]);
 
 Cache::setConfig([

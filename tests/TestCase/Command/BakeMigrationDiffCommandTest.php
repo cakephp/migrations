@@ -25,8 +25,10 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\Utility\Inflector;
 use Exception;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Migrations;
 use Migrations\Test\TestCase\TestCase;
+use Migrations\Util\UtilTrait;
 use function Cake\Core\env;
 
 /**
@@ -35,6 +37,7 @@ use function Cake\Core\env;
 class BakeMigrationDiffCommandTest extends TestCase
 {
     use StringCompareTrait;
+    use UtilTrait;
 
     /**
      * @var string[]
@@ -51,6 +54,8 @@ class BakeMigrationDiffCommandTest extends TestCase
         parent::setUp();
 
         $this->generatedFiles = [];
+        $this->clearMigrationRecords('test');
+        $this->clearMigrationRecords('test', 'Blog');
 
         // Clean up any TheDiff migration files from all directories before test starts
         $configPath = ROOT . DS . 'config' . DS;
@@ -112,8 +117,9 @@ class BakeMigrationDiffCommandTest extends TestCase
 
         if (env('DB_URL_COMPARE')) {
             // Clean up the comparison database each time. Table order is important.
+            // Include both legacy (phinxlog) and unified (cake_migrations) table names.
             $connection = ConnectionManager::get('test_comparisons');
-            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'tags', 'test_blog_phinxlog', 'test_decimal_types'];
+            $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'cake_migrations', 'tags', 'test_blog_phinxlog', 'test_decimal_types'];
             foreach ($tables as $table) {
                 $connection->execute("DROP TABLE IF EXISTS $table");
             }
@@ -407,6 +413,9 @@ class Initial extends BaseMigration
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . $db . '.lock';
 
         $destinationConfigDir = ROOT . DS . 'config' . DS . "MigrationsDiff{$scenario}" . DS;
+        if (!is_dir($destinationConfigDir)) {
+            mkdir($destinationConfigDir, 0777, true);
+        }
         $destination = $destinationConfigDir . "20160415220805_{$classPrefix}{$scenario}" . ucfirst($db) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . $db . '.lock';
         copy($diffMigrationsPath, $destination);
@@ -419,14 +428,18 @@ class Initial extends BaseMigration
         $migrations = $this->getMigrations("MigrationsDiff$scenario");
         $migrations->migrate();
 
-        unlink($destination);
         copy($diffDumpPath, $destinationDumpPath);
 
         $connection = ConnectionManager::get('test_comparisons');
+        $schemaTable = $this->getPhinxTable(null, $connection);
         $connection->deleteQuery()
-            ->delete('phinxlog')
+            ->delete($schemaTable)
             ->where(['version' => 20160415220805])
             ->execute();
+
+        // Delete the migration file too - checkSync() compares the last file version
+        // against the last migrated version, so having an unmigrated file would fail
+        unlink($destination);
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
@@ -446,15 +459,21 @@ class Initial extends BaseMigration
         rename($destinationConfigDir . $generatedMigration, $destination);
         $versionParts = explode('_', $generatedMigration);
 
+        $columns = ['version', 'migration_name', 'start_time', 'end_time'];
+        $values = [
+            'version' => 20160415220805,
+            'migration_name' => $versionParts[1],
+            'start_time' => '2016-05-22 16:51:46',
+            'end_time' => '2016-05-22 16:51:46',
+        ];
+        if ($schemaTable === UnifiedMigrationsTableStorage::TABLE_NAME) {
+            $columns[] = 'plugin';
+            $values['plugin'] = null;
+        }
         $connection->insertQuery()
-            ->insert(['version', 'migration_name', 'start_time', 'end_time'])
-            ->into('phinxlog')
-            ->values([
-                'version' => 20160415220805,
-                'migration_name' => $versionParts[1],
-                'start_time' => '2016-05-22 16:51:46',
-                'end_time' => '2016-05-22 16:51:46',
-            ])
+            ->insert($columns)
+            ->into($schemaTable)
+            ->values($values)
             ->execute();
         $this->getMigrations("MigrationsDiff{$scenario}")->rollback(['target' => 'all']);
     }
@@ -515,6 +534,21 @@ class Initial extends BaseMigration
         $migrations = new Migrations($params);
 
         return $migrations;
+    }
+
+    /**
+     * Override to normalize table names for comparison
+     *
+     * @param string $path Path to comparison file
+     * @param string $result Actual result
+     * @return void
+     */
+    public function assertSameAsFile(string $path, string $result): void
+    {
+        // Normalize unified table name to legacy for comparison
+        $result = str_replace("'cake_migrations'", "'phinxlog'", $result);
+
+        parent::assertSameAsFile($path, $result);
     }
 
     /**

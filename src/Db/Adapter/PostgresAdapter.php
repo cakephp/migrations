@@ -20,7 +20,10 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\Partition;
+use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
+use RuntimeException;
 
 class PostgresAdapter extends AbstractAdapter
 {
@@ -100,9 +103,13 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function hasTable(string $tableName): bool
     {
-        if ($this->hasCreatedTable($tableName)) {
+        // Only use the cache in dry-run mode where tables aren't actually created.
+        // In normal mode, always check the database to handle cases where tables
+        // are dropped via execute() which doesn't update the cache.
+        if ($this->isDryRunEnabled() && $this->hasCreatedTable($tableName)) {
             return true;
         }
+
         $parts = $this->getSchemaName($tableName);
         $tableName = $parts['table'];
 
@@ -170,6 +177,13 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         $sql .= ')';
+
+        // add partitioning clause
+        $partition = $table->getPartition();
+        if ($partition !== null) {
+            $sql .= ' ' . $this->getPartitionSqlDefinition($partition);
+        }
+
         $queries[] = $sql;
 
         // process column comments
@@ -193,6 +207,13 @@ class PostgresAdapter extends AbstractAdapter
                 $this->quoteTableName($table->getName()),
                 $this->quoteString($options['comment']),
             );
+        }
+
+        // create partition tables for PostgreSQL declarative partitioning
+        if ($partition !== null) {
+            foreach ($partition->getDefinitions() as $definition) {
+                $queries[] = $this->getPartitionTableSql($table->getName(), $partition, $definition);
+            }
         }
 
         foreach ($queries as $query) {
@@ -1293,6 +1314,192 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         return '';
+    }
+
+    /**
+     * Gets the PostgreSQL Partition Definition SQL for CREATE TABLE.
+     *
+     * @param \Migrations\Db\Table\Partition $partition Partition configuration
+     * @return string
+     */
+    protected function getPartitionSqlDefinition(Partition $partition): string
+    {
+        $type = $partition->getType();
+        $columns = $partition->getColumns();
+
+        if ($type === Partition::TYPE_KEY) {
+            throw new RuntimeException('KEY partitioning is not supported in PostgreSQL');
+        }
+
+        // Build column list or expression
+        if ($columns instanceof Literal) {
+            $columnsSql = (string)$columns;
+        } else {
+            $columnsSql = implode(', ', array_map(fn($col) => $this->quoteColumnName($col), $columns));
+        }
+
+        return sprintf('PARTITION BY %s (%s)', $type, $columnsSql);
+    }
+
+    /**
+     * Gets the SQL to create a partition table in PostgreSQL.
+     *
+     * @param string $tableName The parent table name
+     * @param \Migrations\Db\Table\Partition $partition The partition configuration
+     * @param \Migrations\Db\Table\PartitionDefinition $definition The partition definition
+     * @return string
+     */
+    protected function getPartitionTableSql(string $tableName, Partition $partition, PartitionDefinition $definition): string
+    {
+        $partitionTableName = $definition->getTable() ?? ($tableName . '_' . $definition->getName());
+        $type = $partition->getType();
+        $value = $definition->getValue();
+
+        $sql = sprintf(
+            'CREATE TABLE %s PARTITION OF %s',
+            $this->quoteTableName($partitionTableName),
+            $this->quoteTableName($tableName),
+        );
+
+        if ($type === Partition::TYPE_RANGE) {
+            $sql .= $this->getRangePartitionBounds($definition);
+        } elseif ($type === Partition::TYPE_LIST) {
+            $sql .= ' FOR VALUES IN (';
+            if (is_array($value)) {
+                $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            } else {
+                $sql .= $this->quotePartitionValue($value);
+            }
+            $sql .= ')';
+        } elseif ($type === Partition::TYPE_HASH) {
+            $count = $partition->getCount() ?? count($partition->getDefinitions());
+            $index = array_search($definition, $partition->getDefinitions(), true);
+            $sql .= sprintf(' FOR VALUES WITH (MODULUS %d, REMAINDER %d)', $count, $index);
+        }
+
+        if ($definition->getTablespace()) {
+            $sql .= ' TABLESPACE ' . $this->quoteColumnName($definition->getTablespace());
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Get the RANGE partition bounds for PostgreSQL.
+     *
+     * @param \Migrations\Db\Table\PartitionDefinition $definition The partition definition
+     * @return string
+     */
+    protected function getRangePartitionBounds(PartitionDefinition $definition): string
+    {
+        $value = $definition->getValue();
+
+        // For RANGE, PostgreSQL uses FROM (value) TO (value) syntax
+        // When MAXVALUE is used, we use MAXVALUE keyword
+        if ($value === 'MAXVALUE') {
+            return ' FOR VALUES FROM (MAXVALUE) TO (MAXVALUE)';
+        }
+
+        // Simple case: single value means upper bound, assume MINVALUE as lower
+        if (!is_array($value) || !isset($value['from'])) {
+            $upperBound = $this->quotePartitionValue($value);
+
+            return sprintf(' FOR VALUES FROM (MINVALUE) TO (%s)', $upperBound);
+        }
+
+        // Explicit from/to
+        $from = $value['from'];
+        $to = $value['to'] ?? 'MAXVALUE';
+
+        $fromSql = $from === 'MINVALUE' ? 'MINVALUE' : $this->quotePartitionValue($from);
+        $toSql = $to === 'MAXVALUE' ? 'MAXVALUE' : $this->quotePartitionValue($to);
+
+        return sprintf(' FOR VALUES FROM (%s) TO (%s)', $fromSql, $toSql);
+    }
+
+    /**
+     * Quote a partition boundary value.
+     *
+     * @param mixed $value The value to quote
+     * @return string
+     */
+    protected function quotePartitionValue(mixed $value): string
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+        if ($value === 'MINVALUE' || $value === 'MAXVALUE') {
+            return $value;
+        }
+        if (is_int($value) || is_float($value)) {
+            return (string)$value;
+        }
+
+        return $this->quoteString((string)$value);
+    }
+
+    /**
+     * Get instructions for adding a partition to an existing table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition to add
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
+    {
+        // PostgreSQL requires creating partition tables using CREATE TABLE ... PARTITION OF
+        // This is more complex as we need the partition type info
+        // For now, we'll create a basic RANGE partition
+        $partitionTableName = $partition->getTable() ?? ($table->getName() . '_' . $partition->getName());
+        $value = $partition->getValue();
+
+        $sql = sprintf(
+            'CREATE TABLE %s PARTITION OF %s',
+            $this->quoteTableName($partitionTableName),
+            $this->quoteTableName($table->getName()),
+        );
+
+        // Detect type based on value format
+        if (is_array($value) && isset($value['from'])) {
+            // Explicit RANGE
+            $from = $value['from'] === 'MINVALUE' ? 'MINVALUE' : $this->quotePartitionValue($value['from']);
+            $to = $value['to'] === 'MAXVALUE' ? 'MAXVALUE' : $this->quotePartitionValue($value['to']);
+            $sql .= sprintf(' FOR VALUES FROM (%s) TO (%s)', $from, $to);
+        } elseif (is_array($value)) {
+            // LIST partition
+            $sql .= ' FOR VALUES IN (';
+            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            $sql .= ')';
+        } else {
+            // Simple RANGE (upper bound only)
+            $sql .= sprintf(' FOR VALUES FROM (MINVALUE) TO (%s)', $this->quotePartitionValue($value));
+        }
+
+        if ($partition->getTablespace()) {
+            $sql .= ' TABLESPACE ' . $this->quoteColumnName($partition->getTablespace());
+        }
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * Get instructions for dropping a partition from an existing table.
+     *
+     * @param string $tableName The table name
+     * @param string $partitionName The partition name to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
+    {
+        // In PostgreSQL, partitions are tables, so we drop the partition table
+        // The partition name is typically the table_partitionname
+        $partitionTableName = $tableName . '_' . $partitionName;
+
+        // Use DETACH first (to preserve data) then DROP
+        // For a complete drop without preserving data:
+        $sql = sprintf('DROP TABLE IF EXISTS %s', $this->quoteTableName($partitionTableName));
+
+        return new AlterInstructions([], [$sql]);
     }
 
     /**

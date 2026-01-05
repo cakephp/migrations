@@ -22,41 +22,28 @@ use Migrations\Db\Table;
 use Migrations\MigrationInterface;
 
 /**
- * Backwards compatibility layer for migration table storage.
+ * Unified migration table storage.
  *
- * Defaults to `phinxlog` and each plugin has its own table
- * that is controlled via parameters.
+ * Uses a single `cake_migrations` table with a `plugin` column
+ * to track all migrations (app and plugins) in one place.
  */
-class MigrationsTableStorage
+class UnifiedMigrationsTableStorage
 {
+    /**
+     * The table name for unified migrations storage.
+     */
+    public const TABLE_NAME = 'cake_migrations';
+
     /**
      * Constructor
      *
      * @param \Migrations\Db\Adapter\AbstractAdapter $adapter The database adapter.
-     * @param string $schemaTableName The schema table name.
-     * @param string|null $plugin The plugin name.
+     * @param string|null $plugin The plugin name (null for app migrations).
      */
     public function __construct(
         protected AbstractAdapter $adapter,
-        protected string $schemaTableName = 'phinxlog',
         protected ?string $plugin = null,
     ) {
-    }
-
-    /**
-     * Gets all the migration versions.
-     *
-     * @param array<string, string> $orderBy The order by clause.
-     * @return \Cake\Database\Query\SelectQuery
-     */
-    public function getVersions(array $orderBy): SelectQuery
-    {
-        $query = $this->adapter->getSelectBuilder();
-        $query->select('*')
-            ->from($this->schemaTableName)
-            ->orderBy($orderBy);
-
-        return $query;
     }
 
     /**
@@ -73,8 +60,10 @@ class MigrationsTableStorage
         $this->adapter->beginTransaction();
         try {
             $where = ['version IN' => $missingVersions];
+            $where['plugin IS'] = $this->adapter->getOption('plugin');
+
             $delete = $this->adapter->getDeleteBuilder()
-                ->from($this->schemaTableName)
+                ->from(self::TABLE_NAME)
                 ->where($where);
             $delete->execute();
             $this->adapter->commitTransaction();
@@ -82,6 +71,23 @@ class MigrationsTableStorage
             $this->adapter->rollbackTransaction();
             throw $e;
         }
+    }
+
+    /**
+     * Gets all the migration versions for the current plugin context.
+     *
+     * @param array<string, string> $orderBy The order by clause.
+     * @return \Cake\Database\Query\SelectQuery
+     */
+    public function getVersions(array $orderBy): SelectQuery
+    {
+        $query = $this->adapter->getSelectBuilder();
+        $query->select('*')
+            ->from(self::TABLE_NAME)
+            ->where(['plugin IS' => $this->plugin])
+            ->orderBy($orderBy);
+
+        return $query;
     }
 
     /**
@@ -95,11 +101,12 @@ class MigrationsTableStorage
     public function recordUp(MigrationInterface $migration, string $startTime, string $endTime): void
     {
         $query = $this->adapter->getInsertBuilder();
-        $query->insert(['version', 'migration_name', 'start_time', 'end_time', 'breakpoint'])
-            ->into($this->schemaTableName)
+        $query->insert(['version', 'migration_name', 'plugin', 'start_time', 'end_time', 'breakpoint'])
+            ->into(self::TABLE_NAME)
             ->values([
                 'version' => (string)$migration->getVersion(),
                 'migration_name' => substr($migration->getName(), 0, 100),
+                'plugin' => $this->plugin,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'breakpoint' => 0,
@@ -117,8 +124,12 @@ class MigrationsTableStorage
     {
         $query = $this->adapter->getDeleteBuilder();
         $query->delete()
-            ->from($this->schemaTableName)
-            ->where(['version' => (string)$migration->getVersion()]);
+            ->from(self::TABLE_NAME)
+            ->where([
+                'version' => (string)$migration->getVersion(),
+                'plugin IS' => $this->plugin,
+            ]);
+
         $this->adapter->executeQuery($query);
     }
 
@@ -130,36 +141,43 @@ class MigrationsTableStorage
      */
     public function toggleBreakpoint(MigrationInterface $migration): void
     {
-        $params = [
-            $migration->getVersion(),
-        ];
+        $pluginCondition = $this->plugin === null
+            ? sprintf('%s IS NULL', $this->adapter->quoteColumnName('plugin'))
+            : sprintf('%s = ?', $this->adapter->quoteColumnName('plugin'));
+
+        $params = $this->plugin === null
+            ? [$migration->getVersion()]
+            : [$migration->getVersion(), $this->plugin];
+
         $this->adapter->query(
             sprintf(
-                'UPDATE %1$s SET %2$s = CASE %2$s WHEN true THEN false ELSE true END, %4$s = %4$s WHERE %3$s = ?;',
-                $this->adapter->quoteTableName($this->schemaTableName),
+                'UPDATE %1$s SET %2$s = CASE %2$s WHEN true THEN false ELSE true END, %4$s = %4$s WHERE %3$s = ? AND %5$s;',
+                $this->adapter->quoteTableName(self::TABLE_NAME),
                 $this->adapter->quoteColumnName('breakpoint'),
                 $this->adapter->quoteColumnName('version'),
                 $this->adapter->quoteColumnName('start_time'),
+                $pluginCondition,
             ),
             $params,
         );
     }
 
     /**
-     * Resets all breakpoints.
+     * Resets all breakpoints for the current plugin context.
      *
      * @return int The number of affected rows.
      */
     public function resetAllBreakpoints(): int
     {
         $query = $this->adapter->getUpdateBuilder();
-        $query->update($this->schemaTableName)
+        $query->update(self::TABLE_NAME)
             ->set([
                 'breakpoint' => 0,
                 'start_time' => $query->identifier('start_time'),
             ])
             ->where([
                 'breakpoint !=' => 0,
+                'plugin IS' => $this->plugin,
             ]);
 
         return $this->adapter->executeQuery($query);
@@ -175,19 +193,21 @@ class MigrationsTableStorage
     public function markBreakpoint(MigrationInterface $migration, bool $state): void
     {
         $query = $this->adapter->getUpdateBuilder();
-        $query->update($this->schemaTableName)
+        $query->update(self::TABLE_NAME)
             ->set([
                 'breakpoint' => (int)$state,
                 'start_time' => $query->identifier('start_time'),
             ])
             ->where([
                 'version' => $migration->getVersion(),
+                'plugin IS' => $this->plugin,
             ]);
+
         $this->adapter->executeQuery($query);
     }
 
     /**
-     * Creates the migration storage table
+     * Creates the unified migration storage table.
      *
      * @return void
      * @throws \InvalidArgumentException When there is a problem creating the table.
@@ -196,20 +216,22 @@ class MigrationsTableStorage
     {
         try {
             $options = [
-                'id' => false,
-                'primary_key' => 'version',
+                'id' => true,
+                'primary_key' => 'id',
             ];
 
-            $table = new Table($this->schemaTableName, $options, $this->adapter);
+            $table = new Table(self::TABLE_NAME, $options, $this->adapter);
             $table->addColumn('version', 'biginteger', ['null' => false])
                 ->addColumn('migration_name', 'string', ['limit' => 100, 'default' => null, 'null' => true])
+                ->addColumn('plugin', 'string', ['limit' => 100, 'default' => null, 'null' => true])
                 ->addColumn('start_time', 'timestamp', ['default' => null, 'null' => true])
                 ->addColumn('end_time', 'timestamp', ['default' => null, 'null' => true])
                 ->addColumn('breakpoint', 'boolean', ['default' => false, 'null' => false])
+                ->addIndex(['version', 'plugin'], ['unique' => true, 'name' => 'version_plugin_unique'])
                 ->save();
         } catch (Exception $exception) {
             throw new InvalidArgumentException(
-                'There was a problem creating the schema table: ' . $exception->getMessage(),
+                'There was a problem creating the migrations table: ' . $exception->getMessage(),
                 (int)$exception->getCode(),
                 $exception,
             );
@@ -217,26 +239,17 @@ class MigrationsTableStorage
     }
 
     /**
-     * Upgrades the migration storage table
+     * Upgrades the migration storage table if needed.
+     *
+     * Since the unified cake_migrations table is new in v5.0 and always created
+     * with all required columns, this is currently a no-op. Future schema changes
+     * would add upgrade logic here.
      *
      * @return void
      */
     public function upgradeTable(): void
     {
-        $table = new Table($this->schemaTableName, [], $this->adapter);
-        if (!$table->hasColumn('migration_name')) {
-            $table
-                ->addColumn(
-                    'migration_name',
-                    'string',
-                    ['limit' => 100, 'after' => 'version', 'default' => null, 'null' => true],
-                )
-                ->save();
-        }
-        if (!$table->hasColumn('breakpoint')) {
-            $table
-                ->addColumn('breakpoint', 'boolean', ['default' => false, 'null' => false])
-                ->save();
-        }
+        // No-op for new installations. Schema upgrades can be added here
+        // if the table structure changes in future versions.
     }
 }

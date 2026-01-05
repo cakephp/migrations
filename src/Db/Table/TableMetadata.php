@@ -26,6 +26,11 @@ class TableMetadata
     protected array $options;
 
     /**
+     * @var \Migrations\Db\Table\Partition|null
+     */
+    protected ?Partition $partition = null;
+
+    /**
      * @param string $name The table name
      * @param array<string, mixed> $options The creation options for this table
      * @throws \InvalidArgumentException
@@ -82,6 +87,29 @@ class TableMetadata
     public function setOptions(array $options)
     {
         $this->options = $options;
+
+        return $this;
+    }
+
+    /**
+     * Gets the partition configuration
+     *
+     * @return \Migrations\Db\Table\Partition|null
+     */
+    public function getPartition(): ?Partition
+    {
+        return $this->partition;
+    }
+
+    /**
+     * Sets the partition configuration
+     *
+     * @param \Migrations\Db\Table\Partition|null $partition The partition configuration
+     * @return $this
+     */
+    public function setPartition(?Partition $partition)
+    {
+        $this->partition = $partition;
 
         return $this;
     }

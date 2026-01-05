@@ -584,6 +584,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             if (preg_match('/^.*phinxlog$/', $table) === 1) {
                 continue;
             }
+            if ($table === 'cake_migrations' || $table === 'cake_seeds') {
+                continue;
+            }
 
             $schema[$table] = $collection->describe($table);
         }

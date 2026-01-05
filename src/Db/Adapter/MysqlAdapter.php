@@ -15,10 +15,13 @@ use Cake\Database\Schema\SchemaDialect;
 use Cake\Database\Schema\TableSchema;
 use InvalidArgumentException;
 use Migrations\Db\AlterInstructions;
+use Migrations\Db\Literal;
 use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\Partition;
+use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
 
 /**
@@ -203,7 +206,10 @@ class MysqlAdapter extends AbstractAdapter
      */
     public function hasTable(string $tableName): bool
     {
-        if ($this->hasCreatedTable($tableName)) {
+        // Only use the cache in dry-run mode where tables aren't actually created.
+        // In normal mode, always check the database to handle cases where tables
+        // are dropped via execute() which doesn't update the cache.
+        if ($this->isDryRunEnabled() && $this->hasCreatedTable($tableName)) {
             return true;
         }
 
@@ -336,6 +342,12 @@ class MysqlAdapter extends AbstractAdapter
 
         $sql .= ') ' . $optionsStr;
         $sql = rtrim($sql);
+
+        // add partitioning
+        $partition = $table->getPartition();
+        if ($partition !== null) {
+            $sql .= ' ' . $this->getPartitionSqlDefinition($partition);
+        }
 
         // execute the sql
         $this->execute($sql);
@@ -1217,6 +1229,164 @@ class MysqlAdapter extends AbstractAdapter
         $row = $query->execute()->fetch('assoc');
 
         return $row['DEFAULT_COLLATION_NAME'] ?? '';
+    }
+
+    /**
+     * Gets the MySQL Partition Definition SQL.
+     *
+     * @param \Migrations\Db\Table\Partition $partition Partition configuration
+     * @return string
+     */
+    protected function getPartitionSqlDefinition(Partition $partition): string
+    {
+        $type = $partition->getType();
+        $columns = $partition->getColumns();
+
+        // Build column list or expression
+        if ($columns instanceof Literal) {
+            $columnsSql = (string)$columns;
+        } else {
+            $columnsSql = implode(', ', array_map(fn($col) => $this->quoteColumnName($col), $columns));
+        }
+
+        $sql = sprintf('PARTITION BY %s (%s)', $type, $columnsSql);
+
+        // For HASH/KEY with count
+        if (in_array($type, [Partition::TYPE_HASH, Partition::TYPE_KEY], true)) {
+            $count = $partition->getCount();
+            if ($count !== null) {
+                $sql .= sprintf(' PARTITIONS %d', $count);
+            }
+
+            return $sql;
+        }
+
+        // For RANGE/LIST with definitions
+        $definitions = $partition->getDefinitions();
+        if ($definitions) {
+            $sql .= ' (';
+            $parts = [];
+            foreach ($definitions as $definition) {
+                $parts[] = $this->getPartitionDefinitionSql($type, $definition);
+            }
+            $sql .= implode(', ', $parts);
+            $sql .= ')';
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Gets the SQL for a single partition definition.
+     *
+     * @param string $type Partition type
+     * @param \Migrations\Db\Table\PartitionDefinition $definition Partition definition
+     * @return string
+     */
+    protected function getPartitionDefinitionSql(string $type, PartitionDefinition $definition): string
+    {
+        $sql = 'PARTITION ' . $this->quoteColumnName($definition->getName());
+
+        $value = $definition->getValue();
+        $isRangeType = in_array($type, [Partition::TYPE_RANGE, Partition::TYPE_RANGE_COLUMNS], true);
+        $isListType = in_array($type, [Partition::TYPE_LIST, Partition::TYPE_LIST_COLUMNS], true);
+
+        if ($isRangeType) {
+            $sql .= ' VALUES LESS THAN ';
+            if ($value === 'MAXVALUE' || $value === Partition::TYPE_RANGE . '_MAXVALUE') {
+                $sql .= 'MAXVALUE';
+            } elseif (is_array($value)) {
+                $sql .= '(' . implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value)) . ')';
+            } else {
+                $sql .= '(' . $this->quotePartitionValue($value) . ')';
+            }
+        } elseif ($isListType) {
+            $sql .= ' VALUES IN (';
+            if (is_array($value)) {
+                $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            } else {
+                $sql .= $this->quotePartitionValue($value);
+            }
+            $sql .= ')';
+        }
+
+        if ($definition->getComment()) {
+            $sql .= ' COMMENT = ' . $this->quoteString($definition->getComment());
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Quote a partition boundary value.
+     *
+     * @param mixed $value The value to quote
+     * @return string
+     */
+    protected function quotePartitionValue(mixed $value): string
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+        if (is_int($value) || is_float($value)) {
+            return (string)$value;
+        }
+        if ($value === 'MAXVALUE') {
+            return 'MAXVALUE';
+        }
+
+        return $this->quoteString((string)$value);
+    }
+
+    /**
+     * Get instructions for adding a partition to an existing table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition to add
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
+    {
+        // For MySQL, we need to know the partition type to generate correct SQL
+        // This is a simplified version - in practice you'd need to query the table's partition type
+        $value = $partition->getValue();
+        $sql = 'ADD PARTITION (PARTITION ' . $this->quoteColumnName($partition->getName());
+
+        // Detect RANGE vs LIST based on value type (simplified heuristic)
+        if ($value === 'MAXVALUE' || is_scalar($value)) {
+            // Likely RANGE
+            if ($value === 'MAXVALUE') {
+                $sql .= ' VALUES LESS THAN MAXVALUE';
+            } else {
+                $sql .= ' VALUES LESS THAN (' . $this->quotePartitionValue($value) . ')';
+            }
+        } elseif (is_array($value)) {
+            // Likely LIST
+            $sql .= ' VALUES IN (';
+            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            $sql .= ')';
+        }
+
+        if ($partition->getComment()) {
+            $sql .= ' COMMENT = ' . $this->quoteString($partition->getComment());
+        }
+        $sql .= ')';
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
+     * Get instructions for dropping a partition from an existing table.
+     *
+     * @param string $tableName The table name
+     * @param string $partitionName The partition name to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
+    {
+        $sql = 'DROP PARTITION ' . $this->quoteColumnName($partitionName);
+
+        return new AlterInstructions([$sql]);
     }
 
     /**

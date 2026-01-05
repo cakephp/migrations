@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\Core\Configure;
 use Cake\TestSuite\TestCase;
 
 /**
@@ -43,9 +44,16 @@ class CompletionTest extends TestCase
     public function testMigrationsSubcommands()
     {
         $this->exec('completion subcommands migrations.migrations');
-        $expected = [
-            'dump mark_migrated migrate rollback status',
-        ];
+        // Upgrade command is hidden when legacyTables is disabled
+        if (Configure::read('Migrations.legacyTables') === false) {
+            $expected = [
+                'dump mark_migrated migrate rollback status',
+            ];
+        } else {
+            $expected = [
+                'dump mark_migrated migrate rollback status upgrade',
+            ];
+        }
         $actual = $this->_out->messages();
         $this->assertEquals($expected, $actual);
     }

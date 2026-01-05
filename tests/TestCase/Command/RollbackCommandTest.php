@@ -3,36 +3,23 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
-use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
-use Cake\Database\Exception\DatabaseException;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
-use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
+use Migrations\Test\TestCase\TestCase;
 use ReflectionProperty;
 
 class RollbackCommandTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
-
     protected array $createdFiles = [];
 
     public function setUp(): void
     {
         parent::setUp();
 
-        try {
-            $table = $this->fetchTable('Phinxlog');
-            $table->deleteAll('1=1');
-        } catch (DatabaseException $e) {
-        }
-
-        try {
-            $table = $this->fetchTable('MigratorPhinxlog');
-            $table->deleteAll('1=1');
-        } catch (DatabaseException $e) {
-        }
+        $this->clearMigrationRecords('test');
+        $this->clearMigrationRecords('test', 'Migrator');
     }
 
     public function tearDown(): void
@@ -71,8 +58,7 @@ class RollbackCommandTest extends TestCase
         $this->assertOutputContains('No migrations to rollback');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
@@ -115,8 +101,8 @@ class RollbackCommandTest extends TestCase
         $this->assertOutputContains('20240309223600 MarkMigratedTestSecond:</info> <comment>reverting');
         $this->assertOutputContains('All Done');
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(2, $table->find()->all()->toArray());
+        $count = $this->getMigrationRecordCount('test');
+        $this->assertEquals(2, $count);
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
@@ -224,8 +210,7 @@ class RollbackCommandTest extends TestCase
         $this->assertExitSuccess();
 
         // migration state was recorded.
-        $phinxlog = $this->fetchTable('MigratorPhinxlog');
-        $this->assertEquals(1, $phinxlog->find()->count(), 'migrate makes a row');
+        $this->assertEquals(1, $this->getMigrationRecordCount('test', 'Migrator'), 'migrate makes a row');
         // Table was created.
         $this->assertNotEmpty($this->fetchTable('Migrator')->getSchema());
 
@@ -236,7 +221,7 @@ class RollbackCommandTest extends TestCase
 
         $this->assertOutputContains('Migrator:</info> <comment>reverted');
         // No more recorded migrations
-        $this->assertEquals(0, $phinxlog->find()->count());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test', 'Migrator'));
     }
 
     public function testLockOption(): void
@@ -262,8 +247,7 @@ class RollbackCommandTest extends TestCase
         $this->exec('migrations migrate -c test --no-lock');
         $this->assertExitSuccess();
         $this->resetOutput();
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertCount(2, $table->find()->all()->toArray());
+        $this->assertEquals(2, $this->getMigrationRecordCount('test'));
 
         $this->exec('migrations rollback -c test --no-lock --target MarkMigratedTestSecond --fake');
         $this->assertExitSuccess();
@@ -271,7 +255,7 @@ class RollbackCommandTest extends TestCase
         $this->assertOutputContains('performing fake rollbacks');
         $this->assertOutputContains('MarkMigratedTestSecond:</info> <comment>reverted');
 
-        $this->assertCount(0, $table->find()->all()->toArray());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
 
         $dumpFile = $migrationPath . DS . 'schema-dump-test.lock';
         $this->assertFileDoesNotExist($dumpFile);
@@ -310,7 +294,6 @@ class RollbackCommandTest extends TestCase
         // Only one event was fired
         $this->assertSame(['Migration.beforeRollback'], $fired);
 
-        $table = $this->fetchTable('Phinxlog');
-        $this->assertEquals(0, $table->find()->count());
+        $this->assertEquals(0, $this->getMigrationRecordCount('test'));
     }
 }
