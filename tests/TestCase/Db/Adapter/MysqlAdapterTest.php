@@ -3142,4 +3142,69 @@ OUTPUT;
 
         $this->assertTrue($this->adapter->hasTable('partitioned_events'));
     }
+
+    public function testAddPartitionToExistingTable()
+    {
+        // Create a partitioned table with room to add more partitions
+        $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('order_date', 'date')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'order_date')
+            ->addPartition('p2022', '2023-01-01')
+            ->addPartition('p2023', '2024-01-01')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_orders'));
+
+        // Add a new partition to the existing table
+        $table = new Table('partitioned_orders', [], $this->adapter);
+        $table->addPartitionToExisting('p2024', '2025-01-01')
+            ->save();
+
+        // Verify the partition was added by inserting data that belongs in the new partition
+        $this->adapter->execute(
+            "INSERT INTO partitioned_orders (id, order_date, amount) VALUES (1, '2024-06-15', 100.00)"
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_orders WHERE order_date = "2024-06-15"');
+        $this->assertCount(1, $rows);
+    }
+
+    public function testDropPartitionFromExistingTable()
+    {
+        // Create a partitioned table with multiple partitions
+        $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('message', 'text')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', 1000000)
+            ->addPartition('p1', 2000000)
+            ->addPartition('pmax', 'MAXVALUE')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_logs'));
+
+        // Insert data into partition p0
+        $this->adapter->execute(
+            "INSERT INTO partitioned_logs (id, message) VALUES (500, 'test message')"
+        );
+
+        // Drop the partition (this also removes the data)
+        $table = new Table('partitioned_logs', [], $this->adapter);
+        $table->dropPartition('p0')
+            ->save();
+
+        // Verify the data was removed with the partition
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 500');
+        $this->assertCount(0, $rows);
+
+        // Verify the table still works by inserting into the next partition
+        $this->adapter->execute(
+            "INSERT INTO partitioned_logs (id, message) VALUES (1500000, 'another message')"
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 1500000');
+        $this->assertCount(1, $rows);
+    }
 }
