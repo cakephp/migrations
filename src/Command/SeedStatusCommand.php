@@ -20,6 +20,7 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
+use Migrations\Util\Util;
 
 /**
  * Seed status command shows which seeds have been executed
@@ -130,11 +131,7 @@ class SeedStatusCommand extends Command
             }
 
             // Strip 'Seed' suffix for display and add ' seed' suffix
-            $displayName = $seedName;
-            if (str_ends_with($displayName, 'Seed')) {
-                $displayName = substr($displayName, 0, -4);
-            }
-            $displayName .= ' seed';
+            $displayName = Util::getSeedDisplayName($seedName) . ' seed';
 
             $statuses[] = [
                 'seedName' => $displayName,

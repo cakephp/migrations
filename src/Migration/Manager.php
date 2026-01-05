@@ -619,13 +619,8 @@ class Manager
      */
     protected function printSeedStatus(SeedInterface $seed, string $status, ?string $duration = null): void
     {
-        $seedName = $seed->getName();
-        if (str_ends_with($seedName, 'Seed')) {
-            $seedName = substr($seedName, 0, -4);
-        }
-
         $this->printStatusOutput(
-            $seedName . ' seed',
+            Util::getSeedDisplayName($seed->getName()) . ' seed',
             $status,
             $duration,
         );
