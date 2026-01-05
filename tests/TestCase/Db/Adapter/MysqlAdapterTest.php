@@ -3164,7 +3164,7 @@ OUTPUT;
 
         // Verify the partition was added by inserting data that belongs in the new partition
         $this->adapter->execute(
-            "INSERT INTO partitioned_orders (id, order_date, amount) VALUES (1, '2024-06-15', 100.00)"
+            "INSERT INTO partitioned_orders (id, order_date, amount) VALUES (1, '2024-06-15', 100.00)",
         );
 
         $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_orders WHERE order_date = "2024-06-15"');
@@ -3187,7 +3187,7 @@ OUTPUT;
 
         // Insert data into partition p0
         $this->adapter->execute(
-            "INSERT INTO partitioned_logs (id, message) VALUES (500, 'test message')"
+            "INSERT INTO partitioned_logs (id, message) VALUES (500, 'test message')",
         );
 
         // Drop the partition (this also removes the data)
@@ -3201,7 +3201,7 @@ OUTPUT;
 
         // Verify the table still works by inserting into the next partition
         $this->adapter->execute(
-            "INSERT INTO partitioned_logs (id, message) VALUES (1500000, 'another message')"
+            "INSERT INTO partitioned_logs (id, message) VALUES (1500000, 'another message')",
         );
 
         $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 1500000');
