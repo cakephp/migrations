@@ -12,12 +12,14 @@ use ArrayObject;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
+use Migrations\Db\Action\AddPartition;
 use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\CreateTable;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
+use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
@@ -71,6 +73,13 @@ class Plan
     protected array $constraints = [];
 
     /**
+     * List of partition additions or removals
+     *
+     * @var \Migrations\Db\Plan\AlterTable[]
+     */
+    protected array $partitions = [];
+
+    /**
      * List of dropped columns
      *
      * @var \Migrations\Db\Plan\AlterTable[]
@@ -100,6 +109,7 @@ class Plan
         $this->gatherTableMoves($actions);
         $this->gatherIndexes($actions);
         $this->gatherConstraints($actions);
+        $this->gatherPartitions($actions);
         $this->resolveConflicts();
     }
 
@@ -114,6 +124,7 @@ class Plan
             $this->tableUpdates,
             $this->constraints,
             $this->indexes,
+            $this->partitions,
             $this->columnRemoves,
             $this->tableMoves,
         ];
@@ -129,6 +140,7 @@ class Plan
         return [
             $this->constraints,
             $this->tableMoves,
+            $this->partitions,
             $this->indexes,
             $this->columnRemoves,
             $this->tableUpdates,
@@ -186,6 +198,7 @@ class Plan
                     $this->tableUpdates = $this->forgetTable($action->getTable(), $this->tableUpdates);
                     $this->constraints = $this->forgetTable($action->getTable(), $this->constraints);
                     $this->indexes = $this->forgetTable($action->getTable(), $this->indexes);
+                    $this->partitions = $this->forgetTable($action->getTable(), $this->partitions);
                     $this->columnRemoves = $this->forgetTable($action->getTable(), $this->columnRemoves);
                 }
             }
@@ -488,6 +501,32 @@ class Plan
             }
 
             $this->constraints[$name]->addAction($action);
+        }
+    }
+
+    /**
+     * Collects all partition creation and drops from the given intent
+     *
+     * @param \Migrations\Db\Action\Action[] $actions The actions to parse
+     * @return void
+     */
+    protected function gatherPartitions(array $actions): void
+    {
+        foreach ($actions as $action) {
+            if (!($action instanceof AddPartition) && !($action instanceof DropPartition)) {
+                continue;
+            } elseif (isset($this->tableCreates[$action->getTable()->getName()])) {
+                continue;
+            }
+
+            $table = $action->getTable();
+            $name = $table->getName();
+
+            if (!isset($this->partitions[$name])) {
+                $this->partitions[$name] = new AlterTable($table);
+            }
+
+            $this->partitions[$name]->addAction($action);
         }
     }
 }

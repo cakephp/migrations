@@ -1656,6 +1656,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     {
         $instructions = new AlterInstructions();
 
+        // Collect partition actions separately as they need special batching
+        /** @var \Migrations\Db\Table\PartitionDefinition[] $addPartitions */
+        $addPartitions = [];
+        /** @var string[] $dropPartitions */
+        $dropPartitions = [];
+
         foreach ($actions as $action) {
             switch (true) {
                 case $action instanceof AddColumn:
@@ -1764,18 +1770,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 case $action instanceof AddPartition:
                     /** @var \Migrations\Db\Action\AddPartition $action */
-                    $instructions->merge($this->getAddPartitionInstructions(
-                        $table,
-                        $action->getPartition(),
-                    ));
+                    $addPartitions[] = $action->getPartition();
                     break;
 
                 case $action instanceof DropPartition:
                     /** @var \Migrations\Db\Action\DropPartition $action */
-                    $instructions->merge($this->getDropPartitionInstructions(
-                        $table->getName(),
-                        $action->getPartitionName(),
-                    ));
+                    $dropPartitions[] = $action->getPartitionName();
                     break;
 
                 default:
@@ -1785,6 +1785,58 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             }
         }
 
+        // Handle batched partition operations
+        if ($addPartitions) {
+            $instructions->merge($this->getAddPartitionsInstructions($table, $addPartitions));
+        }
+        if ($dropPartitions) {
+            $instructions->merge($this->getDropPartitionsInstructions($table->getName(), $dropPartitions));
+        }
+
         $this->executeAlterSteps($table->getName(), $instructions);
+    }
+
+    /**
+     * Get instructions for adding multiple partitions to an existing table.
+     *
+     * This method handles batching multiple partition additions into a single
+     * ALTER TABLE statement where supported by the database.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param array<\Migrations\Db\Table\PartitionDefinition> $partitions The partitions to add
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionsInstructions(TableMetadata $table, array $partitions): AlterInstructions
+    {
+        // Default implementation calls single partition method for each
+        // Subclasses can override for database-specific batching
+        $instructions = new AlterInstructions();
+        foreach ($partitions as $partition) {
+            $instructions->merge($this->getAddPartitionInstructions($table, $partition));
+        }
+
+        return $instructions;
+    }
+
+    /**
+     * Get instructions for dropping multiple partitions from an existing table.
+     *
+     * This method handles batching multiple partition drops into a single
+     * ALTER TABLE statement where supported by the database.
+     *
+     * @param string $tableName The table name
+     * @param array<string> $partitionNames The partition names to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionsInstructions(string $tableName, array $partitionNames): AlterInstructions
+    {
+        // Default implementation calls single partition method for each
+        // Subclasses can override for database-specific batching
+        $instructions = new AlterInstructions();
+        foreach ($partitionNames as $partitionName) {
+            $instructions->merge($this->getDropPartitionInstructions($tableName, $partitionName));
+        }
+
+        return $instructions;
     }
 }

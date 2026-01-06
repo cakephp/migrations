@@ -1390,6 +1390,90 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
+     * Get instructions for adding multiple partitions to an existing table.
+     *
+     * MySQL requires all partitions in a single ADD PARTITION clause:
+     * ADD PARTITION (PARTITION p1 ..., PARTITION p2 ...)
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param array<\Migrations\Db\Table\PartitionDefinition> $partitions The partitions to add
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionsInstructions(TableMetadata $table, array $partitions): AlterInstructions
+    {
+        if (empty($partitions)) {
+            return new AlterInstructions();
+        }
+
+        $partitionDefs = [];
+        foreach ($partitions as $partition) {
+            $partitionDefs[] = $this->getAddPartitionSql($partition);
+        }
+
+        $sql = 'ADD PARTITION (' . implode(', ', $partitionDefs) . ')';
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
+     * Get instructions for dropping multiple partitions from an existing table.
+     *
+     * MySQL allows dropping multiple partitions in a single statement:
+     * DROP PARTITION p1, p2, p3
+     *
+     * @param string $tableName The table name
+     * @param array<string> $partitionNames The partition names to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionsInstructions(string $tableName, array $partitionNames): AlterInstructions
+    {
+        if (empty($partitionNames)) {
+            return new AlterInstructions();
+        }
+
+        $quotedNames = array_map(fn($name) => $this->quoteColumnName($name), $partitionNames);
+        $sql = 'DROP PARTITION ' . implode(', ', $quotedNames);
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
+     * Generate the SQL definition for a single partition when adding to existing table.
+     *
+     * This method is used when adding partitions to an existing table and must
+     * infer the partition type from the value format since we don't have table metadata.
+     *
+     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition definition
+     * @return string
+     */
+    protected function getAddPartitionSql(PartitionDefinition $partition): string
+    {
+        $value = $partition->getValue();
+        $sql = 'PARTITION ' . $this->quoteColumnName($partition->getName());
+
+        // Detect RANGE vs LIST based on value type (simplified heuristic)
+        if ($value === 'MAXVALUE' || is_scalar($value)) {
+            // Likely RANGE
+            if ($value === 'MAXVALUE') {
+                $sql .= ' VALUES LESS THAN MAXVALUE';
+            } else {
+                $sql .= ' VALUES LESS THAN (' . $this->quotePartitionValue($value) . ')';
+            }
+        } elseif (is_array($value)) {
+            // Likely LIST
+            $sql .= ' VALUES IN (';
+            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            $sql .= ')';
+        }
+
+        if ($partition->getComment()) {
+            $sql .= ' COMMENT = ' . $this->quoteString($partition->getComment());
+        }
+
+        return $sql;
+    }
+
+    /**
      * Whether the server has a native uuid type.
      * (MariaDB 10.7.0+)
      *
