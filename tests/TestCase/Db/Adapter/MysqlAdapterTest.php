@@ -3351,6 +3351,41 @@ OUTPUT;
         $this->assertCount(2, $rows);
     }
 
+    public function testCreateTableWithCompositePartitionKey(): void
+    {
+        // Test composite partition keys - partitioning by multiple columns
+        // MySQL RANGE COLUMNS supports multiple columns
+        $table = new Table('composite_partitioned', ['id' => false, 'primary_key' => ['id', 'year', 'month']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('year', 'integer')
+            ->addColumn('month', 'integer')
+            ->addColumn('data', 'string', ['limit' => 100])
+            ->partitionBy(Partition::TYPE_RANGE_COLUMNS, ['year', 'month'])
+            ->addPartition('p202401', [2024, 2])
+            ->addPartition('p202402', [2024, 3])
+            ->addPartition('p202403', [2024, 4])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('composite_partitioned'));
+
+        // Verify partitioning works by inserting data into different partitions
+        $this->adapter->execute(
+            "INSERT INTO composite_partitioned (id, year, month, data) VALUES (1, 2024, 1, 'January')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO composite_partitioned (id, year, month, data) VALUES (2, 2024, 2, 'February')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO composite_partitioned (id, year, month, data) VALUES (3, 2024, 3, 'March')",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM composite_partitioned ORDER BY month');
+        $this->assertCount(3, $rows);
+        $this->assertEquals('January', $rows[0]['data']);
+        $this->assertEquals('February', $rows[1]['data']);
+        $this->assertEquals('March', $rows[2]['data']);
+    }
+
     public function testAddPartitioningToExistingTable(): void
     {
         // Create a non-partitioned table
