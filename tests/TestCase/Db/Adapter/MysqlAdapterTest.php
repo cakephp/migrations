@@ -3341,10 +3341,10 @@ OUTPUT;
 
         // Verify MAXVALUE partition catches all higher values
         $this->adapter->execute(
-            "INSERT INTO partitioned_data (id, value) VALUES (250, 1)",
+            'INSERT INTO partitioned_data (id, value) VALUES (250, 1)',
         );
         $this->adapter->execute(
-            "INSERT INTO partitioned_data (id, value) VALUES (999999, 2)",
+            'INSERT INTO partitioned_data (id, value) VALUES (999999, 2)',
         );
 
         $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_data WHERE id >= 200');
