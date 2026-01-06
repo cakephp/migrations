@@ -1390,6 +1390,20 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
+     * Get instructions for adding partitioning to an existing table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param \Migrations\Db\Table\Partition $partition The partition configuration
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getSetPartitioningInstructions(TableMetadata $table, Partition $partition): AlterInstructions
+    {
+        $sql = $this->getPartitionSqlDefinition($partition);
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
      * Get instructions for adding multiple partitions to an existing table.
      *
      * MySQL requires all partitions in a single ADD PARTITION clause:

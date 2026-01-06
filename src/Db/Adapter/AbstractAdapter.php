@@ -37,6 +37,7 @@ use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
+use Migrations\Db\Action\SetPartitioning;
 use Migrations\Db\AlterInstructions;
 use Migrations\Db\InsertMode;
 use Migrations\Db\Literal;
@@ -45,6 +46,7 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\Partition;
 use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
@@ -1778,6 +1780,14 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     $dropPartitions[] = $action->getPartitionName();
                     break;
 
+                case $action instanceof SetPartitioning:
+                    /** @var \Migrations\Db\Action\SetPartitioning $action */
+                    $instructions->merge($this->getSetPartitioningInstructions(
+                        $table,
+                        $action->getPartition(),
+                    ));
+                    break;
+
                 default:
                     throw new InvalidArgumentException(
                         sprintf("Don't know how to execute action `%s`", get_class($action)),
@@ -1838,5 +1848,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         return $instructions;
+    }
+
+    /**
+     * Get instructions for adding partitioning to an existing table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param \Migrations\Db\Table\Partition $partition The partition configuration
+     * @throws \RuntimeException If partitioning is not supported
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getSetPartitioningInstructions(TableMetadata $table, Partition $partition): AlterInstructions
+    {
+        throw new RuntimeException('Adding partitioning to existing tables is not supported by this adapter');
     }
 }

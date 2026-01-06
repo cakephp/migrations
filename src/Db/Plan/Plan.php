@@ -24,6 +24,7 @@ use Migrations\Db\Action\DropTable;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
+use Migrations\Db\Action\SetPartitioning;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Plan\Solver\ActionSplitter;
 use Migrations\Db\Table\TableMetadata;
@@ -513,7 +514,11 @@ class Plan
     protected function gatherPartitions(array $actions): void
     {
         foreach ($actions as $action) {
-            if (!($action instanceof AddPartition) && !($action instanceof DropPartition)) {
+            if (
+                !($action instanceof AddPartition)
+                && !($action instanceof DropPartition)
+                && !($action instanceof SetPartitioning)
+            ) {
                 continue;
             } elseif (isset($this->tableCreates[$action->getTable()->getName()])) {
                 continue;

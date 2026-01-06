@@ -3351,6 +3351,44 @@ OUTPUT;
         $this->assertCount(2, $rows);
     }
 
+    public function testAddPartitioningToExistingTable(): void
+    {
+        // Create a non-partitioned table
+        $table = new Table('orders', ['id' => false, 'primary_key' => ['id', 'created_at']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('created_at', 'datetime')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('orders'));
+
+        // Add partitioning to the existing table
+        $table = new Table('orders', ['id' => false, 'primary_key' => ['id', 'created_at']], $this->adapter);
+        $table->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'created_at')
+            ->addPartition('p2023', '2024-01-01')
+            ->addPartition('p2024', '2025-01-01')
+            ->addPartition('pmax', 'MAXVALUE')
+            ->update();
+
+        // Verify partitioning was added by inserting data
+        $this->adapter->execute(
+            "INSERT INTO orders (id, created_at, amount) VALUES (1, '2023-06-15', 100.00)",
+        );
+        $this->adapter->execute(
+            "INSERT INTO orders (id, created_at, amount) VALUES (2, '2024-06-15', 200.00)",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM orders');
+        $this->assertCount(2, $rows);
+
+        // Verify partitions exist by querying information_schema
+        $partitions = $this->adapter->fetchAll(
+            "SELECT PARTITION_NAME FROM information_schema.PARTITIONS
+             WHERE TABLE_NAME = 'orders' AND TABLE_SCHEMA = DATABASE() AND PARTITION_NAME IS NOT NULL",
+        );
+        $this->assertCount(3, $partitions);
+    }
+
     public function testCombinedPartitionAndColumnOperations(): void
     {
         // Create a partitioned table
