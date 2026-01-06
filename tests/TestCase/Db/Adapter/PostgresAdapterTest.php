@@ -3011,6 +3011,9 @@ OUTPUT;
 
         $rows = $this->adapter->fetchAll("SELECT * FROM partitioned_orders WHERE order_date = '2024-06-15'");
         $this->assertCount(1, $rows);
+
+        // Cleanup - drop partitioned table (CASCADE drops partitions)
+        $this->adapter->dropTable('partitioned_orders');
     }
 
     public function testDropPartitionFromExistingTable()
@@ -3050,5 +3053,8 @@ OUTPUT;
 
         $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 1500000');
         $this->assertCount(1, $rows);
+
+        // Cleanup - drop partitioned table (CASCADE drops remaining partitions)
+        $this->adapter->dropTable('partitioned_logs');
     }
 }
