@@ -131,15 +131,16 @@ class MigrationsPlugin extends BasePlugin
             return $commands;
         }
 
+        $classes = $this->migrationCommandsList;
         if (class_exists(SimpleBakeCommand::class)) {
-            $found = $commands->discoverPlugin($this->getName());
-
-            return $commands->addMany($found);
+            $classes[] = BakeMigrationCommand::class;
+            $classes[] = BakeMigrationDiffCommand::class;
+            $classes[] = BakeMigrationSnapshotCommand::class;
+            $classes[] = BakeSeedCommand::class;
         }
 
         $found = [];
-        // Convert to a method and use config to toggle command names.
-        foreach ($this->migrationCommandsList as $class) {
+        foreach ($classes as $class) {
             $name = $class::defaultName();
             // If the short name has been used, use the full name.
             // This allows app commands to have name preference.
