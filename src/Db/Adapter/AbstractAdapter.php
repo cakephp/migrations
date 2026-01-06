@@ -1552,32 +1552,6 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     abstract protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions;
 
     /**
-     * Returns the instructions to add a partition to an existing partitioned table.
-     *
-     * @param \Migrations\Db\Table\TableMetadata $table The table
-     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition definition to add
-     * @throws \RuntimeException If partitioning is not supported
-     * @return \Migrations\Db\AlterInstructions
-     */
-    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
-    {
-        throw new RuntimeException('Table partitioning is not supported by this adapter');
-    }
-
-    /**
-     * Returns the instructions to drop a partition from an existing partitioned table.
-     *
-     * @param string $tableName The table name
-     * @param string $partitionName The partition name to drop
-     * @throws \RuntimeException If partitioning is not supported
-     * @return \Migrations\Db\AlterInstructions
-     */
-    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
-    {
-        throw new RuntimeException('Table partitioning is not supported by this adapter');
-    }
-
-    /**
      * @inheritdoc
      */
     public function dropTable(string $tableName): void
@@ -1818,14 +1792,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function getAddPartitionsInstructions(TableMetadata $table, array $partitions): AlterInstructions
     {
-        // Default implementation calls single partition method for each
-        // Subclasses can override for database-specific batching
-        $instructions = new AlterInstructions();
-        foreach ($partitions as $partition) {
-            $instructions->merge($this->getAddPartitionInstructions($table, $partition));
-        }
-
-        return $instructions;
+        throw new RuntimeException('Table partitioning is not supported by this adapter');
     }
 
     /**
@@ -1840,14 +1807,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected function getDropPartitionsInstructions(string $tableName, array $partitionNames): AlterInstructions
     {
-        // Default implementation calls single partition method for each
-        // Subclasses can override for database-specific batching
-        $instructions = new AlterInstructions();
-        foreach ($partitionNames as $partitionName) {
-            $instructions->merge($this->getDropPartitionInstructions($tableName, $partitionName));
-        }
-
-        return $instructions;
+        throw new RuntimeException('Table partitioning is not supported by this adapter');
     }
 
     /**

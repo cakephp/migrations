@@ -1339,57 +1339,6 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
-     * Get instructions for adding a partition to an existing table.
-     *
-     * @param \Migrations\Db\Table\TableMetadata $table The table
-     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition to add
-     * @return \Migrations\Db\AlterInstructions
-     */
-    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
-    {
-        // For MySQL, we need to know the partition type to generate correct SQL
-        // This is a simplified version - in practice you'd need to query the table's partition type
-        $value = $partition->getValue();
-        $sql = 'ADD PARTITION (PARTITION ' . $this->quoteColumnName($partition->getName());
-
-        // Detect RANGE vs LIST based on value type (simplified heuristic)
-        if ($value === 'MAXVALUE' || is_scalar($value)) {
-            // Likely RANGE
-            if ($value === 'MAXVALUE') {
-                $sql .= ' VALUES LESS THAN MAXVALUE';
-            } else {
-                $sql .= ' VALUES LESS THAN (' . $this->quotePartitionValue($value) . ')';
-            }
-        } elseif (is_array($value)) {
-            // Likely LIST
-            $sql .= ' VALUES IN (';
-            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
-            $sql .= ')';
-        }
-
-        if ($partition->getComment()) {
-            $sql .= ' COMMENT = ' . $this->quoteString($partition->getComment());
-        }
-        $sql .= ')';
-
-        return new AlterInstructions([$sql]);
-    }
-
-    /**
-     * Get instructions for dropping a partition from an existing table.
-     *
-     * @param string $tableName The table name
-     * @param string $partitionName The partition name to drop
-     * @return \Migrations\Db\AlterInstructions
-     */
-    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
-    {
-        $sql = 'DROP PARTITION ' . $this->quoteColumnName($partitionName);
-
-        return new AlterInstructions([$sql]);
-    }
-
-    /**
      * Get instructions for adding partitioning to an existing table.
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table

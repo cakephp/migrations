@@ -1439,13 +1439,30 @@ class PostgresAdapter extends AbstractAdapter
     }
 
     /**
-     * Get instructions for adding a partition to an existing table.
+     * Get instructions for adding multiple partitions to an existing table.
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param array<\Migrations\Db\Table\PartitionDefinition> $partitions The partitions to add
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionsInstructions(TableMetadata $table, array $partitions): AlterInstructions
+    {
+        $instructions = new AlterInstructions();
+        foreach ($partitions as $partition) {
+            $instructions->merge($this->getAddPartitionSql($table, $partition));
+        }
+
+        return $instructions;
+    }
+
+    /**
+     * Get instructions for adding a single partition to an existing table.
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table
      * @param \Migrations\Db\Table\PartitionDefinition $partition The partition to add
      * @return \Migrations\Db\AlterInstructions
      */
-    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
+    private function getAddPartitionSql(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
     {
         // PostgreSQL requires creating partition tables using CREATE TABLE ... PARTITION OF
         // This is more complex as we need the partition type info
@@ -1483,13 +1500,30 @@ class PostgresAdapter extends AbstractAdapter
     }
 
     /**
-     * Get instructions for dropping a partition from an existing table.
+     * Get instructions for dropping multiple partitions from an existing table.
+     *
+     * @param string $tableName The table name
+     * @param array<string> $partitionNames The partition names to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionsInstructions(string $tableName, array $partitionNames): AlterInstructions
+    {
+        $instructions = new AlterInstructions();
+        foreach ($partitionNames as $partitionName) {
+            $instructions->merge($this->getDropPartitionSql($tableName, $partitionName));
+        }
+
+        return $instructions;
+    }
+
+    /**
+     * Get instructions for dropping a single partition from an existing table.
      *
      * @param string $tableName The table name
      * @param string $partitionName The partition name to drop
      * @return \Migrations\Db\AlterInstructions
      */
-    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
+    private function getDropPartitionSql(string $tableName, string $partitionName): AlterInstructions
     {
         // In PostgreSQL, partitions are tables, so we drop the partition table
         // The partition name is typically the table_partitionname
