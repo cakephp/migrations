@@ -47,7 +47,6 @@ use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Partition;
-use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
