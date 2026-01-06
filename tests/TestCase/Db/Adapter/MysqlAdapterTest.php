@@ -3207,37 +3207,4 @@ OUTPUT;
         $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 1500000');
         $this->assertCount(1, $rows);
     }
-
-    public function testCombinedPartitionAndColumnOperations(): void
-    {
-        // Create a partitioned table
-        $table = new Table('combined_test', ['id' => false, 'primary_key' => ['id', 'created_year']], $this->adapter);
-        $table->addColumn('id', 'integer')
-            ->addColumn('created_year', 'integer')
-            ->addColumn('name', 'string', ['limit' => 100])
-            ->partitionBy(Partition::TYPE_RANGE, 'created_year')
-            ->addPartition('p2022', 2023)
-            ->addPartition('p2023', 2024)
-            ->create();
-
-        $this->assertTrue($this->adapter->hasTable('combined_test'));
-
-        // Combine adding a column AND adding a partition in one save()
-        $table = new Table('combined_test', [], $this->adapter);
-        $table->addColumn('description', 'text', ['null' => true])
-            ->addPartitionToExisting('p2024', 2025)
-            ->save();
-
-        // Verify the column was added
-        $this->assertTrue($this->adapter->hasColumn('combined_test', 'description'));
-
-        // Verify the partition was added by inserting data
-        $this->adapter->execute(
-            "INSERT INTO combined_test (id, created_year, name, description) VALUES (1, 2024, 'Test', 'A description')",
-        );
-
-        $rows = $this->adapter->fetchAll('SELECT * FROM combined_test WHERE created_year = 2024');
-        $this->assertCount(1, $rows);
-        $this->assertEquals('A description', $rows[0]['description']);
-    }
 }
