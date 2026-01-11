@@ -29,7 +29,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->changeColumn('title', 'text', [
                 'default' => null,
@@ -53,7 +52,15 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
+            ])
+            ->update();
+
+        $this->table('tags')
+            ->changeColumn('id', 'integer', [
+                'default' => null,
+                'length' => null,
+                'limit' => null,
+                'null' => false,
             ])
             ->update();
 
@@ -63,7 +70,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->update();
         $this->table('categories')
@@ -76,7 +82,7 @@ class TheDiffDefaultMysql extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
+                'signed' => false,
             ])
             ->addIndex(
                 $this->index('user_id')
@@ -113,7 +119,6 @@ class TheDiffDefaultMysql extends BaseMigration
                 'null' => true,
                 'precision' => 5,
                 'scale' => 5,
-                'signed' => true,
             ])
             ->addIndex(
                 $this->index('slug')
@@ -128,19 +133,6 @@ class TheDiffDefaultMysql extends BaseMigration
                     ->setName('rating_index')
             )
             ->update();
-
-        $this->table('articles')
-            ->addForeignKey(
-                $this->foreignKey('category_id')
-                    ->setReferencedTable('categories')
-                    ->setReferencedColumns('id')
-                    ->setOnDelete('NO_ACTION')
-                    ->setOnUpdate('NO_ACTION')
-                    ->setName('articles_ibfk_1')
-            )
-            ->update();
-
-        $this->table('tags')->drop()->save();
     }
 
     /**
@@ -157,18 +149,6 @@ class TheDiffDefaultMysql extends BaseMigration
             ->dropForeignKey(
                 'user_id'
             )->save();
-
-        $this->table('articles')
-            ->dropForeignKey(
-                'category_id'
-            )->save();
-        $this->table('tags')
-            ->addColumn('name', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => false,
-            ])
-            ->create();
 
         $this->table('articles')
             ->removeIndexByName('UNIQUE_SLUG')
@@ -227,6 +207,15 @@ class TheDiffDefaultMysql extends BaseMigration
                 $this->index('name')
                     ->setName('BY_NAME')
             )
+            ->update();
+
+        $this->table('tags')
+            ->changeColumn('id', 'integer', [
+                'autoIncrement' => true,
+                'default' => null,
+                'length' => 11,
+                'null' => false,
+            ])
             ->update();
 
         $this->table('users')

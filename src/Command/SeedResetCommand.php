@@ -19,6 +19,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
+use Migrations\Util\Util;
 
 /**
  * Seed reset command removes seeds from the execution log
@@ -112,11 +113,7 @@ class SeedResetCommand extends Command
         $io->out('');
         $io->out('<info>All seeds will be reset:</info>');
         foreach ($seedsToReset as $seed) {
-            $seedName = $seed->getName();
-            if (str_ends_with($seedName, 'Seed')) {
-                $seedName = substr($seedName, 0, -4);
-            }
-            $io->out('  - ' . $seedName);
+            $io->out('  - ' . Util::getSeedDisplayName($seed->getName()));
         }
         $io->out('');
 
@@ -132,14 +129,15 @@ class SeedResetCommand extends Command
         // Reset the seeds
         $count = 0;
         foreach ($seedsToReset as $seed) {
+            $seedName = Util::getSeedDisplayName($seed->getName());
             if ($manager->isSeedExecuted($seed)) {
                 if (!$config->isDryRun()) {
                     $adapter->removeSeedFromLog($seed);
                 }
-                $io->info("Reset: {$seed->getName()}");
+                $io->info("Reset: {$seedName} seed");
                 $count++;
             } else {
-                $io->verbose("Skipped (not executed): {$seed->getName()}");
+                $io->verbose("Skipped (not executed): {$seedName} seed");
             }
         }
 

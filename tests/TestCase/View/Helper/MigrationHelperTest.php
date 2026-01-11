@@ -20,10 +20,15 @@ use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Cake\View\View;
 use Migrations\View\Helper\MigrationHelper;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the ConfigurationTrait
+ *
+ * Note: This test must run in a separate process because adapter tests earlier
+ * in the test suite drop and recreate the database, destroying the schema.
  */
+#[RunTestsInSeparateProcesses]
 class MigrationHelperTest extends TestCase
 {
     /**

@@ -17,6 +17,7 @@ use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
+use Migrations\Db\Table\Partition;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -2982,5 +2983,160 @@ OUTPUT;
         $table->insert([
             ['code' => 'ITEM1', 'name' => 'Different Name'],
         ])->save();
+    }
+
+    public function testAddSinglePartitionToExistingTable()
+    {
+        // Create a partitioned table with room to add more partitions
+        $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('order_date', 'date')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->partitionBy(Partition::TYPE_RANGE, 'order_date')
+            ->addPartition('p2022', ['from' => '2022-01-01', 'to' => '2023-01-01'])
+            ->addPartition('p2023', ['from' => '2023-01-01', 'to' => '2024-01-01'])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_orders'));
+
+        // Add a new partition to the existing table
+        $table = new Table('partitioned_orders', [], $this->adapter);
+        $table->addPartitionToExisting('p2024', ['from' => '2024-01-01', 'to' => '2025-01-01'])
+            ->save();
+
+        // Verify the partition was added by inserting data that belongs in the new partition
+        $this->adapter->execute(
+            "INSERT INTO partitioned_orders (id, order_date, amount) VALUES (1, '2024-06-15', 100.00)",
+        );
+
+        $rows = $this->adapter->fetchAll("SELECT * FROM partitioned_orders WHERE order_date = '2024-06-15'");
+        $this->assertCount(1, $rows);
+
+        // Cleanup - drop partitioned table (CASCADE drops partitions)
+        $this->adapter->dropTable('partitioned_orders');
+    }
+
+    public function testAddMultiplePartitionsToExistingTable()
+    {
+        // Create a partitioned table
+        $table = new Table('partitioned_sales', ['id' => false, 'primary_key' => ['id', 'sale_date']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('sale_date', 'date')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->partitionBy(Partition::TYPE_RANGE, 'sale_date')
+            ->addPartition('p2022', ['from' => '2022-01-01', 'to' => '2023-01-01'])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_sales'));
+
+        // Add multiple partitions at once
+        $table = new Table('partitioned_sales', [], $this->adapter);
+        $table->addPartitionToExisting('p2023', ['from' => '2023-01-01', 'to' => '2024-01-01'])
+            ->addPartitionToExisting('p2024', ['from' => '2024-01-01', 'to' => '2025-01-01'])
+            ->addPartitionToExisting('p2025', ['from' => '2025-01-01', 'to' => '2026-01-01'])
+            ->save();
+
+        // Verify all partitions were added by inserting data into each
+        $this->adapter->execute(
+            "INSERT INTO partitioned_sales (id, sale_date, amount) VALUES (1, '2023-06-15', 100.00)",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_sales (id, sale_date, amount) VALUES (2, '2024-06-15', 200.00)",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_sales (id, sale_date, amount) VALUES (3, '2025-06-15', 300.00)",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_sales');
+        $this->assertCount(3, $rows);
+
+        // Cleanup
+        $this->adapter->dropTable('partitioned_sales');
+    }
+
+    public function testDropSinglePartitionFromExistingTable()
+    {
+        // Create a partitioned table with multiple partitions
+        $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('message', 'text')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', ['from' => 0, 'to' => 1000000])
+            ->addPartition('p1', ['from' => 1000000, 'to' => 2000000])
+            ->addPartition('p2', ['from' => 2000000, 'to' => 3000000])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_logs'));
+
+        // Insert data into partition p0
+        $this->adapter->execute(
+            "INSERT INTO partitioned_logs (id, message) VALUES (500, 'test message')",
+        );
+
+        // Drop the partition (this also removes the data in PostgreSQL)
+        $table = new Table('partitioned_logs', [], $this->adapter);
+        $table->dropPartition('p0')
+            ->save();
+
+        // Verify the partition table was dropped
+        $this->assertFalse($this->adapter->hasTable('partitioned_logs_p0'));
+
+        // Verify the main partitioned table still exists
+        $this->assertTrue($this->adapter->hasTable('partitioned_logs'));
+
+        // Verify the table still works by inserting into the next partition
+        $this->adapter->execute(
+            "INSERT INTO partitioned_logs (id, message) VALUES (1500000, 'another message')",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 1500000');
+        $this->assertCount(1, $rows);
+
+        // Cleanup - drop partitioned table (CASCADE drops remaining partitions)
+        $this->adapter->dropTable('partitioned_logs');
+    }
+
+    public function testDropMultiplePartitionsFromExistingTable()
+    {
+        // Create a partitioned table with multiple partitions
+        $table = new Table('partitioned_archive', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('data', 'text')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', ['from' => 0, 'to' => 1000000])
+            ->addPartition('p1', ['from' => 1000000, 'to' => 2000000])
+            ->addPartition('p2', ['from' => 2000000, 'to' => 3000000])
+            ->addPartition('p3', ['from' => 3000000, 'to' => 4000000])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_archive'));
+
+        // Insert data into partitions
+        $this->adapter->execute(
+            "INSERT INTO partitioned_archive (id, data) VALUES (500, 'data in p0')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_archive (id, data) VALUES (1500000, 'data in p1')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_archive (id, data) VALUES (2500000, 'data in p2')",
+        );
+
+        // Drop multiple partitions at once
+        $table = new Table('partitioned_archive', [], $this->adapter);
+        $table->dropPartition('p0')
+            ->dropPartition('p1')
+            ->save();
+
+        // Verify the partition tables were dropped
+        $this->assertFalse($this->adapter->hasTable('partitioned_archive_p0'));
+        $this->assertFalse($this->adapter->hasTable('partitioned_archive_p1'));
+
+        // Verify data in p2 still exists
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_archive WHERE id = 2500000');
+        $this->assertCount(1, $rows);
+
+        // Cleanup
+        $this->adapter->dropTable('partitioned_archive');
     }
 }

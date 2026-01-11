@@ -96,7 +96,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test NumbersSeed');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -110,8 +110,8 @@ class SeedCommandTest extends TestCase
         $this->createTables();
         $this->exec('seeds run -c test --source BaseSeeds MigrationSeedNumbers');
         $this->assertExitSuccess();
-        $this->assertOutputContains('MigrationSeedNumbers:</info> <comment>seeding');
-        $this->assertOutputContains('AnotherNumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('MigrationSeedNumbers seed:</info> <comment>seeding');
+        $this->assertOutputContains('AnotherNumbers seed:</info> <comment>seeding');
         $this->assertOutputContains('radix=10');
         $this->assertOutputContains('fetchRow=121');
         $this->assertOutputContains('hasTable=1');
@@ -154,8 +154,8 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test --source CallSeeds LettersSeed,NumbersCallSeed');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
-        $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('NumbersCall seed:</info> <comment>seeding');
+        $this->assertOutputContains('Letters seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -182,7 +182,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test StoresSeed');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Stores seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -208,7 +208,7 @@ class SeedCommandTest extends TestCase
 
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
 
@@ -219,7 +219,7 @@ class SeedCommandTest extends TestCase
 
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
 
@@ -245,8 +245,8 @@ class SeedCommandTest extends TestCase
 
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
-        $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
-        $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('NumbersCall seed:</info> <comment>seeding');
+        $this->assertOutputContains('Letters seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -303,7 +303,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test StoresSeed --dry-run');
         $this->assertExitSuccess();
         $this->assertOutputContains('DRY-RUN mode enabled');
-        $this->assertOutputContains('StoresSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Stores seed:</info> <comment>seeding');
 
         $finalCount = $connection->execute('SELECT COUNT(*) FROM stores')->fetchColumn(0);
         $this->assertEquals($initialCount, $finalCount, 'Dry-run mode should not modify stores table');
@@ -315,7 +315,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test AnonymousStoreSeed');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('AnonymousStoreSeed:</info> <comment>seeding');
+        $this->assertOutputContains('AnonymousStore seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -334,7 +334,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test Numbers');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -349,8 +349,8 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test --source CallSeeds Letters,NumbersCall');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
-        $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('NumbersCall seed:</info> <comment>seeding');
+        $this->assertOutputContains('Letters seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -368,7 +368,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test AnonymousStore');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('AnonymousStoreSeed:</info> <comment>seeding');
+        $this->assertOutputContains('AnonymousStore seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -417,7 +417,7 @@ class SeedCommandTest extends TestCase
         $this->assertExitSuccess();
         $this->assertOutputNotContains('The following seeds will be executed:');
         $this->assertOutputNotContains('Do you want to continue?');
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
     }
 
@@ -427,8 +427,8 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds run -c test --source CallSeeds Letters,NumbersCall');
 
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersCallSeed:</info> <comment>seeding');
-        $this->assertOutputContains('LettersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('NumbersCall seed:</info> <comment>seeding');
+        $this->assertOutputContains('Letters seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         /** @var \Cake\Database\Connection $connection */
@@ -450,7 +450,7 @@ class SeedCommandTest extends TestCase
         // First run should execute the seed
         $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
         $this->assertOutputContains('All Done');
 
         // Verify data was inserted
@@ -460,7 +460,7 @@ class SeedCommandTest extends TestCase
         // Second run should skip the seed (already executed)
         $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersSeed:</info> <comment>already executed');
+        $this->assertOutputContains('Numbers seed:</info> <comment>already executed');
         $this->assertOutputNotContains('seeding');
 
         // Verify no additional data was inserted
@@ -470,7 +470,7 @@ class SeedCommandTest extends TestCase
         // Run with --force should re-execute
         $this->exec('seeds run -c test NumbersSeed --force');
         $this->assertExitSuccess();
-        $this->assertOutputContains('NumbersSeed:</info> <comment>seeding');
+        $this->assertOutputContains('Numbers seed:</info> <comment>seeding');
 
         // Verify data was inserted again (now 2 records)
         $query = $connection->execute('SELECT COUNT(*) FROM numbers');
@@ -495,7 +495,7 @@ class SeedCommandTest extends TestCase
         $this->exec('seeds status -c test');
         $this->assertExitSuccess();
         $this->assertOutputContains('executed');
-        $this->assertOutputContains('NumbersSeed');
+        $this->assertOutputContains('Numbers');
     }
 
     public function testSeedResetCommand(): void

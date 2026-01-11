@@ -3246,4 +3246,318 @@ OUTPUT;
 
         $this->assertTrue($this->adapter->hasTable('partitioned_events'));
     }
+
+    public function testAddSinglePartitionToExistingTable()
+    {
+        // Create a partitioned table with room to add more partitions
+        $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('order_date', 'date')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'order_date')
+            ->addPartition('p2022', '2023-01-01')
+            ->addPartition('p2023', '2024-01-01')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_orders'));
+
+        // Add a single partition to the existing table
+        $table = new Table('partitioned_orders', [], $this->adapter);
+        $table->addPartitionToExisting('p2024', '2025-01-01')
+            ->save();
+
+        // Verify the partition was added by inserting data that belongs in the new partition
+        $this->adapter->execute(
+            "INSERT INTO partitioned_orders (id, order_date, amount) VALUES (1, '2024-06-15', 100.00)",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_orders WHERE order_date = "2024-06-15"');
+        $this->assertCount(1, $rows);
+    }
+
+    public function testAddMultiplePartitionsToExistingTable()
+    {
+        // Create a partitioned table with room to add more partitions
+        $table = new Table('partitioned_sales', ['id' => false, 'primary_key' => ['id', 'sale_date']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('sale_date', 'date')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'sale_date')
+            ->addPartition('p2022', '2023-01-01')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_sales'));
+
+        // Add multiple partitions at once - this is the main test for the fix
+        // MySQL requires: ADD PARTITION (PARTITION p1 ..., PARTITION p2 ...)
+        // NOT: ADD PARTITION (...), ADD PARTITION (...)
+        $table = new Table('partitioned_sales', [], $this->adapter);
+        $table->addPartitionToExisting('p2023', '2024-01-01')
+            ->addPartitionToExisting('p2024', '2025-01-01')
+            ->addPartitionToExisting('p2025', '2026-01-01')
+            ->save();
+
+        // Verify all partitions were added by inserting data into each
+        $this->adapter->execute(
+            "INSERT INTO partitioned_sales (id, sale_date, amount) VALUES (1, '2023-06-15', 100.00)",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_sales (id, sale_date, amount) VALUES (2, '2024-06-15', 200.00)",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_sales (id, sale_date, amount) VALUES (3, '2025-06-15', 300.00)",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_sales');
+        $this->assertCount(3, $rows);
+    }
+
+    public function testDropSinglePartitionFromExistingTable()
+    {
+        // Create a partitioned table with multiple partitions
+        $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('message', 'text')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', 1000000)
+            ->addPartition('p1', 2000000)
+            ->addPartition('pmax', 'MAXVALUE')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_logs'));
+
+        // Insert data into partition p0
+        $this->adapter->execute(
+            "INSERT INTO partitioned_logs (id, message) VALUES (500, 'test message')",
+        );
+
+        // Drop the partition (this also removes the data)
+        $table = new Table('partitioned_logs', [], $this->adapter);
+        $table->dropPartition('p0')
+            ->save();
+
+        // Verify the data was removed with the partition
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 500');
+        $this->assertCount(0, $rows);
+
+        // Verify the table still works by inserting into the next partition
+        $this->adapter->execute(
+            "INSERT INTO partitioned_logs (id, message) VALUES (1500000, 'another message')",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_logs WHERE id = 1500000');
+        $this->assertCount(1, $rows);
+    }
+
+    public function testDropMultiplePartitionsFromExistingTable()
+    {
+        // Create a partitioned table with multiple partitions
+        $table = new Table('partitioned_archive', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('data', 'text')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', 1000000)
+            ->addPartition('p1', 2000000)
+            ->addPartition('p2', 3000000)
+            ->addPartition('p3', 4000000)
+            ->addPartition('pmax', 'MAXVALUE')
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_archive'));
+
+        // Insert data into partitions p0 and p1
+        $this->adapter->execute(
+            "INSERT INTO partitioned_archive (id, data) VALUES (500, 'data in p0')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_archive (id, data) VALUES (1500000, 'data in p1')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_archive (id, data) VALUES (2500000, 'data in p2')",
+        );
+
+        // Drop multiple partitions at once
+        // MySQL allows: DROP PARTITION p0, p1
+        $table = new Table('partitioned_archive', [], $this->adapter);
+        $table->dropPartition('p0')
+            ->dropPartition('p1')
+            ->save();
+
+        // Verify the data was removed with the partitions
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_archive WHERE id < 2000000');
+        $this->assertCount(0, $rows);
+
+        // Verify data in p2 still exists
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_archive WHERE id = 2500000');
+        $this->assertCount(1, $rows);
+    }
+
+    public function testAddMultipleListPartitionsToExistingTable()
+    {
+        // Create a LIST partitioned table
+        $table = new Table('partitioned_regions', ['id' => false, 'primary_key' => ['id', 'region_id']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('region_id', 'integer')
+            ->addColumn('name', 'string', ['limit' => 100])
+            ->partitionBy(Partition::TYPE_LIST, 'region_id')
+            ->addPartition('p_north', [1, 2, 3])
+            ->addPartition('p_south', [4, 5, 6])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_regions'));
+
+        // Add multiple LIST partitions at once
+        $table = new Table('partitioned_regions', [], $this->adapter);
+        $table->addPartitionToExisting('p_east', [7, 8, 9])
+            ->addPartitionToExisting('p_west', [10, 11, 12])
+            ->save();
+
+        // Verify all partitions work by inserting data
+        $this->adapter->execute(
+            "INSERT INTO partitioned_regions (id, region_id, name) VALUES (1, 7, 'East Region')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO partitioned_regions (id, region_id, name) VALUES (2, 10, 'West Region')",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_regions WHERE region_id IN (7, 10)');
+        $this->assertCount(2, $rows);
+    }
+
+    public function testAddPartitionsWithMaxvalue()
+    {
+        // Create a partitioned table without MAXVALUE partition
+        $table = new Table('partitioned_data', ['id' => false, 'primary_key' => ['id']], $this->adapter);
+        $table->addColumn('id', 'biginteger')
+            ->addColumn('value', 'integer')
+            ->partitionBy(Partition::TYPE_RANGE, 'id')
+            ->addPartition('p0', 100)
+            ->addPartition('p1', 200)
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('partitioned_data'));
+
+        // Add multiple partitions including one with MAXVALUE
+        $table = new Table('partitioned_data', [], $this->adapter);
+        $table->addPartitionToExisting('p2', 300)
+            ->addPartitionToExisting('pmax', 'MAXVALUE')
+            ->save();
+
+        // Verify MAXVALUE partition catches all higher values
+        $this->adapter->execute(
+            'INSERT INTO partitioned_data (id, value) VALUES (250, 1)',
+        );
+        $this->adapter->execute(
+            'INSERT INTO partitioned_data (id, value) VALUES (999999, 2)',
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM partitioned_data WHERE id >= 200');
+        $this->assertCount(2, $rows);
+    }
+
+    public function testCreateTableWithCompositePartitionKey(): void
+    {
+        // Test composite partition keys - partitioning by multiple columns
+        // MySQL RANGE COLUMNS supports multiple columns
+        $table = new Table('composite_partitioned', ['id' => false, 'primary_key' => ['id', 'year', 'month']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('year', 'integer')
+            ->addColumn('month', 'integer')
+            ->addColumn('data', 'string', ['limit' => 100])
+            ->partitionBy(Partition::TYPE_RANGE_COLUMNS, ['year', 'month'])
+            ->addPartition('p202401', [2024, 2])
+            ->addPartition('p202402', [2024, 3])
+            ->addPartition('p202403', [2024, 4])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('composite_partitioned'));
+
+        // Verify partitioning works by inserting data into different partitions
+        $this->adapter->execute(
+            "INSERT INTO composite_partitioned (id, year, month, data) VALUES (1, 2024, 1, 'January')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO composite_partitioned (id, year, month, data) VALUES (2, 2024, 2, 'February')",
+        );
+        $this->adapter->execute(
+            "INSERT INTO composite_partitioned (id, year, month, data) VALUES (3, 2024, 3, 'March')",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM composite_partitioned ORDER BY month');
+        $this->assertCount(3, $rows);
+        $this->assertEquals('January', $rows[0]['data']);
+        $this->assertEquals('February', $rows[1]['data']);
+        $this->assertEquals('March', $rows[2]['data']);
+    }
+
+    public function testAddPartitioningToExistingTable(): void
+    {
+        // Create a non-partitioned table
+        $table = new Table('orders', ['id' => false, 'primary_key' => ['id', 'created_at']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('created_at', 'datetime')
+            ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('orders'));
+
+        // Add partitioning to the existing table
+        $table = new Table('orders', ['id' => false, 'primary_key' => ['id', 'created_at']], $this->adapter);
+        $table->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'created_at')
+            ->addPartition('p2023', '2024-01-01')
+            ->addPartition('p2024', '2025-01-01')
+            ->addPartition('pmax', 'MAXVALUE')
+            ->update();
+
+        // Verify partitioning was added by inserting data
+        $this->adapter->execute(
+            "INSERT INTO orders (id, created_at, amount) VALUES (1, '2023-06-15', 100.00)",
+        );
+        $this->adapter->execute(
+            "INSERT INTO orders (id, created_at, amount) VALUES (2, '2024-06-15', 200.00)",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM orders');
+        $this->assertCount(2, $rows);
+
+        // Verify partitions exist by querying information_schema
+        $partitions = $this->adapter->fetchAll(
+            "SELECT PARTITION_NAME FROM information_schema.PARTITIONS
+             WHERE TABLE_NAME = 'orders' AND TABLE_SCHEMA = DATABASE() AND PARTITION_NAME IS NOT NULL",
+        );
+        $this->assertCount(3, $partitions);
+    }
+
+    public function testCombinedPartitionAndColumnOperations(): void
+    {
+        // Create a partitioned table
+        $table = new Table('combined_test', ['id' => false, 'primary_key' => ['id', 'created_year']], $this->adapter);
+        $table->addColumn('id', 'integer')
+            ->addColumn('created_year', 'integer')
+            ->addColumn('name', 'string', ['limit' => 100])
+            ->partitionBy(Partition::TYPE_RANGE, 'created_year')
+            ->addPartition('p2022', 2023)
+            ->addPartition('p2023', 2024)
+            ->create();
+
+        $this->assertTrue($this->adapter->hasTable('combined_test'));
+
+        // Combine adding a column AND adding a partition in one save()
+        $table = new Table('combined_test', [], $this->adapter);
+        $table->addColumn('description', 'text', ['null' => true])
+            ->addPartitionToExisting('p2024', 2025)
+            ->save();
+
+        // Verify the column was added
+        $this->assertTrue($this->adapter->hasColumn('combined_test', 'description'));
+
+        // Verify the partition was added by inserting data
+        $this->adapter->execute(
+            "INSERT INTO combined_test (id, created_year, name, description) VALUES (1, 2024, 'Test', 'A description')",
+        );
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM combined_test WHERE created_year = 2024');
+        $this->assertCount(1, $rows);
+        $this->assertEquals('A description', $rows[0]['description']);
+    }
 }

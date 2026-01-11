@@ -14,7 +14,7 @@ class CreateUsersDefault extends BaseMigration
      */
     public function change(): void
     {
-        $table = $this->table('users');
+        $table = $this->table('users', ['signed' => false]);
         $table->addColumn('username', 'string', [
             'default' => null,
             'limit' => 255,

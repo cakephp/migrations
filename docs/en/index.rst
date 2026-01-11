@@ -43,6 +43,12 @@ your application in your **config/app.php** file as explained in the `Database
 Configuration section
 <https://book.cakephp.org/5/en/orm/database-basics.html#database-configuration>`__.
 
+Upgrading from 4.x
+==================
+
+If you are upgrading from Migrations 4.x, please see the :doc:`upgrading` guide
+for breaking changes and migration steps.
+
 Overview
 ========
 
@@ -841,6 +847,7 @@ Feature Flags
 Migrations offers a few feature flags for compatibility. These features are disabled by default but can be enabled if required:
 
 * ``unsigned_primary_keys``: Should Migrations create primary keys as unsigned integers? (default: ``false``)
+* ``unsigned_ints``: Should Migrations create all integer columns as unsigned? (default: ``false``)
 * ``column_null_default``: Should Migrations create columns as null by default? (default: ``false``)
 * ``add_timestamps_use_datetime``: Should Migrations use ``DATETIME`` type
   columns for the columns added by ``addTimestamps()``.
@@ -849,8 +856,17 @@ Set them via Configure to enable (e.g. in ``config/app.php``)::
 
     'Migrations' => [
         'unsigned_primary_keys' => true,
+        'unsigned_ints' => true,
         'column_null_default' => true,
     ],
+
+.. note::
+
+    The ``unsigned_primary_keys`` and ``unsigned_ints`` options only affect MySQL databases.
+    When generating migrations with ``bake migration_snapshot`` or ``bake migration_diff``,
+    the ``signed`` attribute will only be included in the output for unsigned columns
+    (as ``'signed' => false``). Signed is the default for integer columns in MySQL, so
+    ``'signed' => true`` is never output.
 
 Skipping the ``schema.lock`` file generation
 ============================================

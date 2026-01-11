@@ -193,6 +193,23 @@ class Util
     }
 
     /**
+     * Get a human-readable display name for a seed class.
+     *
+     * Strips the 'Seed' suffix from class names like 'UsersSeed' to produce 'Users'.
+     *
+     * @param string $seedName The seed class name
+     * @return string The display name without the 'Seed' suffix
+     */
+    public static function getSeedDisplayName(string $seedName): string
+    {
+        if (str_ends_with($seedName, 'Seed')) {
+            return substr($seedName, 0, -4);
+        }
+
+        return $seedName;
+    }
+
+    /**
      * Expands a set of paths with curly braces (if supported by the OS).
      *
      * @param string[] $paths Paths

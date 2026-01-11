@@ -119,7 +119,7 @@ class TestSnapshotWithNonDefaultCollation extends BaseMigration
 
         $this->table('events')
             ->addColumn('title', 'string', [
-                'collation' => 'utf8mb3_hungarian_ci',
+                'collation' => 'utf8_hungarian_ci',
                 'default' => null,
                 'limit' => 255,
                 'null' => true,

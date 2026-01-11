@@ -30,6 +30,7 @@ use Migrations\Db\Action\DropView;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
+use Migrations\Db\Action\SetPartitioning;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Plan\Intent;
@@ -1099,6 +1100,14 @@ class Table
                     $exists = true;
                     break;
                 }
+            }
+        }
+
+        // If table exists and has partition configuration, create SetPartitioning action
+        if ($exists) {
+            $partition = $this->table->getPartition();
+            if ($partition !== null && $partition->getDefinitions()) {
+                $this->actions->addAction(new SetPartitioning($this->table, $partition));
             }
         }
 

@@ -20,6 +20,7 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
+use Migrations\Util\Util;
 
 /**
  * Seed status command shows which seeds have been executed
@@ -129,8 +130,11 @@ class SeedStatusCommand extends Command
                 }
             }
 
+            // Strip 'Seed' suffix for display and add ' seed' suffix
+            $displayName = Util::getSeedDisplayName($seedName) . ' seed';
+
             $statuses[] = [
-                'seedName' => $seedName,
+                'seedName' => $displayName,
                 'plugin' => $plugin,
                 'status' => $executed ? 'executed' : 'pending',
                 'executedAt' => $executedAt,

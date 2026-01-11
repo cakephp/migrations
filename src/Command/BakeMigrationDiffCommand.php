@@ -290,14 +290,10 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                         }
                     }
 
+                    // Only convert unsigned to signed if it actually changed
                     if (isset($changedAttributes['unsigned'])) {
                         $changedAttributes['signed'] = !$changedAttributes['unsigned'];
                         unset($changedAttributes['unsigned']);
-                    } else {
-                        // badish hack
-                        if (isset($column['unsigned']) && $column['unsigned'] === true) {
-                            $changedAttributes['signed'] = false;
-                        }
                     }
 
                     // For decimal columns, handle CakePHP schema -> migration attribute mapping

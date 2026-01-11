@@ -233,6 +233,9 @@ class BakeMigrationDiffCommandTest extends TestCase
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
+        Configure::write('Migrations.unsigned_primary_keys', true);
+        Configure::write('Migrations.unsigned_ints', true);
+
         $this->runDiffBakingTest('Default');
     }
 

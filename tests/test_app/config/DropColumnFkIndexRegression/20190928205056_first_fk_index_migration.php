@@ -19,6 +19,7 @@ class FirstFkIndexMigration extends BaseMigration
                 'null' => false,
                 'limit' => 20,
                 'identity' => true,
+                'signed' => false,
             ])
             ->create();
 
@@ -35,6 +36,7 @@ class FirstFkIndexMigration extends BaseMigration
                 'null' => false,
                 'limit' => 20,
                 'identity' => true,
+                'signed' => false,
             ])
             ->create();
 
@@ -51,11 +53,13 @@ class FirstFkIndexMigration extends BaseMigration
                 'null' => false,
                 'limit' => 20,
                 'identity' => true,
+                'signed' => false,
             ])
             ->addColumn('table2_id', 'integer', [
                 'null' => true,
                 'limit' => 20,
                 'after' => 'id',
+                'signed' => false,
             ])
             ->addIndex(['table2_id'], [
                     'name' => 'table1_table2_id',
@@ -69,6 +73,7 @@ class FirstFkIndexMigration extends BaseMigration
             ->addColumn('table3_id', 'integer', [
                 'null' => true,
                 'limit' => 20,
+                'signed' => false,
             ])
             ->addIndex(['table3_id'], [
                 'name' => 'table1_table3_id',

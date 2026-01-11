@@ -406,6 +406,10 @@ class MigrationHelper extends Helper
 
         if (!$isMysql) {
             unset($columnOptions['signed']);
+        } elseif (isset($columnOptions['signed']) && $columnOptions['signed'] === true) {
+            // Remove 'signed' => true since signed is the default for integer columns
+            // Only output explicit 'signed' => false for unsigned columns
+            unset($columnOptions['signed']);
         }
 
         if (($isMysql || $isSqlserver) && !empty($columnOptions['collate'])) {
@@ -529,6 +533,10 @@ class MigrationHelper extends Helper
         // currently only MySQL supports the signed option
         $isMysql = $connection->getDriver() instanceof Mysql;
         if (!$isMysql) {
+            unset($attributes['signed']);
+        } elseif (isset($attributes['signed']) && $attributes['signed'] === true) {
+            // Remove 'signed' => true since signed is now the default for integer columns
+            // Only output explicit 'signed' => false for unsigned columns
             unset($attributes['signed']);
         }
 

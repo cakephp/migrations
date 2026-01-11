@@ -23,7 +23,7 @@ class TheDiffWithAutoIdIncompatibleSignedPrimaryKeysMysql extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
+                'signed' => false,
             ])
             ->addPrimaryKey(['id'])
             ->create();
@@ -47,7 +47,6 @@ class TheDiffWithAutoIdIncompatibleSignedPrimaryKeysMysql extends BaseMigration
                 'default' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => true,
             ])
             ->addPrimaryKey(['id'])
             ->create();

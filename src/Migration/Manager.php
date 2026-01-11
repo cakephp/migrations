@@ -620,7 +620,7 @@ class Manager
     protected function printSeedStatus(SeedInterface $seed, string $status, ?string $duration = null): void
     {
         $this->printStatusOutput(
-            $seed->getName(),
+            Util::getSeedDisplayName($seed->getName()) . ' seed',
             $status,
             $duration,
         );

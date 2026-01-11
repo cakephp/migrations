@@ -623,9 +623,8 @@ class MysqlAdapter extends AbstractAdapter
                 ->setScale($record['precision'] ?? null)
                 ->setComment($record['comment']);
 
-            if ($record['unsigned'] ?? false) {
-                $column->setSigned(!$record['unsigned']);
-            }
+            // Always set unsigned property based on unsigned flag
+            $column->setUnsigned($record['unsigned'] ?? false);
             if ($record['autoIncrement'] ?? false) {
                 $column->setIdentity(true);
             }
@@ -1341,18 +1340,80 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
-     * Get instructions for adding a partition to an existing table.
+     * Get instructions for adding partitioning to an existing table.
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table
-     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition to add
+     * @param \Migrations\Db\Table\Partition $partition The partition configuration
      * @return \Migrations\Db\AlterInstructions
      */
-    protected function getAddPartitionInstructions(TableMetadata $table, PartitionDefinition $partition): AlterInstructions
+    protected function getSetPartitioningInstructions(TableMetadata $table, Partition $partition): AlterInstructions
     {
-        // For MySQL, we need to know the partition type to generate correct SQL
-        // This is a simplified version - in practice you'd need to query the table's partition type
+        $sql = $this->getPartitionSqlDefinition($partition);
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
+     * Get instructions for adding multiple partitions to an existing table.
+     *
+     * MySQL requires all partitions in a single ADD PARTITION clause:
+     * ADD PARTITION (PARTITION p1 ..., PARTITION p2 ...)
+     *
+     * @param \Migrations\Db\Table\TableMetadata $table The table
+     * @param array<\Migrations\Db\Table\PartitionDefinition> $partitions The partitions to add
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getAddPartitionsInstructions(TableMetadata $table, array $partitions): AlterInstructions
+    {
+        if (empty($partitions)) {
+            return new AlterInstructions();
+        }
+
+        $partitionDefs = [];
+        foreach ($partitions as $partition) {
+            $partitionDefs[] = $this->getAddPartitionSql($partition);
+        }
+
+        $sql = 'ADD PARTITION (' . implode(', ', $partitionDefs) . ')';
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
+     * Get instructions for dropping multiple partitions from an existing table.
+     *
+     * MySQL allows dropping multiple partitions in a single statement:
+     * DROP PARTITION p1, p2, p3
+     *
+     * @param string $tableName The table name
+     * @param array<string> $partitionNames The partition names to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    protected function getDropPartitionsInstructions(string $tableName, array $partitionNames): AlterInstructions
+    {
+        if (empty($partitionNames)) {
+            return new AlterInstructions();
+        }
+
+        $quotedNames = array_map(fn($name) => $this->quoteColumnName($name), $partitionNames);
+        $sql = 'DROP PARTITION ' . implode(', ', $quotedNames);
+
+        return new AlterInstructions([$sql]);
+    }
+
+    /**
+     * Generate the SQL definition for a single partition when adding to existing table.
+     *
+     * This method is used when adding partitions to an existing table and must
+     * infer the partition type from the value format since we don't have table metadata.
+     *
+     * @param \Migrations\Db\Table\PartitionDefinition $partition The partition definition
+     * @return string
+     */
+    protected function getAddPartitionSql(PartitionDefinition $partition): string
+    {
         $value = $partition->getValue();
-        $sql = 'ADD PARTITION (PARTITION ' . $this->quoteColumnName($partition->getName());
+        $sql = 'PARTITION ' . $this->quoteColumnName($partition->getName());
 
         // Detect RANGE vs LIST based on value type (simplified heuristic)
         if ($value === 'MAXVALUE' || is_scalar($value)) {
@@ -1372,23 +1433,8 @@ class MysqlAdapter extends AbstractAdapter
         if ($partition->getComment()) {
             $sql .= ' COMMENT = ' . $this->quoteString($partition->getComment());
         }
-        $sql .= ')';
 
-        return new AlterInstructions([$sql]);
-    }
-
-    /**
-     * Get instructions for dropping a partition from an existing table.
-     *
-     * @param string $tableName The table name
-     * @param string $partitionName The partition name to drop
-     * @return \Migrations\Db\AlterInstructions
-     */
-    protected function getDropPartitionInstructions(string $tableName, string $partitionName): AlterInstructions
-    {
-        $sql = 'DROP PARTITION ' . $this->quoteColumnName($partitionName);
-
-        return new AlterInstructions([$sql]);
+        return $sql;
     }
 
     /**

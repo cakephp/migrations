@@ -22,7 +22,6 @@ class TheDiffDecimalChangeMysql extends BaseMigration
                 'length' => null,
                 'limit' => null,
                 'null' => false,
-                'signed' => false,
             ])
             ->changeColumn('amount', 'decimal', [
                 'default' => null,

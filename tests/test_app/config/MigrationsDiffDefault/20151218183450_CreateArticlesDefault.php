@@ -6,7 +6,7 @@ class CreateArticlesDefault extends BaseMigration
 {
     public function change(): void
     {
-        $table = $this->table('articles');
+        $table = $this->table('articles', ['signed' => false]);
         $table
             ->addColumn('title', 'string', [
                 'default' => null,

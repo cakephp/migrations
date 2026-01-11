@@ -23,13 +23,13 @@
     },
     "require": {
         "php": ">=8.2",
-        "cakephp/cache": "dev-5.next as 5.3.0",
-        "cakephp/database": "dev-5.next as 5.3.0",
-        "cakephp/orm": "dev-5.next as 5.3.0"
+        "cakephp/cache": "^5.3.0",
+        "cakephp/database": "^5.3.0",
+        "cakephp/orm": "^5.3.0"
     },
     "require-dev": {
         "cakephp/bake": "^3.3",
-        "cakephp/cakephp": "dev-5.next as 5.3.0",
+        "cakephp/cakephp": "^5.3.0",
         "cakephp/cakephp-codesniffer": "^5.0",
         "phpunit/phpunit": "^11.5.3 || ^12.1.3"
     },

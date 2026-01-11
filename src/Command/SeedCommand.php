@@ -21,6 +21,7 @@ use Cake\Event\EventDispatcherTrait;
 use Exception;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
+use Migrations\Util\Util;
 
 /**
  * Seed command runs seeder scripts
@@ -182,11 +183,7 @@ class SeedCommand extends Command
                 $io->out('');
                 $io->out('<info>The following seeds will be executed:</info>');
                 foreach ($availableSeeds as $seed) {
-                    $seedName = $seed->getName();
-                    if (str_ends_with($seedName, 'Seed')) {
-                        $seedName = substr($seedName, 0, -4);
-                    }
-                    $io->out('  - ' . $seedName);
+                    $io->out('  - ' . Util::getSeedDisplayName($seed->getName()));
                 }
                 $io->out('');
                 if (!(bool)$args->getOption('force')) {

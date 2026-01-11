@@ -18,6 +18,26 @@ use RuntimeException;
 
 /**
  * This object is based loosely on: https://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/Table.html.
+ *
+ * ## Configuration
+ *
+ * The following configuration options can be set in your application's config:
+ *
+ * - `Migrations.unsigned_primary_keys` (bool): When true, identity columns default to unsigned.
+ *   Default: false
+ *
+ * - `Migrations.unsigned_ints` (bool): When true, all integer columns default to unsigned.
+ *   Default: false
+ *
+ * Example configuration in config/app.php:
+ * ```php
+ * 'Migrations' => [
+ *     'unsigned_primary_keys' => true,
+ *     'unsigned_ints' => true,
+ * ]
+ * ```
+ *
+ * Note: Explicitly calling setUnsigned() or setSigned() on a column will override these defaults.
  */
 class Column extends DatabaseColumn
 {
@@ -494,6 +514,63 @@ class Column extends DatabaseColumn
     }
 
     /**
+     * Gets whether field should be unsigned.
+     *
+     * Checks configuration options to determine unsigned behavior:
+     * - If explicitly set via setUnsigned/setSigned, uses that value
+     * - If identity column and Migrations.unsigned_primary_keys is true, returns true
+     * - If integer type and Migrations.unsigned_ints is true, returns true
+     * - Otherwise defaults to false (signed)
+     *
+     * @return bool
+     */
+    public function getUnsigned(): bool
+    {
+        // If explicitly set, use that value
+        if ($this->unsigned !== null) {
+            return $this->unsigned;
+        }
+
+        $integerTypes = [
+            self::INTEGER,
+            self::BIGINTEGER,
+            self::SMALLINTEGER,
+            self::TINYINTEGER,
+        ];
+
+        // Only apply configuration to integer types
+        if (!in_array($this->type, $integerTypes, true)) {
+            return false;
+        }
+
+        // Check if this is a primary key/identity column
+        if ($this->identity && Configure::read('Migrations.unsigned_primary_keys')) {
+            return true;
+        }
+
+        // Check general integer configuration
+        if (Configure::read('Migrations.unsigned_ints')) {
+            return true;
+        }
+
+        // Default to signed for backward compatibility
+        return false;
+    }
+
+    /**
+     * Sets whether field should be unsigned.
+     *
+     * @param bool $unsigned Unsigned
+     * @return $this
+     */
+    public function setUnsigned(bool $unsigned)
+    {
+        $this->unsigned = $unsigned;
+
+        return $this;
+    }
+
+    /**
      * Sets whether field should be signed.
      *
      * @param bool $signed Signed
@@ -515,18 +592,7 @@ class Column extends DatabaseColumn
      */
     public function getSigned(): bool
     {
-        return $this->unsigned === null ? true : !$this->unsigned;
-    }
-
-    /**
-     * Should the column be signed?
-     *
-     * @return bool
-     * @deprecated 5.0 Use isUnsigned() instead.
-     */
-    public function isSigned(): bool
-    {
-        return $this->getSigned();
+        return !$this->isUnsigned();
     }
 
     /**
@@ -826,7 +892,7 @@ class Column extends DatabaseColumn
             'null' => $this->getNull(),
             'default' => $default,
             'generated' => $this->getGenerated(),
-            'unsigned' => !$this->getSigned(),
+            'unsigned' => $this->getUnsigned(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
             'precision' => $precision,
