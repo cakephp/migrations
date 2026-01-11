@@ -730,6 +730,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * Get the upsert clause for MySQL (ON DUPLICATE KEY UPDATE).
      *
+     * MySQL's ON DUPLICATE KEY UPDATE applies to all unique key constraints on the table,
+     * so the $conflictColumns parameter is not used. If you pass conflictColumns when using
+     * MySQL, a deprecation warning will be triggered.
+     *
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @param array<string>|null $updateColumns Columns to update on conflict
      * @param array<string>|null $conflictColumns Columns that define uniqueness (unused in MySQL)
@@ -739,6 +743,14 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     {
         if ($mode !== InsertMode::UPSERT || $updateColumns === null) {
             return '';
+        }
+
+        if ($conflictColumns !== null) {
+            deprecationWarning(
+                '5.1.0',
+                'The $conflictColumns parameter is ignored by MySQL. ' .
+                'MySQL\'s ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.',
+            );
         }
 
         $updates = [];

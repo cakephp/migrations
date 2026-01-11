@@ -161,14 +161,25 @@ interface SeedInterface
      * This method performs an "upsert" operation - inserting new rows and updating
      * existing rows that conflict on the specified unique columns.
      *
-     * Uses ON DUPLICATE KEY UPDATE (MySQL), or ON CONFLICT ... DO UPDATE SET
-     * (PostgreSQL/SQLite).
+     * ### Database-specific behavior:
+     *
+     * - **MySQL**: Uses `ON DUPLICATE KEY UPDATE`. The `$conflictColumns` parameter is
+     *   ignored because MySQL automatically applies the update to all unique constraint
+     *   violations. Passing `$conflictColumns` will trigger a deprecation warning.
+     *
+     * - **PostgreSQL/SQLite**: Uses `ON CONFLICT (...) DO UPDATE SET`. The `$conflictColumns`
+     *   parameter is required and must specify the columns that have a unique constraint.
+     *   A RuntimeException will be thrown if this parameter is empty.
+     *
+     * - **SQL Server**: Not currently supported. Use separate insert/update logic.
      *
      * @param string $tableName Table name
      * @param array $data Data
      * @param array<string> $updateColumns Columns to update when a conflict occurs
-     * @param array<string> $conflictColumns Columns that define uniqueness (must have unique index)
+     * @param array<string> $conflictColumns Columns that define uniqueness. Required for PostgreSQL/SQLite,
+     *   ignored by MySQL (triggers deprecation warning if provided).
      * @return void
+     * @throws \RuntimeException When using PostgreSQL or SQLite without specifying conflictColumns
      */
     public function insertOrUpdate(string $tableName, array $data, array $updateColumns, array $conflictColumns): void;
 

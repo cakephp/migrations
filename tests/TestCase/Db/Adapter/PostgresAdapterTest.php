@@ -10,6 +10,7 @@ use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AdapterInterface;
+use RuntimeException;
 use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
@@ -2983,6 +2984,22 @@ OUTPUT;
         $table->insert([
             ['code' => 'ITEM1', 'name' => 'Different Name'],
         ])->save();
+    }
+
+    public function testInsertOrUpdateRequiresConflictColumns()
+    {
+        $table = new Table('currencies', [], $this->adapter);
+        $table->addColumn('code', 'string', ['limit' => 3])
+            ->addColumn('rate', 'decimal', ['precision' => 10, 'scale' => 4])
+            ->addIndex('code', ['unique' => true])
+            ->create();
+
+        // PostgreSQL requires conflictColumns for insertOrUpdate
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('PostgreSQL requires the $conflictColumns parameter');
+        $table->insertOrUpdate([
+            ['code' => 'USD', 'rate' => 1.0000],
+        ], ['rate'], [])->save();
     }
 
     public function testAddSinglePartitionToExistingTable()

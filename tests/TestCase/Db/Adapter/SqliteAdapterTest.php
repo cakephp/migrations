@@ -3377,4 +3377,20 @@ INPUT;
             ['code' => 'ITEM1', 'name' => 'Different Name'],
         ])->save();
     }
+
+    public function testInsertOrUpdateRequiresConflictColumns()
+    {
+        $table = new Table('currencies', [], $this->adapter);
+        $table->addColumn('code', 'string', ['limit' => 3])
+            ->addColumn('rate', 'decimal', ['precision' => 10, 'scale' => 4])
+            ->addIndex('code', ['unique' => true])
+            ->create();
+
+        // SQLite requires conflictColumns for insertOrUpdate
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('SQLite requires the $conflictColumns parameter');
+        $table->insertOrUpdate([
+            ['code' => 'USD', 'rate' => 1.0000],
+        ], ['rate'], [])->save();
+    }
 }

@@ -1288,10 +1288,15 @@ class PostgresAdapter extends AbstractAdapter
     /**
      * Get the ON CONFLICT clause based on insert mode.
      *
+     * PostgreSQL requires explicit conflict columns to determine which unique constraint
+     * should trigger the update. Unlike MySQL's ON DUPLICATE KEY UPDATE which applies
+     * to all unique constraints, PostgreSQL's ON CONFLICT clause must specify the columns.
+     *
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @param array<string>|null $updateColumns Columns to update on upsert conflict
-     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert (required for PostgreSQL)
      * @return string
+     * @throws \RuntimeException When using UPSERT mode without conflictColumns
      */
     protected function getConflictClause(
         ?InsertMode $mode = null,
@@ -1302,7 +1307,13 @@ class PostgresAdapter extends AbstractAdapter
             return ' ON CONFLICT DO NOTHING';
         }
 
-        if ($mode === InsertMode::UPSERT && $updateColumns !== null && $conflictColumns !== null) {
+        if ($mode === InsertMode::UPSERT) {
+            if ($conflictColumns === null || $conflictColumns === []) {
+                throw new RuntimeException(
+                    'PostgreSQL requires the $conflictColumns parameter for insertOrUpdate(). ' .
+                    'Specify the columns that have a unique constraint to determine conflict resolution.',
+                );
+            }
             $quotedConflictColumns = array_map($this->quoteColumnName(...), $conflictColumns);
             $updates = [];
             foreach ($updateColumns as $column) {

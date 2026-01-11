@@ -1713,15 +1713,27 @@ PCRE_PATTERN;
     /**
      * Get the upsert clause for SQLite (ON CONFLICT ... DO UPDATE SET).
      *
+     * SQLite requires explicit conflict columns to determine which unique constraint
+     * should trigger the update. Unlike MySQL's ON DUPLICATE KEY UPDATE which applies
+     * to all unique constraints, SQLite's ON CONFLICT clause must specify the columns.
+     *
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @param array<string>|null $updateColumns Columns to update on conflict
-     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert
+     * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert (required for SQLite)
      * @return string
+     * @throws \RuntimeException When using UPSERT mode without conflictColumns
      */
     protected function getUpsertClause(?InsertMode $mode, ?array $updateColumns, ?array $conflictColumns = null): string
     {
-        if ($mode !== InsertMode::UPSERT || $updateColumns === null || $conflictColumns === null) {
+        if ($mode !== InsertMode::UPSERT || $updateColumns === null) {
             return '';
+        }
+
+        if ($conflictColumns === null || $conflictColumns === []) {
+            throw new RuntimeException(
+                'SQLite requires the $conflictColumns parameter for insertOrUpdate(). ' .
+                'Specify the columns that have a unique constraint to determine conflict resolution.',
+            );
         }
 
         $quotedConflictColumns = array_map($this->quoteColumnName(...), $conflictColumns);
