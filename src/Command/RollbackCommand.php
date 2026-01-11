@@ -19,7 +19,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
 use DateTime;
-use Exception;
 use InvalidArgumentException;
 use LogicException;
 use Migrations\Config\ConfigInterface;
@@ -183,11 +182,6 @@ class RollbackCommand extends Command
                 $manager->rollback($target, $force, $targetMustMatch, $fake);
             }
             $end = microtime(true);
-        } catch (Exception $e) {
-            $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->verbose($e->getTraceAsString());
-
-            return self::CODE_ERROR;
         } catch (Throwable $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
             $io->verbose($e->getTraceAsString());

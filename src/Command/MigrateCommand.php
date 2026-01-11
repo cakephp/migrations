@@ -19,7 +19,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
 use DateTime;
-use Exception;
 use LogicException;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
@@ -170,11 +169,6 @@ class MigrateCommand extends Command
                 $manager->migrate($version, $fake, $count);
             }
             $end = microtime(true);
-        } catch (Exception $e) {
-            $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->verbose($e->getTraceAsString());
-
-            return self::CODE_ERROR;
         } catch (Throwable $e) {
             $io->err('<error>' . $e->getMessage() . '</error>');
             $io->verbose($e->getTraceAsString());

@@ -18,10 +18,10 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
-use Exception;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 use Migrations\Util\Util;
+use Throwable;
 
 /**
  * Seed command runs seeder scripts
@@ -166,8 +166,9 @@ class SeedCommand extends Command
             // Get all available seeds and ask for confirmation
             try {
                 $availableSeeds = $manager->getSeeds();
-            } catch (Exception $e) {
-                $io->error('Failed to load seeds: ' . $e->getMessage());
+            } catch (Throwable $e) {
+                $io->err('<error>Failed to load seeds: ' . $e->getMessage() . '</error>');
+                $io->verbose($e->getTraceAsString());
 
                 return static::CODE_ERROR;
             }
