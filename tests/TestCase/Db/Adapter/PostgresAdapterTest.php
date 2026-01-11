@@ -10,7 +10,6 @@ use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AdapterInterface;
-use RuntimeException;
 use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
@@ -24,6 +23,7 @@ use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class PostgresAdapterTest extends TestCase
 {
