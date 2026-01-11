@@ -47,8 +47,10 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Blog\\": "tests/test_app/Plugin/Blog/src/",
             "Cake\\Test\\": "./vendor/cakephp/cakephp/tests/",
             "Migrations\\Test\\": "tests/",
+            "Migrator\\": "tests/test_app/Plugin/Migrator/src/",
             "SimpleSnapshot\\": "tests/test_app/Plugin/SimpleSnapshot/src/",
             "TestApp\\": "tests/test_app/App/",
             "TestBlog\\": "tests/test_app/Plugin/TestBlog/src/"

@@ -78,7 +78,6 @@ class PendingMigrationsMiddlewareTest extends TestCase
     }
 
     /**
-     * @doesNotPerformAssertions
      * @return void
      */
     public function testAppMigrationsSuccess(): void
@@ -103,7 +102,8 @@ class PendingMigrationsMiddlewareTest extends TestCase
         $handler = new TestRequestHandler(function ($req) {
             return new Response();
         });
-        $middleware->process($request, $handler);
+        $result = $middleware->process($request, $handler);
+        $this->assertInstanceOf(Response::class, $result);
     }
 
     /**
@@ -130,7 +130,6 @@ class PendingMigrationsMiddlewareTest extends TestCase
     }
 
     /**
-     * @doesNotPerformAssertions
      * @return void
      */
     public function testAppAndPluginsMigrationsSuccess(): void
@@ -160,6 +159,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
             return new Response();
         });
 
-        $middleware->process($request, $handler);
+        $result = $middleware->process($request, $handler);
+        $this->assertInstanceOf(Response::class, $result);
     }
 }
