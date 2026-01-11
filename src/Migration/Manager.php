@@ -568,13 +568,18 @@ class Manager
         }
 
         if ($fake) {
+            // Idempotent seeds are not tracked, so faking doesn't apply
+            if ($seed->isIdempotent()) {
+                $this->printSeedStatus($seed, 'skipped (idempotent)');
+
+                return;
+            }
+
             // Record seed as executed without running it
             $this->printSeedStatus($seed, 'faking');
 
-            if (!$seed->isIdempotent()) {
-                $executedTime = date('Y-m-d H:i:s');
-                $adapter->seedExecuted($seed, $executedTime);
-            }
+            $executedTime = date('Y-m-d H:i:s');
+            $adapter->seedExecuted($seed, $executedTime);
 
             $this->printSeedStatus($seed, 'faked');
 

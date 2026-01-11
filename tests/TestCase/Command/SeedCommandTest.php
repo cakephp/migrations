@@ -691,4 +691,23 @@ class SeedCommandTest extends TestCase
         $this->assertExitError();
         $this->assertErrorContains('Seed `NonExistent` does not exist');
     }
+
+    public function testFakeIdempotentSeedIsSkipped(): void
+    {
+        $this->createTables();
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+
+        // Run idempotent seed with --fake flag
+        $this->exec('seeds run -c test -s TestSeeds IdempotentTest --fake');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('skipped (idempotent)');
+        $this->assertOutputNotContains('faking');
+        $this->assertOutputNotContains('faked');
+
+        // Verify the seed was NOT tracked (idempotent seeds are never tracked)
+        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
+        $this->assertEquals(0, $seedLog->fetchColumn(0), 'Idempotent seeds should not be tracked even when faked');
+    }
 }
