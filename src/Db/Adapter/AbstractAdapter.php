@@ -732,7 +732,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      *
      * MySQL's ON DUPLICATE KEY UPDATE applies to all unique key constraints on the table,
      * so the $conflictColumns parameter is not used. If you pass conflictColumns when using
-     * MySQL, a deprecation warning will be triggered.
+     * MySQL, a warning will be triggered.
      *
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @param array<string>|null $updateColumns Columns to update on conflict
@@ -746,10 +746,10 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         }
 
         if ($conflictColumns !== null) {
-            deprecationWarning(
-                '5.1.0',
+            trigger_error(
                 'The $conflictColumns parameter is ignored by MySQL. ' .
                 'MySQL\'s ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.',
+                E_USER_WARNING,
             );
         }
 

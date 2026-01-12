@@ -810,7 +810,7 @@ class Table
      *
      * - **MySQL**: Uses `ON DUPLICATE KEY UPDATE`. The `$conflictColumns` parameter is
      *   ignored because MySQL automatically applies the update to all unique constraint
-     *   violations. Passing `$conflictColumns` will trigger a deprecation warning.
+     *   violations. Passing `$conflictColumns` will trigger a warning.
      *
      * - **PostgreSQL/SQLite**: Uses `ON CONFLICT (...) DO UPDATE SET`. The `$conflictColumns`
      *   parameter is required and must specify the columns that have a unique constraint.
@@ -830,7 +830,7 @@ class Table
      * @param array $data array of data in the same format as insert()
      * @param array<string> $updateColumns Columns to update when a conflict occurs
      * @param array<string> $conflictColumns Columns that define uniqueness. Required for PostgreSQL/SQLite,
-     *   ignored by MySQL (triggers deprecation warning if provided).
+     *   ignored by MySQL (triggers warning if provided).
      * @return $this
      * @throws \RuntimeException When using PostgreSQL or SQLite without specifying conflictColumns
      */
