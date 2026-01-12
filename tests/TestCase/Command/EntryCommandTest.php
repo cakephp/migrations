@@ -45,7 +45,7 @@ class EntryCommandTest extends TestCase
 
         $this->assertExitSuccess();
         $this->assertOutputContains('Using <info>builtin</info> backend');
-        $this->assertOutputContains('migrations:');
+        $this->assertOutputContains('migrations</info>:');
         $this->assertOutputContains('migrations migrate');
         $this->assertOutputContains('migrations status');
         $this->assertOutputContains('migrations rollback');
