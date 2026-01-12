@@ -450,6 +450,89 @@ within your seed class and then use the ``insert()`` method to insert data:
     You must call the ``saveData()`` method to commit your data to the table.
     Migrations will buffer data until you do so.
 
+Insert Modes
+============
+
+In addition to the standard ``insert()`` method, Migrations provides specialized
+insert methods for handling conflicts with existing data.
+
+Insert or Skip
+--------------
+
+The ``insertOrSkip()`` method inserts rows but silently skips any that would
+violate a unique constraint:
+
+.. code-block:: php
+
+    <?php
+
+    use Migrations\BaseSeed;
+
+    class CurrencySeed extends BaseSeed
+    {
+        public function run(): void
+        {
+            $data = [
+                ['code' => 'USD', 'name' => 'US Dollar'],
+                ['code' => 'EUR', 'name' => 'Euro'],
+            ];
+
+            $this->table('currencies')
+                ->insertOrSkip($data)
+                ->saveData();
+        }
+    }
+
+Insert or Update (Upsert)
+-------------------------
+
+The ``insertOrUpdate()`` method performs an "upsert" operation - inserting new
+rows and updating existing rows that conflict on unique columns:
+
+.. code-block:: php
+
+    <?php
+
+    use Migrations\BaseSeed;
+
+    class ExchangeRateSeed extends BaseSeed
+    {
+        public function run(): void
+        {
+            $data = [
+                ['code' => 'USD', 'rate' => 1.0000],
+                ['code' => 'EUR', 'rate' => 0.9234],
+            ];
+
+            $this->table('exchange_rates')
+                ->insertOrUpdate($data, ['rate'], ['code'])
+                ->saveData();
+        }
+    }
+
+The method takes three arguments:
+
+- ``$data``: The rows to insert (same format as ``insert()``)
+- ``$updateColumns``: Which columns to update when a conflict occurs
+- ``$conflictColumns``: Which columns define uniqueness (must have a unique index)
+
+.. warning::
+
+    Database-specific behavior differences:
+
+    **MySQL**: Uses ``ON DUPLICATE KEY UPDATE``. The ``$conflictColumns`` parameter
+    is ignored because MySQL automatically applies the update to *all* unique
+    constraint violations on the table. Passing ``$conflictColumns`` will trigger
+    a warning. If your table has multiple unique constraints, be aware that a
+    conflict on *any* of them will trigger the update.
+
+    **PostgreSQL/SQLite**: Uses ``ON CONFLICT (...) DO UPDATE SET``. The
+    ``$conflictColumns`` parameter is required and specifies exactly which unique
+    constraint should trigger the update. A ``RuntimeException`` will be thrown
+    if this parameter is empty.
+
+    **SQL Server**: Not currently supported. Use separate insert/update logic.
+
 Truncating Tables
 =================
 
