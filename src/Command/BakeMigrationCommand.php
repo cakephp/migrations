@@ -48,7 +48,9 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         EventManager::instance()->on('Bake.initialize', function (Event $event): void {
-            $event->getSubject()->loadHelper('Migrations.Migration');
+            /** @var \Bake\View\BakeView $view */
+            $view = $event->getSubject();
+            $view->loadHelper('Migrations.Migration');
         });
         $this->_name = $name;
 

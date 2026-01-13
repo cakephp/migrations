@@ -418,13 +418,14 @@ class MigrationHelper extends Helper
             unset($columnOptions['collate']);
         }
 
-        // TODO deprecate precision/scale and align with cakephp/database in 5.x
-        // TODO this can be cleaned up when we stop using phinx data structures for column definitions
+        // Handle precision/scale conversion between CakePHP's TableSchema format and SQL standard format.
+        // TableSchema uses: length=total digits, precision=decimal places
+        // Migrations uses SQL standard: precision=total digits, scale=decimal places
         if (!isset($columnOptions['precision']) || $columnOptions['precision'] == null) {
             unset($columnOptions['precision']);
         } else {
-            // due to Phinx using different naming for the precision and scale to CakePHP
-            // Only convert precision to scale if scale is not already set (for decimal columns from diff)
+            // Convert CakePHP's precision (decimal places) to Migrations' scale
+            // Only convert if scale is not already set (for decimal columns from diff)
             if (!isset($columnOptions['scale'])) {
                 $columnOptions['scale'] = $columnOptions['precision'];
             }

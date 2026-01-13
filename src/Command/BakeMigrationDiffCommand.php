@@ -128,7 +128,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         assert($connection instanceof Connection);
 
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection, $connection): void {
-            $event->getSubject()->loadHelper('Migrations.Migration', [
+            /** @var \Bake\View\BakeView $view */
+            $view = $event->getSubject();
+            $view->loadHelper('Migrations.Migration', [
                 'collection' => $collection,
                 'connection' => $connection,
             ]);

@@ -2315,3 +2315,76 @@ Changing templates
 
 See :ref:`custom-seed-migration-templates` for how to customize the templates
 used to generate migrations.
+
+Database-Specific Limitations
+=============================
+
+While Migrations aims to provide a database-agnostic API, some features have
+database-specific limitations or are not available on all platforms.
+
+SQL Server
+----------
+
+The following features are not supported on SQL Server:
+
+**Check Constraints**
+
+Check constraints are not currently implemented for SQL Server. Attempting to
+use ``addCheckConstraint()`` or ``dropCheckConstraint()`` will throw a
+``BadMethodCallException``.
+
+**Table Comments**
+
+SQL Server does not support table comments. Attempting to use ``changeComment()``
+will throw a ``BadMethodCallException``.
+
+**INSERT IGNORE / insertOrSkip()**
+
+SQL Server does not support the ``INSERT IGNORE`` syntax used by ``insertOrSkip()``.
+This method will throw a ``RuntimeException`` on SQL Server. Use ``insertOrUpdate()``
+instead for upsert operations, which uses ``MERGE`` statements on SQL Server.
+
+SQLite
+------
+
+**Foreign Key Names**
+
+SQLite does not support named foreign keys. The foreign key constraint name option
+is ignored when creating foreign keys on SQLite.
+
+**Table Comments**
+
+SQLite does not support table comments directly. Comments are stored as metadata
+but not in the database itself.
+
+**Check Constraint Modifications**
+
+SQLite does not support ``ALTER TABLE`` operations for check constraints. Adding or
+dropping check constraints requires recreating the entire table, which is handled
+automatically by the adapter.
+
+**Table Partitioning**
+
+SQLite does not support table partitioning.
+
+PostgreSQL
+----------
+
+**KEY Partitioning**
+
+PostgreSQL does not support MySQL's ``KEY`` partitioning type. Use ``HASH``
+partitioning instead for similar distribution behavior.
+
+MySQL/MariaDB
+-------------
+
+**insertOrUpdate() Conflict Columns**
+
+For MySQL, the ``$conflictColumns`` parameter in ``insertOrUpdate()`` is ignored
+because MySQL's ``ON DUPLICATE KEY UPDATE`` automatically applies to all unique
+constraints. PostgreSQL and SQLite require this parameter to be specified.
+
+**MariaDB GIS/Geometry**
+
+Some geometry column features may not work correctly on MariaDB due to differences
+in GIS implementation compared to MySQL.

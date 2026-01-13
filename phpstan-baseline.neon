@@ -1,24 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to an undefined method object\:\:loadHelper\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Command/BakeMigrationCommand.php
-
-		-
-			message: '#^Call to an undefined method object\:\:loadHelper\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Command/BakeMigrationDiffCommand.php
-
-		-
-			message: '#^Call to an undefined method object\:\:loadHelper\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Command/BakeMigrationSnapshotCommand.php
-
-		-
 			message: '#^PHPDoc tag @var with type string is not subtype of native type non\-falsy\-string\|true\.$#'
 			identifier: varTag.nativeType
 			count: 1
