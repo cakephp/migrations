@@ -9,7 +9,7 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
      * Up Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/phinx/0/en/migrations.html#the-up-method
+     * https://book.cakephp.org/migrations/5/en/migrations.html#the-up-method
      *
      * @return void
      */
@@ -47,14 +47,14 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -83,14 +83,14 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
                 'limit' => 100,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -194,14 +194,14 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
                 'limit' => 10,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('modified', 'timestamp', [
+            ->addColumn('modified', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -261,7 +261,7 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('highlighted_time', 'timestamp', [
+            ->addColumn('highlighted_time', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -299,14 +299,14 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
                 'limit' => 256,
                 'null' => true,
             ])
-            ->addColumn('created', 'timestamp', [
+            ->addColumn('created', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
                 'precision' => 6,
                 'scale' => 6,
             ])
-            ->addColumn('updated', 'timestamp', [
+            ->addColumn('updated', 'timestampfractional', [
                 'default' => null,
                 'limit' => null,
                 'null' => true,
@@ -359,7 +359,7 @@ class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/5/en/migrations.html#the-down-method
      *
      * @return void
      */
