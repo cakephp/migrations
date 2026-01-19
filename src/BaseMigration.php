@@ -431,7 +431,7 @@ class BaseMigration implements MigrationInterface
     /**
      * Create a new ForeignKey object.
      *
-     * @params string|string[] $columns Columns
+     * @param string|string[] $columns Columns
      * @return \Migrations\Db\Table\ForeignKey
      */
     public function foreignKey(string|array $columns): ForeignKey
@@ -442,7 +442,7 @@ class BaseMigration implements MigrationInterface
     /**
      * Create a new Index object.
      *
-     * @params string|string[] $columns Columns
+     * @param string|string[] $columns Columns
      * @return \Migrations\Db\Table\Index
      */
     public function index(string|array $columns): Index

@@ -5,7 +5,7 @@ use Cake\I18n\DateTime;
 use Migrations\BaseSeed;
 
 /**
- * NumbersSeed seed.
+ * StoresSeed seed.
  */
 class StoresSeed extends BaseSeed
 {
