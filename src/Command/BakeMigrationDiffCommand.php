@@ -20,8 +20,14 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
 use Cake\Database\Schema\CachedCollection;
+use Cake\Database\Schema\CheckConstraint;
 use Cake\Database\Schema\CollectionInterface;
+use Cake\Database\Schema\Column;
+use Cake\Database\Schema\Constraint;
+use Cake\Database\Schema\ForeignKey;
+use Cake\Database\Schema\Index;
 use Cake\Database\Schema\TableSchema;
+use Cake\Database\Schema\UniqueKey;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
@@ -554,6 +560,12 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             'allowed_classes' => [
                 TableSchema::class,
                 CachedCollection::class,
+                Column::class,
+                Index::class,
+                Constraint::class,
+                UniqueKey::class,
+                ForeignKey::class,
+                CheckConstraint::class,
             ],
         ]);
     }
