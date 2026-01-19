@@ -3,7 +3,7 @@
 use Migrations\BaseSeed;
 
 /**
- * NumbersSeed seed.
+ * AnotherNumbersSeed seed.
  */
 class AnotherNumbersSeed extends BaseSeed
 {

@@ -625,7 +625,7 @@ class MigrationHelper extends Helper
         if (!isset($this->tableStatementStatus[$table])) {
             $this->tableStatementStatus[$table] = true;
 
-            return '$this->table(\'' . $table . '\')';
+            return '$this->table(\'' . addslashes($table) . '\')';
         }
 
         return '';

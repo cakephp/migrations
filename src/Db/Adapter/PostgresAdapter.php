@@ -944,10 +944,11 @@ class PostgresAdapter extends AbstractAdapter
         $constraintName = $foreignKey->getName() ?: (
             $parts['table'] . '_' . implode('_', $foreignKey->getColumns()) . '_fkey'
         );
+        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
+        $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName) .
-        ' FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")' .
-        " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable())} (\"" .
-        implode('", "', $foreignKey->getReferencedColumns()) . '")';
+        ' FOREIGN KEY (' . $columnList . ')' .
+        ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }

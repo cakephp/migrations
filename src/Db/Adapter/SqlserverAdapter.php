@@ -236,9 +236,9 @@ class SqlserverAdapter extends AbstractAdapter
     {
         $this->updateCreatedTableName($tableName, $newTableName);
         $sql = sprintf(
-            "EXEC sp_rename '%s', '%s'",
-            $tableName,
-            $newTableName,
+            'EXEC sp_rename %s, %s',
+            $this->quoteString($tableName),
+            $this->quoteString($newTableName),
         );
 
         return new AlterInstructions([], [$sql]);
@@ -377,23 +377,21 @@ class SqlserverAdapter extends AbstractAdapter
 
         $oldConstraintName = "DF_{$tableName}_{$columnName}";
         $newConstraintName = "DF_{$tableName}_{$newColumnName}";
-        $sql = <<<SQL
-IF (OBJECT_ID('$oldConstraintName', 'D') IS NOT NULL)
+        $sql = sprintf(
+            'IF (OBJECT_ID(%s, \'D\') IS NOT NULL)
 BEGIN
-     EXECUTE sp_rename N'%s', N'%s', N'OBJECT'
-END
-SQL;
-        $instructions->addPostStep(sprintf(
-            $sql,
-            $oldConstraintName,
-            $newConstraintName,
-        ));
+     EXECUTE sp_rename %s, %s, N\'OBJECT\'
+END',
+            $this->quoteString($oldConstraintName),
+            $this->quoteString($oldConstraintName),
+            $this->quoteString($newConstraintName),
+        );
+        $instructions->addPostStep($sql);
 
         $instructions->addPostStep(sprintf(
-            "EXECUTE sp_rename N'%s.%s', N'%s', 'COLUMN' ",
-            $tableName,
-            $columnName,
-            $newColumnName,
+            'EXECUTE sp_rename %s, %s, N\'COLUMN\'',
+            $this->quoteString($tableName . '.' . $columnName),
+            $this->quoteString($newColumnName),
         ));
 
         return $instructions;
@@ -858,10 +856,12 @@ SQL;
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey, string $tableName): string
     {
         $constraintName = $foreignKey->getName() ?: $tableName . '_' . implode('_', $foreignKey->getColumns());
+        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
+        $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
 
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName);
-        $def .= ' FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")';
-        $def .= " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable())} (\"" . implode('", "', $foreignKey->getReferencedColumns()) . '")';
+        $def .= ' FOREIGN KEY (' . $columnList . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }
