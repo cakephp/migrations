@@ -725,7 +725,9 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($rows as $row) {
             if (strcasecmp($row['Field'], $columnName) === 0) {
                 $null = $row['Null'] === 'NO' ? 'NOT NULL' : 'NULL';
-                $comment = isset($row['Comment']) ? ' COMMENT ' . '\'' . addslashes($row['Comment']) . '\'' : '';
+                $comment = isset($row['Comment']) && $row['Comment'] !== ''
+                    ? ' COMMENT ' . $this->getConnection()->getDriver()->schemaValue($row['Comment'])
+                    : '';
 
                 // create the extra string by also filtering out the DEFAULT_GENERATED option (MySQL 8 fix)
                 $extras = array_filter(

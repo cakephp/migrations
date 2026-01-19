@@ -1105,27 +1105,40 @@ SQL;
 
     /**
      * @inheritDoc
+     *
+     * Note: Check constraints are not supported for SQL Server adapter.
+     * This method returns an empty array. Use raw SQL via execute() if you need
+     * check constraints on SQL Server.
      */
     protected function getCheckConstraints(string $tableName): array
     {
-        // TODO: Implement check constraints for SQL Server
         return [];
     }
 
     /**
      * @inheritDoc
+     *
+     * @throws \BadMethodCallException Check constraints are not supported for SQL Server.
      */
     protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
     {
-        throw new BadMethodCallException('Check constraints are not yet implemented for SQL Server adapter');
+        throw new BadMethodCallException(
+            'Check constraints are not supported for the SQL Server adapter. ' .
+            'Use $this->execute() with raw SQL to add check constraints.',
+        );
     }
 
     /**
      * @inheritDoc
+     *
+     * @throws \BadMethodCallException Check constraints are not supported for SQL Server.
      */
     protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
     {
-        throw new BadMethodCallException('Check constraints are not yet implemented for SQL Server adapter');
+        throw new BadMethodCallException(
+            'Check constraints are not supported for the SQL Server adapter. ' .
+            'Use $this->execute() with raw SQL to drop check constraints.',
+        );
     }
 
     /**

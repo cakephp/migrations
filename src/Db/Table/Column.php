@@ -789,6 +789,7 @@ class Column extends DatabaseColumn
             'update',
             'comment',
             'signed',
+            'unsigned',
             'timezone',
             'properties',
             'values',

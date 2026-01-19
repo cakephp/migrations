@@ -1101,18 +1101,46 @@ class Manager
      * Order seeds by dependencies
      *
      * @param \Migrations\SeedInterface[] $seeds Seeds
+     * @param array<string, true> $visiting Seeds currently being visited (for cycle detection)
+     * @param array<string, true> $visited Seeds that have been fully processed
      * @return \Migrations\SeedInterface[]
+     * @throws \RuntimeException When a circular dependency is detected
      */
-    protected function orderSeedsByDependencies(array $seeds): array
+    protected function orderSeedsByDependencies(array $seeds, array $visiting = [], array &$visited = []): array
     {
         $orderedSeeds = [];
         foreach ($seeds as $seed) {
             $name = $seed->getName();
-            $orderedSeeds[$name] = $seed;
+
+            // Skip if already fully processed
+            if (isset($visited[$name])) {
+                continue;
+            }
+
+            // Check for circular dependency
+            if (isset($visiting[$name])) {
+                $cycle = array_keys($visiting);
+                $cycle[] = $name;
+                throw new RuntimeException(
+                    'Circular dependency detected in seeds: ' . implode(' -> ', $cycle),
+                );
+            }
+
+            // Mark as currently visiting
+            $visiting[$name] = true;
+
             $dependencies = $this->getSeedDependenciesInstances($seed);
             if ($dependencies) {
-                $orderedSeeds = array_merge($this->orderSeedsByDependencies($dependencies), $orderedSeeds);
+                $orderedSeeds = array_merge(
+                    $this->orderSeedsByDependencies($dependencies, $visiting, $visited),
+                    $orderedSeeds,
+                );
             }
+
+            // Mark as fully visited and add to result
+            $visited[$name] = true;
+            unset($visiting[$name]);
+            $orderedSeeds[$name] = $seed;
         }
 
         return $orderedSeeds;
