@@ -823,7 +823,11 @@ class PostgresAdapter extends AbstractAdapter
     public function createDatabase(string $name, array $options = []): void
     {
         $charset = $options['charset'] ?? 'utf8';
-        $this->execute(sprintf("CREATE DATABASE %s WITH ENCODING = '%s'", $name, $charset));
+        $this->execute(sprintf(
+            'CREATE DATABASE %s WITH ENCODING = %s',
+            $this->quoteSchemaName($name),
+            $this->quoteString($charset),
+        ));
     }
 
     /**
@@ -849,7 +853,7 @@ class PostgresAdapter extends AbstractAdapter
     public function dropDatabase($name): void
     {
         $this->disconnect();
-        $this->execute(sprintf('DROP DATABASE IF EXISTS %s', $name));
+        $this->execute(sprintf('DROP DATABASE IF EXISTS %s', $this->quoteSchemaName($name)));
         $this->createdTables = [];
         $this->connect();
     }

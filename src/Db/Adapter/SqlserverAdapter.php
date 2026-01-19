@@ -767,12 +767,17 @@ ORDER BY IC.[key_ordinal]';
      */
     public function createDatabase(string $name, array $options = []): void
     {
+        $quotedName = $this->quoteSchemaName($name);
         if (isset($options['collation'])) {
-            $this->execute(sprintf('CREATE DATABASE [%s] COLLATE [%s]', $name, $options['collation']));
+            $this->execute(sprintf(
+                'CREATE DATABASE %s COLLATE %s',
+                $quotedName,
+                $this->quoteSchemaName($options['collation']),
+            ));
         } else {
-            $this->execute(sprintf('CREATE DATABASE [%s]', $name));
+            $this->execute(sprintf('CREATE DATABASE %s', $quotedName));
         }
-        $this->execute(sprintf('USE [%s]', $name));
+        $this->execute(sprintf('USE %s', $quotedName));
     }
 
     /**
@@ -794,12 +799,16 @@ ORDER BY IC.[key_ordinal]';
      */
     public function dropDatabase(string $name): void
     {
-        $sql = <<<SQL
-USE master;
-IF EXISTS(select * from sys.databases where name=N'$name')
-ALTER DATABASE [$name] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-DROP DATABASE [$name];
-SQL;
+        $quotedName = $this->quoteSchemaName($name);
+        $sql = sprintf(
+            'USE master;
+IF EXISTS(select * from sys.databases where name=%s)
+ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+DROP DATABASE %s;',
+            $this->quoteString($name),
+            $quotedName,
+            $quotedName,
+        );
         $this->execute($sql);
         $this->createdTables = [];
     }
