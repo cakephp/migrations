@@ -955,7 +955,7 @@ class Table
         $c = array_keys($row);
         foreach ($this->getData() as $row) {
             $k = array_keys($row);
-            if ($k != $c) {
+            if ($k !== $c) {
                 $bulk = false;
                 break;
             }

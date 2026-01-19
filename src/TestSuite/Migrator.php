@@ -199,7 +199,7 @@ class Migrator
         if (!empty($messages['missing'])) {
             $hasProblems = true;
             $output[] = 'Applied but missing migrations:';
-            $output = array_merge($output, array_map($itemize, $messages['down']));
+            $output = array_merge($output, array_map($itemize, $messages['missing']));
             $output[] = '';
         }
         if ($output) {

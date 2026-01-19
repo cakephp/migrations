@@ -238,7 +238,9 @@ class BaseSeed implements SeedInterface
     public function call(string $seeder, array $options = []): void
     {
         $io = $this->getIo();
-        assert($io !== null, 'Requires ConsoleIo');
+        if ($io === null) {
+            throw new RuntimeException('ConsoleIo is required for calling other seeders.');
+        }
         $io->out('');
         $io->out(
             ' ====' .
@@ -285,7 +287,9 @@ class BaseSeed implements SeedInterface
             'source' => $options['source'],
         ]);
         $io = $this->getIo();
-        assert($io !== null, 'Missing ConsoleIo instance');
+        if ($io === null) {
+            throw new RuntimeException('ConsoleIo is required for calling other seeders.');
+        }
         $manager = $factory->createManager($io);
         $manager->seed($seeder);
     }

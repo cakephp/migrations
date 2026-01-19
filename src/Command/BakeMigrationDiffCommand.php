@@ -19,6 +19,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
+use Cake\Database\Schema\CachedCollection;
 use Cake\Database\Schema\CollectionInterface;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -485,7 +486,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $lastVersion = $this->migratedItems[0]['version'];
             $lastFile = end($this->migrationsFiles);
 
-            return $lastFile && (bool)strpos($lastFile, (string)$lastVersion);
+            return $lastFile && str_contains($lastFile, (string)$lastVersion);
         }
 
         return false;
@@ -546,7 +547,15 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $this->io->abort($msg);
         }
 
-        return unserialize((string)file_get_contents($path));
+        $contents = (string)file_get_contents($path);
+
+        // Use allowed_classes to restrict deserialization to safe CakePHP schema classes
+        return unserialize($contents, [
+            'allowed_classes' => [
+                TableSchema::class,
+                CachedCollection::class,
+            ],
+        ]);
     }
 
     /**

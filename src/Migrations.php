@@ -36,7 +36,7 @@ class Migrations
      *
      * @var string
      */
-    protected string $command;
+    protected string $command = '';
 
     /**
      * Constructor
