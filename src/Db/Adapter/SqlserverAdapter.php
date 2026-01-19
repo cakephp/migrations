@@ -1117,7 +1117,6 @@ SQL;
 
     /**
      * @inheritDoc
-     *
      * @throws \BadMethodCallException Check constraints are not supported for SQL Server.
      */
     protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
@@ -1130,7 +1129,6 @@ SQL;
 
     /**
      * @inheritDoc
-     *
      * @throws \BadMethodCallException Check constraints are not supported for SQL Server.
      */
     protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
