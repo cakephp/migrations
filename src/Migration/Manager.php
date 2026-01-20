@@ -795,7 +795,7 @@ class Manager
                     }
                 }
 
-                if ($executedArray['breakpoint'] !== 0 && !$force) {
+                if ((int)$executedArray['breakpoint'] !== 0 && !$force) {
                     $io->out('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
                     break;
                 }
@@ -1304,12 +1304,12 @@ class Manager
                 $env->getAdapter()->toggleBreakpoint($migrations[$version]);
                 break;
             case self::BREAKPOINT_SET:
-                if ($versions[$version]['breakpoint'] === 0) {
+                if ((int)$versions[$version]['breakpoint'] === 0) {
                     $env->getAdapter()->setBreakpoint($migrations[$version]);
                 }
                 break;
             case self::BREAKPOINT_UNSET:
-                if ($versions[$version]['breakpoint'] === 1) {
+                if ((int)$versions[$version]['breakpoint'] === 1) {
                     $env->getAdapter()->unsetBreakpoint($migrations[$version]);
                 }
                 break;
