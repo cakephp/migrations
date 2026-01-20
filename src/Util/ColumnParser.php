@@ -74,7 +74,7 @@ class ColumnParser
                 $type = str_contains($type, '?') ? 'integer?' : 'integer';
             }
 
-            $nullable = (bool)strpos($type, '?');
+            $nullable = str_contains($type, '?');
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
             [$type, $length] = $this->getTypeAndLength($field, $type);

@@ -461,7 +461,7 @@ class Manager
         if ($version === null) {
             $version = max(array_merge($versions, array_keys($migrations)));
         } else {
-            if ($version != 0 && !isset($migrations[$version])) {
+            if ($version !== 0 && !isset($migrations[$version])) {
                 $this->getIo()->out(sprintf(
                     '<comment>warning</comment> %s is not a valid version',
                     $version,
@@ -755,7 +755,7 @@ class Manager
 
         // Check we have at least 1 migration to revert
         $executedVersionCreationTimes = array_keys($executedVersions);
-        if (!$executedVersionCreationTimes || $target == end($executedVersionCreationTimes)) {
+        if (!$executedVersionCreationTimes || $target === end($executedVersionCreationTimes)) {
             $io->out('<error>No migrations to rollback</error>');
 
             return;
@@ -795,7 +795,7 @@ class Manager
                     }
                 }
 
-                if ($executedArray['breakpoint'] != 0 && !$force) {
+                if ($executedArray['breakpoint'] !== 0 && !$force) {
                     $io->out('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
                     break;
                 }
@@ -1290,7 +1290,7 @@ class Manager
         }
 
         $io = $this->getIo();
-        if ($version != 0 && (!isset($versions[$version]) || !isset($migrations[$version]))) {
+        if ($version !== 0 && (!isset($versions[$version]) || !isset($migrations[$version]))) {
             $io->out(sprintf(
                 '<comment>warning</comment> %s is not a valid version',
                 $version,
@@ -1304,12 +1304,12 @@ class Manager
                 $env->getAdapter()->toggleBreakpoint($migrations[$version]);
                 break;
             case self::BREAKPOINT_SET:
-                if ($versions[$version]['breakpoint'] == 0) {
+                if ($versions[$version]['breakpoint'] === 0) {
                     $env->getAdapter()->setBreakpoint($migrations[$version]);
                 }
                 break;
             case self::BREAKPOINT_UNSET:
-                if ($versions[$version]['breakpoint'] == 1) {
+                if ($versions[$version]['breakpoint'] === 1) {
                     $env->getAdapter()->unsetBreakpoint($migrations[$version]);
                 }
                 break;
