@@ -64,7 +64,7 @@ class Migrations
      *
      * @var string
      */
-    protected string $command;
+    protected string $command = '';
 
     /**
      * Stub input to feed the manager class since we might not have an input ready when we get the Manager using

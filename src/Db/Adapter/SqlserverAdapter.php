@@ -248,9 +248,9 @@ class SqlserverAdapter extends AbstractAdapter
     {
         $this->updateCreatedTableName($tableName, $newTableName);
         $sql = sprintf(
-            "EXEC sp_rename '%s', '%s'",
-            $tableName,
-            $newTableName,
+            'EXEC sp_rename %s, %s',
+            $this->quoteString($tableName),
+            $this->quoteString($newTableName),
         );
 
         return new AlterInstructions([], [$sql]);
@@ -404,23 +404,21 @@ class SqlserverAdapter extends AbstractAdapter
 
         $oldConstraintName = "DF_{$tableName}_{$columnName}";
         $newConstraintName = "DF_{$tableName}_{$newColumnName}";
-        $sql = <<<SQL
-IF (OBJECT_ID('$oldConstraintName', 'D') IS NOT NULL)
+        $sql = sprintf(
+            'IF (OBJECT_ID(%s, \'D\') IS NOT NULL)
 BEGIN
-     EXECUTE sp_rename N'%s', N'%s', N'OBJECT'
-END
-SQL;
-        $instructions->addPostStep(sprintf(
-            $sql,
-            $oldConstraintName,
-            $newConstraintName,
-        ));
+     EXECUTE sp_rename %s, %s, N\'OBJECT\'
+END',
+            $this->quoteString($oldConstraintName),
+            $this->quoteString($oldConstraintName),
+            $this->quoteString($newConstraintName),
+        );
+        $instructions->addPostStep($sql);
 
         $instructions->addPostStep(sprintf(
-            "EXECUTE sp_rename N'%s.%s', N'%s', 'COLUMN' ",
-            $tableName,
-            $columnName,
-            $newColumnName,
+            'EXECUTE sp_rename %s, %s, N\'COLUMN\'',
+            $this->quoteString($tableName . '.' . $columnName),
+            $this->quoteString($newColumnName),
         ));
 
         return $instructions;
@@ -970,12 +968,17 @@ ORDER BY IC.[key_ordinal]';
      */
     public function createDatabase(string $name, array $options = []): void
     {
+        $quotedName = $this->quoteSchemaName($name);
         if (isset($options['collation'])) {
-            $this->execute(sprintf('CREATE DATABASE [%s] COLLATE [%s]', $name, $options['collation']));
+            $this->execute(sprintf(
+                'CREATE DATABASE %s COLLATE %s',
+                $quotedName,
+                $this->quoteSchemaName($options['collation']),
+            ));
         } else {
-            $this->execute(sprintf('CREATE DATABASE [%s]', $name));
+            $this->execute(sprintf('CREATE DATABASE %s', $quotedName));
         }
-        $this->execute(sprintf('USE [%s]', $name));
+        $this->execute(sprintf('USE %s', $quotedName));
     }
 
     /**
@@ -997,12 +1000,16 @@ ORDER BY IC.[key_ordinal]';
      */
     public function dropDatabase(string $name): void
     {
-        $sql = <<<SQL
-USE master;
-IF EXISTS(select * from sys.databases where name=N'$name')
-ALTER DATABASE [$name] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-DROP DATABASE [$name];
-SQL;
+        $quotedName = $this->quoteSchemaName($name);
+        $sql = sprintf(
+            'USE master;
+IF EXISTS(select * from sys.databases where name=%s)
+ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+DROP DATABASE %s;',
+            $this->quoteString($name),
+            $quotedName,
+            $quotedName,
+        );
         $this->execute($sql);
         $this->createdTables = [];
     }
@@ -1061,10 +1068,12 @@ SQL;
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey, string $tableName): string
     {
         $constraintName = $foreignKey->getName() ?: $tableName . '_' . implode('_', $foreignKey->getColumns());
+        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
+        $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
 
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName);
-        $def .= ' FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")';
-        $def .= " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable()->getName())} (\"" . implode('", "', $foreignKey->getReferencedColumns()) . '")';
+        $def .= ' FOREIGN KEY (' . $columnList . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()->getName()) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }

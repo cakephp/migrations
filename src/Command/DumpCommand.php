@@ -141,7 +141,7 @@ class DumpCommand extends Command
 
             return self::CODE_SUCCESS;
         }
-        $io->error("An error occurred while writing dump file `{$filePath}`");
+        $io->err("<error>An error occurred while writing dump file `{$filePath}`</error>");
 
         return self::CODE_ERROR;
     }

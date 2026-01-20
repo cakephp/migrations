@@ -972,7 +972,11 @@ class PostgresAdapter extends AbstractAdapter
     public function createDatabase(string $name, array $options = []): void
     {
         $charset = $options['charset'] ?? 'utf8';
-        $this->execute(sprintf("CREATE DATABASE %s WITH ENCODING = '%s'", $name, $charset));
+        $this->execute(sprintf(
+            'CREATE DATABASE %s WITH ENCODING = %s',
+            $this->quoteSchemaName($name),
+            $this->quoteString($charset),
+        ));
     }
 
     /**
@@ -995,7 +999,7 @@ class PostgresAdapter extends AbstractAdapter
     public function dropDatabase($name): void
     {
         $this->disconnect();
-        $this->execute(sprintf('DROP DATABASE IF EXISTS %s', $name));
+        $this->execute(sprintf('DROP DATABASE IF EXISTS %s', $this->quoteSchemaName($name)));
         $this->createdTables = [];
         $this->connect();
     }
@@ -1091,10 +1095,11 @@ class PostgresAdapter extends AbstractAdapter
         $constraintName = $foreignKey->getName() ?: (
             $parts['table'] . '_' . implode('_', $foreignKey->getColumns()) . '_fkey'
         );
+        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
+        $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName) .
-        ' FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")' .
-        " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable()->getName())} (\"" .
-        implode('", "', $foreignKey->getReferencedColumns()) . '")';
+        ' FOREIGN KEY (' . $columnList . ')' .
+        ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()->getName()) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }
