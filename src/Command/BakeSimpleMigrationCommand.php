@@ -25,7 +25,6 @@ use Cake\Core\Plugin;
 use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
-use InvalidArgumentException;
 use Migrations\Util\Util;
 
 /**
@@ -121,14 +120,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     public function getPath(Arguments $args): string
     {
-        $source = (string)$args->getOption('source');
-        // Validate source option to prevent path traversal
-        if (preg_match('/\.\.[\\/\\\\]|^[\\/\\\\]/', $source)) {
-            throw new InvalidArgumentException(
-                'The --source option cannot contain path traversal patterns or absolute paths.',
-            );
-        }
-        $migrationFolder = $this->pathFragment . DS . $source . DS;
+        $migrationFolder = $this->pathFragment . DS . $args->getOption('source') . DS;
         $path = ROOT . DS . $migrationFolder;
         if ($this->plugin) {
             $path = $this->_pluginPath($this->plugin) . $migrationFolder;
