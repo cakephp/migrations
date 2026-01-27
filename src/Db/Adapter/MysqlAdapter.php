@@ -253,6 +253,11 @@ class MysqlAdapter extends AbstractAdapter
             'engine' => 'InnoDB',
         ];
 
+        $collation = Configure::read('Migrations.default_collation');
+        if ($collation) {
+            $defaultOptions['collation'] = $collation;
+        }
+
         $options = array_merge(
             $defaultOptions,
             array_intersect_key($this->getOptions(), $defaultOptions),
