@@ -546,10 +546,9 @@ In addition, the MySQL adapter supports following options:
 Option     Platform         Description
 ========== ================ ===========
 comment    MySQL, Postgres  set a text comment on the table
-collation  MySQL, SqlServer the default collation for a table if different than the database.
+collation  MySQL, SqlServer set the table collation *(defaults to database collation)*
 row_format MySQL            set the table row format
 engine     MySQL            define table engine *(defaults to ``InnoDB``)*
-collation  MySQL            define table collation *(defaults to ``utf8mb4_unicode_ci``)*
 signed     MySQL            whether the primary key is ``signed``  *(defaults to ``false``)*
 limit      MySQL            set the maximum length for the primary key
 ========== ================ ===========

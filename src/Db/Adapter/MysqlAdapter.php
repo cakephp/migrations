@@ -251,7 +251,6 @@ class MysqlAdapter extends AbstractAdapter
         // This method is based on the MySQL docs here: https://dev.mysql.com/doc/refman/5.1/en/create-index.html
         $defaultOptions = [
             'engine' => 'InnoDB',
-            'collation' => 'utf8mb4_unicode_ci',
         ];
 
         $options = array_merge(
