@@ -112,6 +112,12 @@ class DumpCommand extends Command
         ]);
         $config = $factory->createConfig();
         $path = $config->getMigrationPath();
+
+        if (!is_dir($path)) {
+            $io->verbose('<info>No migrations directory found, skipping dump.</info>');
+
+            return self::CODE_SUCCESS;
+        }
         $connectionName = (string)$config->getConnection();
         $connection = ConnectionManager::get($connectionName);
         assert($connection instanceof Connection);

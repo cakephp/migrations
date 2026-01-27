@@ -81,6 +81,13 @@ class DumpCommandTest extends TestCase
         $this->assertEquals(['id', 'letter'], $generatedDump['letters']->columns());
     }
 
+    public function testExecuteNoMigrationsDirectory(): void
+    {
+        $this->exec('migrations dump --connection test --source NonExistentMigrations');
+
+        $this->assertExitSuccess();
+    }
+
     public function testExecutePlugin(): void
     {
         $this->loadPlugins(['Migrator']);
