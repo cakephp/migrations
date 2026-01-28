@@ -24,7 +24,7 @@
     "require": {
         "php": ">=8.2",
         "cakephp/cache": "^5.3.0",
-        "cakephp/database": "^5.3.0",
+        "cakephp/database": "^5.3.2",
         "cakephp/orm": "^5.3.0"
     },
     "require-dev": {
