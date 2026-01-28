@@ -63,6 +63,7 @@ interface AdapterInterface
 
     // only for mysql so far
     public const TYPE_YEAR = TableSchemaInterface::TYPE_YEAR;
+    public const TYPE_BIT = TableSchemaInterface::TYPE_BIT;
 
     // only for postgresql so far
     public const TYPE_CIDR = TableSchemaInterface::TYPE_CIDR;
