@@ -275,4 +275,56 @@ class ColumnTest extends TestCase
         $decimalColumn->setName('price')->setType('decimal');
         $this->assertFalse($decimalColumn->isUnsigned());
     }
+
+    public function testFixedOptionDefaultsToNull(): void
+    {
+        $column = new Column();
+        $column->setName('data')->setType('binary');
+
+        $this->assertNull($column->getFixed());
+    }
+
+    public function testSetFixedTrue(): void
+    {
+        $column = new Column();
+        $column->setName('hash')->setType('binary')->setFixed(true);
+
+        $this->assertTrue($column->getFixed());
+    }
+
+    public function testSetFixedFalse(): void
+    {
+        $column = new Column();
+        $column->setName('data')->setType('binary')->setFixed(false);
+
+        $this->assertFalse($column->getFixed());
+    }
+
+    public function testSetOptionsWithFixed(): void
+    {
+        $column = new Column();
+        $column->setName('hash')->setType('binary');
+        $column->setOptions(['fixed' => true, 'limit' => 20]);
+
+        $this->assertTrue($column->getFixed());
+        $this->assertSame(20, $column->getLimit());
+    }
+
+    public function testToArrayIncludesFixed(): void
+    {
+        $column = new Column();
+        $column->setName('hash')->setType('binary')->setFixed(true)->setLimit(20);
+
+        $result = $column->toArray();
+        $this->assertTrue($result['fixed']);
+    }
+
+    public function testToArrayFixedNullByDefault(): void
+    {
+        $column = new Column();
+        $column->setName('data')->setType('binary')->setLimit(20);
+
+        $result = $column->toArray();
+        $this->assertNull($result['fixed']);
+    }
 }

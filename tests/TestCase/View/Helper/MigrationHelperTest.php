@@ -456,4 +456,38 @@ class MigrationHelperTest extends TestCase
         $this->assertArrayHasKey('collation', $result, 'collation should be set from collate value');
         $this->assertSame('en_US.UTF-8', $result['collation']);
     }
+
+    /**
+     * Test that getColumnOption includes the fixed option for binary columns
+     */
+    public function testGetColumnOptionIncludesFixed(): void
+    {
+        $options = [
+            'length' => 20,
+            'null' => true,
+            'default' => null,
+            'fixed' => true,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayHasKey('fixed', $result);
+        $this->assertTrue($result['fixed']);
+    }
+
+    /**
+     * Test that getColumnOption excludes fixed when not set
+     */
+    public function testGetColumnOptionExcludesFixedWhenNotSet(): void
+    {
+        $options = [
+            'length' => 20,
+            'null' => true,
+            'default' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('fixed', $result);
+    }
 }
