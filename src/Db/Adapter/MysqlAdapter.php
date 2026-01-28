@@ -633,6 +633,9 @@ class MysqlAdapter extends AbstractAdapter
             if ($record['onUpdate'] ?? false) {
                 $column->setUpdate($record['onUpdate']);
             }
+            if ($record['fixed'] ?? false) {
+                $column->setFixed(true);
+            }
 
             $columns[] = $column;
         }
