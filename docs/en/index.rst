@@ -841,6 +841,8 @@ pass them to the method::
     // This one with the "default" connection
     $migrate = $migrations->migrate(['connection' => 'default']);
 
+.. _feature-flags:
+
 Feature Flags
 =============
 

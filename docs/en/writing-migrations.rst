@@ -549,13 +549,14 @@ comment    MySQL, Postgres  set a text comment on the table
 collation  MySQL, SqlServer set the table collation *(defaults to database collation)*
 row_format MySQL            set the table row format
 engine     MySQL            define table engine *(defaults to ``InnoDB``)*
-signed     MySQL            whether the primary key is ``signed``  *(defaults to ``false``)*
+signed     MySQL            whether the primary key is ``signed``  *(defaults to ``true``)*
 limit      MySQL            set the maximum length for the primary key
 ========== ================ ===========
 
-By default, the primary key is ``unsigned``.
-To simply set it to be signed just pass ``signed`` option with a ``true``
-value::
+By default, the primary key is ``signed``.
+To set it to be unsigned, pass the ``signed`` option with a ``false``
+value, or enable the ``Migrations.unsigned_primary_keys`` feature flag
+(see :ref:`feature-flags`)::
 
     <?php
 
