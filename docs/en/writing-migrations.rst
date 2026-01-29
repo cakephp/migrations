@@ -555,8 +555,10 @@ limit      MySQL            set the maximum length for the primary key
 
 By default, the primary key is ``signed``.
 To set it to be unsigned, pass the ``signed`` option with a ``false``
-value, or enable the ``Migrations.unsigned_primary_keys`` feature flag
-(see :ref:`feature-flags`)::
+value, or enable the ``Migrations.unsigned_primary_keys`` and
+``Migrations.unsigned_ints`` feature flags (see :ref:`feature-flags`).
+Both flags should be used together so that foreign key columns match
+the primary keys they reference::
 
     <?php
 
