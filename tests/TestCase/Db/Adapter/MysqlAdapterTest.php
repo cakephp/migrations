@@ -3528,6 +3528,8 @@ OUTPUT;
 
         $this->assertNotNull($hashCol);
         $this->assertNotNull($dataCol);
+        $this->assertSame('binary', $hashCol->getType());
+        $this->assertSame('binary', $dataCol->getType());
         $this->assertTrue($hashCol->getFixed());
         $this->assertNull($dataCol->getFixed());
     }
