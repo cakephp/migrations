@@ -138,6 +138,7 @@ class SeedStatusCommand extends Command
                 'plugin' => $plugin,
                 'status' => $executed ? 'executed' : 'pending',
                 'executedAt' => $executedAt,
+                'idempotent' => $seed->isIdempotent(),
             ];
         }
 
@@ -168,14 +169,15 @@ class SeedStatusCommand extends Command
         foreach ($statuses as $status) {
             $seedName = str_pad($status['seedName'], $maxNameLength);
             $plugin = $status['plugin'] ? str_pad($status['plugin'], $maxPluginLength) : str_repeat(' ', $maxPluginLength);
+            $idempotent = $status['idempotent'] ? ' <info>(idempotent)</info>' : '';
 
             if ($status['status'] === 'executed') {
                 $statusText = '<info>executed</info>';
                 $date = $status['executedAt'] ? ' (' . $status['executedAt'] . ')' : '';
-                $io->out("  {$statusText} {$plugin}  {$seedName}{$date}");
+                $io->out("  {$statusText} {$plugin}  {$seedName}{$date}{$idempotent}");
             } else {
                 $statusText = '<comment>pending</comment> ';
-                $io->out("  {$statusText} {$plugin}  {$seedName}");
+                $io->out("  {$statusText} {$plugin}  {$seedName}{$idempotent}");
             }
         }
 
