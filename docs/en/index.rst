@@ -1,5 +1,5 @@
-Migrations
-##########
+Migrations 5.x
+##############
 
 Migrations is a plugin that lets you track changes to your database schema over
 time as PHP code that accompanies your application. This lets you ensure each
@@ -8,6 +8,21 @@ migrations.
 
 Instead of writing schema modifications in SQL, this plugin allows you to
 define schema changes with a high-level database portable API.
+
+What's New in 5.x
+=================
+
+Migrations 5.x includes several new features:
+
+- **Seed tracking** - Seeds are now tracked in a ``cake_seeds`` table, preventing
+  accidental re-runs
+- **Check constraints** - Support for database check constraints via ``addCheckConstraint()``
+- **Default values in bake** - Specify default values when baking migrations
+  (e.g., ``active:boolean:default[true]``)
+- **MySQL ALTER options** - Control ``ALGORITHM`` and ``LOCK`` for ALTER TABLE operations
+- **insertOrSkip()** - New method for idempotent seed data insertion
+
+See the :doc:`upgrading` guide for breaking changes and migration steps from 4.x.
 
 Installation
 ============
