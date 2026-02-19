@@ -9,7 +9,6 @@ use Exception;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Test\TestCase\TestCase;
-use PDO;
 
 class UpgradeCommandTest extends TestCase
 {
@@ -22,6 +21,17 @@ class UpgradeCommandTest extends TestCase
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test');
         $connection->execute('DROP TABLE IF EXISTS cake_migrations');
+    }
+
+    public function tearDown(): void
+    {
+        $this->clearMigrationRecords('test');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $connection->execute('DROP TABLE IF EXISTS cake_migrations');
+
+        parent::tearDown();
     }
 
     protected function getAdapter(): AdapterInterface
