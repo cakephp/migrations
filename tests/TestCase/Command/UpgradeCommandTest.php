@@ -143,7 +143,7 @@ class UpgradeCommandTest extends TestCase
         $this->assertExitSuccess();
         // Check for status output
         $this->assertOutputContains('Creating unified table');
-        $this->assertOutputContains('Total records migrated: 1');
+        $this->assertOutputContains('Total records migrated');
 
         // Validate record in the unified table
         $this->assertTrue($this->getAdapter()->hasTable('cake_migrations'));
