@@ -151,9 +151,7 @@ class UpgradeCommandTest extends TestCase
         $rows = $this->getAdapter()->getSelectBuilder()
             ->select(['version', 'migration_name', 'breakpoint'])
             ->from('cake_migrations')
-            ->where([
-                'migration_name' => 'TestMigration'
-            ])
+            ->where(['migration_name' => 'TestMigration'])
             ->all()
             ->fetchAll(PDO::FETCH_ASSOC);
 
