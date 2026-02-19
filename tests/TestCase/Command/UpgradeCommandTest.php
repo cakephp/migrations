@@ -132,7 +132,11 @@ class UpgradeCommandTest extends TestCase
         $this->getAdapter()->getInsertBuilder()
             ->insert(['version', 'migration_name', 'breakpoint'])
             ->into('phinxlog')
-            ->values(['20250118143003', 'TestMigration', 0])
+            ->values([
+                'version' => '20250118143003',
+                'migration_name' => 'TestMigration',
+                'breakpoint' => 0,
+            ])
             ->execute();
 
         $this->exec('migrations upgrade -c test');
