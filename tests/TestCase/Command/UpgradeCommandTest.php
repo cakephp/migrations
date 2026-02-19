@@ -9,6 +9,7 @@ use Exception;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Test\TestCase\TestCase;
+use PDO;
 
 class UpgradeCommandTest extends TestCase
 {
@@ -117,5 +118,41 @@ class UpgradeCommandTest extends TestCase
 
         $this->assertTrue($adapter->hasTable('cake_migrations'));
         $this->assertFalse($adapter->hasTable('phinxlog'));
+    }
+
+    public function testExecuteWithMigrations(): void
+    {
+        Configure::write('Migrations.legacyTables', true);
+        try {
+            $this->getAdapter()->createSchemaTable();
+        } catch (Exception $e) {
+            // Table probably exists
+        }
+
+        $this->getAdapter()->getInsertBuilder()
+            ->insert(['version', 'migration_name', 'breakpoint'])
+            ->into('phinxlog')
+            ->values(['20250118143003', 'TestMigration', 0])
+            ->execute();
+
+        $this->exec('migrations upgrade -c test');
+        $this->assertExitSuccess();
+        // Check for status output
+        $this->assertOutputContains('Creating unified table');
+        $this->assertOutputContains('Total records migrated: 1');
+
+        // Validate record in the unified table
+        $this->assertTrue($this->getAdapter()->hasTable('cake_migrations'));
+
+        $rows = $this->getAdapter()->getSelectBuilder()
+            ->select(['version', 'migration_name', 'breakpoint'])
+            ->from('cake_migrations')
+            ->where([
+                'migration_name' => 'TestMigration'
+            ])
+            ->all()
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->assertCount(1, $rows);
     }
 }
