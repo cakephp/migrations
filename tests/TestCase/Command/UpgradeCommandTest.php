@@ -152,8 +152,7 @@ class UpgradeCommandTest extends TestCase
             ->select(['version', 'migration_name', 'breakpoint'])
             ->from('cake_migrations')
             ->where(['migration_name' => 'TestMigration'])
-            ->all()
-            ->fetchAll(PDO::FETCH_ASSOC);
+            ->all();
 
         $this->assertCount(1, $rows);
     }
