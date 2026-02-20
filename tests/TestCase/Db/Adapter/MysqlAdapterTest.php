@@ -79,13 +79,6 @@ class MysqlAdapterTest extends TestCase
         unset($this->adapter, $this->out, $this->io);
     }
 
-    private function getDefaultCollation(): string
-    {
-        return $this->usingMariaDbWithUuid() ?
-            'utf8mb4_general_ci' :
-            'utf8mb4_0900_ai_ci';
-    }
-
     private function usingMysql8(): bool
     {
         $version = $this->adapter->getConnection()->getDriver()->version();
@@ -461,7 +454,7 @@ class MysqlAdapterTest extends TestCase
               ->save();
         $this->assertTrue($adapter->hasTable('table_with_default_collation'));
         $row = $adapter->fetchRow(sprintf("SHOW TABLE STATUS WHERE Name = '%s'", 'table_with_default_collation'));
-        $this->assertContains($row['Collation'], ['utf8mb4_general_ci', 'utf8mb4_0900_ai_ci', 'utf8mb4_unicode_ci']);
+        $this->assertContains($row['Collation'], ['utf8mb4_general_ci', 'utf8mb4_0900_ai_ci', 'utf8mb4_uca1400_ai_ci', 'utf8mb4_unicode_ci']);
     }
 
     public function testCreateTableWithLatin1Collate()
@@ -2288,8 +2281,9 @@ class MysqlAdapterTest extends TestCase
 
         $actualOutput = join("\n", $this->out->messages());
         // MySQL version affects default collation (8.0.0+ uses utf8mb4_0900_ai_ci, older uses utf8mb4_general_ci)
+        // MariaDB 11.8 uses: utf8mb4_uca1400_ai_ci
         $this->assertMatchesRegularExpression(
-            '/CREATE TABLE `table1` \(`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT, `column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, `column3` VARCHAR\(255\) NOT NULL DEFAULT \'test\', PRIMARY KEY \(`id`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|general_ci);/',
+            '/CREATE TABLE `table1` \(`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT, `column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, `column3` VARCHAR\(255\) NOT NULL DEFAULT \'test\', PRIMARY KEY \(`id`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|uca1400_ai_ci|general_ci);/',
             $actualOutput,
             'Passing the --dry-run option does not dump create table query to the output',
         );
@@ -2398,7 +2392,7 @@ OUTPUT;
         $actualOutput = preg_replace('~\R~u', '', $actualOutput);
         // MySQL version affects default collation (8.0.0+ uses utf8mb4_0900_ai_ci, older uses utf8mb4_general_ci)
         $this->assertMatchesRegularExpression(
-            '/CREATE TABLE `table1` \(`column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, PRIMARY KEY \(`column1`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|general_ci);INSERT INTO `table1` \(`column1`, `column2`\) VALUES \(\'id1\', 1\);/',
+            '/CREATE TABLE `table1` \(`column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, PRIMARY KEY \(`column1`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|uca1400_ai_ci|general_ci);INSERT INTO `table1` \(`column1`, `column2`\) VALUES \(\'id1\', 1\);/',
             $actualOutput,
             'Passing the --dry-run option does not dump create and then insert table queries to the output',
         );
