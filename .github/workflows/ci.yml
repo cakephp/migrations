@@ -59,18 +59,29 @@ jobs:
           persist-credentials: false
 
       - name: Setup MariaDB
-        uses: getong/mariadb-action@v1.11
-        if: matrix.db-type == 'mariadb'
-        with:
-          mariadb version: '10.11.10'
-          mysql database: 'cakephp_test'
-          mysql root password: 'root'
-      - name: Setup MariaDB (part 2)
         if: matrix.db-type == 'mariadb'
         run: |
-          mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
-          mysql -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_snapshot;'
+          docker run -d --name=mariadb \
+            -e MARIADB_ROOT_PASSWORD=root \
+            -e MARIADB_DATABASE=cakephp_test \
+            -p 3306:3306 \
+            --health-cmd="mariadb-admin ping -h 127.0.0.1 -proot || exit 1" \
+            --health-interval=10s \
+            --health-timeout=5s \
+            --health-retries=10 \
+            mariadb:11.8
 
+          echo "Waiting for MariaDB to be ready..."
+          for i in {1..60}; do
+            if docker exec mariadb mariadb-admin ping -h 127.0.0.1 -proot >/dev/null 2>&1; then
+              echo "MariaDB is responding."
+              break
+            fi
+
+            sleep 2
+          done
+          mariadb -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
+          mariadb -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_snapshot;'
       - name: Setup MySQL
         if: matrix.db-type == 'mysql'
         run: |
