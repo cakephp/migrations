@@ -81,7 +81,7 @@ jobs:
             sleep 2
           done
           docker exec mariadb mariadb -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_comparisons;'
-          docker exec mariadb -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_snapshot;'
+          docker exec mariadb mariadb -h 127.0.0.1 -u root -proot -e 'CREATE DATABASE cakephp_snapshot;'
       - name: Setup MySQL
         if: matrix.db-type == 'mysql'
         run: |
