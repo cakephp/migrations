@@ -195,8 +195,8 @@ class TableTest extends TestCase
         $this->assertEquals('timestamp', $columns[1]->getType());
         $this->assertEquals($withTimezone, $columns[1]->getTimezone());
         $this->assertEquals('CURRENT_TIMESTAMP', $columns[1]->getUpdate());
-        $this->assertTrue($columns[1]->isNull());
-        $this->assertNull($columns[1]->getDefault());
+        $this->assertFalse($columns[1]->isNull());
+        $this->assertEquals('CURRENT_TIMESTAMP', $columns[1]->getDefault());
     }
 
     /**
@@ -246,8 +246,8 @@ class TableTest extends TestCase
         $this->assertSame('timestamp', $columns[0]->getType());
         $this->assertFalse($columns[0]->getTimezone());
         $this->assertSame('CURRENT_TIMESTAMP', $columns[0]->getUpdate());
-        $this->assertTrue($columns[0]->isNull());
-        $this->assertNull($columns[0]->getDefault());
+        $this->assertFalse($columns[0]->isNull());
+        $this->assertSame('CURRENT_TIMESTAMP', $columns[0]->getDefault());
     }
 
     /**
@@ -299,8 +299,8 @@ class TableTest extends TestCase
         $this->assertEquals('timestamp', $columns[1]->getType());
         $this->assertTrue($columns[1]->getTimezone());
         $this->assertEquals('CURRENT_TIMESTAMP', $columns[1]->getUpdate());
-        $this->assertTrue($columns[1]->isNull());
-        $this->assertNull($columns[1]->getDefault());
+        $this->assertFalse($columns[1]->isNull());
+        $this->assertEquals('CURRENT_TIMESTAMP', $columns[1]->getDefault());
     }
 
     public function testInsert()

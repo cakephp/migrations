@@ -29,7 +29,7 @@
     },
     "require-dev": {
         "cakephp/bake": "^3.3",
-        "cakephp/cakephp": "^5.3.0",
+        "cakephp/cakephp": "^5.3.2",
         "cakephp/cakephp-codesniffer": "^5.0",
         "phpunit/phpunit": "^11.5.3 || ^12.1.3"
     },

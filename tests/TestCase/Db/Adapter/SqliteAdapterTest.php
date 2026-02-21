@@ -2092,7 +2092,7 @@ OUTPUT;
             ['name' => 'string_col_2', 'type' => 'string', 'default' => null, 'null' => true],
             ['name' => 'string_col_3', 'type' => 'string', 'default' => null, 'null' => false],
             ['name' => 'created', 'type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'null' => false],
-            ['name' => 'updated', 'type' => 'timestamp', 'default' => null, 'null' => true],
+            ['name' => 'updated', 'type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'null' => false],
         ];
 
         $this->assertEquals(count($expected), count($columns));

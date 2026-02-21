@@ -576,8 +576,8 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('updated', $columns[2]->getName());
         $this->assertEquals('datetime', $columns[2]->getType());
         $this->assertContains($columns[2]->getUpdate(), ['CURRENT_TIMESTAMP', 'current_timestamp()']);
-        $this->assertTrue($columns[2]->isNull());
-        $this->assertNull($columns[2]->getDefault());
+        $this->assertFalse($columns[2]->isNull());
+        $this->assertContains($columns[2]->getDefault(), ['CURRENT_TIMESTAMP', 'current_timestamp()']);
     }
 
     public function testCreateTableWithSchema()
