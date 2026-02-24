@@ -338,7 +338,7 @@ class SqlserverAdapter extends AbstractAdapter
 
         $result = preg_replace(["/\('(.*)'\)/", "/\(\((.*)\)\)/", "/\((.*)\)/"], '$1', $default);
 
-        if (strtoupper($result) === 'NULL') {
+        if (strtoupper((string)$result) === 'NULL') {
             $result = null;
         } elseif (is_numeric($result)) {
             $result = (int)$result;
@@ -475,7 +475,7 @@ END',
             $dialect->columnDefinitionSql($columnData),
         );
         $alterColumn = preg_replace('/DEFAULT NULL/', '', $alterColumn);
-        $instructions->addPostStep($alterColumn);
+        $instructions->addPostStep((string)$alterColumn);
 
         // change column comment if needed
         if ($newColumn->getComment()) {
@@ -864,13 +864,13 @@ DROP DATABASE %s;',
      */
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey, string $tableName): string
     {
-        $constraintName = $foreignKey->getName() ?: $tableName . '_' . implode('_', $foreignKey->getColumns());
-        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
+        $constraintName = $foreignKey->getName() ?: $tableName . '_' . implode('_', $foreignKey->getColumns() ?? []);
+        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns() ?? []));
         $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
 
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName);
         $def .= ' FOREIGN KEY (' . $columnList . ')';
-        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }

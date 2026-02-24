@@ -362,7 +362,7 @@ class Table
         if ($columnName instanceof Column) {
             $action = new AddColumn($this->table, $columnName);
         } else {
-            $action = new AddColumn($this->table, $this->getAdapter()->getColumnForType($columnName, $type, $options));
+            $action = new AddColumn($this->table, $this->getAdapter()->getColumnForType($columnName, (string)$type, $options));
         }
 
         // Delegate to Adapters to check column type
@@ -902,7 +902,7 @@ class Table
                 return $action->getColumn();
             });
         $primaryKeyColumns = $columnsCollection->filter(function (Column $columnDef, $key) use ($primaryKey) {
-            return isset($primaryKey[$columnDef->getName()]);
+            return isset($primaryKey[(string)$columnDef->getName()]);
         })->toArray();
 
         if (!$primaryKeyColumns) {
@@ -911,7 +911,7 @@ class Table
 
         foreach ($primaryKeyColumns as $primaryKeyColumn) {
             if ($primaryKeyColumn->isIdentity()) {
-                unset($primaryKey[$primaryKeyColumn->getName()]);
+                unset($primaryKey[(string)$primaryKeyColumn->getName()]);
             }
         }
 

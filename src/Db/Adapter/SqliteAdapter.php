@@ -570,7 +570,7 @@ PCRE_PATTERN;
                 return $state;
             }
             $finalColumnName = end($columns)->getName();
-            $sql = preg_replace(
+            $sql = (string)preg_replace(
                 sprintf(
                     "/(%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+)([,)])/",
                     $this->quoteColumnName((string)$finalColumnName),
@@ -619,7 +619,7 @@ PCRE_PATTERN;
             $columnNamePattern = "\"$columnName\"|`$columnName`|\\[$columnName\\]|$columnName";
             $columnNamePattern = "#([\(,]+\\s*)($columnNamePattern)(\\s)#iU";
 
-            $sql = preg_replace_callback(
+            $sql = (string)preg_replace_callback(
                 $columnNamePattern,
                 function ($matches) use ($column) {
                     return $matches[1] . $this->quoteColumnName($column['name']) . $matches[3];
@@ -631,7 +631,7 @@ PCRE_PATTERN;
         $tableNamePattern = "\"$tableName\"|`$tableName`|\\[$tableName\\]|$tableName";
         $tableNamePattern = "#^(CREATE TABLE)\s*($tableNamePattern)\s*(\()#Ui";
 
-        $sql = preg_replace($tableNamePattern, "$1 `$tableName` $3", $sql, 1);
+        $sql = (string)preg_replace($tableNamePattern, "$1 `$tableName` $3", $sql, 1);
 
         return $sql;
     }
@@ -1115,7 +1115,7 @@ PCRE_PATTERN;
         $newColumnName = (string)$newColumn->getName();
         $instructions->addPostStep(function ($state) use ($columnName, $newColumn) {
             $dialect = $this->getSchemaDialect();
-            $sql = preg_replace(
+            $sql = (string)preg_replace(
                 sprintf("/%s(?:\/\*.*?\*\/|\([^)]+\)|'[^']*?'|[^,])+([,)])/", $this->quoteColumnName($columnName)),
                 sprintf('%s$1', $dialect->columnDefinitionSql($newColumn->toArray())),
                 (string)$state['createSQL'],
@@ -1149,7 +1149,7 @@ PCRE_PATTERN;
         });
 
         $instructions->addPostStep(function ($state) use ($columnName) {
-            $sql = preg_replace(
+            $sql = (string)preg_replace(
                 sprintf("/%s\s\w+.*(,\s(?!')|\)$)/U", preg_quote($this->quoteColumnName($columnName))),
                 '',
                 (string)$state['createSQL'],
@@ -1679,7 +1679,7 @@ PCRE_PATTERN;
             $def .= ' CONSTRAINT ' . $this->quoteColumnName((string)$foreignKey->getName());
         }
         $columnNames = [];
-        foreach ($foreignKey->getColumns() as $column) {
+        foreach ($foreignKey->getColumns() ?? [] as $column) {
             $columnNames[] = $this->quoteColumnName($column);
         }
         $def .= ' FOREIGN KEY (' . implode(',', $columnNames) . ')';
@@ -1687,7 +1687,7 @@ PCRE_PATTERN;
         foreach ($foreignKey->getReferencedColumns() as $column) {
             $refColumnNames[] = $this->quoteColumnName($column);
         }
-        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= ' ON DELETE ' . $foreignKey->getOnDelete();
         }

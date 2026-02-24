@@ -201,6 +201,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $this->connection = $this->getOption('connection');
             $this->connect();
         }
+        assert($this->connection !== null);
 
         return $this->connection;
     }
@@ -1681,7 +1682,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     /** @var \Migrations\Db\Action\DropForeignKey $action */
                     $instructions->merge($this->getDropForeignKeyByColumnsInstructions(
                         $table->getName(),
-                        $action->getForeignKey()->getColumns(),
+                        $action->getForeignKey()->getColumns() ?? [],
                     ));
                     break;
 
