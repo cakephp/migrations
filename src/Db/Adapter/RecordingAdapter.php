@@ -13,6 +13,7 @@ use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
 use Migrations\Db\Action\CreateTable;
+use InvalidArgumentException;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropTable;
@@ -90,7 +91,10 @@ class RecordingAdapter extends AdapterWrapper
                 case $command instanceof RenameColumn:
                     /** @var \Migrations\Db\Action\RenameColumn $command */
                     $column = clone $command->getColumn();
-                    $name = (string)$column->getName();
+                    $name = $column->getName();
+                    if ($name === null) {
+                        throw new InvalidArgumentException('Column name must be set.');
+                    }
                     $column->setName($command->getNewName());
                     $inverted->addAction(new RenameColumn($command->getTable(), $column, $name));
                     break;

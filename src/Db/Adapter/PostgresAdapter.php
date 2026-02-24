@@ -546,12 +546,16 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         // rename column
-        if ($columnName !== $newColumn->getName()) {
+        $newColumnName = $newColumn->getName();
+        if ($columnName !== $newColumnName) {
+            if ($newColumnName === null) {
+                throw new InvalidArgumentException('Column name must be set.');
+            }
             $instructions->addPostStep(sprintf(
                 'ALTER TABLE %s RENAME COLUMN %s TO %s',
                 $this->quoteTableName($tableName),
                 $quotedColumnName,
-                $this->quoteColumnName((string)$newColumn->getName()),
+                $this->quoteColumnName($newColumnName),
             ));
         }
 
@@ -873,6 +877,11 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function getColumnCommentSqlDefinition(Column $column, string $tableName): string
     {
+        $columnName = $column->getName();
+        if ($columnName === null) {
+            throw new InvalidArgumentException('Column name must be set.');
+        }
+
         $comment = (string)$column->getComment();
         // passing 'null' is to remove column comment
         $comment = strcasecmp($comment, 'NULL') !== 0
@@ -882,7 +891,7 @@ class PostgresAdapter extends AbstractAdapter
         return sprintf(
             'COMMENT ON COLUMN %s.%s IS %s;',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName((string)$column->getName()),
+            $this->quoteColumnName($columnName),
             $comment,
         );
     }
@@ -957,9 +966,13 @@ class PostgresAdapter extends AbstractAdapter
         );
         $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns() ?? []));
         $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
+        $referencedTable = $foreignKey->getReferencedTable();
+        if ($referencedTable === null) {
+            throw new InvalidArgumentException('Foreign key must have a referenced table.');
+        }
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName) .
         ' FOREIGN KEY (' . $columnList . ')' .
-        ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
+        ' REFERENCES ' . $this->quoteTableName($referencedTable) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }

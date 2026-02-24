@@ -367,11 +367,16 @@ class Table
         }
 
         // Delegate to Adapters to check column type
-        if (!$this->getAdapter()->isValidColumnType($action->getColumn())) {
+        $column = $action->getColumn();
+        $colName = $column->getName();
+        if ($colName === null) {
+            throw new InvalidArgumentException('Column name must be set.');
+        }
+        if (!$this->getAdapter()->isValidColumnType($column)) {
             throw new InvalidArgumentException(sprintf(
                 'An invalid column type "%s" was specified for column "%s".',
-                (string)$action->getColumn()->getType(),
-                (string)$action->getColumn()->getName(),
+                $column->getType(),
+                $colName,
             ));
         }
 
@@ -903,7 +908,9 @@ class Table
                 return $action->getColumn();
             });
         $primaryKeyColumns = $columnsCollection->filter(function (Column $columnDef, $key) use ($primaryKey) {
-            return isset($primaryKey[(string)$columnDef->getName()]);
+            $name = $columnDef->getName();
+
+            return $name !== null && isset($primaryKey[$name]);
         })->toArray();
 
         if (!$primaryKeyColumns) {
@@ -912,7 +919,11 @@ class Table
 
         foreach ($primaryKeyColumns as $primaryKeyColumn) {
             if ($primaryKeyColumn->isIdentity()) {
-                unset($primaryKey[(string)$primaryKeyColumn->getName()]);
+                $pkColName = $primaryKeyColumn->getName();
+                if ($pkColName === null) {
+                    continue;
+                }
+                unset($primaryKey[$pkColName]);
             }
         }
 
