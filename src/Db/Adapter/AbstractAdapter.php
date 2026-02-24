@@ -201,7 +201,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $this->connection = $this->getOption('connection');
             $this->connect();
         }
-        assert($this->connection !== null);
+        if ($this->connection === null) {
+            throw new RuntimeException('Unable to establish database connection. Ensure a connection is configured.');
+        }
 
         return $this->connection;
     }
