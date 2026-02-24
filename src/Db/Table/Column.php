@@ -234,7 +234,7 @@ class Column extends DatabaseColumn
      */
     public function getNull(): bool
     {
-        return $this->null;
+        return $this->null ?? false;
     }
 
     /**
