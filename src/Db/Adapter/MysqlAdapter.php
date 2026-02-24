@@ -727,7 +727,7 @@ class MysqlAdapter extends AbstractAdapter
         $targetColumn = null;
 
         foreach ($columns as $column) {
-            if (strcasecmp((string)$column->getName(), $columnName) === 0) {
+            if ($column->getName() !== null && strcasecmp($column->getName(), $columnName) === 0) {
                 $targetColumn = $column;
                 break;
             }
@@ -1210,7 +1210,11 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($foreignKey->getReferencedColumns() as $column) {
             $refColumnNames[] = $this->quoteColumnName($column);
         }
-        $def .= ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
+        $referencedTable = $foreignKey->getReferencedTable();
+        if ($referencedTable === null) {
+            throw new InvalidArgumentException('Foreign key must have a referenced table.');
+        }
+        $def .= ' REFERENCES ' . $this->quoteTableName($referencedTable) . ' (' . implode(',', $refColumnNames) . ')';
         $onDelete = $foreignKey->getOnDelete();
         if ($onDelete) {
             $def .= ' ON DELETE ' . $onDelete;

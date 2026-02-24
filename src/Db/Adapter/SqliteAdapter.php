@@ -1112,7 +1112,10 @@ PCRE_PATTERN;
     {
         $instructions = $this->beginAlterByCopyTable($tableName);
 
-        $newColumnName = (string)$newColumn->getName();
+        $newColumnName = $newColumn->getName();
+        if ($newColumnName === null) {
+            throw new InvalidArgumentException('Column name must be set.');
+        }
         $instructions->addPostStep(function ($state) use ($columnName, $newColumn) {
             $dialect = $this->getSchemaDialect();
             $sql = (string)preg_replace(
@@ -1689,7 +1692,11 @@ PCRE_PATTERN;
         foreach ($foreignKey->getReferencedColumns() as $column) {
             $refColumnNames[] = $this->quoteColumnName($column);
         }
-        $def .= ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
+        $referencedTable = $foreignKey->getReferencedTable();
+        if ($referencedTable === null) {
+            throw new InvalidArgumentException('Foreign key must have a referenced table.');
+        }
+        $def .= ' REFERENCES ' . $this->quoteTableName($referencedTable) . ' (' . implode(',', $refColumnNames) . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= ' ON DELETE ' . $foreignKey->getOnDelete();
         }

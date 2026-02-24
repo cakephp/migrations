@@ -213,8 +213,16 @@ class SqlserverAdapter extends AbstractAdapter
      */
     protected function getColumnCommentSqlDefinition(Column $column, ?string $tableName): string
     {
+        $columnName = $column->getName();
+        if ($columnName === null) {
+            throw new InvalidArgumentException('Column name must be set.');
+        }
+        if ($tableName === null) {
+            throw new InvalidArgumentException('Table name must be set.');
+        }
+
         // passing 'null' is to remove column comment
-        $currentComment = $this->getColumnComment((string)$tableName, $column->getName());
+        $currentComment = $this->getColumnComment($tableName, $columnName);
 
         $comment = strcasecmp((string)$column->getComment(), 'NULL') !== 0 ? $this->quoteString((string)$column->getComment()) : '\'\'';
         $command = $currentComment === null ? 'sp_addextendedproperty' : 'sp_updateextendedproperty';
@@ -224,8 +232,8 @@ class SqlserverAdapter extends AbstractAdapter
             $command,
             $comment,
             $this->schema,
-            (string)$tableName,
-            (string)$column->getName(),
+            $tableName,
+            $columnName,
         );
     }
 
@@ -420,12 +428,16 @@ END',
             return $instructions;
         }
 
+        $newColumnName = $newColumn->getName();
+        if ($newColumnName === null) {
+            throw new InvalidArgumentException('Column name must be set.');
+        }
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s ADD CONSTRAINT %s %s FOR %s',
             $this->quoteTableName($tableName),
             $constraintName,
             $default,
-            $this->quoteColumnName((string)$newColumn->getName()),
+            $this->quoteColumnName($newColumnName),
         ));
 
         return $instructions;
@@ -455,14 +467,19 @@ END',
         $instructions = new AlterInstructions();
         $dialect = $this->getSchemaDialect();
 
-        if ($columnName !== $newColumn->getName()) {
+        $newColumnName = $newColumn->getName();
+        if ($newColumnName === null) {
+            throw new InvalidArgumentException('Column name must be set.');
+        }
+
+        if ($columnName !== $newColumnName) {
             $instructions->merge(
-                $this->getRenameColumnInstructions($tableName, $columnName, (string)$newColumn->getName()),
+                $this->getRenameColumnInstructions($tableName, $columnName, $newColumnName),
             );
         }
 
         if ($changeDefault) {
-            $instructions->merge($this->getDropDefaultConstraint($tableName, (string)$newColumn->getName()));
+            $instructions->merge($this->getDropDefaultConstraint($tableName, $newColumnName));
         }
 
         // Sqlserver doesn't support defaults
@@ -871,7 +888,11 @@ DROP DATABASE %s;',
 
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName);
         $def .= ' FOREIGN KEY (' . $columnList . ')';
-        $def .= ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
+        $referencedTable = $foreignKey->getReferencedTable();
+        if ($referencedTable === null) {
+            throw new InvalidArgumentException('Foreign key must have a referenced table.');
+        }
+        $def .= ' REFERENCES ' . $this->quoteTableName($referencedTable) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }

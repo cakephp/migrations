@@ -1723,17 +1723,25 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 case $action instanceof RemoveColumn:
                     /** @var \Migrations\Db\Action\RemoveColumn $action */
+                    $columnName = $action->getColumn()->getName();
+                    if ($columnName === null) {
+                        throw new InvalidArgumentException('Column name must be set.');
+                    }
                     $instructions->merge($this->getDropColumnInstructions(
                         $table->getName(),
-                        (string)$action->getColumn()->getName(),
+                        $columnName,
                     ));
                     break;
 
                 case $action instanceof RenameColumn:
                     /** @var \Migrations\Db\Action\RenameColumn $action */
+                    $columnName = $action->getColumn()->getName();
+                    if ($columnName === null) {
+                        throw new InvalidArgumentException('Column name must be set.');
+                    }
                     $instructions->merge($this->getRenameColumnInstructions(
                         $table->getName(),
-                        (string)$action->getColumn()->getName(),
+                        $columnName,
                         $action->getNewName(),
                     ));
                     break;
