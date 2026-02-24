@@ -246,7 +246,9 @@ class ForeignKey extends DatabaseForeignKey
      */
     public function getOnDelete(): ?string
     {
-        return $this->mapAction($this->getDelete());
+        $delete = $this->getDelete();
+
+        return $delete !== null ? $this->mapAction($delete) : null;
     }
 
     /**
@@ -271,6 +273,8 @@ class ForeignKey extends DatabaseForeignKey
      */
     public function getOnUpdate(): ?string
     {
-        return $this->mapAction($this->getUpdate());
+        $update = $this->getUpdate();
+
+        return $update !== null ? $this->mapAction($update) : null;
     }
 }
