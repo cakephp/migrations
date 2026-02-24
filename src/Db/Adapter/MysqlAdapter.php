@@ -727,7 +727,7 @@ class MysqlAdapter extends AbstractAdapter
         $targetColumn = null;
 
         foreach ($columns as $column) {
-            if (strcasecmp($column->getName(), $columnName) === 0) {
+            if (strcasecmp((string)$column->getName(), $columnName) === 0) {
                 $targetColumn = $column;
                 break;
             }
@@ -1201,7 +1201,7 @@ class MysqlAdapter extends AbstractAdapter
             $def .= ' CONSTRAINT ' . $this->quoteColumnName((string)$foreignKey->getName());
         }
         $columnNames = [];
-        foreach ($foreignKey->getColumns() as $column) {
+        foreach ($foreignKey->getColumns() ?? [] as $column) {
             $columnNames[] = $this->quoteColumnName($column);
         }
         $def .= ' FOREIGN KEY (' . implode(',', $columnNames) . ')';
@@ -1209,7 +1209,7 @@ class MysqlAdapter extends AbstractAdapter
         foreach ($foreignKey->getReferencedColumns() as $column) {
             $refColumnNames[] = $this->quoteColumnName($column);
         }
-        $def .= ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
+        $def .= ' REFERENCES ' . $this->quoteTableName((string)$foreignKey->getReferencedTable()) . ' (' . implode(',', $refColumnNames) . ')';
         $onDelete = $foreignKey->getOnDelete();
         if ($onDelete) {
             $def .= ' ON DELETE ' . $onDelete;

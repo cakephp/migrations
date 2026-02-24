@@ -78,7 +78,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
             return;
         }
 
-        $this->getIo()->verbose(' -- ' . $command);
+        $this->getIo()?->verbose(' -- ' . $command);
     }
 
     /**
