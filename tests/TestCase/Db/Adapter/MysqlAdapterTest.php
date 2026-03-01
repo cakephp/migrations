@@ -1369,6 +1369,37 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropTable('blob_round_trip_test');
     }
 
+    public static function textRoundTripData()
+    {
+        return [
+            // type, limit, expected type after round-trip, expected limit after round-trip
+            ['text', null, 'text', null],
+            ['text', MysqlAdapter::TEXT_TINY, 'text', MysqlAdapter::TEXT_TINY],
+            ['text', MysqlAdapter::TEXT_MEDIUM, 'text', MysqlAdapter::TEXT_MEDIUM],
+            ['text', MysqlAdapter::TEXT_LONG, 'text', MysqlAdapter::TEXT_LONG],
+        ];
+    }
+
+    #[DataProvider('textRoundTripData')]
+    public function testTextRoundTrip(string $type, ?int $limit, string $expectedType, ?int $expectedLimit)
+    {
+        // Create a table with a TEXT column
+        $table = new Table('text_round_trip_test', [], $this->adapter);
+        $table->addColumn('text_col', $type, ['limit' => $limit])
+              ->save();
+
+        // Read the column back from the database
+        $columns = $this->adapter->getColumns('text_round_trip_test');
+
+        $textColumn = $columns[1];
+        $this->assertNotNull($textColumn, 'TEXT column not found');
+        $this->assertSame($expectedType, $textColumn->getType(), 'Type mismatch after round-trip');
+        $this->assertSame($expectedLimit, $textColumn->getLimit(), 'Limit mismatch after round-trip');
+
+        // Clean up
+        $this->adapter->dropTable('text_round_trip_test');
+    }
+
     public function testTimestampInvalidLimit()
     {
         $this->adapter->connect();
