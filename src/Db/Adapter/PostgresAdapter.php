@@ -476,6 +476,12 @@ class PostgresAdapter extends AbstractAdapter
                 $quotedColumnName,
             );
         }
+        if (in_array($newColumn->getType(), ['json'])) {
+            $sql .= sprintf(
+                ' USING (%s::jsonb)',
+                $quotedColumnName,
+            );
+        }
         // NULL and DEFAULT cannot be set while changing column type
         $sql = preg_replace('/ NOT NULL/', '', $sql);
         $sql = preg_replace('/ DEFAULT NULL/', '', $sql);
