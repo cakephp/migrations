@@ -15,7 +15,6 @@ namespace Migrations\Test\TestCase;
 
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
-use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
@@ -218,14 +217,19 @@ class MigrationsTest extends TestCase
         $expected = ['id', 'name', 'created', 'updated'];
         $this->assertEquals($expected, $columns);
         $createdColumn = $storesTable->getSchema()->getColumn('created');
-        $expected = 'CURRENT_TIMESTAMP';
         $driver = $this->Connection->getDriver();
-        if ($driver instanceof Mysql && $driver->isMariadb()) {
-            $expected = 'current_timestamp()';
-        } elseif ($driver instanceof Sqlserver) {
+        if ($driver instanceof Sqlserver) {
             $expected = 'getdate()';
+            $this->assertEquals($expected, $createdColumn['default']);
+        } else {
+            // MySQL and MariaDB may return CURRENT_TIMESTAMP in different formats
+            // depending on version: CURRENT_TIMESTAMP, current_timestamp(), CURRENT_TIMESTAMP()
+            $this->assertMatchesRegularExpression(
+                '/^current_timestamp(\(\))?$/i',
+                $createdColumn['default'],
+                'Default value should be CURRENT_TIMESTAMP in some form',
+            );
         }
-        $this->assertEquals($expected, $createdColumn['default']);
 
         // Rollback last
         $rollback = $this->migrations->rollback();
