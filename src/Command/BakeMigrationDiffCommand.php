@@ -27,13 +27,17 @@ use Cake\Database\Schema\Constraint;
 use Cake\Database\Schema\ForeignKey;
 use Cake\Database\Schema\Index;
 use Cake\Database\Schema\TableSchema;
+use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Database\Schema\UniqueKey;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
+use Error;
 use Migrations\Migration\ManagerFactory;
 use Migrations\Util\TableFinder;
 use Migrations\Util\UtilTrait;
+use ReflectionException;
+use ReflectionProperty;
 
 /**
  * Task class for generating migration diff files.
@@ -259,7 +263,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // brand new columns
             $addedColumns = array_diff($currentColumns, $oldColumns);
             foreach ($addedColumns as $columnName) {
-                $column = $currentSchema->getColumn($columnName);
+                $column = $this->safeGetColumn($currentSchema, $columnName);
                 /** @var int $key */
                 $key = array_search($columnName, $currentColumns);
                 if ($key > 0) {
@@ -274,8 +278,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
             // changes in columns meta-data
             foreach ($currentColumns as $columnName) {
-                $column = $currentSchema->getColumn($columnName);
-                $oldColumn = $this->dumpSchema[$table]->getColumn($columnName);
+                $column = $this->safeGetColumn($currentSchema, $columnName);
+                $oldColumn = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
                 unset(
                     $column['collate'],
                     $column['fixed'],
@@ -351,7 +355,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $removedColumns = array_diff($oldColumns, $currentColumns);
             if ($removedColumns) {
                 foreach ($removedColumns as $columnName) {
-                    $column = $this->dumpSchema[$table]->getColumn($columnName);
+                    $column = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
                     /** @var int $key */
                     $key = array_search($columnName, $oldColumns);
                     if ($key > 0) {
@@ -619,6 +623,67 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     public function template(): string
     {
         return 'Migrations.config/diff';
+    }
+
+    /**
+     * Safely get column information from a TableSchema.
+     *
+     * This method handles the case where Column::$fixed property may not be
+     * initialized (e.g., when loaded from a cached/serialized schema).
+     *
+     * @param \Cake\Database\Schema\TableSchemaInterface $schema The table schema
+     * @param string $columnName The column name
+     * @return array<string, mixed>|null Column data array or null if column doesn't exist
+     */
+    protected function safeGetColumn(TableSchemaInterface $schema, string $columnName): ?array
+    {
+        try {
+            return $schema->getColumn($columnName);
+        } catch (Error $e) {
+            // Handle uninitialized typed property errors (e.g., Column::$fixed)
+            // This can happen with cached/serialized schema objects
+            if (str_contains($e->getMessage(), 'must not be accessed before initialization')) {
+                // Initialize uninitialized properties using reflection and retry
+                $this->initializeColumnProperties($schema, $columnName);
+
+                return $schema->getColumn($columnName);
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Initialize potentially uninitialized Column properties using reflection.
+     *
+     * @param \Cake\Database\Schema\TableSchemaInterface $schema The table schema
+     * @param string $columnName The column name
+     * @return void
+     */
+    protected function initializeColumnProperties(TableSchemaInterface $schema, string $columnName): void
+    {
+        // Access the internal columns array via reflection
+        $reflection = new ReflectionProperty($schema, '_columns');
+        $columns = $reflection->getValue($schema);
+
+        if (!isset($columns[$columnName]) || !($columns[$columnName] instanceof Column)) {
+            return;
+        }
+
+        $column = $columns[$columnName];
+
+        // List of nullable properties that might not be initialized
+        $nullableProperties = ['fixed', 'collate', 'unsigned', 'generated', 'srid', 'onUpdate'];
+
+        foreach ($nullableProperties as $propertyName) {
+            try {
+                $propReflection = new ReflectionProperty(Column::class, $propertyName);
+                if (!$propReflection->isInitialized($column)) {
+                    $propReflection->setValue($column, null);
+                }
+            } catch (Error | ReflectionException) {
+                // Property doesn't exist or can't be accessed, skip it
+            }
+        }
     }
 
     /**

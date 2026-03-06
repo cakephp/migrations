@@ -190,16 +190,33 @@ class SeedCommand extends Command
 
             // Skip confirmation in quiet mode
             if ($io->level() > ConsoleIo::QUIET) {
-                $io->out('');
-                $io->out('<info>The following seeds will be executed:</info>');
+                $force = (bool)$args->getOption('force');
+
+                // Determine which seeds will actually run
+                $willRun = [];
                 foreach ($availableSeeds as $seed) {
-                    $io->out('  - ' . Util::getSeedDisplayName($seed->getName()));
+                    $displayName = Util::getSeedDisplayName($seed->getName());
+                    if ($seed->isIdempotent()) {
+                        $willRun[] = $displayName . ' <info>(idempotent)</info>';
+                    } elseif ($force || !$manager->isSeedExecuted($seed)) {
+                        $willRun[] = $displayName;
+                    }
+                }
+
+                $io->out('');
+                if (!$willRun) {
+                    $io->out('All seeds have already been executed. Use --force to re-run.');
+                    $io->out('');
+
+                    return self::CODE_SUCCESS;
+                }
+
+                $io->out('<info>The following seeds will be executed:</info>');
+                foreach ($willRun as $name) {
+                    $io->out('  - ' . $name);
                 }
                 $io->out('');
-                if (!(bool)$args->getOption('force')) {
-                    $io->out('<info>Note:</info> Seeds that have already been executed will be skipped.');
-                    $io->out('Use --force to re-run seeds.');
-                } else {
+                if ($force) {
                     $io->out('<warning>Warning:</warning> Running with --force will re-execute all seeds,');
                     $io->out('potentially creating duplicate data. Ensure your seeds are idempotent.');
                 }

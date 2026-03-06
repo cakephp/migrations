@@ -150,11 +150,13 @@ class Environment
         // Run the seeder
         $seed->{SeedInterface::RUN}();
 
-        // Record the seed execution (skip for idempotent seeds)
-        if (!$seed->isIdempotent()) {
-            $executedTime = date('Y-m-d H:i:s');
-            $adapter->seedExecuted($seed, $executedTime);
+        // Record the seed execution
+        // For idempotent seeds, remove old record first to update the timestamp
+        if ($seed->isIdempotent()) {
+            $adapter->removeSeedFromLog($seed);
         }
+        $executedTime = date('Y-m-d H:i:s');
+        $adapter->seedExecuted($seed, $executedTime);
 
         // commit the transaction if the adapter supports it
         if ($atomic) {

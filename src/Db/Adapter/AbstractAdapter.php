@@ -745,7 +745,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             return '';
         }
 
-        if ($conflictColumns !== null) {
+        if ($conflictColumns !== null && $conflictColumns !== []) {
             trigger_error(
                 'The $conflictColumns parameter is ignored by MySQL. ' .
                 'MySQL\'s ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.',

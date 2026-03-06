@@ -23,6 +23,17 @@ class UpgradeCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS cake_migrations');
     }
 
+    public function tearDown(): void
+    {
+        $this->clearMigrationRecords('test');
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $connection->execute('DROP TABLE IF EXISTS cake_migrations');
+
+        parent::tearDown();
+    }
+
     protected function getAdapter(): AdapterInterface
     {
         $config = ConnectionManager::getConfig('test');
@@ -117,5 +128,42 @@ class UpgradeCommandTest extends TestCase
 
         $this->assertTrue($adapter->hasTable('cake_migrations'));
         $this->assertFalse($adapter->hasTable('phinxlog'));
+    }
+
+    public function testExecuteWithMigrations(): void
+    {
+        Configure::write('Migrations.legacyTables', true);
+        try {
+            $this->getAdapter()->createSchemaTable();
+        } catch (Exception $e) {
+            // Table probably exists
+        }
+
+        $this->getAdapter()->getInsertBuilder()
+            ->insert(['version', 'migration_name', 'breakpoint'])
+            ->into('phinxlog')
+            ->values([
+                'version' => '20250118143003',
+                'migration_name' => 'TestMigration',
+                'breakpoint' => 0,
+            ])
+            ->execute();
+
+        $this->exec('migrations upgrade -c test');
+        $this->assertExitSuccess();
+        // Check for status output
+        $this->assertOutputContains('Creating unified table');
+        $this->assertOutputContains('Total records migrated');
+
+        // Validate record in the unified table
+        $this->assertTrue($this->getAdapter()->hasTable('cake_migrations'));
+
+        $rows = $this->getAdapter()->getSelectBuilder()
+            ->select(['version', 'migration_name', 'breakpoint'])
+            ->from('cake_migrations')
+            ->where(['migration_name' => 'TestMigration'])
+            ->all();
+
+        $this->assertCount(1, $rows);
     }
 }
