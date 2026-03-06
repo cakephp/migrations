@@ -545,21 +545,20 @@ class Manager
      */
     public function executeSeed(SeedInterface $seed, bool $force = false, bool $fake = false): void
     {
-        $this->getIo()->out('');
-
         // Skip the seed if it should not be executed
         if (!$seed->shouldExecute()) {
+            $this->getIo()->out('');
             $this->printSeedStatus($seed, 'skipped');
 
             return;
         }
 
-        // Check if seed has already been executed (skip for idempotent seeds)
+        // Silently skip non-idempotent seeds that have already been executed
         if (!$force && !$seed->isIdempotent() && $this->isSeedExecuted($seed)) {
-            $this->printSeedStatus($seed, 'already executed');
-
             return;
         }
+
+        $this->getIo()->out('');
 
         // Ensure seed schema table exists
         $adapter = $this->getEnvironment()->getAdapter();
@@ -568,16 +567,12 @@ class Manager
         }
 
         if ($fake) {
-            // Idempotent seeds are not tracked, so faking doesn't apply
-            if ($seed->isIdempotent()) {
-                $this->printSeedStatus($seed, 'skipped (idempotent)');
-
-                return;
-            }
-
             // Record seed as executed without running it
             $this->printSeedStatus($seed, 'faking');
 
+            if ($seed->isIdempotent()) {
+                $adapter->removeSeedFromLog($seed);
+            }
             $executedTime = date('Y-m-d H:i:s');
             $adapter->seedExecuted($seed, $executedTime);
 

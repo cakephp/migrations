@@ -282,7 +282,7 @@ class UpgradeCommand extends Command
                         'plugin' => $plugin,
                         'start_time' => $row['start_time'] ?? null,
                         'end_time' => $row['end_time'] ?? null,
-                        'breakpoint' => $row['breakpoint'] ?? 0,
+                        'breakpoint' => (int)($row['breakpoint'] ?? 0),
                     ]);
                 $insertQuery->execute();
             } catch (QueryException $e) {

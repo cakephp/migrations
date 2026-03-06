@@ -79,13 +79,6 @@ class MysqlAdapterTest extends TestCase
         unset($this->adapter, $this->out, $this->io);
     }
 
-    private function getDefaultCollation(): string
-    {
-        return $this->usingMariaDbWithUuid() ?
-            'utf8mb4_general_ci' :
-            'utf8mb4_0900_ai_ci';
-    }
-
     private function usingMysql8(): bool
     {
         $version = $this->adapter->getConnection()->getDriver()->version();
@@ -461,7 +454,7 @@ class MysqlAdapterTest extends TestCase
               ->save();
         $this->assertTrue($adapter->hasTable('table_with_default_collation'));
         $row = $adapter->fetchRow(sprintf("SHOW TABLE STATUS WHERE Name = '%s'", 'table_with_default_collation'));
-        $this->assertContains($row['Collation'], ['utf8mb4_general_ci', 'utf8mb4_0900_ai_ci', 'utf8mb4_unicode_ci']);
+        $this->assertContains($row['Collation'], ['utf8mb4_general_ci', 'utf8mb4_0900_ai_ci', 'utf8mb4_uca1400_ai_ci', 'utf8mb4_unicode_ci']);
     }
 
     public function testCreateTableWithLatin1Collate()
@@ -1376,6 +1369,37 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropTable('blob_round_trip_test');
     }
 
+    public static function textRoundTripData()
+    {
+        return [
+            // type, limit, expected type after round-trip, expected limit after round-trip
+            ['text', null, 'text', null],
+            ['text', MysqlAdapter::TEXT_TINY, 'text', MysqlAdapter::TEXT_TINY],
+            ['text', MysqlAdapter::TEXT_MEDIUM, 'text', MysqlAdapter::TEXT_MEDIUM],
+            ['text', MysqlAdapter::TEXT_LONG, 'text', MysqlAdapter::TEXT_LONG],
+        ];
+    }
+
+    #[DataProvider('textRoundTripData')]
+    public function testTextRoundTrip(string $type, ?int $limit, string $expectedType, ?int $expectedLimit)
+    {
+        // Create a table with a TEXT column
+        $table = new Table('text_round_trip_test', [], $this->adapter);
+        $table->addColumn('text_col', $type, ['limit' => $limit])
+              ->save();
+
+        // Read the column back from the database
+        $columns = $this->adapter->getColumns('text_round_trip_test');
+
+        $textColumn = $columns[1];
+        $this->assertNotNull($textColumn, 'TEXT column not found');
+        $this->assertSame($expectedType, $textColumn->getType(), 'Type mismatch after round-trip');
+        $this->assertSame($expectedLimit, $textColumn->getLimit(), 'Limit mismatch after round-trip');
+
+        // Clean up
+        $this->adapter->dropTable('text_round_trip_test');
+    }
+
     public function testTimestampInvalidLimit()
     {
         $this->adapter->connect();
@@ -2288,8 +2312,9 @@ class MysqlAdapterTest extends TestCase
 
         $actualOutput = join("\n", $this->out->messages());
         // MySQL version affects default collation (8.0.0+ uses utf8mb4_0900_ai_ci, older uses utf8mb4_general_ci)
+        // MariaDB 11.8 uses: utf8mb4_uca1400_ai_ci
         $this->assertMatchesRegularExpression(
-            '/CREATE TABLE `table1` \(`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT, `column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, `column3` VARCHAR\(255\) NOT NULL DEFAULT \'test\', PRIMARY KEY \(`id`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|general_ci);/',
+            '/CREATE TABLE `table1` \(`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT, `column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, `column3` VARCHAR\(255\) NOT NULL DEFAULT \'test\', PRIMARY KEY \(`id`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|uca1400_ai_ci|general_ci);/',
             $actualOutput,
             'Passing the --dry-run option does not dump create table query to the output',
         );
@@ -2398,7 +2423,7 @@ OUTPUT;
         $actualOutput = preg_replace('~\R~u', '', $actualOutput);
         // MySQL version affects default collation (8.0.0+ uses utf8mb4_0900_ai_ci, older uses utf8mb4_general_ci)
         $this->assertMatchesRegularExpression(
-            '/CREATE TABLE `table1` \(`column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, PRIMARY KEY \(`column1`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|general_ci);INSERT INTO `table1` \(`column1`, `column2`\) VALUES \(\'id1\', 1\);/',
+            '/CREATE TABLE `table1` \(`column1` VARCHAR\(255\) NOT NULL, `column2` INTEGER, PRIMARY KEY \(`column1`\)\) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_(0900_ai_ci|uca1400_ai_ci|general_ci);INSERT INTO `table1` \(`column1`, `column2`\) VALUES \(\'id1\', 1\);/',
             $actualOutput,
             'Passing the --dry-run option does not dump create and then insert table queries to the output',
         );
@@ -3084,6 +3109,38 @@ OUTPUT;
         $table->insert([
             ['code' => 'ITEM1', 'name' => 'Different Name'],
         ])->save();
+    }
+
+    public function testInsertOrUpdateWithEmptyConflictColumnsDoesNotWarn()
+    {
+        $table = new Table('currencies', [], $this->adapter);
+        $table->addColumn('code', 'string', ['limit' => 3])
+            ->addColumn('rate', 'decimal', ['precision' => 10, 'scale' => 4])
+            ->addIndex('code', ['unique' => true])
+            ->create();
+
+        $warning = null;
+        set_error_handler(function (int $errno, string $errstr) use (&$warning) {
+            $warning = $errstr;
+
+            return true;
+        }, E_USER_WARNING);
+
+        try {
+            $table->insertOrUpdate([
+                ['code' => 'USD', 'rate' => 1.0000],
+                ['code' => 'EUR', 'rate' => 0.9000],
+            ], ['rate'], [])->save();
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertNull($warning, 'Empty conflictColumns should not trigger a warning for MySQL');
+
+        $rows = $this->adapter->fetchAll('SELECT * FROM currencies ORDER BY code');
+        $this->assertCount(2, $rows);
+        $this->assertEquals('0.9000', $rows[0]['rate']);
+        $this->assertEquals('1.0000', $rows[1]['rate']);
     }
 
     public function testCreateTableWithRangeColumnsPartitioning()

@@ -18,6 +18,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Migrations\Config\ConfigInterface;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Migration\ManagerFactory;
 
 /**
@@ -153,6 +154,9 @@ class StatusCommand extends Command
     protected function display(array $migrations, ConsoleIo $io, string $tableName): void
     {
         $io->out(sprintf('using migration table <info>%s</info>', $tableName));
+        if ($tableName !== UnifiedMigrationsTableStorage::TABLE_NAME) {
+            $io->warning('You are using legacy phinxlog tables. Run `migrations upgrade` to switch to the unified `cake_migrations` table.');
+        }
         $io->out('');
 
         if ($migrations) {

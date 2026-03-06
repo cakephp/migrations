@@ -218,9 +218,10 @@ interface SeedInterface
      *
      * Returns false by default, meaning the seed will be tracked and only run once.
      *
-     * If you return true, the seed will NOT be tracked in the cake_seeds table,
-     * allowing it to run every time. Make sure your seed is truly idempotent
-     * (handles duplicate data safely) before returning true.
+     * If you return true, the seed will run every time it is invoked.
+     * The last execution time is still tracked in the cake_seeds table.
+     * Make sure your seed is truly idempotent (handles duplicate data safely)
+     * before returning true.
      *
      * @return bool
      */

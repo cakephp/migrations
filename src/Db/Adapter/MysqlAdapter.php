@@ -251,8 +251,12 @@ class MysqlAdapter extends AbstractAdapter
         // This method is based on the MySQL docs here: https://dev.mysql.com/doc/refman/5.1/en/create-index.html
         $defaultOptions = [
             'engine' => 'InnoDB',
-            'collation' => 'utf8mb4_unicode_ci',
         ];
+
+        $collation = Configure::read('Migrations.default_collation');
+        if ($collation) {
+            $defaultOptions['collation'] = $collation;
+        }
 
         $options = array_merge(
             $defaultOptions,
@@ -590,6 +594,20 @@ class MysqlAdapter extends AbstractAdapter
                 }
             }
             // else: keep as binary or varbinary (actual BINARY/VARBINARY column)
+        } elseif ($type === TableSchema::TYPE_TEXT) {
+            // CakePHP returns TEXT columns as 'text' with specific lengths
+            // Check the raw MySQL type to distinguish TEXT variants
+            $rawType = $columnData['rawType'] ?? '';
+            if (str_contains($rawType, 'tinytext')) {
+                $length = static::TEXT_TINY;
+            } elseif (str_contains($rawType, 'mediumtext')) {
+                $length = static::TEXT_MEDIUM;
+            } elseif (str_contains($rawType, 'longtext')) {
+                $length = static::TEXT_LONG;
+            } else {
+                // Regular TEXT - use null to indicate default TEXT type
+                $length = null;
+            }
         }
 
         return [$type, $length];

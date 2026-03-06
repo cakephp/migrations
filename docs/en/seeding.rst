@@ -235,7 +235,7 @@ Idempotent Seeds
 
 Some seeds are designed to be run multiple times safely (idempotent), such as seeds
 that update configuration or reference data. For these seeds, you can override the
-``isIdempotent()`` method to skip tracking entirely:
+``isIdempotent()`` method:
 
 .. code-block:: php
 
@@ -248,7 +248,7 @@ that update configuration or reference data. For these seeds, you can override t
     {
         /**
          * Mark this seed as idempotent.
-         * It will run every time without being tracked.
+         * It will run every time it is invoked.
          */
         public function isIdempotent(): bool
         {
@@ -280,8 +280,9 @@ that update configuration or reference data. For these seeds, you can override t
 
 When ``isIdempotent()`` returns ``true``:
 
-- The seed will **not** be tracked in the ``cake_seeds`` table
 - The seed will run **every time** you execute ``seeds run``
+- The last execution time is still tracked in the ``cake_seeds`` table
+- The ``seeds status`` command will show the seed as ``(idempotent)``
 - You must ensure the seed's ``run()`` method handles duplicate executions safely
 
 This is useful for:

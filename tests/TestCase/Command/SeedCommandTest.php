@@ -457,10 +457,9 @@ class SeedCommandTest extends TestCase
         $query = $connection->execute('SELECT COUNT(*) FROM numbers');
         $this->assertEquals(1, $query->fetchColumn(0));
 
-        // Second run should skip the seed (already executed)
+        // Second run should silently skip the seed (already executed)
         $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
-        $this->assertOutputContains('Numbers seed:</info> <comment>already executed');
         $this->assertOutputNotContains('seeding');
 
         // Verify no additional data was inserted
@@ -543,9 +542,9 @@ class SeedCommandTest extends TestCase
         $query = $connection->execute('SELECT COUNT(*) FROM numbers WHERE number = 99');
         $this->assertEquals(2, $query->fetchColumn(0));
 
-        // Verify the seed was NOT tracked in cake_seeds table
+        // Verify the seed WAS tracked in cake_seeds table (only one record, updated each run)
         $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
-        $this->assertEquals(0, $seedLog->fetchColumn(0), 'Idempotent seeds should not be tracked');
+        $this->assertEquals(1, $seedLog->fetchColumn(0), 'Idempotent seeds should track last execution');
     }
 
     public function testNonIdempotentSeedIsTracked(): void
@@ -564,10 +563,9 @@ class SeedCommandTest extends TestCase
         $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
         $this->assertEquals(1, $seedLog->fetchColumn(0), 'Regular seeds should be tracked');
 
-        // Run again - should be skipped
+        // Run again - should be silently skipped
         $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
-        $this->assertOutputContains('already executed');
         $this->assertOutputNotContains('seeding');
     }
 
@@ -594,10 +592,10 @@ class SeedCommandTest extends TestCase
         $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
         $this->assertEquals(1, $seedLog->fetchColumn(0), 'Fake seeds should be tracked');
 
-        // Running again should show already executed
+        // Running again should be silently skipped
         $this->exec('seeds run -c test NumbersSeed');
         $this->assertExitSuccess();
-        $this->assertOutputContains('already executed');
+        $this->assertOutputNotContains('seeding');
     }
 
     public function testFakeSeedWithForce(): void
@@ -692,7 +690,7 @@ class SeedCommandTest extends TestCase
         $this->assertErrorContains('Seed `NonExistent` does not exist');
     }
 
-    public function testFakeIdempotentSeedIsSkipped(): void
+    public function testFakeIdempotentSeedIsTracked(): void
     {
         $this->createTables();
 
@@ -702,12 +700,15 @@ class SeedCommandTest extends TestCase
         // Run idempotent seed with --fake flag
         $this->exec('seeds run -c test -s TestSeeds IdempotentTest --fake');
         $this->assertExitSuccess();
-        $this->assertOutputContains('skipped (idempotent)');
-        $this->assertOutputNotContains('faking');
-        $this->assertOutputNotContains('faked');
+        $this->assertOutputContains('faking');
+        $this->assertOutputContains('faked');
 
-        // Verify the seed was NOT tracked (idempotent seeds are never tracked)
+        // Verify NO data was inserted
+        $query = $connection->execute('SELECT COUNT(*) FROM numbers WHERE number = 99');
+        $this->assertEquals(0, $query->fetchColumn(0), 'Fake seed should not insert data');
+
+        // Verify the seed WAS tracked
         $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
-        $this->assertEquals(0, $seedLog->fetchColumn(0), 'Idempotent seeds should not be tracked even when faked');
+        $this->assertEquals(1, $seedLog->fetchColumn(0), 'Idempotent seeds should be tracked when faked');
     }
 }
