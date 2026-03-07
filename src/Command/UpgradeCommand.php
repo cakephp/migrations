@@ -17,6 +17,7 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Plugin;
 use Cake\Database\Connection;
 use Cake\Database\Exception\QueryException;
 use Cake\Datasource\ConnectionManager;
@@ -184,18 +185,49 @@ class UpgradeCommand extends Command
         $tables = $schema->listTables();
         $legacyTables = [];
 
+        // Build a map of expected table prefixes to plugin names for loaded plugins
+        // This allows matching plugins with special characters like CakeDC/Users
+        $pluginPrefixMap = $this->buildPluginPrefixMap();
+
         foreach ($tables as $table) {
             if ($table === 'phinxlog') {
                 $legacyTables[$table] = null;
             } elseif (str_ends_with($table, '_phinxlog')) {
                 // Extract plugin name from table name
                 $prefix = substr($table, 0, -9); // Remove '_phinxlog'
-                $plugin = Inflector::camelize($prefix);
+
+                // Try to match against loaded plugins first
+                if (isset($pluginPrefixMap[$prefix])) {
+                    $plugin = $pluginPrefixMap[$prefix];
+                } else {
+                    // Fall back to camelizing the prefix
+                    $plugin = Inflector::camelize($prefix);
+                }
                 $legacyTables[$table] = $plugin;
             }
         }
 
         return $legacyTables;
+    }
+
+    /**
+     * Build a map of table prefixes to plugin names for all loaded plugins.
+     *
+     * This handles plugins with special characters like CakeDC/Users where
+     * the table prefix is cake_d_c_users but the plugin name is CakeDC/Users.
+     *
+     * @return array<string, string> Map of table prefix => plugin name
+     */
+    protected function buildPluginPrefixMap(): array
+    {
+        $map = [];
+        foreach (Plugin::loaded() as $plugin) {
+            $prefix = Inflector::underscore($plugin);
+            $prefix = str_replace(['\\', '/', '.'], '_', $prefix);
+            $map[$prefix] = $plugin;
+        }
+
+        return $map;
     }
 
     /**
