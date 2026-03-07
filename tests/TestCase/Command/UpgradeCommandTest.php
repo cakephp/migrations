@@ -166,4 +166,64 @@ class UpgradeCommandTest extends TestCase
 
         $this->assertCount(1, $rows);
     }
+
+    /**
+     * Test that plugins with slashes (like CakeDC/Users) are correctly identified
+     * during upgrade from legacy phinxlog tables.
+     */
+    public function testExecuteWithSlashInPluginName(): void
+    {
+        Configure::write('Migrations.legacyTables', true);
+
+        /** @var \Cake\Database\Connection $connection */
+        $connection = ConnectionManager::get('test');
+        $driver = $connection->getDriver();
+
+        // Create the plugin's phinxlog table (cake_d_c_users_phinxlog)
+        $tableName = $driver->quoteIdentifier('cake_d_c_users_phinxlog');
+        $connection->execute("DROP TABLE IF EXISTS {$tableName}");
+        $connection->execute("CREATE TABLE {$tableName} (
+            version BIGINT NOT NULL PRIMARY KEY,
+            migration_name VARCHAR(100) DEFAULT NULL,
+            start_time TIMESTAMP NULL,
+            end_time TIMESTAMP NULL,
+            breakpoint BOOLEAN NOT NULL DEFAULT false
+        )");
+
+        // Insert a migration record
+        $connection->insertQuery()
+            ->insert(['version', 'migration_name', 'breakpoint'])
+            ->into('cake_d_c_users_phinxlog')
+            ->values([
+                'version' => '20250118143003',
+                'migration_name' => 'SlashPluginMigration',
+                'breakpoint' => 0,
+            ])
+            ->execute();
+
+        // Load a fake plugin with a slash in the name using loadPlugins
+        // which properly integrates with the console application
+        $this->loadPlugins(['CakeDC/Users' => ['path' => TMP]]);
+
+        try {
+            $this->exec('migrations upgrade -c test');
+            $this->assertExitSuccess();
+
+            $this->assertOutputContains('cake_d_c_users_phinxlog (CakeDC/Users)');
+
+            // Verify the plugin column has the correct value with slash
+            $rows = $this->getAdapter()->getSelectBuilder()
+                ->select(['version', 'migration_name', 'plugin'])
+                ->from('cake_migrations')
+                ->where(['migration_name' => 'SlashPluginMigration'])
+                ->all();
+
+            $this->assertCount(1, $rows);
+            $this->assertSame('CakeDC/Users', $rows[0]['plugin']);
+        } finally {
+            // Cleanup
+            $connection->execute("DROP TABLE IF EXISTS {$tableName}");
+            $this->removePlugins(['CakeDC/Users']);
+        }
+    }
 }
