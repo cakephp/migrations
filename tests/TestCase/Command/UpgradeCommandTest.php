@@ -175,23 +175,22 @@ class UpgradeCommandTest extends TestCase
     {
         Configure::write('Migrations.legacyTables', true);
 
-        /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get('test');
-        $driver = $connection->getDriver();
-
-        // Create the plugin's phinxlog table (cake_d_c_users_phinxlog)
-        $tableName = $driver->quoteIdentifier('cake_d_c_users_phinxlog');
-        $connection->execute("DROP TABLE IF EXISTS {$tableName}");
-        $connection->execute("CREATE TABLE {$tableName} (
-            version BIGINT NOT NULL PRIMARY KEY,
-            migration_name VARCHAR(100) DEFAULT NULL,
-            start_time TIMESTAMP NULL,
-            end_time TIMESTAMP NULL,
-            breakpoint BOOLEAN NOT NULL DEFAULT false
-        )");
+        // Create the plugin's phinxlog table using the adapter for cross-database compatibility
+        $config = ConnectionManager::getConfig('test');
+        $environment = new Environment('default', [
+            'connection' => 'test',
+            'database' => $config['database'],
+            'migration_table' => 'cake_d_c_users_phinxlog',
+        ]);
+        $adapter = $environment->getAdapter();
+        try {
+            $adapter->createSchemaTable();
+        } catch (Exception $e) {
+            // Table probably exists
+        }
 
         // Insert a migration record
-        $connection->insertQuery()
+        $adapter->getInsertBuilder()
             ->insert(['version', 'migration_name', 'breakpoint'])
             ->into('cake_d_c_users_phinxlog')
             ->values([
@@ -222,7 +221,9 @@ class UpgradeCommandTest extends TestCase
             $this->assertSame('CakeDC/Users', $rows[0]['plugin']);
         } finally {
             // Cleanup
-            $connection->execute("DROP TABLE IF EXISTS {$tableName}");
+            /** @var \Cake\Database\Connection $connection */
+            $connection = ConnectionManager::get('test');
+            $connection->execute('DROP TABLE ' . $connection->getDriver()->quoteIdentifier('cake_d_c_users_phinxlog'));
             $this->removePlugins(['CakeDC/Users']);
         }
     }
