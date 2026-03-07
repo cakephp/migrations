@@ -3541,4 +3541,53 @@ OUTPUT;
         $this->assertCount(1, $rows);
         $this->assertEquals('A description', $rows[0]['description']);
     }
+
+    public function testBinaryColumnWithFixedOption(): void
+    {
+        $table = new Table('binary_fixed_test', [], $this->adapter);
+        $table->addColumn('hash', 'binary', ['limit' => 20, 'fixed' => true])
+            ->addColumn('data', 'binary', ['limit' => 20])
+            ->save();
+
+        $this->assertTrue($this->adapter->hasColumn('binary_fixed_test', 'hash'));
+        $this->assertTrue($this->adapter->hasColumn('binary_fixed_test', 'data'));
+
+        // Check that the fixed column is created as BINARY and the non-fixed as VARBINARY
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM binary_fixed_test');
+        $hashColumn = null;
+        $dataColumn = null;
+        foreach ($rows as $row) {
+            if ($row['Field'] === 'hash') {
+                $hashColumn = $row;
+            }
+            if ($row['Field'] === 'data') {
+                $dataColumn = $row;
+            }
+        }
+
+        $this->assertNotNull($hashColumn);
+        $this->assertNotNull($dataColumn);
+        $this->assertSame('binary(20)', $hashColumn['Type']);
+        $this->assertSame('varbinary(20)', $dataColumn['Type']);
+
+        // Verify the fixed attribute is reflected back
+        $columns = $this->adapter->getColumns('binary_fixed_test');
+        $hashCol = null;
+        $dataCol = null;
+        foreach ($columns as $col) {
+            if ($col->getName() === 'hash') {
+                $hashCol = $col;
+            }
+            if ($col->getName() === 'data') {
+                $dataCol = $col;
+            }
+        }
+
+        $this->assertNotNull($hashCol);
+        $this->assertNotNull($dataCol);
+        $this->assertSame('binary', $hashCol->getType());
+        $this->assertSame('binary', $dataCol->getType());
+        $this->assertTrue($hashCol->getFixed());
+        $this->assertNull($dataCol->getFixed());
+    }
 }

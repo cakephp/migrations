@@ -118,6 +118,11 @@ class Column extends DatabaseColumn
     protected ?string $lock = null;
 
     /**
+     * @var bool|null
+     */
+    protected ?bool $fixed = null;
+
+    /**
      * Column constructor
      *
      * @param string $name The name of the column.
@@ -773,6 +778,31 @@ class Column extends DatabaseColumn
     }
 
     /**
+     * Sets whether field should use fixed-length storage (for binary columns).
+     *
+     * When true, binary columns will use BINARY(n) instead of VARBINARY(n).
+     *
+     * @param bool $fixed Fixed
+     * @return $this
+     */
+    public function setFixed(bool $fixed)
+    {
+        $this->fixed = $fixed;
+
+        return $this;
+    }
+
+    /**
+     * Gets whether field should use fixed-length storage.
+     *
+     * @return bool|null
+     */
+    public function getFixed(): ?bool
+    {
+        return $this->fixed;
+    }
+
+    /**
      * Gets all allowed options. Each option must have a corresponding `setFoo` method.
      *
      * @return array
@@ -802,6 +832,7 @@ class Column extends DatabaseColumn
             'generated',
             'algorithm',
             'lock',
+            'fixed',
         ];
     }
 
@@ -894,6 +925,7 @@ class Column extends DatabaseColumn
             'default' => $default,
             'generated' => $this->getGenerated(),
             'unsigned' => $this->getUnsigned(),
+            'fixed' => $this->getFixed(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
             'precision' => $precision,
