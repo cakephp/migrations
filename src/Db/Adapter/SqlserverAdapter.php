@@ -29,6 +29,11 @@ use Migrations\MigrationInterface;
 class SqlserverAdapter extends AbstractAdapter
 {
     /**
+     * Maximum length for identifiers (table names, column names, constraint names, etc.)
+     */
+    protected const IDENTIFIER_MAX_LENGTH = 128;
+
+    /**
      * @var string[]
      */
     protected static array $specificColumnTypes = [
@@ -891,8 +896,9 @@ DROP DATABASE %s;',
     protected function getUniqueForeignKeyName(string $tableName, array $columns): string
     {
         $baseName = $tableName . '_' . implode('_', $columns);
-        if (strlen($baseName) > 125) {
-            $baseName = substr($baseName, 0, 125);
+        $maxLength = static::IDENTIFIER_MAX_LENGTH - 3;
+        if (strlen($baseName) > $maxLength) {
+            $baseName = substr($baseName, 0, $maxLength);
         }
         $existingKeys = $this->getForeignKeys($tableName);
         $existingNames = array_column($existingKeys, 'name');

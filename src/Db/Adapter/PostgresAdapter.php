@@ -27,6 +27,11 @@ use RuntimeException;
 
 class PostgresAdapter extends AbstractAdapter
 {
+    /**
+     * Maximum length for identifiers (table names, column names, constraint names, etc.)
+     */
+    protected const IDENTIFIER_MAX_LENGTH = 63;
+
     public const GENERATED_ALWAYS = 'ALWAYS';
     public const GENERATED_BY_DEFAULT = 'BY DEFAULT';
     /**
@@ -979,8 +984,9 @@ class PostgresAdapter extends AbstractAdapter
     {
         $parts = $this->getSchemaName($tableName);
         $baseName = $parts['table'] . '_' . implode('_', $columns) . '_fkey';
-        if (strlen($baseName) > 60) {
-            $baseName = substr($baseName, 0, 60);
+        $maxLength = static::IDENTIFIER_MAX_LENGTH - 3;
+        if (strlen($baseName) > $maxLength) {
+            $baseName = substr($baseName, 0, $maxLength);
         }
         $existingKeys = $this->getForeignKeys($tableName);
         $existingNames = array_column($existingKeys, 'name');
