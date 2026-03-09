@@ -1707,9 +1707,6 @@ PCRE_PATTERN;
     protected function getUniqueForeignKeyName(string $tableName, array $columns): string
     {
         $baseName = $tableName . '_' . implode('_', $columns);
-        if (strlen($baseName) > 125) {
-            $baseName = substr($baseName, 0, 125);
-        }
         $existingKeys = $this->getForeignKeys($tableName);
         $existingNames = array_column($existingKeys, 'name');
 
