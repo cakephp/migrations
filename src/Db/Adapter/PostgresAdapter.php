@@ -951,9 +951,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $parts = $this->getSchemaName($tableName);
 
-        $constraintName = $foreignKey->getName() ?: (
-            $parts['table'] . '_' . implode('_', $foreignKey->getColumns()) . '_fkey'
-        );
+        $constraintName = $foreignKey->getName() ?: $this->getUniqueForeignKeyName($tableName, $foreignKey->getColumns());
         $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
         $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName) .
@@ -970,6 +968,32 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         return $def;
+    }
+
+    /**
+     * Generate a unique foreign key constraint name.
+     *
+     * @param string $tableName Table name
+     * @param array<string> $columns Column names
+     * @return string
+     */
+    protected function getUniqueForeignKeyName(string $tableName, array $columns): string
+    {
+        $parts = $this->getSchemaName($tableName);
+        $baseName = $parts['table'] . '_' . implode('_', $columns) . '_fkey';
+        $existingKeys = $this->getForeignKeys($tableName);
+        $existingNames = array_column($existingKeys, 'name');
+
+        if (!in_array($baseName, $existingNames, true)) {
+            return $baseName;
+        }
+
+        $counter = 2;
+        while (in_array($baseName . '_' . $counter, $existingNames, true)) {
+            $counter++;
+        }
+
+        return $baseName . '_' . $counter;
     }
 
     /**
