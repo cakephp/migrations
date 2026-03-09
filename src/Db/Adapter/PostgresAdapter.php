@@ -979,6 +979,9 @@ class PostgresAdapter extends AbstractAdapter
     {
         $parts = $this->getSchemaName($tableName);
         $baseName = $parts['table'] . '_' . implode('_', $columns) . '_fkey';
+        if (strlen($baseName) > 125) {
+            $baseName = substr($baseName, 0, 125);
+        }
         $existingKeys = $this->getForeignKeys($tableName);
         $existingNames = array_column($existingKeys, 'name');
 
