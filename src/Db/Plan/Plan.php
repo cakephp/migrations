@@ -284,7 +284,7 @@ class Plan
             if ($action instanceof DropForeignKey) {
                 [$this->indexes, $dropIndexActions] = $this->forgetDropIndex(
                     $action->getTable(),
-                    $action->getForeignKey()->getColumns() ?? [],
+                    $action->getForeignKey()->getColumns(),
                     $this->indexes,
                 );
                 foreach ($dropIndexActions as $dropIndexAction) {
