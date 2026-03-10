@@ -1684,7 +1684,7 @@ PCRE_PATTERN;
             $def .= ' CONSTRAINT ' . $this->quoteColumnName($name);
         }
         $columnNames = [];
-        foreach ($foreignKey->getColumns() ?? [] as $column) {
+        foreach ($foreignKey->getColumns() as $column) {
             $columnNames[] = $this->quoteColumnName($column);
         }
         $def .= ' FOREIGN KEY (' . implode(',', $columnNames) . ')';

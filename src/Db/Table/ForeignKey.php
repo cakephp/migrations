@@ -87,6 +87,19 @@ class ForeignKey extends DatabaseForeignKey
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * Narrows the return type from the parent's ?array to array,
+     * since $columns is always initialized as [] in this class.
+     *
+     * @return array<string>
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
      * Utility method that maps an array of index options to this object's methods.
      *
      * @param array<string, mixed> $options Options

@@ -962,9 +962,9 @@ class PostgresAdapter extends AbstractAdapter
         $parts = $this->getSchemaName($tableName);
 
         $constraintName = $foreignKey->getName() ?: (
-            $parts['table'] . '_' . implode('_', $foreignKey->getColumns() ?? []) . '_fkey'
+            $parts['table'] . '_' . implode('_', $foreignKey->getColumns()) . '_fkey'
         );
-        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns() ?? []));
+        $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
         $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
         $referencedTable = $foreignKey->getReferencedTable();
         if ($referencedTable === null) {
