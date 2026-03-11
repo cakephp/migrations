@@ -1197,8 +1197,9 @@ class MysqlAdapter extends AbstractAdapter
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey): string
     {
         $def = '';
-        if ($foreignKey->getName()) {
-            $def .= ' CONSTRAINT ' . $this->quoteColumnName((string)$foreignKey->getName());
+        $name = $foreignKey->getName();
+        if ($name) {
+            $def .= ' CONSTRAINT ' . $this->quoteColumnName($name);
         }
         $columnNames = [];
         foreach ($foreignKey->getColumns() ?? [] as $column) {

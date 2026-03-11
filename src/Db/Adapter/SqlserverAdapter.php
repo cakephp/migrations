@@ -839,9 +839,10 @@ DROP DATABASE %s;',
 
         $include = $index->getInclude();
         $includedColumns = $include ? sprintf(' INCLUDE ([%s])', implode('],[', $include)) : '';
-        $where = (string)$index->getWhere();
-        if ($where) {
-            $where = ' WHERE ' . $where;
+        $where = '';
+        $whereClause = $index->getWhere();
+        if ($whereClause) {
+            $where = ' WHERE ' . $whereClause;
         }
 
         return sprintf(
