@@ -505,11 +505,11 @@ class PostgresAdapter extends AbstractAdapter
                 'ALTER COLUMN %s',
                 $quotedColumnName,
             );
-            if ($newColumn->isIdentity() && $newColumn->getGenerated() !== null) {
+            if ($newColumn->isIdentity() && ($generated = $newColumn->getGenerated()) !== null) {
                 if ($column->isIdentity()) {
-                    $sql .= sprintf(' SET GENERATED %s', (string)$newColumn->getGenerated());
+                    $sql .= sprintf(' SET GENERATED %s', $generated);
                 } else {
-                    $sql .= sprintf(' ADD GENERATED %s AS IDENTITY', (string)$newColumn->getGenerated());
+                    $sql .= sprintf(' ADD GENERATED %s AS IDENTITY', $generated);
                 }
             } else {
                 $sql .= ' DROP IDENTITY IF EXISTS';
@@ -923,9 +923,10 @@ class PostgresAdapter extends AbstractAdapter
         } else {
             $createIndexSentence .= '(%s)%s%s;';
         }
-        $where = (string)$index->getWhere();
-        if ($where) {
-            $where = ' WHERE ' . $where;
+        $where = '';
+        $whereClause = $index->getWhere();
+        if ($whereClause) {
+            $where = ' WHERE ' . $whereClause;
         }
 
         return sprintf(

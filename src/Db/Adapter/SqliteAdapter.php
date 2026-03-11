@@ -1214,9 +1214,10 @@ PCRE_PATTERN;
             $indexColumnArray[] = sprintf('%s ASC', $this->quoteColumnName($column));
         }
         $indexColumns = implode(',', $indexColumnArray);
-        $where = (string)$index->getWhere();
-        if ($where) {
-            $where = ' WHERE ' . $where;
+        $where = '';
+        $whereClause = $index->getWhere();
+        if ($whereClause) {
+            $where = ' WHERE ' . $whereClause;
         }
         $sql = sprintf(
             'CREATE %s ON %s (%s)%s',
@@ -1675,8 +1676,9 @@ PCRE_PATTERN;
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey): string
     {
         $def = '';
-        if ($foreignKey->getName()) {
-            $def .= ' CONSTRAINT ' . $this->quoteColumnName((string)$foreignKey->getName());
+        $name = $foreignKey->getName();
+        if ($name) {
+            $def .= ' CONSTRAINT ' . $this->quoteColumnName($name);
         }
         $columnNames = [];
         foreach ($foreignKey->getColumns() ?? [] as $column) {
