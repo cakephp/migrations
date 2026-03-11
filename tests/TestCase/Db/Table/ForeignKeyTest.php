@@ -151,5 +151,4 @@ class ForeignKeyTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->fk->setDeferrableMode('invalid_value');
     }
-
 }

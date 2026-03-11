@@ -505,7 +505,8 @@ class PostgresAdapter extends AbstractAdapter
                 'ALTER COLUMN %s',
                 $quotedColumnName,
             );
-            if ($newColumn->isIdentity() && ($generated = $newColumn->getGenerated()) !== null) {
+            $generated = $newColumn->getGenerated();
+            if ($newColumn->isIdentity() && $generated !== null) {
                 if ($column->isIdentity()) {
                     $sql .= sprintf(' SET GENERATED %s', $generated);
                 } else {

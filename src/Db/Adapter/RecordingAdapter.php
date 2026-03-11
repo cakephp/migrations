@@ -12,7 +12,6 @@ use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
 use Migrations\Db\Action\CreateTable;
-use InvalidArgumentException;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropTable;
