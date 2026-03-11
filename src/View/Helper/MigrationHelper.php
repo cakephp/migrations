@@ -693,7 +693,7 @@ class MigrationHelper extends Helper
         $indexes = $this->indexes($table);
         $foreignKeys = [];
         foreach ($constraints as $constraint) {
-            if ($constraint['type'] === 'foreign') {
+            if (isset($constraint['type']) && $constraint['type'] === 'foreign') {
                 $foreignKeys[] = $constraint['columns'];
             }
         }
