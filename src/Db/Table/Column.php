@@ -785,10 +785,10 @@ class Column extends DatabaseColumn
      *
      * When true, binary columns will use BINARY(n) instead of VARBINARY(n).
      *
-     * @param bool $fixed Fixed
+     * @param bool|null $fixed Fixed
      * @return $this
      */
-    public function setFixed(bool $fixed)
+    public function setFixed(?bool $fixed)
     {
         $this->fixed = $fixed;
 
