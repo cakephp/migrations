@@ -278,8 +278,8 @@ class BaseSeed implements SeedInterface
 
         $options += [
             'connection' => $connection,
-            'plugin' => $pluginName ?? $config['plugin'],
-            'source' => $config['source'],
+            'plugin' => $pluginName ?? ($config !== null ? $config['plugin'] : null),
+            'source' => $config !== null ? $config['source'] : null,
         ];
         $factory = new ManagerFactory([
             'connection' => $options['connection'],

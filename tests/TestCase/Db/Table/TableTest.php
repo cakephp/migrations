@@ -80,6 +80,15 @@ class TableTest extends TestCase
         $this->assertSame($column, $actions[0]->getColumn());
     }
 
+    public function testAddColumnWithNullTypeThrows()
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Column type must not be null when column name is a string.');
+        $table->addColumn('email', null);
+    }
+
     public function testAddColumnWithNoAdapterSpecified()
     {
         try {

@@ -405,13 +405,18 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // if present in both, check if they are the same : if not, remove the old one and add the new one
             foreach ($currentConstraints as $constraintName) {
                 $constraint = $currentSchema->getConstraint($constraintName);
+                if ($constraint === null) {
+                    continue;
+                }
 
+                $oldConstraint = $this->dumpSchema[$table]->getConstraint($constraintName);
                 if (
                     in_array($constraintName, $oldConstraints, true) &&
-                    $constraint !== $this->dumpSchema[$table]->getConstraint($constraintName)
+                    $constraint !== $oldConstraint
                 ) {
-                    $this->templateData[$table]['constraints']['remove'][$constraintName] =
-                        $this->dumpSchema[$table]->getConstraint($constraintName);
+                    if ($oldConstraint !== null) {
+                        $this->templateData[$table]['constraints']['remove'][$constraintName] = $oldConstraint;
+                    }
                     $this->templateData[$table]['constraints']['add'][$constraintName] =
                         $constraint;
                 }

@@ -213,7 +213,7 @@ class ColumnParser
             $referencedTable = $indexType;
             if (!$referencedTable) {
                 // Remove common suffixes like _id and pluralize
-                $referencedTable = preg_replace('/_id$/', '', $fieldName);
+                $referencedTable = (string)preg_replace('/_id$/', '', $fieldName);
                 $referencedTable = Inflector::pluralize($referencedTable);
             }
 
