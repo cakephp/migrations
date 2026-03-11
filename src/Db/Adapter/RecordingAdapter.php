@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
-use InvalidArgumentException;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
@@ -92,9 +91,6 @@ class RecordingAdapter extends AdapterWrapper
                     /** @var \Migrations\Db\Action\RenameColumn $command */
                     $column = clone $command->getColumn();
                     $name = $column->getName();
-                    if ($name === null) {
-                        throw new InvalidArgumentException('Column name must be set.');
-                    }
                     $column->setName($command->getNewName());
                     $inverted->addAction(new RenameColumn($command->getTable(), $column, $name));
                     break;
