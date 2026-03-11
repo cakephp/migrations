@@ -1690,7 +1690,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 case $action instanceof DropForeignKey && $action->getForeignKey()->getName():
                     /** @var \Migrations\Db\Action\DropForeignKey $action */
-                    $fkName = $action->getForeignKey()->getName();
+                    $fkName = (string)$action->getForeignKey()->getName();
                     $instructions->merge($this->getDropForeignKeyInstructions(
                         $table->getName(),
                         $fkName,
@@ -1699,7 +1699,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 case $action instanceof DropIndex && $action->getIndex()->getName():
                     /** @var \Migrations\Db\Action\DropIndex $action */
-                    $indexName = $action->getIndex()->getName();
+                    $indexName = (string)$action->getIndex()->getName();
                     $instructions->merge($this->getDropIndexByNameInstructions(
                         $table->getName(),
                         $indexName,
