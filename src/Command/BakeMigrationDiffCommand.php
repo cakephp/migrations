@@ -279,11 +279,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // changes in columns meta-data
             foreach ($currentColumns as $columnName) {
                 $column = $this->safeGetColumn($currentSchema, $columnName);
-                if ($column === null) {
-                    continue;
-                }
-
-                if (!in_array($columnName, $oldColumns, true)) {
+                if ($column === null || !in_array($columnName, $oldColumns, true)) {
                     continue;
                 }
 
