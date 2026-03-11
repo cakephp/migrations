@@ -214,9 +214,6 @@ class SqlserverAdapter extends AbstractAdapter
     protected function getColumnCommentSqlDefinition(Column $column, ?string $tableName): string
     {
         $columnName = $column->getName();
-        if ($columnName === null) {
-            throw new InvalidArgumentException('Column name must be set.');
-        }
         if ($tableName === null) {
             throw new InvalidArgumentException('Table name must be set.');
         }
@@ -429,9 +426,6 @@ END',
         }
 
         $newColumnName = $newColumn->getName();
-        if ($newColumnName === null) {
-            throw new InvalidArgumentException('Column name must be set.');
-        }
         $instructions->addPostStep(sprintf(
             'ALTER TABLE %s ADD CONSTRAINT %s %s FOR %s',
             $this->quoteTableName($tableName),
@@ -468,10 +462,6 @@ END',
         $dialect = $this->getSchemaDialect();
 
         $newColumnName = $newColumn->getName();
-        if ($newColumnName === null) {
-            throw new InvalidArgumentException('Column name must be set.');
-        }
-
         if ($columnName !== $newColumnName) {
             $instructions->merge(
                 $this->getRenameColumnInstructions($tableName, $columnName, $newColumnName),

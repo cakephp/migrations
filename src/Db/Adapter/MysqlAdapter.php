@@ -727,7 +727,7 @@ class MysqlAdapter extends AbstractAdapter
         $targetColumn = null;
 
         foreach ($columns as $column) {
-            if ($column->getName() !== null && strcasecmp($column->getName(), $columnName) === 0) {
+            if (strcasecmp($column->getName(), $columnName) === 0) {
                 $targetColumn = $column;
                 break;
             }

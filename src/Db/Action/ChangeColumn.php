@@ -41,7 +41,7 @@ class ChangeColumn extends Action
         $this->column = $column;
 
         // if the name was omitted use the existing column name
-        if ($column->getName() === null || strlen($column->getName()) === 0) {
+        if (strlen($column->getName()) === 0) {
             $column->setName($columnName);
         }
     }

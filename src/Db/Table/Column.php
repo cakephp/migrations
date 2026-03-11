@@ -182,9 +182,12 @@ class Column extends DatabaseColumn
     /**
      * Gets the column name.
      *
-     * @return string|null
+     * Narrows the return type from the parent's ?string to string,
+     * since $name is typed as string (not ?string) in this class.
+     *
+     * @return string
      */
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }

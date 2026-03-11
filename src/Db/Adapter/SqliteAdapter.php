@@ -1113,9 +1113,6 @@ PCRE_PATTERN;
         $instructions = $this->beginAlterByCopyTable($tableName);
 
         $newColumnName = $newColumn->getName();
-        if ($newColumnName === null) {
-            throw new InvalidArgumentException('Column name must be set.');
-        }
         $instructions->addPostStep(function ($state) use ($columnName, $newColumn) {
             $dialect = $this->getSchemaDialect();
             $sql = (string)preg_replace(

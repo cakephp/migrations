@@ -548,9 +548,6 @@ class PostgresAdapter extends AbstractAdapter
         // rename column
         $newColumnName = $newColumn->getName();
         if ($columnName !== $newColumnName) {
-            if ($newColumnName === null) {
-                throw new InvalidArgumentException('Column name must be set.');
-            }
             $instructions->addPostStep(sprintf(
                 'ALTER TABLE %s RENAME COLUMN %s TO %s',
                 $this->quoteTableName($tableName),
@@ -878,10 +875,6 @@ class PostgresAdapter extends AbstractAdapter
     protected function getColumnCommentSqlDefinition(Column $column, string $tableName): string
     {
         $columnName = $column->getName();
-        if ($columnName === null) {
-            throw new InvalidArgumentException('Column name must be set.');
-        }
-
         $comment = (string)$column->getComment();
         // passing 'null' is to remove column comment
         $comment = strcasecmp($comment, 'NULL') !== 0
