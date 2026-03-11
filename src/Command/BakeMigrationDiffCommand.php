@@ -283,12 +283,17 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 unset(
                     $column['collate'],
                     $column['fixed'],
-                    $oldColumn['collate'],
-                    $oldColumn['fixed'],
                 );
+                if ($oldColumn !== null) {
+                    unset(
+                        $oldColumn['collate'],
+                        $oldColumn['fixed'],
+                    );
+                }
 
                 if (
                     in_array($columnName, $oldColumns, true) &&
+                    $oldColumn !== null &&
                     $column !== $oldColumn
                 ) {
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
@@ -385,9 +390,10 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // brand new constraints
             $addedConstraints = array_diff($currentConstraints, $oldConstraints);
             foreach ($addedConstraints as $constraintName) {
-                $this->templateData[$table]['constraints']['add'][$constraintName] =
-                    $currentSchema->getConstraint($constraintName);
                 $constraint = $currentSchema->getConstraint($constraintName);
+                if ($constraint === null) {
+                    continue;
+                }
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
                 } else {
@@ -415,6 +421,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $removedConstraints = array_diff($oldConstraints, $currentConstraints);
             foreach ($removedConstraints as $constraintName) {
                 $constraint = $this->dumpSchema[$table]->getConstraint($constraintName);
+                if ($constraint === null) {
+                    continue;
+                }
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] = $constraint;
                 } else {
