@@ -30,8 +30,8 @@ class CreateArticles extends BaseMigration
             $this->foreignKey('author_id')
                 ->setReferencedTable('authors')
                 ->setReferencedColumns('id')
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
+                ->setDelete('CASCADE')
+                ->setUpdate('CASCADE')
                 ->setName('fk_author_id')
         );
         $table->create();

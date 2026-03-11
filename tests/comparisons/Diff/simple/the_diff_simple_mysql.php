@@ -70,8 +70,8 @@ class TheDiffSimpleMysql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('RESTRICT')
-                    ->setOnUpdate('RESTRICT')
+                    ->setDelete('RESTRICT')
+                    ->setUpdate('RESTRICT')
                     ->setName('articles_ibfk_1')
             )
             ->update();

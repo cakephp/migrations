@@ -144,8 +144,7 @@ class TableTest extends TestCase
             $key->setColumns('user_id')
                 ->setReferencedTable('users')
                 ->setReferencedColumns(['id'])
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
+                ->setOptions(['delete' => 'CASCADE', 'update' => 'CASCADE'])
                 ->setName('fk_user_id'),
         );
 

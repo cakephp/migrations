@@ -30,8 +30,8 @@ class CreatePosts extends BaseMigration
             $this->foreignKey('user_id')
                 ->setReferencedTable('users')
                 ->setReferencedColumns('id')
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
+                ->setDelete('CASCADE')
+                ->setUpdate('CASCADE')
                 ->setName('fk_user_id')
         );
         $table->create();

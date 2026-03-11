@@ -99,8 +99,8 @@ class TheDiffDefaultMysql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('RESTRICT')
-                    ->setOnUpdate('RESTRICT')
+                    ->setDelete('RESTRICT')
+                    ->setUpdate('RESTRICT')
                     ->setName('categories_ibfk_1')
             )
             ->update();
@@ -232,8 +232,8 @@ class TheDiffDefaultMysql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
                     ->setName('articles_ibfk_1')
             )
             ->update();

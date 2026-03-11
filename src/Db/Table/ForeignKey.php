@@ -100,11 +100,11 @@ class ForeignKey extends DatabaseForeignKey
                 throw new RuntimeException(sprintf('"%s" is not a valid foreign key option.', $option));
             }
 
-            // handle $options['delete'] as $options['update']
+            // handle $options['delete'] and $options['update']
             if ($option === 'delete') {
-                $this->setOnDelete($value);
+                $this->delete = $this->normalizeAction($value);
             } elseif ($option === 'update') {
-                $this->setOnUpdate($value);
+                $this->update = $this->normalizeAction($value);
             } elseif ($option === 'deferrable') {
                 $this->setDeferrableMode($value);
             } else {

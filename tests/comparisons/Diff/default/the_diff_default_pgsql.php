@@ -64,8 +64,8 @@ class TheDiffDefaultPgsql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('RESTRICT')
-                    ->setOnUpdate('RESTRICT')
+                    ->setDelete('RESTRICT')
+                    ->setUpdate('RESTRICT')
             )
             ->update();
 
@@ -114,8 +114,8 @@ class TheDiffDefaultPgsql extends BaseMigration
                 $this->foreignKey('category_id')
                     ->setReferencedTable('categories')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('NO_ACTION')
-                    ->setOnUpdate('NO_ACTION')
+                    ->setDelete('NO_ACTION')
+                    ->setUpdate('NO_ACTION')
             )
             ->update();
 
@@ -207,8 +207,8 @@ class TheDiffDefaultPgsql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
             )
             ->update();
 

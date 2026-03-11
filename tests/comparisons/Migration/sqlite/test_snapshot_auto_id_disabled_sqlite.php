@@ -351,8 +351,8 @@ class TestSnapshotAutoIdDisabledSqlite extends BaseMigration
                 $this->foreignKey('category_id')
                     ->setReferencedTable('categories')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('NO_ACTION')
-                    ->setOnUpdate('NO_ACTION')
+                    ->setDelete('NO_ACTION')
+                    ->setUpdate('NO_ACTION')
                     ->setName('articles_category_fk')
             )
             ->update();
@@ -368,8 +368,8 @@ class TestSnapshotAutoIdDisabledSqlite extends BaseMigration
                         'category_id',
                         'id',
                     ])
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
                     ->setName('orders_product_fk')
             )
             ->update();
@@ -379,8 +379,8 @@ class TestSnapshotAutoIdDisabledSqlite extends BaseMigration
                 $this->foreignKey('category_id')
                     ->setReferencedTable('categories')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
                     ->setName('products_category_fk')
             )
             ->update();

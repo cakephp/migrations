@@ -25,8 +25,8 @@ class AddCategoryIdToProducts extends BaseMigration
             $this->foreignKey('category_id')
                 ->setReferencedTable('categories')
                 ->setReferencedColumns('id')
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
+                ->setDelete('CASCADE')
+                ->setUpdate('CASCADE')
                 ->setName('fk_category_id')
         );
         $table->update();
