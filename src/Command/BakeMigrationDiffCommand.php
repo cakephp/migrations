@@ -279,23 +279,27 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // changes in columns meta-data
             foreach ($currentColumns as $columnName) {
                 $column = $this->safeGetColumn($currentSchema, $columnName);
+                if ($column === null) {
+                    continue;
+                }
+
+                if (!in_array($columnName, $oldColumns, true)) {
+                    continue;
+                }
+
                 $oldColumn = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
+                if ($oldColumn === null) {
+                    continue;
+                }
+
                 unset(
                     $column['collate'],
                     $column['fixed'],
+                    $oldColumn['collate'],
+                    $oldColumn['fixed'],
                 );
-                if ($oldColumn !== null) {
-                    unset(
-                        $oldColumn['collate'],
-                        $oldColumn['fixed'],
-                    );
-                }
 
-                if (
-                    in_array($columnName, $oldColumns, true) &&
-                    $oldColumn !== null &&
-                    $column !== $oldColumn
-                ) {
+                if ($column !== $oldColumn) {
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
 
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
