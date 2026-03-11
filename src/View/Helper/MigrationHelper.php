@@ -401,6 +401,10 @@ class MigrationHelper extends Helper
         if (empty($columnOptions['collate'])) {
             unset($columnOptions['collate']);
         }
+        // isset() returns false for null values, so this handles both missing and null cases
+        if (!isset($columnOptions['fixed'])) {
+            unset($columnOptions['fixed']);
+        }
 
         // currently only MySQL supports the signed option
         $driver = $connection->getDriver();
