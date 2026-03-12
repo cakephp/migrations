@@ -47,11 +47,11 @@ class CompletionTest extends TestCase
         // Upgrade command is hidden when legacyTables is disabled
         if (Configure::read('Migrations.legacyTables') === false) {
             $expected = [
-                'dump mark_migrated migrate rollback status',
+                'dump mark_migrated migrate reset rollback status',
             ];
         } else {
             $expected = [
-                'dump mark_migrated migrate rollback status upgrade',
+                'dump mark_migrated migrate reset rollback status upgrade',
             ];
         }
         $actual = $this->_out->messages();
