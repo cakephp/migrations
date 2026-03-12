@@ -222,22 +222,78 @@ class ResetCommand extends Command
     protected function dropTables(Connection $connection, array $tables, ConsoleIo $io): void
     {
         $driver = $connection->getDriver();
+        $driverClass = get_class($driver);
 
-        // Disable foreign key checks temporarily
-        $this->setForeignKeyChecks($connection, false);
+        // For PostgreSQL and SQL Server, we need to drop foreign keys first
+        // or use CASCADE in the drop statement
+        if (str_contains($driverClass, 'Postgres')) {
+            foreach ($tables as $table) {
+                $quotedTable = $driver->quoteIdentifier($table);
+                $io->verbose("Dropping table: {$table}");
+                $connection->execute("DROP TABLE IF EXISTS {$quotedTable} CASCADE");
+            }
+        } elseif (str_contains($driverClass, 'Sqlserver')) {
+            // Drop all foreign key constraints first
+            $this->dropForeignKeyConstraints($connection, $tables, $io);
 
-        try {
+            // Then drop tables
             foreach ($tables as $table) {
                 $quotedTable = $driver->quoteIdentifier($table);
                 $io->verbose("Dropping table: {$table}");
                 $connection->execute("DROP TABLE IF EXISTS {$quotedTable}");
             }
-        } finally {
-            // Re-enable foreign key checks
-            $this->setForeignKeyChecks($connection, true);
+        } else {
+            // MySQL and SQLite support disabling foreign key checks
+            $this->setForeignKeyChecks($connection, false);
+
+            try {
+                foreach ($tables as $table) {
+                    $quotedTable = $driver->quoteIdentifier($table);
+                    $io->verbose("Dropping table: {$table}");
+                    $connection->execute("DROP TABLE IF EXISTS {$quotedTable}");
+                }
+            } finally {
+                $this->setForeignKeyChecks($connection, true);
+            }
         }
 
         $io->success('Dropped ' . count($tables) . ' table(s).');
+    }
+
+    /**
+     * Drop all foreign key constraints from the given tables.
+     *
+     * @param \Cake\Database\Connection $connection Database connection
+     * @param array<string> $tables Tables to process
+     * @param \Cake\Console\ConsoleIo $io Console IO
+     * @return void
+     */
+    protected function dropForeignKeyConstraints(Connection $connection, array $tables, ConsoleIo $io): void
+    {
+        $driver = $connection->getDriver();
+        $driverClass = get_class($driver);
+
+        if (!str_contains($driverClass, 'Sqlserver')) {
+            return;
+        }
+
+        // Query to find all foreign key constraints on the specified tables
+        $tableList = implode("','", array_map(fn($t) => addslashes($t), $tables));
+
+        $sql = "SELECT
+                    fk.name AS constraint_name,
+                    OBJECT_NAME(fk.parent_object_id) AS table_name
+                FROM sys.foreign_keys fk
+                WHERE OBJECT_NAME(fk.parent_object_id) IN ('{$tableList}')";
+
+        $result = $connection->execute($sql)->fetchAll('assoc');
+
+        foreach ($result as $row) {
+            $constraintName = $driver->quoteIdentifier($row['constraint_name']);
+            $tableName = $driver->quoteIdentifier($row['table_name']);
+            $io->verbose("Dropping foreign key: {$row['constraint_name']} on {$row['table_name']}");
+            $connection->execute("ALTER TABLE {$tableName} DROP CONSTRAINT {$constraintName}");
+        }
     }
 
     /**
@@ -254,13 +310,8 @@ class ResetCommand extends Command
 
         if (str_contains($driverClass, 'Mysql')) {
             $connection->execute('SET FOREIGN_KEY_CHECKS = ' . ($enable ? '1' : '0'));
-        } elseif (str_contains($driverClass, 'Postgres')) {
-            // PostgreSQL handles this per-session via constraints
-            // We'll use CASCADE in the DROP statement instead
         } elseif (str_contains($driverClass, 'Sqlite')) {
             $connection->execute('PRAGMA foreign_keys = ' . ($enable ? 'ON' : 'OFF'));
-        } elseif (str_contains($driverClass, 'Sqlserver')) {
-            // SQL Server doesn't have a global toggle, handled differently
         }
     }
 
