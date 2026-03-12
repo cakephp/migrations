@@ -18,11 +18,13 @@ use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Schema\CollectionInterface;
+use Cake\Database\Schema\TableSchema;
 use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
 use Cake\View\View;
+use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Table\ForeignKey;
 
 /**
@@ -443,6 +445,13 @@ class MigrationHelper extends Helper
                 $columnOptions['precision'] = $columnOptions['length'];
                 unset($columnOptions['length']);
             }
+        }
+
+        // Convert CakePHP's LENGTH_LONG to migrations TEXT_LONG for text columns
+        // CakePHP uses LENGTH_LONG = 4294967295, but migrations expects TEXT_LONG = 2147483647
+        // (LENGTH_TINY and LENGTH_MEDIUM have the same values as TEXT_TINY and TEXT_MEDIUM)
+        if (isset($columnOptions['limit']) && $columnOptions['limit'] === TableSchema::LENGTH_LONG) {
+            $columnOptions['limit'] = MysqlAdapter::TEXT_LONG;
         }
 
         return $columnOptions;

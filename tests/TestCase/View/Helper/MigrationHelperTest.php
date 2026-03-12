@@ -16,9 +16,11 @@ namespace Migrations\Test\TestCase\View\Helper;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\Collection;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Cake\View\View;
+use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\View\Helper\MigrationHelper;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -489,5 +491,41 @@ class MigrationHelperTest extends TestCase
         $result = $this->helper->getColumnOption($options);
 
         $this->assertArrayNotHasKey('fixed', $result);
+    }
+
+    /**
+     * Test that getColumnOption converts CakePHP's LENGTH_LONG to migrations TEXT_LONG
+     *
+     * CakePHP uses LENGTH_LONG = 4294967295 for LONGTEXT, but migrations expects
+     * TEXT_LONG = 2147483647. This ensures generated migrations use the correct value.
+     */
+    public function testGetColumnOptionConvertsLengthLongToTextLong(): void
+    {
+        $options = [
+            'limit' => TableSchema::LENGTH_LONG, // 4294967295
+            'null' => true,
+            'default' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayHasKey('limit', $result);
+        $this->assertSame(MysqlAdapter::TEXT_LONG, $result['limit']); // 2147483647
+    }
+
+    /**
+     * Test that getColumnOption preserves other limit values unchanged
+     */
+    public function testGetColumnOptionPreservesOtherLimits(): void
+    {
+        $options = [
+            'limit' => 255, // TEXT_TINY / LENGTH_TINY - same value
+            'null' => true,
+            'default' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertSame(255, $result['limit']);
     }
 }

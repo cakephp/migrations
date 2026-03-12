@@ -374,8 +374,10 @@ class MysqlAdapter extends AbstractAdapter
     protected function mapColumnData(array $data): array
     {
         if ($data['type'] == self::TYPE_TEXT && $data['length'] !== null) {
+            // Accept both migrations TEXT_LONG and CakePHP LENGTH_LONG for backward compatibility
+            // with migrations generated before the fix (LENGTH_TINY/MEDIUM are already equal to TEXT_TINY/MEDIUM)
             $data['length'] = match ($data['length']) {
-                self::TEXT_LONG => TableSchema::LENGTH_LONG,
+                self::TEXT_LONG, TableSchema::LENGTH_LONG => TableSchema::LENGTH_LONG,
                 self::TEXT_MEDIUM => TableSchema::LENGTH_MEDIUM,
                 self::TEXT_REGULAR => null,
                 self::TEXT_TINY => TableSchema::LENGTH_TINY,

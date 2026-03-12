@@ -9,6 +9,7 @@ use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\MysqlAdapter;
@@ -1377,6 +1378,9 @@ class MysqlAdapterTest extends TestCase
             ['text', MysqlAdapter::TEXT_TINY, 'text', MysqlAdapter::TEXT_TINY],
             ['text', MysqlAdapter::TEXT_MEDIUM, 'text', MysqlAdapter::TEXT_MEDIUM],
             ['text', MysqlAdapter::TEXT_LONG, 'text', MysqlAdapter::TEXT_LONG],
+            // Test backward compatibility: CakePHP's LENGTH_LONG (4294967295) should also work
+            // This ensures migrations generated before the fix still create LONGTEXT correctly
+            ['text', TableSchema::LENGTH_LONG, 'text', MysqlAdapter::TEXT_LONG],
         ];
     }
 
