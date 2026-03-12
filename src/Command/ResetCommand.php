@@ -37,20 +37,6 @@ class ResetCommand extends Command
     use EventDispatcherTrait;
 
     /**
-     * Migration/seed tracking tables that should not be dropped.
-     *
-     * These tables are kept (structure preserved) but their contents
-     * are cleared so migrations can run fresh.
-     *
-     * @var array<string>
-     */
-    protected array $trackingTables = [
-        'cake_migrations',
-        'cake_seeds',
-        'phinxlog',
-    ];
-
-    /**
      * The default name added to the application command list
      *
      * @return string
@@ -163,9 +149,6 @@ class ResetCommand extends Command
         $io->out('');
         if (!$dryRun) {
             $this->dropTables($connection, $tablesToDrop, $io);
-            /** @var string|null $plugin */
-            $plugin = $args->getOption('plugin');
-            $this->clearTrackingRecords($connection, $plugin, $io);
         } else {
             $io->info('DRY-RUN: Would drop ' . count($tablesToDrop) . ' table(s).');
         }
@@ -194,23 +177,8 @@ class ResetCommand extends Command
     protected function getTablesToDrop(Connection $connection): array
     {
         $schema = $connection->getDriver()->schemaDialect();
-        $tables = $schema->listTables();
 
-        // Filter out migration/seed tracking tables
-        $tablesToDrop = [];
-        foreach ($tables as $table) {
-            // Skip migration/seed tracking tables (we clear their contents instead)
-            if (in_array($table, $this->trackingTables, true)) {
-                continue;
-            }
-            // Skip plugin phinxlog tables
-            if (str_ends_with($table, '_phinxlog')) {
-                continue;
-            }
-            $tablesToDrop[] = $table;
-        }
-
-        return $tablesToDrop;
+        return $schema->listTables();
     }
 
     /**
@@ -314,46 +282,6 @@ class ResetCommand extends Command
             $connection->execute('SET FOREIGN_KEY_CHECKS = ' . ($enable ? '1' : '0'));
         } elseif (str_contains($driverClass, 'Sqlite')) {
             $connection->execute('PRAGMA foreign_keys = ' . ($enable ? 'ON' : 'OFF'));
-        }
-    }
-
-    /**
-     * Clear migration and seed records from tracking tables.
-     *
-     * @param \Cake\Database\Connection $connection Database connection
-     * @param string|null $plugin Plugin name
-     * @param \Cake\Console\ConsoleIo $io Console IO
-     * @return void
-     */
-    protected function clearTrackingRecords(Connection $connection, ?string $plugin, ConsoleIo $io): void
-    {
-        $schema = $connection->getDriver()->schemaDialect();
-
-        // Clear unified migrations table if exists
-        if ($schema->hasTable('cake_migrations')) {
-            $query = $connection->deleteQuery()->delete('cake_migrations');
-            if ($plugin !== null) {
-                $query->where(['plugin' => $plugin]);
-            }
-            $query->execute();
-            $io->verbose('Cleared migration records from cake_migrations');
-        }
-
-        // Clear legacy phinxlog table if exists
-        $legacyTable = $plugin ? strtolower($plugin) . '_phinxlog' : 'phinxlog';
-        if ($schema->hasTable($legacyTable)) {
-            $connection->deleteQuery()
-                ->delete($legacyTable)
-                ->execute();
-            $io->verbose("Cleared migration records from {$legacyTable}");
-        }
-
-        // Clear seed tracking table if exists
-        if ($schema->hasTable('cake_seeds')) {
-            $connection->deleteQuery()
-                ->delete('cake_seeds')
-                ->execute();
-            $io->verbose('Cleared seed records from cake_seeds');
         }
     }
 
