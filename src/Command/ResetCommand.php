@@ -18,6 +18,10 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
+use Cake\Database\Driver\Mysql;
+use Cake\Database\Driver\Postgres;
+use Cake\Database\Driver\Sqlite;
+use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventDispatcherTrait;
 use Migrations\Config\ConfigInterface;
@@ -118,10 +122,7 @@ class ResetCommand extends Command
             $io->out('');
             $io->out('Running migrations...');
 
-            $result = $this->runMigrations($args, $io);
-            $this->dispatchEvent('Migration.afterReset');
-
-            return $result;
+            return $this->runMigrationsAndDispatch($args, $io);
         }
 
         // Show what will be dropped
@@ -157,10 +158,7 @@ class ResetCommand extends Command
 
         // Re-run migrations
         if (!$dryRun) {
-            $result = $this->runMigrations($args, $io);
-            $this->dispatchEvent('Migration.afterReset');
-
-            return $result;
+            return $this->runMigrationsAndDispatch($args, $io);
         }
 
         $io->info('DRY-RUN: Would re-run all migrations.');
@@ -192,17 +190,16 @@ class ResetCommand extends Command
     protected function dropTables(Connection $connection, array $tables, ConsoleIo $io): void
     {
         $driver = $connection->getDriver();
-        $driverClass = get_class($driver);
 
         // For PostgreSQL and SQL Server, we need to drop foreign keys first
         // or use CASCADE in the drop statement
-        if (str_contains($driverClass, 'Postgres')) {
+        if ($driver instanceof Postgres) {
             foreach ($tables as $table) {
                 $quotedTable = $driver->quoteIdentifier($table);
                 $io->verbose("Dropping table: {$table}");
                 $connection->execute("DROP TABLE IF EXISTS {$quotedTable} CASCADE");
             }
-        } elseif (str_contains($driverClass, 'Sqlserver')) {
+        } elseif ($driver instanceof Sqlserver) {
             // Drop all foreign key constraints first
             $this->dropForeignKeyConstraints($connection, $tables, $io);
 
@@ -241,9 +238,8 @@ class ResetCommand extends Command
     protected function dropForeignKeyConstraints(Connection $connection, array $tables, ConsoleIo $io): void
     {
         $driver = $connection->getDriver();
-        $driverClass = get_class($driver);
 
-        if (!str_contains($driverClass, 'Sqlserver')) {
+        if (!$driver instanceof Sqlserver) {
             return;
         }
 
@@ -276,13 +272,27 @@ class ResetCommand extends Command
     protected function setForeignKeyChecks(Connection $connection, bool $enable): void
     {
         $driver = $connection->getDriver();
-        $driverClass = get_class($driver);
 
-        if (str_contains($driverClass, 'Mysql')) {
+        if ($driver instanceof Mysql) {
             $connection->execute('SET FOREIGN_KEY_CHECKS = ' . ($enable ? '1' : '0'));
-        } elseif (str_contains($driverClass, 'Sqlite')) {
+        } elseif ($driver instanceof Sqlite) {
             $connection->execute('PRAGMA foreign_keys = ' . ($enable ? 'ON' : 'OFF'));
         }
+    }
+
+    /**
+     * Run migrations and dispatch afterReset event.
+     *
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io
+     * @return int|null The exit code
+     */
+    protected function runMigrationsAndDispatch(Arguments $args, ConsoleIo $io): ?int
+    {
+        $result = $this->runMigrations($args, $io);
+        $this->dispatchEvent('Migration.afterReset');
+
+        return $result;
     }
 
     /**
