@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Db\Table;
 
 use InvalidArgumentException;
+use Migrations\Db\Action\AddCheckConstraint;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
+use Migrations\Db\Action\DropCheckConstraint;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
@@ -14,6 +16,7 @@ use Migrations\Db\Adapter\PostgresAdapter;
 use Migrations\Db\Adapter\SqliteAdapter;
 use Migrations\Db\Adapter\SqlserverAdapter;
 use Migrations\Db\Table;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -519,6 +522,44 @@ class TableTest extends TestCase
                 (new Index())->setColumns(['indexD']),
             ],
         ];
+    }
+
+    public function testAddCheckConstraintWithExpression(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->addCheckConstraint('age >= 18', ['name' => 'age_check']);
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddCheckConstraint::class, $actions[0]);
+        $constraint = $actions[0]->getCheckConstraint();
+        $this->assertSame('age_check', $constraint->getName());
+        $this->assertSame('age >= 18', $constraint->getExpression());
+    }
+
+    public function testAddCheckConstraintWithObject(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $constraint = new CheckConstraint('price_positive', 'price > 0');
+        $table->addCheckConstraint($constraint);
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddCheckConstraint::class, $actions[0]);
+        $this->assertSame($constraint, $actions[0]->getCheckConstraint());
+        $this->assertSame('price_positive', $actions[0]->getCheckConstraint()->getName());
+        $this->assertSame('price > 0', $actions[0]->getCheckConstraint()->getExpression());
+    }
+
+    public function testDropCheckConstraint(): void
+    {
+        $adapter = new MysqlAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->dropCheckConstraint('age_check');
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(DropCheckConstraint::class, $actions[0]);
+        $this->assertSame('age_check', $actions[0]->getConstraintName());
     }
 
     protected function getPendingActions($table)

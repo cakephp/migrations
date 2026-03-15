@@ -23,6 +23,7 @@ use Cake\I18n\DateTime;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Config\Config;
+use Migrations\Db\Action\AddCheckConstraint;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
@@ -32,6 +33,7 @@ use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\CreateTrigger;
 use Migrations\Db\Action\CreateView;
+use Migrations\Db\Action\DropCheckConstraint;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropPartition;
@@ -1847,6 +1849,22 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     $instructions->merge($this->getDropTriggerInstructions(
                         $table->getName(),
                         $action->getTriggerName(),
+                    ));
+                    break;
+
+                case $action instanceof AddCheckConstraint:
+                    /** @var \Migrations\Db\Action\AddCheckConstraint $action */
+                    $instructions->merge($this->getAddCheckConstraintInstructions(
+                        $table,
+                        $action->getCheckConstraint(),
+                    ));
+                    break;
+
+                case $action instanceof DropCheckConstraint:
+                    /** @var \Migrations\Db\Action\DropCheckConstraint $action */
+                    $instructions->merge($this->getDropCheckConstraintInstructions(
+                        $table->getName(),
+                        $action->getConstraintName(),
                     ));
                     break;
 

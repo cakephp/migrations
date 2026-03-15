@@ -11,6 +11,7 @@ namespace Migrations\Db;
 use Cake\Collection\Collection;
 use Cake\Core\Configure;
 use InvalidArgumentException;
+use Migrations\Db\Action\AddCheckConstraint;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
@@ -21,6 +22,7 @@ use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\CreateTable;
 use Migrations\Db\Action\CreateTrigger;
 use Migrations\Db\Action\CreateView;
+use Migrations\Db\Action\DropCheckConstraint;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropPartition;
@@ -35,6 +37,7 @@ use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Plan\Intent;
 use Migrations\Db\Plan\Plan;
+use Migrations\Db\Table\CheckConstraint;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
@@ -623,6 +626,50 @@ class Table
     public function hasForeignKey(string|array $columns, ?string $constraint = null): bool
     {
         return $this->getAdapter()->hasForeignKey($this->getName(), $columns, $constraint);
+    }
+
+    /**
+     * Add a check constraint to a database table.
+     *
+     * @param string|\Migrations\Db\Table\CheckConstraint $expression The check constraint expression or object
+     * @param array<string, mixed> $options Options for the check constraint (e.g., 'name')
+     * @return $this
+     */
+    public function addCheckConstraint(string|CheckConstraint $expression, array $options = [])
+    {
+        if ($expression instanceof CheckConstraint) {
+            $action = new AddCheckConstraint($this->table, $expression);
+        } else {
+            $action = AddCheckConstraint::build($this->table, $expression, $options);
+        }
+        $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    /**
+     * Removes the given check constraint from the table.
+     *
+     * @param string $constraintName The name of the check constraint to drop
+     * @return $this
+     */
+    public function dropCheckConstraint(string $constraintName)
+    {
+        $action = new DropCheckConstraint($this->table, $constraintName);
+        $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    /**
+     * Checks to see if a check constraint exists.
+     *
+     * @param string $constraintName The name of the check constraint
+     * @return bool
+     */
+    public function hasCheckConstraint(string $constraintName): bool
+    {
+        return $this->getAdapter()->hasCheckConstraint($this->getName(), $constraintName);
     }
 
     /**

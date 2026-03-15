@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Plan;
 
 use ArrayObject;
+use Migrations\Db\Action\AddCheckConstraint;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
@@ -19,6 +20,7 @@ use Migrations\Db\Action\ChangePrimaryKey;
 use Migrations\Db\Action\CreateTable;
 use Migrations\Db\Action\CreateTrigger;
 use Migrations\Db\Action\CreateView;
+use Migrations\Db\Action\DropCheckConstraint;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropPartition;
@@ -497,7 +499,9 @@ class Plan
     }
 
     /**
-     * Collects all foreign key creation and drops from the given intent
+     * Collects all constraint creation and drops from the given intent
+     *
+     * This includes foreign keys and check constraints.
      *
      * @param \Migrations\Db\Action\Action[] $actions The actions to parse
      * @return void
@@ -505,7 +509,12 @@ class Plan
     protected function gatherConstraints(array $actions): void
     {
         foreach ($actions as $action) {
-            if (!($action instanceof AddForeignKey || $action instanceof DropForeignKey)) {
+            if (
+                !($action instanceof AddForeignKey)
+                && !($action instanceof DropForeignKey)
+                && !($action instanceof AddCheckConstraint)
+                && !($action instanceof DropCheckConstraint)
+            ) {
                 continue;
             }
             $table = $action->getTable();
