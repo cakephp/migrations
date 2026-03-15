@@ -554,6 +554,26 @@ interface AdapterInterface
     public function truncateTable(string $tableName): void;
 
     /**
+     * Disable foreign key constraint checking.
+     *
+     * This is useful when dropping tables or performing bulk operations
+     * that would otherwise fail due to foreign key constraints.
+     *
+     * @return void
+     */
+    public function disableForeignKeyConstraints(): void;
+
+    /**
+     * Enable foreign key constraint checking.
+     *
+     * This should be called after disableForeignKeyConstraints() to
+     * restore normal constraint checking behavior.
+     *
+     * @return void
+     */
+    public function enableForeignKeyConstraints(): void;
+
+    /**
      * Returns table columns
      *
      * @param string $tableName Table name

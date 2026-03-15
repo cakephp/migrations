@@ -18,14 +18,13 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
-use Cake\Database\Driver\Mysql;
-use Cake\Database\Driver\Postgres;
-use Cake\Database\Driver\Sqlite;
-use Cake\Database\Driver\Sqlserver;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventDispatcherTrait;
 use Migrations\Config\ConfigInterface;
+use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\Db\Adapter\DirectActionInterface;
 use Migrations\Migration\ManagerFactory;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -149,7 +148,15 @@ class ResetCommand extends Command
         // Drop tables
         $io->out('');
         if (!$dryRun) {
-            $this->dropTables($connection, $tablesToDrop, $io);
+            $factory = new ManagerFactory([
+                'plugin' => $args->getOption('plugin'),
+                'source' => $args->getOption('source'),
+                'connection' => $args->getOption('connection'),
+            ]);
+            $manager = $factory->createManager($io);
+            $adapter = $manager->getEnvironment()->getAdapter();
+
+            $this->dropTables($adapter, $tablesToDrop, $io);
         } else {
             $io->info('DRY-RUN: Would drop ' . count($tablesToDrop) . ' table(s).');
         }
@@ -182,102 +189,29 @@ class ResetCommand extends Command
     /**
      * Drop tables with foreign key handling.
      *
-     * @param \Cake\Database\Connection $connection Database connection
+     * @param \Migrations\Db\Adapter\AdapterInterface $adapter The adapter
      * @param array<string> $tables Tables to drop
      * @param \Cake\Console\ConsoleIo $io Console IO
      * @return void
      */
-    protected function dropTables(Connection $connection, array $tables, ConsoleIo $io): void
+    protected function dropTables(AdapterInterface $adapter, array $tables, ConsoleIo $io): void
     {
-        $driver = $connection->getDriver();
+        if (!$adapter instanceof DirectActionInterface) {
+            throw new RuntimeException('The adapter must implement DirectActionInterface');
+        }
 
-        // For PostgreSQL and SQL Server, we need to drop foreign keys first
-        // or use CASCADE in the drop statement
-        if ($driver instanceof Postgres) {
+        $adapter->disableForeignKeyConstraints();
+
+        try {
             foreach ($tables as $table) {
-                $quotedTable = $driver->quoteIdentifier($table);
                 $io->verbose("Dropping table: {$table}");
-                $connection->execute("DROP TABLE IF EXISTS {$quotedTable} CASCADE");
+                $adapter->dropTable($table);
             }
-        } elseif ($driver instanceof Sqlserver) {
-            // Drop all foreign key constraints first
-            $this->dropForeignKeyConstraints($connection, $tables, $io);
-
-            // Then drop tables
-            foreach ($tables as $table) {
-                $quotedTable = $driver->quoteIdentifier($table);
-                $io->verbose("Dropping table: {$table}");
-                $connection->execute("DROP TABLE IF EXISTS {$quotedTable}");
-            }
-        } else {
-            // MySQL and SQLite support disabling foreign key checks
-            $this->setForeignKeyChecks($connection, false);
-
-            try {
-                foreach ($tables as $table) {
-                    $quotedTable = $driver->quoteIdentifier($table);
-                    $io->verbose("Dropping table: {$table}");
-                    $connection->execute("DROP TABLE IF EXISTS {$quotedTable}");
-                }
-            } finally {
-                $this->setForeignKeyChecks($connection, true);
-            }
+        } finally {
+            $adapter->enableForeignKeyConstraints();
         }
 
         $io->success('Dropped ' . count($tables) . ' table(s).');
-    }
-
-    /**
-     * Drop all foreign key constraints from the given tables.
-     *
-     * @param \Cake\Database\Connection $connection Database connection
-     * @param array<string> $tables Tables to process
-     * @param \Cake\Console\ConsoleIo $io Console IO
-     * @return void
-     */
-    protected function dropForeignKeyConstraints(Connection $connection, array $tables, ConsoleIo $io): void
-    {
-        $driver = $connection->getDriver();
-
-        if (!$driver instanceof Sqlserver) {
-            return;
-        }
-
-        // Query to find all foreign key constraints on the specified tables
-        $tableList = implode("','", array_map(fn($t) => addslashes($t), $tables));
-
-        $sql = "SELECT
-                    fk.name AS constraint_name,
-                    OBJECT_NAME(fk.parent_object_id) AS table_name
-                FROM sys.foreign_keys fk
-                WHERE OBJECT_NAME(fk.parent_object_id) IN ('{$tableList}')";
-
-        $result = $connection->execute($sql)->fetchAll('assoc');
-
-        foreach ($result as $row) {
-            $constraintName = $driver->quoteIdentifier($row['constraint_name']);
-            $tableName = $driver->quoteIdentifier($row['table_name']);
-            $io->verbose("Dropping foreign key: {$row['constraint_name']} on {$row['table_name']}");
-            $connection->execute("ALTER TABLE {$tableName} DROP CONSTRAINT {$constraintName}");
-        }
-    }
-
-    /**
-     * Enable or disable foreign key checks.
-     *
-     * @param \Cake\Database\Connection $connection Database connection
-     * @param bool $enable Whether to enable or disable
-     * @return void
-     */
-    protected function setForeignKeyChecks(Connection $connection, bool $enable): void
-    {
-        $driver = $connection->getDriver();
-
-        if ($driver instanceof Mysql) {
-            $connection->execute('SET FOREIGN_KEY_CHECKS = ' . ($enable ? '1' : '0'));
-        } elseif ($driver instanceof Sqlite) {
-            $connection->execute('PRAGMA foreign_keys = ' . ($enable ? 'ON' : 'OFF'));
-        }
     }
 
     /**

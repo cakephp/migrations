@@ -333,7 +333,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getDropTableInstructions(string $tableName): AlterInstructions
     {
         $this->removeCreatedTable($tableName);
-        $sql = sprintf('DROP TABLE %s', $this->quoteTableName($tableName));
+        $sql = sprintf('DROP TABLE %s CASCADE', $this->quoteTableName($tableName));
 
         return new AlterInstructions([], [$sql]);
     }
@@ -349,6 +349,24 @@ class PostgresAdapter extends AbstractAdapter
         );
 
         $this->execute($sql);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        // PostgreSQL uses CASCADE on DROP TABLE instead of disabling FK checks.
+        // This method is a no-op for PostgreSQL since dropTable already uses CASCADE.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        // PostgreSQL uses CASCADE on DROP TABLE instead of disabling FK checks.
+        // This method is a no-op for PostgreSQL.
     }
 
     /**

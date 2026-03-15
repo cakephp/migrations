@@ -590,4 +590,20 @@ abstract class AdapterWrapper implements WrapperInterface
     {
         return $this->getAdapter()->getSchemaTableName();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        $this->getAdapter()->disableForeignKeyConstraints();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        $this->getAdapter()->enableForeignKeyConstraints();
+    }
 }

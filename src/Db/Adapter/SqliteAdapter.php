@@ -409,6 +409,22 @@ class SqliteAdapter extends AbstractAdapter
     }
 
     /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        $this->execute('PRAGMA foreign_keys = OFF');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        $this->execute('PRAGMA foreign_keys = ON');
+    }
+
+    /**
      * Parses a default-value expression to yield either a Literal representing
      * a string value, a string representing an expression, or some other scalar
      *

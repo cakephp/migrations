@@ -281,6 +281,40 @@ class SqlserverAdapter extends AbstractAdapter
     }
 
     /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        // SQL Server doesn't support disabling FK checks globally.
+        // We drop all foreign key constraints instead.
+        $sql = "SELECT
+                    fk.name AS constraint_name,
+                    SCHEMA_NAME(t.schema_id) AS schema_name,
+                    t.name AS table_name
+                FROM sys.foreign_keys fk
+                INNER JOIN sys.tables t ON fk.parent_object_id = t.object_id
+                WHERE SCHEMA_NAME(t.schema_id) = ?";
+
+        $rows = $this->query($sql, [$this->schema])->fetchAll('assoc');
+
+        foreach ($rows as $row) {
+            $constraintName = $this->quoteColumnName($row['constraint_name']);
+            $tableName = $this->quoteTableName($row['table_name']);
+            $this->execute("ALTER TABLE {$tableName} DROP CONSTRAINT {$constraintName}");
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        // SQL Server FK constraints were dropped, not disabled.
+        // They would need to be recreated, but after a reset/drop operation
+        // the tables will be recreated with their constraints by migrations.
+    }
+
+    /**
      * @param string $tableName Table name
      * @param ?string $columnName Column name
      * @return string|null

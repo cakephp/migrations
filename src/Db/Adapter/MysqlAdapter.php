@@ -561,6 +561,22 @@ class MysqlAdapter extends AbstractAdapter
     }
 
     /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        $this->execute('SET FOREIGN_KEY_CHECKS = 0');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        $this->execute('SET FOREIGN_KEY_CHECKS = 1');
+    }
+
+    /**
      * Convert from cakephp/database conventions to migrations\column
      *
      * - converts datetimefractional -> datetime + length
