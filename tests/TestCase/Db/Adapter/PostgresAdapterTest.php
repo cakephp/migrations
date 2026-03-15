@@ -8,6 +8,7 @@ use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
+use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PostgresAdapter;
@@ -1499,16 +1500,15 @@ class PostgresAdapterTest extends TestCase
 
     public function testAddGistIndex(): void
     {
-        // GiST indexes on text columns require an operator class.
-        // We use inet type which has built-in GiST support.
+        // GiST indexes require specific data types with GiST support.
+        // We use int4range which has built-in GiST support in PostgreSQL.
+        $this->adapter->execute('CREATE TABLE table1 (id SERIAL PRIMARY KEY, int_range int4range)');
+
         $table = new Table('table1', [], $this->adapter);
-        $table->addColumn('ip_range', 'inet')
+        $table->addIndex('int_range', ['type' => 'gist'])
               ->save();
 
-        $table->addIndex('ip_range', ['type' => 'gist'])
-              ->save();
-
-        $this->assertTrue($table->hasIndex('ip_range'));
+        $this->assertTrue($table->hasIndex('int_range'));
 
         // Verify the index uses the GIST access method
         $rows = $this->adapter->fetchAll(
@@ -1517,7 +1517,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_ip_range'",
+             WHERE t.relname = 'table1' AND c.relname = 'table1_int_range'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('gist', $rows[0]['access_method']);
@@ -1626,7 +1626,7 @@ class PostgresAdapterTest extends TestCase
         // Skip if extension is not available
         try {
             $this->adapter->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             $this->markTestSkipped('pg_trgm extension is not available');
         }
 
