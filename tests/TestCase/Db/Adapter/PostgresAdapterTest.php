@@ -1497,6 +1497,152 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
+    public function testAddGistIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('data', 'text')
+              ->save();
+
+        $table->addIndex('data', ['type' => 'gist', 'opclass' => ['data' => 'gist_trgm_ops']])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('data'));
+
+        // Verify the index uses the GIST access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_data'"
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('gist', $rows[0]['access_method']);
+    }
+
+    public function testAddGinIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('tags', 'jsonb')
+              ->save();
+
+        $table->addIndex('tags', ['type' => 'gin'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('tags'));
+
+        // Verify the index uses the GIN access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_tags'"
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('gin', $rows[0]['access_method']);
+    }
+
+    public function testAddBrinIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('created_at', 'timestamp')
+              ->save();
+
+        $table->addIndex('created_at', ['type' => 'brin'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('created_at'));
+
+        // Verify the index uses the BRIN access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_created_at'"
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('brin', $rows[0]['access_method']);
+    }
+
+    public function testAddHashIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('session_id', 'string', ['limit' => 64])
+              ->save();
+
+        $table->addIndex('session_id', ['type' => 'hash'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('session_id'));
+
+        // Verify the index uses the HASH access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_session_id'"
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('hash', $rows[0]['access_method']);
+    }
+
+    public function testAddSpgistIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('data', 'text')
+              ->save();
+
+        $table->addIndex('data', ['type' => 'spgist', 'opclass' => ['data' => 'text_ops']])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('data'));
+
+        // Verify the index uses the SP-GIST access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_data'"
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('spgist', $rows[0]['access_method']);
+    }
+
+    public function testAddIndexWithOpclass(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('name', 'string')
+              ->save();
+
+        $table->addIndex('name', [
+            'type' => 'gist',
+            'opclass' => ['name' => 'gist_trgm_ops'],
+        ])->save();
+
+        $this->assertTrue($table->hasIndex('name'));
+
+        // Verify the index was created with the correct access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_name'"
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('gist', $rows[0]['access_method']);
+    }
+
     public function testAddForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);

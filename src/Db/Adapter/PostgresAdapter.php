@@ -58,7 +58,18 @@ class PostgresAdapter extends AbstractAdapter
         self::TYPE_NATIVE_UUID,
     ];
 
-    private const GIN_INDEX_TYPE = 'gin';
+    /**
+     * PostgreSQL index access methods that require USING clause.
+     *
+     * @var array<string>
+     */
+    private const ACCESS_METHOD_TYPES = [
+        Index::GIN,
+        Index::GIST,
+        Index::SPGIST,
+        Index::BRIN,
+        Index::HASH,
+    ];
 
     /**
      * Columns with comments
@@ -925,8 +936,16 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         $order = $index->getOrder() ?? [];
-        $columnNames = array_map(function (string $columnName) use ($order): string {
+        $opclass = $index->getOpclass() ?? [];
+        $columnNames = array_map(function (string $columnName) use ($order, $opclass): string {
             $ret = '"' . $columnName . '"';
+
+            // Add operator class if specified (e.g., gist_trgm_ops)
+            if (isset($opclass[$columnName])) {
+                $ret .= ' ' . $opclass[$columnName];
+            }
+
+            // Add ordering if specified (e.g., ASC NULLS FIRST)
             if (isset($order[$columnName])) {
                 $ret .= ' ' . $order[$columnName];
             }
@@ -937,11 +956,11 @@ class PostgresAdapter extends AbstractAdapter
         $include = $index->getInclude();
         $includedColumns = $include ? sprintf(' INCLUDE ("%s")', implode('","', $include)) : '';
 
-        $createIndexSentence = 'CREATE %sINDEX%s %s ON %s ';
-        if ($index->getType() === self::GIN_INDEX_TYPE) {
-            $createIndexSentence .= ' USING ' . $index->getType() . '(%s) %s;';
-        } else {
-            $createIndexSentence .= '(%s)%s%s;';
+        // Build USING clause for access method types (gin, gist, spgist, brin, hash)
+        $indexType = $index->getType();
+        $usingClause = '';
+        if (in_array($indexType, self::ACCESS_METHOD_TYPES, true)) {
+            $usingClause = ' USING ' . $indexType;
         }
         $where = '';
         $whereClause = $index->getWhere();
@@ -950,11 +969,12 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         return sprintf(
-            $createIndexSentence,
-            $index->getType() === Index::UNIQUE ? 'UNIQUE ' : '',
+            'CREATE %sINDEX%s %s ON %s%s (%s)%s%s;',
+            $indexType === Index::UNIQUE ? 'UNIQUE ' : '',
             $index->getConcurrently() ? ' CONCURRENTLY' : '',
             $this->quoteColumnName($indexName),
             $this->quoteTableName($tableName),
+            $usingClause,
             implode(',', $columnNames),
             $includedColumns,
             $where,
