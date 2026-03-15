@@ -1,0 +1,23 @@
+{
+  "/": [
+    {
+      "text": "Migrations",
+      "collapsed": false,
+      "items": [
+        { "text": "Introduction", "link": "/index" },
+        { "text": "Writing Migrations", "link": "/writing-migrations" },
+        { "text": "Using the Query Builder", "link": "/using-the-query-builder" },
+        { "text": "Executing Queries", "link": "/executing-queries" },
+        { "text": "Database Seeding", "link": "/seeding" }
+      ]
+    },
+    {
+      "text": "Upgrade Guides",
+      "collapsed": true,
+      "items": [
+        { "text": "Upgrading from 4.x to 5.x", "link": "/upgrading" },
+        { "text": "Upgrading to the Builtin Backend", "link": "/upgrading-to-builtin-backend" }
+      ]
+    }
+  ]
+}
