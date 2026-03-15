@@ -209,4 +209,12 @@ trait DefaultAdapterTrait
     {
         return new AlterInstructions();
     }
+
+    public function disableForeignKeyConstraints(): void
+    {
+    }
+
+    public function enableForeignKeyConstraints(): void
+    {
+    }
 }
