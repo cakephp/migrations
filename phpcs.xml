@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="CakePHP Core">
-    <arg value="ns"/>
+    <arg value="nps"/>
+    <arg name="colors"/>
+    <arg name="parallel" value="4"/>
+    <arg name="cache" value=".phpcs.cache"/>
 
     <file>src/</file>
     <file>tests/</file>
