@@ -1499,14 +1499,16 @@ class PostgresAdapterTest extends TestCase
 
     public function testAddGistIndex(): void
     {
+        // GiST indexes on text columns require an operator class.
+        // We use inet type which has built-in GiST support.
         $table = new Table('table1', [], $this->adapter);
-        $table->addColumn('data', 'text')
+        $table->addColumn('ip_range', 'inet')
               ->save();
 
-        $table->addIndex('data', ['type' => 'gist', 'opclass' => ['data' => 'gist_trgm_ops']])
+        $table->addIndex('ip_range', ['type' => 'gist'])
               ->save();
 
-        $this->assertTrue($table->hasIndex('data'));
+        $this->assertTrue($table->hasIndex('ip_range'));
 
         // Verify the index uses the GIST access method
         $rows = $this->adapter->fetchAll(
@@ -1515,7 +1517,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_data'"
+             WHERE t.relname = 'table1' AND c.relname = 'table1_ip_range'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('gist', $rows[0]['access_method']);
@@ -1539,7 +1541,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_tags'"
+             WHERE t.relname = 'table1' AND c.relname = 'table1_tags'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('gin', $rows[0]['access_method']);
@@ -1563,7 +1565,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_created_at'"
+             WHERE t.relname = 'table1' AND c.relname = 'table1_created_at'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('brin', $rows[0]['access_method']);
@@ -1587,7 +1589,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_session_id'"
+             WHERE t.relname = 'table1' AND c.relname = 'table1_session_id'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('hash', $rows[0]['access_method']);
@@ -1595,6 +1597,7 @@ class PostgresAdapterTest extends TestCase
 
     public function testAddSpgistIndex(): void
     {
+        // SP-GiST indexes on text require the text_ops operator class
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('data', 'text')
               ->save();
@@ -1611,7 +1614,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_data'"
+             WHERE t.relname = 'table1' AND c.relname = 'table1_data'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('spgist', $rows[0]['access_method']);
@@ -1619,6 +1622,14 @@ class PostgresAdapterTest extends TestCase
 
     public function testAddIndexWithOpclass(): void
     {
+        // Test opclass with GiST using pg_trgm extension
+        // Skip if extension is not available
+        try {
+            $this->adapter->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+        } catch (\Exception $e) {
+            $this->markTestSkipped('pg_trgm extension is not available');
+        }
+
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('name', 'string')
               ->save();
@@ -1637,7 +1648,7 @@ class PostgresAdapterTest extends TestCase
              JOIN pg_class c ON c.oid = i.indexrelid
              JOIN pg_am am ON am.oid = c.relam
              JOIN pg_class t ON t.oid = i.indrelid
-             WHERE t.relname = 'table1' AND c.relname = 'table1_name'"
+             WHERE t.relname = 'table1' AND c.relname = 'table1_name'",
         );
         $this->assertCount(1, $rows);
         $this->assertEquals('gist', $rows[0]['access_method']);
