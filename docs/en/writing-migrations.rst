@@ -1547,7 +1547,7 @@ You can add a check constraint to a table using the ``addCheckConstraint()`` met
         {
             $table = $this->table('products');
             $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
-                  ->addCheckConstraint('price_positive', 'price > 0')
+                  ->addCheckConstraint('price > 0', ['name' => 'price_positive'])
                   ->save();
         }
 
@@ -1562,18 +1562,19 @@ You can add a check constraint to a table using the ``addCheckConstraint()`` met
         }
     }
 
-The first argument is the constraint name, and the second is the SQL expression
-that defines the constraint. The expression should evaluate to a boolean value.
+The first argument is the SQL expression that defines the constraint. The expression
+should evaluate to a boolean value. The second argument is an options array where
+you can specify the constraint ``name``.
 
-Using the CheckConstraint Fluent Builder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using the CheckConstraint Object
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For more complex scenarios, you can use the ``checkConstraint()`` method to get
-a fluent builder::
+For more complex scenarios, you can create a ``CheckConstraint`` object directly::
 
     <?php
 
     use Migrations\BaseMigration;
+    use Migrations\Db\Table\CheckConstraint;
 
     class MyNewMigration extends BaseMigration
     {
@@ -1586,14 +1587,10 @@ a fluent builder::
             $table->addColumn('age', 'integer')
                   ->addColumn('status', 'string', ['limit' => 20])
                   ->addCheckConstraint(
-                      $this->checkConstraint()
-                          ->setName('age_valid')
-                          ->setExpression('age >= 18 AND age <= 120')
+                      new CheckConstraint('age_valid', 'age >= 18 AND age <= 120')
                   )
                   ->addCheckConstraint(
-                      $this->checkConstraint()
-                          ->setName('status_valid')
-                          ->setExpression("status IN ('active', 'inactive', 'pending')")
+                      new CheckConstraint('status_valid', "status IN ('active', 'inactive', 'pending')")
                   )
                   ->save();
         }
@@ -1602,8 +1599,7 @@ a fluent builder::
 Auto-Generated Constraint Names
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you don't specify a constraint name, one will be automatically generated based
-on the table name and expression hash::
+If you don't specify a constraint name, one will be automatically generated::
 
     <?php
 
@@ -1618,11 +1614,8 @@ on the table name and expression hash::
         {
             $table = $this->table('inventory');
             $table->addColumn('quantity', 'integer')
-                  // Name will be auto-generated like 'inventory_chk_a1b2c3d4'
-                  ->addCheckConstraint(
-                      $this->checkConstraint()
-                          ->setExpression('quantity >= 0')
-                  )
+                  // Name will be auto-generated
+                  ->addCheckConstraint('quantity >= 0')
                   ->save();
         }
     }
@@ -1647,8 +1640,8 @@ Check constraints can reference multiple columns and use complex SQL expressions
             $table->addColumn('start_date', 'date')
                   ->addColumn('end_date', 'date')
                   ->addColumn('discount', 'decimal', ['precision' => 5, 'scale' => 2])
-                  ->addCheckConstraint('valid_date_range', 'end_date >= start_date')
-                  ->addCheckConstraint('valid_discount', 'discount BETWEEN 0 AND 100')
+                  ->addCheckConstraint('end_date >= start_date', ['name' => 'valid_date_range'])
+                  ->addCheckConstraint('discount BETWEEN 0 AND 100', ['name' => 'valid_discount'])
                   ->save();
         }
     }
@@ -1674,7 +1667,7 @@ You can verify if a check constraint exists using the ``hasCheckConstraint()`` m
             if ($exists) {
                 // do something
             } else {
-                $table->addCheckConstraint('price_positive', 'price > 0')
+                $table->addCheckConstraint('price > 0', ['name' => 'price_positive'])
                       ->save();
             }
         }
@@ -1708,7 +1701,7 @@ constraint name::
         public function down(): void
         {
             $table = $this->table('products');
-            $table->addCheckConstraint('price_positive', 'price > 0')
+            $table->addCheckConstraint('price > 0', ['name' => 'price_positive'])
                   ->save();
         }
     }
