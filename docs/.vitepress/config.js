@@ -7,10 +7,10 @@ const toc_en = require("./toc_en.json");
 const versions = {
   text: "5.x",
   items: [
-    { text: "5.x (latest)", link: "https://book.cakephp.org/5.x/", target: '_self' },
-    { text: "4.x", link: "https://book.cakephp.org/migrations/4/en/", target: '_self' },
-    { text: "3.x", link: "https://book.cakephp.org/migrations/3/en/", target: '_self' },
-    { text: "2.x", link: "https://book.cakephp.org/migrations/2/en/", target: '_self' },
+    { text: "5.x (current)", link: "book.cakephp.org/migrations/5.x/", target: '_self' },
+    { text: "4.x", link: "book.cakephp.org/migrations/4.x/", target: '_self' },
+    { text: "3.x", link: "book.cakephp.org/migrations/3.x/", target: '_self' },
+    { text: "2.x", link: "book.cakephp.org/migrations/2.x/", target: '_self' },
   ],
 };
 
