@@ -899,6 +899,20 @@ class MysqlAdapter extends AbstractAdapter
                 $this->getIndexSqlDefinition($index),
             );
 
+            // FULLTEXT indexes use post-steps (raw SQL) which executeAlterSteps
+            // does not append algorithm/lock to, so we inline the clause here.
+            // Setting on instructions as well ensures validation still runs.
+            if ($index->getAlgorithm() !== null || $index->getLock() !== null) {
+                if ($index->getAlgorithm() !== null) {
+                    $alter .= ', ALGORITHM=' . strtoupper($index->getAlgorithm());
+                    $instructions->setAlgorithm($index->getAlgorithm());
+                }
+                if ($index->getLock() !== null) {
+                    $alter .= ', LOCK=' . strtoupper($index->getLock());
+                    $instructions->setLock($index->getLock());
+                }
+            }
+
             $instructions->addPostStep($alter);
         } else {
             $alter = sprintf(
@@ -907,6 +921,13 @@ class MysqlAdapter extends AbstractAdapter
             );
 
             $instructions->addAlter($alter);
+
+            if ($index->getAlgorithm() !== null) {
+                $instructions->setAlgorithm($index->getAlgorithm());
+            }
+            if ($index->getLock() !== null) {
+                $instructions->setLock($index->getLock());
+            }
         }
 
         return $instructions;

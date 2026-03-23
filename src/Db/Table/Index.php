@@ -47,6 +47,8 @@ class Index extends DatabaseIndex
      * @param array<string>|null $include The included columns for covering indexes.
      * @param ?string $where The where clause for partial indexes.
      * @param bool $concurrent Whether to create the index concurrently.
+     * @param ?string $algorithm The ALTER TABLE algorithm (MySQL-specific).
+     * @param ?string $lock The ALTER TABLE lock mode (MySQL-specific).
      */
     public function __construct(
         protected string $name = '',
@@ -57,6 +59,8 @@ class Index extends DatabaseIndex
         protected ?array $include = null,
         protected ?string $where = null,
         protected bool $concurrent = false,
+        protected ?string $algorithm = null,
+        protected ?string $lock = null,
     ) {
     }
 
@@ -150,6 +154,52 @@ class Index extends DatabaseIndex
     }
 
     /**
+     * Sets the ALTER TABLE algorithm (MySQL-specific).
+     *
+     * @param string $algorithm Algorithm
+     * @return $this
+     */
+    public function setAlgorithm(string $algorithm)
+    {
+        $this->algorithm = $algorithm;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ALTER TABLE algorithm.
+     *
+     * @return string|null
+     */
+    public function getAlgorithm(): ?string
+    {
+        return $this->algorithm;
+    }
+
+    /**
+     * Sets the ALTER TABLE lock mode (MySQL-specific).
+     *
+     * @param string $lock Lock mode
+     * @return $this
+     */
+    public function setLock(string $lock)
+    {
+        $this->lock = $lock;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ALTER TABLE lock mode.
+     *
+     * @return string|null
+     */
+    public function getLock(): ?string
+    {
+        return $this->lock;
+    }
+
+    /**
      * Utility method that maps an array of index options to this object's methods.
      *
      * @param array<string, mixed> $options Options
@@ -159,7 +209,7 @@ class Index extends DatabaseIndex
     public function setOptions(array $options)
     {
         // Valid Options
-        $validOptions = ['concurrently', 'type', 'unique', 'name', 'limit', 'order', 'include', 'where'];
+        $validOptions = ['concurrently', 'type', 'unique', 'name', 'limit', 'order', 'include', 'where', 'algorithm', 'lock'];
         foreach ($options as $option => $value) {
             if (!in_array($option, $validOptions, true)) {
                 throw new RuntimeException(sprintf('"%s" is not a valid index option.', $option));

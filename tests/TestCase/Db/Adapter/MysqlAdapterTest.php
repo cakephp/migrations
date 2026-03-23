@@ -3127,6 +3127,143 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('mixed_case', 'col2'));
     }
 
+    public function testAddIndexWithAlgorithm(): void
+    {
+        $table = new Table('index_algo', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_algo', ['email']));
+    }
+
+    public function testAddIndexWithAlgorithmAndLock(): void
+    {
+        $table = new Table('index_algo_lock', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_algo_lock', ['email']));
+    }
+
+    public function testAddIndexWithAlgorithmCopy(): void
+    {
+        $table = new Table('index_copy', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_COPY,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_copy', ['email']));
+    }
+
+    public function testAddIndexWithAlgorithmMixedCase(): void
+    {
+        $table = new Table('index_case', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => 'inplace',
+            'lock' => 'none',
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_case', ['email']));
+    }
+
+    public function testAddIndexWithInvalidAlgorithmThrowsException(): void
+    {
+        $table = new Table('index_invalid_algo', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid algorithm');
+
+        $table->addIndex('email', [
+            'algorithm' => 'INVALID',
+        ])->update();
+    }
+
+    public function testAddIndexWithInvalidLockThrowsException(): void
+    {
+        $table = new Table('index_invalid_lock', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid lock');
+
+        $table->addIndex('email', [
+            'lock' => 'INVALID',
+        ])->update();
+    }
+
+    public function testAddIndexWithAlgorithmInstantAndExplicitLockThrowsException(): void
+    {
+        $table = new Table('index_instant_lock', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ALGORITHM=INSTANT cannot be combined with LOCK=NONE');
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+    }
+
+    public function testBatchedIndexesWithSameAlgorithm(): void
+    {
+        $table = new Table('index_batch', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->addColumn('name', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->addIndex('name', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_batch', ['email']));
+        $this->assertTrue($this->adapter->hasIndex('index_batch', ['name']));
+    }
+
+    public function testBatchedIndexesWithConflictingAlgorithmsThrowsException()
+    {
+        $table = new Table('index_batch_conflict', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->addColumn('name', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Conflicting algorithm specifications');
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+        ])
+        ->addIndex('name', [
+            'algorithm' => MysqlAdapter::ALGORITHM_COPY,
+        ])
+        ->update();
+    }
+
     public function testInsertOrUpdateWithDuplicates(): void
     {
         $table = new Table('currencies', [], $this->adapter);
