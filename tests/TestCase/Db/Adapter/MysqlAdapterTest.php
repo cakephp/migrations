@@ -3264,6 +3264,58 @@ OUTPUT;
         ->update();
     }
 
+    public function testBatchedIndexesWithConflictingLocksThrowsException(): void
+    {
+        $table = new Table('index_lock_conflict', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->addColumn('name', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Conflicting lock specifications');
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->addIndex('name', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_SHARED,
+        ])
+        ->update();
+    }
+
+    public function testAddFulltextIndexWithAlgorithmAndLock(): void
+    {
+        $table = new Table('index_fulltext_algo', [], $this->adapter);
+        $table->addColumn('content', 'text')
+            ->create();
+
+        $table->addIndex('content', [
+            'type' => 'fulltext',
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_SHARED,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_fulltext_algo', ['content']));
+    }
+
+    public function testAddFulltextIndexWithInstantAndLockThrowsException(): void
+    {
+        $table = new Table('index_fulltext_instant', [], $this->adapter);
+        $table->addColumn('content', 'text')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ALGORITHM=INSTANT cannot be combined with LOCK=NONE');
+
+        $table->addIndex('content', [
+            'type' => 'fulltext',
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+    }
+
     public function testInsertOrUpdateWithDuplicates(): void
     {
         $table = new Table('currencies', [], $this->adapter);
