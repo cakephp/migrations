@@ -639,6 +639,18 @@ class ManagerTest extends TestCase
         $manager->getMigrations();
     }
 
+    public function testGetMigrationsWithLegacyAbstractMigrationClass(): void
+    {
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/LegacyAbstractMigration']]);
+        $manager = new Manager($config, $this->io);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/uses the legacy `Migrations\\\\AbstractMigration` class/');
+        $this->expectExceptionMessageMatches('/20260327000000_LegacyAbstractMigration\\.php/');
+
+        $manager->getMigrations();
+    }
+
     public function testGetMigrationsWithAnonymousClass()
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/AnonymousMigrations']]);

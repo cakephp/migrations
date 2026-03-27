@@ -975,7 +975,8 @@ class Manager
 
                     $io->verbose("Loading class <info>$class</info> from <info>$filePath</info>.");
 
-                    // load the migration file
+                    $this->checkMigrationClass($filePath);
+
                     $orig_display_errors_setting = ini_get('display_errors');
                     ini_set('display_errors', 'On');
 
@@ -1023,6 +1024,32 @@ class Manager
         }
 
         return (array)$this->migrations;
+    }
+
+    /**
+     * Prevent fatal errors when loading legacy migration files that still reference old classes
+     *
+     * @param string $filePath Migration file path
+     * @return void
+     */
+    protected function checkMigrationClass(string $filePath): void
+    {
+        $contents = file_get_contents($filePath);
+        if ($contents === false) {
+            return;
+        }
+
+        $usesLegacyAbstractMigration =
+            str_contains($contents, 'use Migrations\AbstractMigration;') ||
+            str_contains($contents, 'extends AbstractMigration') ||
+            str_contains($contents, 'extends \Migrations\AbstractMigration');
+
+        if ($usesLegacyAbstractMigration) {
+            throw new RuntimeException(sprintf(
+                'Migration file `%s` uses the legacy `Migrations\\AbstractMigration` class, which is not available in this version. Update the migration to extend `Migrations\\BaseMigration`.',
+                $filePath,
+            ));
+        }
     }
 
     /**
