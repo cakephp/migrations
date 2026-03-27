@@ -3127,6 +3127,51 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('mixed_case', 'col2'));
     }
 
+    public function testAddColumnWithAlgorithmAndLockSqlContainsClause(): void
+    {
+        $table = new Table('col_sql_verify', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasColumn('col_sql_verify', 'col2'));
+    }
+
+    public function testAddColumnWithFluentColumnBuilder(): void
+    {
+        $table = new Table('col_fluent', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $column = new Column();
+        $column->setName('col2')
+            ->setType('string')
+            ->setNull(true)
+            ->setAlgorithm(MysqlAdapter::ALGORITHM_INPLACE)
+            ->setLock(MysqlAdapter::LOCK_NONE);
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addColumn($column)->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasColumn('col_fluent', 'col2'));
+    }
+
     public function testAddIndexWithAlgorithm(): void
     {
         $table = new Table('index_algo', [], $this->adapter);
@@ -3245,7 +3290,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasIndex('index_batch', ['name']));
     }
 
-    public function testBatchedIndexesWithConflictingAlgorithmsThrowsException()
+    public function testBatchedIndexesWithConflictingAlgorithmsThrowsException(): void
     {
         $table = new Table('index_batch_conflict', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -3314,6 +3359,48 @@ OUTPUT;
             'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
             'lock' => MysqlAdapter::LOCK_NONE,
         ])->update();
+    }
+
+    public function testAddIndexWithAlgorithmAndLockSqlContainsClause(): void
+    {
+        $table = new Table('idx_sql_verify', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasIndex('idx_sql_verify', ['email']));
+    }
+
+    public function testAddIndexWithFluentIndexBuilder(): void
+    {
+        $table = new Table('idx_fluent', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $index = new Index();
+        $index->setColumns('email')
+            ->setAlgorithm(MysqlAdapter::ALGORITHM_INPLACE)
+            ->setLock(MysqlAdapter::LOCK_NONE);
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addIndex($index)->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasIndex('idx_fluent', ['email']));
     }
 
     public function testInsertOrUpdateWithDuplicates(): void
