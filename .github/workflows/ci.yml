@@ -7,9 +7,13 @@ on:
       - 4.x
       - 4.next
       - 5.x
+    paths-ignore:
+      - docs/**
   pull_request:
     branches:
       - '*'
+    paths-ignore:
+      - docs/**
   workflow_dispatch:
 
 permissions:
