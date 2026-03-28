@@ -33,6 +33,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Error;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Migration\ManagerFactory;
 use Migrations\Util\TableFinder;
 use Migrations\Util\UtilTrait;
@@ -169,13 +170,18 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
         $migratedItems = [];
         if ($tableExists) {
-            $query = $connection->selectQuery();
-            /** @var array $migratedItems */
-            $migratedItems = $query
+            $query = $connection->selectQuery()
                 ->select(['version'])
                 ->from($this->phinxTable)
-                ->orderBy(['version DESC'])
-                ->execute()->fetchAll('assoc');
+                ->orderBy(['version DESC']);
+
+            // In unified table mode, filter by the current plugin context
+            if ($this->phinxTable === UnifiedMigrationsTableStorage::TABLE_NAME) {
+                $query->where(['plugin IS' => $this->plugin]);
+            }
+
+            /** @var array $migratedItems */
+            $migratedItems = $query->execute()->fetchAll('assoc');
         }
 
         $this->migratedItems = $migratedItems;
@@ -484,22 +490,56 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * Checks that the migrations history is in sync with the migrations files
      *
+     * Compares the last migrated version against the last migration file,
+     * but only considers migrations that belong to the current context (app or plugin).
+     * This avoids false positives when migrations from other plugins have been
+     * run more recently than the last app migration.
+     *
+     * @see https://github.com/cakephp/migrations/issues/1060
      * @return bool Whether migrations history is sync or not
      */
     protected function checkSync(): bool
     {
+        // No files and no migrations - nothing to check
         if (!$this->migrationsFiles && !$this->migratedItems) {
             return true;
         }
 
-        if ($this->migratedItems) {
-            $lastVersion = $this->migratedItems[0]['version'];
-            $lastFile = end($this->migrationsFiles);
-
-            return $lastFile && str_contains($lastFile, (string)$lastVersion);
+        // No files in this context - nothing to sync
+        // This allows baking a snapshot for a new plugin even when
+        // the unified migrations table has records from other contexts
+        if (!$this->migrationsFiles) {
+            return true;
         }
 
-        return false;
+        // Have files - need to verify they're synced
+        // Extract version numbers from current context's migration files
+        $fileVersions = [];
+        foreach ($this->migrationsFiles as $file) {
+            $filename = basename($file);
+            if (preg_match('/^(\d+)_/', $filename, $matches)) {
+                $fileVersions[] = $matches[1];
+            }
+        }
+
+        // Filter migrated versions to only those that have corresponding files in this context
+        $contextMigratedVersions = [];
+        foreach ($this->migratedItems as $item) {
+            if (in_array((string)$item['version'], $fileVersions, true)) {
+                $contextMigratedVersions[] = (string)$item['version'];
+            }
+        }
+
+        if (empty($contextMigratedVersions)) {
+            // No migrations from this context have been run yet
+            return false;
+        }
+
+        // Get the most recent migrated version within this context
+        $lastVersion = max($contextMigratedVersions);
+        $lastFile = end($this->migrationsFiles);
+
+        return $lastFile && str_contains($lastFile, $lastVersion);
     }
 
     /**

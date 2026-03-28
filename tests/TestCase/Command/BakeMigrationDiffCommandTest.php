@@ -143,6 +143,53 @@ class BakeMigrationDiffCommandTest extends TestCase
     }
 
     /**
+     * Tests that baking a diff succeeds when app migrations are in sync
+     * even if a plugin has more recent migrations.
+     *
+     * This test specifically tests the unified table mode where all migrations
+     * (app and plugins) are stored in a single cake_migrations table.
+     *
+     * @see https://github.com/cakephp/migrations/issues/1060
+     * @return void
+     */
+    public function testCheckSyncWithPluginMigrationsMoreRecent(): void
+    {
+        // This bug only affects unified table mode
+        Configure::write('Migrations.legacyTables', false);
+
+        // Run app migrations first to get them in sync
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitSuccess();
+
+        // Create a schema dump file (required for baking a diff)
+        $this->exec('migrations dump -c test');
+        $this->assertExitSuccess();
+
+        // Insert a more recent migration record for a plugin
+        // This simulates having a plugin migration that was run after the last app migration
+        $this->insertMigrationRecord('test', 99999999999999, 'PluginMigration', 'SomePlugin');
+
+        // Now try to bake a diff for the app - this should succeed
+        // because all app migration files have been migrated
+        $this->exec('bake migration_diff CheckSyncTest -c test');
+
+        // Should not contain the "not in sync" error
+        $this->assertOutputNotContains('Your migrations history is not in sync');
+        $this->assertExitSuccess();
+
+        // Clean up generated files
+        $path = ROOT . DS . 'config' . DS . 'Migrations' . DS;
+        $this->generatedFiles = array_merge(
+            $this->generatedFiles,
+            glob($path . '*_CheckSyncTest.php') ?: [],
+        );
+        $this->generatedFiles[] = $path . 'schema-dump-test.lock';
+
+        // Restore legacy table mode
+        Configure::delete('Migrations.legacyTables');
+    }
+
+    /**
      * Tests that baking a diff while history is empty and no migration files exists
      * will fall back to baking a snapshot
      *
