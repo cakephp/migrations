@@ -13,7 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@cakephp/docs-skeleton": "git+ssh://git@github.com:cakephp/docs-skeleton.git#node-package",
+    "@cakephp/docs-skeleton": "github:cakephp/docs-skeleton#node-package",
     "vitepress": "^2.0.0-alpha.16"
   }
 }
