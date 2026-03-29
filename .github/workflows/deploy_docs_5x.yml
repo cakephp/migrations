@@ -21,3 +21,4 @@ jobs:
         with:
           git_remote_url: 'ssh://dokku@apps.cakephp.org:22/migrations-docs-5'
           ssh_private_key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          branch: '5.x'
