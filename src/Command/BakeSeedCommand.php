@@ -32,20 +32,13 @@ class BakeSeedCommand extends SimpleBakeCommand
 {
     /**
      * path to Migration directory
-     *
-     * @var string
      */
     public string $pathFragment = 'config/Seeds/';
 
-    /**
-     * @var string
-     */
     protected string $_name;
 
     /**
      * Arguments
-     *
-     * @var \Cake\Console\Arguments|null
      */
     protected ?Arguments $args = null;
 
@@ -160,7 +153,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->args = $args;
         /** @var array<string, bool|string|null> $options */
@@ -257,7 +250,7 @@ class BakeSeedCommand extends SimpleBakeCommand
                 if ($line[$j] === '\\') {
                     // skip character right after an escape \
                     $j++;
-                } elseif ($line[$j] === '\'') {
+                } elseif ($line[$j] === "'") {
                     // check string open/end
                     $inString = !$inString;
                 }
@@ -272,7 +265,7 @@ class BakeSeedCommand extends SimpleBakeCommand
         unset($line);
 
         // Remove marked lines
-        $lines = array_filter($lines, function ($line) {
+        $lines = array_filter($lines, function ($line): bool {
             return $line !== false;
         });
 

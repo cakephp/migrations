@@ -53,26 +53,32 @@ class MysqlAdapter extends AbstractAdapter
      * @deprecated 5.0.0 Enum column support will be removed in a future release.
      */
     public const PHINX_TYPE_ENUM = 'enum';
+
     /**
      * @deprecated 5.0.0 Set column support will be removed in a future release.
      */
     public const PHINX_TYPE_SET = 'set';
+
     /**
      * @deprecated 5.0.0 Use binary type with with no limit instead.
      */
     public const PHINX_TYPE_BLOB = 'blob';
+
     /**
      * @deprecated 5.0.0 Use binary type with with limit BLOB_SMALL instead.
      */
     public const PHINX_TYPE_TINYBLOB = 'tinyblob';
+
     /**
      * @deprecated 5.0.0 Use binary type with with limit BLOB_MEDIUM instead.
      */
     public const PHINX_TYPE_MEDIUMBLOB = 'mediumblob';
+
     /**
      * @deprecated 5.0.0 Use binary type with with limit BLOB_LONG instead.
      */
     public const PHINX_TYPE_LONGBLOB = 'longblob';
+
     /**
      * @deprecated 5.0.0 Use binary type instead.
      */
@@ -84,29 +90,45 @@ class MysqlAdapter extends AbstractAdapter
     // as its actual value is its regular value is larger than PHP_INT_MAX. We do this
     // to keep consistent the type hints for Column::$limit being integers.
     public const TEXT_TINY = 255;
+
     public const TEXT_SMALL = 255; /* deprecated, alias of TEXT_TINY */
     /** @deprecated Use length of null instead **/
     public const TEXT_REGULAR = 65535;
+
     public const TEXT_MEDIUM = 16777215;
+
     public const TEXT_LONG = 2147483647;
 
     // According to https://dev.mysql.com/doc/refman/5.0/en/blob.html BLOB sizes are the same as TEXT
     public const BLOB_TINY = TableSchema::LENGTH_TINY;
-    public const BLOB_SMALL = TableSchema::LENGTH_TINY; /* deprecated, alias of BLOB_TINY */
+
+    public const BLOB_SMALL = TableSchema::LENGTH_TINY;
+
+     /* deprecated, alias of BLOB_TINY */
     public const BLOB_REGULAR = 65535;
+
     public const BLOB_MEDIUM = TableSchema::LENGTH_MEDIUM;
+
     public const BLOB_LONG = TableSchema::LENGTH_LONG;
 
     public const INT_TINY = 255;
+
     public const INT_SMALL = 65535;
+
     public const INT_MEDIUM = 16777215;
+
     public const INT_REGULAR = 1073741823;
+
     public const INT_BIG = 2147483647;
 
     public const INT_DISPLAY_TINY = 4;
+
     public const INT_DISPLAY_SMALL = 6;
+
     public const INT_DISPLAY_MEDIUM = 8;
+
     public const INT_DISPLAY_REGULAR = 11;
+
     public const INT_DISPLAY_BIG = 20;
 
     public const BIT = 64;
@@ -154,8 +176,11 @@ class MysqlAdapter extends AbstractAdapter
      * @see https://mariadb.com/kb/en/alter-table/#algorithm
      */
     public const ALGORITHM_DEFAULT = 'DEFAULT';
+
     public const ALGORITHM_INSTANT = 'INSTANT';
+
     public const ALGORITHM_INPLACE = 'INPLACE';
+
     public const ALGORITHM_COPY = 'COPY';
 
     /**
@@ -182,8 +207,11 @@ class MysqlAdapter extends AbstractAdapter
      * @see https://mariadb.com/kb/en/alter-table/#lock
      */
     public const LOCK_DEFAULT = 'DEFAULT';
+
     public const LOCK_NONE = 'NONE';
+
     public const LOCK_SHARED = 'SHARED';
+
     public const LOCK_EXCLUSIVE = 'EXCLUSIVE';
 
     /**
@@ -218,7 +246,7 @@ class MysqlAdapter extends AbstractAdapter
             return true;
         }
 
-        if (strpos($tableName, '.') !== false) {
+        if (str_contains($tableName, '.')) {
             [$schema, $table] = explode('.', $tableName);
             $exists = $this->hasTableWithSchema($schema, $table);
             // Only break here on success, because it is possible for table names to contain a dot.
@@ -306,7 +334,7 @@ class MysqlAdapter extends AbstractAdapter
 
         // process table collation
         if (isset($options['collation'])) {
-            $charset = explode('_', $options['collation']);
+            $charset = explode('_', (string)$options['collation']);
             $optionsStr .= sprintf(' CHARACTER SET %s', $charset[0]);
             $optionsStr .= sprintf(' COLLATE %s', $options['collation']);
         }
@@ -354,7 +382,7 @@ class MysqlAdapter extends AbstractAdapter
 
         // add partitioning
         $partition = $table->getPartition();
-        if ($partition !== null) {
+        if ($partition instanceof Partition) {
             $sql .= ' ' . $this->getPartitionSqlDefinition($partition);
         }
 
@@ -450,7 +478,7 @@ class MysqlAdapter extends AbstractAdapter
             $sql = $this->quoteColumnName($columnData['name']) . ' ' . $columnData['type'];
             $values = $column->getValues();
             if ($values) {
-                $sql .= '(' . implode(', ', array_map(function ($value) {
+                $sql .= '(' . implode(', ', array_map(function ($value): string {
                     // Special case NULL to trigger errors as it isn't allowed
                     // in enum values.
                     return $value === null ? 'NULL' : $this->quoteString($value);
@@ -512,7 +540,7 @@ class MysqlAdapter extends AbstractAdapter
         $instructions = new AlterInstructions();
 
         // passing 'null' is to remove table comment
-        $newComment = $newComment ?? '';
+        $newComment ??= '';
         $sql = sprintf(' COMMENT=%s ', $this->quoteString($newComment));
         $instructions->addAlter($sql);
 
@@ -632,7 +660,7 @@ class MysqlAdapter extends AbstractAdapter
         $rawTypes = [];
         $rows = $this->fetchAll(sprintf('SHOW COLUMNS FROM %s', $this->quoteTableName($tableName)));
         foreach ($rows as $row) {
-            $rawTypes[$row['Field']] = strtolower($row['Type']);
+            $rawTypes[$row['Field']] = strtolower((string)$row['Type']);
         }
 
         $columns = [];
@@ -734,7 +762,7 @@ class MysqlAdapter extends AbstractAdapter
         $targetColumn = null;
 
         foreach ($columns as $column) {
-            if (strcasecmp($column->getName(), $columnName) === 0) {
+            if (strcasecmp((string)$column->getName(), $columnName) === 0) {
                 $targetColumn = $column;
                 break;
             }
@@ -751,7 +779,7 @@ class MysqlAdapter extends AbstractAdapter
         $rows = $this->fetchAll(sprintf('SHOW FULL COLUMNS FROM %s', $this->quoteTableName($tableName)));
 
         foreach ($rows as $row) {
-            if (strcasecmp($row['Field'], $columnName) === 0) {
+            if (strcasecmp((string)$row['Field'], $columnName) === 0) {
                 $null = $row['Null'] === 'NO' ? 'NOT NULL' : 'NULL';
                 $comment = isset($row['Comment']) && $row['Comment'] !== ''
                     ? ' COMMENT ' . $this->getConnection()->getDriver()->schemaValue($row['Comment'])
@@ -759,8 +787,8 @@ class MysqlAdapter extends AbstractAdapter
 
                 // create the extra string by also filtering out the DEFAULT_GENERATED option (MySQL 8 fix)
                 $extras = array_filter(
-                    explode(' ', strtoupper($row['Extra'])),
-                    static function ($value) {
+                    explode(' ', strtoupper((string)$row['Extra'])),
+                    static function (string $value): bool {
                         return $value !== 'DEFAULT_GENERATED';
                     },
                 );
@@ -833,9 +861,8 @@ class MysqlAdapter extends AbstractAdapter
     protected function getIndexes(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        $indexes = $dialect->describeIndexes($tableName);
 
-        return $indexes;
+        return $dialect->describeIndexes($tableName);
     }
 
     /**
@@ -879,7 +906,7 @@ class MysqlAdapter extends AbstractAdapter
         }
 
         $indexes = $this->getIndexes($tableName);
-        $columns = array_map('strtolower', $columns);
+        $columns = array_map(strtolower(...), $columns);
 
         foreach ($indexes as $index) {
             if ($columns == $index['columns']) {
@@ -933,11 +960,10 @@ class MysqlAdapter extends AbstractAdapter
 
         if ($constraint) {
             return $primaryKey['name'] === $constraint;
-        } else {
-            $missingColumns = array_diff((array)$columns, (array)$primaryKey['columns']);
-
-            return empty($missingColumns);
         }
+        $missingColumns = array_diff((array)$columns, (array)$primaryKey['columns']);
+
+        return $missingColumns === [];
     }
 
     /**
@@ -972,9 +998,8 @@ class MysqlAdapter extends AbstractAdapter
     protected function getForeignKeys(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        $foreignKeys = $dialect->describeForeignKeys($tableName);
 
-        return $foreignKeys;
+        return $dialect->describeForeignKeys($tableName);
     }
 
     /**
@@ -1012,12 +1037,12 @@ class MysqlAdapter extends AbstractAdapter
     {
         $instructions = new AlterInstructions();
 
-        $columns = array_map('mb_strtolower', $columns);
+        $columns = array_map(mb_strtolower(...), $columns);
 
         $matches = [];
         $foreignKeys = $this->getForeignKeys($tableName);
         foreach ($foreignKeys as $key) {
-            if (array_map('mb_strtolower', $key['columns']) === $columns) {
+            if (array_map(mb_strtolower(...), $key['columns']) === $columns) {
                 $matches[] = $key['name'];
             }
         }
@@ -1165,7 +1190,7 @@ class MysqlAdapter extends AbstractAdapter
 
         $columnNames = (array)$index->getColumns();
         $order = $index->getOrder() ?? [];
-        $columnNames = array_map(function ($columnName) use ($order) {
+        $columnNames = array_map(function (string $columnName) use ($order): string {
             $ret = $this->quoteColumnName($columnName);
             if (isset($order[$columnName])) {
                 $ret .= ' ' . $order[$columnName];
@@ -1307,7 +1332,7 @@ class MysqlAdapter extends AbstractAdapter
         if ($columns instanceof Literal) {
             $columnsSql = (string)$columns;
         } else {
-            $columnsSql = implode(', ', array_map(fn($col) => $this->quoteColumnName($col), $columns));
+            $columnsSql = implode(', ', array_map($this->quoteColumnName(...), $columns));
         }
 
         $sql = sprintf('PARTITION BY %s (%s)', $type, $columnsSql);
@@ -1357,14 +1382,14 @@ class MysqlAdapter extends AbstractAdapter
             if ($value === 'MAXVALUE' || $value === Partition::TYPE_RANGE . '_MAXVALUE') {
                 $sql .= 'MAXVALUE';
             } elseif (is_array($value)) {
-                $sql .= '(' . implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value)) . ')';
+                $sql .= '(' . implode(', ', array_map($this->quotePartitionValue(...), $value)) . ')';
             } else {
                 $sql .= '(' . $this->quotePartitionValue($value) . ')';
             }
         } elseif ($isListType) {
             $sql .= ' VALUES IN (';
             if (is_array($value)) {
-                $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+                $sql .= implode(', ', array_map($this->quotePartitionValue(...), $value));
             } else {
                 $sql .= $this->quotePartitionValue($value);
             }
@@ -1425,7 +1450,7 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getAddPartitionsInstructions(TableMetadata $table, array $partitions): AlterInstructions
     {
-        if (empty($partitions)) {
+        if ($partitions === []) {
             return new AlterInstructions();
         }
 
@@ -1451,11 +1476,11 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getDropPartitionsInstructions(string $tableName, array $partitionNames): AlterInstructions
     {
-        if (empty($partitionNames)) {
+        if ($partitionNames === []) {
             return new AlterInstructions();
         }
 
-        $quotedNames = array_map(fn($name) => $this->quoteColumnName($name), $partitionNames);
+        $quotedNames = array_map($this->quoteColumnName(...), $partitionNames);
         $sql = 'DROP PARTITION ' . implode(', ', $quotedNames);
 
         return new AlterInstructions([$sql]);
@@ -1486,7 +1511,7 @@ class MysqlAdapter extends AbstractAdapter
         } elseif (is_array($value)) {
             // Likely LIST
             $sql .= ' VALUES IN (';
-            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            $sql .= implode(', ', array_map($this->quotePartitionValue(...), $value));
             $sql .= ')';
         }
 
@@ -1506,7 +1531,7 @@ class MysqlAdapter extends AbstractAdapter
     protected function hasNativeUuid(): bool
     {
         // Prevent infinite connect() loop when MysqlAdapter is used as a stub.
-        if ($this->connection === null || !$this->getOption('connection')) {
+        if (!$this->connection instanceof Connection || !$this->getOption('connection')) {
             return false;
         }
         $connection = $this->getConnection();
@@ -1523,7 +1548,7 @@ class MysqlAdapter extends AbstractAdapter
     protected function isMariaDb(): bool
     {
         // Prevent infinite connect() loop when MysqlAdapter is used as a stub.
-        if ($this->connection === null || !$this->getOption('connection')) {
+        if (!$this->connection instanceof Connection || !$this->getOption('connection')) {
             return false;
         }
         $connection = $this->getConnection();

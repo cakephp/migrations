@@ -6,7 +6,7 @@ use Migrations\BaseMigration;
 
 class DirectionAwareReversibleDown extends BaseMigration
 {
-    public function change()
+    public function change(): void
     {
         $this->table('change_direction_test')
             ->addColumn('subthing', Column::STRING, [

@@ -18,10 +18,17 @@ use Migrations\Db\Literal;
 class Partition
 {
     public const TYPE_RANGE = 'RANGE';
-    public const TYPE_RANGE_COLUMNS = 'RANGE COLUMNS'; // MySQL: for DATE/STRING columns
+
+    public const TYPE_RANGE_COLUMNS = 'RANGE COLUMNS';
+
+     // MySQL: for DATE/STRING columns
     public const TYPE_LIST = 'LIST';
-    public const TYPE_LIST_COLUMNS = 'LIST COLUMNS'; // MySQL: for STRING columns
+
+    public const TYPE_LIST_COLUMNS = 'LIST COLUMNS';
+
+     // MySQL: for STRING columns
     public const TYPE_HASH = 'HASH';
+
     public const TYPE_KEY = 'KEY'; // MySQL only
 
     /**

@@ -76,7 +76,7 @@ class MigrationHelperTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -141,34 +141,34 @@ class MigrationHelperTest extends TestCase
      *
      * @return void
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         unset($this->helper, $this->view, $this->collection, $this->connection);
     }
 
-    public function testTableMethod()
+    public function testTableMethod(): void
     {
         $this->assertSame('drop', $this->helper->tableMethod('drop_table'));
         $this->assertSame('create', $this->helper->tableMethod('create_table'));
         $this->assertSame('update', $this->helper->tableMethod('other_method'));
     }
 
-    public function testIndexMethod()
+    public function testIndexMethod(): void
     {
         $this->assertSame('removeIndex', $this->helper->indexMethod('drop_field'));
         $this->assertSame('addIndex', $this->helper->indexMethod('add_field'));
         $this->assertSame('addIndex', $this->helper->indexMethod('alter_field'));
     }
 
-    public function testColumnMethod()
+    public function testColumnMethod(): void
     {
         $this->assertSame('removeColumn', $this->helper->columnMethod('drop_field'));
         $this->assertSame('addColumn', $this->helper->columnMethod('add_field'));
         $this->assertSame('changeColumn', $this->helper->columnMethod('alter_field'));
     }
 
-    public function testColumns()
+    public function testColumns(): void
     {
         $extra = [];
         if ($this->connection->getDriver() instanceof Sqlserver) {
@@ -218,7 +218,7 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->columns('users'));
     }
 
-    public function testColumn()
+    public function testColumn(): void
     {
         $tableSchema = $this->collection->describe('users');
 
@@ -289,7 +289,7 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->column($tableSchema, 'updated'));
     }
 
-    public function testValue()
+    public function testValue(): void
     {
         $this->assertSame('null', $this->helper->value(null));
         $this->assertSame('null', $this->helper->value('null'));
@@ -309,7 +309,7 @@ class MigrationHelperTest extends TestCase
         $this->assertSame("'o\\\"ne'", $this->helper->value('o"ne'));
     }
 
-    public function testAttributes()
+    public function testAttributes(): void
     {
         $attributes = [
             'null' => false,
@@ -381,7 +381,7 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals($attributes, $result);
     }
 
-    public function testStringifyList()
+    public function testStringifyList(): void
     {
         $this->assertSame('', $this->helper->stringifyList([]));
         $this->assertSame("

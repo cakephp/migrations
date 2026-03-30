@@ -9,7 +9,7 @@ use RuntimeException;
 
 class IndexTest extends TestCase
 {
-    public function testSetOptionThrowsExceptionIfOptionIsNotString()
+    public function testSetOptionThrowsExceptionIfOptionIsNotString(): void
     {
         $column = new Index();
 

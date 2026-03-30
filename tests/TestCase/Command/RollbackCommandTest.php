@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
@@ -14,7 +15,7 @@ class RollbackCommandTest extends TestCase
 {
     protected array $createdFiles = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -22,7 +23,7 @@ class RollbackCommandTest extends TestCase
         $this->clearMigrationRecords('test', 'Migrator');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         foreach ($this->createdFiles as $file) {
@@ -32,7 +33,7 @@ class RollbackCommandTest extends TestCase
 
     protected function resetOutput(): void
     {
-        if ($this->_out) {
+        if ($this->_out instanceof StubConsoleOutput) {
             $property = new ReflectionProperty($this->_out, '_out');
             $property->setValue($this->_out, []);
         }

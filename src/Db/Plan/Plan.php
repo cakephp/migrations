@@ -211,7 +211,7 @@ class Plan
         $splitter = new ActionSplitter(
             RenameColumn::class,
             ChangeColumn::class,
-            function (RenameColumn $a, ChangeColumn $b) {
+            function (RenameColumn $a, ChangeColumn $b): bool {
                 return $a->getNewName() === $b->getColumnName();
             },
         );
@@ -231,7 +231,7 @@ class Plan
         $splitter = new ActionSplitter(
             DropForeignKey::class,
             AddForeignKey::class,
-            function (DropForeignKey $a, AddForeignKey $b) {
+            function (DropForeignKey $a, AddForeignKey $b): bool {
                 return $a->getForeignKey()->getColumns() === $b->getForeignKey()->getColumns();
             },
         );
@@ -308,7 +308,7 @@ class Plan
     protected function forgetDropIndex(TableMetadata $table, array $columns, array $actions): array
     {
         $dropIndexActions = new ArrayObject();
-        $indexes = array_map(function ($alter) use ($table, $columns, $dropIndexActions) {
+        $indexes = array_map(function (AlterTable $alter) use ($table, $columns, $dropIndexActions): AlterTable {
             if ($alter->getTable()->getName() !== $table->getName()) {
                 return $alter;
             }
@@ -340,7 +340,7 @@ class Plan
     protected function forgetRemoveColumn(TableMetadata $table, array $columns, array $actions): array
     {
         $removeColumnActions = new ArrayObject();
-        $indexes = array_map(function ($alter) use ($table, $columns, $removeColumnActions) {
+        $indexes = array_map(function (AlterTable $alter) use ($table, $columns, $removeColumnActions): AlterTable {
             if ($alter->getTable()->getName() !== $table->getName()) {
                 return $alter;
             }
@@ -407,8 +407,9 @@ class Plan
                 && !($action instanceof RemoveColumn)
                 && !($action instanceof RenameColumn)
             ) {
-                 continue;
-            } elseif (isset($this->tableCreates[$action->getTable()->getName()])) {
+                continue;
+            }
+            if (isset($this->tableCreates[$action->getTable()->getName()])) {
                 continue;
             }
             $table = $action->getTable();
@@ -467,7 +468,8 @@ class Plan
         foreach ($actions as $action) {
             if (!($action instanceof AddIndex) && !($action instanceof DropIndex)) {
                 continue;
-            } elseif (isset($this->tableCreates[$action->getTable()->getName()])) {
+            }
+            if (isset($this->tableCreates[$action->getTable()->getName()])) {
                 continue;
             }
 
@@ -491,7 +493,7 @@ class Plan
     protected function gatherConstraints(array $actions): void
     {
         foreach ($actions as $action) {
-            if (!($action instanceof AddForeignKey || $action instanceof DropForeignKey)) {
+            if (!$action instanceof AddForeignKey && !$action instanceof DropForeignKey) {
                 continue;
             }
             $table = $action->getTable();
@@ -520,7 +522,8 @@ class Plan
                 && !($action instanceof SetPartitioning)
             ) {
                 continue;
-            } elseif (isset($this->tableCreates[$action->getTable()->getName()])) {
+            }
+            if (isset($this->tableCreates[$action->getTable()->getName()])) {
                 continue;
             }
 

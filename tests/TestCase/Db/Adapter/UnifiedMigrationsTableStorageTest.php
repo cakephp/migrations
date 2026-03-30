@@ -21,12 +21,7 @@ use Migrations\Test\TestCase\TestCase;
  */
 class UnifiedMigrationsTableStorageTest extends TestCase
 {
-    /**
-     * @var bool
-     */
-    private bool $tableCreated = false;
-
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -37,7 +32,7 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         $this->cleanupTable();
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         // Always clean up the table
         $this->cleanupTable();
@@ -74,7 +69,7 @@ class UnifiedMigrationsTableStorageTest extends TestCase
             // Also drop any phinxlog tables that might exist
             $connection->execute('DROP TABLE IF EXISTS phinxlog');
             $connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Ignore cleanup errors
         }
     }
@@ -96,7 +91,6 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         $dialect = $connection->getDriver()->schemaDialect();
 
         $this->assertTrue($dialect->hasTable(UnifiedMigrationsTableStorage::TABLE_NAME));
-        $this->tableCreated = true;
 
         // Verify records were inserted with null plugin (app migrations)
         $result = $connection->selectQuery()
@@ -120,7 +114,6 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         // Run app migrations first to create the table
         $this->exec('migrations migrate -c test --source Migrations --no-lock');
         $this->assertExitSuccess();
-        $this->tableCreated = true;
 
         // Clear the migration records for app (but keep the table)
         $this->clearMigrationRecords('test');
@@ -148,7 +141,6 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         // Run migrations
         $this->exec('migrations migrate -c test --source Migrations --no-lock');
         $this->assertExitSuccess();
-        $this->tableCreated = true;
 
         // Verify we have records
         $initialCount = $this->getMigrationRecordCount('test');
@@ -168,7 +160,6 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         // Run migrations
         $this->exec('migrations migrate -c test --source Migrations --no-lock');
         $this->assertExitSuccess();
-        $this->tableCreated = true;
 
         // Check status
         $this->exec('migrations status -c test --source Migrations');
@@ -183,7 +174,6 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         // Run app migrations
         $this->exec('migrations migrate -c test --source Migrations --no-lock');
         $this->assertExitSuccess();
-        $this->tableCreated = true;
 
         // Run plugin migrations
         $this->exec('migrations migrate -c test --plugin Migrator --no-lock');

@@ -57,7 +57,7 @@ class StatusCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'The <info>status</info> command prints a list of all migrations, along with their current status',
@@ -146,7 +146,6 @@ class StatusCommand extends Command
     /**
      * Print migration status to stdout.
      *
-     * @param array $migrations
      * @param \Cake\Console\ConsoleIo $io The console io
      * @param string $tableName The migration tracking table name
      * @return void

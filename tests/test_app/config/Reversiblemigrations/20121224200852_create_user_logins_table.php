@@ -8,7 +8,7 @@ class CreateUserLoginsTable extends BaseMigration
     /**
      * Change.
      */
-    public function change()
+    public function change(): void
     {
         // user logins table
         $table = $this->table('user_logins');

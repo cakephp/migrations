@@ -29,29 +29,50 @@ use Migrations\SeedInterface;
 interface AdapterInterface
 {
     public const TYPE_STRING = TableSchemaInterface::TYPE_STRING;
+
     public const TYPE_CHAR = TableSchemaInterface::TYPE_CHAR;
+
     public const TYPE_TEXT = TableSchemaInterface::TYPE_TEXT;
+
     public const TYPE_INTEGER = TableSchemaInterface::TYPE_INTEGER;
+
     public const TYPE_TINYINTEGER = TableSchemaInterface::TYPE_TINYINTEGER;
+
     public const TYPE_SMALLINTEGER = TableSchemaInterface::TYPE_SMALLINTEGER;
+
     public const TYPE_BIGINTEGER = TableSchemaInterface::TYPE_BIGINTEGER;
+
     public const TYPE_FLOAT = TableSchemaInterface::TYPE_FLOAT;
+
     public const TYPE_DECIMAL = TableSchemaInterface::TYPE_DECIMAL;
+
     public const TYPE_DATETIME = TableSchemaInterface::TYPE_DATETIME;
+
     public const TYPE_TIMESTAMP = TableSchemaInterface::TYPE_TIMESTAMP;
+
     public const TYPE_TIME = TableSchemaInterface::TYPE_TIME;
+
     public const TYPE_DATE = TableSchemaInterface::TYPE_DATE;
+
     public const TYPE_BINARY = TableSchemaInterface::TYPE_BINARY;
+
     public const TYPE_BINARY_UUID = TableSchemaInterface::TYPE_BINARY_UUID;
+
     public const TYPE_BOOLEAN = TableSchemaInterface::TYPE_BOOLEAN;
+
     public const TYPE_JSON = TableSchemaInterface::TYPE_JSON;
+
     public const TYPE_UUID = TableSchemaInterface::TYPE_UUID;
+
     public const TYPE_NATIVE_UUID = TableSchemaInterface::TYPE_NATIVE_UUID;
 
     // Geospatial database types
     public const TYPE_GEOMETRY = TableSchemaInterface::TYPE_GEOMETRY;
+
     public const TYPE_POINT = TableSchemaInterface::TYPE_POINT;
+
     public const TYPE_LINESTRING = TableSchemaInterface::TYPE_LINESTRING;
+
     public const TYPE_POLYGON = TableSchemaInterface::TYPE_POLYGON;
 
     public const TYPES_GEOSPATIAL = [
@@ -63,90 +84,113 @@ interface AdapterInterface
 
     // only for mysql so far
     public const TYPE_YEAR = TableSchemaInterface::TYPE_YEAR;
+
     public const TYPE_BIT = TableSchemaInterface::TYPE_BIT;
 
     // only for postgresql so far
     public const TYPE_CIDR = TableSchemaInterface::TYPE_CIDR;
+
     public const TYPE_INET = TableSchemaInterface::TYPE_INET;
+
     public const TYPE_MACADDR = TableSchemaInterface::TYPE_MACADDR;
+
     public const TYPE_INTERVAL = TableSchemaInterface::TYPE_INTERVAL;
 
     /**
      * @deprecated 5.0.0 Use TYPE_STRING instead.
      */
     public const PHINX_TYPE_STRING = self::TYPE_STRING;
+
     /**
      * @deprecated 5.0.0 Use TYPE_CHAR instead.
      */
     public const PHINX_TYPE_CHAR = self::TYPE_CHAR;
+
     /**
      * @deprecated 5.0.0 Use TYPE_TEXT instead.
      */
     public const PHINX_TYPE_TEXT = self::TYPE_TEXT;
+
     /**
      * @deprecated 5.0.0 Use TYPE_INTEGER instead.
      */
     public const PHINX_TYPE_INTEGER = self::TYPE_INTEGER;
+
     /**
      * @deprecated 5.0.0 Use TYPE_TINYINTEGER instead.
      */
     public const PHINX_TYPE_TINY_INTEGER = self::TYPE_TINYINTEGER;
+
     /**
      * @deprecated 5.0.0 Use TYPE_SMALLINTEGER instead.
      */
     public const PHINX_TYPE_SMALL_INTEGER = self::TYPE_SMALLINTEGER;
+
     /**
      * @deprecated 5.0.0 Use TYPE_BIGINTEGER instead.
      */
     public const PHINX_TYPE_BIG_INTEGER = self::TYPE_BIGINTEGER;
+
     /**
      * @deprecated 5.0.0 Use TYPE_FLOAT instead.
      */
     public const PHINX_TYPE_FLOAT = self::TYPE_FLOAT;
+
     /**
      * @deprecated 5.0.0 Use TYPE_DECIMAL instead.
      */
     public const PHINX_TYPE_DECIMAL = self::TYPE_DECIMAL;
+
     /**
      * @deprecated 5.0.0 Use TYPE_DATETIME instead.
      */
     public const PHINX_TYPE_DATETIME = self::TYPE_DATETIME;
+
     /**
      * @deprecated 5.0.0 Use TYPE_TIMESTAMP instead.
      */
     public const PHINX_TYPE_TIMESTAMP = self::TYPE_TIMESTAMP;
+
     /**
      * @deprecated 5.0.0 Use TYPE_TIME instead.
      */
     public const PHINX_TYPE_TIME = self::TYPE_TIME;
+
     /**
      * @deprecated 5.0.0 Use TYPE_DATE instead.
      */
     public const PHINX_TYPE_DATE = self::TYPE_DATE;
+
     /**
      * @deprecated 5.0.0 Use TYPE_BINARY instead.
      */
     public const PHINX_TYPE_BINARY = self::TYPE_BINARY;
+
     /**
      * @deprecated 5.0.0 Use TYPE_BINARY_UUID instead.
      */
     public const PHINX_TYPE_BINARYUUID = self::TYPE_BINARY_UUID;
+
     /**
      * @deprecated 5.0.0 Use TYPE_BOOLEAN instead.
      */
     public const PHINX_TYPE_BOOLEAN = self::TYPE_BOOLEAN;
+
     /**
      * @deprecated 5.0.0 Use TYPE_JSON instead.
      */
     public const PHINX_TYPE_JSON = self::TYPE_JSON;
+
     /**
      * @deprecated 5.0.0 Use TableSchemaInterface::TYPE_JSON instead.
      */
     public const PHINX_TYPE_JSONB = 'jsonb';
+
     /**
      * @deprecated 5.0.0 Use TYPE_UUID instead.
      */
     public const PHINX_TYPE_UUID = self::TYPE_UUID;
+
     /**
      * @deprecated 5.0.0 Use TYPE_NATIVE_UUID instead.
      */
@@ -156,14 +200,17 @@ interface AdapterInterface
      * @deprecated 5.0.0 Use TYPE_GEOMETRY instead.
      */
     public const PHINX_TYPE_GEOMETRY = self::TYPE_GEOMETRY;
+
     /**
      * @deprecated 5.0.0 Use TYPE_POINT instead.
      */
     public const PHINX_TYPE_POINT = self::TYPE_POINT;
+
     /**
      * @deprecated 5.0.0 Use TYPE_LINESTRING instead.
      */
     public const PHINX_TYPE_LINESTRING = self::TYPE_LINESTRING;
+
     /**
      * @deprecated 5.0.0 Use TYPE_POLYGON instead.
      */
@@ -188,14 +235,17 @@ interface AdapterInterface
      * @deprecated 5.0.0 Use TYPE_CIDR instead.
      */
     public const PHINX_TYPE_CIDR = self::TYPE_CIDR;
+
     /**
      * @deprecated 5.0.0 Use TYPE_INET instead.
      */
     public const PHINX_TYPE_INET = self::TYPE_INET;
+
     /**
      * @deprecated 5.0.0 Use TYPE_MACADDR instead.
      */
     public const PHINX_TYPE_MACADDR = self::TYPE_MACADDR;
+
     /**
      * @deprecated 5.0.0 Use TYPE_INTERVAL instead.
      */

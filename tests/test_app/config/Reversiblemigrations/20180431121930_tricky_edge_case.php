@@ -5,7 +5,7 @@ use Migrations\BaseMigration;
 
 class TrickyEdgeCase extends BaseMigration
 {
-    public function change()
+    public function change(): void
     {
         $table = $this->table('user_logins');
         $table

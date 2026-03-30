@@ -7,7 +7,7 @@ class ChangeFkRegression extends BaseMigration
     /**
      * Migrate Up.
      */
-    public function up()
+    public function up(): void
     {
         $table = $this->table('my_table');
         $table

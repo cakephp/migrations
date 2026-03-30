@@ -51,7 +51,7 @@ class RollbackCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'Rollback migrations to a specific migration',
@@ -154,7 +154,7 @@ class RollbackCommand extends Command
         $config = $manager->getConfig();
 
         $versionOrder = $config->getVersionOrder();
-        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 

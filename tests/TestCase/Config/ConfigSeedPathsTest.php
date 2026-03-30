@@ -10,7 +10,7 @@ use UnexpectedValueException;
  */
 class ConfigSeedPathsTest extends AbstractConfigTestCase
 {
-    public function testGetSeedPathsThrowsExceptionForNoPath()
+    public function testGetSeedPathsThrowsExceptionForNoPath(): void
     {
         $config = new Config([]);
 
@@ -22,13 +22,13 @@ class ConfigSeedPathsTest extends AbstractConfigTestCase
     /**
      * Normal behavior
      */
-    public function testGetSeedPaths()
+    public function testGetSeedPaths(): void
     {
         $config = new Config($this->getConfigArray());
         $this->assertEquals($this->getSeedPath(), $config->getSeedPath());
     }
 
-    public function testGetSeedPathConvertsStringToArray()
+    public function testGetSeedPathConvertsStringToArray(): void
     {
         $values = [
             'paths' => [

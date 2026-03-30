@@ -64,9 +64,6 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected array $options = [];
 
-    /**
-     * @var \Cake\Console\ConsoleIo
-     */
     protected ConsoleIo $io;
 
     /**
@@ -74,24 +71,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected array $createdTables = [];
 
-    /**
-     * @var string
-     */
     protected string $schemaTableName = 'phinxlog';
 
-    /**
-     * @var string
-     */
     protected string $seedSchemaTableName = 'cake_seeds';
 
-    /**
-     * @var array
-     */
     protected array $dataDomain = [];
 
-    /**
-     * @var \Cake\Database\Connection|null
-     */
     protected ?Connection $connection = null;
 
     /**
@@ -103,7 +88,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function __construct(array $options, ?ConsoleIo $io = null)
     {
         $this->setOptions($options);
-        if ($io !== null) {
+        if ($io instanceof ConsoleIo) {
             $this->setIo($io);
         }
     }
@@ -197,7 +182,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function getConnection(): Connection
     {
-        if ($this->connection === null) {
+        if (!$this->connection instanceof Connection) {
             $this->connection = $this->getOption('connection');
             $this->connect();
         }
@@ -294,9 +279,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     {
         $io = $this->getIo();
         if (
-            $io === null || (
+            !$io instanceof ConsoleIo || (
                 !$this->isDryRunEnabled() &&
-                $io->level() != ConsoleIo::VERBOSE
+                $io->level() !== ConsoleIo::VERBOSE
             )
         ) {
             return;
@@ -465,7 +450,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     protected function addCreatedTable(string $tableName): void
     {
         $tableName = $this->quoteTableName($tableName);
-        if (substr_compare($tableName, 'phinxlog', -strlen('phinxlog')) !== 0) {
+        if (!str_ends_with($tableName, 'phinxlog')) {
             $this->createdTables[] = $tableName;
         }
     }
@@ -694,22 +679,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
-            $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $upsertClause . ';';
-
-            return $sql;
-        } else {
-            $values = [];
-            foreach ($row as $value) {
-                $placeholder = '?';
-                if ($value instanceof Literal) {
-                    $placeholder = (string)$value;
-                }
-                $values[] = $placeholder;
-            }
-            $sql .= ' VALUES (' . implode(',', $values) . ')' . $upsertClause;
-
-            return $sql;
+            return $sql . (' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $upsertClause . ';');
         }
+        $values = [];
+        foreach ($row as $value) {
+            $placeholder = '?';
+            if ($value instanceof Literal) {
+                $placeholder = (string)$value;
+            }
+            $values[] = $placeholder;
+        }
+
+        return $sql . (' VALUES (' . implode(',', $values) . ')' . $upsertClause);
     }
 
     /**
@@ -748,7 +729,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if ($conflictColumns !== null && $conflictColumns !== []) {
             trigger_error(
                 'The $conflictColumns parameter is ignored by MySQL. ' .
-                'MySQL\'s ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.',
+                "MySQL's ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.",
                 E_USER_WARNING,
             );
         }
@@ -875,30 +856,27 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
-            $values = array_map(function ($row) {
+            $values = array_map(function ($row): string {
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
-            $sql .= implode(', ', $values) . $upsertClause . ';';
 
-            return $sql;
-        } else {
-            $queries = [];
-            foreach ($rows as $row) {
-                $values = [];
-                foreach ($row as $v) {
-                    $placeholder = '?';
-                    if ($v instanceof Literal) {
-                        $placeholder = (string)$v;
-                    }
-                    $values[] = $placeholder;
-                }
-                $query = '(' . implode(', ', $values) . ')';
-                $queries[] = $query;
-            }
-            $sql .= implode(',', $queries) . $upsertClause;
-
-            return $sql;
+            return $sql . (implode(', ', $values) . $upsertClause . ';');
         }
+        $queries = [];
+        foreach ($rows as $row) {
+            $values = [];
+            foreach ($row as $v) {
+                $placeholder = '?';
+                if ($v instanceof Literal) {
+                    $placeholder = (string)$v;
+                }
+                $values[] = $placeholder;
+            }
+            $query = '(' . implode(', ', $values) . ')';
+            $queries[] = $query;
+        }
+
+        return $sql . implode(',', $queries) . $upsertClause;
     }
 
     /**
@@ -969,7 +947,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         // Autodetect mode (config is null or not set)
         // Check if the main legacy phinxlog table exists
-        if ($this->connection !== null) {
+        if ($this->connection instanceof Connection) {
             $dialect = $this->connection->getDriver()->schemaDialect();
             if ($dialect->hasTable('phinxlog')) {
                 return false;
@@ -987,16 +965,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function getVersionLog(): array
     {
-        switch ($this->options['version_order']) {
-            case Config::VERSION_ORDER_CREATION_TIME:
-                $orderBy = ['version' => 'ASC'];
-                break;
-            case Config::VERSION_ORDER_EXECUTION_TIME:
-                $orderBy = ['start_time' => 'ASC', 'version' => 'ASC'];
-                break;
-            default:
-                throw new RuntimeException('Invalid version_order configuration option');
-        }
+        $orderBy = match ($this->options['version_order']) {
+            Config::VERSION_ORDER_CREATION_TIME => ['version' => 'ASC'],
+            Config::VERSION_ORDER_EXECUTION_TIME => ['start_time' => 'ASC', 'version' => 'ASC'],
+            default => throw new RuntimeException('Invalid version_order configuration option'),
+        };
         $query = $this->migrationsTable()->getVersions($orderBy);
 
         // This will throw an exception if doing a --dry-run without any migrations as phinxlog
@@ -1113,7 +1086,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function seedExecuted(SeedInterface $seed, string $executedTime): AdapterInterface
     {
         $plugin = null;
-        $className = get_class($seed);
+        $className = $seed::class;
 
         if (str_contains($className, '\\')) {
             $parts = explode('\\', $className);
@@ -1144,7 +1117,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function removeSeedFromLog(SeedInterface $seed): AdapterInterface
     {
         $plugin = null;
-        $className = get_class($seed);
+        $className = $seed::class;
 
         if (str_contains($className, '\\')) {
             $parts = explode('\\', $className);
@@ -1278,7 +1251,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $default = $this->castToBool((bool)$default);
         }
 
-        return isset($default) ? " DEFAULT $default" : '';
+        return isset($default) ? ' DEFAULT ' . $default : '';
     }
 
     /**
@@ -1291,7 +1264,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     protected function executeAlterSteps(string $tableName, AlterInstructions $instructions): void
     {
         $alter = sprintf('ALTER TABLE %s %%s', $this->quoteTableName($tableName));
-        $instructions->execute($alter, [$this, 'execute']);
+        $instructions->execute($alter, $this->execute(...));
     }
 
     /**
@@ -1710,7 +1683,6 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     break;
 
                 case $action instanceof DropTable:
-                    /** @var \Migrations\Db\Action\DropTable $action */
                     $instructions->merge($this->getDropTableInstructions(
                         $table->getName(),
                     ));
@@ -1777,7 +1749,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 default:
                     throw new InvalidArgumentException(
-                        sprintf("Don't know how to execute action `%s`", get_class($action)),
+                        sprintf("Don't know how to execute action `%s`", $action::class),
                     );
             }
         }

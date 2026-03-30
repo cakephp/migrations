@@ -26,7 +26,7 @@ class EntryCommandTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
     }
@@ -36,7 +36,7 @@ class EntryCommandTest extends TestCase
      *
      * @return void
      */
-    public function testExecuteHelp()
+    public function testExecuteHelp(): void
     {
         $this->exec('migrations --help');
 
@@ -51,7 +51,7 @@ class EntryCommandTest extends TestCase
      *
      * @return void
      */
-    public function testExecuteMissingCommand()
+    public function testExecuteMissingCommand(): void
     {
         $this->exec('migrations derp');
 

@@ -4,7 +4,7 @@ use Migrations\BaseMigration;
 
 class SecondDropFkMigration extends BaseMigration
 {
-    public function change()
+    public function change(): void
     {
         $this->table('customers')
             ->addColumn('name', 'text')

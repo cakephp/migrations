@@ -31,8 +31,6 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
 {
     /**
      * The command collection to get help on.
-     *
-     * @var \Cake\Console\CommandCollection
      */
     protected CommandCollection $commands;
 
@@ -109,7 +107,7 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
         if ($args->hasArgumentAt(0)) {
             $name = $args->getArgumentAt(0);
             $io->err(
-                "<error>Could not find migrations command named `$name`."
+                sprintf('<error>Could not find migrations command named `%s`.', $name)
                 . ' Run `migrations --help` to get a list of commands.</error>',
             );
 
@@ -135,7 +133,7 @@ class EntryCommand extends Command implements CommandCollectionAwareInterface
 
                 // Remove `migrations`
                 array_shift($parts);
-                if (count($parts) === 0) {
+                if ($parts === []) {
                     continue;
                 }
                 $commands[$command] = $class;

@@ -14,10 +14,12 @@ use RuntimeException;
 class DumpCommandTest extends TestCase
 {
     protected Connection $connection;
+
     protected string $_compareBasePath;
+
     protected string $dumpFile;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -32,7 +34,7 @@ class DumpCommandTest extends TestCase
         $this->dumpFile = ROOT . DS . 'config/TestsMigrations/schema-dump-test.lock';
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
 

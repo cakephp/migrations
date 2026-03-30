@@ -61,7 +61,19 @@ parameters:
 			path: src/Migration/Environment.php
 
 		-
+			message: '#^Method Migrations\\Migration\\Manager\:\:getMigrationClassName\(\) should return class\-string\<Migrations\\MigrationInterface\> but returns string\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Migration/Manager.php
+
+		-
 			message: '#^Parameter \#1 \.\.\.\$arg1 of function max expects non\-empty\-array, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Migration/Manager.php
+
+		-
+			message: '#^Parameter \#3 \$length of function substr expects int\|null, int\<0, max\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Migration/Manager.php

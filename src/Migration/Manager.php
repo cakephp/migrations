@@ -24,23 +24,16 @@ use RuntimeException;
 class Manager
 {
     public const BREAKPOINT_TOGGLE = 1;
+
     public const BREAKPOINT_SET = 2;
+
     public const BREAKPOINT_UNSET = 3;
 
-    /**
-     * @var \Migrations\Config\ConfigInterface
-     */
     protected ConfigInterface $config;
 
-    /**
-     * @var \Cake\Console\ConsoleIo
-     */
     protected ConsoleIo $io;
 
-    /**
-     * @var \Migrations\Migration\Environment|null
-     */
-    protected ?Environment $environment;
+    protected ?Environment $environment = null;
 
     /**
      * @var \Migrations\MigrationInterface[]|null
@@ -52,9 +45,6 @@ class Manager
      */
     protected ?array $seeds = null;
 
-    /**
-     * @var \Psr\Container\ContainerInterface
-     */
     protected ContainerInterface $container;
 
     /**
@@ -225,7 +215,7 @@ class Manager
         $seedLog = $adapter->getSeedLog();
 
         $plugin = null;
-        $className = get_class($seed);
+        $className = $seed::class;
 
         if (str_contains($className, '\\')) {
             $parts = explode('\\', $className);
@@ -306,7 +296,7 @@ class Manager
         }
 
         // Check if the file returns an anonymous class instance
-        if (is_object($migrationInstance) && $migrationInstance instanceof MigrationInterface) {
+        if ($migrationInstance instanceof MigrationInterface) {
             $migration = $migrationInstance;
             $migration->setVersion($version);
         } elseif (class_exists($className)) {
@@ -336,15 +326,14 @@ class Manager
      */
     protected function getMigrationClassName(string $path): string
     {
-        $class = (string)preg_replace('/^[0-9]+_/', '', basename($path));
+        $class = (string)preg_replace('/^\d+_/', '', basename($path));
         $class = str_replace('_', ' ', $class);
         $class = ucwords($class);
         $class = str_replace(' ', '', $class);
-        if (strpos($class, '.') !== false) {
-            $class = substr($class, 0, strpos($class, '.'));
+        if (str_contains($class, '.')) {
+            return substr($class, 0, strpos($class, '.'));
         }
 
-        /** @var class-string<\Migrations\MigrationInterface> */
         return $class;
     }
 
@@ -376,17 +365,17 @@ class Manager
 
         if ($args->getOption('only') || $versionArg) {
             if (!in_array($version, $versions)) {
-                throw new InvalidArgumentException("Migration `$version` was not found !");
+                throw new InvalidArgumentException(sprintf('Migration `%d` was not found !', $version));
             }
 
             return [$version];
         }
 
         $lengthIncrease = $args->getOption('exclude') ? 0 : 1;
-        $index = array_search($version, $versions);
+        $index = array_search($version, $versions, true);
 
         if ($index === false) {
-            throw new InvalidArgumentException("Migration `$version` was not found !");
+            throw new InvalidArgumentException(sprintf('Migration `%d` was not found !', $version));
         }
 
         return array_slice($versions, 0, $index + $lengthIncrease);
@@ -460,15 +449,13 @@ class Manager
 
         if ($version === null) {
             $version = max(array_merge($versions, array_keys($migrations)));
-        } else {
-            if ($version !== 0 && !isset($migrations[$version])) {
-                $this->getIo()->out(sprintf(
-                    '<comment>warning</comment> %s is not a valid version',
-                    $version,
-                ));
+        } elseif ($version !== 0 && !isset($migrations[$version])) {
+            $this->getIo()->out(sprintf(
+                '<comment>warning</comment> %s is not a valid version',
+                $version,
+            ));
 
-                return;
-            }
+            return;
         }
 
         // are we migrating up or down?
@@ -583,14 +570,12 @@ class Manager
 
         // Auto-execute missing dependencies
         $missingDeps = $this->getSeedDependenciesNotExecuted($seed);
-        if (!empty($missingDeps)) {
-            foreach ($missingDeps as $depSeed) {
-                $this->getIo()->verbose(sprintf(
-                    '  Auto-executing dependency: %s',
-                    $depSeed->getName(),
-                ));
-                $this->executeSeed($depSeed, $force, $fake);
-            }
+        foreach ($missingDeps as $depSeed) {
+            $this->getIo()->verbose(sprintf(
+                '  Auto-executing dependency: %s',
+                $depSeed->getName(),
+            ));
+            $this->executeSeed($depSeed, $force, $fake);
         }
 
         $this->printSeedStatus($seed, 'seeding');
@@ -733,7 +718,7 @@ class Manager
             $target = 0;
         } elseif (!is_numeric($target) && $target !== null) { // try to find a target version based on name
             // search through the migrations using the name
-            $migrationNames = array_map(function ($item) {
+            $migrationNames = array_map(function (array $item) {
                 return $item['migration_name'];
             }, $executedVersions);
             $found = array_search($target, $migrationNames, true);
@@ -742,7 +727,7 @@ class Manager
             if ($found !== false) {
                 $target = (string)$found;
             } else {
-                $io->out("<error>No migration found with name ($target)</error>");
+                $io->out(sprintf('<error>No migration found with name (%s)</error>', $target));
 
                 return;
             }
@@ -765,7 +750,7 @@ class Manager
 
         // If the target must match a version, check the target version exists
         if ($targetMustMatchVersion && $target !== 0 && !isset($migrations[$target])) {
-            $io->out("<error>Target version ($target) not found</error>");
+            $io->out(sprintf('<error>Target version (%s) not found</error>', $target));
 
             return;
         }
@@ -781,13 +766,8 @@ class Manager
             if (in_array($migration->getVersion(), $executedVersionCreationTimes)) {
                 $executedArray = $executedVersions[$migration->getVersion()];
 
-                if (!$targetMustMatchVersion) {
-                    if (
-                        ($this->getConfig()->isVersionOrderCreationTime() && $executedArray['version'] <= $target) ||
-                        (!$this->getConfig()->isVersionOrderCreationTime() && $executedArray['start_time'] <= $target)
-                    ) {
-                        break;
-                    }
+                if (!$targetMustMatchVersion && ($this->getConfig()->isVersionOrderCreationTime() && $executedArray['version'] <= $target || !$this->getConfig()->isVersionOrderCreationTime() && $executedArray['start_time'] <= $target)) {
+                    break;
                 }
 
                 if ((int)$executedArray['breakpoint'] !== 0 && !$force) {
@@ -843,7 +823,7 @@ class Manager
      */
     public function getEnvironment(): Environment
     {
-        if (isset($this->environment)) {
+        if ($this->environment instanceof Environment) {
             return $this->environment;
         }
 
@@ -885,7 +865,6 @@ class Manager
     /**
      * Replace the environment
      *
-     * @param \Migrations\Migration\Environment $environment
      * @return $this
      */
     public function setEnvironment(Environment $environment)
@@ -937,8 +916,8 @@ class Manager
             $io->verbose('Migration file');
             $io->verbose(
                 array_map(
-                    function ($phpFile) {
-                        return "    <info>{$phpFile}</info>";
+                    function (string $phpFile): string {
+                        return sprintf('    <info>%s</info>', $phpFile);
                     },
                     $phpFiles,
                 ),
@@ -952,7 +931,7 @@ class Manager
             $io = $this->getIo();
             foreach ($phpFiles as $filePath) {
                 if (Util::isValidMigrationFileName(basename($filePath))) {
-                    $io->verbose("Valid migration file <info>{$filePath}</info>.");
+                    $io->verbose(sprintf('Valid migration file <info>%s</info>.', $filePath));
 
                     $version = Util::getVersionFromFileName(basename($filePath));
 
@@ -973,7 +952,7 @@ class Manager
 
                     $fileNames[$class] = basename($filePath);
 
-                    $io->verbose("Loading class <info>$class</info> from <info>$filePath</info>.");
+                    $io->verbose(sprintf('Loading class <info>%s</info> from <info>%s</info>.', $class, $filePath));
 
                     $this->checkMigrationClass($filePath);
 
@@ -992,13 +971,13 @@ class Manager
                     ini_set('display_errors', $orig_display_errors_setting);
 
                     // Check if the file returns an anonymous class instance
-                    if (is_object($migrationInstance) && $migrationInstance instanceof MigrationInterface) {
-                        $io->verbose("Using anonymous class from <info>$filePath</info>.");
+                    if ($migrationInstance instanceof MigrationInterface) {
+                        $io->verbose(sprintf('Using anonymous class from <info>%s</info>.', $filePath));
                         $migration = $migrationInstance;
                         $migration->setVersion($version);
                     } elseif (class_exists($class)) {
                         // Fall back to traditional class-based migration
-                        $io->verbose("Constructing <info>$class</info>.");
+                        $io->verbose(sprintf('Constructing <info>%s</info>.', $class));
                         $migration = new $class($version);
                     } else {
                         throw new InvalidArgumentException(sprintf(
@@ -1015,7 +994,7 @@ class Manager
 
                     $versions[$version] = $migration;
                 } else {
-                    $io->verbose("Invalid migration file <error>{$filePath}</error>.");
+                    $io->verbose(sprintf('Invalid migration file <error>%s</error>.', $filePath));
                 }
             }
 
@@ -1205,19 +1184,15 @@ class Manager
                     }
 
                     // Check if the file returns an anonymous class instance
-                    if (is_object($seedInstance) && $seedInstance instanceof SeedInterface) {
-                        $io->verbose("Using anonymous class from <info>$filePath</info>.");
+                    if ($seedInstance instanceof SeedInterface) {
+                        $io->verbose(sprintf('Using anonymous class from <info>%s</info>.', $filePath));
                         $seed = $seedInstance;
                     } elseif (class_exists($class)) {
                         // Fall back to traditional class-based seed
-                        $io->verbose("Instantiating <info>$class</info>.");
+                        $io->verbose(sprintf('Instantiating <info>%s</info>.', $class));
                         // instantiate it
                         /** @var \Migrations\SeedInterface $seed */
-                        if (isset($this->container)) {
-                            $seed = $this->container->get($class);
-                        } else {
-                            $seed = new $class();
-                        }
+                        $seed = isset($this->container) ? $this->container->get($class) : new $class();
                     } else {
                         throw new InvalidArgumentException(sprintf(
                             'Could not find class `%s` in file `%s` and file did not return a seed instance',
@@ -1432,7 +1407,7 @@ class Manager
 
         // Find missing migrations (those in migration table but not in filesystem)
         $missingVersions = [];
-        foreach ($versions as $versionId => $versionInfo) {
+        foreach (array_keys($versions) as $versionId) {
             if (!isset($defaultMigrations[$versionId])) {
                 $missingVersions[] = $versionId;
             }

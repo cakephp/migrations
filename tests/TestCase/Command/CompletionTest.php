@@ -24,12 +24,14 @@ class CompletionTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
+    public $Shell;
+
     /**
      * tearDown
      *
      * @return void
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         unset($this->Shell);
@@ -41,7 +43,7 @@ class CompletionTest extends TestCase
      *
      * @return void
      */
-    public function testMigrationsSubcommands()
+    public function testMigrationsSubcommands(): void
     {
         $this->exec('completion subcommands migrations.migrations');
         // Upgrade command is hidden when legacyTables is disabled
@@ -64,7 +66,7 @@ class CompletionTest extends TestCase
      *
      * @return void
      */
-    public function testMigrationsOptionsMarkMigrated()
+    public function testMigrationsOptionsMarkMigrated(): void
     {
         $this->exec('completion options migrations.migrations mark_migrated');
         $this->assertCount(1, $this->_out->messages());
@@ -85,7 +87,7 @@ class CompletionTest extends TestCase
      *
      * @return void
      */
-    public function testMigrationsOptionsMigrate()
+    public function testMigrationsOptionsMigrate(): void
     {
         $this->exec('completion options migrations.migrations migrate');
         $this->assertCount(1, $this->_out->messages());
@@ -106,7 +108,7 @@ class CompletionTest extends TestCase
      *
      * @return void
      */
-    public function testMigrationsOptionsRollback()
+    public function testMigrationsOptionsRollback(): void
     {
         $this->exec('completion options migrations.migrations rollback');
         $this->assertCount(1, $this->_out->messages());
@@ -127,7 +129,7 @@ class CompletionTest extends TestCase
      *
      * @return void
      */
-    public function testMigrationsOptionsStatus()
+    public function testMigrationsOptionsStatus(): void
     {
         $this->exec('completion options migrations.migrations status');
         $this->assertCount(1, $this->_out->messages());

@@ -44,22 +44,16 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
 
     /**
      * path to Migration directory
-     *
-     * @var string
      */
     public string $pathFragment = 'config';
 
     /**
      * Console IO
-     *
-     * @var \Cake\Console\ConsoleIo|null
      */
     protected ?ConsoleIo $io = null;
 
     /**
      * Arguments
-     *
-     * @var \Cake\Console\Arguments|null
      */
     protected ?Arguments $args = null;
 
@@ -154,7 +148,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->io = $io;
         $this->args = $args;
@@ -189,6 +183,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $renderer = new TemplateRenderer($this->theme);
         $renderer->set('name', $name);
         $renderer->set($this->templateData($args));
+
         $contents = $renderer->generate($this->template());
 
         $path = $this->getPath($args);
@@ -271,7 +266,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * If reserved PHP keyword.
      *
-     * @param string $name
      * @return bool
      */
     protected function isReservedKeyword(string $name): bool

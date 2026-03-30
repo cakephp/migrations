@@ -54,16 +54,16 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     public function writeCommand(string $command, array $args = []): void
     {
         $io = $this->getIo();
-        if ($io && $io->level() < ConsoleIo::VERBOSE) {
+        if ($io instanceof ConsoleIo && $io->level() < ConsoleIo::VERBOSE) {
             return;
         }
-        if (count($args)) {
+        if ($args !== []) {
             $outArr = [];
             foreach ($args as $arg) {
                 if (is_array($arg)) {
                     $arg = array_map(
-                        function ($value) {
-                            return '\'' . $value . '\'';
+                        function (string $value): string {
+                            return "'" . $value . "'";
                         },
                         $arg,
                     );
@@ -71,7 +71,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
                     continue;
                 }
 
-                $outArr[] = '\'' . $arg . '\'';
+                $outArr[] = "'" . $arg . "'";
             }
             $this->getIo()?->verbose(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
 

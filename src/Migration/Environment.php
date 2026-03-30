@@ -18,9 +18,6 @@ use RuntimeException;
 
 class Environment
 {
-    /**
-     * @var string
-     */
     protected string $name;
 
     /**
@@ -28,24 +25,12 @@ class Environment
      */
     protected array $options;
 
-    /**
-     * @var \Cake\Console\ConsoleIo|null
-     */
     protected ?ConsoleIo $io = null;
 
-    /**
-     * @var int
-     */
     protected int $currentVersion;
 
-    /**
-     * @var string
-     */
     protected string $schemaTableName = 'phinxlog';
 
-    /**
-     * @var \Migrations\Db\Adapter\AdapterInterface
-     */
     protected AdapterInterface $adapter;
 
     /**
@@ -323,7 +308,7 @@ class Environment
 
         // Get the driver classname as those are aligned with adapter names.
         $driver = $connection->getDriver();
-        $driverClass = get_class($driver);
+        $driverClass = $driver::class;
         $driverName = strtolower(substr($driverClass, (int)strrpos($driverClass, '\\') + 1));
         $options['adapter'] = $driverName;
 
@@ -340,7 +325,7 @@ class Environment
         }
 
         $io = $this->getIo();
-        if ($io) {
+        if ($io instanceof ConsoleIo) {
             $adapter->setIo($io);
         }
         $this->setAdapter($adapter);

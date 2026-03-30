@@ -37,7 +37,7 @@ class Util
      * @var string
      * @phpstan-var non-empty-string
      */
-    protected const MIGRATION_FILE_NAME_NO_NAME_PATTERN = '/^[0-9]{14}\.php$/';
+    protected const MIGRATION_FILE_NAME_NO_NAME_PATTERN = '/^\d{14}\.php$/';
 
     /**
      * Enhanced migration file name pattern with readable timestamp and CamelCase
@@ -115,7 +115,7 @@ class Util
         }
 
         // Traditional format
-        preg_match('/^[0-9]+/', $baseName, $matches);
+        preg_match('/^\d+/', $baseName, $matches);
         $value = (int)($matches[0] ?? null);
         if (!$value) {
             throw new RuntimeException(sprintf('Cannot get a valid version from filename `%s`', $fileName));
@@ -134,13 +134,12 @@ class Util
      */
     public static function mapClassNameToFileName(string $className): string
     {
-        $snake = function ($matches) {
-            return '_' . strtolower($matches[0]);
+        $snake = function ($matches): string {
+            return '_' . strtolower((string)$matches[0]);
         };
         $fileName = preg_replace_callback('/\d+|[A-Z]/', $snake, $className);
-        $fileName = static::getCurrentTimestamp() . "$fileName.php";
 
-        return $fileName;
+        return static::getCurrentTimestamp() . $fileName . '.php';
     }
 
     /**
@@ -250,7 +249,7 @@ class Util
      */
     public static function getFiles(string|array $paths): array
     {
-        $files = static::globAll(array_map(function ($path) {
+        $files = static::globAll(array_map(function (string $path): string {
             return $path . DIRECTORY_SEPARATOR . '*.php';
         }, (array)$paths));
         // glob() can return the same file multiple times
@@ -263,7 +262,6 @@ class Util
     }
 
     /**
-     * @param string|null $plugin
      * @return string
      */
     public static function tableName(?string $plugin): string

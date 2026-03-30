@@ -3,13 +3,14 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Exception\MissingPluginException;
 use Migrations\Test\TestCase\TestCase;
 use RuntimeException;
 
 class StatusCommandTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -41,7 +42,7 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --format json');
         $this->assertExitSuccess();
 
-        assert(isset($this->_out));
+        assert($this->_out instanceof StubConsoleOutput);
         $output = $this->_out->messages();
         $parsed = json_decode($output[0], true);
         $this->assertTrue(is_array($parsed));

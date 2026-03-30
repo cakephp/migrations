@@ -122,7 +122,6 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param string $plugin
      * @return bool
      */
     protected function checkPluginMigrations(string $plugin): bool
@@ -158,7 +157,6 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return bool
      */
     protected function isSkipped(ServerRequestInterface $request): bool

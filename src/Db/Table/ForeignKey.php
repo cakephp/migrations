@@ -23,11 +23,17 @@ use RuntimeException;
 class ForeignKey extends DatabaseForeignKey
 {
     public const CASCADE = 'CASCADE';
+
     public const RESTRICT = 'RESTRICT';
+
     public const SET_NULL = 'SET NULL';
+
     public const NO_ACTION = 'NO ACTION';
+
     public const DEFERRED = 'DEFERRABLE INITIALLY DEFERRED';
+
     public const IMMEDIATE = 'DEFERRABLE INITIALLY IMMEDIATE';
+
     public const NOT_DEFERRED = 'NOT DEFERRABLE';
 
     /**

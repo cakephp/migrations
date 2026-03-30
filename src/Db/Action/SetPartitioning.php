@@ -16,9 +16,6 @@ use Migrations\Db\Table\TableMetadata;
  */
 class SetPartitioning extends Action
 {
-    /**
-     * @var \Migrations\Db\Table\Partition
-     */
     protected Partition $partition;
 
     /**

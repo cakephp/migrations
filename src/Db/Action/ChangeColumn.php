@@ -15,15 +15,11 @@ class ChangeColumn extends Action
 {
     /**
      * The column definition
-     *
-     * @var \Migrations\Db\Table\Column
      */
     protected Column $column;
 
     /**
      * The name of the column to be changed
-     *
-     * @var string
      */
     protected string $columnName;
 
@@ -41,7 +37,7 @@ class ChangeColumn extends Action
         $this->column = $column;
 
         // if the name was omitted use the existing column name
-        if ($column->getName() === null || strlen((string)$column->getName()) === 0) {
+        if ($column->getName() === null || $column->getName() === '') {
             $column->setName($columnName);
         }
     }

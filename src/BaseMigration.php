@@ -30,24 +30,18 @@ class BaseMigration implements MigrationInterface
 {
     /**
      * The Adapter instance
-     *
-     * @var \Migrations\Db\Adapter\AdapterInterface
      */
     protected ?AdapterInterface $adapter = null;
 
     /**
      * The ConsoleIo instance
-     *
-     * @var \Cake\Console\ConsoleIo
      */
     protected ?ConsoleIo $io = null;
 
     /**
      * The config instance.
-     *
-     * @var \Migrations\Config\ConfigInterface
      */
-    protected ?ConfigInterface $config;
+    protected ?ConfigInterface $config = null;
 
     /**
      * List of all the table objects created by this migration
@@ -58,15 +52,11 @@ class BaseMigration implements MigrationInterface
 
     /**
      * Is migrating up prop
-     *
-     * @var bool
      */
     protected bool $isMigratingUp = true;
 
     /**
      * The version number.
-     *
-     * @var int
      */
     protected int $version;
 
@@ -77,8 +67,6 @@ class BaseMigration implements MigrationInterface
      * This option is global for all tables created in the migration file.
      * If you set it to false, you have to manually add the primary keys for your
      * tables using the Migrations\Table::addPrimaryKey() method
-     *
-     * @var bool
      */
     public bool $autoId = true;
 
@@ -110,7 +98,7 @@ class BaseMigration implements MigrationInterface
      */
     public function getAdapter(): AdapterInterface
     {
-        if (!$this->adapter) {
+        if (!$this->adapter instanceof AdapterInterface) {
             throw new RuntimeException('Adapter not set.');
         }
 
@@ -458,18 +446,13 @@ class BaseMigration implements MigrationInterface
      */
     public function preFlightCheck(): void
     {
-        if (method_exists($this, MigrationInterface::CHANGE)) {
-            if (
-                method_exists($this, MigrationInterface::UP) ||
-                method_exists($this, MigrationInterface::DOWN)
-            ) {
-                $io = $this->getIo();
-                if ($io) {
-                    $io->out(
-                        '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
-                        ' <warning>Ignoring up() and down()</warning>.',
-                    );
-                }
+        if (method_exists($this, MigrationInterface::CHANGE) && (method_exists($this, MigrationInterface::UP) || method_exists($this, MigrationInterface::DOWN))) {
+            $io = $this->getIo();
+            if ($io instanceof ConsoleIo) {
+                $io->out(
+                    '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
+                    ' <warning>Ignoring up() and down()</warning>.',
+                );
             }
         }
     }

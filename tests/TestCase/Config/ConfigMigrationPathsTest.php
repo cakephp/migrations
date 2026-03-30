@@ -10,7 +10,7 @@ use UnexpectedValueException;
  */
 class ConfigMigrationPathsTest extends AbstractConfigTestCase
 {
-    public function testGetMigrationPathsThrowsExceptionForNoPath()
+    public function testGetMigrationPathsThrowsExceptionForNoPath(): void
     {
         $config = new Config([]);
 
@@ -22,7 +22,7 @@ class ConfigMigrationPathsTest extends AbstractConfigTestCase
     /**
      * Normal behavior
      */
-    public function testGetMigrationPaths()
+    public function testGetMigrationPaths(): void
     {
         $config = new Config($this->getConfigArray());
         $this->assertEquals($this->getMigrationPath(), $config->getMigrationPath());

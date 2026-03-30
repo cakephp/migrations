@@ -13,6 +13,7 @@ use Migrations\Config\Config;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Migration\Environment;
 use Migrations\Migration\Manager;
+use Migrations\MigrationInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -40,10 +41,7 @@ class ManagerTest extends TestCase
      */
     protected $in;
 
-    /**
-     * @var Manager
-     */
-    private $manager;
+    private ?Manager $manager = null;
 
     protected function setUp(): void
     {
@@ -51,6 +49,7 @@ class ManagerTest extends TestCase
 
         $this->out = new StubConsoleOutput();
         $this->out->setOutputAs(StubConsoleOutput::PLAIN);
+
         $this->in = new StubConsoleInput([]);
 
         $this->io = new ConsoleIo($this->out, $this->out, $this->in);
@@ -70,19 +69,14 @@ class ManagerTest extends TestCase
     protected function getOutput(): string
     {
         $lines = $this->out->messages();
-        $lines = array_map(fn($line) => strip_tags($line), $lines);
+        $lines = array_map(strip_tags(...), $lines);
 
-        return join("\n", $lines);
+        return implode("\n", $lines);
     }
 
     protected function tearDown(): void
     {
         $this->manager = null;
-    }
-
-    private static function getCorrectedPath(string $path): string
-    {
-        return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
 
     /**
@@ -306,7 +300,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testPrintStatusMethodWithNoMigrations()
+    public function testPrintStatusMethodWithNoMigrations(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -325,7 +319,7 @@ class ManagerTest extends TestCase
         $this->assertEquals([], $return);
     }
 
-    public function testPrintStatusMethodWithMissingMigrations()
+    public function testPrintStatusMethodWithMissingMigrations(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -384,7 +378,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testPrintStatusMethodWithMissingLastMigration()
+    public function testPrintStatusMethodWithMissingLastMigration(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -445,7 +439,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testPrintStatusMethodWithMissingMigrationsAndBreakpointSet()
+    public function testPrintStatusMethodWithMissingMigrationsAndBreakpointSet(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -504,7 +498,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testPrintStatusMethodWithDownMigrations()
+    public function testPrintStatusMethodWithDownMigrations(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -540,7 +534,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testPrintStatusMethodWithMissingAndDownMigrations()
+    public function testPrintStatusMethodWithMissingAndDownMigrations(): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -605,7 +599,7 @@ class ManagerTest extends TestCase
         $this->assertEquals($expected, $return);
     }
 
-    public function testGetMigrationsWithDuplicateMigrationVersions()
+    public function testGetMigrationsWithDuplicateMigrationVersions(): void
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/Duplicateversions']]);
         $manager = new Manager($config, $this->io);
@@ -616,7 +610,7 @@ class ManagerTest extends TestCase
         $manager->getMigrations();
     }
 
-    public function testGetMigrationsWithDuplicateMigrationNames()
+    public function testGetMigrationsWithDuplicateMigrationNames(): void
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/Duplicatenames']]);
         $manager = new Manager($config, $this->io);
@@ -627,7 +621,7 @@ class ManagerTest extends TestCase
         $manager->getMigrations();
     }
 
-    public function testGetMigrationsWithInvalidMigrationClassName()
+    public function testGetMigrationsWithInvalidMigrationClassName(): void
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/Invalidclassname']]);
         $manager = new Manager($config, $this->io);
@@ -651,7 +645,7 @@ class ManagerTest extends TestCase
         $manager->getMigrations();
     }
 
-    public function testGetMigrationsWithAnonymousClass()
+    public function testGetMigrationsWithAnonymousClass(): void
     {
         $config = new Config(['paths' => ['migrations' => ROOT . '/config/AnonymousMigrations']]);
         $manager = new Manager($config, $this->io);
@@ -665,13 +659,13 @@ class ManagerTest extends TestCase
         $migration = reset($migrations);
 
         // Check that it's a valid migration object
-        $this->assertInstanceOf('\Migrations\MigrationInterface', $migration);
+        $this->assertInstanceOf(MigrationInterface::class, $migration);
 
         // Check the version was set correctly (2024_12_08_150000 => 20241208150000)
         $this->assertEquals(20241208150000, $migration->getVersion());
     }
 
-    public function testGettingAValidEnvironment()
+    public function testGettingAValidEnvironment(): void
     {
         $this->assertInstanceOf(
             Environment::class,
@@ -684,12 +678,9 @@ class ManagerTest extends TestCase
      * migration to point to.
      *
      * @param string[] $availableMigrations
-     * @param string $dateString
-     * @param string $expectedMigration
-     * @param string $message
      */
     #[DataProvider('migrateDateDataProvider')]
-    public function testMigrationsByDate(array $availableMigrations, $dateString, $expectedMigration, $message)
+    public function testMigrationsByDate(array $availableMigrations, string $dateString, string $expectedMigration, string $message): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -719,12 +710,10 @@ class ManagerTest extends TestCase
      * migration to point to.
      *
      * @param string[] $availableMigrations
-     * @param int $count
      * @param string $expectedMigration
-     * @param string $message
      */
     #[DataProvider('migrateByCountDataProvider')]
-    public function testMigrationsByCount(array $availableMigrations, $count, $expectedMigration, $message)
+    public function testMigrationsByCount(array $availableMigrations, int $count, ?string $expectedMigration, string $message): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -744,7 +733,7 @@ class ManagerTest extends TestCase
         // Mock getMigrations to return the available migrations
         $migrations = [];
         foreach ($availableMigrations as $version) {
-            $migration = $this->getMockBuilder('\Migrations\MigrationInterface')
+            $migration = $this->getMockBuilder(MigrationInterface::class)
                 ->getMock();
             $migration->expects($this->any())
                 ->method('getVersion')
@@ -758,11 +747,11 @@ class ManagerTest extends TestCase
         // Use reflection to set the migrations property
         $reflection = new ReflectionClass($this->manager);
         $migrationsProperty = $reflection->getProperty('migrations');
-        $migrationsProperty->setAccessible(true);
         $migrationsProperty->setValue($this->manager, $migrations);
 
         $this->manager->setEnvironment($envStub);
         $this->manager->migrate(null, false, $count);
+
         $output = $this->getOutput();
         if (is_null($expectedMigration)) {
             $this->assertEmpty($output, $message);
@@ -776,7 +765,7 @@ class ManagerTest extends TestCase
      * migration to point to.
      */
     #[DataProvider('rollbackToVersionDataProvider')]
-    public function testRollbackToVersion($availableRollbacks, $version, $expectedOutput)
+    public function testRollbackToVersion(array $availableRollbacks, ?string $version, string|array|null $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -788,6 +777,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version);
+
         $output = $this->getOutput();
         if (is_null($expectedOutput)) {
             $output = explode("\n", $output);
@@ -808,7 +798,7 @@ class ManagerTest extends TestCase
      * migration to point to.
      */
     #[DataProvider('rollbackToDateDataProvider')]
-    public function testRollbackToDate($availableRollbacks, $version, $expectedOutput)
+    public function testRollbackToDate(array $availableRollbacks, string $version, string|array|null $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -820,6 +810,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version, false, false);
+
         $output = $this->getOutput();
         if (is_null($expectedOutput)) {
             $output = explode("\n", $output);
@@ -839,7 +830,7 @@ class ManagerTest extends TestCase
      * Test that rollbacking with count stops at the right migration.
      */
     #[DataProvider('rollbackByCountDataProvider')]
-    public function testRollbackByCount($availableRollbacks, $count, $expectedOutput)
+    public function testRollbackByCount(array $availableRollbacks, int $count, string|array|null $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -852,7 +843,7 @@ class ManagerTest extends TestCase
         // Mock getMigrations to return migrations matching the version log
         $migrations = [];
         foreach ($availableRollbacks as $version => $details) {
-            $migration = $this->getMockBuilder('\Migrations\MigrationInterface')
+            $migration = $this->getMockBuilder(MigrationInterface::class)
                 ->getMock();
             $migration->expects($this->any())
                 ->method('getVersion')
@@ -869,11 +860,11 @@ class ManagerTest extends TestCase
         // Use reflection to set the migrations property
         $reflection = new ReflectionClass($this->manager);
         $migrationsProperty = $reflection->getProperty('migrations');
-        $migrationsProperty->setAccessible(true);
         $migrationsProperty->setValue($this->manager, $migrations);
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollbackByCount($count);
+
         $output = $this->getOutput();
         if (is_null($expectedOutput)) {
             $output = explode("\n", $output);
@@ -894,7 +885,7 @@ class ManagerTest extends TestCase
      * migration to point to.
      */
     #[DataProvider('rollbackToVersionByExecutionTimeDataProvider')]
-    public function testRollbackToVersionByExecutionTime($availableRollbacks, $version, $expectedOutput)
+    public function testRollbackToVersionByExecutionTime(array $availableRollbacks, ?string $version, string|array $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -912,6 +903,7 @@ class ManagerTest extends TestCase
         $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($version);
+
         $output = $this->getOutput();
 
         if (is_null($expectedOutput)) {
@@ -932,7 +924,7 @@ class ManagerTest extends TestCase
      * migration to point to.
      */
     #[DataProvider('rollbackToVersionByExecutionTimeDataProvider')]
-    public function testRollbackToVersionByName($availableRollbacks, $version, $expectedOutput)
+    public function testRollbackToVersionByName(array $availableRollbacks, ?string $version, string|array $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -950,6 +942,7 @@ class ManagerTest extends TestCase
         $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($availableRollbacks[$version]['migration_name'] ?? $version);
+
         $output = $this->getOutput();
 
         if (is_null($expectedOutput)) {
@@ -970,7 +963,7 @@ class ManagerTest extends TestCase
      * migration to point to.
      */
     #[DataProvider('rollbackToDateByExecutionTimeDataProvider')]
-    public function testRollbackToDateByExecutionTime($availableRollbacks, $date, $expectedOutput)
+    public function testRollbackToDateByExecutionTime(array $availableRollbacks, ?string $date, string|array|null $expectedOutput): void
     {
         // stub environment
         $envStub = $this->getMockBuilder(Environment::class)
@@ -988,6 +981,7 @@ class ManagerTest extends TestCase
         $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback($date, false, false);
+
         $output = $this->getOutput();
 
         if (is_null($expectedOutput)) {
@@ -1021,6 +1015,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
+
         $output = $this->getOutput();
 
         $this->assertStringContainsString('== 20120111235330 TestMigration: reverting', $output);
@@ -1054,6 +1049,7 @@ class ManagerTest extends TestCase
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
+
         $output = $this->getOutput();
 
         $this->assertStringNotContainsString('== 20120111235330 TestMigration: reverting', $output);
@@ -1080,7 +1076,8 @@ class ManagerTest extends TestCase
 
         $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback(null);
+        $this->manager->rollback();
+
         $output = $this->getOutput();
         if (is_null($expectedOutput)) {
             $this->assertEquals('No migrations to rollback' . PHP_EOL, $output);
@@ -2425,7 +2422,7 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironment($envStub);
         $this->manager->seed();
 
-        $output = join("\n", $this->out->messages());
+        $output = implode("\n", $this->out->messages());
         $this->assertStringContainsString('GSeeder', $output);
         $this->assertStringContainsString('PostSeeder', $output);
         $this->assertStringContainsString('UserSeeder', $output);
@@ -2439,7 +2436,8 @@ class ManagerTest extends TestCase
             ->getMock();
         $this->manager->setEnvironment($envStub);
         $this->manager->seed('UserSeeder');
-        $output = join("\n", $this->out->messages());
+
+        $output = implode("\n", $this->out->messages());
         $this->assertStringContainsString('UserSeeder', $output);
     }
 
@@ -2474,7 +2472,7 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironment($envStub);
         $this->manager->seed('UserSeederNotExecuted');
 
-        $output = join("\n", $this->out->messages());
+        $output = implode("\n", $this->out->messages());
         $this->assertStringContainsString('skipped', $output);
     }
 
@@ -2962,7 +2960,7 @@ class ManagerTest extends TestCase
         $this->manager->setEnvironment($envStub);
         $this->manager->setBreakpoint(20120133235330);
 
-        $output = join("\n", $this->out->messages());
+        $output = implode("\n", $this->out->messages());
         $this->assertStringContainsString('<comment>warning</comment> 20120133235330 is not a valid version', $output);
     }
 

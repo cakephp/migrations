@@ -42,7 +42,7 @@ class SeedResetCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'The <info>reset</info> command removes seed execution records from the log',
@@ -98,7 +98,7 @@ class SeedResetCommand extends Command
             $io->info('DRY-RUN mode enabled');
         }
 
-        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getSeedPath());
 
         $seeds = $manager->getSeeds();
@@ -109,13 +109,13 @@ class SeedResetCommand extends Command
         $seedsToReset = $seeds;
 
         if ($seedOption) {
-            $requestedSeeds = array_map('trim', explode(',', (string)$seedOption));
+            $requestedSeeds = array_map(trim(...), explode(',', (string)$seedOption));
             $seedsToReset = [];
 
             foreach ($requestedSeeds as $requestedSeed) {
                 $normalizedName = $manager->normalizeSeedName($requestedSeed, $seeds);
                 if ($normalizedName === null) {
-                    $io->error("Seed `{$requestedSeed}` does not exist.");
+                    $io->error(sprintf('Seed `%s` does not exist.', $requestedSeed));
 
                     return self::CODE_ERROR;
                 }
@@ -123,7 +123,7 @@ class SeedResetCommand extends Command
             }
         }
 
-        if (empty($seedsToReset)) {
+        if ($seedsToReset === []) {
             $io->warning('No seeds to reset.');
 
             return self::CODE_SUCCESS;
@@ -155,18 +155,18 @@ class SeedResetCommand extends Command
                 if (!$config->isDryRun()) {
                     $adapter->removeSeedFromLog($seed);
                 }
-                $io->info("Reset: {$seedName} seed");
+                $io->info(sprintf('Reset: %s seed', $seedName));
                 $count++;
             } else {
-                $io->verbose("Skipped (not executed): {$seedName} seed");
+                $io->verbose(sprintf('Skipped (not executed): %s seed', $seedName));
             }
         }
 
         $io->out('');
         if ($config->isDryRun()) {
-            $io->success("DRY-RUN: Would reset {$count} seed(s).");
+            $io->success(sprintf('DRY-RUN: Would reset %d seed(s).', $count));
         } else {
-            $io->success("Reset {$count} seed(s).");
+            $io->success(sprintf('Reset %d seed(s).', $count));
         }
 
         return self::CODE_SUCCESS;

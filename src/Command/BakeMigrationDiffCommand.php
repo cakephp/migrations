@@ -50,29 +50,21 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
     /**
      * Array of migrations that have already been migrated
-     *
-     * @var array
      */
     protected array $migratedItems = [];
 
     /**
      * Path to the migration files
-     *
-     * @var string
      */
     protected string $migrationsPath;
 
     /**
      * Migration files that are stored in the self::migrationsPath
-     *
-     * @var array
      */
     protected array $migrationsFiles = [];
 
     /**
      * Name of the phinx log table
-     *
-     * @var string
      */
     protected string $phinxTable;
 
@@ -121,7 +113,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->setup($args);
 
@@ -271,7 +263,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             foreach ($addedColumns as $columnName) {
                 $column = $this->safeGetColumn($currentSchema, $columnName);
                 /** @var int $key */
-                $key = array_search($columnName, $currentColumns);
+                $key = array_search($columnName, $currentColumns, true);
                 if ($key > 0) {
                     $column['after'] = $currentColumns[$key - 1];
                 }
@@ -359,16 +351,14 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 $this->templateData[$table]['columns']['remove'] = [];
             }
             $removedColumns = array_diff($oldColumns, $currentColumns);
-            if ($removedColumns) {
-                foreach ($removedColumns as $columnName) {
-                    $column = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
-                    /** @var int $key */
-                    $key = array_search($columnName, $oldColumns);
-                    if ($key > 0) {
-                        $column['after'] = $oldColumns[$key - 1];
-                    }
-                    $this->templateData[$table]['columns']['remove'][$columnName] = $column;
+            foreach ($removedColumns as $columnName) {
+                $column = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
+                /** @var int $key */
+                $key = array_search($columnName, $oldColumns, true);
+                if ($key > 0) {
+                    $column['after'] = $oldColumns[$key - 1];
                 }
+                $this->templateData[$table]['columns']['remove'][$columnName] = $column;
             }
         }
     }
@@ -475,10 +465,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
             $removedIndexes = array_diff($oldIndexes, $currentIndexes);
             $parts = [];
-            if ($removedIndexes) {
-                foreach ($removedIndexes as $index) {
-                    $parts[$index] = $this->dumpSchema[$table]->getIndex($index);
-                }
+            foreach ($removedIndexes as $index) {
+                $parts[$index] = $this->dumpSchema[$table]->getIndex($index);
             }
             $this->templateData[$table]['indexes']['remove'] = array_merge(
                 $this->templateData[$table]['indexes']['remove'],
@@ -516,7 +504,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         // Extract version numbers from current context's migration files
         $fileVersions = [];
         foreach ($this->migrationsFiles as $file) {
-            $filename = basename($file);
+            $filename = basename((string)$file);
             if (preg_match('/^(\d+)_/', $filename, $matches)) {
                 $fileVersions[] = $matches[1];
             }
@@ -530,7 +518,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             }
         }
 
-        if (empty($contextMigratedVersions)) {
+        if ($contextMigratedVersions === []) {
             // No migrations from this context have been run yet
             return false;
         }
@@ -539,7 +527,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         $lastVersion = max($contextMigratedVersions);
         $lastFile = end($this->migrationsFiles);
 
-        return $lastFile && str_contains($lastFile, $lastVersion);
+        return $lastFile && str_contains((string)$lastFile, $lastVersion);
     }
 
     /**
@@ -555,6 +543,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     {
         $io->out('Your migrations history is empty and you do not have any migrations files.');
         $io->out('Falling back to baking a snapshot...');
+
         $newArgs = [];
         $newArgs[] = $name;
 
@@ -644,10 +633,13 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         }
 
         foreach ($tablesToDescribe as $table) {
-            if (preg_match('/^.*phinxlog$/', $table) === 1) {
+            if (preg_match('/^.*phinxlog$/', (string)$table) === 1) {
                 continue;
             }
-            if ($table === 'cake_migrations' || $table === 'cake_seeds') {
+            if ($table === 'cake_migrations') {
+                continue;
+            }
+            if ($table === 'cake_seeds') {
                 continue;
             }
 

@@ -7,7 +7,7 @@ class CreateDropFkInitialSchema extends BaseMigration
     /**
      * Change.
      */
-    public function change()
+    public function change(): void
     {
         $this->table('my_table')
             ->addColumn('name', 'string')

@@ -35,9 +35,6 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     use SnapshotTrait;
     use UtilTrait;
 
-    /**
-     * @var string
-     */
     protected string $_name;
 
     /**
@@ -51,7 +48,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $collection = $this->getCollection($this->connection);
 

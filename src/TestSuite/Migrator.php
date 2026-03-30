@@ -23,9 +23,6 @@ use RuntimeException;
 
 class Migrator
 {
-    /**
-     * @var \Cake\TestSuite\ConnectionHelper
-     */
     protected ConnectionHelper $helper;
 
     /**
@@ -115,7 +112,7 @@ class Migrator
             try {
                 if (!$migrations->migrate($migrationSet)) {
                     throw new RuntimeException(
-                        "Unable to migrate fixtures for `{$migrationSet['connection']}`.",
+                        sprintf('Unable to migrate fixtures for `%s`.', $migrationSet['connection']),
                     );
                 }
             } catch (Exception $e) {
@@ -124,7 +121,7 @@ class Migrator
                     "Migrations failed to apply with message:\n\n" .
                     $e->getMessage() . "\n\n" .
                     'If you are using the `skip` option and running multiple sets of migrations ' .
-                    'on the same connection, you can\'t skip tables managed by CakePHP in the connection.',
+                    "on the same connection, you can't skip tables managed by CakePHP in the connection.",
                     0,
                     $e,
                 );
@@ -170,7 +167,7 @@ class Migrator
      */
     protected function shouldDropTables(Migrations $migrations, array $options): bool
     {
-        Log::write('debug', "Reading migrations status for {$options['connection']}...");
+        Log::write('debug', sprintf('Reading migrations status for %s...', $options['connection']));
 
         $messages = [
             'down' => [],
@@ -179,24 +176,24 @@ class Migrator
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
                 $messages['missing'][] = 'Applied but, missing Migration ' .
-                    "source={$migration['name']} id={$migration['id']}";
+                    sprintf('source=%s id=%s', $migration['name'], $migration['id']);
             }
             if ($migration['status'] === 'down') {
-                $messages['down'][] = "Migration to reverse. source={$migration['name']} id={$migration['id']}";
+                $messages['down'][] = sprintf('Migration to reverse. source=%s id=%s', $migration['name'], $migration['id']);
             }
         }
         $output = [];
         $hasProblems = false;
-        $itemize = function ($item) {
+        $itemize = function (string $item): string {
             return '- ' . $item;
         };
-        if (!empty($messages['down'])) {
+        if ($messages['down'] !== []) {
             $hasProblems = true;
             $output[] = 'Migrations needing to be reversed:';
             $output = array_merge($output, array_map($itemize, $messages['down']));
             $output[] = '';
         }
-        if (!empty($messages['missing'])) {
+        if ($messages['missing'] !== []) {
             $hasProblems = true;
             $output[] = 'Applied but missing migrations:';
             $output = array_merge($output, array_map($itemize, $messages['missing']));
@@ -225,11 +222,11 @@ class Migrator
     protected function dropTables(string $connection, array $skip = []): void
     {
         $dropTables = $this->getNonPhinxTables($connection, $skip);
-        if (count($dropTables)) {
+        if ($dropTables !== []) {
             $this->helper->dropTables($connection, $dropTables);
         }
         $phinxTables = $this->getPhinxTables($connection);
-        if (count($phinxTables)) {
+        if ($phinxTables !== []) {
             $this->helper->truncateTables($connection, $phinxTables);
         }
     }
@@ -246,8 +243,8 @@ class Migrator
         assert($connection instanceof Connection);
         $tables = $connection->getSchemaCollection()->listTables();
 
-        return array_filter($tables, function ($table) {
-            return strpos($table, 'phinxlog') !== false;
+        return array_filter($tables, function (string $table): bool {
+            return str_contains($table, 'phinxlog');
         });
     }
 
@@ -266,9 +263,9 @@ class Migrator
         $skip[] = '*phinxlog*';
         $skip[] = 'cake_migrations';
 
-        return array_filter($tables, function ($table) use ($skip) {
+        return array_filter($tables, function (string $table) use ($skip): bool {
             foreach ($skip as $pattern) {
-                if (fnmatch($pattern, $table) === true) {
+                if (fnmatch($pattern, $table)) {
                     return false;
                 }
             }

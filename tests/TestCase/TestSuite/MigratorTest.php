@@ -55,7 +55,7 @@ class MigratorTest extends TestCase
             : [];
     }
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -67,7 +67,7 @@ class MigratorTest extends TestCase
         (new ConnectionHelper())->dropTables('test');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         if ($this->restore) {
@@ -185,7 +185,7 @@ class MigratorTest extends TestCase
         $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
     }
 
-    private function setMigrationEndDateToYesterday()
+    private function setMigrationEndDateToYesterday(): void
     {
         $query = ConnectionManager::get('test')->updateQuery()
             ->update($this->getMigratorTableName())

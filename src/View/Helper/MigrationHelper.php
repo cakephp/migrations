@@ -23,7 +23,6 @@ use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
-use Cake\View\View;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Table\ForeignKey;
 
@@ -74,22 +73,6 @@ class MigrationHelper extends Helper
     public function getReturnedData(): array
     {
         return $this->returnedData;
-    }
-
-    /**
-     * Constructor
-     *
-     * ### Settings
-     *
-     * - `collection` \Cake\Database\Schema\Collection
-     * - `connection` \Cake\Database\Connection
-     *
-     * @param \Cake\View\View $View The View this helper is being attached to.
-     * @param array $config Configuration settings for the helper.
-     */
-    public function __construct(View $View, array $config = [])
-    {
-        parent::__construct($View, $config);
     }
 
     /**
@@ -206,10 +189,8 @@ class MigrationHelper extends Helper
 
         $tableIndexes = $tableSchema->indexes();
         $indexes = [];
-        if ($tableIndexes) {
-            foreach ($tableIndexes as $name) {
-                $indexes[$name] = $tableSchema->getIndex($name);
-            }
+        foreach ($tableIndexes as $name) {
+            $indexes[$name] = $tableSchema->getIndex($name);
         }
 
         return $indexes;
@@ -466,7 +447,7 @@ class MigrationHelper extends Helper
      */
     public function value(string|float|int|bool|null $value, bool $numbersAsString = false): string|float
     {
-        if ($value === null || $value === 'null' || $value === 'NULL') {
+        if (in_array($value, [null, 'null', 'NULL'], true)) {
             return 'null';
         }
 
@@ -607,7 +588,7 @@ class MigrationHelper extends Helper
                 $v = $this->value($v, $k === 'default');
             }
             if (!is_numeric($k)) {
-                $v = "'$k' => $v";
+                $v = sprintf("'%s' => %s", $k, $v);
             }
         }
 
@@ -632,14 +613,14 @@ class MigrationHelper extends Helper
      */
     public function tableStatement(string $table, bool $reset = false): string
     {
-        if ($reset === true) {
+        if ($reset) {
             unset($this->tableStatementStatus[$table]);
         }
 
         if (!isset($this->tableStatementStatus[$table])) {
             $this->tableStatementStatus[$table] = true;
 
-            return '$this->table(\'' . addslashes($table) . '\')';
+            return '$this->table(\'' . addslashes($table) . "')";
         }
 
         return '';
@@ -734,7 +715,7 @@ class MigrationHelper extends Helper
             $data = $this->getCreateTableData($table);
             $tableConstraintsNoUnique = array_filter(
                 $data['constraints'],
-                function ($constraint) {
+                function (array $constraint): bool {
                     return $constraint['type'] !== 'unique';
                 },
             );

@@ -15,9 +15,6 @@ use Migrations\Db\Table\TableMetadata;
  */
 class DropPartition extends Action
 {
-    /**
-     * @var string
-     */
     protected string $partitionName;
 
     /**

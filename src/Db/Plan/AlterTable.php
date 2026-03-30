@@ -18,8 +18,6 @@ class AlterTable
 {
     /**
      * The table
-     *
-     * @var \Migrations\Db\Table\TableMetadata
      */
     protected TableMetadata $table;
 

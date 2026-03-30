@@ -8,7 +8,9 @@ declare(strict_types=1);
 
 namespace Migrations\Db;
 
-class Expression
+use Stringable;
+
+class Expression implements Stringable
 {
     /**
      * @var string The expression

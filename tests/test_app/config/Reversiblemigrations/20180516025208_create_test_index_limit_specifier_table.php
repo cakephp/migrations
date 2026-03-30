@@ -26,7 +26,7 @@ class CreateTestIndexLimitSpecifierTable extends BaseMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+    public function change(): void
     {
         $table = $this->table('test_index_limit_specifier');
         $table->addColumn('column1', Column::STRING)

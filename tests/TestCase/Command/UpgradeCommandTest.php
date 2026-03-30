@@ -12,7 +12,7 @@ use Migrations\Test\TestCase\TestCase;
 
 class UpgradeCommandTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -23,7 +23,7 @@ class UpgradeCommandTest extends TestCase
         $connection->execute('DROP TABLE IF EXISTS cake_migrations');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $this->clearMigrationRecords('test');
 
@@ -48,7 +48,7 @@ class UpgradeCommandTest extends TestCase
 
     public function testHelp(): void
     {
-        Configure::write('Migrations.legacyTables', null);
+        Configure::write('Migrations.legacyTables');
 
         $this->exec('migrations upgrade --help');
         $this->assertExitSuccess();
@@ -61,7 +61,7 @@ class UpgradeCommandTest extends TestCase
         Configure::write('Migrations.legacyTables', true);
         try {
             $this->getAdapter()->createSchemaTable();
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Table probably exists
         }
 
@@ -85,7 +85,7 @@ class UpgradeCommandTest extends TestCase
         $adapter = $environment->getAdapter();
         try {
             $adapter->createSchemaTable();
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Table probably exists
         }
 
@@ -113,7 +113,7 @@ class UpgradeCommandTest extends TestCase
         $adapter = $environment->getAdapter();
         try {
             $adapter->createSchemaTable();
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Table probably exists
         }
 
@@ -135,7 +135,7 @@ class UpgradeCommandTest extends TestCase
         Configure::write('Migrations.legacyTables', true);
         try {
             $this->getAdapter()->createSchemaTable();
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Table probably exists
         }
 
@@ -185,7 +185,7 @@ class UpgradeCommandTest extends TestCase
         $adapter = $environment->getAdapter();
         try {
             $adapter->createSchemaTable();
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Table probably exists
         }
 

@@ -15,9 +15,6 @@ use InvalidArgumentException;
  */
 class TableMetadata
 {
-    /**
-     * @var string
-     */
     protected string $name;
 
     /**
@@ -25,9 +22,6 @@ class TableMetadata
      */
     protected array $options;
 
-    /**
-     * @var \Migrations\Db\Table\Partition|null
-     */
     protected ?Partition $partition = null;
 
     /**

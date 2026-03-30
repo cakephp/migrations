@@ -52,7 +52,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -68,7 +68,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         ConnectionManager::drop('alternative');
@@ -85,7 +85,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testNotEmptySnapshot()
+    public function testNotEmptySnapshot(): void
     {
         $this->runSnapshotTest('NotEmpty');
     }
@@ -95,10 +95,10 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testNotEmptySnapshotNoLock()
+    public function testNotEmptySnapshotNoLock(): void
     {
         $bakeName = $this->getBakeName('TestNotEmptySnapshot');
-        $this->exec("bake migration_snapshot {$bakeName} -c test --no-lock");
+        $this->exec(sprintf('bake migration_snapshot %s -c test --no-lock', $bakeName));
 
         $generatedMigration = glob($this->migrationPath . '*_TestNotEmptySnapshot*.php');
         $this->generatedFiles = $generatedMigration;
@@ -115,14 +115,14 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testSnapshotGenerateOnly()
+    public function testSnapshotGenerateOnly(): void
     {
         if (file_exists($this->migrationPath . 'schema-dump-test.lock')) {
             unlink($this->migrationPath . 'schema-dump-test.lock');
         }
 
         $bakeName = $this->getBakeName('TestGenerateOnlySnapshot');
-        $this->exec("bake migration_snapshot {$bakeName} -c test --generate-only");
+        $this->exec(sprintf('bake migration_snapshot %s -c test --generate-only', $bakeName));
 
         $generatedMigration = glob($this->migrationPath . '*_TestGenerateOnlySnapshot*.php');
         $this->generatedFiles = $generatedMigration;
@@ -150,12 +150,12 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         $scenario = 'PostgresTimestampTz';
 
-        $bakeName = $this->getBakeName("TestSnapshot{$scenario}");
-        $this->exec("bake migration_snapshot {$bakeName} -c test");
+        $bakeName = $this->getBakeName('TestSnapshot' . $scenario);
+        $this->exec(sprintf('bake migration_snapshot %s -c test', $bakeName));
 
         $connection->execute('DROP TABLE postgres_timestamp_tz');
 
-        $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*.php");
+        $generatedMigration = glob($this->migrationPath . sprintf('*_TestSnapshot%s*.php', $scenario));
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
 
@@ -172,7 +172,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAutoIdDisabledSnapshot()
+    public function testAutoIdDisabledSnapshot(): void
     {
         $this->runSnapshotTest('AutoIdDisabled', '--disable-autoid');
     }
@@ -182,7 +182,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testSnapshotWithChange()
+    public function testSnapshotWithChange(): void
     {
         $this->runSnapshotTest('WithChange', '--change');
     }
@@ -247,7 +247,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testPluginBlog()
+    public function testPluginBlog(): void
     {
         $this->loadPlugins(['TestBlog']);
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'TestBlog' . DS . 'config' . DS . 'Migrations' . DS;
@@ -263,13 +263,13 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      *
      * @return void
      */
-    public function testPluginWithCustomConnection()
+    public function testPluginWithCustomConnection(): void
     {
         $this->loadPlugins(['SimpleSnapshot']);
         $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
 
         $bakeName = $this->getBakeName('TestSnapshotPluginCustomConnection');
-        $this->exec("bake migration_snapshot {$bakeName} -c test -p SimpleSnapshot");
+        $this->exec(sprintf('bake migration_snapshot %s -c test -p SimpleSnapshot', $bakeName));
 
         $generatedMigration = glob($this->migrationPath . '*_TestSnapshotPluginCustomConnection*.php');
         $this->generatedFiles = $generatedMigration;
@@ -286,13 +286,13 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     protected function runSnapshotTest(string $scenario, string $arguments = ''): void
     {
         if ($arguments) {
-            $arguments = " $arguments";
+            $arguments = ' ' . $arguments;
         }
 
-        $bakeName = $this->getBakeName("TestSnapshot{$scenario}");
-        $this->exec("bake migration_snapshot {$bakeName} -c test{$arguments}");
+        $bakeName = $this->getBakeName('TestSnapshot' . $scenario);
+        $this->exec(sprintf('bake migration_snapshot %s -c test%s', $bakeName, $arguments));
 
-        $generatedMigration = glob($this->migrationPath . "*_TestSnapshot{$scenario}*.php");
+        $generatedMigration = glob($this->migrationPath . sprintf('*_TestSnapshot%s*.php', $scenario));
         $this->generatedFiles = $generatedMigration;
         $this->generatedFiles[] = $this->migrationPath . 'schema-dump-test.lock';
 
@@ -310,7 +310,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      * @param string $name Name of the baked file, unaware of the DB environment
      * @return string Baked filename
      */
-    public function getBakeName($name)
+    public function getBakeName(string $name)
     {
         $dbenv = getenv('DB');
         if ($dbenv !== 'mysql') {
@@ -348,6 +348,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
 
         // Normalize utf8mb3 to utf8 for MySQL 8.0.30+ compatibility
         $expected = str_replace('utf8mb3_', 'utf8_', $expected);
+
         $result = str_replace('utf8mb3_', 'utf8_', $result);
 
         // Normalize unified table name to legacy for comparison
@@ -363,7 +364,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
      * @param string $result Results generated by the test to be compared
      * @return void
      */
-    public function assertCorrectSnapshot($bakeName, $result)
+    public function assertCorrectSnapshot($bakeName, string $result): void
     {
         $dbenv = getenv('DB');
         $bakeName = Inflector::underscore($bakeName);

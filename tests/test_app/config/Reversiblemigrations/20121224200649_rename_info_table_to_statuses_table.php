@@ -7,7 +7,7 @@ class RenameInfoTableToStatusesTable extends BaseMigration
     /**
      * Change.
      */
-    public function change()
+    public function change(): void
     {
         // users table
         $table = $this->table('info');

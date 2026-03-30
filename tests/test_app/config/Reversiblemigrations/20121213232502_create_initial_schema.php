@@ -8,7 +8,7 @@ class CreateInitialSchema extends BaseMigration
     /**
      * Change.
      */
-    public function change()
+    public function change(): void
     {
         // users table
         $users = $this->table('users');

@@ -6,6 +6,8 @@ namespace Migrations\Test\TestCase\Migration;
 use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
+use Cake\Database\Connection;
+use Cake\Database\Driver\Mysql;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Migration\ManagerFactory;
 use PHPUnit\Framework\TestCase;
@@ -16,6 +18,7 @@ class ManagerFactoryTest extends TestCase
     {
         $out = new StubConsoleOutput();
         $out->setOutputAs(StubConsoleOutput::PLAIN);
+
         $in = new StubConsoleInput([]);
 
         $io = new ConsoleIo($out, $out, $in);
@@ -41,6 +44,7 @@ class ManagerFactoryTest extends TestCase
     {
         $out = new StubConsoleOutput();
         $out->setOutputAs(StubConsoleOutput::PLAIN);
+
         $in = new StubConsoleInput([]);
 
         $io = new ConsoleIo($out, $out, $in);
@@ -53,9 +57,9 @@ class ManagerFactoryTest extends TestCase
             'scheme' => 'mysql',
             'username' => 'root',
             'host' => '127.0.0.1',
-            'className' => 'Cake\Database\Connection',
+            'className' => Connection::class,
             'database' => 'db_tmp',
-            'driver' => 'Cake\Database\Driver\Mysql',
+            'driver' => Mysql::class,
             'name' => 'tmp',
         ];
         $this->assertEquals($expected, ConnectionManager::getConfig('tmp'));

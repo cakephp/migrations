@@ -49,7 +49,7 @@ class SeedCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $description = [
             'Seed the database with data',
@@ -166,7 +166,7 @@ class SeedCommand extends Command
         if ($fake) {
             $io->warning('performing fake seeding');
         }
-        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 

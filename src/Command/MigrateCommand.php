@@ -50,7 +50,7 @@ class MigrateCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'Apply migrations to a SQL datasource',
@@ -152,7 +152,7 @@ class MigrateCommand extends Command
         if ($config->isDryRun()) {
             $io->info('DRY-RUN mode enabled');
         }
-        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 

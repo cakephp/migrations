@@ -5,7 +5,7 @@ use Migrations\BaseMigration;
 
 class ShouldNotExecuteMigration extends BaseMigration
 {
-    public function change()
+    public function change(): void
     {
         // info table
         $this->table('info')->create();

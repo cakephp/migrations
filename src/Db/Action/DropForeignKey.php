@@ -15,8 +15,6 @@ class DropForeignKey extends Action
 {
     /**
      * The foreign key to remove
-     *
-     * @var \Migrations\Db\Table\ForeignKey
      */
     protected ForeignKey $foreignKey;
 

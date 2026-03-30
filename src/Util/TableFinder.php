@@ -34,8 +34,6 @@ class TableFinder
 
     /**
      * Regex of Table name to skip
-     *
-     * @var string
      */
     public string $skipTablesRegex = '_phinxlog';
 
@@ -94,7 +92,7 @@ class TableFinder
             $tables = $tableNamesInPlugin;
         } else {
             foreach ($tables as $num => $table) {
-                if (in_array($table, $this->skipTables, true) || (strpos($table, $this->skipTablesRegex) !== false)) {
+                if (in_array($table, $this->skipTables, true) || (str_contains($table, $this->skipTablesRegex))) {
                     unset($tables[$num]);
                     continue;
                 }
@@ -138,17 +136,13 @@ class TableFinder
     public function findTables(?string $pluginName = null): array
     {
         $path = 'Model' . DS . 'Table' . DS;
-        if ($pluginName) {
-            $path = CorePlugin::path($pluginName) . 'src' . DS . $path;
-        } else {
-            $path = APP . $path;
-        }
+        $path = $pluginName ? CorePlugin::path($pluginName) . 'src' . DS . $path : APP . $path;
 
         if (!is_dir($path)) {
             return [];
         }
 
-        return array_map('basename', glob($path . '*.php') ?: []);
+        return array_map(basename(...), glob($path . '*.php') ?: []);
     }
 
     /**

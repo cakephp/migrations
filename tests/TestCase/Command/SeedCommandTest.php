@@ -11,14 +11,14 @@ use Migrations\Test\TestCase\TestCase;
 
 class SeedCommandTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->clearMigrationRecords('test');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         /** @var \Cake\Database\Connection $connection */
@@ -543,7 +543,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(2, $query->fetchColumn(0));
 
         // Verify the seed WAS tracked in cake_seeds table (only one record, updated each run)
-        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
+        $seedLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'IdempotentTestSeed'");
         $this->assertEquals(1, $seedLog->fetchColumn(0), 'Idempotent seeds should track last execution');
     }
 
@@ -560,7 +560,7 @@ class SeedCommandTest extends TestCase
         $connection = ConnectionManager::get('test');
 
         // Verify the seed WAS tracked in cake_seeds table
-        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $seedLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'NumbersSeed'");
         $this->assertEquals(1, $seedLog->fetchColumn(0), 'Regular seeds should be tracked');
 
         // Run again - should be silently skipped
@@ -589,7 +589,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(0, $query->fetchColumn(0), 'Fake seed should not insert data');
 
         // Verify the seed WAS tracked in cake_seeds table
-        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $seedLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'NumbersSeed'");
         $this->assertEquals(1, $seedLog->fetchColumn(0), 'Fake seeds should be tracked');
 
         // Running again should be silently skipped
@@ -610,7 +610,7 @@ class SeedCommandTest extends TestCase
         $this->assertExitSuccess();
 
         // Verify seed is tracked
-        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $seedLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'NumbersSeed'");
         $this->assertEquals(1, $seedLog->fetchColumn(0));
 
         // Run with --force to actually execute it
@@ -638,10 +638,10 @@ class SeedCommandTest extends TestCase
         $this->assertExitSuccess();
 
         // Verify both are tracked
-        $numbersLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $numbersLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'NumbersSeed'");
         $this->assertEquals(1, $numbersLog->fetchColumn(0));
 
-        $storesLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'StoresSeed\'');
+        $storesLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'StoresSeed'");
         $this->assertEquals(1, $storesLog->fetchColumn(0));
 
         // Reset only Numbers seed
@@ -651,10 +651,10 @@ class SeedCommandTest extends TestCase
         $this->assertOutputNotContains('All seeds will be reset:');
 
         // Verify Numbers is reset but Stores is still tracked
-        $numbersLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $numbersLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'NumbersSeed'");
         $this->assertEquals(0, $numbersLog->fetchColumn(0), 'Numbers seed should be reset');
 
-        $storesLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'StoresSeed\'');
+        $storesLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'StoresSeed'");
         $this->assertEquals(1, $storesLog->fetchColumn(0), 'Stores seed should still be tracked');
     }
 
@@ -674,10 +674,10 @@ class SeedCommandTest extends TestCase
         $this->assertExitSuccess();
 
         // Verify both are reset
-        $numbersLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'NumbersSeed\'');
+        $numbersLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'NumbersSeed'");
         $this->assertEquals(0, $numbersLog->fetchColumn(0));
 
-        $storesLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'StoresSeed\'');
+        $storesLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'StoresSeed'");
         $this->assertEquals(0, $storesLog->fetchColumn(0));
     }
 
@@ -708,7 +708,7 @@ class SeedCommandTest extends TestCase
         $this->assertEquals(0, $query->fetchColumn(0), 'Fake seed should not insert data');
 
         // Verify the seed WAS tracked
-        $seedLog = $connection->execute('SELECT COUNT(*) FROM cake_seeds WHERE seed_name = \'IdempotentTestSeed\'');
+        $seedLog = $connection->execute("SELECT COUNT(*) FROM cake_seeds WHERE seed_name = 'IdempotentTestSeed'");
         $this->assertEquals(1, $seedLog->fetchColumn(0), 'Idempotent seeds should be tracked when faked');
     }
 }

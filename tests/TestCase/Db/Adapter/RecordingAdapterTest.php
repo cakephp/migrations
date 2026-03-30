@@ -3,6 +3,12 @@ declare(strict_types=1);
 
 namespace Migrations\Test\Db\Adapter;
 
+use Migrations\Db\Action\DropForeignKey;
+use Migrations\Db\Action\DropIndex;
+use Migrations\Db\Action\DropTable;
+use Migrations\Db\Action\RemoveColumn;
+use Migrations\Db\Action\RenameColumn;
+use Migrations\Db\Action\RenameTable;
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\RecordingAdapter;
 use Migrations\Db\Table;
@@ -12,10 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class RecordingAdapterTest extends TestCase
 {
-    /**
-     * @var \Migrations\Db\Adapter\RecordingAdapter
-     */
-    private $adapter;
+    private RecordingAdapter $adapter;
 
     protected function setUp(): void
     {
@@ -35,30 +38,30 @@ class RecordingAdapterTest extends TestCase
         unset($this->adapter);
     }
 
-    public function testRecordingAdapterCanInvertCreateTable()
+    public function testRecordingAdapterCanInvertCreateTable(): void
     {
         $table = new Table('atable', [], $this->adapter);
         $table->addColumn('column1', 'string')
               ->save();
 
         $commands = $this->adapter->getInvertedCommands()->getActions();
-        $this->assertInstanceOf('Migrations\Db\Action\DropTable', $commands[0]);
+        $this->assertInstanceOf(DropTable::class, $commands[0]);
         $this->assertEquals('atable', $commands[0]->getTable()->getName());
     }
 
-    public function testRecordingAdapterCanInvertRenameTable()
+    public function testRecordingAdapterCanInvertRenameTable(): void
     {
         $table = new Table('oldname', [], $this->adapter);
         $table->rename('newname')
               ->save();
 
         $commands = $this->adapter->getInvertedCommands()->getActions();
-        $this->assertInstanceOf('Migrations\Db\Action\RenameTable', $commands[0]);
+        $this->assertInstanceOf(RenameTable::class, $commands[0]);
         $this->assertEquals('newname', $commands[0]->getTable()->getName());
         $this->assertEquals('oldname', $commands[0]->getNewName());
     }
 
-    public function testRecordingAdapterCanInvertAddColumn()
+    public function testRecordingAdapterCanInvertAddColumn(): void
     {
         $this->adapter
             ->getAdapter()
@@ -82,12 +85,12 @@ class RecordingAdapterTest extends TestCase
               ->save();
 
         $commands = $this->adapter->getInvertedCommands()->getActions();
-        $this->assertInstanceOf('Migrations\Db\Action\RemoveColumn', $commands[0]);
+        $this->assertInstanceOf(RemoveColumn::class, $commands[0]);
         $this->assertEquals('atable', $commands[0]->getTable()->getName());
         $this->assertEquals('acolumn', $commands[0]->getColumn()->getName());
     }
 
-    public function testRecordingAdapterCanInvertRenameColumn()
+    public function testRecordingAdapterCanInvertRenameColumn(): void
     {
         $this->adapter
             ->getAdapter()
@@ -100,12 +103,12 @@ class RecordingAdapterTest extends TestCase
               ->save();
 
         $commands = $this->adapter->getInvertedCommands()->getActions();
-        $this->assertInstanceOf('Migrations\Db\Action\RenameColumn', $commands[0]);
+        $this->assertInstanceOf(RenameColumn::class, $commands[0]);
         $this->assertEquals('newname', $commands[0]->getColumn()->getName());
         $this->assertEquals('oldname', $commands[0]->getNewName());
     }
 
-    public function testRecordingAdapterCanInvertAddIndex()
+    public function testRecordingAdapterCanInvertAddIndex(): void
     {
         $this->adapter
             ->getAdapter()
@@ -118,12 +121,12 @@ class RecordingAdapterTest extends TestCase
               ->save();
 
         $commands = $this->adapter->getInvertedCommands()->getActions();
-        $this->assertInstanceOf('Migrations\Db\Action\DropIndex', $commands[0]);
+        $this->assertInstanceOf(DropIndex::class, $commands[0]);
         $this->assertEquals('atable', $commands[0]->getTable()->getName());
         $this->assertEquals(['email'], $commands[0]->getIndex()->getColumns());
     }
 
-    public function testRecordingAdapterCanInvertAddForeignKey()
+    public function testRecordingAdapterCanInvertAddForeignKey(): void
     {
         $this->adapter
             ->getAdapter()
@@ -136,12 +139,12 @@ class RecordingAdapterTest extends TestCase
               ->save();
 
         $commands = $this->adapter->getInvertedCommands()->getActions();
-        $this->assertInstanceOf('Migrations\Db\Action\DropForeignKey', $commands[0]);
+        $this->assertInstanceOf(DropForeignKey::class, $commands[0]);
         $this->assertEquals('atable', $commands[0]->getTable()->getName());
         $this->assertEquals(['ref_table_id'], $commands[0]->getForeignKey()->getColumns());
     }
 
-    public function testGetInvertedCommandsThrowsExceptionForIrreversibleCommand()
+    public function testGetInvertedCommandsThrowsExceptionForIrreversibleCommand(): void
     {
         $this->adapter
             ->getAdapter()

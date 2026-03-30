@@ -22,7 +22,7 @@ class ColumnTest extends TestCase
         Configure::delete('Migrations.unsigned_ints');
     }
 
-    public function testNullConstructorParameter()
+    public function testNullConstructorParameter(): void
     {
         $column = new Column(name: 'title');
         $this->assertTrue($column->isNull());
@@ -38,7 +38,7 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->isNull());
     }
 
-    public function testSetOptionThrowsExceptionIfOptionIsNotString()
+    public function testSetOptionThrowsExceptionIfOptionIsNotString(): void
     {
         $column = new Column();
 
@@ -48,7 +48,7 @@ class ColumnTest extends TestCase
         $column->setOptions(['identity']);
     }
 
-    public function testSetOptionsIdentity()
+    public function testSetOptionsIdentity(): void
     {
         $column = new Column();
         $this->assertTrue($column->isNull());
@@ -59,7 +59,7 @@ class ColumnTest extends TestCase
         $this->assertTrue($column->isIdentity());
     }
 
-    public function testColumnNullFeatureFlag()
+    public function testColumnNullFeatureFlag(): void
     {
         $column = new Column();
         $this->assertTrue($column->isNull());

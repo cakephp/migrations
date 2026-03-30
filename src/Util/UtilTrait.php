@@ -53,7 +53,7 @@ trait UtilTrait
         }
 
         // Autodetect mode (config is null or not set)
-        if ($connection !== null && $this->detectLegacyTables($connection)) {
+        if ($connection instanceof Connection && $this->detectLegacyTables($connection)) {
             return $this->getLegacyTableName($plugin);
         }
 
@@ -113,7 +113,7 @@ trait UtilTrait
         }
 
         // Autodetect
-        if ($connection !== null) {
+        if ($connection instanceof Connection) {
             return $this->detectLegacyTables($connection);
         }
 

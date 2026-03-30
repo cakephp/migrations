@@ -31,8 +31,6 @@ class SeedsEntryCommand extends Command implements CommandCollectionAwareInterfa
 {
     /**
      * The command collection to get help on.
-     *
-     * @var \Cake\Console\CommandCollection
      */
     protected CommandCollection $commands;
 
@@ -109,7 +107,7 @@ class SeedsEntryCommand extends Command implements CommandCollectionAwareInterfa
         if ($args->hasArgumentAt(0)) {
             $name = $args->getArgumentAt(0);
             $io->err(
-                "<error>Could not find seeds command named `$name`."
+                sprintf('<error>Could not find seeds command named `%s`.', $name)
                 . ' Run `seeds --help` to get a list of commands.</error>',
             );
 
@@ -135,7 +133,7 @@ class SeedsEntryCommand extends Command implements CommandCollectionAwareInterfa
 
                 // Remove `seeds`
                 array_shift($parts);
-                if (count($parts) === 0) {
+                if ($parts === []) {
                     continue;
                 }
                 $commands[$command] = $class;

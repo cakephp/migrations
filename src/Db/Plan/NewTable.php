@@ -19,8 +19,6 @@ class NewTable
 {
     /**
      * The table to create
-     *
-     * @var \Migrations\Db\Table\TableMetadata
      */
     protected TableMetadata $table;
 

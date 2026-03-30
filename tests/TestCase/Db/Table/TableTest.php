@@ -49,7 +49,7 @@ class TableTest extends TestCase
         return $result;
     }
 
-    public function testAddColumnWithAnInvalidColumnType()
+    public function testAddColumnWithAnInvalidColumnType(): void
     {
         try {
             $adapter = new MysqlAdapter([]);
@@ -61,13 +61,13 @@ class TableTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
+                'Expected exception of type InvalidArgumentException, got ' . $e::class,
             );
             $this->assertStringStartsWith('An invalid column type ', $e->getMessage());
         }
     }
 
-    public function testAddColumnWithColumnObject()
+    public function testAddColumnWithColumnObject(): void
     {
         $adapter = new MysqlAdapter([]);
         $column = new Column();
@@ -75,12 +75,13 @@ class TableTest extends TestCase
                ->setType('integer');
         $table = new Table('ntable', [], $adapter);
         $table->addColumn($column);
+
         $actions = $this->getPendingActions($table);
         $this->assertInstanceOf(AddColumn::class, $actions[0]);
         $this->assertSame($column, $actions[0]->getColumn());
     }
 
-    public function testAddColumnWithNoAdapterSpecified()
+    public function testAddColumnWithNoAdapterSpecified(): void
     {
         try {
             $table = new Table('ntable');
@@ -90,12 +91,12 @@ class TableTest extends TestCase
             $this->assertInstanceOf(
                 'RuntimeException',
                 $e,
-                'Expected exception of type RuntimeException, got ' . get_class($e),
+                'Expected exception of type RuntimeException, got ' . $e::class,
             );
         }
     }
 
-    public function testAddComment()
+    public function testAddComment(): void
     {
         $adapter = new MysqlAdapter([]);
         $table = new Table('ntable', ['comment' => 'test comment'], $adapter);
@@ -103,7 +104,7 @@ class TableTest extends TestCase
         $this->assertEquals('test comment', $options['comment']);
     }
 
-    public function testAddIndexWithIndexObject()
+    public function testAddIndexWithIndexObject(): void
     {
         $adapter = new MysqlAdapter([]);
         $index = new Index();
@@ -111,6 +112,7 @@ class TableTest extends TestCase
               ->setColumns(['email']);
         $table = new Table('ntable', [], $adapter);
         $table->addIndex($index);
+
         $actions = $this->getPendingActions($table);
         $this->assertInstanceOf(AddIndex::class, $actions[0]);
         $this->assertSame($index, $actions[0]->getIndex());
@@ -158,7 +160,6 @@ class TableTest extends TestCase
     }
 
     /**
-     * @param AdapterInterface $adapter
      * @param string|null      $createdAtColumnName
      * @param string|null      $updatedAtColumnName
      * @param string           $expectedCreatedAtColumnName
@@ -168,14 +169,15 @@ class TableTest extends TestCase
     #[DataProvider('provideTimestampColumnNames')]
     public function testAddTimestamps(
         AdapterInterface $adapter,
-        $createdAtColumnName,
-        $updatedAtColumnName,
+        string|bool|null $createdAtColumnName,
+        string|bool|null $updatedAtColumnName,
         $expectedCreatedAtColumnName,
         $expectedUpdatedAtColumnName,
         $withTimezone,
     ): void {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps($createdAtColumnName, $updatedAtColumnName, $withTimezone);
+
         $actions = $this->getPendingActions($table);
 
         $columns = [];
@@ -198,14 +200,12 @@ class TableTest extends TestCase
         $this->assertNull($columns[1]->getDefault());
     }
 
-    /**
-     * @param AdapterInterface $adapter
-     */
     #[DataProvider('provideAdapters')]
-    public function testAddTimestampsNoUpdated(AdapterInterface $adapter)
+    public function testAddTimestampsNoUpdated(AdapterInterface $adapter): void
     {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps(null, false);
+
         $actions = $this->getPendingActions($table);
 
         $columns = [];
@@ -223,14 +223,12 @@ class TableTest extends TestCase
         $this->assertSame('', $columns[0]->getUpdate());
     }
 
-    /**
-     * @param AdapterInterface $adapter
-     */
     #[DataProvider('provideAdapters')]
-    public function testAddTimestampsNoCreated(AdapterInterface $adapter)
+    public function testAddTimestampsNoCreated(AdapterInterface $adapter): void
     {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestamps(false, null);
+
         $actions = $this->getPendingActions($table);
 
         $columns = [];
@@ -249,11 +247,8 @@ class TableTest extends TestCase
         $this->assertNull($columns[0]->getDefault());
     }
 
-    /**
-     * @param AdapterInterface $adapter
-     */
     #[DataProvider('provideAdapters')]
-    public function testAddTimestampsThrowsOnBothFalse(AdapterInterface $adapter)
+    public function testAddTimestampsThrowsOnBothFalse(AdapterInterface $adapter): void
     {
         $table = new Table('ntable', [], $adapter);
         $this->expectException(RuntimeException::class);
@@ -262,7 +257,6 @@ class TableTest extends TestCase
     }
 
     /**
-     * @param AdapterInterface $adapter
      * @param string|null      $createdAtColumnName
      * @param string|null      $updatedAtColumnName
      * @param string           $expectedCreatedAtColumnName
@@ -272,14 +266,15 @@ class TableTest extends TestCase
     #[DataProvider('provideTimestampColumnNames')]
     public function testAddTimestampsWithTimezone(
         AdapterInterface $adapter,
-        $createdAtColumnName,
-        $updatedAtColumnName,
+        string|bool|null $createdAtColumnName,
+        string|bool|null $updatedAtColumnName,
         $expectedCreatedAtColumnName,
         $expectedUpdatedAtColumnName,
         $withTimezone,
     ): void {
         $table = new Table('ntable', [], $adapter);
         $table->addTimestampsWithTimezone($createdAtColumnName, $updatedAtColumnName);
+
         $actions = $this->getPendingActions($table);
 
         $columns = [];
@@ -302,7 +297,7 @@ class TableTest extends TestCase
         $this->assertNull($columns[1]->getDefault());
     }
 
-    public function testInsert()
+    public function testInsert(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -319,7 +314,7 @@ class TableTest extends TestCase
         $this->assertEquals($expectedData, $table->getData());
     }
 
-    public function testInsertMultipleRowsWithoutZeroKey()
+    public function testInsertMultipleRowsWithoutZeroKey(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -340,7 +335,7 @@ class TableTest extends TestCase
         $this->assertEquals($expectedData, $table->getData());
     }
 
-    public function testInsertSaveEmptyData()
+    public function testInsertSaveEmptyData(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -352,7 +347,7 @@ class TableTest extends TestCase
         $table->insert([])->save();
     }
 
-    public function testInsertSaveData()
+    public function testInsertSaveData(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -385,7 +380,7 @@ class TableTest extends TestCase
               ->save();
     }
 
-    public function testSaveAfterSaveData()
+    public function testSaveAfterSaveData(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -418,31 +413,29 @@ class TableTest extends TestCase
             ->save();
     }
 
-    public function testResetAfterAddingData()
+    public function testResetAfterAddingData(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
         $columns = ['column1'];
-        $data = [['value1']];
-        $table->insert($columns, $data)->save();
+        $table->insert($columns)->save();
         $this->assertEquals([], $table->getData());
     }
 
-    public function testPendingAfterAddingData()
+    public function testPendingAfterAddingData(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
             ->getMock();
         $table = new Table('ntable', [], $adapterStub);
         $columns = ['column1'];
-        $data = [['value1']];
-        $table->insert($columns, $data);
+        $table->insert($columns);
         $this->assertTrue($table->hasPendingActions());
     }
 
-    public function testPendingAfterAddingColumn()
+    public function testPendingAfterAddingColumn(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -455,7 +448,7 @@ class TableTest extends TestCase
         $this->assertTrue($table->hasPendingActions());
     }
 
-    public function testGetColumn()
+    public function testGetColumn(): void
     {
         $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
             ->setConstructorArgs([[]])
@@ -477,23 +470,22 @@ class TableTest extends TestCase
 
     /**
      * @param string $indexIdentifier
-     * @param Index $index
      */
     #[DataProvider('removeIndexDataprovider')]
-    public function testRemoveIndex($indexIdentifier, Index $index)
+    public function testRemoveIndex(string|array $indexIdentifier, Index $index): void
     {
         $adapter = new MysqlAdapter([]);
         $table = new Table('table', [], $adapter);
         $table->removeIndex($indexIdentifier);
 
-        $indexes = array_map(function (DropIndex $action) {
+        $indexes = array_map(function (DropIndex $action): Index {
             return $action->getIndex();
         }, $this->getPendingActions($table));
 
         $this->assertEquals([$index], $indexes);
     }
 
-    public static function removeIndexDataprovider()
+    public static function removeIndexDataprovider(): array
     {
         return [
             [
@@ -513,8 +505,7 @@ class TableTest extends TestCase
 
     protected function getPendingActions($table)
     {
-        $prop = new ReflectionProperty(get_class($table), 'actions');
-        $prop->setAccessible(true);
+        $prop = new ReflectionProperty($table::class, 'actions');
 
         return $prop->getValue($table)->getActions();
     }

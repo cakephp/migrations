@@ -5,7 +5,7 @@ use Migrations\BaseMigration;
 
 class DirectionAwareReversibleUp extends BaseMigration
 {
-    public function change()
+    public function change(): void
     {
         $this->table('change_direction_test')
             ->addColumn('thing', Column::STRING, [

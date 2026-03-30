@@ -49,7 +49,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -82,13 +82,13 @@ class BakeMigrationDiffCommandTest extends TestCase
             try {
                 $connection = ConnectionManager::get('test_comparisons');
                 $connection->execute('DROP TABLE IF EXISTS test_decimal_types');
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Ignore errors if connection doesn't exist yet
             }
         }
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         foreach ($this->generatedFiles as $file) {
@@ -121,7 +121,7 @@ class BakeMigrationDiffCommandTest extends TestCase
             $connection = ConnectionManager::get('test_comparisons');
             $tables = ['articles', 'categories', 'comments', 'users', 'orphan_table', 'phinxlog', 'cake_migrations', 'tags', 'test_blog_phinxlog', 'test_decimal_types'];
             foreach ($tables as $table) {
-                $connection->execute("DROP TABLE IF EXISTS $table");
+                $connection->execute('DROP TABLE IF EXISTS ' . $table);
             }
             Cache::clear('_cake_model_');
         }
@@ -132,7 +132,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testHistoryNotInSync()
+    public function testHistoryNotInSync(): void
     {
         $expectedMessage = 'Your migrations history is not in sync with your migrations files. ' .
             'Make sure all your migrations have been migrated before baking a diff.';
@@ -195,7 +195,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testEmptyHistoryNoMigrations()
+    public function testEmptyHistoryNoMigrations(): void
     {
         $this->exec('bake migration_diff EmptyHistoryNoMigrations -c test -p Blog');
 
@@ -215,7 +215,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBakeMigrationDiffInCustomFolder()
+    public function testBakeMigrationDiffInCustomFolder(): void
     {
         $customFolderName = 'CustomMigrationsFolder';
         $this->exec('bake migration_diff MigrationDiffForCustomFolder -c test -s ' . $customFolderName);
@@ -237,7 +237,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBakeMigrationDiffGenerateOnly()
+    public function testBakeMigrationDiffGenerateOnly(): void
     {
         //$this->skipIf(!env('DB_URL_COMPARE'));
 
@@ -276,7 +276,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBakingDiff()
+    public function testBakingDiff(): void
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
@@ -292,7 +292,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBakingDiffSimple()
+    public function testBakingDiffSimple(): void
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
@@ -305,7 +305,7 @@ class BakeMigrationDiffCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBakingDiffAddRemove()
+    public function testBakingDiffAddRemove(): void
     {
         $this->skipIf(!env('DB_URL_COMPARE'));
 
@@ -462,11 +462,11 @@ class Initial extends BaseMigration
         $diffMigrationsPath = $diffConfigFolder . $prefix . Inflector::underscore($scenario) . '_' . $db . '.php';
         $diffDumpPath = $diffConfigFolder . 'schema-dump-test_comparisons_' . $db . '.lock';
 
-        $destinationConfigDir = ROOT . DS . 'config' . DS . "MigrationsDiff{$scenario}" . DS;
+        $destinationConfigDir = ROOT . DS . 'config' . DS . 'MigrationsDiff' . $scenario . DS;
         if (!is_dir($destinationConfigDir)) {
             mkdir($destinationConfigDir, 0777, true);
         }
-        $destination = $destinationConfigDir . "20160415220805_{$classPrefix}{$scenario}" . ucfirst($db) . '.php';
+        $destination = $destinationConfigDir . sprintf('20160415220805_%s%s', $classPrefix, $scenario) . ucfirst($db) . '.php';
         $destinationDumpPath = $destinationConfigDir . 'schema-dump-test_comparisons_' . $db . '.lock';
         copy($diffMigrationsPath, $destination);
 
@@ -475,7 +475,7 @@ class Initial extends BaseMigration
             $destinationDumpPath,
         ];
 
-        $migrations = $this->getMigrations("MigrationsDiff$scenario");
+        $migrations = $this->getMigrations('MigrationsDiff' . $scenario);
         $migrations->migrate();
 
         copy($diffDumpPath, $destinationDumpPath);
@@ -493,14 +493,14 @@ class Initial extends BaseMigration
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
-        $bakeName = $this->getBakeName("TheDiff{$scenario}");
-        $targetFolder = "MigrationsDiff{$scenario}";
+        $bakeName = $this->getBakeName('TheDiff' . $scenario);
+        $targetFolder = 'MigrationsDiff' . $scenario;
         $comparison = lcfirst($scenario);
-        $this->exec("custom bake migration_diff {$bakeName} -c test_comparisons --test-target-folder {$targetFolder} --comparison {$comparison}");
+        $this->exec(sprintf('custom bake migration_diff %s -c test_comparisons --test-target-folder %s --comparison %s', $bakeName, $targetFolder, $comparison));
 
         $this->generatedFiles[] = ROOT . DS . 'config' . DS . 'Migrations' . DS . 'schema-dump-test_comparisons.lock';
 
-        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, "*TheDiff$scenario*");
+        $generatedMigration = $this->getGeneratedMigrationName($destinationConfigDir, sprintf('*TheDiff%s*', $scenario));
         $fileName = pathinfo($generatedMigration, PATHINFO_FILENAME);
         $this->assertOutputContains('Marking the migration ' . $fileName . ' as migrated...');
         $this->assertOutputContains('Creating a dump of the new database state...');
@@ -525,7 +525,7 @@ class Initial extends BaseMigration
             ->into($schemaTable)
             ->values($values)
             ->execute();
-        $this->getMigrations("MigrationsDiff{$scenario}")->rollback(['target' => 'all']);
+        $this->getMigrations('MigrationsDiff' . $scenario)->rollback(['target' => 'all']);
     }
 
     /**
@@ -537,14 +537,17 @@ class Initial extends BaseMigration
     {
         $connection = ConnectionManager::get('test_comparisons');
         $driver = $connection->getDriver();
-
         if ($driver instanceof Mysql) {
             return 'mysql';
-        } elseif ($driver instanceof Postgres) {
+        }
+        if ($driver instanceof Postgres) {
             return 'pgsql';
-        } elseif ($driver instanceof Sqlite) {
+        }
+        if ($driver instanceof Sqlite) {
             return 'sqlite';
-        } elseif ($driver instanceof Sqlserver) {
+        }
+
+        if ($driver instanceof Sqlserver) {
             return 'sqlserver';
         }
 
@@ -557,15 +560,14 @@ class Initial extends BaseMigration
      * @param string $name Name of the baked file, unaware of the DB environment
      * @return string Baked filename
      */
-    public function getBakeName($name)
+    public function getBakeName(string $name): string
     {
         $db = getenv('DB');
         if (!$db) {
             $db = $this->getDbType();
         }
-        $name .= ucfirst($db);
 
-        return $name;
+        return $name . ucfirst($db);
     }
 
     /**
@@ -575,15 +577,14 @@ class Initial extends BaseMigration
      * @param string $source Source folder where migrations are located
      * @return Migrations
      */
-    protected function getMigrations($source = 'MigrationsDiff')
+    protected function getMigrations($source = 'MigrationsDiff'): Migrations
     {
         $params = [
             'connection' => 'test_comparisons',
             'source' => $source,
         ];
-        $migrations = new Migrations($params);
 
-        return $migrations;
+        return new Migrations($params);
     }
 
     /**
@@ -608,7 +609,7 @@ class Initial extends BaseMigration
      * @param string $result Results generated by the test to be compared
      * @return void
      */
-    public function assertCorrectSnapshot($bakeName, $result)
+    public function assertCorrectSnapshot($bakeName, string $result): void
     {
         $dbenv = getenv('DB');
         if (!$dbenv) {
@@ -629,10 +630,10 @@ class Initial extends BaseMigration
      * @param string $needle The filename pattern to find.
      * @return string
      */
-    public function getGeneratedMigrationName($configDir, $needle)
+    public function getGeneratedMigrationName(string $configDir, string $needle): string
     {
         $files = glob($configDir . $needle);
-        $this->assertNotEmpty($files, "Could not find any files matching `{$needle}` in `{$configDir}`");
+        $this->assertNotEmpty($files, sprintf('Could not find any files matching `%s` in `%s`', $needle, $configDir));
 
         // Record the generated file so we can cleanup if the test fails.
         $this->generatedFiles[] = $files[0];

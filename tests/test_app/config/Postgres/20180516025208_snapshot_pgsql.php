@@ -4,7 +4,7 @@ use Migrations\BaseMigration;
 
 class SnapshotPgsql extends BaseMigration
 {
-    public function up()
+    public function up(): void
     {
         $this->table('articles')
             ->addColumn('title', 'string', [
@@ -304,7 +304,7 @@ class SnapshotPgsql extends BaseMigration
             ->update();
     }
 
-    public function down()
+    public function down(): void
     {
         $this->table('articles')
             ->dropForeignKey(

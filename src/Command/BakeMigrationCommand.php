@@ -29,9 +29,6 @@ use Migrations\Util\ColumnParser;
  */
 class BakeMigrationCommand extends BakeSimpleMigrationCommand
 {
-    /**
-     * @var string
-     */
     protected string $_name;
 
     /**
@@ -45,7 +42,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         EventManager::instance()->on('Bake.initialize', function (Event $event): void {
             /** @var \Bake\View\BakeView $view */

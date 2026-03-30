@@ -14,8 +14,6 @@ class ChangeComment extends Action
 {
     /**
      * The new comment for the table
-     *
-     * @var string|null
      */
     protected ?string $newComment = null;
 

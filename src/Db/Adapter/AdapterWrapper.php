@@ -30,9 +30,6 @@ use Migrations\SeedInterface;
  */
 abstract class AdapterWrapper implements WrapperInterface
 {
-    /**
-     * @var \Migrations\Db\Adapter\AdapterInterface
-     */
     protected AdapterInterface $adapter;
 
     /**

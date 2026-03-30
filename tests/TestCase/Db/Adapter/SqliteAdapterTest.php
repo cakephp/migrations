@@ -27,13 +27,12 @@ use RuntimeException;
 class SqliteAdapterTest extends TestCase
 {
     private array $config;
+
     private StubConsoleOutput $out;
+
     private ConsoleIo $io;
 
-    /**
-     * @var \Migrations\Db\Adapter\SqliteAdapter
-     */
-    private $adapter;
+    private SqliteAdapter $adapter;
 
     protected function setUp(): void
     {
@@ -78,17 +77,17 @@ class SqliteAdapterTest extends TestCase
         unset($this->adapter, $this->out, $this->io);
     }
 
-    public function testGetConnection()
+    public function testGetConnection(): void
     {
         error_reporting(E_ALL);
-        $this->deprecated(function () {
+        $this->deprecated(function (): void {
             $connection = $this->adapter->getConnection();
             $this->assertInstanceOf(Connection::class, $connection);
             $this->assertSame($connection, $this->adapter->getDecoratedConnection());
         });
     }
 
-    public function testBeginTransaction()
+    public function testBeginTransaction(): void
     {
         $this->adapter->beginTransaction();
 
@@ -98,7 +97,7 @@ class SqliteAdapterTest extends TestCase
         );
     }
 
-    public function testRollbackTransaction()
+    public function testRollbackTransaction(): void
     {
         $this->adapter->beginTransaction();
         $this->adapter->rollbackTransaction();
@@ -109,7 +108,7 @@ class SqliteAdapterTest extends TestCase
         );
     }
 
-    public function testCommitTransactionTransaction()
+    public function testCommitTransactionTransaction(): void
     {
         $this->adapter->beginTransaction();
         $this->adapter->commitTransaction();
@@ -120,7 +119,7 @@ class SqliteAdapterTest extends TestCase
         );
     }
 
-    public function testCreatingTheSchemaTableOnConnect()
+    public function testCreatingTheSchemaTableOnConnect(): void
     {
         $this->adapter->connect();
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
@@ -131,24 +130,24 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
     }
 
-    public function testSchemaTableIsCreatedWithPrimaryKey()
+    public function testSchemaTableIsCreatedWithPrimaryKey(): void
     {
         $this->adapter->connect();
         new Table($this->adapter->getSchemaTableName(), [], $this->adapter);
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));
     }
 
-    public function testQuoteTableName()
+    public function testQuoteTableName(): void
     {
         $this->assertEquals('"test_table"', $this->adapter->quoteTableName('test_table'));
     }
 
-    public function testQuoteColumnName()
+    public function testQuoteColumnName(): void
     {
         $this->assertEquals('"test_column"', $this->adapter->quoteColumnName('test_column'));
     }
 
-    public function testCreateTable()
+    public function testCreateTable(): void
     {
         $table = new Table('ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -161,7 +160,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableCustomIdColumn()
+    public function testCreateTableCustomIdColumn(): void
     {
         $table = new Table('ntable', ['id' => 'custom_id'], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -181,7 +180,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($idColumn->isNull());
     }
 
-    public function testCreateTableIdentityIdColumn()
+    public function testCreateTableIdentityIdColumn(): void
     {
         $table = new Table('ntable', ['id' => false, 'primary_key' => ['custom_id']], $this->adapter);
         $table->addColumn('custom_id', 'integer', ['identity' => true])
@@ -195,7 +194,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($idColumn->getIdentity());
     }
 
-    public function testCreateTableWithNoPrimaryKey()
+    public function testCreateTableWithNoPrimaryKey(): void
     {
         $options = [
             'id' => false,
@@ -206,7 +205,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('atable', 'id'));
     }
 
-    public function testCreateTableWithMultiplePrimaryKeys()
+    public function testCreateTableWithMultiplePrimaryKeys(): void
     {
         $options = [
             'id' => false,
@@ -226,7 +225,7 @@ class SqliteAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsUuid()
+    public function testCreateTableWithPrimaryKeyAsUuid(): void
     {
         $options = [
             'id' => false,
@@ -241,7 +240,7 @@ class SqliteAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsBinaryUuid()
+    public function testCreateTableWithPrimaryKeyAsBinaryUuid(): void
     {
         $options = [
             'id' => false,
@@ -253,7 +252,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex('ztable', 'id'));
     }
 
-    public function testCreateTableWithMultipleIndexes()
+    public function testCreateTableWithMultipleIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -267,7 +266,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_name']));
     }
 
-    public function testCreateTableWithUniqueIndexes()
+    public function testCreateTableWithUniqueIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -277,7 +276,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
     }
 
-    public function testCreateTableWithNamedIndexes()
+    public function testCreateTableWithNamedIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -288,7 +287,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndexByName('table1', 'myemailindex'));
     }
 
-    public function testCreateTableWithForeignKey()
+    public function testCreateTableWithForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -302,7 +301,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testCreateTableWithIndexesAndForeignKey()
+    public function testCreateTableWithIndexesAndForeignKey(): void
     {
         $refTable = new Table('tbl_master', [], $this->adapter);
         $refTable->create();
@@ -335,7 +334,7 @@ class SqliteAdapterTest extends TestCase
         );
     }
 
-    public function testCreateTableWithoutAutoIncrementingPrimaryKeyAndWithForeignKey()
+    public function testCreateTableWithoutAutoIncrementingPrimaryKeyAndWithForeignKey(): void
     {
         $refTable = (new Table('tbl_master', ['id' => false, 'primary_key' => 'id'], $this->adapter))
             ->addColumn('id', 'text');
@@ -384,7 +383,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertStringContainsString('("email" ASC) WHERE is_verified = true', $indexQuery);
     }
 
-    public function testAddPrimaryKey()
+    public function testAddPrimaryKey(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table
@@ -396,7 +395,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['id']));
     }
 
-    public function testChangePrimaryKey()
+    public function testChangePrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -412,7 +411,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column2']));
     }
 
-    public function testChangePrimaryKeyNonInteger()
+    public function testChangePrimaryKeyNonInteger(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -428,7 +427,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column2']));
     }
 
-    public function testChangePrimaryKeyWithoutAutoIncrement()
+    public function testChangePrimaryKeyWithoutAutoIncrement(): void
     {
         // Create table with id_1 as PK without AUTOINCREMENT keyword
         $this->adapter->execute('CREATE TABLE table1 (id_1 INTEGER NOT NULL PRIMARY KEY, id_2 INTEGER NOT NULL)');
@@ -450,7 +449,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertStringNotContainsString('AUTOINCREMENT', $result['sql'], 'AUTOINCREMENT should not be added when changing PK to a column that did not have it');
     }
 
-    public function testChangePrimaryKeyFromAutoIncrementColumn()
+    public function testChangePrimaryKeyFromAutoIncrementColumn(): void
     {
         // Create table with id_1 as PK with AUTOINCREMENT
         $this->adapter->execute('CREATE TABLE table1 (id_1 INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id_2 INTEGER NOT NULL)');
@@ -473,7 +472,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertStringNotContainsString('AUTOINCREMENT', $result['sql'], 'AUTOINCREMENT should not be added when changing PK to a column that never had it');
     }
 
-    public function testDropPrimaryKey()
+    public function testDropPrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -488,7 +487,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testAddMultipleColumnPrimaryKeyFails()
+    public function testAddMultipleColumnPrimaryKeyFails(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table
@@ -503,7 +502,7 @@ class SqliteAdapterTest extends TestCase
             ->save();
     }
 
-    public function testChangeCommentFails()
+    public function testChangeCommentFails(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -515,7 +514,7 @@ class SqliteAdapterTest extends TestCase
             ->save();
     }
 
-    public function testRenameTable()
+    public function testRenameTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -526,7 +525,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable('table2'));
     }
 
-    public function testAddColumn()
+    public function testAddColumn(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -541,7 +540,7 @@ class SqliteAdapterTest extends TestCase
         // $this->assertEquals('realname', $rows[1]['Field']);
     }
 
-    public function testAddColumnWithDefaultValue()
+    public function testAddColumnWithDefaultValue(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -551,7 +550,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals("'test'", $rows[1]['dflt_value']);
     }
 
-    public function testAddColumnWithDefaultZero()
+    public function testAddColumnWithDefaultZero(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -562,7 +561,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('0', $rows[1]['dflt_value']);
     }
 
-    public function testAddColumnWithDefaultEmptyString()
+    public function testAddColumnWithDefaultEmptyString(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -572,7 +571,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals("''", $rows[1]['dflt_value']);
     }
 
-    public function testAddDecimalWithPrecisionAndScale()
+    public function testAddDecimalWithPrecisionAndScale(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -620,7 +619,7 @@ class SqliteAdapterTest extends TestCase
         }
     }
 
-    public function testRenameColumn()
+    public function testRenameColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -631,7 +630,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column2'));
     }
 
-    public function testRenamingANonExistentColumn()
+    public function testRenamingANonExistentColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -642,7 +641,7 @@ class SqliteAdapterTest extends TestCase
         $this->adapter->renameColumn('t', 'column2', 'column1');
     }
 
-    public function testRenameColumnWithIndex()
+    public function testRenameColumnWithIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -659,7 +658,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex($table->getName(), 'newindexcol'));
     }
 
-    public function testRenameColumnWithUniqueIndex()
+    public function testRenameColumnWithUniqueIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -676,7 +675,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex($table->getName(), 'newindexcol'));
     }
 
-    public function testRenameColumnWithCompositeIndex()
+    public function testRenameColumnWithCompositeIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -698,7 +697,7 @@ class SqliteAdapterTest extends TestCase
      * Tests that rewriting the index SQL does not accidentally change
      * the table name in case it matches the column name.
      */
-    public function testRenameColumnWithIndexMatchingTheTableName()
+    public function testRenameColumnWithIndexMatchingTheTableName(): void
     {
         $table = new Table('indexcol', [], $this->adapter);
         $table
@@ -719,7 +718,7 @@ class SqliteAdapterTest extends TestCase
      * Tests that rewriting the index SQL does not accidentally change
      * column names that partially match the column to rename.
      */
-    public function testRenameColumnWithIndexColumnPartialMatch()
+    public function testRenameColumnWithIndexColumnPartialMatch(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -738,7 +737,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex($table->getName(), ['indexcolumn', 'newindexcol']));
     }
 
-    public function testRenameColumnWithIndexColumnRequiringQuoting()
+    public function testRenameColumnWithIndexColumnRequiringQuoting(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -758,7 +757,7 @@ class SqliteAdapterTest extends TestCase
     /**
      * Indices that are using expressions are not being updated.
      */
-    public function testRenameColumnWithExpressionIndex()
+    public function testRenameColumnWithExpressionIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -847,7 +846,7 @@ class SqliteAdapterTest extends TestCase
      * @param string $newIndexSQL Expected new index creation SQL
      */
     #[DataProvider('customIndexSQLDataProvider')]
-    public function testRenameColumnWithCustomIndex(string $indexSQL, string $newIndexSQL)
+    public function testRenameColumnWithCustomIndex(string $indexSQL, string $newIndexSQL): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -946,7 +945,7 @@ class SqliteAdapterTest extends TestCase
      * @param string $newIndexSQL Expected new index creation SQL
      */
     #[DataProvider('customCompositeIndexSQLDataProvider')]
-    public function testRenameColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL)
+    public function testRenameColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -969,7 +968,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertSame($index['sql'], $newIndexSQL);
     }
 
-    public function testChangeColumn()
+    public function testChangeColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -978,6 +977,7 @@ class SqliteAdapterTest extends TestCase
         $newColumn1 = new Column();
         $newColumn1->setName('column1');
         $newColumn1->setType('string');
+
         $table->changeColumn('column1', $newColumn1);
         $this->assertTrue($this->adapter->hasColumn('t', 'column1'));
         $newColumn2 = new Column();
@@ -988,7 +988,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column2'));
     }
 
-    public function testChangeColumnDefaultValue()
+    public function testChangeColumnDefaultValue(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test'])
@@ -1004,7 +1004,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals("'test1'", $rows[1]['dflt_value']);
     }
 
-    public function testChangeColumnWithForeignKey()
+    public function testChangeColumnWithForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1022,7 +1022,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testChangeColumnWithIndex()
+    public function testChangeColumnWithIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1040,7 +1040,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex($table->getName(), 'indexcol'));
     }
 
-    public function testChangeColumnWithTrigger()
+    public function testChangeColumnWithTrigger(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1075,7 +1075,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals($triggerSQL, $rows[0]['sql']);
     }
 
-    public function testChangeColumnDefaultToZero()
+    public function testChangeColumnDefaultToZero(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'integer')
@@ -1089,7 +1089,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('0', $rows[1]['dflt_value']);
     }
 
-    public function testChangeColumnDefaultToNull()
+    public function testChangeColumnDefaultToNull(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test'])
@@ -1103,7 +1103,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertNull($rows[1]['dflt_value']);
     }
 
-    public function testChangeColumnWithCommasInCommentsOrDefaultValue()
+    public function testChangeColumnWithCommasInCommentsOrDefaultValue(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'one, two or three', 'comment' => 'three, two or one'])
@@ -1119,11 +1119,11 @@ class SqliteAdapterTest extends TestCase
     }
 
     #[DataProvider('columnCreationArgumentProvider')]
-    public function testDropColumn($columnCreationArgs)
+    public function testDropColumn(array $columnCreationArgs): void
     {
         $table = new Table('t', [], $this->adapter);
         $columnName = $columnCreationArgs[0];
-        call_user_func_array([$table, 'addColumn'], $columnCreationArgs);
+        $table->addColumn(...$columnCreationArgs);
         $table->save();
         $this->assertTrue($this->adapter->hasColumn('t', $columnName));
 
@@ -1132,7 +1132,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('t', $columnName));
     }
 
-    public function testDropColumnWithIndex()
+    public function testDropColumnWithIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1147,7 +1147,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex($table->getName(), 'indexcol'));
     }
 
-    public function testDropColumnWithUniqueIndex()
+    public function testDropColumnWithUniqueIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1162,7 +1162,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex($table->getName(), 'indexcol'));
     }
 
-    public function testDropColumnWithCompositeIndex()
+    public function testDropColumnWithCompositeIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1182,7 +1182,7 @@ class SqliteAdapterTest extends TestCase
      * Tests that removing columns does not accidentally drop indices
      * on table names that match the column to remove.
      */
-    public function testDropColumnWithIndexMatchingTheTableName()
+    public function testDropColumnWithIndexMatchingTheTableName(): void
     {
         $table = new Table('indexcol', [], $this->adapter);
         $table
@@ -1202,7 +1202,7 @@ class SqliteAdapterTest extends TestCase
      * Tests that removing columns does not accidentally drop indices
      * that contain column names that partially match the column to remove.
      */
-    public function testDropColumnWithIndexColumnPartialMatch()
+    public function testDropColumnWithIndexColumnPartialMatch(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1222,7 +1222,7 @@ class SqliteAdapterTest extends TestCase
     /**
      * Indices with expressions are not being removed.
      */
-    public function testDropColumnWithExpressionIndex()
+    public function testDropColumnWithExpressionIndex(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1244,7 +1244,7 @@ class SqliteAdapterTest extends TestCase
      * @param string $newIndexSQL Expected new index creation SQL
      */
     #[DataProvider('customIndexSQLDataProvider')]
-    public function testDropColumnWithCustomIndex(string $indexSQL, string $newIndexSQL)
+    public function testDropColumnWithCustomIndex(string $indexSQL, string $newIndexSQL): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1265,7 +1265,7 @@ class SqliteAdapterTest extends TestCase
      * @param string $newIndexSQL Expected new index creation SQL
      */
     #[DataProvider('customCompositeIndexSQLDataProvider')]
-    public function testDropColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL)
+    public function testDropColumnWithCustomCompositeIndex(string $indexSQL, string $newIndexSQL): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -1285,7 +1285,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex($table->getName(), ['indexcol1', 'indexcol3']));
     }
 
-    public static function columnCreationArgumentProvider()
+    public static function columnCreationArgumentProvider(): array
     {
         return [
             [['column1', 'string']],
@@ -1293,7 +1293,7 @@ class SqliteAdapterTest extends TestCase
         ];
     }
 
-    public static function columnsProvider()
+    public static function columnsProvider(): array
     {
         return [
             ['column1', 'string', []],
@@ -1313,7 +1313,7 @@ class SqliteAdapterTest extends TestCase
         ];
     }
 
-    public function testAddIndex()
+    public function testAddIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1324,7 +1324,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
     }
 
-    public function testDropIndex()
+    public function testDropIndex(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -1365,7 +1365,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($table4->hasIndex(['fname', 'lname']));
     }
 
-    public function testDropIndexByName()
+    public function testDropIndexByName(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -1387,7 +1387,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($table2->hasIndex(['fname', 'lname']));
     }
 
-    public function testAddForeignKey()
+    public function testAddForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1401,7 +1401,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKey()
+    public function testDropForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')
@@ -1431,7 +1431,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable($table->getName()));
     }
 
-    public function testDropForeignKeyWithQuoteVariants()
+    public function testDropForeignKeyWithQuoteVariants(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')
@@ -1465,7 +1465,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey('table', ['ref_lots_of_space', 'ref_lots_of_space']));
     }
 
-    public function testDropForeignKeyWithMultipleColumns()
+    public function testDropForeignKeyWithMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1525,11 +1525,8 @@ class SqliteAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @param array $columns
-     */
     #[DataProvider('nonExistentForeignKeyColumnsProvider')]
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1557,7 +1554,7 @@ class SqliteAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), $columns);
     }
 
-    public function testDropForeignKeyCaseInsensitivity()
+    public function testDropForeignKeyCaseInsensitivity(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1572,7 +1569,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyByName()
+    public function testDropForeignKeyByName(): void
     {
         $this->expectExceptionMessage('SQLite does not have named foreign keys');
         $this->expectException(BadMethodCallException::class);
@@ -1594,7 +1591,7 @@ class SqliteAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), [], 'my_constraint');
     }
 
-    public function testHasDatabase()
+    public function testHasDatabase(): void
     {
         if ($this->config['database'] === ':memory:') {
             $this->markTestSkipped('Skipping hasDatabase() when testing in-memory db.');
@@ -1603,7 +1600,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
-    public function testDropDatabase()
+    public function testDropDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('phinx_temp_database'));
         $this->adapter->createDatabase('phinx_temp_database');
@@ -1611,7 +1608,7 @@ class SqliteAdapterTest extends TestCase
         $this->adapter->dropDatabase('phinx_temp_database');
     }
 
-    public function testAddColumnWithComment()
+    public function testAddColumnWithComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string', ['comment' => 'Comments from "column1"'])
@@ -1628,7 +1625,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertMatchesRegularExpression('/\/\* Comments from "column1" \*\//', $sql);
     }
 
-    public function testAddColumnTableWithConstraint()
+    public function testAddColumnTableWithConstraint(): void
     {
         $this->adapter->execute('PRAGMA foreign_keys = ON');
         $roles = new Table('constraint_roles', [], $this->adapter);
@@ -1648,13 +1645,13 @@ class SqliteAdapterTest extends TestCase
         $updatedRoles
             ->addColumn('description', 'string', ['default' => 'short desc'])
             ->update();
-        $res = $this->adapter->fetchAll('select * from sqlite_master where type = \'table\'');
+        $res = $this->adapter->fetchAll("select * from sqlite_master where type = 'table'");
         $res = $this->adapter->fetchRow('select * from constraint_roles LIMIT 1');
         $this->assertArrayHasKey('description', $res, 'Should have new column in output');
         $this->assertEquals('short desc', $res['description']);
     }
 
-    public function testAddIndexTwoTablesSameIndex()
+    public function testAddIndexTwoTablesSameIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1675,7 +1672,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertTrue($table2->hasIndex('email'));
     }
 
-    public function testBulkInsertData()
+    public function testBulkInsertData(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1698,7 +1695,7 @@ class SqliteAdapterTest extends TestCase
             )
             ->insert(
                 [
-                    'column1' => '\'value4\'',
+                    'column1' => "'value4'",
                     'column2' => null,
                 ],
             )
@@ -1708,14 +1705,14 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('value1', $rows[0]['column1']);
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
-        $this->assertEquals('\'value4\'', $rows[3]['column1']);
+        $this->assertEquals("'value4'", $rows[3]['column1']);
         $this->assertEquals(1, $rows[0]['column2']);
         $this->assertEquals(2, $rows[1]['column2']);
         $this->assertEquals(3, $rows[2]['column2']);
         $this->assertNull($rows[3]['column2']);
     }
 
-    public function testBulkInsertLiteral()
+    public function testBulkInsertLiteral(): void
     {
         $data = [
             [
@@ -1741,12 +1738,12 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('value1', $rows[0]['column1']);
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column2']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column2']);
         $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column2']);
         $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column2']);
     }
 
-    public function testInsertData()
+    public function testInsertData(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1769,7 +1766,7 @@ class SqliteAdapterTest extends TestCase
             )
             ->insert(
                 [
-                    'column1' => '\'value4\'',
+                    'column1' => "'value4'",
                     'column2' => null,
                 ],
             )
@@ -1780,14 +1777,14 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('value1', $rows[0]['column1']);
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
-        $this->assertEquals('\'value4\'', $rows[3]['column1']);
+        $this->assertEquals("'value4'", $rows[3]['column1']);
         $this->assertEquals(1, $rows[0]['column2']);
         $this->assertEquals(2, $rows[1]['column2']);
         $this->assertEquals(3, $rows[2]['column2']);
         $this->assertNull($rows[3]['column2']);
     }
 
-    public function testInsertLiteral()
+    public function testInsertLiteral(): void
     {
         $data = [
             [
@@ -1818,12 +1815,12 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('test', $rows[0]['column2']);
         $this->assertEquals('test', $rows[1]['column2']);
         $this->assertEquals('foo', $rows[2]['column2']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column3']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column3']);
         $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column3']);
         $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column3']);
     }
 
-    public function testBulkInsertDataEnum()
+    public function testBulkInsertDataEnum(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1841,7 +1838,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('c', $rows[0]['column3']);
     }
 
-    public function testNullWithoutDefaultValue()
+    public function testNullWithoutDefaultValue(): void
     {
         // construct table with default/null combinations
         $table = new Table('table1', [], $this->adapter);
@@ -1878,7 +1875,7 @@ class SqliteAdapterTest extends TestCase
         $this->assertEquals('some2', $dd->getDefault());
     }
 
-    public function testDumpCreateTable()
+    public function testDumpCreateTable(): void
     {
         $this->adapter->setOptions($this->adapter->getOptions() + ['dryrun' => true]);
         $table = new Table('table1', [], $this->adapter);
@@ -1891,7 +1888,7 @@ class SqliteAdapterTest extends TestCase
         $expectedOutput = <<<'OUTPUT'
 CREATE TABLE "table1" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "column1" VARCHAR NOT NULL, "column2" INTEGER, "column3" VARCHAR DEFAULT 'test');
 OUTPUT;
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create table query to the output');
     }
 
@@ -1900,7 +1897,7 @@ OUTPUT;
      * Then sets phinx to dry run mode and inserts a record.
      * Asserts that phinx outputs the insert statement and doesn't insert a record.
      */
-    public function testDumpInsert()
+    public function testDumpInsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -1925,9 +1922,9 @@ INSERT INTO "table1" ("string_col") VALUES ('test data');
 INSERT INTO "table1" ("string_col") VALUES (null);
 INSERT INTO "table1" ("int_col") VALUES (23);
 OUTPUT;
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         $actualOutput = preg_replace("/\r\n|\r/", "\n", $actualOutput); // normalize line endings for Windows
-        $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the insert to the output');
+        $this->assertStringContainsString($expectedOutput, $actualOutput, "Passing the --dry-run option doesn't dump the insert to the output");
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
@@ -1940,7 +1937,7 @@ OUTPUT;
      * Then sets phinx to dry run mode and inserts some records.
      * Asserts that phinx outputs the insert statement and doesn't insert any record.
      */
-    public function testDumpBulkinsert()
+    public function testDumpBulkinsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -1962,8 +1959,8 @@ OUTPUT;
         $expectedOutput = <<<'OUTPUT'
 INSERT INTO "table1" ("string_col", "int_col") VALUES ('test_data1', 23), (null, 42);
 OUTPUT;
-        $actualOutput = join("\n", $this->out->messages());
-        $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the bulkinsert to the output');
+        $actualOutput = implode("\n", $this->out->messages());
+        $this->assertStringContainsString($expectedOutput, $actualOutput, "Passing the --dry-run option doesn't dump the bulkinsert to the output");
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
@@ -1971,7 +1968,7 @@ OUTPUT;
         $this->assertEquals(0, $res[0][0]);
     }
 
-    public function testDumpCreateTableAndThenInsert()
+    public function testDumpCreateTableAndThenInsert(): void
     {
         $this->adapter->setOptions($this->adapter->getOptions() + ['dryrun' => true]);
         $table = new Table('table1', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
@@ -1992,7 +1989,7 @@ OUTPUT;
 CREATE TABLE "table1" ("column1" VARCHAR NOT NULL, "column2" INTEGER, PRIMARY KEY ("column1"));
 INSERT INTO "table1" ("column1", "column2") VALUES ('id1', 1);
 OUTPUT;
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         $actualOutput = preg_replace("/\r\n|\r/", "\n", $actualOutput); // normalize line endings for Windows
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
@@ -2000,7 +1997,7 @@ OUTPUT;
     /**
      * Tests interaction with the query builder
      */
-    public function testQueryBuilder()
+    public function testQueryBuilder(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2039,7 +2036,7 @@ OUTPUT;
         $this->assertEquals(1, $stm->rowCount());
     }
 
-    public function testQueryWithParams()
+    public function testQueryWithParams(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2074,7 +2071,7 @@ OUTPUT;
      * Tests adding more than one column to a table
      * that already exists due to adapters having different add column instructions
      */
-    public function testAlterTableColumnAdd()
+    public function testAlterTableColumnAdd(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->create();
@@ -2099,14 +2096,14 @@ OUTPUT;
 
         $columnCount = count($columns);
         for ($i = 0; $i < $columnCount; $i++) {
-            $this->assertSame($expected[$i]['name'], $columns[$i]->getName(), "Wrong name for {$expected[$i]['name']}");
-            $this->assertSame($expected[$i]['type'], $columns[$i]->getType(), "Wrong type for {$expected[$i]['name']}");
-            $this->assertSame($expected[$i]['default'], $columns[$i]->getDefault() instanceof Literal ? (string)$columns[$i]->getDefault() : $columns[$i]->getDefault(), "Wrong default for {$expected[$i]['name']}");
-            $this->assertSame($expected[$i]['null'], $columns[$i]->getNull(), "Wrong null for {$expected[$i]['name']}");
+            $this->assertSame($expected[$i]['name'], $columns[$i]->getName(), 'Wrong name for ' . $expected[$i]['name']);
+            $this->assertSame($expected[$i]['type'], $columns[$i]->getType(), 'Wrong type for ' . $expected[$i]['name']);
+            $this->assertSame($expected[$i]['default'], $columns[$i]->getDefault() instanceof Literal ? (string)$columns[$i]->getDefault() : $columns[$i]->getDefault(), 'Wrong default for ' . $expected[$i]['name']);
+            $this->assertSame($expected[$i]['null'], $columns[$i]->getNull(), 'Wrong null for ' . $expected[$i]['name']);
         }
     }
 
-    public function testAlterTableWithConstraints()
+    public function testAlterTableWithConstraints(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->create();
@@ -2135,10 +2132,10 @@ OUTPUT;
 
         $columnCount = count($columns);
         for ($i = 0; $i < $columnCount; $i++) {
-            $this->assertSame($expected[$i]['name'], $columns[$i]->getName(), "Wrong name for {$expected[$i]['name']}");
-            $this->assertSame($expected[$i]['type'], $columns[$i]->getType(), "Wrong type for {$expected[$i]['name']}");
-            $this->assertSame($expected[$i]['default'], $columns[$i]->getDefault() instanceof Literal ? (string)$columns[$i]->getDefault() : $columns[$i]->getDefault(), "Wrong default for {$expected[$i]['name']}");
-            $this->assertSame($expected[$i]['null'], $columns[$i]->getNull(), "Wrong null for {$expected[$i]['name']}");
+            $this->assertSame($expected[$i]['name'], $columns[$i]->getName(), 'Wrong name for ' . $expected[$i]['name']);
+            $this->assertSame($expected[$i]['type'], $columns[$i]->getType(), 'Wrong type for ' . $expected[$i]['name']);
+            $this->assertSame($expected[$i]['default'], $columns[$i]->getDefault() instanceof Literal ? (string)$columns[$i]->getDefault() : $columns[$i]->getDefault(), 'Wrong default for ' . $expected[$i]['name']);
+            $this->assertSame($expected[$i]['null'], $columns[$i]->getNull(), 'Wrong null for ' . $expected[$i]['name']);
         }
     }
 
@@ -2146,7 +2143,7 @@ OUTPUT;
      * Tests that operations that trigger implicit table drops will not cause
      * a foreign key constraint violation error.
      */
-    public function testAlterTableDoesNotViolateRestrictedForeignKeyConstraint()
+    public function testAlterTableDoesNotViolateRestrictedForeignKeyConstraint(): void
     {
         $this->adapter->execute('PRAGMA foreign_keys = ON');
 
@@ -2213,7 +2210,7 @@ OUTPUT;
      * alteration process (being it implicitly by the process itself or by the user)
      * will trigger an error accordingly.
      */
-    public function testAlterTableDoesViolateForeignKeyConstraintOnTargetTableChange()
+    public function testAlterTableDoesViolateForeignKeyConstraintOnTargetTableChange(): void
     {
         $articlesTable = new Table('articles', [], $this->adapter);
         $articlesTable
@@ -2249,7 +2246,7 @@ OUTPUT;
      * alteration process (being it implicitly by the process itself or by the user)
      * will trigger an error accordingly.
      */
-    public function testAlterTableDoesViolateForeignKeyConstraintOnSourceTableChange()
+    public function testAlterTableDoesViolateForeignKeyConstraintOnSourceTableChange(): void
     {
         $adapter = $this
             ->getMockBuilder(SqliteAdapter::class)
@@ -2302,7 +2299,7 @@ OUTPUT;
      * Tests that the adapter's foreign key validation does not apply when
      * the `foreign_keys` pragma is set to `OFF`.
      */
-    public function testAlterTableForeignKeyConstraintValidationNotRunningWithDisabledForeignKeys()
+    public function testAlterTableForeignKeyConstraintValidationNotRunningWithDisabledForeignKeys(): void
     {
         $articlesTable = new Table('articles', [], $this->adapter);
         $articlesTable
@@ -2345,7 +2342,7 @@ OUTPUT;
             ->update();
     }
 
-    public function testLiteralSupport()
+    public function testLiteralSupport(): void
     {
         $createQuery = <<<'INPUT'
 CREATE TABLE `test` (`real_col` DECIMAL)
@@ -2358,23 +2355,23 @@ INPUT;
     }
 
     #[DataProvider('provideTableNamesForPresenceCheck')]
-    public function testHasTable($createName, $tableName, $exp)
+    public function testHasTable(string $createName, string $tableName, bool $exp): void
     {
         // Test case for issue #1535
         $conn = $this->adapter->getConnection();
-        $conn->execute('ATTACH DATABASE \':memory:\' as etc');
+        $conn->execute("ATTACH DATABASE ':memory:' as etc");
         $conn->execute('ATTACH DATABASE \':memory:\' as "main.db"');
         $conn->execute(sprintf('DROP TABLE IF EXISTS %s', $createName));
         $this->assertFalse($this->adapter->hasTable($tableName), sprintf('Adapter claims table %s exists when it does not', $tableName));
         $conn->execute(sprintf('CREATE TABLE %s (a text)', $createName));
-        if ($exp == true) {
+        if ($exp) {
             $this->assertTrue($this->adapter->hasTable($tableName), sprintf('Adapter claims table %s does not exist when it does', $tableName));
         } else {
             $this->assertFalse($this->adapter->hasTable($tableName), sprintf('Adapter claims table %s exists when it does not', $tableName));
         }
     }
 
-    public static function provideTableNamesForPresenceCheck()
+    public static function provideTableNamesForPresenceCheck(): array
     {
         return [
             'Ordinary table' => ['t', 't', true],
@@ -2386,8 +2383,8 @@ INPUT;
             'Wrong schema 1' => ['t', 'etc.t', false],
             'Wrong schema 2' => ['t', 'temp.t', false],
             'Missing schema' => ['t', 'not_attached.t', false],
-            'Malicious table' => ['"\'"', '\'', true],
-            'Malicious missing table' => ['t', '\'', false],
+            'Malicious table' => ['"\'"', "'", true],
+            'Malicious missing table' => ['t', "'", false],
             'Table name case 1' => ['t', 'T', true],
             'Table name case 2' => ['T', 't', true],
             'Schema name case 1' => ['main.t', 'MAIN.t', true],
@@ -2424,10 +2421,10 @@ INPUT;
     }
 
     #[DataProvider('provideIndexColumnsToCheck')]
-    public function testHasIndex($tableDef, $cols, $exp)
+    public function testHasIndex(string $tableDef, string|array $cols, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
-        if (strpos($tableDef, ';') !== false) {
+        if (str_contains($tableDef, ';')) {
             $queries = explode(';', $tableDef);
             foreach ($queries as $query) {
                 $stmt = $conn->execute($query);
@@ -2441,7 +2438,7 @@ INPUT;
         $this->assertEquals($exp, $this->adapter->hasIndex('t', $cols));
     }
 
-    public static function provideIndexColumnsToCheck()
+    public static function provideIndexColumnsToCheck(): array
     {
         return [
             ['create table t(a text)', 'a', false],
@@ -2464,10 +2461,10 @@ INPUT;
     }
 
     #[DataProvider('provideIndexNamesToCheck')]
-    public function testHasIndexByName($tableDef, $index, $exp)
+    public function testHasIndexByName(string $tableDef, string $index, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
-        if (strpos($tableDef, ';') !== false) {
+        if (str_contains($tableDef, ';')) {
             $queries = explode(';', $tableDef);
             foreach ($queries as $query) {
                 $stmt = $conn->execute($query);
@@ -2480,7 +2477,7 @@ INPUT;
         $this->assertEquals($exp, $this->adapter->hasIndexByName('t', $index));
     }
 
-    public static function provideIndexNamesToCheck()
+    public static function provideIndexNamesToCheck(): array
     {
         return [
             ['create table t(a text)', 'test', false],
@@ -2496,11 +2493,11 @@ INPUT;
     }
 
     #[DataProvider('providePrimaryKeysToCheck')]
-    public function testHasPrimaryKey($tableDef, $key, $exp)
+    public function testHasPrimaryKey(string $tableDef, string|array $key, bool $exp): void
     {
         $this->assertFalse($this->adapter->hasTable('t'), 'Dirty test fixture');
         $conn = $this->adapter->getConnection();
-        if (strpos($tableDef, ';') !== false) {
+        if (str_contains($tableDef, ';')) {
             $queries = explode(';', $tableDef);
             foreach ($queries as $query) {
                 $stmt = $conn->execute($query);
@@ -2513,7 +2510,7 @@ INPUT;
         $this->assertSame($exp, $this->adapter->hasPrimaryKey('t', $key));
     }
 
-    public static function providePrimaryKeysToCheck()
+    public static function providePrimaryKeysToCheck(): array
     {
         return [
             ['create table t(a integer)', 'a', false],
@@ -2525,7 +2522,7 @@ INPUT;
             ['create table t("a" integer PRIMARY KEY)', 'a', true],
             ['create table t([a] integer PRIMARY KEY)', 'a', true],
             ['create table t(`a` integer PRIMARY KEY)', 'a', true],
-            ['create table t(\'a\' integer PRIMARY KEY)', 'a', true],
+            ["create table t('a' integer PRIMARY KEY)", 'a', true],
             ['create table t(`a.a` integer PRIMARY KEY)', 'a.a', true],
             ['create table t(a integer primary key)', ['a'], true],
             ['create table t(a integer primary key)', ['a', 'b'], false],
@@ -2555,7 +2552,7 @@ INPUT;
         ];
     }
 
-    public function testHasNamedPrimaryKey()
+    public function testHasNamedPrimaryKey(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -2563,11 +2560,11 @@ INPUT;
     }
 
     #[DataProvider('provideForeignKeysToCheck')]
-    public function testHasForeignKey($tableDef, $key, $exp)
+    public function testHasForeignKey(string $tableDef, string|array $key, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a integer, b integer, c integer)');
-        if (strpos($tableDef, ';') !== false) {
+        if (str_contains($tableDef, ';')) {
             $queries = explode(';', $tableDef);
             foreach ($queries as $query) {
                 $stmt = $conn->execute($query);
@@ -2581,7 +2578,7 @@ INPUT;
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
-    public static function provideForeignKeysToCheck()
+    public static function provideForeignKeysToCheck(): array
     {
         return [
             ['create table t(a integer)', 'a', false],
@@ -2723,13 +2720,13 @@ INPUT;
     }
 
     #[DataProvider('provideColumnTypesForValidation')]
-    public function testIsValidColumnType($phinxType, $exp)
+    public function testIsValidColumnType(string $phinxType, bool $exp): void
     {
         $col = (new Column())->setType($phinxType);
         $this->assertSame($exp, $this->adapter->isValidColumnType($col));
     }
 
-    public static function provideColumnTypesForValidation()
+    public static function provideColumnTypesForValidation(): array
     {
         return [
             [SqliteAdapter::TYPE_BIGINTEGER, true],
@@ -2761,12 +2758,12 @@ INPUT;
     }
 
     #[DataProvider('provideDatabaseVersionStrings')]
-    public function testDatabaseVersionAtLeast($ver, $exp)
+    public function testDatabaseVersionAtLeast(string $ver, bool $exp): void
     {
         $this->assertSame($exp, $this->adapter->databaseVersionAtLeast($ver));
     }
 
-    public static function provideDatabaseVersionStrings()
+    public static function provideDatabaseVersionStrings(): array
     {
         return [
             ['2', true],
@@ -2780,10 +2777,10 @@ INPUT;
     }
 
     #[DataProvider('provideColumnNamesToCheck')]
-    public function testHasColumn($tableDef, $col, $exp)
+    public function testHasColumn(string $tableDef, string $col, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
-        if (strpos($tableDef, ';') !== false) {
+        if (str_contains($tableDef, ';')) {
             $queries = explode(';', $tableDef);
             foreach ($queries as $query) {
                 $stmt = $conn->execute($query);
@@ -2797,7 +2794,7 @@ INPUT;
         $this->assertEquals($exp, $this->adapter->hasColumn('t', $col));
     }
 
-    public static function provideColumnNamesToCheck()
+    public static function provideColumnNamesToCheck(): array
     {
         return [
             ['create table t(a text)', 'a', true],
@@ -2805,7 +2802,7 @@ INPUT;
             ['create table t(A text)', 'A', true],
             ['create table t("a" text)', 'a', true],
             ['create table t([a] text)', 'a', true],
-            ['create table t(\'a\' text)', 'a', true],
+            ["create table t('a' text)", 'a', true],
             ['create table t("A" text)', 'A', true],
             ['create table t(a text)', 'a', true],
             ['create table t(b text)', 'a', false],
@@ -2818,10 +2815,11 @@ INPUT;
         ];
     }
 
-    public function testGetColumns()
+    public function testGetColumns(): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('create table t(a integer, b text, c char(5), d integer(12,6), e integer not null, f integer null)');
+
         $exp = [
             ['name' => 'a', 'type' => 'integer', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
             ['name' => 'b', 'type' => 'text', 'null' => true, 'limit' => null, 'precision' => null, 'scale' => null],
@@ -2836,16 +2834,17 @@ INPUT;
             $this->assertInstanceOf(Column::class, $act[$index]);
             foreach ($data as $key => $value) {
                 $m = 'get' . ucfirst($key);
-                $this->assertEquals($value, $act[$index]->$m(), "Parameter '$key' of column at index $index did not match expectations.");
+                $this->assertEquals($value, $act[$index]->$m(), sprintf("Parameter '%s' of column at index %s did not match expectations.", $key, $index));
             }
         }
     }
 
     #[DataProvider('provideIdentityCandidates')]
-    public function testGetColumnsForIdentity($tableDef, $exp)
+    public function testGetColumnsForIdentity(string $tableDef, ?string $exp): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute($tableDef);
+
         $cols = $this->adapter->getColumns('t');
         $act = [];
         foreach ($cols as $col) {
@@ -2856,7 +2855,7 @@ INPUT;
         $this->assertEquals((array)$exp, $act);
     }
 
-    public static function provideIdentityCandidates()
+    public static function provideIdentityCandidates(): array
     {
         return [
             ['create table t(a text)', null],
@@ -2871,7 +2870,7 @@ INPUT;
     }
 
     #[DataProvider('provideDefaultValues')]
-    public function testGetColumnsForDefaults($tableDef, $exp)
+    public function testGetColumnsForDefaults(string $tableDef, string|Literal|int|float|Expression|null $exp): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute($tableDef);
@@ -2884,7 +2883,7 @@ INPUT;
         }
     }
 
-    public static function provideDefaultValues()
+    public static function provideDefaultValues(): array
     {
         return [
             'Implicit null' => ['create table t(a integer)', null],
@@ -2905,12 +2904,12 @@ INPUT;
             'Current timestamp LC' => ['create table t(a datetime default current_timestamp)', 'CURRENT_TIMESTAMP'],
             'Current timestamp UC' => ['create table t(a datetime default CURRENT_TIMESTAMP)', 'CURRENT_TIMESTAMP'],
             'Current timestamp MC' => ['create table t(a datetime default CURRENT_timestamp)', 'CURRENT_TIMESTAMP'],
-            'String 1' => ['create table t(a text default \'\')', Literal::from('')],
-            'String 2' => ['create table t(a text default \'value!\')', Literal::from('value!')],
-            'String 3' => ['create table t(a text default \'O\'\'Brien\')', Literal::from('O\'Brien')],
-            'String 4' => ['create table t(a text default \'CURRENT_TIMESTAMP\')', Literal::from('CURRENT_TIMESTAMP')],
-            'String 5' => ['create table t(a text default \'current_timestamp\')', Literal::from('current_timestamp')],
-            'String 6' => ['create table t(a text default \'\' /* comment */)', Literal::from('')],
+            'String 1' => ["create table t(a text default '')", Literal::from('')],
+            'String 2' => ["create table t(a text default 'value!')", Literal::from('value!')],
+            'String 3' => ["create table t(a text default 'O''Brien')", Literal::from("O'Brien")],
+            'String 4' => ["create table t(a text default 'CURRENT_TIMESTAMP')", Literal::from('CURRENT_TIMESTAMP')],
+            'String 5' => ["create table t(a text default 'current_timestamp')", Literal::from('current_timestamp')],
+            'String 6' => ["create table t(a text default '' /* comment */)", Literal::from('')],
             'Hexadecimal LC' => ['create table t(a integer default 0xff)', 255],
             'Hexadecimal UC' => ['create table t(a integer default 0XFF)', 255],
             'Hexadecimal MC' => ['create table t(a integer default 0x1F)', 31],
@@ -2934,26 +2933,27 @@ INPUT;
             'Float 9' => ['create table t(a float default 1e+1)', 10.0],
             'Float 10' => ['create table t(a float default 1e-1)', 0.1],
             'Float 11' => ['create table t(a float default 1E-1)', 0.1],
-            'Blob literal 1' => ['create table t(a float default x\'ff\')', Expression::from('x\'ff\'')],
-            'Blob literal 2' => ['create table t(a float default X\'FF\')', Expression::from('X\'FF\'')],
+            'Blob literal 1' => ["create table t(a float default x'ff')", Expression::from("x'ff'")],
+            'Blob literal 2' => ["create table t(a float default X'FF')", Expression::from("X'FF'")],
             'Arbitrary expression' => ['create table t(a float default ((2) + (2)))', Expression::from('(2) + (2)')],
-            'Pathological case 1' => ['create table t(a float default (\'/*\' || \'*/\'))', Expression::from('/*\' || \'*/')],
+            'Pathological case 1' => ["create table t(a float default ('/*' || '*/'))", Expression::from("/*' || '*/")],
         ];
     }
 
     #[DataProvider('provideBooleanDefaultValues')]
-    public function testGetColumnsForBooleanDefaults($tableDef, $exp)
+    public function testGetColumnsForBooleanDefaults(string $tableDef, int $exp): void
     {
         if (!$this->adapter->databaseVersionAtLeast('3.24')) {
             $this->markTestSkipped('SQLite 3.24.0 or later is required for this test.');
         }
         $conn = $this->adapter->getConnection();
         $conn->execute($tableDef);
+
         $act = $this->adapter->getColumns('t')[0]->getDefault();
         $this->assertSame($exp, $act);
     }
 
-    public static function provideBooleanDefaultValues()
+    public static function provideBooleanDefaultValues(): array
     {
         return [
             'True LC' => ['create table t(a boolean default true)', 1],
@@ -2966,26 +2966,26 @@ INPUT;
     }
 
     #[DataProvider('provideTablesForTruncation')]
-    public function testTruncateTable($tableDef, $tableName, $tableId)
+    public function testTruncateTable(string $tableDef, string $tableName, string $tableId): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute($tableDef);
-        $conn->execute("INSERT INTO $tableId default values");
-        $conn->execute("INSERT INTO $tableId default values");
-        $conn->execute("INSERT INTO $tableId default values");
-        $this->assertEquals(3, $conn->execute("select count(*) from $tableId")->fetchColumn(0), 'Broken fixture: data were not inserted properly');
-        $this->assertEquals(3, $conn->execute("select max(id) from $tableId")->fetchColumn(0), 'Broken fixture: data were not inserted properly');
+        $conn->execute(sprintf('INSERT INTO %s default values', $tableId));
+        $conn->execute(sprintf('INSERT INTO %s default values', $tableId));
+        $conn->execute(sprintf('INSERT INTO %s default values', $tableId));
+        $this->assertEquals(3, $conn->execute('select count(*) from ' . $tableId)->fetchColumn(0), 'Broken fixture: data were not inserted properly');
+        $this->assertEquals(3, $conn->execute('select max(id) from ' . $tableId)->fetchColumn(0), 'Broken fixture: data were not inserted properly');
         $this->adapter->truncateTable($tableName);
-        $this->assertEquals(0, $conn->execute("select count(*) from $tableId")->fetchColumn(0), 'Table was not truncated');
-        $conn->execute("INSERT INTO $tableId default values");
-        $this->assertEquals(1, $conn->execute("select max(id) from $tableId")->fetchColumn(0), 'Autoincrement was not reset');
-        $conn->execute("DROP TABLE $tableId");
+        $this->assertEquals(0, $conn->execute('select count(*) from ' . $tableId)->fetchColumn(0), 'Table was not truncated');
+        $conn->execute(sprintf('INSERT INTO %s default values', $tableId));
+        $this->assertEquals(1, $conn->execute('select max(id) from ' . $tableId)->fetchColumn(0), 'Autoincrement was not reset');
+        $conn->execute('DROP TABLE ' . $tableId);
     }
 
     /**
      * @return array
      */
-    public static function provideTablesForTruncation()
+    public static function provideTablesForTruncation(): array
     {
         return [
             ['create table t(id integer primary key)', 't', 't'],
@@ -3003,7 +3003,7 @@ INPUT;
         ];
     }
 
-    public function testForeignKeyReferenceCorrectAfterRenameColumn()
+    public function testForeignKeyReferenceCorrectAfterRenameColumn(): void
     {
         $refTableColumnId = 'ref_table_id';
         $refTableColumnToRename = 'columnToRename';
@@ -3019,7 +3019,7 @@ INPUT;
         $refTable->renameColumn($refTableColumnToRename, $refTableRenamedColumn)->save();
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [$refTableColumnId]));
-        $this->assertFalse($this->adapter->hasTable("tmp_{$refTable->getName()}"));
+        $this->assertFalse($this->adapter->hasTable('tmp_' . $refTable->getName()));
         $this->assertTrue($this->adapter->hasColumn($refTable->getName(), $refTableRenamedColumn));
 
         $rows = $this->adapter->fetchAll('select * from sqlite_master where "type" = \'table\'');
@@ -3028,10 +3028,10 @@ INPUT;
                 $sql = $row['sql'];
             }
         }
-        $this->assertStringContainsString("REFERENCES \"{$refTable->getName()}\" (\"id\")", $sql);
+        $this->assertStringContainsString(sprintf('REFERENCES "%s" ("id")', $refTable->getName()), $sql);
     }
 
-    public function testForeignKeyReferenceCorrectAfterChangeColumn()
+    public function testForeignKeyReferenceCorrectAfterChangeColumn(): void
     {
         $refTableColumnId = 'ref_table_id';
         $refTableColumnToChange = 'columnToChange';
@@ -3046,7 +3046,7 @@ INPUT;
         $refTable->changeColumn($refTableColumnToChange, 'text')->save();
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [$refTableColumnId]));
-        $this->assertFalse($this->adapter->hasTable("tmp_{$refTable->getName()}"));
+        $this->assertFalse($this->adapter->hasTable('tmp_' . $refTable->getName()));
         $this->assertEquals('text', $this->adapter->getColumns($refTable->getName())[1]->getType());
 
         $rows = $this->adapter->fetchAll('select * from sqlite_master where "type" = \'table\'');
@@ -3055,10 +3055,10 @@ INPUT;
                 $sql = $row['sql'];
             }
         }
-        $this->assertStringContainsString("REFERENCES \"{$refTable->getName()}\" (\"id\")", $sql);
+        $this->assertStringContainsString(sprintf('REFERENCES "%s" ("id")', $refTable->getName()), $sql);
     }
 
-    public function testForeignKeyReferenceCorrectAfterRemoveColumn()
+    public function testForeignKeyReferenceCorrectAfterRemoveColumn(): void
     {
         $refTableColumnId = 'ref_table_id';
         $refTableColumnToRemove = 'columnToRemove';
@@ -3073,7 +3073,7 @@ INPUT;
         $refTable->removeColumn($refTableColumnToRemove)->save();
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [$refTableColumnId]));
-        $this->assertFalse($this->adapter->hasTable("tmp_{$refTable->getName()}"));
+        $this->assertFalse($this->adapter->hasTable('tmp_' . $refTable->getName()));
         $this->assertFalse($this->adapter->hasColumn($refTable->getName(), $refTableColumnToRemove));
 
         $rows = $this->adapter->fetchAll('select * from sqlite_master where "type" = \'table\'');
@@ -3082,10 +3082,10 @@ INPUT;
                 $sql = $row['sql'];
             }
         }
-        $this->assertStringContainsString("REFERENCES \"{$refTable->getName()}\" (\"id\")", $sql);
+        $this->assertStringContainsString(sprintf('REFERENCES "%s" ("id")', $refTable->getName()), $sql);
     }
 
-    public function testForeignKeyReferenceCorrectAfterChangePrimaryKey()
+    public function testForeignKeyReferenceCorrectAfterChangePrimaryKey(): void
     {
         $refTableColumnAdditionalId = 'additional_id';
         $refTableColumnId = 'ref_table_id';
@@ -3103,7 +3103,7 @@ INPUT;
             ->save();
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [$refTableColumnId]));
-        $this->assertFalse($this->adapter->hasTable("tmp_{$refTable->getName()}"));
+        $this->assertFalse($this->adapter->hasTable('tmp_' . $refTable->getName()));
         $this->assertTrue($this->adapter->getColumns($refTable->getName())[1]->getIdentity());
 
         $rows = $this->adapter->fetchAll('select * from sqlite_master where "type" = \'table\'');
@@ -3112,10 +3112,10 @@ INPUT;
                 $sql = $row['sql'];
             }
         }
-        $this->assertStringContainsString("REFERENCES \"{$refTable->getName()}\" (\"id\")", $sql);
+        $this->assertStringContainsString(sprintf('REFERENCES "%s" ("id")', $refTable->getName()), $sql);
     }
 
-    public function testForeignKeyReferenceCorrectAfterDropForeignKey()
+    public function testForeignKeyReferenceCorrectAfterDropForeignKey(): void
     {
         $refTableAdditionalColumnId = 'ref_table_additional_id';
         $refTableAdditional = new Table('ref_table_additional', [], $this->adapter);
@@ -3135,7 +3135,7 @@ INPUT;
         $refTable->dropForeignKey($refTableAdditionalColumnId)->save();
 
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [$refTableColumnId]));
-        $this->assertFalse($this->adapter->hasTable("tmp_{$refTable->getName()}"));
+        $this->assertFalse($this->adapter->hasTable('tmp_' . $refTable->getName()));
         $this->assertFalse($this->adapter->hasForeignKey($refTable->getName(), [$refTableAdditionalColumnId]));
 
         $rows = $this->adapter->fetchAll('select * from sqlite_master where "type" = \'table\'');
@@ -3144,17 +3144,17 @@ INPUT;
                 $sql = $row['sql'];
             }
         }
-        $this->assertStringContainsString("REFERENCES \"{$refTable->getName()}\" (\"id\")", $sql);
+        $this->assertStringContainsString(sprintf('REFERENCES "%s" ("id")', $refTable->getName()), $sql);
     }
 
-    public function testPdoExceptionUpdateNonExistingTable()
+    public function testPdoExceptionUpdateNonExistingTable(): void
     {
         $this->expectException(PDOException::class);
         $table = new Table('non_existing_table', [], $this->adapter);
         $table->addColumn('column', 'string')->update();
     }
 
-    public function testAddCheckConstraint()
+    public function testAddCheckConstraint(): void
     {
         $table = new Table('check_table', [], $this->adapter);
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
@@ -3166,7 +3166,7 @@ INPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table', 'price_positive'));
     }
 
-    public function testHasCheckConstraint()
+    public function testHasCheckConstraint(): void
     {
         $table = new Table('check_table3', [], $this->adapter);
         $table->addColumn('quantity', 'integer')
@@ -3180,7 +3180,7 @@ INPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table3', 'quantity_positive'));
     }
 
-    public function testDropCheckConstraint()
+    public function testDropCheckConstraint(): void
     {
         $table = new Table('check_table4', [], $this->adapter);
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
@@ -3194,7 +3194,7 @@ INPUT;
         $this->assertFalse($this->adapter->hasCheckConstraint('check_table4', 'price_check'));
     }
 
-    public function testCheckConstraintWithComplexExpression()
+    public function testCheckConstraintWithComplexExpression(): void
     {
         $table = new Table('check_table5', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -3211,10 +3211,10 @@ INPUT;
         // Verify the constraint is actually enforced
         $quotedTableName = $this->adapter->getConnection()->getDriver()->quoteIdentifier('check_table5');
         $this->expectException(PDOException::class);
-        $this->adapter->execute("INSERT INTO {$quotedTableName} (email, status) VALUES ('test@example.com', 'invalid')");
+        $this->adapter->execute(sprintf("INSERT INTO %s (email, status) VALUES ('test@example.com', 'invalid')", $quotedTableName));
     }
 
-    public function testInsertOrSkipWithDuplicates()
+    public function testInsertOrSkipWithDuplicates(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -3237,7 +3237,7 @@ INPUT;
         $this->assertEquals('John', $rows[0]['name']);
     }
 
-    public function testInsertModeResetsAfterInsertOrSkip()
+    public function testInsertModeResetsAfterInsertOrSkip(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -3257,7 +3257,7 @@ INPUT;
         ])->save();
     }
 
-    public function testBulkinsertOrSkipWithDuplicates()
+    public function testBulkinsertOrSkipWithDuplicates(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('sku', 'string', ['limit' => 50])
@@ -3284,7 +3284,7 @@ INPUT;
         $this->assertEquals('30.00', $rows[2]['price']);
     }
 
-    public function testInsertOrSkipWithoutDuplicates()
+    public function testInsertOrSkipWithoutDuplicates(): void
     {
         $table = new Table('categories', [], $this->adapter);
         $table->addColumn('name', 'string')
@@ -3300,7 +3300,7 @@ INPUT;
         $this->assertCount(2, $rows);
     }
 
-    public function testInsertOrUpdateWithDuplicates()
+    public function testInsertOrUpdateWithDuplicates(): void
     {
         $table = new Table('currencies', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 3])
@@ -3333,7 +3333,7 @@ INPUT;
         $this->assertEquals('1.0500', $rows[2]['rate']); // USD updated
     }
 
-    public function testInsertOrUpdateWithMultipleUpdateColumns()
+    public function testInsertOrUpdateWithMultipleUpdateColumns(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('sku', 'string', ['limit' => 50])
@@ -3358,7 +3358,7 @@ INPUT;
         $this->assertEquals(50, $rows[0]['stock']);
     }
 
-    public function testInsertOrUpdateModeResetsAfterSave()
+    public function testInsertOrUpdateModeResetsAfterSave(): void
     {
         $table = new Table('items', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 10])
@@ -3378,7 +3378,7 @@ INPUT;
         ])->save();
     }
 
-    public function testInsertOrUpdateRequiresConflictColumns()
+    public function testInsertOrUpdateRequiresConflictColumns(): void
     {
         $table = new Table('currencies', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 3])

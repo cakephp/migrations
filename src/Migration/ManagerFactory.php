@@ -99,10 +99,10 @@ class ManagerFactory
             $connectionConfig = ConnectionManager::getConfig($connectionName);
         }
         if (!$connectionConfig) {
-            throw new RuntimeException("Could not find connection `{$connectionName}`");
+            throw new RuntimeException(sprintf('Could not find connection `%s`', $connectionName));
         }
         if (!isset($connectionConfig['database'])) {
-            throw new RuntimeException("The `{$connectionName}` connection has no `database` key defined.");
+            throw new RuntimeException(sprintf('The `%s` connection has no `database` key defined.', $connectionName));
         }
 
         $adapter = $connectionConfig['scheme'] ?? null;
