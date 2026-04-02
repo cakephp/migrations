@@ -197,7 +197,7 @@ The command line above will generate a migration file that resembles::
          * Change Method.
          *
          * More information on this method is available here:
-         * https://book.cakephp.org/migrations/3/en/writing-migrations.html#the-change-method
+         * https://book.cakephp.org/migrations/5/en/writing-migrations.html#the-change-method
          * @return void
          */
         public function change(): void
