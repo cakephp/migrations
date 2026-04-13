@@ -1335,7 +1335,14 @@ class MyNewMigration extends BaseMigration
 }
 ```
 
-PostgreSQL adapters also supports Generalized Inverted Index `gin` indexes:
+#### PostgreSQL Index Access Methods
+
+PostgreSQL supports several index access methods beyond the default B-tree.
+Use the `type` option to specify the access method.
+
+**GIN (Generalized Inverted Index)**
+
+GIN indexes are useful for full-text search, arrays, and JSONB columns:
 
 ```php
 <?php
@@ -1346,13 +1353,114 @@ class MyNewMigration extends BaseMigration
 {
     public function change(): void
     {
-        $table = $this->table('users');
-        $table->addColumn('address', 'string')
-              ->addIndex('address', ['type' => 'gin'])
+        $table = $this->table('articles');
+        $table->addColumn('tags', 'jsonb')
+              ->addIndex('tags', ['type' => 'gin'])
               ->create();
     }
 }
 ```
+
+**GiST (Generalized Search Tree)**
+
+GiST indexes support geometric data, range types, and full-text search.
+For trigram similarity searches (requires the `pg_trgm` extension), use the
+`opclass` option:
+
+```php
+<?php
+
+use Migrations\BaseMigration;
+
+class MyNewMigration extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('products');
+        $table->addColumn('name', 'string')
+              ->addIndex('name', [
+                  'type' => 'gist',
+                  'opclass' => ['name' => 'gist_trgm_ops'],
+              ])
+              ->create();
+    }
+}
+```
+
+**BRIN (Block Range Index)**
+
+BRIN indexes are highly efficient for large, naturally-ordered tables like
+time-series data. They are much smaller than B-tree indexes but only work well
+when data is physically ordered by the indexed column:
+
+```php
+<?php
+
+use Migrations\BaseMigration;
+
+class MyNewMigration extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('sensor_readings');
+        $table->addColumn('recorded_at', 'timestamp')
+              ->addColumn('value', 'decimal')
+              ->addIndex('recorded_at', ['type' => 'brin'])
+              ->create();
+    }
+}
+```
+
+**SP-GiST (Space-Partitioned GiST)**
+
+SP-GiST indexes work well for data with natural clustering, like IP addresses
+or phone numbers:
+
+```php
+<?php
+
+use Migrations\BaseMigration;
+
+class MyNewMigration extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('access_logs');
+        $table->addColumn('client_ip', 'inet')
+              ->addIndex('client_ip', ['type' => 'spgist'])
+              ->create();
+    }
+}
+```
+
+**Hash**
+
+Hash indexes handle simple equality comparisons. They are rarely needed since
+B-tree handles equality efficiently too:
+
+```php
+<?php
+
+use Migrations\BaseMigration;
+
+class MyNewMigration extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('sessions');
+        $table->addColumn('session_id', 'string', ['limit' => 64])
+              ->addIndex('session_id', ['type' => 'hash'])
+              ->create();
+    }
+}
+```
+
+::: warning
+Until CakePHP 5.4 ships the reflection side of these access methods, schema
+snapshots generated from tables using non-default index types may be lossy -
+the `USING <method>` clause and `opclass` options are not yet reflected back
+into generated migration code.
+:::
 
 Removing indexes is as easy as calling the `removeIndex()` method. You must
 call this method for each index:
