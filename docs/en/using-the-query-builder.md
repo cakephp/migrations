@@ -9,7 +9,7 @@ The Query builder is provided by the [cakephp/database](https://github.com/cakep
 be easy to work with as it resembles very closely plain SQL. Accesing the query builder is done by calling the
 `getQueryBuilder(string $type)` function. The `string $type` options are <span class="title-ref">'select'</span>, <span class="title-ref">'insert'</span>, <span class="title-ref">'update'</span> and \`'delete'\`:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -32,7 +32,7 @@ class MyNewMigration extends BaseMigration
 
 Adding fields to the SELECT clause:
 
-``` php
+```php
 <?php
 $builder->select(['id', 'title', 'body']);
 
@@ -49,7 +49,7 @@ $builder->select(function ($builder) {
 
 Generating conditions:
 
-``` php
+```php
 // WHERE id = 1
 $builder->where(['id' => 1]);
 
@@ -59,7 +59,7 @@ $builder->where(['id >' => 1]);
 
 As you can see you can use any operator by placing it with a space after the field name. Adding multiple conditions is easy as well:
 
-``` php
+```php
 <?php
 $builder->where(['id >' => 1])->andWhere(['title' => 'My Title']);
 
@@ -72,7 +72,7 @@ $builder->where(['OR' => ['id >' => 1, 'title' => 'My title']]);
 
 For even more complex conditions you can use closures and expression objects:
 
-``` php
+```php
 <?php
 // Coditions are tied together with AND by default
 $builder
@@ -89,7 +89,7 @@ $builder
 
 Which results in:
 
-``` sql
+```sql
 SELECT * FROM articles
 WHERE
     author_id = 2
@@ -100,7 +100,7 @@ WHERE
 
 Combining expressions is also possible:
 
-``` php
+```php
 <?php
 $builder
     ->select('*')
@@ -116,7 +116,7 @@ $builder
 
 It generates:
 
-``` sql
+```sql
 SELECT *
 FROM articles
 WHERE
@@ -141,7 +141,7 @@ When using the expression objects you can use the following methods to create co
 
 ## Aggregates and SQL Functions
 
-``` php
+```php
 <?php
 // Results in SELECT COUNT(*) count FROM ...
 $builder->select(['count' => $builder->func()->count('*')]);
@@ -163,7 +163,7 @@ When providing arguments for SQL functions, there are two kinds of parameters yo
 literal arguments and bound parameters. Literal parameters allow you to reference columns or
 other SQL literals. Bound parameters can be used to safely add user data to SQL functions. For example:
 
-``` php
+```php
 <?php
 // Generates:
 // SELECT CONCAT(title, ' NEW') ...;
@@ -178,7 +178,7 @@ $query->select(['title' => $concat]);
 
 Once you’ve made your query, you’ll want to retrieve rows from it. There are a few ways of doing this:
 
-``` php
+```php
 <?php
 // Iterate the query
 foreach ($builder as $row) {
@@ -193,7 +193,7 @@ $results = $builder->execute()->fetchAll('assoc');
 
 Creating insert queries is also possible:
 
-``` php
+```php
 <?php
 $builder = $this->getQueryBuilder('insert');
 $builder
@@ -206,7 +206,7 @@ $builder
 
 For increased performance, you can use another builder object as the values for an insert query:
 
-``` php
+```php
 <?php
 
 $namesQuery = $this->getQueryBuilder('select');
@@ -227,7 +227,7 @@ var_dump($st->lastInsertId('names', 'id'));
 
 The above code will generate:
 
-``` sql
+```sql
 INSERT INTO names (first_name, last_name)
     (SELECT fname, lname FROM USERS where is_active = 1)
 ```
@@ -236,7 +236,7 @@ INSERT INTO names (first_name, last_name)
 
 Creating update queries is similar to both inserting and selecting:
 
-``` php
+```php
 <?php
 $builder = $this->getQueryBuilder('update');
 $builder
@@ -250,7 +250,7 @@ $builder
 
 Finally, delete queries:
 
-``` php
+```php
 <?php
 $builder = $this->getQueryBuilder('delete');
 $builder

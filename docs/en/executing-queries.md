@@ -7,7 +7,7 @@ Queries can be executed with the `execute()` and `query()` methods. The
 accept an optional second parameter `$params` which is an array of elements,
 and if used will cause the underlying connection to use a prepared statement:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -48,7 +48,7 @@ There are two methods available to fetch rows. The `fetchRow()` method will
 fetch a single row, whilst the `fetchAll()` method will return multiple rows.
 Both methods accept raw SQL as their only parameter:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -83,7 +83,7 @@ Migrations makes it easy to insert data into your tables. Whilst this feature is
 intended for the [seed feature](seeding), you are also free to use the
 insert methods in your migrations:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;

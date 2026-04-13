@@ -8,8 +8,8 @@ your migrations using the Migrations API, but raw SQL is also supported.
 
 Let's start by creating a new migration with `bake`:
 
-``` bash
-$ bin/cake bake migration
+```bash
+bin/cake bake migration
 ```
 
 This will create a new migration in the format
@@ -21,7 +21,7 @@ which path to create the new migration in.
 
 Bake will automatically creates a skeleton migration file with a single method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -52,13 +52,13 @@ anonymous class feature instead of named classes. This style is useful for:
 
 To generate an anonymous migration class, use the `--style anonymous` option:
 
-``` bash
-$ bin/cake bake migration CreateProducts --style anonymous
+```bash
+bin/cake bake migration CreateProducts --style anonymous
 ```
 
 This generates a migration file using an anonymous class:
 
-``` php
+```php
 <?php
 declare(strict_types=1);
 
@@ -84,7 +84,7 @@ be used interchangeably within the same project.
 
 You can set the default migration style globally in your application configuration:
 
-``` php
+```php
 // In config/app.php or config/app_local.php
 'Migrations' => [
     'style' => 'anonymous',  // or 'traditional'
@@ -100,7 +100,7 @@ Migrations supports 'reversible migrations'. In many scenarios, you
 only need to define the `up` logic, and Migrations can figure out how to
 generate the rollback operations for you. For example:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -147,7 +147,7 @@ use a command that cannot be reversed in the change function, you can use an
 if statement with `$this->isMigratingUp()` to only run things in the
 up or down direction. For example:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -200,7 +200,7 @@ The Table object enables you to easily manipulate database tables using PHP
 code. You can retrieve an instance of the Table object by calling the
 `table()` method from within your database migration:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -368,7 +368,7 @@ that will always set the third argument to `true` (see examples below). The
 only, `updated` column will have update set to
 `CURRENT_TIMESTAMP`:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -447,7 +447,7 @@ For `binary` or `varbinary` types, if limit is set greater than allowed 255
 bytes, the type will be changed to the best matching blob type given the
 length:
 
-``` php
+```php
 <?php
 
 use Migrations\Db\Adapter\MysqlAdapter;
@@ -468,7 +468,7 @@ If you need to set a default to an expression, you can use a `Literal` to have
 the column's default value used without any quoting or escaping. This is helpful
 when you want to use a function as a default value:
 
-``` php
+```php
 use Migrations\BaseMigration;
 use Migrations\Db\Literal;
 
@@ -492,7 +492,7 @@ class AddSomeColumns extends BaseMigration
 Creating a table is really easy using the Table object. Let's create a table to
 store a collection of users:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -534,7 +534,7 @@ To specify an alternate primary key, you can specify the `primary_key` option
 when accessing the Table object. Let's disable the automatic `id` column and
 create a primary key using two columns instead:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -555,7 +555,7 @@ class MyNewMigration extends BaseMigration
 Setting a single `primary_key` doesn't enable the `AUTO_INCREMENT` option.
 To simply change the name of the primary key, we need to override the default `id` field name:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -590,7 +590,7 @@ value, or enable the `Migrations.unsigned_primary_keys` and
 Both flags should be used together so that foreign key columns match
 the primary keys they reference:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -610,7 +610,7 @@ class MyNewMigration extends BaseMigration
 If you need to create a table with a different collation than the database,
 use:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -645,7 +645,7 @@ When modifying tables in MySQL, you can control how the ALTER TABLE operation is
 performed using the `algorithm` and `lock` options. This is useful for performing
 zero-downtime schema changes on large tables in production environments.
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -711,7 +711,7 @@ RANGE partitioning is useful when you want to partition by numeric ranges. For M
 use `TYPE_RANGE` with integer columns or expressions, and `TYPE_RANGE_COLUMNS` for
 DATE/DATETIME/STRING columns:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -744,7 +744,7 @@ class CreatePartitionedOrders extends BaseMigration
 LIST partitioning is useful when you want to partition by discrete values. For MySQL,
 use `TYPE_LIST` with integer columns and `TYPE_LIST_COLUMNS` for STRING columns:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -775,7 +775,7 @@ class CreatePartitionedCustomers extends BaseMigration
 
 HASH partitioning distributes data evenly across a specified number of partitions:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -798,7 +798,7 @@ class CreatePartitionedSessions extends BaseMigration
 
 KEY partitioning is similar to HASH but uses MySQL's internal hashing function:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -824,7 +824,7 @@ class CreatePartitionedCache extends BaseMigration
 
 You can partition by expressions using the `Literal` class:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -854,7 +854,7 @@ class CreatePartitionedEvents extends BaseMigration
 
 You can add or drop partitions on existing partitioned tables:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -905,7 +905,7 @@ the appropriate function and commit any pending changes to the database.
 To rename a column, access an instance of the Table object then call the
 `renameColumn()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -940,7 +940,7 @@ When adding a column with the MySQL adapter, you can dictate its position using
 the `after` option, where its value is the name of the column to position it
 after:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -968,7 +968,7 @@ table.
 
 To drop a column, use the `removeColumn()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -991,7 +991,7 @@ class MyNewMigration extends BaseMigration
 
 You can limit the maximum length of a column by using the `limit` option:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1019,7 +1019,7 @@ There are two methods for modifying existing columns:
 To modify specific column attributes while preserving others, use the `updateColumn()` method.
 This method automatically preserves unspecified attributes like defaults, nullability, limits, etc.:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1051,7 +1051,7 @@ class MyNewMigration extends BaseMigration
 
 You can pass `null` as the column type to preserve the existing type, or specify a new type:
 
-``` php
+```php
 // Preserve type and other attributes, only change nullability
 $table->updateColumn('email', null, ['null' => true]);
 
@@ -1077,9 +1077,9 @@ The following attributes are automatically preserved by `updateColumn()`:
 
 To completely replace a column definition, use the `changeColumn()` method.
 This method requires you to specify all desired column attributes.
-See [Valid Column Types](#valid-column-types) and [Valid Column Options](#valid-column-options) for allowed values:
+See [Adding Columns](#adding-columns) and [Valid Column Options](#valid-column-options) for allowed values:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1114,7 +1114,7 @@ class MyNewMigration extends BaseMigration
 You can enable attribute preservation with `changeColumn()` by passing
 `'preserveUnspecified' => true` in the options:
 
-``` php
+```php
 $table->changeColumn('email', 'string', [
     'null' => true,
     'preserveUnspecified' => true,
@@ -1131,7 +1131,7 @@ $table->changeColumn('email', 'string', [
 To add an index to a table you can simply call the `addIndex()` method on the
 table object:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1165,7 +1165,7 @@ specify a unique index. We can also explicitly specify a name for the index
 using the `name` parameter, the index columns sort order can also be specified using
 the `order` parameter. The order parameter takes an array of column names and sort order key/value pairs:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1193,7 +1193,7 @@ class MyNewMigration extends BaseMigration
 As of 4.6.0, you can use `BaseMigration::index()` to get a fluent builder to
 define indexes:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1222,7 +1222,7 @@ class MyNewMigration extends BaseMigration
 The MySQL adapter also supports `fulltext` indexes. If you are using a version before 5.6 you must
 ensure the table uses the `MyISAM` engine:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1243,7 +1243,7 @@ MySQL adapter supports setting the index length defined by limit option.
 When you are using a multi-column index, you are able to define each column index length.
 The single column index can define its index length with or without defining column name in limit option:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1265,7 +1265,7 @@ class MyNewMigration extends BaseMigration
 
 The SQL Server and PostgreSQL adapters support `include` (non-key) columns on indexes:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1287,7 +1287,7 @@ class MyNewMigration extends BaseMigration
 PostgreSQL, SQLServer, and SQLite support partial indexes by defining where
 clauses for the index:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1313,7 +1313,7 @@ class MyNewMigration extends BaseMigration
 PostgreSQL can create indexes concurrently which avoids taking disruptive locks
 during index creation:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1337,7 +1337,7 @@ class MyNewMigration extends BaseMigration
 
 PostgreSQL adapters also supports Generalized Inverted Index `gin` indexes:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1357,7 +1357,7 @@ class MyNewMigration extends BaseMigration
 Removing indexes is as easy as calling the `removeIndex()` method. You must
 call this method for each index:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1397,7 +1397,7 @@ class MyNewMigration extends BaseMigration
 Migrations has support for creating foreign key constraints on your database tables.
 Let's add a foreign key to an example table:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1442,7 +1442,7 @@ with the option `['null' => true]`.
 Foreign keys can be defined with arrays of columns to build constraints between
 tables with composite keys:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1482,7 +1482,7 @@ The options parameter of `addForeignKey()` supports the following options:
 Using the `foreignKey()` method provides a fluent builder to define a foreign
 key:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1515,7 +1515,7 @@ The `foreignKey` method was added.
 
 We can also easily check if a foreign key exists:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1551,7 +1551,7 @@ needs `save()` to be called at the end in order to be executed. This allows
 Migrations to intelligently plan migrations when more than one table is
 involved:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1594,7 +1594,7 @@ They are particularly useful for ensuring data integrity across your application
 
 You can add a check constraint to a table using the `addCheckConstraint()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1632,7 +1632,7 @@ that defines the constraint. The expression should evaluate to a boolean value.
 For more complex scenarios, you can use the `checkConstraint()` method to get
 a fluent builder:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1667,7 +1667,7 @@ class MyNewMigration extends BaseMigration
 If you don't specify a constraint name, one will be automatically generated based
 on the table name and expression hash:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1695,7 +1695,7 @@ class MyNewMigration extends BaseMigration
 
 Check constraints can reference multiple columns and use complex SQL expressions:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1722,7 +1722,7 @@ class MyNewMigration extends BaseMigration
 
 You can verify if a check constraint exists using the `hasCheckConstraint()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1751,7 +1751,7 @@ class MyNewMigration extends BaseMigration
 To remove a check constraint, use the `dropCheckConstraint()` method with the
 constraint name:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1811,7 +1811,7 @@ Check constraint support for SQL Server is planned for a future release.
 You can determine whether or not a table exists by using the `hasTable()`
 method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1848,7 +1848,7 @@ Note that like other methods in the `Table` class, `drop` also needs `save()`
 to be called at the end in order to be executed. This allows Migrations to intelligently
 plan migrations when more than one table is involved:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1888,7 +1888,7 @@ class MyNewMigration extends BaseMigration
 To rename a table access an instance of the Table object then call the
 `rename()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1926,7 +1926,7 @@ method. Pass in a column name or array of columns names to include in the
 primary key, or `null` to drop the primary key. Note that the mentioned
 columns must be added to the table, they will not be added implicitly:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -1967,7 +1967,7 @@ You can specify a `autoId` property in the Migration class and set it to
 need to manually create the column that will be used as a primary key and add
 it to the table declaration:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -1995,7 +1995,7 @@ When specifying a custom primary key on the command line, you must note
 it as the primary key in the id field, otherwise you may get an error
 regarding duplicate id fields, i.e.:
 
-``` bash
+```bash
 bin/cake bake migration CreateProducts id:uuid:primary name:string description:text created modified
 ```
 
@@ -2010,7 +2010,7 @@ All baked migrations and snapshot will use this new way when necessary.
 To change the comment on an existing table, use the `changeComment()` method.
 Pass in a string to set as the new table comment, or `null` to drop the existing comment:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2055,7 +2055,7 @@ To retrieve all table columns, simply create a `table` object and call
 `getColumns()` method. This method will return an array of Column classes with
 basic info. Example below:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2087,7 +2087,7 @@ To retrieve one table column, simply create a `table` object and call the
 `getColumn()` method. This method will return a Column class with basic info
 or NULL when the column doesn't exist. Example below:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2118,7 +2118,7 @@ class ColumnListMigration extends BaseMigration
 You can check if a table already has a certain column by using the
 `hasColumn()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2160,7 +2160,7 @@ Note that like other methods in the `Table` class, `drop` also needs `save()`
 to be called at the end in order to be executed. This allows Migrations to intelligently
 plan migrations when more than one table is involved:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2200,7 +2200,7 @@ class MyNewMigration extends BaseMigration
 To rename a table access an instance of the Table object then call the
 `rename()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2238,7 +2238,7 @@ method. Pass in a column name or array of columns names to include in the
 primary key, or `null` to drop the primary key. Note that the mentioned
 columns must be added to the table, they will not be added implicitly:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2279,7 +2279,7 @@ You can specify a `autoId` property in the Migration class and set it to
 need to manually create the column that will be used as a primary key and add
 it to the table declaration:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -2307,7 +2307,7 @@ When specifying a custom primary key on the command line, you must note
 it as the primary key in the id field, otherwise you may get an error
 regarding duplicate id fields, i.e.:
 
-``` bash
+```bash
 bin/cake bake migration CreateProducts id:uuid:primary name:string description:text created modified
 ```
 
@@ -2322,7 +2322,7 @@ All baked migrations and snapshot will use this new way when necessary.
 To change the comment on an existing table, use the `changeComment()` method.
 Pass in a string to set as the new table comment, or `null` to drop the existing comment:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2367,7 +2367,7 @@ To retrieve all table columns, simply create a `table` object and call
 `getColumns()` method. This method will return an array of Column classes with
 basic info. Example below:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2399,7 +2399,7 @@ To retrieve one table column, simply create a `table` object and call the
 `getColumn()` method. This method will return a Column class with basic info
 or NULL when the column doesn't exist. Example below:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;
@@ -2430,7 +2430,7 @@ class ColumnListMigration extends BaseMigration
 You can check if a table already has a certain column by using the
 `hasColumn()` method:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseMigration;

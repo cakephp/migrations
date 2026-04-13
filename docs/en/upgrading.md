@@ -21,7 +21,7 @@ The phinx wrapper commands have been removed. The new command structure is:
 
 The migration commands remain unchanged:
 
-``` bash
+```bash
 bin/cake migrations migrate
 bin/cake migrations rollback
 bin/cake migrations status
@@ -33,7 +33,7 @@ bin/cake migrations dump
 
 Seed commands have changed:
 
-``` bash
+```bash
 # 4.x                              # 5.x
 bin/cake migrations seed           bin/cake seeds run
 bin/cake migrations seed --seed X  bin/cake seeds run X
@@ -51,7 +51,7 @@ The new seed commands are:
 If you need to maintain the old `migrations seed` command for existing scripts or
 CI/CD pipelines, you can add command aliases in your `src/Application.php`:
 
-``` php
+```php
 public function console(CommandCollection $commands): CommandCollection
 {
     $commands = $this->addConsoleCommands($commands);
@@ -83,7 +83,7 @@ If you have code that directly references any of these classes, you will need to
 If your migrations use `AdapterInterface::query()` to fetch rows, the return type has
 changed from a phinx result to `Cake\Database\StatementInterface`:
 
-``` php
+```php
 // 4.x (phinx)
 $stmt = $this->getAdapter()->query('SELECT * FROM articles');
 $rows = $stmt->fetchAll();
@@ -138,10 +138,10 @@ the generated names may differ between old and new migrations. This could cause
 
 **Recommendations:**
 
-1.  For new migrations, you can rely on auto-generated names or provide explicit names
-2.  If you have rollback issues with existing migrations, you may need to update them
+1. For new migrations, you can rely on auto-generated names or provide explicit names
+2. If you have rollback issues with existing migrations, you may need to update them
     to use explicit constraint names
-3.  The auto-generated names include conflict resolution - if `{table}_{columns}` already
+3. The auto-generated names include conflict resolution - if `{table}_{columns}` already
     exists, a counter suffix is added (`_2`, `_3`, etc.)
 
 **Name length limits:**

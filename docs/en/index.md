@@ -29,7 +29,7 @@ you've removed it and want to re-install it, you can do so by running the
 following from your application's ROOT directory (where **composer.json** file is
 located):
 
-``` bash
+```bash
 php composer.phar require cakephp/migrations "@stable"
 
 # Or if composer is installed globally
@@ -40,14 +40,14 @@ To use the plugin you'll need to load it in your application's
 **config/bootstrap.php** file. You can use [CakePHP's Plugin shell](https://book.cakephp.org/5/en/console-and-shells/plugin-shell.html) to
 load and unload plugins from your **config/bootstrap.php**:
 
-``` bash
+```bash
 bin/cake plugin load Migrations
 ```
 
 Or you can load the plugin by editing your **src/Application.php** file and
 adding the following statement:
 
-``` php
+```php
 $this->addPlugin('Migrations');
 ```
 
@@ -67,7 +67,7 @@ A migration file can add, change or remove tables, columns, indexes and foreign 
 
 If we wanted to create a table, we could use a migration similar to this:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -115,7 +115,7 @@ When applied, this migration will add a table to your database named
 Once the file has been created in the **config/Migrations** folder, you can
 apply it:
 
-``` bash
+```bash
 bin/cake migrations migrate
 ```
 
@@ -131,7 +131,7 @@ Here are examples of migration filenames:
 
 The easiest way to create a migrations file is by using `bin/cake bake migration` CLI command:
 
-``` bash
+```bash
 bin/cake bake migration CreateProducts
 ```
 
@@ -172,13 +172,13 @@ You can also use the `underscore_form` as the name for your migrations i.e.
 
 You can use `bake migration` to create a table:
 
-``` bash
+```bash
 bin/cake bake migration CreateProducts name:string description:text created modified
 ```
 
 The command line above will generate a migration file that resembles:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -188,7 +188,7 @@ class CreateProducts extends BaseMigration
      * Change Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/3/en/writing-migrations.html#the-change-method
+     * https://book.cakephp.org/migrations/5/en/writing-migrations.html#the-change-method
      * @return void
      */
     public function change(): void
@@ -221,7 +221,7 @@ class CreateProducts extends BaseMigration
 The `bake migration` command provides a compact syntax to define columns when
 generating a migration:
 
-``` bash
+```bash
 bin/cake bake migration CreateProducts name:string description:text created modified
 ```
 
@@ -273,7 +273,7 @@ an invalid value. Default field type is `string`:
 Additionally you can create an empty migrations file if you want full control
 over what needs to be executed, by omitting to specify a columns definition:
 
-``` bash
+```bash
 bin/cake migrations create MyCustomMigration
 ```
 
@@ -286,13 +286,13 @@ If the migration name in the command line is of the form "AddXXXToYYY" and is
 followed by a list of column names and types then a migration file containing
 the code for creating the columns will be generated:
 
-``` bash
+```bash
 bin/cake bake migration AddPriceToProducts price:decimal[5,2]
 ```
 
 Executing the command line above will generate:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -316,13 +316,13 @@ class AddPriceToProducts extends BaseMigration
 
 It is also possible to add indexes to columns:
 
-``` bash
+```bash
 bin/cake bake migration AddNameIndexToProducts name:string:index
 ```
 
 will generate:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -345,13 +345,13 @@ class AddNameIndexToProducts extends BaseMigration
 
 You can specify default values for columns using the `default[value]` syntax:
 
-``` bash
+```bash
 bin/cake bake migration AddActiveToUsers active:boolean:default[true]
 ```
 
 will generate:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -371,7 +371,7 @@ class AddActiveToUsers extends BaseMigration
 
 You can combine default values with other options like nullable and indexes:
 
-``` bash
+```bash
 bin/cake bake migration AddStatusToOrders status:string:default['pending']:unique
 ```
 
@@ -380,13 +380,13 @@ bin/cake bake migration AddStatusToOrders status:string:default['pending']:uniqu
 In the same way, you can generate a migration to alter a column by using the
 command line, if the migration name is of the form "AlterXXXOnYYY":
 
-``` bash
+```bash
 bin/cake bake migration AlterPriceOnProducts name:float
 ```
 
 will generate:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -411,13 +411,13 @@ class AlterPriceOnProducts extends BaseMigration
 In the same way, you can generate a migration to remove a column by using the
 command line, if the migration name is of the form "RemoveXXXFromYYY":
 
-``` bash
+```bash
 bin/cake bake migration RemovePriceFromProducts price
 ```
 
 creates the file:
 
-``` php
+```php
 <?php
 use Migrations\BaseMigration;
 
@@ -443,7 +443,7 @@ If you have a pre-existing database and want to start using
 migrations, or to version control the initial schema of your application's
 database, you can run the `bake migration_snapshot` command:
 
-``` bash
+```bash
 bin/cake bake migration_snapshot Initial
 ```
 
@@ -454,14 +454,14 @@ By default, the snapshot will be created by connecting to the database defined
 in the `default` connection configuration. If you need to bake a snapshot from
 a different datasource, you can use the `--connection` option:
 
-``` bash
+```bash
 bin/cake bake migration_snapshot Initial --connection my_other_connection
 ```
 
 You can also make sure the snapshot includes only the tables for which you have
 defined the corresponding model classes by using the `--require-table` flag:
 
-``` bash
+```bash
 bin/cake bake migration_snapshot Initial --require-table
 ```
 
@@ -471,7 +471,7 @@ application `Table` classes and will only add the model tables in the snapshot.
 If you want to generate a snapshot without marking it as migrated (for example,
 for use in unit tests), you can use the `--generate-only` flag:
 
-``` bash
+```bash
 bin/cake bake migration_snapshot Initial --generate-only
 ```
 
@@ -482,7 +482,7 @@ tracking table, allowing you to move the file to a different location without ca
 The same logic will be applied implicitly if you wish to bake a snapshot for a
 plugin. To do so, you need to use the `--plugin` option:
 
-``` bash
+```bash
 bin/cake bake migration_snapshot Initial --plugin MyPlugin
 ```
 
@@ -504,7 +504,7 @@ outside of migrations, you can use `bake migration_diff` to generate
 a migration file that captures the difference between the current schema dump
 file and database schema. To do so, you can use the following command:
 
-``` bash
+```bash
 bin/cake bake migration_diff NameOfTheMigrations
 ```
 
@@ -513,7 +513,7 @@ in the `default` connection configuration.
 If you need to bake a diff from a different datasource, you can use the
 `--connection` option:
 
-``` bash
+```bash
 bin/cake bake migration_diff NameOfTheMigrations --connection my_other_connection
 ```
 
@@ -521,7 +521,7 @@ If you want to use the diff feature on an application that already has a
 migrations history, you need to manually create the dump file that will be used
 as comparison:
 
-``` bash
+```bash
 bin/cake migrations dump
 ```
 
@@ -538,7 +538,7 @@ and use the `bake migration_diff` command whenever you see fit.
 Once you have generated or written your migration file, you need to execute the
 following command to apply the changes to your database:
 
-``` bash
+```bash
 # Run all the migrations
 bin/cake migrations migrate
 
@@ -568,7 +568,7 @@ bin/cake migrations migrate -p MyAwesomePlugin
 The rollback command is used to undo previous migrations executed by this
 plugin. It is the reverse action of the `migrate` command:
 
-``` bash
+```bash
 # You can rollback to the previous migration by using the
 # ``rollback`` command::
 bin/cake migrations rollback
@@ -586,14 +586,14 @@ just like for the `migrate` command.
 The Status command prints a list of all migrations, along with their current
 status. You can use this command to determine which migrations have been run:
 
-``` bash
+```bash
 bin/cake migrations status
 ```
 
 You can also output the results as a JSON formatted string using the
 `--format` option (or `-f` for short):
 
-``` bash
+```bash
 bin/cake migrations status --format json
 ```
 
@@ -607,7 +607,7 @@ in the migrations tracking table. These migrations will be marked as **MISSING**
 status output. You can remove these entries from the tracking table using the
 `--cleanup` option:
 
-``` bash
+```bash
 bin/cake migrations status --cleanup
 ```
 
@@ -622,28 +622,28 @@ command. The command works seamlessly as the other commands.
 
 You can mark all migrations as migrated using this command:
 
-``` bash
+```bash
 bin/cake migrations mark_migrated
 ```
 
 You can also mark all migrations up to a specific version as migrated using
 the `--target` option:
 
-``` bash
+```bash
 bin/cake migrations mark_migrated --target=20151016204000
 ```
 
 If you do not want the targeted migration to be marked as migrated during the
 process, you can use the `--exclude` flag with it:
 
-``` bash
+```bash
 bin/cake migrations mark_migrated --target=20151016204000 --exclude
 ```
 
 Finally, if you wish to mark only the targeted migration as migrated, you can
 use the `--only` flag:
 
-``` bash
+```bash
 bin/cake migrations mark_migrated --target=20151016204000 --only
 ```
 
@@ -658,14 +658,14 @@ just like for the `migrate` command.
 
 This command expects the migration version number as argument:
 
-``` bash
+```bash
 bin/cake migrations mark_migrated 20150420082532
 ```
 
 If you wish to mark all migrations as migrated, you can use the `all` special
 value. If you use it, it will mark all found migrations as migrated:
 
-``` bash
+```bash
 bin/cake migrations mark_migrated all
 ```
 
@@ -682,7 +682,7 @@ your application. See the [Database Seeding](seeding) for how to build and use s
 The dump command creates a file to be used with the `bake migration_diff`
 command:
 
-``` bash
+```bash
 bin/cake migrations dump
 ```
 
@@ -706,7 +706,7 @@ and if the migration history that is in the database differs from what is in the
 filesystem, all tables will be dropped and migrations will be rerun from the
 beginning:
 
-``` php
+```php
 // in tests/bootstrap.php
 use Migrations\TestSuite\Migrator;
 
@@ -727,7 +727,7 @@ $migrator->run(['plugin' => 'Documents', 'connection' => 'test_docs']);
 
 If you need to run multiple sets of migrations, those can be run as follows:
 
-``` php
+```php
 // Run migrations for plugin Contacts on the ``test`` connection, and Documents on the ``test_docs`` connection
 $migrator->runMany([
     ['plugin' => 'Contacts'],
@@ -739,7 +739,7 @@ If your database also contains tables that are not managed by your application
 like those created by PostGIS, then you can exclude those tables from the drop
 & truncate behavior using the `skip` option:
 
-``` php
+```php
 $migrator->run(['connection' => 'test', 'skip' => ['postgis*']]);
 ```
 
@@ -756,7 +756,7 @@ to be distributed much more portable and easy to install. All commands in the
 Migrations plugin support the `--plugin` or `-p` option that will scope the
 execution to the migrations relative to that plugin:
 
-``` bash
+```bash
 bin/cake migrations status -p PluginName
 
 bin/cake migrations migrate -p PluginName
@@ -780,7 +780,7 @@ Each of these commands has a method defined in the `Migrations` class.
 
 Here is how to use it:
 
-``` php
+```php
 use Migrations\Migrations;
 
 $migrations = new Migrations();
@@ -804,7 +804,7 @@ $seeded = $migrations->seed();
 The methods can accept an array of parameters that should match options from
 the commands:
 
-``` php
+```php
 use Migrations\Migrations;
 
 $migrations = new Migrations();
@@ -822,7 +822,7 @@ Optionally, you can pass these parameters in the constructor of the class.
 They will be used as default and this will prevent you from having to pass
 them on each method call:
 
-``` php
+```php
 use Migrations\Migrations;
 
 $migrations = new Migrations(['connection' => 'custom', 'source' => 'MyMigrationsFolder']);
@@ -835,7 +835,7 @@ $migrate = $migrations->migrate();
 If you need to override one or more default parameters for one call, you can
 pass them to the method:
 
-``` php
+```php
 use Migrations\Migrations;
 
 $migrations = new Migrations(['connection' => 'custom', 'source' => 'MyMigrationsFolder']);
@@ -860,7 +860,7 @@ Migrations offers a few feature flags for compatibility. These features are disa
 
 Set them via Configure to enable (e.g. in `config/app.php`):
 
-``` text
+```text
 'Migrations' => [
     'unsigned_primary_keys' => true,
     'unsigned_ints' => true,
@@ -883,7 +883,7 @@ database schema at any given point in time. You can skip this file generation,
 for instance when deploying on your production environment, by using the
 `--no-lock` option for the aforementioned command:
 
-``` bash
+```bash
 bin/cake migrations migrate --no-lock
 
 bin/cake migrations rollback --no-lock
@@ -903,7 +903,7 @@ columns not existing when performing operations on those new columns. The
 CakePHP Core includes a [Schema Cache Shell](https://book.cakephp.org/5/en/console-and-shells/schema-cache.html) that you
 can use to perform this operation:
 
-``` bash
+```bash
 bin/cake migration migrate
 bin/cake schema_cache clear
 ```
@@ -913,7 +913,7 @@ bin/cake schema_cache clear
 You can use the `Migrations.PendingMigrations` middleware in local development
 to alert developers about new migrations that have not been applied:
 
-``` php
+```php
 use Migrations\Middleware\PendingMigrationsMiddleware;
 
 $config = [

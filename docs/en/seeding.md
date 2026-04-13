@@ -11,13 +11,13 @@ it's created. By default, they are stored in the `config/Seeds` directory.
 
 Migrations includes a command to easily generate a new seed class:
 
-``` bash
-$ bin/cake bake seed MyNewSeed
+```bash
+bin/cake bake seed MyNewSeed
 ```
 
 By default, it generates a traditional seed class with a named class:
 
-``` php
+```php
 <?php
 declare(strict_types=1);
 
@@ -68,13 +68,13 @@ anonymous class feature instead of named classes. This style is useful for:
 
 To generate an anonymous seed class, use the `--style anonymous` option:
 
-``` bash
-$ bin/cake bake seed MyNewSeed --style anonymous
+```bash
+bin/cake bake seed MyNewSeed --style anonymous
 ```
 
 This generates a seed file using an anonymous class:
 
-``` php
+```php
 <?php
 declare(strict_types=1);
 
@@ -102,7 +102,7 @@ be used interchangeably within the same project.
 
 You can set the default seed style globally in your application configuration:
 
-``` php
+```php
 // In config/app.php or config/app_local.php
 'Migrations' => [
     'style' => 'anonymous',  // or 'traditional'
@@ -111,7 +111,7 @@ You can set the default seed style globally in your application configuration:
 
 ### Seed Options
 
-``` bash
+```bash
 # you specify the name of the table the seed files will alter by using the ``--table`` option
 bin/cake bake seed articles --table my_articles_table
 # You can specify a plugin to bake into
@@ -127,7 +127,7 @@ bin/cake bake seed --data Articles
 By default, it will export all the rows found in your table. You can limit the
 number of rows exported by using the `--limit` option:
 
-``` bash
+```bash
 # Will only export the first 10 rows found
 bin/cake bake seed --data --limit 10 Articles
 ```
@@ -136,7 +136,7 @@ If you only want to include a selection of fields from the table in your seed
 file, you can use the `--fields` option. It takes the list of fields to
 include as a comma separated value string:
 
-``` bash
+```bash
 # Will only export the fields `id`, `title` and `excerpt`
 bin/cake bake seed --data --fields id,title,excerpt Articles
 ```
@@ -182,19 +182,19 @@ executed, it will be skipped with an "already executed" message.
 
 To re-run a seed that has already been executed, use the `--force` flag:
 
-``` bash
+```bash
 bin/cake seeds run Users --force
 ```
 
 You can check which seeds have been executed using the status command:
 
-``` bash
+```bash
 bin/cake seeds status
 ```
 
 To reset all seeds' execution state (allowing them to run again without `--force`):
 
-``` bash
+```bash
 bin/cake seeds reset
 ```
 
@@ -208,7 +208,7 @@ By default, seed execution is tracked in a table named `cake_seeds`. You can
 customize this table name by configuring it in your `config/app.php` or
 `config/app_local.php`:
 
-``` php
+```php
 'Migrations' => [
     'seed_table' => 'my_custom_seeds_table',
 ],
@@ -223,7 +223,7 @@ Some seeds are designed to be run multiple times safely (idempotent), such as se
 that update configuration or reference data. For these seeds, you can override the
 `isIdempotent()` method:
 
-``` php
+```php
 <?php
 declare(strict_types=1);
 
@@ -254,7 +254,7 @@ class ConfigSeed extends BaseSeed
             "SELECT COUNT(*) as count FROM settings WHERE setting_key = 'maintenance_mode'"
         );
 
-        if ($exists['count'] == 0) {
+        if ($exists['count'] === 0) {
             $this->table('settings')->insert([
                 'setting_key' => 'maintenance_mode',
                 'setting_value' => 'false',
@@ -301,7 +301,7 @@ violate foreign key constraints. To define this order, you can implement the
 `getDependencies()` method that returns an array of seeds to run before the
 current seed:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseSeed;
@@ -326,7 +326,7 @@ class ShoppingCartSeed extends BaseSeed
 
 You can also use the full seed name including the `Seed` suffix:
 
-``` php
+```php
 return [
     'UserSeed',
     'ShopItemSeed',
@@ -344,7 +344,7 @@ execution order and prevents foreign key constraint violations.
 
 For example, if you run:
 
-``` bash
+```bash
 bin/cake seeds run ShoppingCartSeed
 ```
 
@@ -363,7 +363,7 @@ to not encounter constraint violations. Since seeds are executed in an
 alphabetical order by default, you can use the `\Migrations\BaseSeed::call()`
 method to define your own sequence of seeds execution:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseSeed;
@@ -383,7 +383,7 @@ class DatabaseSeed extends BaseSeed
 
 You can also use the full seed name including the `Seed` suffix:
 
-``` php
+```php
 $this->call('AnotherSeed');
 $this->call('YetAnotherSeed');
 $this->call('PluginName.FromPluginSeed');
@@ -397,7 +397,7 @@ Seed classes can also use the familiar `Table` object to insert data. You can
 retrieve an instance of the Table object by calling the `table()` method from
 within your seed class and then use the `insert()` method to insert data:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseSeed;
@@ -437,7 +437,7 @@ insert methods for handling conflicts with existing data.
 The `insertOrSkip()` method inserts rows but silently skips any that would
 violate a unique constraint:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseSeed;
@@ -463,7 +463,7 @@ class CurrencySeed extends BaseSeed
 The `insertOrUpdate()` method performs an "upsert" operation - inserting new
 rows and updating existing rows that conflict on unique columns:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseSeed;
@@ -511,7 +511,7 @@ The method takes three arguments:
 In addition to inserting data Migrations makes it trivial to empty your tables using the
 SQL <span class="title-ref">TRUNCATE</span> command:
 
-``` php
+```php
 <?php
 
 use Migrations\BaseSeed;
@@ -550,34 +550,34 @@ class UserSeed extends BaseSeed
 
 This is the easy part. To seed your database, simply use the `seeds run` command:
 
-``` bash
-$ bin/cake seeds run
+```bash
+bin/cake seeds run
 ```
 
 By default, Migrations will execute all available seed classes. If you would like to
 run a specific seed, simply pass in the seed name as an argument.
 You can use either the short name (without the `Seed` suffix) or the full name:
 
-``` bash
-$ bin/cake seeds run User
+```bash
+bin/cake seeds run User
 # or
-$ bin/cake seeds run UserSeed
+bin/cake seeds run UserSeed
 ```
 
 Both commands work identically.
 
 You can also run multiple seeds by separating them with commas:
 
-``` bash
-$ bin/cake seeds run User,Permission,Log
+```bash
+bin/cake seeds run User,Permission,Log
 # or with full names
-$ bin/cake seeds run UserSeed,PermissionSeed,LogSeed
+bin/cake seeds run UserSeed,PermissionSeed,LogSeed
 ```
 
 You can also use the <span class="title-ref">-v</span> parameter for more output verbosity:
 
-``` bash
-$ bin/cake seeds run -v
+```bash
+bin/cake seeds run -v
 ```
 
 The Migrations seed functionality provides a simple mechanism to easily and repeatably

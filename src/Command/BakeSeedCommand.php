@@ -40,7 +40,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * Arguments
      */
-    protected ?Arguments $args = null;
+    protected Arguments $args;
 
     /**
      * @inheritDoc
@@ -84,7 +84,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      */
     public function template(): string
     {
-        $style = $this->args?->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
+        $style = $this->args->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
         if ($style === 'anonymous') {
             return 'Migrations.Seed/seed-anonymous';
         }

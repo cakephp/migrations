@@ -269,7 +269,7 @@ that update configuration or reference data. For these seeds, you can override t
                 "SELECT COUNT(*) as count FROM settings WHERE setting_key = 'maintenance_mode'"
             );
 
-            if ($exists['count'] == 0) {
+            if ($exists['count'] === 0) {
                 $this->table('settings')->insert([
                     'setting_key' => 'maintenance_mode',
                     'setting_value' => 'false',

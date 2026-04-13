@@ -22,7 +22,7 @@ commands have been removed and replaced with new command names:
 
 **Seeds:**
 
-``` bash
+```bash
 # Old (4.x and earlier)
 bin/cake migrations seed
 bin/cake migrations seed --seed Articles
@@ -45,7 +45,7 @@ If you need to maintain the old command structure for existing scripts or CI/CD
 pipelines, you can add command aliases in your application. In your
 `src/Application.php` file, add the following to the `console()` method:
 
-``` php
+```php
 public function console(CommandCollection $commands): CommandCollection
 {
     // Add your application's commands
@@ -60,7 +60,7 @@ public function console(CommandCollection $commands): CommandCollection
 
 For multiple aliases, you can add them all together:
 
-``` php
+```php
 // Add multiple backward compatibility aliases
 $commands->add('migrations seed', \Migrations\Command\SeedCommand::class);
 $commands->add('migrations seed:run', \Migrations\Command\SeedCommand::class);
@@ -78,7 +78,7 @@ execute queries, the return of this method is now
 `Cake\Database\StatementInterface` instead. This impacts `fetchAll()`,
 and `fetch()`:
 
-``` php
+```php
 // This
 $stmt = $this->getAdapter()->query('SELECT * FROM articles');
 $rows = $stmt->fetchAll();
@@ -90,7 +90,7 @@ $rows = $stmt->fetchAll('assoc');
 
 Similar changes are for fetching a single row:
 
-``` php
+```php
 // This
 $stmt = $this->getAdapter()->query('SELECT * FROM articles');
 $rows = $stmt->fetch();
@@ -124,7 +124,7 @@ For existing applications with `phinxlog` tables:
 
 The `Migrations.legacyTables` configuration option controls the behavior:
 
-``` php
+```php
 // config/app.php or config/app_local.php
 'Migrations' => [
     // null (default): Autodetect - use legacy if phinxlog tables exist
@@ -138,32 +138,32 @@ The `Migrations.legacyTables` configuration option controls the behavior:
 
 To migrate from `phinxlog` tables to the new `cake_migrations` table:
 
-1.  **Preview the upgrade** (dry run):
+1. **Preview the upgrade** (dry run):
 
-    ``` bash
+    ```bash
     bin/cake migrations upgrade --dry-run
     ```
 
-2.  **Run the upgrade**:
+2. **Run the upgrade**:
 
-    ``` bash
+    ```bash
     bin/cake migrations upgrade
     ```
 
-3.  **Update your configuration**:
+3. **Update your configuration**:
 
-    ``` php
+    ```php
     // config/app.php
     'Migrations' => [
         'legacyTables' => false,
     ],
     ```
 
-4.  **Optionally drop phinx tables**: Your migration history is preserved
+4. **Optionally drop phinx tables**: Your migration history is preserved
     by default. Use `--drop-tables` to drop the `phinxlog`tables after
     verifying your migrations run correctly.
 
-    ``` bash
+    ```bash
     bin/cake migrations upgrade --drop-tables
     ```
 
@@ -171,7 +171,7 @@ To migrate from `phinxlog` tables to the new `cake_migrations` table:
 
 If you need to revert to phinx tables after upgrading:
 
-1.  Set `'legacyTables' => true` in your configuration.
+1. Set `'legacyTables' => true` in your configuration.
 
 > [!WARNING]
 > You cannot rollback after running `upgrade --drop-tables`.

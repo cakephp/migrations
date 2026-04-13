@@ -28,6 +28,8 @@ export default {
     hostname: "https://book.cakephp.org/migrations/5/",
   },
   themeConfig: {
+    siteTitle: false,
+    pluginName: "Migrations",
     socialLinks: [
       { icon: "github", link: "https://github.com/cakephp/cakephp" },
     ],
