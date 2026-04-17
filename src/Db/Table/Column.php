@@ -92,6 +92,9 @@ class Column extends DatabaseColumn
     /** Postgres-only column type */
     public const MACADDR = TableSchemaInterface::TYPE_MACADDR;
 
+    /** Postgres-only column type, requires the `citext` extension */
+    public const CITEXT = TableSchemaInterface::TYPE_CITEXT;
+
     /** Postgres-only column type */
     public const INTERVAL = TableSchemaInterface::TYPE_INTERVAL;
 

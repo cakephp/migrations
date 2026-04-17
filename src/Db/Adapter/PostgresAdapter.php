@@ -53,6 +53,7 @@ class PostgresAdapter extends AbstractAdapter
         self::TYPE_CIDR,
         self::TYPE_INET,
         self::TYPE_MACADDR,
+        self::TYPE_CITEXT,
         self::TYPE_INTERVAL,
         self::TYPE_BINARY_UUID,
         self::TYPE_NATIVE_UUID,

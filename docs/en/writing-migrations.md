@@ -264,8 +264,11 @@ however with the MySQL adapter + MariaDB, the `nativeuuid` type maps to
 a native uuid column instead of `CHAR(36)` like `uuid` does.
 
 In addition, the Postgres adapter supports `interval`, `json`, `jsonb`,
-`uuid`, `cidr`, `inet` and `macaddr` column types (PostgreSQL 9.3 and
-above).
+`uuid`, `cidr`, `inet`, `macaddr` and `citext` column types (PostgreSQL 9.3
+and above). The `citext` type requires the `citext` extension to be enabled
+on the database; the migration does not create the extension automatically,
+run `CREATE EXTENSION IF NOT EXISTS citext` first (for example from an
+earlier migration via `$this->execute(...)`).
 
 ### Valid Column Options
 

@@ -669,6 +669,34 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($table->hasColumn('config'));
     }
 
+    /**
+     * Test that adding a column with the citext type works.
+     *
+     * Requires the `citext` extension to be enabled on the database; the setUp
+     * above creates the extension when missing.
+     */
+    public function testAddColumnCitext(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('nickname'));
+        $table->addColumn('nickname', 'citext', ['null' => true])
+              ->save();
+        $this->assertTrue($table->hasColumn('nickname'));
+
+        $columns = $this->adapter->getColumns('table1');
+        $nickname = null;
+        foreach ($columns as $column) {
+            if ($column->getName() === 'nickname') {
+                $nickname = $column;
+                break;
+            }
+        }
+        $this->assertNotNull($nickname);
+        $this->assertSame('citext', $nickname->getType());
+        $this->assertTrue($nickname->isNull());
+    }
+
     public static function providerAddColumnIdentity(): array
     {
         return [

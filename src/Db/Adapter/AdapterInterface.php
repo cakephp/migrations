@@ -94,6 +94,8 @@ interface AdapterInterface
 
     public const TYPE_MACADDR = TableSchemaInterface::TYPE_MACADDR;
 
+    public const TYPE_CITEXT = TableSchemaInterface::TYPE_CITEXT;
+
     public const TYPE_INTERVAL = TableSchemaInterface::TYPE_INTERVAL;
 
     /**

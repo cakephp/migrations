@@ -2745,6 +2745,7 @@ INPUT;
             [SqliteAdapter::TYPE_UUID, true],
             [SqliteAdapter::TYPE_TIMESTAMP, true],
             [SqliteAdapter::TYPE_CIDR, false],
+            [SqliteAdapter::TYPE_CITEXT, false],
             [SqliteAdapter::TYPE_DECIMAL, true],
             [SqliteAdapter::TYPE_GEOMETRY, false],
             [SqliteAdapter::TYPE_INET, false],
