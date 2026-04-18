@@ -213,7 +213,7 @@ class Migrator
 
     /**
      * Drops the regular tables of the provided connection
-     * and truncates the phinx tables.
+     * and truncates the migration metadata tables.
      *
      * @param string $connection Connection on which tables are dropped.
      * @param string[] $skip A fnmatch compatible list of tables to skip.
@@ -225,26 +225,26 @@ class Migrator
         if ($dropTables !== []) {
             $this->helper->dropTables($connection, $dropTables);
         }
-        $phinxTables = $this->getPhinxTables($connection);
-        if ($phinxTables !== []) {
-            $this->helper->truncateTables($connection, $phinxTables);
+        $migrationTables = $this->getMigrationTables($connection);
+        if ($migrationTables !== []) {
+            $this->helper->truncateTables($connection, $migrationTables);
         }
     }
 
     /**
-     * Get the list of tables that are phinxlog
+     * Get the list of migration metadata tables.
      *
      * @param string $connection The connection name to operate on.
-     * @return string[] The list of tables that are not related to phinx in the provided connection.
+     * @return string[] The list of migration metadata tables in the provided connection.
      */
-    protected function getPhinxTables(string $connection): array
+    protected function getMigrationTables(string $connection): array
     {
         $connection = ConnectionManager::get($connection);
         assert($connection instanceof Connection);
         $tables = $connection->getSchemaCollection()->listTables();
 
         return array_filter($tables, function (string $table): bool {
-            return str_contains($table, 'phinxlog');
+            return str_contains($table, 'phinxlog') || $table === 'cake_migrations';
         });
     }
 

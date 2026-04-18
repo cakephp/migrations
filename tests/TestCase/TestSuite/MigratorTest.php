@@ -16,6 +16,7 @@ namespace Migrations\Test\TestCase\TestSuite;
 use Cake\Chronos\ChronosDate;
 use Cake\Core\Configure;
 use Cake\Database\Driver\Postgres;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
@@ -53,6 +54,47 @@ class MigratorTest extends TestCase
         return Configure::read('Migrations.legacyTables') === false
             ? ['plugin' => 'Migrator']
             : [];
+    }
+
+    protected function makeInspectableMigrator(): Migrator
+    {
+        return new class () extends Migrator {
+            /**
+             * @return array<string>
+             */
+            public function exposedGetMigrationTables(string $connection): array
+            {
+                return array_values($this->getMigrationTables($connection));
+            }
+
+            /**
+             * @return array<string>
+             */
+            public function exposedGetNonPhinxTables(string $connection, array $skip = []): array
+            {
+                return array_values($this->getNonPhinxTables($connection, $skip));
+            }
+        };
+    }
+
+    protected function createPortableTable(string $name, bool $withPlugin = false): void
+    {
+        $connection = ConnectionManager::get('test');
+        $schema = new TableSchema($name);
+        $schema
+            ->addColumn('version', ['type' => 'biginteger', 'null' => false])
+            ->addColumn('migration_name', ['type' => 'string', 'limit' => 100, 'null' => false])
+            ->addColumn('start_time', ['type' => 'timestamp', 'default' => null, 'null' => true])
+            ->addColumn('end_time', ['type' => 'timestamp', 'default' => null, 'null' => true])
+            ->addColumn('breakpoint', ['type' => 'boolean', 'default' => false, 'null' => false]);
+
+        if ($withPlugin) {
+            $schema->addColumn('plugin', ['type' => 'string', 'limit' => 100, 'default' => null, 'null' => true]);
+        }
+
+        foreach ($schema->createSql($connection) as $statement) {
+            $connection->execute($statement);
+        }
     }
 
     protected function setUp(): void
@@ -93,6 +135,32 @@ class MigratorTest extends TestCase
         $this->assertContains('migrator', $tables);
 
         $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
+    }
+
+    public function testGetMigrationTablesIncludesUnifiedLedger(): void
+    {
+        $this->skipIf(Configure::read('Migrations.legacyTables') !== false);
+
+        $connection = ConnectionManager::get('test');
+        $connection->execute('CREATE TABLE sample_table (id INT)');
+        $this->createPortableTable('cake_migrations', true);
+
+        $migrator = $this->makeInspectableMigrator();
+
+        $this->assertSame(['cake_migrations'], $migrator->exposedGetMigrationTables('test'));
+        $this->assertSame(['sample_table'], $migrator->exposedGetNonPhinxTables('test'));
+    }
+
+    public function testGetMigrationTablesIncludesLegacyLedger(): void
+    {
+        $connection = ConnectionManager::get('test');
+        $connection->execute('CREATE TABLE sample_table (id INT)');
+        $this->createPortableTable('app_phinxlog');
+
+        $migrator = $this->makeInspectableMigrator();
+
+        $this->assertSame(['app_phinxlog'], $migrator->exposedGetMigrationTables('test'));
+        $this->assertSame(['sample_table'], $migrator->exposedGetNonPhinxTables('test'));
     }
 
     public function testMigrateDropNoTruncate(): void
