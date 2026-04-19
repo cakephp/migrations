@@ -223,7 +223,15 @@ class Migrator
     {
         $dropTables = $this->getNonPhinxTables($connection, $skip);
         if ($dropTables !== []) {
-            $this->helper->dropTables($connection, $dropTables);
+            $connectionObject = ConnectionManager::get($connection);
+            assert($connectionObject instanceof Connection);
+            // Disable FK checks so bulk drops don't block on cross-table references.
+            // Without this, dropping a parent table before its children fails on
+            // MySQL with error 3730 ("Cannot drop table X referenced by FK on Y")
+            // when the schema has constraints the drop-order can't satisfy.
+            $connectionObject->disableConstraints(function () use ($connection, $dropTables): void {
+                $this->helper->dropTables($connection, $dropTables);
+            });
         }
         $migrationTables = $this->getMigrationTables($connection);
         if ($migrationTables !== []) {

@@ -15,6 +15,7 @@ namespace Migrations\Test\TestCase\TestSuite;
 
 use Cake\Chronos\ChronosDate;
 use Cake\Core\Configure;
+use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Postgres;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
@@ -73,6 +74,11 @@ class MigratorTest extends TestCase
             public function exposedGetNonPhinxTables(string $connection, array $skip = []): array
             {
                 return array_values($this->getNonPhinxTables($connection, $skip));
+            }
+
+            public function exposedDropTables(string $connection, array $skip = []): void
+            {
+                $this->dropTables($connection, $skip);
             }
         };
     }
@@ -149,6 +155,33 @@ class MigratorTest extends TestCase
 
         $this->assertSame(['cake_migrations'], $migrator->exposedGetMigrationTables('test'));
         $this->assertSame(['sample_table'], $migrator->exposedGetNonPhinxTables('test'));
+    }
+
+    public function testDropTablesHandlesCrossTableForeignKeys(): void
+    {
+        $connection = ConnectionManager::get('test');
+        // MySQL rejects dropping a FK-referenced parent table if children
+        // still have the FK. Guard the bulk-drop path for that.
+        $this->skipIf(!($connection->getDriver() instanceof Mysql));
+
+        $connection->execute('CREATE TABLE fk_a (id INT PRIMARY KEY) ENGINE=InnoDB');
+        $connection->execute(
+            'CREATE TABLE fk_b (id INT PRIMARY KEY, a_id INT, ' .
+            'CONSTRAINT fk_b_to_a FOREIGN KEY (a_id) REFERENCES fk_a (id)) ENGINE=InnoDB',
+        );
+        $connection->execute(
+            'CREATE TABLE fk_c (id INT PRIMARY KEY, a_id INT, b_id INT, ' .
+            'CONSTRAINT fk_c_to_a FOREIGN KEY (a_id) REFERENCES fk_a (id), ' .
+            'CONSTRAINT fk_c_to_b FOREIGN KEY (b_id) REFERENCES fk_b (id)) ENGINE=InnoDB',
+        );
+
+        $migrator = $this->makeInspectableMigrator();
+        $migrator->exposedDropTables('test');
+
+        $remaining = $connection->getSchemaCollection()->listTables();
+        $this->assertNotContains('fk_a', $remaining);
+        $this->assertNotContains('fk_b', $remaining);
+        $this->assertNotContains('fk_c', $remaining);
     }
 
     public function testGetMigrationTablesIncludesLegacyLedger(): void
