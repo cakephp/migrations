@@ -160,7 +160,7 @@ To migrate from `phinxlog` tables to the new `cake_migrations` table:
     ```
 
 4. **Optionally drop phinx tables**: Your migration history is preserved
-    by default. Use `--drop-tables` to drop the `phinxlog`tables after
+    by default. Use `--drop-tables` to drop the `phinxlog` tables after
     verifying your migrations run correctly.
 
     ```bash

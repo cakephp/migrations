@@ -201,17 +201,177 @@ Migrations supports table partitioning for MySQL and PostgreSQL. Partitioning
 helps manage large tables by splitting them into smaller, more manageable
 pieces.
 
-Supported strategies include:
+> [!NOTE]
+> Partition columns must be included in the primary key for MySQL. SQLite does
+> not support partitioning. MySQL's `RANGE` and `LIST` types only work with
+> integer columns - use `RANGE COLUMNS` and `LIST COLUMNS` for DATE/STRING
+> columns.
 
-- `RANGE`
-- `RANGE COLUMNS`
-- `LIST`
-- `LIST COLUMNS`
-- `HASH`
-- `KEY` *(MySQL only)*
+### RANGE Partitioning
 
-You can also partition by expressions using `Literal::from(...)`, and add or
-drop partitions on existing tables.
+RANGE partitioning is useful when you want to partition by numeric ranges. For
+MySQL, use `TYPE_RANGE` with integer columns or expressions, and
+`TYPE_RANGE_COLUMNS` for DATE/DATETIME/STRING columns:
+
+```php
+<?php
+use Migrations\BaseMigration;
+use Migrations\Db\Table\Partition;
+
+class CreatePartitionedOrders extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('orders', [
+            'id' => false,
+            'primary_key' => ['id', 'order_date'],
+        ]);
+        $table->addColumn('id', 'integer', ['identity' => true])
+              ->addColumn('order_date', 'date')
+              ->addColumn('amount', 'decimal', ['precision' => 10, 'scale' => 2])
+              ->partitionBy(Partition::TYPE_RANGE_COLUMNS, 'order_date')
+              ->addPartition('p2022', '2023-01-01')
+              ->addPartition('p2023', '2024-01-01')
+              ->addPartition('p2024', '2025-01-01')
+              ->addPartition('pmax', 'MAXVALUE')
+              ->create();
+    }
+}
+```
+
+### LIST Partitioning
+
+LIST partitioning is useful when you want to partition by discrete values. For
+MySQL, use `TYPE_LIST` with integer columns and `TYPE_LIST_COLUMNS` for STRING
+columns:
+
+```php
+<?php
+use Migrations\BaseMigration;
+use Migrations\Db\Table\Partition;
+
+class CreatePartitionedCustomers extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('customers', [
+            'id' => false,
+            'primary_key' => ['id', 'region'],
+        ]);
+        $table->addColumn('id', 'integer', ['identity' => true])
+              ->addColumn('region', 'string', ['limit' => 20])
+              ->addColumn('name', 'string')
+              ->partitionBy(Partition::TYPE_LIST_COLUMNS, 'region')
+              ->addPartition('p_americas', ['US', 'CA', 'MX', 'BR'])
+              ->addPartition('p_europe', ['UK', 'DE', 'FR', 'IT'])
+              ->addPartition('p_asia', ['JP', 'CN', 'IN', 'KR'])
+              ->create();
+    }
+}
+```
+
+### HASH Partitioning
+
+HASH partitioning distributes data evenly across a specified number of
+partitions:
+
+```php
+<?php
+use Migrations\BaseMigration;
+use Migrations\Db\Table\Partition;
+
+class CreatePartitionedSessions extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('sessions');
+        $table->addColumn('user_id', 'integer')
+              ->addColumn('data', 'text')
+              ->partitionBy(Partition::TYPE_HASH, 'user_id', ['count' => 8])
+              ->create();
+    }
+}
+```
+
+### KEY Partitioning (MySQL only)
+
+KEY partitioning is similar to HASH but uses MySQL's internal hashing function:
+
+```php
+<?php
+use Migrations\BaseMigration;
+use Migrations\Db\Table\Partition;
+
+class CreatePartitionedCache extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('cache', [
+            'id' => false,
+            'primary_key' => ['cache_key'],
+        ]);
+        $table->addColumn('cache_key', 'string', ['limit' => 255])
+              ->addColumn('value', 'binary')
+              ->partitionBy(Partition::TYPE_KEY, 'cache_key', ['count' => 16])
+              ->create();
+    }
+}
+```
+
+### Partitioning with Expressions
+
+You can partition by expressions using the `Literal` class:
+
+```php
+<?php
+use Migrations\BaseMigration;
+use Migrations\Db\Literal;
+use Migrations\Db\Table\Partition;
+
+class CreatePartitionedEvents extends BaseMigration
+{
+    public function change(): void
+    {
+        $table = $this->table('events', [
+            'id' => false,
+            'primary_key' => ['id', 'created_at'],
+        ]);
+        $table->addColumn('id', 'integer', ['identity' => true])
+              ->addColumn('created_at', 'datetime')
+              ->partitionBy(Partition::TYPE_RANGE, Literal::from('YEAR(created_at)'))
+              ->addPartition('p2022', 2023)
+              ->addPartition('p2023', 2024)
+              ->addPartition('pmax', 'MAXVALUE')
+              ->create();
+    }
+}
+```
+
+### Modifying Partitions on Existing Tables
+
+You can add or drop partitions on existing partitioned tables:
+
+```php
+<?php
+use Migrations\BaseMigration;
+
+class ModifyOrdersPartitions extends BaseMigration
+{
+    public function up(): void
+    {
+        $this->table('orders')
+            ->addPartitionToExisting('p2025', '2026-01-01')
+            ->update();
+    }
+
+    public function down(): void
+    {
+        $this->table('orders')
+            ->dropPartition('p2025')
+            ->update();
+    }
+}
+```
 
 ## Saving Changes
 

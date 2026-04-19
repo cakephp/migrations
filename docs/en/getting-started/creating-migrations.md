@@ -45,6 +45,54 @@ You can also use the `underscore_form` as the name for your migrations, such as
 > migrations if the class names are not unique. In that case, you may need to
 > rename the migration manually.
 
+## Anonymous Migration Classes
+
+Migrations also supports generating anonymous migration classes, which use PHP's
+anonymous class feature instead of named classes. This style is useful for:
+
+- Avoiding namespace declarations
+- Better PHPCS compatibility (no class name to filename matching required)
+- Simpler file structure without named class constraints
+- More readable filenames like `2024_12_08_120000_CreateProducts.php`
+
+To generate an anonymous migration class, use the `--style anonymous` option:
+
+```bash
+bin/cake bake migration CreateProducts --style anonymous
+```
+
+This generates a migration file using an anonymous class:
+
+```php
+<?php
+declare(strict_types=1);
+
+use Migrations\BaseMigration;
+
+return new class extends BaseMigration
+{
+    public function change(): void
+    {
+    }
+};
+```
+
+Both traditional and anonymous migration classes work identically at runtime
+and can be used interchangeably within the same project.
+
+You can set the default migration style globally in your application
+configuration:
+
+```php
+// In config/app.php or config/app_local.php
+'Migrations' => [
+    'style' => 'anonymous',  // or 'traditional'
+],
+```
+
+This configuration also applies to seeds, allowing you to use consistent
+styling across your entire project.
+
 ## Creating a Table
 
 You can use `bake migration` to create a table:

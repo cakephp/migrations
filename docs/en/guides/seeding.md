@@ -509,7 +509,7 @@ The method takes three arguments:
 ## Truncating Tables
 
 In addition to inserting data Migrations makes it trivial to empty your tables using the
-SQL <span class="title-ref">TRUNCATE</span> command:
+SQL `TRUNCATE` command:
 
 ```php
 <?php
@@ -574,7 +574,7 @@ bin/cake seeds run User,Permission,Log
 bin/cake seeds run UserSeed,PermissionSeed,LogSeed
 ```
 
-You can also use the <span class="title-ref">-v</span> parameter for more output verbosity:
+You can also use the `-v` parameter for more output verbosity:
 
 ```bash
 bin/cake seeds run -v

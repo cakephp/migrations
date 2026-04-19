@@ -7,7 +7,7 @@ Migrations provides access to a Query builder object, that you may use to execut
 
 The Query builder is provided by the [cakephp/database](https://github.com/cakephp/database) project, and should
 be easy to work with as it resembles very closely plain SQL. Accesing the query builder is done by calling the
-`getQueryBuilder(string $type)` function. The `string $type` options are <span class="title-ref">'select'</span>, <span class="title-ref">'insert'</span>, <span class="title-ref">'update'</span> and \`'delete'\`:
+`getQueryBuilder(string $type)` function. The `string $type` options are `'select'`, `'insert'`, `'update'` and `'delete'`:
 
 ```php
 <?php

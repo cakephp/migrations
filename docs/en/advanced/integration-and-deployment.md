@@ -192,7 +192,7 @@ columns not existing when performing operations on those new columns. The
 CakePHP core includes a [Schema Cache Shell](https://book.cakephp.org/5/en/console-and-shells/schema-cache.html) that you can use:
 
 ```bash
-bin/cake migration migrate
+bin/cake migrations migrate
 bin/cake schema_cache clear
 ```
 
