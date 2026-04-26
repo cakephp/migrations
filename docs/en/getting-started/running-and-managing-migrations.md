@@ -58,6 +58,38 @@ bin/cake migrations status --format json
 You can also use the `--source`, `--connection`, and `--plugin` options just
 like for the `migrate` command.
 
+### Checking All Plugins at Once
+
+The `--all` flag prints the status for the app and every loaded plugin that
+ships migrations in a single call:
+
+```bash
+bin/cake migrations status --all
+```
+
+The default output is a compact summary listing only sections that need
+action:
+
+```
+Summary: 2 of 3 sections require action:
+  - APP: 2 pending
+  - Migrator: 1 pending
+```
+
+When everything is migrated, it collapses to a single
+`Summary: all N sections are up to date.` line. Add `-v` to also print the
+full per-section migration tables before the summary.
+
+The exit code reflects the worst state across all sections — `0` when clean,
+`3` (`CODE_STATUS_DOWN`) when migrations are pending, `2`
+(`CODE_STATUS_MISSING`) when entries in the tracking table no longer have
+matching files. This makes `status --all` directly usable as a deploy gate
+in CI.
+
+`--format json` returns one combined object keyed by section name,
+e.g. `{"app": [...], "PluginName": [...]}`. `--all` cannot be combined with
+`--plugin` or `--cleanup`.
+
 ### Cleaning Up Missing Migrations
 
 Sometimes migration files may be deleted from the filesystem but still exist in

@@ -62,6 +62,19 @@ bin/cake migrations status -p PluginName
 bin/cake migrations migrate -p PluginName
 ```
 
+To check the app and every loaded plugin in a single call — a typical need on
+deploy gates — use `migrations status --all` instead of looping over plugins
+manually:
+
+```bash
+bin/cake migrations status --all
+```
+
+The command prints a compact per-section summary and exits non-zero when
+anything is pending, so it slots straight into a CI step. See
+[Checking All Plugins at Once](../getting-started/running-and-managing-migrations#checking-all-plugins-at-once)
+for the full description of the output and exit codes.
+
 ## Running Migrations in a Non-shell Environment
 
 While typical usage of migrations is from the command line, you can also run
