@@ -225,12 +225,10 @@ class StatusCommand extends Command
                 continue;
             }
 
-            $heading = $label === 'app'
-                ? '<info>App</info>'
-                : sprintf('<info>Plugin: %s</info>', $label);
+            $heading = $label === 'app' ? 'APP' : $label;
             $io->out('');
             $io->out('==================================================');
-            $io->out($heading);
+            $io->out(sprintf('<info>%s</info>', $heading));
             $io->out('==================================================');
             $this->display($migrations, $io, $manager->getSchemaTableName());
         }
@@ -303,7 +301,7 @@ class StatusCommand extends Command
             count($summary),
         ));
         foreach ($needsAction as $label => $counts) {
-            $heading = $label === 'app' ? 'App' : sprintf('Plugin: %s', $label);
+            $heading = $label === 'app' ? 'APP' : $label;
             $parts = [];
             if ($counts['down'] > 0) {
                 $parts[] = sprintf('%d pending', $counts['down']);

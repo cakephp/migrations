@@ -122,7 +122,7 @@ class StatusCommandTest extends TestCase
         $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
         // Default output is summary only — no per-section table.
         $this->assertOutputContains('Summary:');
-        $this->assertOutputContains('App:');
+        $this->assertOutputContains('APP:');
         $this->assertOutputContains('pending');
         $this->assertOutputNotContains('Migration ID');
     }
@@ -133,8 +133,9 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --all');
         $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
         $this->assertOutputContains('Summary:');
-        $this->assertOutputContains('App:');
-        $this->assertOutputContains('Plugin: Migrator:');
+        $this->assertOutputContains('- APP:');
+        $this->assertOutputContains('- Migrator:');
+        $this->assertOutputNotContains('Plugin:');
     }
 
     public function testAllVerboseShowsPerSectionTables(): void
@@ -143,7 +144,9 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --all -v');
         $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
         $this->assertOutputContains('Migration ID');
-        $this->assertOutputContains('Plugin: Migrator');
+        // Plugin section header reads as just the plugin name now.
+        $this->assertOutputContains('Migrator');
+        $this->assertOutputNotContains('Plugin: Migrator');
         // Summary still rendered after the tables.
         $this->assertOutputContains('Summary:');
     }
