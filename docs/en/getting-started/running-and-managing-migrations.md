@@ -70,7 +70,7 @@ bin/cake migrations status --all
 The default output is a compact summary listing only sections that need
 action:
 
-```
+```text
 Summary: 2 of 3 sections require action:
   - APP: 2 pending
   - Migrator: 1 pending
