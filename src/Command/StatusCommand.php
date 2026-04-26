@@ -182,7 +182,7 @@ class StatusCommand extends Command
         $sections = ['app' => null];
         foreach (Plugin::loaded() as $pluginName) {
             $migrationsPath = Plugin::path($pluginName) . 'config' . DS
-                . (string)$args->getOption('source') . DS;
+                . $args->getOption('source') . DS;
             if (!is_dir($migrationsPath)) {
                 continue;
             }
