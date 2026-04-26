@@ -66,14 +66,16 @@ class StatusCommand extends Command
             '<info>migrations status -c secondary</info>',
             '<info>migrations status -c secondary  -f json</info>',
             '<info>migrations status --all</info>',
-            'Print status for the app and every loaded plugin that has migrations.',
+            'Print a summary for the app and every loaded plugin that has migrations.',
+            'Add <info>-v</info> to also print the per-section migration tables.',
             '<info>migrations status --cleanup</info>',
             'Remove *MISSING* migrations from the migration tracking table',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
         ])->addOption('all', [
-            'help' => 'Print status for the app and every loaded plugin that has migrations. '
+            'help' => 'Print a status summary for the app and every loaded plugin that has migrations. '
+                . 'Use -v to also print the per-section migration tables. '
                 . 'Cannot be combined with --plugin or --cleanup.',
             'boolean' => true,
             'default' => false,
@@ -189,7 +191,9 @@ class StatusCommand extends Command
             $sections[$pluginName] = $pluginName;
         }
 
+        $verbose = (bool)$args->getOption('verbose');
         $jsonResults = [];
+        $summary = [];
         $exitCode = Command::CODE_SUCCESS;
 
         foreach ($sections as $label => $plugin) {
@@ -210,8 +214,14 @@ class StatusCommand extends Command
                 $exitCode = self::CODE_STATUS_DOWN;
             }
 
+            $summary[$label] = $this->countActions($migrations);
+
             if ($format === 'json') {
                 $jsonResults[$label] = $migrations;
+                continue;
+            }
+
+            if (!$verbose) {
                 continue;
             }
 
@@ -227,13 +237,82 @@ class StatusCommand extends Command
 
         if ($format === 'json') {
             $flags = 0;
-            if ($args->getOption('verbose')) {
+            if ($verbose) {
                 $flags = JSON_PRETTY_PRINT;
             }
             $io->out((string)json_encode($jsonResults, $flags));
+
+            return $exitCode;
         }
 
+        $this->displaySummary($io, $summary);
+
         return $exitCode;
+    }
+
+    /**
+     * Count actionable items (down + missing) in a section's migrations array.
+     *
+     * @param array $migrations The result of {@see Manager::printStatus()}.
+     * @return array{down: int, missing: int}
+     */
+    protected function countActions(array $migrations): array
+    {
+        $down = 0;
+        $missing = 0;
+        foreach ($migrations as $migration) {
+            if (!empty($migration['missing'])) {
+                $missing++;
+                continue;
+            }
+            if (($migration['status'] ?? null) === 'down') {
+                $down++;
+            }
+        }
+
+        return ['down' => $down, 'missing' => $missing];
+    }
+
+    /**
+     * Render the trailing summary block listing sections that need action.
+     *
+     * @param \Cake\Console\ConsoleIo $io The console io.
+     * @param array<string, array{down: int, missing: int}> $summary
+     * @return void
+     */
+    protected function displaySummary(ConsoleIo $io, array $summary): void
+    {
+        $needsAction = array_filter(
+            $summary,
+            fn(array $counts): bool => $counts['down'] > 0 || $counts['missing'] > 0,
+        );
+
+        $io->out('');
+        if (!$needsAction) {
+            $io->out(sprintf(
+                '<success>Summary: all %d sections are up to date.</success>',
+                count($summary),
+            ));
+
+            return;
+        }
+
+        $io->out(sprintf(
+            '<warning>Summary: %d of %d sections require action:</warning>',
+            count($needsAction),
+            count($summary),
+        ));
+        foreach ($needsAction as $label => $counts) {
+            $heading = $label === 'app' ? 'App' : sprintf('Plugin: %s', $label);
+            $parts = [];
+            if ($counts['down'] > 0) {
+                $parts[] = sprintf('%d pending', $counts['down']);
+            }
+            if ($counts['missing'] > 0) {
+                $parts[] = sprintf('%d missing', $counts['missing']);
+            }
+            $io->out(sprintf('  - %s: %s', $heading, implode(', ', $parts)));
+        }
     }
 
     /**

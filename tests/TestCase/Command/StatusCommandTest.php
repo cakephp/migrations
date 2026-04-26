@@ -120,9 +120,11 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --all');
         // App has unmigrated migrations, so the exit code signals pending.
         $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
-        $this->assertOutputContains('App');
-        $this->assertOutputContains('Status');
-        $this->assertOutputContains('Migration ID');
+        // Default output is summary only — no per-section table.
+        $this->assertOutputContains('Summary:');
+        $this->assertOutputContains('App:');
+        $this->assertOutputContains('pending');
+        $this->assertOutputNotContains('Migration ID');
     }
 
     public function testAllIncludesLoadedPluginWithMigrations(): void
@@ -130,8 +132,20 @@ class StatusCommandTest extends TestCase
         $this->loadPlugins(['Migrator']);
         $this->exec('migrations status -c test --all');
         $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
-        $this->assertOutputContains('App');
+        $this->assertOutputContains('Summary:');
+        $this->assertOutputContains('App:');
+        $this->assertOutputContains('Plugin: Migrator:');
+    }
+
+    public function testAllVerboseShowsPerSectionTables(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all -v');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+        $this->assertOutputContains('Migration ID');
         $this->assertOutputContains('Plugin: Migrator');
+        // Summary still rendered after the tables.
+        $this->assertOutputContains('Summary:');
     }
 
     public function testAllJsonOutput(): void
