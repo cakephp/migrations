@@ -134,7 +134,7 @@ class CompletionTest extends TestCase
         $this->exec('completion options migrations.migrations status');
         $this->assertCount(1, $this->_out->messages());
         $output = $this->_out->messages()[0];
-        $expected = '--cleanup --connection -c --format -f --help -h --plugin -p --quiet -q --source -s --verbose -v';
+        $expected = '--all --cleanup --connection -c --format -f --help -h --plugin -p --quiet -q --source -s --verbose -v';
         $outputExplode = explode(' ', trim($output));
         sort($outputExplode);
         $expectedExplode = explode(' ', $expected);

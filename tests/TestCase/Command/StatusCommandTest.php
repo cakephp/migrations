@@ -5,6 +5,7 @@ namespace Migrations\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Exception\MissingPluginException;
+use Migrations\Command\StatusCommand;
 use Migrations\Test\TestCase\TestCase;
 use RuntimeException;
 
@@ -104,5 +105,64 @@ class StatusCommandTest extends TestCase
         $this->assertExitSuccess();
         $this->assertOutputContains('--cleanup');
         $this->assertOutputContains('Remove MISSING migrations from the');
+    }
+
+    public function testAllHelp(): void
+    {
+        $this->exec('migrations status --help');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('--all');
+        $this->assertOutputContains('every loaded plugin');
+    }
+
+    public function testAllAppOnlyExitCodeDownWhenPending(): void
+    {
+        $this->exec('migrations status -c test --all');
+        // App has unmigrated migrations, so the exit code signals pending.
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+        $this->assertOutputContains('App');
+        $this->assertOutputContains('Status');
+        $this->assertOutputContains('Migration ID');
+    }
+
+    public function testAllIncludesLoadedPluginWithMigrations(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+        $this->assertOutputContains('App');
+        $this->assertOutputContains('Plugin: Migrator');
+    }
+
+    public function testAllJsonOutput(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all --format json');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+
+        assert($this->_out instanceof StubConsoleOutput);
+        $messages = $this->_out->messages();
+        $jsonLine = end($messages);
+        $parsed = json_decode((string)$jsonLine, true);
+        $this->assertIsArray($parsed);
+        $this->assertArrayHasKey('app', $parsed);
+        $this->assertArrayHasKey('Migrator', $parsed);
+        $this->assertIsArray($parsed['app']);
+        $this->assertIsArray($parsed['Migrator']);
+    }
+
+    public function testAllRejectsPluginOption(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all -p Migrator');
+        $this->assertExitError();
+        $this->assertErrorContains('cannot be combined with --plugin');
+    }
+
+    public function testAllRejectsCleanupOption(): void
+    {
+        $this->exec('migrations status -c test --all --cleanup');
+        $this->assertExitError();
+        $this->assertErrorContains('cannot be combined with --cleanup');
     }
 }

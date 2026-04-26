@@ -17,6 +17,7 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Plugin;
 use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Migration\ManagerFactory;
@@ -64,11 +65,18 @@ class StatusCommand extends Command
             '',
             '<info>migrations status -c secondary</info>',
             '<info>migrations status -c secondary  -f json</info>',
+            '<info>migrations status --all</info>',
+            'Print status for the app and every loaded plugin that has migrations.',
             '<info>migrations status --cleanup</info>',
             'Remove *MISSING* migrations from the migration tracking table',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
+        ])->addOption('all', [
+            'help' => 'Print status for the app and every loaded plugin that has migrations. '
+                . 'Cannot be combined with --plugin or --cleanup.',
+            'boolean' => true,
+            'default' => false,
         ])->addOption('connection', [
             'short' => 'c',
             'help' => 'The datasource connection to use',
@@ -103,6 +111,22 @@ class StatusCommand extends Command
         /** @var string|null $format */
         $format = $args->getOption('format');
         $clean = $args->getOption('cleanup');
+        $all = (bool)$args->getOption('all');
+
+        if ($all) {
+            if ($args->getOption('plugin')) {
+                $io->err('<error>The --all option cannot be combined with --plugin.</error>');
+
+                return Command::CODE_ERROR;
+            }
+            if ($clean) {
+                $io->err('<error>The --all option cannot be combined with --cleanup.</error>');
+
+                return Command::CODE_ERROR;
+            }
+
+            return $this->executeAll($args, $io, $format);
+        }
 
         $factory = new ManagerFactory([
             'plugin' => $args->getOption('plugin'),
@@ -141,6 +165,97 @@ class StatusCommand extends Command
         }
 
         return Command::CODE_SUCCESS;
+    }
+
+    /**
+     * Execute the status command for the app and every loaded plugin
+     * that ships migrations.
+     *
+     * @param \Cake\Console\Arguments $args The command arguments.
+     * @param \Cake\Console\ConsoleIo $io The console io.
+     * @param string|null $format Output format.
+     * @return int The exit code: CODE_STATUS_MISSING (2) when there are missing entries,
+     *   CODE_STATUS_DOWN (3) when there are pending down migrations, CODE_SUCCESS otherwise.
+     */
+    protected function executeAll(Arguments $args, ConsoleIo $io, ?string $format): int
+    {
+        $sections = ['app' => null];
+        foreach (Plugin::loaded() as $pluginName) {
+            $migrationsPath = Plugin::path($pluginName) . 'config' . DS
+                . (string)$args->getOption('source') . DS;
+            if (!is_dir($migrationsPath)) {
+                continue;
+            }
+            $sections[$pluginName] = $pluginName;
+        }
+
+        $jsonResults = [];
+        $exitCode = Command::CODE_SUCCESS;
+
+        foreach ($sections as $label => $plugin) {
+            $factory = new ManagerFactory([
+                'plugin' => $plugin,
+                'source' => $args->getOption('source'),
+                'connection' => $args->getOption('connection'),
+                'dry-run' => $args->getOption('dry-run'),
+            ]);
+            $manager = $factory->createManager($io);
+            $migrations = $manager->printStatus($format);
+
+            $sectionExit = $this->statusExitCode($migrations);
+            // Precedence: MISSING > DOWN > SUCCESS — once we see MISSING anywhere, keep it.
+            if ($sectionExit === self::CODE_STATUS_MISSING) {
+                $exitCode = self::CODE_STATUS_MISSING;
+            } elseif ($sectionExit === self::CODE_STATUS_DOWN && $exitCode === Command::CODE_SUCCESS) {
+                $exitCode = self::CODE_STATUS_DOWN;
+            }
+
+            if ($format === 'json') {
+                $jsonResults[$label] = $migrations;
+                continue;
+            }
+
+            $heading = $label === 'app'
+                ? '<info>App</info>'
+                : sprintf('<info>Plugin: %s</info>', $label);
+            $io->out('');
+            $io->out('==================================================');
+            $io->out($heading);
+            $io->out('==================================================');
+            $this->display($migrations, $io, $manager->getSchemaTableName());
+        }
+
+        if ($format === 'json') {
+            $flags = 0;
+            if ($args->getOption('verbose')) {
+                $flags = JSON_PRETTY_PRINT;
+            }
+            $io->out((string)json_encode($jsonResults, $flags));
+        }
+
+        return $exitCode;
+    }
+
+    /**
+     * Compute the appropriate status exit code for a single section's migrations array.
+     *
+     * @param array $migrations The result of {@see Manager::printStatus()}.
+     * @return int CODE_STATUS_MISSING when missing entries exist, CODE_STATUS_DOWN when
+     *   any migration is pending (down), otherwise CODE_SUCCESS.
+     */
+    protected function statusExitCode(array $migrations): int
+    {
+        $hasDown = false;
+        foreach ($migrations as $migration) {
+            if (!empty($migration['missing'])) {
+                return self::CODE_STATUS_MISSING;
+            }
+            if (($migration['status'] ?? null) === 'down') {
+                $hasDown = true;
+            }
+        }
+
+        return $hasDown ? self::CODE_STATUS_DOWN : Command::CODE_SUCCESS;
     }
 
     /**
