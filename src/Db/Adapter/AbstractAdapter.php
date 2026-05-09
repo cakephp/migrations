@@ -867,7 +867,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
-            $values = array_map(function ($row): string {
+            $values = array_map(function (array $row): string {
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
 

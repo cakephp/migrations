@@ -331,6 +331,7 @@ class Manager
         $class = str_replace('_', ' ', $class);
         $class = ucwords($class);
         $class = str_replace(' ', '', $class);
+
         $dotPos = strpos($class, '.');
         if ($dotPos !== false) {
             /** @var class-string<\Migrations\MigrationInterface> $name */
