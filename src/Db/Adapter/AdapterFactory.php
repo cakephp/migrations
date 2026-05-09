@@ -24,6 +24,13 @@ class AdapterFactory
     protected static ?AdapterFactory $instance = null;
 
     /**
+     * Constructor.
+     */
+    final public function __construct()
+    {
+    }
+
+    /**
      * Get the factory singleton instance.
      *
      * @return static

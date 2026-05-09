@@ -1,36 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^PHPDoc tag @var with type string is not subtype of native type non\-falsy\-string\|true\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Command/BakeSeedCommand.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between string and false will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: src/Command/BakeSeedCommand.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(int\|string\)\: mixed\)\|null, Closure\(string\)\: string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Db/Adapter/AbstractAdapter.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: src/Db/Adapter/AdapterFactory.php
-
-		-
-			message: '#^Offset ''id'' on non\-empty\-array\<string, mixed\> in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 2
-			path: src/Db/Adapter/MysqlAdapter.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between Cake\\Database\\StatementInterface and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
@@ -41,51 +11,3 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Db/Table/Index.php
-
-		-
-			message: '#^Call to an undefined method Migrations\\MigrationInterface\:\:down\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Migration/Environment.php
-
-		-
-			message: '#^Call to an undefined method Migrations\\MigrationInterface\:\:up\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Migration/Environment.php
-
-		-
-			message: '#^Call to function method_exists\(\) with Migrations\\MigrationInterface and ''useTransactions'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Migration/Environment.php
-
-		-
-			message: '#^Method Migrations\\Migration\\Manager\:\:getMigrationClassName\(\) should return class\-string\<Migrations\\MigrationInterface\> but returns string\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Migration/Manager.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$arg1 of function max expects non\-empty\-array, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Migration/Manager.php
-
-		-
-			message: '#^Parameter \#3 \$length of function substr expects int\|null, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Migration/Manager.php
-
-		-
-			message: '#^Offset 0 on non\-empty\-list\<string\> in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 2
-			path: src/Util/TableFinder.php
-
-		-
-			message: '#^Possibly invalid array key type Cake\\Database\\Schema\\TableSchemaInterface\|string\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 2
-			path: src/View/Helper/MigrationHelper.php

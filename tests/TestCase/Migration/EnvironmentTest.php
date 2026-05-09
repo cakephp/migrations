@@ -204,8 +204,7 @@ class EnvironmentTest extends TestCase
         $adapterStub->expects($this->never())
                     ->method('commitTransaction');
 
-        $adapterStub->expects($this->atLeastOnce())
-                    ->method('hasTransactions')
+        $adapterStub->method('hasTransactions')
                     ->willReturn(true);
 
         $this->environment->setAdapter($adapterStub);

@@ -322,7 +322,8 @@ class Manager
      * Resolves a migration class name based on $path
      *
      * @param string $path Path to the migration file of which we want the class name
-     * @return class-string<\Migrations\MigrationInterface> Migration class name
+     * @return string Migration class name
+     * @phpstan-return class-string<\Migrations\MigrationInterface>
      */
     protected function getMigrationClassName(string $path): string
     {
@@ -330,10 +331,15 @@ class Manager
         $class = str_replace('_', ' ', $class);
         $class = ucwords($class);
         $class = str_replace(' ', '', $class);
-        if (str_contains($class, '.')) {
-            return substr($class, 0, strpos($class, '.'));
+        $dotPos = strpos($class, '.');
+        if ($dotPos !== false) {
+            /** @var class-string<\Migrations\MigrationInterface> $name */
+            $name = substr($class, 0, $dotPos);
+
+            return $name;
         }
 
+        /** @var class-string<\Migrations\MigrationInterface> $class */
         return $class;
     }
 
@@ -448,7 +454,8 @@ class Manager
         }
 
         if ($version === null) {
-            $version = max(array_merge($versions, array_keys($migrations)));
+            $candidates = [...$versions, ...array_keys($migrations)];
+            $version = $candidates ? max($candidates) : 0;
         } elseif ($version !== 0 && !isset($migrations[$version])) {
             $this->getIo()->out(sprintf(
                 '<comment>warning</comment> %s is not a valid version',

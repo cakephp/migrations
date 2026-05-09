@@ -67,10 +67,7 @@ class Environment
             $migration->{MigrationInterface::INIT}();
         }
 
-        $atomic = $adapter->hasTransactions();
-        if (method_exists($migration, 'useTransactions')) {
-            $atomic = $migration->useTransactions();
-        }
+        $atomic = $migration->useTransactions();
         // begin the transaction if the adapter supports it
         if ($atomic) {
             $adapter->beginTransaction();
@@ -97,7 +94,7 @@ class Environment
                 } else {
                     $migration->{MigrationInterface::CHANGE}();
                 }
-            } else {
+            } elseif (method_exists($migration, $direction)) {
                 $migration->{$direction}();
             }
         }

@@ -708,9 +708,10 @@ class MigrationHelper extends Helper
             'tables' => [],
         ];
         foreach ($tables as $table) {
-            $tableName = $table;
             if ($table instanceof TableSchemaInterface) {
                 $tableName = $table->name();
+            } else {
+                $tableName = $table;
             }
             $data = $this->getCreateTableData($table);
             $tableConstraintsNoUnique = array_filter(

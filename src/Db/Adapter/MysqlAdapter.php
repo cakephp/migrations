@@ -300,11 +300,11 @@ class MysqlAdapter extends AbstractAdapter
         );
 
         // Add the default primary key
-        if (!isset($options['id']) || (isset($options['id']) && $options['id'] === true)) {
+        if (!isset($options['id']) || $options['id'] === true) {
             $options['id'] = 'id';
         }
 
-        if (isset($options['id']) && is_string($options['id'])) {
+        if (is_string($options['id'])) {
             $useUnsigned = (bool)Configure::read('Migrations.unsigned_primary_keys');
             // Handle id => "field_name" to support AUTO_INCREMENT
             $column = new Column();
