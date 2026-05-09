@@ -378,7 +378,13 @@ class SqliteAdapterTest extends TestCase
               ->addIndex($index)
               ->save();
         $queries = $this->out->messages();
-        $indexQuery = $queries[2];
+        $indexQuery = '';
+        foreach ($queries as $query) {
+            if (str_contains($query, 'CREATE UNIQUE INDEX "table1_email_index"')) {
+                $indexQuery = $query;
+                break;
+            }
+        }
         $this->assertStringContainsString('CREATE UNIQUE INDEX "table1_email_index"', $indexQuery);
         $this->assertStringContainsString('("email" ASC) WHERE is_verified = true', $indexQuery);
     }
