@@ -37,7 +37,8 @@
       "collapsed": true,
       "items": [
         { "text": "Upgrading from 4.x to 5.x", "link": "/upgrades/upgrading-from-4-x" },
-        { "text": "Upgrading to the Builtin Backend", "link": "/upgrades/upgrading-to-builtin-backend" }
+        { "text": "Upgrading to the Builtin Backend", "link": "/upgrades/upgrading-to-builtin-backend" },
+        { "text": "Upgrading to Capability Interfaces", "link": "/upgrades/upgrading-to-capability-interfaces" }
       ]
     }
   ]

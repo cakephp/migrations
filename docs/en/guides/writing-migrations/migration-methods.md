@@ -1,5 +1,19 @@
 # Migration Methods
 
+A migration declares its style by implementing one of two capability interfaces:
+
+- `Migrations\ReversibleMigrationInterface` for migrations that define a
+  single `change()` method.
+- `Migrations\DirectionalMigrationInterface` for migrations that define
+  separate `up()` and `down()` methods.
+
+A migration implements **one** of the two, never both. Bake-generated
+migrations already include the right `implements` clause. Migrations from
+older versions of cakephp/migrations keep working without the interface
+through a `method_exists()` fallback; see
+[Upgrading to Capability Interfaces](/upgrades/upgrading-to-capability-interfaces)
+for the adoption path.
+
 ## The Change Method
 
 Migrations supports 'reversible migrations'. In many scenarios, you only need
@@ -10,8 +24,9 @@ rollback operations for you. For example:
 <?php
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class CreateUserLoginsTable extends BaseMigration
+class CreateUserLoginsTable extends BaseMigration implements ReversibleMigrationInterface
 {
     public function change(): void
     {
@@ -57,8 +72,9 @@ direction. For example:
 <?php
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class CreateUserLoginsTable extends BaseMigration
+class CreateUserLoginsTable extends BaseMigration implements ReversibleMigrationInterface
 {
     public function change(): void
     {
@@ -111,8 +127,9 @@ from within your database migration:
 <?php
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class MyNewMigration extends BaseMigration
+class MyNewMigration extends BaseMigration implements DirectionalMigrationInterface
 {
     public function up(): void
     {
