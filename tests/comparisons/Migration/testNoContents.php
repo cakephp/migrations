@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class NoContents extends BaseMigration
+class NoContents extends BaseMigration implements ReversibleMigrationInterface
 {
     /**
      * Change Method.

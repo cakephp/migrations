@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotPluginBlogPgsql extends BaseMigration
+class TestSnapshotPluginBlogPgsql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.

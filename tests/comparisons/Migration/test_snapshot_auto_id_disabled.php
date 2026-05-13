@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotAutoIdDisabled extends BaseMigration
+class TestSnapshotAutoIdDisabled extends BaseMigration implements DirectionalMigrationInterface
 {
     public bool $autoId = false;
 

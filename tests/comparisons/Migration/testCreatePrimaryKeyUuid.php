@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class CreateUsers extends BaseMigration
+class CreateUsers extends BaseMigration implements ReversibleMigrationInterface
 {
     public bool $autoId = false;
 

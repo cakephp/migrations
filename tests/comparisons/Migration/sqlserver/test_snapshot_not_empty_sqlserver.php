@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotNotEmptySqlserver extends BaseMigration
+class TestSnapshotNotEmptySqlserver extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.

@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotNotEmptyPgsql extends BaseMigration
+class TestSnapshotNotEmptyPgsql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.

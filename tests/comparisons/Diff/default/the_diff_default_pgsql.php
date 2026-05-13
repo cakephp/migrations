@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TheDiffDefaultPgsql extends BaseMigration
+class TheDiffDefaultPgsql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.

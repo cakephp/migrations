@@ -23,8 +23,13 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+{% if useChange %}
+use Migrations\ReversibleMigrationInterface;
+{% else %}
+use Migrations\DirectionalMigrationInterface;
+{% endif %}
 
-class {{ name }} extends BaseMigration
+class {{ name }} extends BaseMigration implements {{ useChange ? 'ReversibleMigrationInterface' : 'DirectionalMigrationInterface' }}
 {
 {% if not autoId  %}
     public bool $autoId = false;

@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class TestSnapshotWithChange extends BaseMigration
+class TestSnapshotWithChange extends BaseMigration implements ReversibleMigrationInterface
 {
     /**
      * Change Method.

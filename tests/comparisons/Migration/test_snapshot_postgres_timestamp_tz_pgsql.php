@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration
+class TestSnapshotPostgresTimestampTzPgsql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.

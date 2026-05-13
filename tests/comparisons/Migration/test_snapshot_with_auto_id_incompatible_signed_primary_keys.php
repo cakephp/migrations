@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends BaseMigration
+class TestSnapshotWithAutoIdIncompatibleSignedPrimaryKeys extends BaseMigration implements DirectionalMigrationInterface
 {
     public bool $autoId = false;
 

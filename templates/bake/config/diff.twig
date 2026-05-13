@@ -20,8 +20,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class {{ name }} extends BaseMigration
+class {{ name }} extends BaseMigration implements DirectionalMigrationInterface
 {
 {% if not autoId %}
     public bool $autoId = false;

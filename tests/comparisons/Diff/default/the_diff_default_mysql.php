@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TheDiffDefaultMysql extends BaseMigration
+class TheDiffDefaultMysql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.

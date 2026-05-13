@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TheDiffWithAutoIdCompatibleSignedPrimaryKeysMysql extends BaseMigration
+class TheDiffWithAutoIdCompatibleSignedPrimaryKeysMysql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.
