@@ -5,6 +5,12 @@ parameters:
     level: 8
     paths:
         - src/
+    excludePaths:
+        # rector/rector is installed on-demand via the rector-setup composer
+        # script, so PHPStan cannot resolve AbstractRector or the Symplify
+        # value objects during the main analysis run. The rule is autoloaded
+        # for downstream apps and type-checked by rector itself when invoked.
+        - src/Rector/
     bootstrapFiles:
         - tests/bootstrap.php
     ignoreErrors:
