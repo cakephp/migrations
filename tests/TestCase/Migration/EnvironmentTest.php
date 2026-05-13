@@ -9,8 +9,10 @@ use Migrations\BaseMigration;
 use Migrations\BaseSeed;
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\AdapterWrapper;
+use Migrations\DirectionalMigrationInterface;
 use Migrations\Migration\Environment;
 use Migrations\MigrationInterface;
+use Migrations\ReversibleMigrationInterface;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -278,6 +280,159 @@ class EnvironmentTest extends TestCase
 
         $this->environment->executeMigration($migration, MigrationInterface::DOWN);
         $this->assertTrue($migration->executed);
+    }
+
+    public function testExecutingAReversibleInterfaceMigrationUp(): void
+    {
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
+            ->setConstructorArgs([[]])
+            ->getMock();
+        $adapterStub->expects($this->once())
+            ->method('migrated')
+            ->willReturn($adapterStub);
+
+        $this->environment->setAdapter($adapterStub);
+
+        $migration = new class (20260513120000) extends BaseMigration implements ReversibleMigrationInterface {
+            public bool $executed = false;
+
+            public function change(): void
+            {
+                $this->executed = true;
+            }
+        };
+
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $this->assertTrue($migration->executed);
+    }
+
+    public function testExecutingAReversibleInterfaceMigrationDown(): void
+    {
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
+            ->setConstructorArgs([[]])
+            ->getMock();
+        $adapterStub->expects($this->once())
+            ->method('migrated')
+            ->willReturn($adapterStub);
+
+        $this->environment->setAdapter($adapterStub);
+
+        $migration = new class (20260513120000) extends BaseMigration implements ReversibleMigrationInterface {
+            public bool $executed = false;
+
+            public function change(): void
+            {
+                $this->executed = true;
+            }
+        };
+
+        $this->environment->executeMigration($migration, MigrationInterface::DOWN);
+        $this->assertTrue($migration->executed);
+    }
+
+    public function testExecutingADirectionalInterfaceMigrationUp(): void
+    {
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
+            ->setConstructorArgs([[]])
+            ->getMock();
+        $adapterStub->expects($this->once())
+            ->method('migrated')
+            ->willReturn($adapterStub);
+
+        $this->environment->setAdapter($adapterStub);
+
+        $migration = new class (20260513120000) extends BaseMigration implements DirectionalMigrationInterface {
+            public bool $upExecuted = false;
+
+            public bool $downExecuted = false;
+
+            public function up(): void
+            {
+                $this->upExecuted = true;
+            }
+
+            public function down(): void
+            {
+                $this->downExecuted = true;
+            }
+        };
+
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $this->assertTrue($migration->upExecuted);
+        $this->assertFalse($migration->downExecuted);
+    }
+
+    public function testExecutingADirectionalInterfaceMigrationDown(): void
+    {
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
+            ->setConstructorArgs([[]])
+            ->getMock();
+        $adapterStub->expects($this->once())
+            ->method('migrated')
+            ->willReturn($adapterStub);
+
+        $this->environment->setAdapter($adapterStub);
+
+        $migration = new class (20260513120000) extends BaseMigration implements DirectionalMigrationInterface {
+            public bool $upExecuted = false;
+
+            public bool $downExecuted = false;
+
+            public function up(): void
+            {
+                $this->upExecuted = true;
+            }
+
+            public function down(): void
+            {
+                $this->downExecuted = true;
+            }
+        };
+
+        $this->environment->executeMigration($migration, MigrationInterface::DOWN);
+        $this->assertTrue($migration->downExecuted);
+        $this->assertFalse($migration->upExecuted);
+    }
+
+    /**
+     * If a class declares DirectionalMigrationInterface, dispatch must use
+     * up()/down() even if the class happens to define a change() method —
+     * the interface declaration wins over the legacy method_exists check.
+     */
+    public function testDirectionalInterfaceWinsOverChangeMethod(): void
+    {
+        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
+            ->setConstructorArgs([[]])
+            ->getMock();
+        $adapterStub->expects($this->once())
+            ->method('migrated')
+            ->willReturn($adapterStub);
+
+        $this->environment->setAdapter($adapterStub);
+
+        $migration = new class (20260513120000) extends BaseMigration implements DirectionalMigrationInterface {
+            public bool $upExecuted = false;
+
+            public bool $changeExecuted = false;
+
+            public function up(): void
+            {
+                $this->upExecuted = true;
+            }
+
+            public function down(): void
+            {
+            }
+
+            public function change(): void
+            {
+                $this->changeExecuted = true;
+            }
+        };
+
+        $this->environment->executeMigration($migration, MigrationInterface::UP);
+        $this->assertTrue($migration->upExecuted);
+        $this->assertFalse($migration->changeExecuted);
     }
 
     public function testExecutingAFakeMigration(): void

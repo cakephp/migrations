@@ -12,7 +12,9 @@ use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\DirectionalMigrationInterface;
 use Migrations\MigrationInterface;
+use Migrations\ReversibleMigrationInterface;
 use Migrations\SeedInterface;
 use RuntimeException;
 
@@ -74,8 +76,15 @@ class Environment
         }
 
         if (!$fake) {
-            // Run the migration
-            if (method_exists($migration, MigrationInterface::CHANGE)) {
+            // Run the migration. Dispatch order: capability interfaces first
+            // (statically narrowable for IDEs and static analysis), then a
+            // method_exists fallback for migrations that haven't yet adopted
+            // either ReversibleMigrationInterface or DirectionalMigrationInterface.
+            $isReversible = $migration instanceof ReversibleMigrationInterface
+                || (!$migration instanceof DirectionalMigrationInterface
+                    && method_exists($migration, MigrationInterface::CHANGE));
+
+            if ($isReversible) {
                 if ($direction === MigrationInterface::DOWN) {
                     // Create an instance of the RecordingAdapter so we can record all
                     // of the migration commands for reverse playback
@@ -94,6 +103,8 @@ class Environment
                 } else {
                     $migration->{MigrationInterface::CHANGE}();
                 }
+            } elseif ($migration instanceof DirectionalMigrationInterface) {
+                $direction === MigrationInterface::UP ? $migration->up() : $migration->down();
             } elseif (method_exists($migration, $direction)) {
                 $migration->{$direction}();
             }
