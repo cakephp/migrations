@@ -14,7 +14,7 @@ class TextsSeed extends BaseSeed
      * Write your database seeder using this method.
      *
      * More information on writing seeds is available here:
-     * https://book.cakephp.org/migrations/5/en/seeding.html
+     * https://book.cakephp.org/migrations/5/guides/seeding.html
      *
      * @return void
      */

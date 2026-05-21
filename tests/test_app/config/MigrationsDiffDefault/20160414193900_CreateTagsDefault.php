@@ -8,7 +8,7 @@ class CreateTagsDefault extends BaseMigration
      * Change Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-change-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-change-method
      *
      * @return void
      */
