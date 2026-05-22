@@ -1848,6 +1848,32 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'ref_table_fk_2'));
     }
 
+    public function testDropForeignKeyWithNameContainingWhitespace(): void
+    {
+        $refTable = new Table('ref_table', [], $this->adapter);
+        $refTable->addColumn('field1', 'string')->save();
+
+        $table = new Table('table', [], $this->adapter);
+        $key = (new ForeignKey())
+            ->setName('ref table fk')
+            ->setColumns(['ref_table_id'])
+            ->setReferencedTable('ref_table')
+            ->setReferencedColumns(['id']);
+        $table
+            ->addColumn('ref_table_id', 'integer', ['signed' => false])
+            ->addForeignKey($key)
+            ->save();
+
+        $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [], 'ref table fk'));
+
+        // The constraint name must be quoted in the DROP statement, otherwise
+        // names with whitespace (or numeric names auto-assigned by MariaDB 12)
+        // produce invalid SQL.
+        $this->adapter->dropForeignKey($table->getName(), [], 'ref table fk');
+
+        $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'ref table fk'));
+    }
+
     public static function nonExistentForeignKeyColumnsProvider(): array
     {
         return [

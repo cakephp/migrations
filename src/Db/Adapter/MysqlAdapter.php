@@ -1061,7 +1061,7 @@ class MysqlAdapter extends AbstractAdapter
     {
         $alter = sprintf(
             'DROP FOREIGN KEY %s',
-            $constraint,
+            $this->quoteColumnName($constraint),
         );
 
         return new AlterInstructions([$alter]);
