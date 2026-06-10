@@ -1,6 +1,6 @@
 # Upgrading to Capability Interfaces
 
-Starting with 5.next, cakephp/migrations ships two capability interfaces that let migrations declare their style explicitly:
+Starting with 5.2.0, cakephp/migrations ships two capability interfaces that let migrations declare their style explicitly:
 
 - `Migrations\ReversibleMigrationInterface` — for migrations that define a single reversible `change()` method.
 - `Migrations\DirectionalMigrationInterface` — for migrations that define separate `up()` and `down()` methods.
