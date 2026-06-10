@@ -166,7 +166,7 @@ jobs:
 
       - name: Code Coverage Report
         if: success() && matrix.php-version == '8.1' && matrix.db-type == 'mysql'
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
 
   testsuite-windows:
     runs-on: windows-2022
@@ -240,7 +240,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
     - name: Submit code coverage
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
 
   cs-stan:
     uses: cakephp/.github/.github/workflows/cs-stan.yml@5.x
