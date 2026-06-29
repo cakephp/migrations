@@ -984,7 +984,7 @@ class PostgresAdapter extends AbstractAdapter
      */
     public function hasDatabase(string $name): bool
     {
-        $sql = sprintf("SELECT count(*) FROM pg_database WHERE datname = '%s'", $name);
+        $sql = sprintf("SELECT count(*) FROM pg_database WHERE datname = '%s'", $this->quoteSchemaName($name));
         $result = $this->fetchRow($sql);
         if (!$result) {
             return false;
