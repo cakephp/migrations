@@ -987,7 +987,7 @@ class PostgresAdapter extends AbstractAdapter
         $connection = $this->getConnection();
         $result = $connection->execute(
             'SELECT count(*) FROM pg_database WHERE datname = ?',
-            [$name]
+            [$name],
         )->fetch('assoc');
         if (!$result) {
             return false;
