@@ -227,6 +227,40 @@ class ColumnParserTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * A composite primary key (e.g. a join table) must not auto-increment its
+     * integer columns, otherwise MySQL rejects the table with
+     * "there can be only one auto column".
+     *
+     * @return void
+     */
+    public function testParseFieldsCompositePrimaryKey(): void
+    {
+        $expected = [
+            'article_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+            'tag_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields([
+            'article_id:integer:primary',
+            'tag_id:integer:primary',
+        ]);
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testParseIndexes(): void
     {
         $this->assertEquals(['UNIQUE_ID' => [
