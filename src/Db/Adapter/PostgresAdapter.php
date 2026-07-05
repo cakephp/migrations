@@ -826,7 +826,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
     {
         $constraintName = $checkConstraint->getName();
-        if ($constraintName === null) {
+        if ($constraintName === null || $constraintName === '') {
             // Auto-generate constraint name if not provided
             $parts = $this->getSchemaName($table->getName());
             $constraintName = $parts['table'] . '_chk_' . substr(md5($checkConstraint->getExpression()), 0, 8);

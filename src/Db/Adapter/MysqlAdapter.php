@@ -1121,7 +1121,7 @@ class MysqlAdapter extends AbstractAdapter
     protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
     {
         $constraintName = $checkConstraint->getName();
-        if ($constraintName === null) {
+        if ($constraintName === null || $constraintName === '') {
             // Auto-generate constraint name if not provided
             $constraintName = $table->getName() . '_chk_' . substr(md5($checkConstraint->getExpression()), 0, 8);
         }

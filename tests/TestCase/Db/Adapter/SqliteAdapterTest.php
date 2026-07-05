@@ -3173,6 +3173,21 @@ INPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table', 'price_positive'));
     }
 
+    public function testAddCheckConstraintAutoGeneratesName(): void
+    {
+        $table = new Table('check_table_auto', [], $this->adapter);
+        $table->addColumn('quantity', 'integer')
+              ->create();
+
+        $expression = 'quantity >= 0';
+        // An empty name must trigger auto-generation, not produce an unnamed constraint.
+        $checkConstraint = new CheckConstraint('', $expression);
+        $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
+
+        $expectedName = 'chk_' . substr(md5($expression), 0, 8);
+        $this->assertTrue($this->adapter->hasCheckConstraint('check_table_auto', $expectedName));
+    }
+
     public function testHasCheckConstraint(): void
     {
         $table = new Table('check_table3', [], $this->adapter);
