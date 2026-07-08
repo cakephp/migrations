@@ -509,6 +509,10 @@ class Manager
     {
         $this->getIo()->out('');
 
+        // Make the adapter available so shouldExecute() can inspect the database.
+        // The environment sets it again (and wraps it for down/change) before running the migration body.
+        $migration->setAdapter($this->getEnvironment()->getAdapter());
+
         // Skip the migration if it should not be executed
         if (!$migration->shouldExecute()) {
             $this->printMigrationStatus($migration, 'skipped');
@@ -540,6 +544,9 @@ class Manager
      */
     public function executeSeed(SeedInterface $seed, bool $force = false, bool $fake = false): void
     {
+        // Make the adapter available so shouldExecute() can inspect the database.
+        $seed->setAdapter($this->getEnvironment()->getAdapter());
+
         // Skip the seed if it should not be executed
         if (!$seed->shouldExecute()) {
             $this->getIo()->out('');

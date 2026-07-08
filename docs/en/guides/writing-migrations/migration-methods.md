@@ -101,6 +101,29 @@ migration. This can be used to prevent the migration from being executed at
 this time. It always returns `true` by default. You can override it in your
 custom `BaseMigration` implementation.
 
+The database adapter is available inside `shouldExecute()`, so the decision can
+be based on the current state of the database (for example the server version or
+whether a table already exists):
+
+```php
+<?php
+
+use Migrations\BaseMigration;
+
+class MyNewMigration extends BaseMigration
+{
+    public function shouldExecute(): bool
+    {
+        return !$this->hasTable('some_table');
+    }
+
+    public function change(): void
+    {
+        // ...
+    }
+}
+```
+
 ## Working With Tables
 
 The Table object enables you to manipulate database tables using PHP code. You
