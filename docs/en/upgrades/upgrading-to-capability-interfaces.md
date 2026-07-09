@@ -166,7 +166,8 @@ What the rule does:
 
 - For every class extending `Migrations\BaseMigration` (directly or transitively):
   - If the class defines `change()`, add `implements ReversibleMigrationInterface`.
-  - If the class defines `up()` or `down()`, add `implements DirectionalMigrationInterface`.
+  - If the class defines both `up()` and `down()`, add `implements DirectionalMigrationInterface`.
+- One-way migrations that define only `up()` or only `down()` are left untouched. They keep working through the `method_exists()` fallback; adding `DirectionalMigrationInterface` would make `Environment` call the missing direction unconditionally and turn a rollback no-op into a fatal error.
 - Classes that already implement either capability interface are skipped.
 - Classes that define both `change()` and `up()`/`down()` are skipped — these are user errors that need a deliberate decision.
 

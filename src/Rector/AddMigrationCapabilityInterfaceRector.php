@@ -26,7 +26,9 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  * to every class that extends {@see BaseMigration} based on the migration methods it defines.
  *
  * - Classes defining `change()` get {@see ReversibleMigrationInterface}.
- * - Classes defining `up()` or `down()` get {@see DirectionalMigrationInterface}.
+ * - Classes defining both `up()` and `down()` get {@see DirectionalMigrationInterface}.
+ * - One-way migrations (only `up()` or only `down()`) are left untouched and keep
+ *   working through the Environment `method_exists()` fallback.
  * - Classes defining both styles are skipped (the user must pick a style deliberately).
  * - Classes already implementing either capability interface are skipped.
  *
@@ -99,19 +101,32 @@ CODE_AFTER,
             return null;
         }
 
-        $hasChange = $this->classHasMethod($node, MigrationInterface::CHANGE);
-        $hasDirection = $this->classHasMethod($node, MigrationInterface::UP)
-            || $this->classHasMethod($node, MigrationInterface::DOWN);
-
-        // Mixed style is user error. Leave it untouched so the developer picks deliberately.
-        if ($hasChange && $hasDirection) {
+        // Already annotated with either capability interface: leave it alone so the
+        // rule stays idempotent and never ends up adding the second, conflicting one.
+        if (
+            $classReflection->implementsInterface(ReversibleMigrationInterface::class)
+            || $classReflection->implementsInterface(DirectionalMigrationInterface::class)
+        ) {
             return null;
         }
 
+        $hasChange = $this->classHasMethod($node, MigrationInterface::CHANGE);
+        $hasUp = $this->classHasMethod($node, MigrationInterface::UP);
+        $hasDown = $this->classHasMethod($node, MigrationInterface::DOWN);
+
+        // Mixed style is user error. Leave it untouched so the developer picks deliberately.
+        if ($hasChange && ($hasUp || $hasDown)) {
+            return null;
+        }
+
+        // Only adopt the directional interface when BOTH methods are present. A one-way
+        // migration (only up() or only down()) must stay on the Environment method_exists()
+        // fallback: DirectionalMigrationInterface makes Environment call the missing
+        // direction unconditionally, turning a rollback no-op into a fatal error.
         $targetInterface = null;
-        if ($hasChange && !$classReflection->implementsInterface(ReversibleMigrationInterface::class)) {
+        if ($hasChange) {
             $targetInterface = ReversibleMigrationInterface::class;
-        } elseif ($hasDirection && !$classReflection->implementsInterface(DirectionalMigrationInterface::class)) {
+        } elseif ($hasUp && $hasDown) {
             $targetInterface = DirectionalMigrationInterface::class;
         }
 
