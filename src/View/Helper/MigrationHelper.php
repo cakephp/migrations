@@ -41,6 +41,20 @@ class MigrationHelper extends Helper
     protected array $schemas = [];
 
     /**
+     * Cached default collation of the database being baked from.
+     *
+     * @var string|null
+     */
+    protected ?string $defaultCollation = null;
+
+    /**
+     * Whether the default collation has already been resolved.
+     *
+     * @var bool
+     */
+    protected bool $defaultCollationResolved = false;
+
+    /**
      * Stores the status of the ``$this->table()`` statements issued while baking.
      * It helps prevent duplicate calls in case of complex conditions
      *
@@ -543,6 +557,111 @@ class MigrationHelper extends Helper
         ksort($attributes);
 
         return $attributes;
+    }
+
+    /**
+     * Returns the table level options to render in a ``$this->table()`` statement.
+     *
+     * Only options that would not be applied anyway when the migration runs are returned.
+     * Rendering a collation that already matches the database default would pin a
+     * server specific collation into the snapshot, so those are left out and the target
+     * server gets to apply its own default.
+     *
+     * Table options are only reflected for MySQL, other drivers report none.
+     *
+     * @param \Cake\Database\Schema\TableSchemaInterface|string $table Name of the table to retrieve options for
+     *  or a table schema object.
+     * @return array<string, mixed>
+     */
+    public function tableOptions(TableSchemaInterface|string $table): array
+    {
+        $tableSchema = $table;
+        if (!($tableSchema instanceof TableSchemaInterface)) {
+            $tableSchema = $this->schema($tableSchema);
+        }
+
+        $schemaOptions = $tableSchema->getOptions();
+        $options = [];
+
+        $collation = $schemaOptions['collation'] ?? null;
+        if ($collation && $collation !== $this->defaultCollation()) {
+            $options['collation'] = $collation;
+        }
+
+        $engine = $schemaOptions['engine'] ?? null;
+        if ($engine && $engine !== MysqlAdapter::DEFAULT_ENGINE) {
+            $options['engine'] = $engine;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Returns the collation the database applies to tables that do not specify one.
+     *
+     * @return string|null
+     */
+    protected function defaultCollation(): ?string
+    {
+        if ($this->defaultCollationResolved) {
+            return $this->defaultCollation;
+        }
+        $this->defaultCollationResolved = true;
+
+        $configured = Configure::read('Migrations.default_collation');
+        if ($configured) {
+            $this->defaultCollation = (string)$configured;
+
+            return $this->defaultCollation;
+        }
+
+        $connection = $this->getConfig('connection');
+        assert($connection instanceof Connection);
+        if (!($connection->getDriver() instanceof Mysql)) {
+            return $this->defaultCollation;
+        }
+
+        $row = $connection->selectQuery()
+            ->select(['DEFAULT_COLLATION_NAME'])
+            ->from('INFORMATION_SCHEMA.SCHEMATA')
+            ->where(['SCHEMA_NAME' => $connection->config()['database']])
+            ->execute()
+            ->fetch('assoc');
+
+        if ($row) {
+            $this->defaultCollation = $row['DEFAULT_COLLATION_NAME'];
+        }
+
+        return $this->defaultCollation;
+    }
+
+    /**
+     * Returns the table options converted into a formatted single line string
+     *
+     * Unlike ``stringifyList()`` this keeps the options on one line, preserves insertion
+     * order so the primary key options keep leading the list, and omits the trailing comma.
+     * Sorting them like ``stringifyList()`` does would reorder the arguments of every
+     * existing ``$this->table()`` statement.
+     *
+     * @param array<string, mixed> $options The table options to stringify.
+     * @return string
+     */
+    public function stringifyTableOptions(array $options): string
+    {
+        $stringified = [];
+        foreach ($options as $name => $value) {
+            if (is_array($value)) {
+                $value = sprintf('[%s]', implode(', ', array_map(
+                    fn(mixed $item): string => (string)$this->value($item, true),
+                    $value,
+                )));
+            } else {
+                $value = (string)$this->value($value, true);
+            }
+            $stringified[] = sprintf("'%s' => %s", $name, $value);
+        }
+
+        return implode(', ', $stringified);
     }
 
     /**

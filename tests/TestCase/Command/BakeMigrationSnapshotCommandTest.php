@@ -392,4 +392,39 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->runSnapshotTest('WithNonDefaultCollation', '-p SimpleSnapshot');
         $connection->execute('ALTER TABLE events MODIFY title VARCHAR(255)');
     }
+
+    /**
+     * Tests that non default table options are used in the initial snapshot.
+     *
+     * Tables that carry a collation or engine differing from the defaults must have
+     * them rendered, otherwise the snapshot recreates them with the connection defaults.
+     */
+    public function testSnapshotWithNonDefaultTableOptions(): void
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+        $this->loadPlugins(['SimpleSnapshot']);
+
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $connection = ConnectionManager::get('test');
+        assert($connection instanceof Connection);
+
+        $default = $connection
+            ->execute('SELECT @@character_set_database AS charset, @@collation_database AS collation')
+            ->fetch('assoc');
+
+        $connection->execute('ALTER TABLE events CONVERT TO CHARACTER SET utf8 COLLATE utf8mb3_hungarian_ci');
+        $connection->execute('ALTER TABLE parts ENGINE=MyISAM');
+
+        try {
+            $this->runSnapshotTest('WithNonDefaultTableOptions', '-p SimpleSnapshot');
+        } finally {
+            $connection->execute('ALTER TABLE parts ENGINE=InnoDB');
+            $connection->execute(sprintf(
+                'ALTER TABLE events CONVERT TO CHARACTER SET %s COLLATE %s',
+                $default['charset'],
+                $default['collation'],
+            ));
+        }
+    }
 }

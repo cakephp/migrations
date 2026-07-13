@@ -1151,6 +1151,7 @@ class MigrationsTest extends TestCase
                 [$path, 'test_snapshot_with_auto_id_incompatible_signed_primary_keys'],
                 [$path, 'test_snapshot_with_auto_id_incompatible_unsigned_primary_keys', ['unsigned_primary_keys' => false]],
                 [$path, 'test_snapshot_with_non_default_collation'],
+                [$path, 'test_snapshot_with_non_default_table_options'],
             ];
         }
 

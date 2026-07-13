@@ -37,6 +37,11 @@ class MysqlAdapter extends AbstractAdapter
     protected const IDENTIFIER_MAX_LENGTH = 64;
 
     /**
+     * The storage engine applied to tables that do not specify one.
+     */
+    public const DEFAULT_ENGINE = 'InnoDB';
+
+    /**
      * @var string[]
      */
     protected static array $specificColumnTypes = [
@@ -285,7 +290,7 @@ class MysqlAdapter extends AbstractAdapter
     {
         // This method is based on the MySQL docs here: https://dev.mysql.com/doc/refman/5.1/en/create-index.html
         $defaultOptions = [
-            'engine' => 'InnoDB',
+            'engine' => self::DEFAULT_ENGINE,
         ];
 
         $collation = Configure::read('Migrations.default_collation');

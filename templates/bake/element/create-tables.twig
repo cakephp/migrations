@@ -6,13 +6,17 @@
     {%~ set primaryKeysColumns = Migration.primaryKeysColumnsList(tableArgForMethods) %}
     {%~ set primaryKeys = Migration.primaryKeys(tableArgForMethods) %}
     {%~ set specialPk = primaryKeys and (primaryKeys|length > 1 or primaryKeys[0]['name'] != 'id' or primaryKeys[0]['info']['columnType'] != 'integer') and autoId %}
+    {%~ set tableOptions = Migration.tableOptions(tableArgForMethods) %}
+    {%~ if specialPk %}
+        {%~ set tableOptions = {'id': false, 'primary_key': Migration.extract(primaryKeys)}|merge(tableOptions) %}
+    {%~ elseif not primaryKeys and autoId %}
+        {%~ set tableOptions = {'id': false}|merge(tableOptions) %}
+    {%~ endif %}
     {%~ if loop.index > 1 %}
 
     {%~ endif -%}
-    {%~ if specialPk %}
-        $this->table('{{ tableArgForArray }}', ['id' => false, 'primary_key' => ['{{ Migration.extract(primaryKeys)|join("', '")|raw }}']])
-    {%~ elseif not primaryKeys and autoId %}
-        $this->table('{{ tableArgForArray }}', ['id' => false])
+    {%~ if tableOptions is not empty %}
+        $this->table('{{ tableArgForArray }}', [{{ Migration.stringifyTableOptions(tableOptions)|raw }}])
     {%~ else %}
         $this->table('{{ tableArgForArray }}')
     {%~ endif %}

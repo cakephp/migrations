@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Test\TestCase\View\Helper;
 
+use Cake\Core\Configure;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\Collection;
@@ -527,5 +528,85 @@ class MigrationHelperTest extends TestCase
         $result = $this->helper->getColumnOption($options);
 
         $this->assertSame(255, $result['limit']);
+    }
+
+    /**
+     * Test that table options the adapter would apply anyway are not rendered
+     */
+    public function testTableOptionsOmitsDefaults(): void
+    {
+        Configure::write('Migrations.default_collation', 'utf8mb4_general_ci');
+
+        $schema = new TableSchema('events');
+        $schema->addColumn('id', ['type' => 'integer']);
+        $schema->setOptions([
+            'collation' => 'utf8mb4_general_ci',
+            'engine' => MysqlAdapter::DEFAULT_ENGINE,
+        ]);
+
+        $this->assertSame([], $this->helper->tableOptions($schema));
+
+        Configure::delete('Migrations.default_collation');
+    }
+
+    /**
+     * Test that table options differing from the defaults are rendered
+     */
+    public function testTableOptionsIncludesNonDefaults(): void
+    {
+        Configure::write('Migrations.default_collation', 'utf8mb4_general_ci');
+
+        $schema = new TableSchema('events');
+        $schema->addColumn('id', ['type' => 'integer']);
+        $schema->setOptions([
+            'collation' => 'utf8_hungarian_ci',
+            'engine' => 'MyISAM',
+        ]);
+
+        $this->assertSame(
+            ['collation' => 'utf8_hungarian_ci', 'engine' => 'MyISAM'],
+            $this->helper->tableOptions($schema),
+        );
+
+        Configure::delete('Migrations.default_collation');
+    }
+
+    /**
+     * Test that drivers reflecting no table options render none
+     */
+    public function testTableOptionsWithoutReflectedOptions(): void
+    {
+        $schema = new TableSchema('events');
+        $schema->addColumn('id', ['type' => 'integer']);
+
+        $this->assertSame([], $this->helper->tableOptions($schema));
+    }
+
+    /**
+     * Test that table options are rendered inline, in insertion order
+     */
+    public function testStringifyTableOptions(): void
+    {
+        $this->assertSame('', $this->helper->stringifyTableOptions([]));
+
+        $this->assertSame(
+            "'id' => false, 'primary_key' => ['id', 'name'], 'collation' => 'utf8_hungarian_ci'",
+            $this->helper->stringifyTableOptions([
+                'id' => false,
+                'primary_key' => ['id', 'name'],
+                'collation' => 'utf8_hungarian_ci',
+            ]),
+        );
+    }
+
+    /**
+     * Test that quotes in a value cannot break out of the generated statement
+     */
+    public function testStringifyTableOptionsEscapesQuotes(): void
+    {
+        $this->assertSame(
+            "'primary_key' => ['it\\'s']",
+            $this->helper->stringifyTableOptions(['primary_key' => ["it's"]]),
+        );
     }
 }
