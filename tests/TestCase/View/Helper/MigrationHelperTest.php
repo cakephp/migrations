@@ -460,6 +460,49 @@ class MigrationHelperTest extends TestCase
     }
 
     /**
+     * Test that getColumnOption converts onUpdate to update
+     *
+     * CakePHP reflects `ON UPDATE` clauses as 'onUpdate', but Phinx uses the
+     * 'update' column option, so this must be converted for the clause to
+     * survive a snapshot.
+     */
+    public function testGetColumnOptionConvertsOnUpdateToUpdate(): void
+    {
+        $options = [
+            'null' => true,
+            'default' => null,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('onUpdate', $result, 'onUpdate should be converted to update');
+        $this->assertArrayHasKey('update', $result, 'update should be set from onUpdate value');
+        $this->assertSame('CURRENT_TIMESTAMP', $result['update']);
+    }
+
+    /**
+     * Test that getColumnOption removes null onUpdate
+     *
+     * Column::toArray() always emits an 'onUpdate' key, so columns without an
+     * `ON UPDATE` clause carry a null. Column::setUpdate() is not nullable, so
+     * passing it through would be a TypeError.
+     */
+    public function testGetColumnOptionRemovesNullOnUpdate(): void
+    {
+        $options = [
+            'null' => true,
+            'default' => null,
+            'onUpdate' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('onUpdate', $result, 'onUpdate => null should be removed');
+        $this->assertArrayNotHasKey('update', $result, 'update should not be set when onUpdate is null');
+    }
+
+    /**
      * Test that getColumnOption includes the fixed option for binary columns
      */
     public function testGetColumnOptionIncludesFixed(): void
