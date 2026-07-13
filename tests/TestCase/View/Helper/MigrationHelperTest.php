@@ -381,6 +381,57 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals($attributes, $result);
     }
 
+    /**
+     * Test that attributes() preserves the onUpdate attribute
+     *
+     * `onUpdate` is a first-class column key in CakePHP's TableSchema for datetime
+     * and timestamp types, so attributes() must not filter it out. The schema is
+     * built by hand rather than reflected so this holds for every driver.
+     */
+    public function testAttributesPreservesOnUpdate(): void
+    {
+        $tableSchema = new TableSchema('on_update_columns');
+        $tableSchema->addColumn('modified', [
+            'type' => 'datetime',
+            'null' => false,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ]);
+        $tableSchema->addColumn('plain', [
+            'type' => 'datetime',
+            'null' => true,
+        ]);
+
+        $modified = $this->helper->attributes($tableSchema, 'modified');
+        $this->assertArrayHasKey('onUpdate', $modified, 'onUpdate should survive attributes()');
+        $this->assertSame('CURRENT_TIMESTAMP', $modified['onUpdate']);
+
+        $plain = $this->helper->attributes($tableSchema, 'plain');
+        $this->assertArrayNotHasKey('onUpdate', $plain, 'columns without ON UPDATE should not gain the key');
+    }
+
+    /**
+     * Test that a column with an ON UPDATE clause bakes the Phinx `update` option
+     *
+     * Guards the whole snapshot path: attributes() must preserve `onUpdate` and
+     * getColumnOption() must translate it to Phinx's `update` option. Either half
+     * regressing silently drops the clause from generated migrations.
+     */
+    public function testColumnsRendersOnUpdateAsUpdateOption(): void
+    {
+        $tableSchema = new TableSchema('on_update_columns');
+        $tableSchema->addColumn('modified', [
+            'type' => 'datetime',
+            'null' => false,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ]);
+
+        $columns = $this->helper->columns($tableSchema);
+        $options = $this->helper->getColumnOption($columns['modified']['options']);
+
+        $this->assertArrayNotHasKey('onUpdate', $options);
+        $this->assertSame('CURRENT_TIMESTAMP', $options['update']);
+    }
+
     public function testStringifyList(): void
     {
         $this->assertSame('', $this->helper->stringifyList([]));
