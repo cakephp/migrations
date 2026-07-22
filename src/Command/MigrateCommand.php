@@ -29,9 +29,6 @@ use Throwable;
  */
 class MigrateCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
-     */
     use EventDispatcherTrait;
 
     /**

@@ -34,9 +34,6 @@ use Throwable;
  */
 class ResetCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\ResetCommand>
-     */
     use EventDispatcherTrait;
 
     /**

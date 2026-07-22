@@ -30,9 +30,6 @@ use Throwable;
  */
 class RollbackCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
-     */
     use EventDispatcherTrait;
 
     /**
