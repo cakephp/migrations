@@ -202,6 +202,14 @@ bin/cake seeds reset
 > When re-running seeds with `--force`, be careful to ensure your seeds are
 > idempotent (safe to run multiple times) or they may create duplicate data.
 
+Plugin seeds are tracked with their plugin name, so the `plugin` option is
+required to see or reset them:
+
+```bash
+bin/cake seeds status --plugin PluginName
+bin/cake seeds reset --plugin PluginName
+```
+
 ### Customizing the Seed Tracking Table
 
 By default, seed execution is tracked in a table named `cake_seeds`. You can

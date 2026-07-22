@@ -58,6 +58,7 @@ use Migrations\Db\Table\Trigger;
 use Migrations\Db\Table\View;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
+use Migrations\Util\Util;
 use PDOException;
 use RuntimeException;
 use function Cake\Core\deprecationWarning;
@@ -1096,17 +1097,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function seedExecuted(SeedInterface $seed, string $executedTime): AdapterInterface
     {
-        $plugin = null;
-        $className = $seed::class;
-
-        if (str_contains($className, '\\')) {
-            $parts = explode('\\', $className);
-            $appNamespace = Configure::read('App.namespace', 'App');
-            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                $plugin = $parts[0];
-            }
-        }
-
+        $plugin = $this->resolveSeedPlugin($seed);
         $seedName = substr($seed->getName(), 0, 100);
 
         $query = $this->getInsertBuilder();
@@ -1127,29 +1118,49 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function removeSeedFromLog(SeedInterface $seed): AdapterInterface
     {
-        $plugin = null;
-        $className = $seed::class;
-
-        if (str_contains($className, '\\')) {
-            $parts = explode('\\', $className);
-            $appNamespace = Configure::read('App.namespace', 'App');
-            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                $plugin = $parts[0];
-            }
-        }
-
+        $plugin = $this->resolveSeedPlugin($seed);
         $seedName = $seed->getName();
+
+        $conditions = ['seed_name' => $seedName];
+        if ($plugin !== null) {
+            // Also remove entries logged before plugin attribution was fixed.
+            $conditions['OR'] = [
+                'plugin' => $plugin,
+                'plugin IS' => null,
+            ];
+        } else {
+            $conditions['plugin IS'] = null;
+        }
 
         $query = $this->getDeleteBuilder();
         $query->delete()
             ->from($this->getSeedSchemaTableName())
-            ->where([
-                'seed_name' => $seedName,
-                'plugin IS' => $plugin,
-            ]);
+            ->where($conditions);
         $this->executeQuery($query);
 
         return $this;
+    }
+
+    /**
+     * Resolve the plugin a seed belongs to.
+     *
+     * Seed classes are not namespaced, so the plugin cannot be derived from the class
+     * name. The plugin of the current run is used instead, matching how migrations are
+     * tracked.
+     *
+     * @param \Migrations\SeedInterface $seed The seed to resolve the plugin for.
+     * @return string|null The plugin name or null for application seeds.
+     */
+    protected function resolveSeedPlugin(SeedInterface $seed): ?string
+    {
+        $plugin = Util::getSeedPlugin($seed);
+        if ($plugin !== null) {
+            return $plugin;
+        }
+
+        $option = $this->getOption('plugin');
+
+        return $option ? (string)$option : null;
     }
 
     /**

@@ -10,7 +10,6 @@ namespace Migrations\Migration;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
-use Cake\Core\Configure;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -214,21 +213,11 @@ class Manager
 
         $seedLog = $adapter->getSeedLog();
 
-        $plugin = null;
-        $className = $seed::class;
-
-        if (str_contains($className, '\\')) {
-            $parts = explode('\\', $className);
-            $appNamespace = Configure::read('App.namespace', 'App');
-            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                $plugin = $parts[0];
-            }
-        }
-
+        $plugin = Util::getSeedPlugin($seed);
         $seedName = $seed->getName();
 
         foreach ($seedLog as $entry) {
-            if ($entry['seed_name'] === $seedName && $entry['plugin'] === $plugin) {
+            if ($entry['seed_name'] === $seedName && Util::matchesSeedPlugin($entry['plugin'], $plugin)) {
                 return true;
             }
         }
