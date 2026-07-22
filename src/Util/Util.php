@@ -12,6 +12,7 @@ use Cake\Core\Configure;
 use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
+use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\SeedInterface;
 use RuntimeException;
@@ -221,7 +222,7 @@ class Util
     public static function getSeedPlugin(SeedInterface $seed): ?string
     {
         $config = $seed->getConfig();
-        if ($config === null || !isset($config['plugin'])) {
+        if (!$config instanceof ConfigInterface || !isset($config['plugin'])) {
             return null;
         }
 
