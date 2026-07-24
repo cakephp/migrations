@@ -562,6 +562,7 @@ class SeedCommandTest extends TestCase
 
         $this->exec('seeds run -c test -p TestBlog --source CallSeeds PluginLettersSeed');
         $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
 
         $this->exec('seeds status -c test -p TestBlog --source CallSeeds');
         $this->assertExitSuccess();
@@ -577,9 +578,11 @@ class SeedCommandTest extends TestCase
 
         $this->exec('seeds run -c test -p TestBlog --source CallSeeds PluginLettersSeed');
         $this->assertExitSuccess();
+        $this->assertOutputContains('seeding');
 
         $this->exec('seeds reset -c test -p TestBlog --source CallSeeds', ['y']);
         $this->assertExitSuccess();
+        $this->assertOutputContains('All seeds will be reset:');
 
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get('test');
