@@ -43,6 +43,14 @@ class StatusCommand extends Command
     public const CODE_STATUS_DOWN = 3;
 
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Display the state of migrations.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string

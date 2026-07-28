@@ -105,6 +105,14 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
+    public static function getDescription(): string
+    {
+        return 'Create a migration containing the difference between the current schema and migration state.';
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function defaultName(): string
     {
         return 'bake migration_diff';

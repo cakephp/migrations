@@ -37,6 +37,14 @@ class ResetCommand extends Command
     use EventDispatcherTrait;
 
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Reset database state by dropping tables, and re-running migrations.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string

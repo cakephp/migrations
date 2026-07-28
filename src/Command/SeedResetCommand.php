@@ -27,6 +27,14 @@ use Migrations\Util\Util;
 class SeedResetCommand extends Command
 {
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Reset the seed execution state.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string
