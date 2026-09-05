@@ -848,6 +848,67 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('utf8mb4_unicode_ci', $rows[2]['Collation']);
     }
 
+    public function testCreateTableWithCustomEncoding(): void
+    {
+        $table = new Table('table_create_encoding', [], $this->adapter);
+        $table->addColumn('string_encoding_custom', 'string', ['encoding' => 'ascii'])
+              ->addColumn('text_encoding_custom', 'text', ['encoding' => 'ascii'])
+              ->save();
+
+        $this->assertEquals('ascii', $this->fetchColumnEncoding('table_create_encoding', 'string_encoding_custom'));
+        $this->assertEquals('ascii', $this->fetchColumnEncoding('table_create_encoding', 'text_encoding_custom'));
+    }
+
+    public function testAddStringColumnWithCustomEncoding(): void
+    {
+        $table = new Table('table_custom_encoding', [], $this->adapter);
+        $table->save();
+        $table->addColumn('string_encoding_custom', 'string', ['encoding' => 'ascii'])->save();
+        $table->addColumn('text_encoding_custom', 'text', ['encoding' => 'ascii'])->save();
+
+        $this->assertEquals('ascii', $this->fetchColumnEncoding('table_custom_encoding', 'string_encoding_custom'));
+        $this->assertEquals('ascii', $this->fetchColumnEncoding('table_custom_encoding', 'text_encoding_custom'));
+    }
+
+    public function testAddStringColumnWithCustomEncodingAndCollation(): void
+    {
+        $table = new Table('table_custom_encoding_collation', [], $this->adapter);
+        $table->save();
+        $table->addColumn('string_both', 'string', [
+            'encoding' => 'ascii',
+            'collation' => 'ascii_bin',
+        ])->save();
+
+        $rows = $this->adapter->fetchAll('SHOW FULL COLUMNS FROM table_custom_encoding_collation');
+        $this->assertEquals('ascii_bin', $rows[1]['Collation']);
+        $this->assertEquals('ascii', $this->fetchColumnEncoding('table_custom_encoding_collation', 'string_both'));
+    }
+
+    public function testChangeColumnWithCustomEncoding(): void
+    {
+        $table = new Table('table_change_encoding', [], $this->adapter);
+        $table->addColumn('string_column', 'string')->save();
+        $this->assertEquals('utf8mb4', $this->fetchColumnEncoding('table_change_encoding', 'string_column'));
+
+        $table->changeColumn('string_column', 'string', ['encoding' => 'ascii'])->save();
+        $this->assertEquals('ascii', $this->fetchColumnEncoding('table_change_encoding', 'string_column'));
+    }
+
+    /**
+     * SHOW FULL COLUMNS only exposes the collation, so read the character set from information_schema.
+     */
+    protected function fetchColumnEncoding(string $table, string $column): ?string
+    {
+        $row = $this->adapter->fetchRow(sprintf(
+            'SELECT CHARACTER_SET_NAME FROM information_schema.COLUMNS ' .
+            "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
+            $table,
+            $column,
+        ));
+
+        return $row['CHARACTER_SET_NAME'] ?? null;
+    }
+
     public function testRenameColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
