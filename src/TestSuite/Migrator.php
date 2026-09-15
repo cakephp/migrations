@@ -26,14 +26,6 @@ class Migrator
     protected ConnectionHelper $helper;
 
     /**
-     * Migration ids found on disk in the sources that share a migration history
-     * with the set currently being inspected.
-     *
-     * @var array<int|string, bool>
-     */
-    protected array $siblingMigrationIds = [];
-
-    /**
      * Constructor.
      */
     public function __construct()
@@ -125,13 +117,11 @@ class Migrator
                 continue;
             }
 
-            $this->siblingMigrationIds = $groupMigrationIds[$set['group']];
             $migrations = new Migrations();
-            if ($this->shouldDropTables($migrations, $set['options'])) {
+            if ($this->shouldDropTables($migrations, $set['options'], $groupMigrationIds[$set['group']])) {
                 $connectionsToDrop[$connectionName] = ['name' => $connectionName, 'skip' => $set['skip']];
             }
         }
-        $this->siblingMigrationIds = [];
 
         foreach ($connectionsToDrop as $item) {
             $this->dropTables($item['name'], $item['skip']);
@@ -224,10 +214,14 @@ class Migrator
      *
      * @param \Migrations\Migrations $migrations The migrations service.
      * @param array $options The connection options.
+     * @param array<int|string, bool> $siblingMigrationIds Migration ids found in sources sharing the history.
      * @return bool
      */
-    protected function shouldDropTables(Migrations $migrations, array $options): bool
-    {
+    protected function shouldDropTables(
+        Migrations $migrations,
+        array $options,
+        array $siblingMigrationIds = [],
+    ): bool {
         Log::write('debug', sprintf('Reading migrations status for %s...', $options['connection']));
 
         $messages = [
@@ -237,7 +231,7 @@ class Migrator
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
                 // The migration belongs to another source sharing this history.
-                if (isset($this->siblingMigrationIds[$migration['id']])) {
+                if (isset($siblingMigrationIds[$migration['id']])) {
                     continue;
                 }
                 $messages['missing'][] = 'Applied but, missing Migration ' .
