@@ -718,6 +718,23 @@ class ManagerTest extends TestCase
         $manager->migrate();
     }
 
+    public function testValidateMigrationsReportsMigrationsThatCannotBeLoaded(): void
+    {
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/LegacyAbstractMigration']]);
+        $manager = new Manager($config, $this->io);
+
+        $errors = $manager->validateMigrations();
+
+        $this->assertCount(1, $errors);
+        $this->assertArrayHasKey(20260327000000, $errors);
+        $this->assertStringContainsString('uses the legacy', $errors[20260327000000]);
+    }
+
+    public function testValidateMigrationsWithValidMigrations(): void
+    {
+        $this->assertSame([], $this->manager->validateMigrations());
+    }
+
     public function testGettingAValidEnvironment(): void
     {
         $this->assertInstanceOf(

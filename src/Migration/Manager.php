@@ -19,6 +19,7 @@ use Migrations\SeedInterface;
 use Migrations\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
+use Throwable;
 
 class Manager
 {
@@ -979,6 +980,30 @@ class Manager
         }
 
         return $this->loadedMigrations[$version];
+    }
+
+    /**
+     * Loads every migration class and collects the errors that prevent them from being loaded.
+     *
+     * Migration classes are loaded when the migration they contain is executed, so a broken
+     * migration file is only reported when that migration runs. This loads all of them upfront
+     * so that the migration files can be validated explicitly, for example in CI.
+     *
+     * @throws \InvalidArgumentException When two migrations share a version or a name
+     * @return array<int, string> Error messages indexed by migration version.
+     */
+    public function validateMigrations(): array
+    {
+        $errors = [];
+        foreach ($this->getMigrationVersions() as $version) {
+            try {
+                $this->getMigration($version);
+            } catch (Throwable $e) {
+                $errors[$version] = $e->getMessage();
+            }
+        }
+
+        return $errors;
     }
 
     /**
