@@ -920,6 +920,7 @@ class Column extends DatabaseColumn
             'unsigned' => $this->getUnsigned(),
             'fixed' => $this->getFixed(),
             'onUpdate' => $this->getUpdate(),
+            'charset' => $this->getEncoding(),
             'collate' => $this->getCollation(),
             'precision' => $precision,
             'srid' => $this->getSrid(),
