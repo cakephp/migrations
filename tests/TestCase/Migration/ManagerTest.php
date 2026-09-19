@@ -665,6 +665,76 @@ class ManagerTest extends TestCase
         $this->assertEquals(20241208150000, $migration->getVersion());
     }
 
+    public function testGetMigrationVersionsDoesNotLoadMigrations(): void
+    {
+        // Loading this migration throws, so the versions must come from the file names only.
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/LegacyAbstractMigration']]);
+        $manager = new Manager($config, $this->io);
+
+        $this->assertSame([20260327000000], $manager->getMigrationVersions());
+    }
+
+    public function testPrintStatusDoesNotLoadMigrations(): void
+    {
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/LegacyAbstractMigration']]);
+        $manager = new Manager($config, $this->io);
+
+        $envStub = $this->getMockBuilder(Environment::class)
+            ->setConstructorArgs(['mockenv', []])
+            ->getMock();
+        $envStub->expects($this->once())
+            ->method('getVersionLog')
+            ->willReturn([]);
+        $manager->setEnvironment($envStub);
+
+        $expected = [
+            [
+                'status' => 'down',
+                'id' => 20260327000000,
+                'name' => 'LegacyAbstractMigration',
+            ],
+        ];
+        $this->assertEquals($expected, $manager->printStatus());
+    }
+
+    public function testMigrateDoesNotLoadExecutedMigrations(): void
+    {
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/LegacyAbstractMigration']]);
+        $manager = new Manager($config, $this->io);
+
+        $envStub = $this->getMockBuilder(Environment::class)
+            ->setConstructorArgs(['mockenv', []])
+            ->getMock();
+        $envStub->expects($this->any())
+            ->method('getVersions')
+            ->willReturn([20260327000000]);
+        $envStub->expects($this->any())
+            ->method('getCurrentVersion')
+            ->willReturn(20260327000000);
+        $envStub->expects($this->never())
+            ->method('executeMigration');
+        $manager->setEnvironment($envStub);
+
+        $manager->migrate();
+    }
+
+    public function testValidateMigrationsReportsMigrationsThatCannotBeLoaded(): void
+    {
+        $config = new Config(['paths' => ['migrations' => ROOT . '/config/LegacyAbstractMigration']]);
+        $manager = new Manager($config, $this->io);
+
+        $errors = $manager->validateMigrations();
+
+        $this->assertCount(1, $errors);
+        $this->assertArrayHasKey(20260327000000, $errors);
+        $this->assertStringContainsString('uses the legacy', $errors[20260327000000]);
+    }
+
+    public function testValidateMigrationsWithValidMigrations(): void
+    {
+        $this->assertSame([], $this->manager->validateMigrations());
+    }
+
     public function testGettingAValidEnvironment(): void
     {
         $this->assertInstanceOf(
