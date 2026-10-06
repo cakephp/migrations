@@ -710,7 +710,7 @@ PCRE_PATTERN;
                     case 'index':
                         $info = $indexMap[$row['name']];
                         $columns = array_map(
-                            function ($column) {
+                            function ($column): ?string {
                                 if ($column === null) {
                                     return null;
                                 }
