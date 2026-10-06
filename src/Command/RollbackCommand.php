@@ -235,7 +235,6 @@ class RollbackCommand extends Command
             4 => '0101000000',
         ];
 
-        /** @var string $date */
         $dateLength = strlen($date);
         if (!isset($dateStrlenToAppend[$dateLength])) {
             throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');

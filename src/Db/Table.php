@@ -1186,7 +1186,7 @@ class Table
             }
 
             // Only skip CreateTable if we have ONLY view/trigger actions (and at least one)
-            if (!$hasViewOrTriggerActions || $hasTableActions || $actions === []) {
+            if (!$hasViewOrTriggerActions || $hasTableActions) {
                 $this->actions->addAction(new CreateTable($this->table));
             }
         }
