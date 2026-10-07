@@ -10,7 +10,6 @@ namespace Migrations\Migration;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
-use Cake\Core\Configure;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -214,21 +213,11 @@ class Manager
 
         $seedLog = $adapter->getSeedLog();
 
-        $plugin = null;
-        $className = $seed::class;
-
-        if (str_contains($className, '\\')) {
-            $parts = explode('\\', $className);
-            $appNamespace = Configure::read('App.namespace', 'App');
-            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                $plugin = $parts[0];
-            }
-        }
-
+        $plugin = Util::getSeedPlugin($seed);
         $seedName = $seed->getName();
 
         foreach ($seedLog as $entry) {
-            if ($entry['seed_name'] === $seedName && $entry['plugin'] === $plugin) {
+            if ($entry['seed_name'] === $seedName && Util::matchesSeedPlugin($entry['plugin'], $plugin)) {
                 return true;
             }
         }
@@ -509,6 +498,10 @@ class Manager
     {
         $this->getIo()->out('');
 
+        // Make the adapter available so shouldExecute() can inspect the database.
+        // The environment sets it again (and wraps it for down/change) before running the migration body.
+        $migration->setAdapter($this->getEnvironment()->getAdapter());
+
         // Skip the migration if it should not be executed
         if (!$migration->shouldExecute()) {
             $this->printMigrationStatus($migration, 'skipped');
@@ -540,6 +533,9 @@ class Manager
      */
     public function executeSeed(SeedInterface $seed, bool $force = false, bool $fake = false): void
     {
+        // Make the adapter available so shouldExecute() can inspect the database.
+        $seed->setAdapter($this->getEnvironment()->getAdapter());
+
         // Skip the seed if it should not be executed
         if (!$seed->shouldExecute()) {
             $this->getIo()->out('');

@@ -10,7 +10,7 @@ class TestSnapshotPluginBlogSqlserver extends BaseMigration implements Direction
      * Up Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-up-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-up-method
      *
      * @return void
      */
@@ -366,7 +366,7 @@ class TestSnapshotPluginBlogSqlserver extends BaseMigration implements Direction
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-down-method
      *
      * @return void
      */

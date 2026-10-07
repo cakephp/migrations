@@ -1546,7 +1546,7 @@ PCRE_PATTERN;
 
         $instructions->addPostStep(function (array $state) use ($checkConstraint): array {
             $constraintName = $checkConstraint->getName();
-            if ($constraintName === null) {
+            if ($constraintName === null || $constraintName === '') {
                 // Auto-generate constraint name if not provided
                 $constraintName = 'chk_' . substr(md5($checkConstraint->getExpression()), 0, 8);
             }

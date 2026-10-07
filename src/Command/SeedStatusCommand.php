@@ -17,7 +17,6 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Core\Configure;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 use Migrations\Util\Util;
@@ -106,24 +105,14 @@ class SeedStatusCommand extends Command
 
         // Build status list
         $statuses = [];
-        $appNamespace = Configure::read('App.namespace', 'App');
         foreach ($seeds as $seed) {
-            $plugin = null;
-            $className = $seed::class;
-
-            if (str_contains($className, '\\')) {
-                $parts = explode('\\', $className);
-                if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                    $plugin = $parts[0];
-                }
-            }
-
+            $plugin = Util::getSeedPlugin($seed);
             $seedName = $seed->getName();
             $executed = false;
             $executedAt = null;
 
             foreach ($seedLog as $entry) {
-                if ($entry['seed_name'] === $seedName && $entry['plugin'] === $plugin) {
+                if ($entry['seed_name'] === $seedName && Util::matchesSeedPlugin($entry['plugin'], $plugin)) {
                     $executed = true;
                     $executedAt = $entry['executed_at'];
                     break;

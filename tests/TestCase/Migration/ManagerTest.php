@@ -2987,4 +2987,20 @@ class ManagerTest extends TestCase
 
         $this->assertTrue($adapter->hasTable('info'));
     }
+
+    public function testMigrationShouldExecuteCanQueryDatabase(): void
+    {
+        $configArray = $this->getConfigArray();
+        $adapter = $this->manager->getEnvironment()->getAdapter();
+
+        // override the migrations directory to use a shouldExecute() that queries the database
+        $configArray['paths']['migrations'] = ROOT . '/config/ShouldExecuteWithDb/';
+        $config = new Config($configArray);
+
+        // shouldExecute() calls getAdapter()->hasTable(); before the fix this threw 'Adapter not set.'
+        $this->manager->setConfig($config);
+        $this->manager->migrate(20201207205100);
+
+        $this->assertTrue($adapter->hasTable('info'));
+    }
 }

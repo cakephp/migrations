@@ -373,6 +373,7 @@ class MigrationHelper extends Helper
             'after',
             'collate',
             'fixed',
+            'onUpdate',
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -383,6 +384,9 @@ class MigrationHelper extends Helper
         }
         if (empty($columnOptions['collate'])) {
             unset($columnOptions['collate']);
+        }
+        if (empty($columnOptions['onUpdate'])) {
+            unset($columnOptions['onUpdate']);
         }
         // isset() returns false for null values, so this handles both missing and null cases
         if (!isset($columnOptions['fixed'])) {
@@ -404,6 +408,12 @@ class MigrationHelper extends Helper
             // Phinx uses 'collation' not 'collate'
             $columnOptions['collation'] = $columnOptions['collate'];
             unset($columnOptions['collate']);
+        }
+
+        if (!empty($columnOptions['onUpdate'])) {
+            // Phinx uses 'update' not 'onUpdate'
+            $columnOptions['update'] = $columnOptions['onUpdate'];
+            unset($columnOptions['onUpdate']);
         }
 
         // Handle precision/scale conversion between CakePHP's TableSchema format and SQL standard format.
@@ -491,6 +501,7 @@ class MigrationHelper extends Helper
             'signed', 'properties',
             'autoIncrement', 'unique',
             'collate', 'fixed',
+            'onUpdate',
         ];
 
         $attributes = [];
@@ -538,6 +549,10 @@ class MigrationHelper extends Helper
         $defaultCollation = $tableSchema->getOptions()['collation'] ?? null;
         if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
             unset($attributes['collate']);
+        }
+
+        if (empty($attributes['onUpdate'])) {
+            unset($attributes['onUpdate']);
         }
 
         ksort($attributes);

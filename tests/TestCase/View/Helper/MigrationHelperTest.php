@@ -381,6 +381,57 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals($attributes, $result);
     }
 
+    /**
+     * Test that attributes() preserves the onUpdate attribute
+     *
+     * `onUpdate` is a first-class column key in CakePHP's TableSchema for datetime
+     * and timestamp types, so attributes() must not filter it out. The schema is
+     * built by hand rather than reflected so this holds for every driver.
+     */
+    public function testAttributesPreservesOnUpdate(): void
+    {
+        $tableSchema = new TableSchema('on_update_columns');
+        $tableSchema->addColumn('modified', [
+            'type' => 'datetime',
+            'null' => false,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ]);
+        $tableSchema->addColumn('plain', [
+            'type' => 'datetime',
+            'null' => true,
+        ]);
+
+        $modified = $this->helper->attributes($tableSchema, 'modified');
+        $this->assertArrayHasKey('onUpdate', $modified, 'onUpdate should survive attributes()');
+        $this->assertSame('CURRENT_TIMESTAMP', $modified['onUpdate']);
+
+        $plain = $this->helper->attributes($tableSchema, 'plain');
+        $this->assertArrayNotHasKey('onUpdate', $plain, 'columns without ON UPDATE should not gain the key');
+    }
+
+    /**
+     * Test that a column with an ON UPDATE clause bakes the Phinx `update` option
+     *
+     * Guards the whole snapshot path: attributes() must preserve `onUpdate` and
+     * getColumnOption() must translate it to Phinx's `update` option. Either half
+     * regressing silently drops the clause from generated migrations.
+     */
+    public function testColumnsRendersOnUpdateAsUpdateOption(): void
+    {
+        $tableSchema = new TableSchema('on_update_columns');
+        $tableSchema->addColumn('modified', [
+            'type' => 'datetime',
+            'null' => false,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ]);
+
+        $columns = $this->helper->columns($tableSchema);
+        $options = $this->helper->getColumnOption($columns['modified']['options']);
+
+        $this->assertArrayNotHasKey('onUpdate', $options);
+        $this->assertSame('CURRENT_TIMESTAMP', $options['update']);
+    }
+
     public function testStringifyList(): void
     {
         $this->assertSame('', $this->helper->stringifyList([]));
@@ -457,6 +508,49 @@ class MigrationHelperTest extends TestCase
         $this->assertArrayNotHasKey('collate', $result, 'collate should be converted to collation');
         $this->assertArrayHasKey('collation', $result, 'collation should be set from collate value');
         $this->assertSame('en_US.UTF-8', $result['collation']);
+    }
+
+    /**
+     * Test that getColumnOption converts onUpdate to update
+     *
+     * CakePHP reflects `ON UPDATE` clauses as 'onUpdate', but Phinx uses the
+     * 'update' column option, so this must be converted for the clause to
+     * survive a snapshot.
+     */
+    public function testGetColumnOptionConvertsOnUpdateToUpdate(): void
+    {
+        $options = [
+            'null' => true,
+            'default' => null,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('onUpdate', $result, 'onUpdate should be converted to update');
+        $this->assertArrayHasKey('update', $result, 'update should be set from onUpdate value');
+        $this->assertSame('CURRENT_TIMESTAMP', $result['update']);
+    }
+
+    /**
+     * Test that getColumnOption removes null onUpdate
+     *
+     * Column::toArray() always emits an 'onUpdate' key, so columns without an
+     * `ON UPDATE` clause carry a null. Column::setUpdate() is not nullable, so
+     * passing it through would be a TypeError.
+     */
+    public function testGetColumnOptionRemovesNullOnUpdate(): void
+    {
+        $options = [
+            'null' => true,
+            'default' => null,
+            'onUpdate' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('onUpdate', $result, 'onUpdate => null should be removed');
+        $this->assertArrayNotHasKey('update', $result, 'update should not be set when onUpdate is null');
     }
 
     /**

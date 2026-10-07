@@ -45,6 +45,14 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
+    public static function getDescription(): string
+    {
+        return 'Create a migration seed.';
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function defaultName(): string
     {
         return 'bake seed';

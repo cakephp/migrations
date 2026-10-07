@@ -28,10 +28,15 @@ use Throwable;
  */
 class SeedCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
-     */
     use EventDispatcherTrait;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Run migration seeds.';
+    }
 
     /**
      * The default name added to the application command list

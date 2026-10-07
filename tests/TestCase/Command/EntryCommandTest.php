@@ -56,6 +56,9 @@ class EntryCommandTest extends TestCase
         $this->exec('migrations derp');
 
         $this->assertExitError();
-        $this->assertErrorContains('Could not find migrations command named `derp`');
+        // CakePHP >= 5.4 rejects unknown subcommands before they reach EntryCommand,
+        // so only the parts both error messages have in common are asserted.
+        $this->assertErrorContains('derp');
+        $this->assertErrorContains('--help');
     }
 }

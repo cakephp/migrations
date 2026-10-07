@@ -202,7 +202,7 @@ the application code becomes active.
 After running migrations, remember to clear the ORM cache so it renews the
 column metadata of your tables. Otherwise, you might end up with errors about
 columns not existing when performing operations on those new columns. The
-CakePHP core includes a [Schema Cache Shell](https://book.cakephp.org/5/en/console-and-shells/schema-cache.html) that you can use:
+CakePHP core includes a [Schema Cache Shell](https://book.cakephp.org/5/console-commands/schema-cache.html) that you can use:
 
 ```bash
 bin/cake migrations migrate

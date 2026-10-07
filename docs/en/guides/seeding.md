@@ -31,7 +31,7 @@ class MyNewSeed extends BaseSeed
      * Write your database seed using this method.
      *
      * More information on writing seeds is available here:
-     * https://book.cakephp.org/migrations/5/en/seeding.html
+     * https://book.cakephp.org/migrations/5/guides/seeding.html
      */
     public function run() : void
     {
@@ -88,7 +88,7 @@ return new class extends BaseSeed
      * Write your database seeder using this method.
      *
      * More information on writing seeds is available here:
-     * https://book.cakephp.org/migrations/5/en/seeding.html
+     * https://book.cakephp.org/migrations/5/guides/seeding.html
      */
     public function run(): void
     {
@@ -201,6 +201,14 @@ bin/cake seeds reset
 > [!NOTE]
 > When re-running seeds with `--force`, be careful to ensure your seeds are
 > idempotent (safe to run multiple times) or they may create duplicate data.
+
+Plugin seeds are tracked with their plugin name, so the `plugin` option is
+required to see or reset them:
+
+```bash
+bin/cake seeds status --plugin PluginName
+bin/cake seeds reset --plugin PluginName
+```
 
 ### Customizing the Seed Tracking Table
 

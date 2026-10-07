@@ -34,10 +34,15 @@ use Throwable;
  */
 class ResetCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\ResetCommand>
-     */
     use EventDispatcherTrait;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Reset database state by dropping tables, and re-running migrations.';
+    }
 
     /**
      * The default name added to the application command list

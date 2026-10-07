@@ -2,12 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
-use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration implements DirectionalMigrationInterface
+class TestSnapshotWithOnUpdate extends BaseMigration
 {
-    public bool $autoId = false;
-
     /**
      * Up Method.
      *
@@ -19,14 +16,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
     public function up(): void
     {
         $this->table('articles')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'comment' => 'Article title',
                 'default' => null,
@@ -82,14 +71,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             ->create();
 
         $this->table('categories')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('parent_id', 'integer', [
                 'default' => null,
                 'limit' => null,
@@ -123,7 +104,7 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             )
             ->create();
 
-        $this->table('composite_pks')
+        $this->table('composite_pks', ['id' => false, 'primary_key' => ['id', 'name']])
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
@@ -134,17 +115,9 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
                 'limit' => 10,
                 'null' => false,
             ])
-            ->addPrimaryKey(['id', 'name'])
             ->create();
 
         $this->table('events')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -163,14 +136,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             ->create();
 
         $this->table('orders')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('product_category', 'integer', [
                 'default' => null,
                 'limit' => null,
@@ -193,14 +158,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             ->create();
 
         $this->table('parts')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -215,14 +172,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             ->create();
 
         $this->table('products')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('title', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -269,13 +218,12 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             )
             ->create();
 
-        $this->table('special_pks')
+        $this->table('special_pks', ['id' => false, 'primary_key' => ['id']])
             ->addColumn('id', 'uuid', [
                 'default' => 'a4950df3-515f-474c-be4c-6a027c1957e7',
                 'limit' => null,
                 'null' => false,
             ])
-            ->addPrimaryKey(['id'])
             ->addColumn('name', 'string', [
                 'default' => null,
                 'limit' => 256,
@@ -284,14 +232,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             ->create();
 
         $this->table('special_tags')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('article_id', 'integer', [
                 'default' => null,
                 'limit' => null,
@@ -327,7 +267,7 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             )
             ->create();
 
-        $this->table('texts')
+        $this->table('texts', ['id' => false])
             ->addColumn('title', 'string', [
                 'default' => null,
                 'limit' => 255,
@@ -341,14 +281,6 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
             ->create();
 
         $this->table('users')
-            ->addColumn('id', 'integer', [
-                'autoIncrement' => true,
-                'default' => null,
-                'limit' => null,
-                'null' => false,
-                'signed' => false,
-            ])
-            ->addPrimaryKey(['id'])
             ->addColumn('username', 'string', [
                 'default' => null,
                 'limit' => 256,
@@ -368,6 +300,7 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration im
                 'default' => null,
                 'limit' => null,
                 'null' => true,
+                'update' => 'CURRENT_TIMESTAMP',
             ])
             ->create();
 

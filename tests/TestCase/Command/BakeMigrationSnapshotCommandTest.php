@@ -392,4 +392,25 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         $this->runSnapshotTest('WithNonDefaultCollation', '-p SimpleSnapshot');
         $connection->execute('ALTER TABLE events MODIFY title VARCHAR(255)');
     }
+
+    /**
+     * Tests that an ON UPDATE clause is kept in the initial snapshot.
+     */
+    public function testSnapshotWithOnUpdate(): void
+    {
+        $this->skipIf(env('DB') !== 'mysql');
+        $this->loadPlugins(['SimpleSnapshot']);
+
+        $this->migrationPath = ROOT . DS . 'Plugin' . DS . 'SimpleSnapshot' . DS . 'config' . DS . 'Migrations' . DS;
+
+        $connection = ConnectionManager::get('test');
+        assert($connection instanceof Connection);
+
+        $connection->execute('ALTER TABLE users MODIFY updated TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
+        try {
+            $this->runSnapshotTest('WithOnUpdate', '-p SimpleSnapshot');
+        } finally {
+            $connection->execute('ALTER TABLE users MODIFY updated TIMESTAMP NULL DEFAULT NULL');
+        }
+    }
 }

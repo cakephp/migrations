@@ -30,10 +30,15 @@ use Throwable;
  */
 class RollbackCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
-     */
     use EventDispatcherTrait;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Rollback reversible migrations.';
+    }
 
     /**
      * The default name added to the application command list
@@ -230,7 +235,6 @@ class RollbackCommand extends Command
             4 => '0101000000',
         ];
 
-        /** @var string $date */
         $dateLength = strlen($date);
         if (!isset($dateStrlenToAppend[$dateLength])) {
             throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');

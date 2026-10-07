@@ -36,6 +36,14 @@ use Migrations\Migration\ManagerFactory;
 class UpgradeCommand extends Command
 {
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Upgrade migration storage to use <info>cake_migrations</info>.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string

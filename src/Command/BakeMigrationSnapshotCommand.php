@@ -40,6 +40,14 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
+    public static function getDescription(): string
+    {
+        return 'Create a migration snapshot of the current schema.';
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function defaultName(): string
     {
         return 'bake migration_snapshot';

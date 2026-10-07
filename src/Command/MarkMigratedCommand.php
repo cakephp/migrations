@@ -27,6 +27,14 @@ use Migrations\Migration\ManagerFactory;
 class MarkMigratedCommand extends Command
 {
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Mark one or more migrations as run.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string

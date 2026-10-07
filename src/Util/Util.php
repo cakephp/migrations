@@ -12,7 +12,9 @@ use Cake\Core\Configure;
 use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
+use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
+use Migrations\SeedInterface;
 use RuntimeException;
 
 /**
@@ -206,6 +208,46 @@ class Util
         }
 
         return $seedName;
+    }
+
+    /**
+     * Get the plugin a seed belongs to.
+     *
+     * Seed classes are not namespaced, so the plugin cannot be derived from the class
+     * name. The plugin of the run the seed was loaded in is used instead.
+     *
+     * @param \Migrations\SeedInterface $seed The seed to get the plugin for.
+     * @return string|null The plugin name, or null for application seeds.
+     */
+    public static function getSeedPlugin(SeedInterface $seed): ?string
+    {
+        $config = $seed->getConfig();
+        if (!$config instanceof ConfigInterface || !isset($config['plugin'])) {
+            return null;
+        }
+
+        return (string)$config['plugin'] ?: null;
+    }
+
+    /**
+     * Check whether a seed log entry belongs to the given plugin.
+     *
+     * Seeds executed before plugin attribution was fixed were logged without a plugin.
+     * Those entries are still matched for plugin seeds so that they are not executed twice.
+     * As a trade-off, an application seed sharing its name with a plugin seed can be
+     * matched as well, which is preferred over re-running a seed that already ran.
+     *
+     * @param string|null $entryPlugin The plugin stored in the seed log entry.
+     * @param string|null $plugin The plugin of the seed being checked.
+     * @return bool
+     */
+    public static function matchesSeedPlugin(?string $entryPlugin, ?string $plugin): bool
+    {
+        if ($entryPlugin === $plugin) {
+            return true;
+        }
+
+        return $plugin !== null && $entryPlugin === null;
     }
 
     /**

@@ -33,6 +33,14 @@ class DumpCommand extends Command
     protected string $connection;
 
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Create a migration state dump file.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string

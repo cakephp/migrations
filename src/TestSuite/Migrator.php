@@ -84,6 +84,8 @@ class Migrator
         // Detect all connections involved, and mark those with changed status.
         $connectionsToDrop = [];
         $connectionsList = [];
+        $sets = [];
+        $historyGroups = [];
         foreach ($options as $i => $migrationSet) {
             $migrationSet += ['connection' => 'test'];
             $skip = $migrationSet['skip'] ?? [];
@@ -95,9 +97,29 @@ class Migrator
                 $connectionsList[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
             }
 
+            // Sets sharing a connection and a plugin also share a migration history,
+            // while each of them only has its own source directory on disk. Group
+            // them so that a set is not told that its siblings' applied migrations
+            // are missing.
+            $groupKey = $connectionName . '|' . ($migrationSet['plugin'] ?? '');
+            $historyGroups[$groupKey][] = $migrationSet;
+            $sets[] = ['options' => $migrationSet, 'skip' => $skip, 'group' => $groupKey];
+        }
+
+        $groupMigrationIds = [];
+        foreach ($historyGroups as $groupKey => $group) {
+            $groupMigrationIds[$groupKey] = $this->getSiblingMigrationIds($group);
+        }
+
+        foreach ($sets as $set) {
+            $connectionName = $set['options']['connection'];
+            if (isset($connectionsToDrop[$connectionName])) {
+                continue;
+            }
+
             $migrations = new Migrations();
-            if (!isset($connectionsToDrop[$connectionName]) && $this->shouldDropTables($migrations, $migrationSet)) {
-                $connectionsToDrop[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
+            if ($this->shouldDropTables($migrations, $set['options'], $groupMigrationIds[$set['group']])) {
+                $connectionsToDrop[$connectionName] = ['name' => $connectionName, 'skip' => $set['skip']];
             }
         }
 
@@ -159,14 +181,47 @@ class Migrator
     }
 
     /**
+     * Collect the migration ids that exist on disk for a group of migration sets
+     * that share a single migration history.
+     *
+     * Returns an empty list for groups of one, where no sibling source exists.
+     *
+     * @param array<array<string, mixed>> $group Migration sets sharing a history.
+     * @return array<int|string, bool> Migration ids present on disk, keyed by id.
+     */
+    protected function getSiblingMigrationIds(array $group): array
+    {
+        if (count($group) < 2) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($group as $options) {
+            $migrations = new Migrations();
+            foreach ($migrations->status($options) as $migration) {
+                if ($migration['missing'] ?? false) {
+                    continue;
+                }
+                $ids[$migration['id']] = true;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
      * Detect if migrations have changed and the database needs to be wiped.
      *
      * @param \Migrations\Migrations $migrations The migrations service.
      * @param array $options The connection options.
+     * @param array<int|string, bool> $siblingMigrationIds Migration ids found in sources sharing the history.
      * @return bool
      */
-    protected function shouldDropTables(Migrations $migrations, array $options): bool
-    {
+    protected function shouldDropTables(
+        Migrations $migrations,
+        array $options,
+        array $siblingMigrationIds = [],
+    ): bool {
         Log::write('debug', sprintf('Reading migrations status for %s...', $options['connection']));
 
         $messages = [
@@ -175,6 +230,10 @@ class Migrator
         ];
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
+                // The migration belongs to another source sharing this history.
+                if (isset($siblingMigrationIds[$migration['id']])) {
+                    continue;
+                }
                 $messages['missing'][] = 'Applied but, missing Migration ' .
                     sprintf('source=%s id=%s', $migration['name'], $migration['id']);
             }
