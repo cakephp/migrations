@@ -72,7 +72,7 @@ class AddForeignKey extends Action
         );
         $fk->setOptions($options);
 
-        return new AddForeignKey($table, $fk);
+        return new self($table, $fk);
     }
 
     /**

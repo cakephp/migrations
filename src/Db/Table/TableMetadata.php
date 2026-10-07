@@ -45,7 +45,7 @@ class TableMetadata
      * @param string $name The name of the table
      * @return $this
      */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -78,7 +78,7 @@ class TableMetadata
      * @param array<string, mixed> $options The options for the table creation
      * @return $this
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): static
     {
         $this->options = $options;
 
@@ -101,7 +101,7 @@ class TableMetadata
      * @param \Migrations\Db\Table\Partition|null $partition The partition configuration
      * @return $this
      */
-    public function setPartition(?Partition $partition)
+    public function setPartition(?Partition $partition): static
     {
         $this->partition = $partition;
 

@@ -37,7 +37,7 @@ class Expression implements Stringable
      * @param string $value The expression
      * @return self
      */
-    public static function from(string $value): Expression
+    public static function from(string $value): self
     {
         return new self($value);
     }

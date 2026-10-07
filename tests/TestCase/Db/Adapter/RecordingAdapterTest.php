@@ -73,7 +73,7 @@ class RecordingAdapterTest extends TestCase
             ->getAdapter()
             ->expects($this->any())
             ->method('getColumnForType')
-            ->willReturnCallback(function (string $columnName, string $type, array $options) {
+            ->willReturnCallback(function (string $columnName, string $type, array $options): Column {
                 return (new Column())
                     ->setName($columnName)
                     ->setType($type)

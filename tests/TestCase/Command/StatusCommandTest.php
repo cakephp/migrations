@@ -43,8 +43,8 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --format json');
         $this->assertExitSuccess();
 
-        assert($this->_out instanceof StubConsoleOutput);
-        $output = $this->_out->messages();
+        assert($this->out instanceof StubConsoleOutput);
+        $output = $this->out->messages();
         $parsed = json_decode($output[0], true);
         $this->assertTrue(is_array($parsed));
         $this->assertCount(2, $parsed);
@@ -157,8 +157,8 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --all --format json');
         $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
 
-        assert($this->_out instanceof StubConsoleOutput);
-        $messages = $this->_out->messages();
+        assert($this->out instanceof StubConsoleOutput);
+        $messages = $this->out->messages();
         $jsonLine = end($messages);
         $parsed = json_decode((string)$jsonLine, true);
         $this->assertIsArray($parsed);

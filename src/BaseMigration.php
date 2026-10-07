@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -34,9 +34,9 @@ class BaseMigration implements MigrationInterface
     protected ?AdapterInterface $adapter = null;
 
     /**
-     * The ConsoleIo instance
+     * The ConsoleIoInterface instance
      */
-    protected ?ConsoleIo $io = null;
+    protected ?ConsoleIoInterface $io = null;
 
     /**
      * The config instance.
@@ -108,7 +108,7 @@ class BaseMigration implements MigrationInterface
     /**
      * {@inheritDoc}
      */
-    public function setIo(ConsoleIo $io)
+    public function setIo(ConsoleIoInterface $io)
     {
         $this->io = $io;
 
@@ -118,7 +118,7 @@ class BaseMigration implements MigrationInterface
     /**
      * {@inheritDoc}
      */
-    public function getIo(): ?ConsoleIo
+    public function getIo(): ?ConsoleIoInterface
     {
         return $this->io;
     }
@@ -155,7 +155,7 @@ class BaseMigration implements MigrationInterface
      * @param int $version Version
      * @return $this
      */
-    public function setVersion(int $version)
+    public function setVersion(int $version): static
     {
         $this->validateVersion($version);
         $this->version = $version;
@@ -179,7 +179,7 @@ class BaseMigration implements MigrationInterface
      * @param bool $isMigratingUp True if the migration is being applied
      * @return $this
      */
-    public function setMigratingUp(bool $isMigratingUp)
+    public function setMigratingUp(bool $isMigratingUp): static
     {
         $this->isMigratingUp = $isMigratingUp;
 
@@ -448,7 +448,7 @@ class BaseMigration implements MigrationInterface
     {
         if (method_exists($this, MigrationInterface::CHANGE) && (method_exists($this, MigrationInterface::UP) || method_exists($this, MigrationInterface::DOWN))) {
             $io = $this->getIo();
-            if ($io instanceof ConsoleIo) {
+            if ($io instanceof ConsoleIoInterface) {
                 $io->out(
                     '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
                     ' <warning>Ignoring up() and down()</warning>.',

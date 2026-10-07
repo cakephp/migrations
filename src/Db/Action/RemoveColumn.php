@@ -43,7 +43,7 @@ class RemoveColumn extends Action
         $column = new Column();
         $column->setName($columnName);
 
-        return new RemoveColumn($table, $column);
+        return new self($table, $column);
     }
 
     /**

@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
 use Cake\Database\Connection;
@@ -95,87 +93,77 @@ class UpgradeCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         /** @var \Cake\Database\Connection $connection */
-        $connection = ConnectionManager::get((string)$args->getOption('connection'));
-        $dryRun = (bool)$args->getOption('dry-run');
-        $dropTables = (bool)$args->getOption('drop-tables');
-
+        $connection = ConnectionManager::get((string)$this->args->getOption('connection'));
+        $dryRun = (bool)$this->args->getOption('dry-run');
+        $dropTables = (bool)$this->args->getOption('drop-tables');
         if ($dryRun) {
-            $io->out('<warning>DRY RUN - No changes will be made</warning>');
-            $io->out('');
+            $this->io->out('<warning>DRY RUN - No changes will be made</warning>');
+            $this->io->out('');
         }
-
         // Find all legacy phinxlog tables
         $legacyTables = $this->findLegacyTables($connection);
-
         if ($legacyTables === []) {
-            $io->out('<info>No phinxlog tables found. Nothing to upgrade.</info>');
+            $this->io->out('<info>No phinxlog tables found. Nothing to upgrade.</info>');
 
             return self::CODE_SUCCESS;
         }
-
-        $io->out(sprintf('Found <info>%d</info> phinxlog table(s):', count($legacyTables)));
+        $this->io->out(sprintf('Found <info>%d</info> phinxlog table(s):', count($legacyTables)));
         foreach ($legacyTables as $table => $plugin) {
             $pluginLabel = $plugin === null ? '(app)' : sprintf('(%s)', $plugin);
-            $io->out(sprintf('  - %s %s', $table, $pluginLabel));
+            $this->io->out(sprintf('  - %s %s', $table, $pluginLabel));
         }
-        $io->out('');
-
+        $this->io->out('');
         // Create unified table if needed
         $unifiedTableName = UnifiedMigrationsTableStorage::TABLE_NAME;
         if (!$this->tableExists($connection, $unifiedTableName)) {
-            $io->out(sprintf('Creating unified table <info>%s</info>...', $unifiedTableName));
+            $this->io->out(sprintf('Creating unified table <info>%s</info>...', $unifiedTableName));
             if (!$dryRun) {
-                $this->createUnifiedTable($connection, $io);
+                $this->createUnifiedTable($connection);
             }
         } else {
-            $io->out(sprintf('Unified table <info>%s</info> already exists.', $unifiedTableName));
+            $this->io->out(sprintf('Unified table <info>%s</info> already exists.', $unifiedTableName));
         }
-        $io->out('');
-
+        $this->io->out('');
         // Migrate data from each legacy table
         $totalMigrated = 0;
         foreach ($legacyTables as $tableName => $plugin) {
-            $count = $this->migrateTable($connection, $tableName, $plugin, $dryRun, $io);
+            $count = $this->migrateTable($connection, $tableName, $plugin, $dryRun);
             $totalMigrated += $count;
         }
-
-        $io->out('');
-        $io->out(sprintf('Total records migrated: <info>%d</info>', $totalMigrated));
-
+        $this->io->out('');
+        $this->io->out(sprintf('Total records migrated: <info>%d</info>', $totalMigrated));
         if (!$dryRun) {
             // Clean up legacy tables
-            $io->out('');
+            $this->io->out('');
             foreach (array_keys($legacyTables) as $tableName) {
                 if ($dropTables) {
-                    $io->out(sprintf('Dropping legacy table <info>%s</info>...', $tableName));
+                    $this->io->out(sprintf('Dropping legacy table <info>%s</info>...', $tableName));
                     $connection->execute('DROP TABLE ' . $connection->getDriver()->quoteIdentifier($tableName));
                 } else {
-                    $io->out('Retaining legacy table. You should drop these tables once you have verified your upgrade.');
+                    $this->io->out('Retaining legacy table. You should drop these tables once you have verified your upgrade.');
                 }
             }
 
-            $io->out('');
-            $io->success('Upgrade complete!');
-            $io->out('');
-            $io->out('Next steps:');
+            $this->io->out('');
+            $this->io->success('Upgrade complete!');
+            $this->io->out('');
+            $this->io->out('Next steps:');
             if ($dropTables) {
-                $io->out("  1. Set <info>'Migrations' => ['legacyTables' => false]</info> in your config");
-                $io->out('  2. Test your application');
+                $this->io->out("  1. Set <info>'Migrations' => ['legacyTables' => false]</info> in your config");
+                $this->io->out('  2. Test your application');
             } else {
-                $io->out('  1. Test your application');
-                $io->out('  2. Drop the phinxlog tables (re-run `bin/cake migrations upgrade --drop-tables`)');
-                $io->out("  3. Set <info>'Migrations' => ['legacyTables' => false]</info> in your config");
+                $this->io->out('  1. Test your application');
+                $this->io->out('  2. Drop the phinxlog tables (re-run `bin/cake migrations upgrade --drop-tables`)');
+                $this->io->out("  3. Set <info>'Migrations' => ['legacyTables' => false]</info> in your config");
             }
         } else {
-            $io->out('');
-            $io->out('<warning>This was a dry run. Run without --dry-run to execute.</warning>');
+            $this->io->out('');
+            $this->io->out('<warning>This was a dry run. Run without --dry-run to execute.</warning>');
         }
 
         return self::CODE_SUCCESS;
@@ -256,10 +244,9 @@ class UpgradeCommand extends Command
      * Create the unified migrations table.
      *
      * @param \Cake\Database\Connection $connection Database connection
-     * @param \Cake\Console\ConsoleIo $io Console IO
      * @return void
      */
-    protected function createUnifiedTable(Connection $connection, ConsoleIo $io): void
+    protected function createUnifiedTable(Connection $connection): void
     {
         $factory = new ManagerFactory([
             'plugin' => null,
@@ -269,7 +256,7 @@ class UpgradeCommand extends Command
             'dry-run' => false,
         ]);
 
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $adapter = $manager->getEnvironment()->getAdapter();
         if ($adapter instanceof WrapperInterface) {
             $adapter = $adapter->getAdapter();
@@ -287,7 +274,6 @@ class UpgradeCommand extends Command
      * @param string $tableName Legacy table name
      * @param string|null $plugin Plugin name (null for app)
      * @param bool $dryRun Whether this is a dry run
-     * @param \Cake\Console\ConsoleIo $io Console IO
      * @return int Number of records migrated
      */
     protected function migrateTable(
@@ -295,7 +281,6 @@ class UpgradeCommand extends Command
         string $tableName,
         ?string $plugin,
         bool $dryRun,
-        ConsoleIo $io,
     ): int {
         $unifiedTable = UnifiedMigrationsTableStorage::TABLE_NAME;
         $pluginLabel = $plugin ?? 'app';
@@ -307,7 +292,7 @@ class UpgradeCommand extends Command
         $rows = $query->execute()->fetchAll('assoc');
 
         $count = count($rows);
-        $io->out(sprintf('Migrating <info>%d</info> record(s) from <info>%s</info> (%s)...', $count, $tableName, $pluginLabel));
+        $this->io->out(sprintf('Migrating <info>%d</info> record(s) from <info>%s</info> (%s)...', $count, $tableName, $pluginLabel));
 
         if ($dryRun || $count === 0) {
             return $count;
@@ -329,7 +314,7 @@ class UpgradeCommand extends Command
                     ]);
                 $insertQuery->execute();
             } catch (QueryException) {
-                $io->out('Already migrated <info>' . $row['migration_name'] . '</info>.');
+                $this->io->out('Already migrated <info>' . $row['migration_name'] . '</info>.');
             }
         }
 

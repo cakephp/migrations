@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 namespace Migrations\Migration;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
@@ -136,12 +136,12 @@ class ManagerFactory
     /**
      * Get the migration manager for the current CLI options and application configuration.
      *
-     * @param \Cake\Console\ConsoleIo $io The command io.
+     * @param \Cake\Console\ConsoleIoInterface $io The command io.
      * @param \Migrations\Config\ConfigInterface $config A config instance. Providing null will create a new Config
      * based on the factory constructor options.
      * @return \Migrations\Migration\Manager
      */
-    public function createManager(ConsoleIo $io, ?ConfigInterface $config = null): Manager
+    public function createManager(ConsoleIoInterface $io, ?ConfigInterface $config = null): Manager
     {
         $config ??= $this->createConfig();
 

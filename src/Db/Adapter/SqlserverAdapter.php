@@ -350,7 +350,7 @@ class SqlserverAdapter extends AbstractAdapter
         foreach ($dialect->describeColumns($tableName) as $columnInfo) {
             $column = (new Column())
                 ->setName($columnInfo['name'])
-                ->setType($columnInfo['type'])
+                ->setType($columnInfo['type'] === TableSchema::TYPE_VARBINARY ? self::TYPE_BINARY : $columnInfo['type'])
                 ->setNull($columnInfo['null'])
                 ->setLimit($columnInfo['length'])
                 ->setDefault($this->parseDefault($columnInfo['default']))

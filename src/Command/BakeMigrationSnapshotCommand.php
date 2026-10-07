@@ -15,8 +15,6 @@ declare(strict_types=1);
  */
 namespace Migrations\Command;
 
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
@@ -56,7 +54,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name): void
     {
         $collection = $this->getCollection($this->connection);
 
@@ -73,7 +71,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
         });
         $this->_name = $name;
 
-        parent::bake($name, $args, $io);
+        parent::bake($name);
     }
 
     /**
@@ -87,18 +85,18 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function templateData(Arguments $arguments): array
+    public function templateData(): array
     {
         $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
-            $namespace = $this->_pluginNamespace($this->plugin);
+            $namespace = $this->pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
         }
 
         $collection = $this->getCollection($this->connection);
         $options = [
-            'require-table' => $arguments->getOption('require-table'),
+            'require-table' => $this->args->getOption('require-table'),
             'plugin' => $this->plugin,
         ];
         $finder = new TableFinder($this->connection);
@@ -109,11 +107,11 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
         $tables = array_combine($tables, $tables);
 
         $autoId = true;
-        if ($arguments->hasOption('disable-autoid')) {
-            $autoId = !$arguments->getOption('disable-autoid');
+        if ($this->args->hasOption('disable-autoid')) {
+            $autoId = !$this->args->getOption('disable-autoid');
         }
 
-        $useChange = (bool)$arguments->getOption('change');
+        $useChange = (bool)$this->args->getOption('change');
 
         return [
             'plugin' => $this->plugin,

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
@@ -110,17 +109,15 @@ class SeedCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $event = $this->dispatchEvent('Migration.beforeSeed');
         if ($event->isStopped()) {
             return $event->getResult() ? self::CODE_SUCCESS : self::CODE_ERROR;
         }
-        $result = $this->executeSeeds($args, $io);
+        $result = $this->executeSeeds();
         $this->dispatchEvent('Migration.afterSeed');
 
         return $result;
@@ -129,26 +126,22 @@ class SeedCommand extends Command
     /**
      * Execute seeds based on console inputs.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    protected function executeSeeds(Arguments $args, ConsoleIo $io): ?int
+    protected function executeSeeds(): ?int
     {
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
-            'dry-run' => (bool)$args->getOption('dry-run'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
+            'dry-run' => (bool)$this->args->getOption('dry-run'),
         ]);
-
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $config = $manager->getConfig();
-
         // Get seed names from arguments
         $seeds = [];
-        if ($args->hasArgument('seed')) {
-            $seedArg = $args->getArgument('seed');
+        if ($this->args->hasArgument('seed')) {
+            $seedArg = $this->args->getArgument('seed');
             if ($seedArg !== null) {
                 // Split by comma to support comma-separated list
                 $seedList = explode(',', $seedArg);
@@ -160,20 +153,17 @@ class SeedCommand extends Command
                 }
             }
         }
-
         $versionOrder = $config->getVersionOrder();
-
-        $fake = (bool)$args->getOption('fake');
-
+        $fake = (bool)$this->args->getOption('fake');
         if ($config->isDryRun()) {
-            $io->info('DRY-RUN mode enabled');
+            $this->io->info('DRY-RUN mode enabled');
         }
         if ($fake) {
-            $io->warning('performing fake seeding');
+            $this->io->warning('performing fake seeding');
         }
-        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
-        $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
-        $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
+        $this->io->verbose('<info>using connection</info> ' . $this->args->getOption('connection'));
+        $this->io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
+        $this->io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
         $start = microtime(true);
         if (!$seeds) {
@@ -181,21 +171,21 @@ class SeedCommand extends Command
             try {
                 $availableSeeds = $manager->getSeeds();
             } catch (Throwable $e) {
-                $io->err('<error>Failed to load seeds: ' . $e->getMessage() . '</error>');
-                $io->verbose($e->getTraceAsString());
+                $this->io->err('<error>Failed to load seeds: ' . $e->getMessage() . '</error>');
+                $this->io->verbose($e->getTraceAsString());
 
                 return static::CODE_ERROR;
             }
 
             if (!$availableSeeds) {
-                $io->warning('No seeds found.');
+                $this->io->warning('No seeds found.');
 
                 return self::CODE_SUCCESS;
             }
 
             // Skip confirmation in quiet mode
-            if ($io->level() > ConsoleIo::QUIET) {
-                $force = (bool)$args->getOption('force');
+            if ($this->io->level() > ConsoleIo::QUIET) {
+                $force = (bool)$this->args->getOption('force');
 
                 // Determine which seeds will actually run
                 $willRun = [];
@@ -208,45 +198,44 @@ class SeedCommand extends Command
                     }
                 }
 
-                $io->out('');
+                $this->io->out('');
                 if (!$willRun) {
-                    $io->out('All seeds have already been executed. Use --force to re-run.');
-                    $io->out('');
+                    $this->io->out('All seeds have already been executed. Use --force to re-run.');
+                    $this->io->out('');
 
                     return self::CODE_SUCCESS;
                 }
 
-                $io->out('<info>The following seeds will be executed:</info>');
+                $this->io->out('<info>The following seeds will be executed:</info>');
                 foreach ($willRun as $name) {
-                    $io->out('  - ' . $name);
+                    $this->io->out('  - ' . $name);
                 }
-                $io->out('');
+                $this->io->out('');
                 if ($force) {
-                    $io->out('<warning>Warning:</warning> Running with --force will re-execute all seeds,');
-                    $io->out('potentially creating duplicate data. Ensure your seeds are idempotent.');
+                    $this->io->out('<warning>Warning:</warning> Running with --force will re-execute all seeds,');
+                    $this->io->out('potentially creating duplicate data. Ensure your seeds are idempotent.');
                 }
-                $io->out('');
+                $this->io->out('');
 
                 // Ask for confirmation
-                $continue = $io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
+                $continue = $this->io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
                 if ($continue !== 'y') {
-                    $io->warning('Seed operation aborted.');
+                    $this->io->warning('Seed operation aborted.');
 
                     return self::CODE_SUCCESS;
                 }
             }
 
             // run all the seed(ers)
-            $manager->seed(null, (bool)$args->getOption('force'), $fake);
+            $manager->seed(null, (bool)$this->args->getOption('force'), $fake);
         } else {
             // run seed(ers) specified as arguments
             foreach ($seeds as $seed) {
-                $manager->seed(trim($seed), (bool)$args->getOption('force'), $fake);
+                $manager->seed(trim($seed), (bool)$this->args->getOption('force'), $fake);
             }
         }
         $end = microtime(true);
-
-        $io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
+        $this->io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
 
         return self::CODE_SUCCESS;
     }

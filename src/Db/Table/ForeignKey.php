@@ -112,7 +112,7 @@ class ForeignKey extends DatabaseForeignKey
      * @throws \RuntimeException
      * @return $this
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): static
     {
         foreach ($options as $option => $value) {
             if (!in_array($option, static::$validOptions, true)) {
@@ -187,7 +187,7 @@ class ForeignKey extends DatabaseForeignKey
      * @param string $deferrableMode Constraint
      * @return $this
      */
-    public function setDeferrableMode(string $deferrableMode)
+    public function setDeferrableMode(string $deferrableMode): static
     {
         $this->deferrable = $this->normalizeDeferrable($deferrableMode);
 
@@ -250,7 +250,7 @@ class ForeignKey extends DatabaseForeignKey
      * @return $this
      * @deprecated 5.0 Use setDelete() instead.
      */
-    public function setOnDelete(string $onDelete)
+    public function setOnDelete(string $onDelete): static
     {
         $this->delete = $this->normalizeAction($onDelete);
 
@@ -277,7 +277,7 @@ class ForeignKey extends DatabaseForeignKey
      * @return $this
      * @deprecated 5.0 Use setUpdate() instead.
      */
-    public function setOnUpdate(string $onUpdate)
+    public function setOnUpdate(string $onUpdate): static
     {
         $this->update = $this->normalizeAction($onUpdate);
 

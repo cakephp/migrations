@@ -40,7 +40,7 @@ class View
      * @param string $name Name
      * @return $this
      */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -63,7 +63,7 @@ class View
      * @param string $definition Definition
      * @return $this
      */
-    public function setDefinition(string $definition)
+    public function setDefinition(string $definition): static
     {
         $this->definition = $definition;
 
@@ -86,7 +86,7 @@ class View
      * @param bool $replace Replace flag
      * @return $this
      */
-    public function setReplace(bool $replace)
+    public function setReplace(bool $replace): static
     {
         $this->replace = $replace;
 
@@ -109,7 +109,7 @@ class View
      * @param bool $materialized Materialized flag
      * @return $this
      */
-    public function setMaterialized(bool $materialized)
+    public function setMaterialized(bool $materialized): static
     {
         $this->materialized = $materialized;
 

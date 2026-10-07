@@ -21,7 +21,7 @@ use Cake\Console\Arguments;
 use Cake\Console\Command\HelpCommand;
 use Cake\Console\CommandCollection;
 use Cake\Console\CommandCollectionAwareInterface;
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Console\Exception\ConsoleException;
 
 /**
@@ -56,64 +56,65 @@ class SeedsEntryCommand extends Command implements CommandCollectionAwareInterfa
      * Override the run() method for special handling of the `--help` option.
      *
      * @param array $argv Arguments from the CLI environment.
-     * @param \Cake\Console\ConsoleIo $io The console io
+     * @param \Cake\Console\ConsoleIoInterface|null $io The console IO.
      * @return int|null Exit code or null for success.
      */
-    public function run(array $argv, ConsoleIo $io): ?int
+    public function run(array $argv, ?ConsoleIoInterface $io = null): ?int
     {
+        if ($io instanceof ConsoleIoInterface) {
+            $this->io = $io;
+        }
         $this->initialize();
 
         $parser = $this->getOptionParser();
         try {
             [$options, $arguments] = $parser->parse($argv);
-            $args = new Arguments(
+            $this->args = new Arguments(
                 $arguments,
                 $options,
                 $parser->argumentNames(),
             );
         } catch (ConsoleException $e) {
-            $io->err('Error: ' . $e->getMessage());
+            $this->io->err('Error: ' . $e->getMessage());
 
             return static::CODE_ERROR;
         }
-        $this->setOutputLevel($args, $io);
+        $this->setOutputLevel();
 
         // This is the variance from Command::run()
-        if (!$args->getArgumentAt(0) && $args->getOption('help')) {
-            $io->out([
+        if (!$this->args->getArgumentAt(0) && $this->args->getOption('help')) {
+            $this->io->out([
                 '<info>Seeds</info>',
                 '',
                 'Seeds provides commands for managing your application database seed data.',
                 '',
             ]);
             $help = $this->getHelp();
-            $this->executeCommand($help, [], $io);
+            $this->executeCommand($help, []);
 
             return static::CODE_SUCCESS;
         }
 
-        return $this->execute($args, $io);
+        return $this->execute();
     }
 
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
-        if ($args->hasArgumentAt(0)) {
-            $name = $args->getArgumentAt(0);
-            $io->err(
+        if ($this->args->hasArgumentAt(0)) {
+            $name = $this->args->getArgumentAt(0);
+            $this->io->err(
                 sprintf('<error>Could not find seeds command named `%s`.', $name)
                 . ' Run `seeds --help` to get a list of commands.</error>',
             );
 
             return static::CODE_ERROR;
         }
-        $io->err('<warning>No command provided. Run `seeds --help` to get a list of commands.</warning>');
+        $this->io->err('<warning>No command provided. Run `seeds --help` to get a list of commands.</warning>');
 
         return static::CODE_ERROR;
     }

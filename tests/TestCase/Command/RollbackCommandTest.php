@@ -9,7 +9,6 @@ use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use InvalidArgumentException;
 use Migrations\Test\TestCase\TestCase;
-use ReflectionProperty;
 
 class RollbackCommandTest extends TestCase
 {
@@ -33,9 +32,8 @@ class RollbackCommandTest extends TestCase
 
     protected function resetOutput(): void
     {
-        if ($this->_out instanceof StubConsoleOutput) {
-            $property = new ReflectionProperty($this->_out, '_out');
-            $property->setValue($this->_out, []);
+        if ($this->out instanceof StubConsoleOutput) {
+            $this->out->clear();
         }
     }
 
@@ -80,7 +78,7 @@ class RollbackCommandTest extends TestCase
 
         $this->exec('migrations status -c test -s MigrationsRollback --format json');
         $this->assertExitSuccess();
-        $output = $this->_out->messages();
+        $output = $this->out->messages();
         $parsed = json_decode($output[0], true);
         $this->assertEquals('down', $parsed[0]['status'], 'Migration status should be down');
     }

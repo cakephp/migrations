@@ -21,7 +21,7 @@ class AdapterFactory
     /**
      * @var static|null
      */
-    protected static ?AdapterFactory $instance = null;
+    protected static ?self $instance = null;
 
     /**
      * Constructor.
@@ -37,7 +37,7 @@ class AdapterFactory
      */
     public static function instance(): static
     {
-        if (!static::$instance instanceof AdapterFactory) {
+        if (!static::$instance instanceof self) {
             static::$instance = new static();
         }
 
@@ -76,7 +76,7 @@ class AdapterFactory
      * @throws \RuntimeException
      * @return $this
      */
-    public function registerAdapter(string $name, Closure|string $class)
+    public function registerAdapter(string $name, Closure|string $class): static
     {
         if (
             !$class instanceof Closure && !is_subclass_of($class, AdapterInterface::class)
@@ -122,7 +122,7 @@ class AdapterFactory
      * @throws \RuntimeException
      * @return $this
      */
-    public function registerWrapper(string $name, string $class)
+    public function registerWrapper(string $name, string $class): static
     {
         if (!is_subclass_of($class, WrapperInterface::class)) {
             throw new RuntimeException(sprintf(

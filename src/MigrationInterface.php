@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
 use Cake\Database\Query\InsertQuery;
@@ -63,17 +63,17 @@ interface MigrationInterface
     /**
      * Set the Console IO object to be used.
      *
-     * @param \Cake\Console\ConsoleIo $io The Io
+     * @param \Cake\Console\ConsoleIoInterface $io The Io
      * @return $this
      */
-    public function setIo(ConsoleIo $io);
+    public function setIo(ConsoleIoInterface $io);
 
     /**
      * Get the Console IO object to be used.
      *
-     * @return \Cake\Console\ConsoleIo|null
+     * @return \Cake\Console\ConsoleIoInterface|null
      */
-    public function getIo(): ?ConsoleIo;
+    public function getIo(): ?ConsoleIoInterface;
 
     /**
      * Gets the config.

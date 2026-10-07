@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
@@ -97,83 +95,71 @@ class ResetCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $event = $this->dispatchEvent('Migration.beforeReset');
         if ($event->isStopped()) {
             return $event->getResult() ? self::CODE_SUCCESS : self::CODE_ERROR;
         }
-
-        $connectionName = (string)$args->getOption('connection');
+        $connectionName = (string)$this->args->getOption('connection');
         /** @var \Cake\Database\Connection $connection */
         $connection = ConnectionManager::get($connectionName);
-        $dryRun = (bool)$args->getOption('dry-run');
-
+        $dryRun = (bool)$this->args->getOption('dry-run');
         if ($dryRun) {
-            $io->out('<warning>DRY-RUN mode enabled - no changes will be made</warning>');
-            $io->out('');
+            $this->io->out('<warning>DRY-RUN mode enabled - no changes will be made</warning>');
+            $this->io->out('');
         }
-
         // Get tables to drop
         $tablesToDrop = $this->getTablesToDrop($connection);
-
         if ($tablesToDrop === []) {
-            $io->out('<info>No tables to drop.</info>');
-            $io->out('');
-            $io->out('Running migrations...');
+            $this->io->out('<info>No tables to drop.</info>');
+            $this->io->out('');
+            $this->io->out('Running migrations...');
 
-            return $this->runMigrationsAndDispatch($args, $io);
+            return $this->runMigrationsAndDispatch();
         }
-
         // Show what will be dropped
-        $io->out('<warning>The following tables will be dropped:</warning>');
+        $this->io->out('<warning>The following tables will be dropped:</warning>');
         foreach ($tablesToDrop as $table) {
-            $io->out('  - ' . $table);
+            $this->io->out('  - ' . $table);
         }
-        $io->out('');
-
+        $this->io->out('');
         // Ask for confirmation (unless dry-run)
         if (!$dryRun) {
-            $continue = $io->askChoice(
+            $continue = $this->io->askChoice(
                 'This will permanently delete all data. Do you want to continue?',
                 ['y', 'n'],
                 'n',
             );
             if ($continue !== 'y') {
-                $io->warning('Reset operation aborted.');
+                $this->io->warning('Reset operation aborted.');
 
                 return self::CODE_SUCCESS;
             }
         }
-
         // Drop tables
-        $io->out('');
+        $this->io->out('');
         if (!$dryRun) {
             $factory = new ManagerFactory([
-                'plugin' => $args->getOption('plugin'),
-                'source' => $args->getOption('source'),
-                'connection' => $args->getOption('connection'),
+                'plugin' => $this->args->getOption('plugin'),
+                'source' => $this->args->getOption('source'),
+                'connection' => $this->args->getOption('connection'),
             ]);
-            $manager = $factory->createManager($io);
+            $manager = $factory->createManager($this->io);
             $adapter = $manager->getEnvironment()->getAdapter();
 
-            $this->dropTables($adapter, $tablesToDrop, $io);
+            $this->dropTables($adapter, $tablesToDrop);
         } else {
-            $io->info('DRY-RUN: Would drop ' . count($tablesToDrop) . ' table(s).');
+            $this->io->info('DRY-RUN: Would drop ' . count($tablesToDrop) . ' table(s).');
         }
-
-        $io->out('');
-
+        $this->io->out('');
         // Re-run migrations
         if (!$dryRun) {
-            return $this->runMigrationsAndDispatch($args, $io);
+            return $this->runMigrationsAndDispatch();
         }
-
-        $io->info('DRY-RUN: Would re-run all migrations.');
+        $this->io->info('DRY-RUN: Would re-run all migrations.');
 
         return self::CODE_SUCCESS;
     }
@@ -196,10 +182,9 @@ class ResetCommand extends Command
      *
      * @param \Migrations\Db\Adapter\AdapterInterface $adapter The adapter
      * @param array<string> $tables Tables to drop
-     * @param \Cake\Console\ConsoleIo $io Console IO
      * @return void
      */
-    protected function dropTables(AdapterInterface $adapter, array $tables, ConsoleIo $io): void
+    protected function dropTables(AdapterInterface $adapter, array $tables): void
     {
         if (!$adapter instanceof DirectActionInterface) {
             throw new RuntimeException('The adapter must implement DirectActionInterface');
@@ -209,26 +194,24 @@ class ResetCommand extends Command
 
         try {
             foreach ($tables as $table) {
-                $io->verbose('Dropping table: ' . $table);
+                $this->io->verbose('Dropping table: ' . $table);
                 $adapter->dropTable($table);
             }
         } finally {
             $adapter->enableForeignKeyConstraints();
         }
 
-        $io->success('Dropped ' . count($tables) . ' table(s).');
+        $this->io->success('Dropped ' . count($tables) . ' table(s).');
     }
 
     /**
      * Run migrations and dispatch afterReset event.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code
      */
-    protected function runMigrationsAndDispatch(Arguments $args, ConsoleIo $io): ?int
+    protected function runMigrationsAndDispatch(): ?int
     {
-        $result = $this->runMigrations($args, $io);
+        $result = $this->runMigrations();
         $this->dispatchEvent('Migration.afterReset');
 
         return $result;
@@ -237,49 +220,42 @@ class ResetCommand extends Command
     /**
      * Run migrations.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code
      */
-    protected function runMigrations(Arguments $args, ConsoleIo $io): ?int
+    protected function runMigrations(): ?int
     {
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
-            'dry-run' => (bool)$args->getOption('dry-run'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
+            'dry-run' => (bool)$this->args->getOption('dry-run'),
         ]);
-
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $config = $manager->getConfig();
-
-        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
-        $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
-
+        $this->io->verbose('<info>using connection</info> ' . $this->args->getOption('connection'));
+        $this->io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         try {
             $start = microtime(true);
             $manager->migrate(null, false);
             $end = microtime(true);
         } catch (Throwable $e) {
-            $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->verbose($e->getTraceAsString());
+            $this->io->err('<error>' . $e->getMessage() . '</error>');
+            $this->io->verbose($e->getTraceAsString());
 
             return self::CODE_ERROR;
         }
-
-        $io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
-        $io->out('');
+        $this->io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
+        $this->io->out('');
 
         $exitCode = self::CODE_SUCCESS;
-
         // Run dump command to generate lock file
-        if (!$args->getOption('no-lock') && !$args->getOption('dry-run')) {
-            $io->verbose('');
-            $io->verbose('Dumping the current schema of the database to be used while baking a diff');
-            $io->verbose('');
+        if (!$this->args->getOption('no-lock') && !$this->args->getOption('dry-run')) {
+            $this->io->verbose('');
+            $this->io->verbose('Dumping the current schema of the database to be used while baking a diff');
+            $this->io->verbose('');
 
-            $newArgs = DumpCommand::extractArgs($args);
-            $exitCode = $this->executeCommand(DumpCommand::class, $newArgs, $io);
+            $newArgs = DumpCommand::extractArgs($this->args);
+            $exitCode = $this->executeCommand(DumpCommand::class, $newArgs);
         }
 
         return $exitCode;

@@ -112,7 +112,7 @@ class Index extends DatabaseIndex
      * @param string|string[] $columns Columns
      * @return $this
      */
-    public function setColumns(string|array $columns)
+    public function setColumns(string|array $columns): static
     {
         $this->columns = is_string($columns) ? [$columns] : $columns;
 
@@ -125,7 +125,7 @@ class Index extends DatabaseIndex
      * @param string $type Type
      * @return $this
      */
-    public function setType(string $type)
+    public function setType(string $type): static
     {
         $this->type = $type;
 
@@ -152,7 +152,7 @@ class Index extends DatabaseIndex
      * @return $this
      * @deprecated 5.0 Use setLength() instead.
      */
-    public function setLimit(int|array $limit)
+    public function setLimit(int|array $limit): static
     {
         $this->setLength($limit);
 
@@ -178,7 +178,7 @@ class Index extends DatabaseIndex
      * @param bool $value The concurrent mode for an index.
      * @return $this
      */
-    public function setConcurrently(bool $value)
+    public function setConcurrently(bool $value): static
     {
         $this->concurrent = $value;
 
@@ -201,7 +201,7 @@ class Index extends DatabaseIndex
      * @param string $algorithm Algorithm
      * @return $this
      */
-    public function setAlgorithm(string $algorithm)
+    public function setAlgorithm(string $algorithm): static
     {
         $this->algorithm = $algorithm;
 
@@ -224,7 +224,7 @@ class Index extends DatabaseIndex
      * @param string $lock Lock mode
      * @return $this
      */
-    public function setLock(string $lock)
+    public function setLock(string $lock): static
     {
         $this->lock = $lock;
 
@@ -252,7 +252,7 @@ class Index extends DatabaseIndex
      * @param array<string, string> $opclass Map of column names to operator classes.
      * @return $this
      */
-    public function setOpclass(array $opclass)
+    public function setOpclass(array $opclass): static
     {
         $this->opclass = $opclass;
 
@@ -276,7 +276,7 @@ class Index extends DatabaseIndex
      * @throws \RuntimeException
      * @return $this
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): static
     {
         // Valid Options
         $validOptions = ['concurrently', 'type', 'unique', 'name', 'limit', 'order', 'include', 'where', 'algorithm', 'lock', 'opclass'];

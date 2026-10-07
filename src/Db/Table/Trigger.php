@@ -72,7 +72,7 @@ class Trigger
      * @param string $name Name
      * @return $this
      */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -95,7 +95,7 @@ class Trigger
      * @param string $timing Timing
      * @return $this
      */
-    public function setTiming(string $timing)
+    public function setTiming(string $timing): static
     {
         $this->timing = $timing;
 
@@ -118,7 +118,7 @@ class Trigger
      * @param string|array<string> $event Event(s)
      * @return $this
      */
-    public function setEvent(string|array $event)
+    public function setEvent(string|array $event): static
     {
         $this->event = $event;
 
@@ -141,7 +141,7 @@ class Trigger
      * @param string $definition Definition
      * @return $this
      */
-    public function setDefinition(string $definition)
+    public function setDefinition(string $definition): static
     {
         $this->definition = $definition;
 
@@ -164,7 +164,7 @@ class Trigger
      * @param bool $forEach For each row flag
      * @return $this
      */
-    public function setForEach(bool $forEach)
+    public function setForEach(bool $forEach): static
     {
         $this->forEach = $forEach;
 
