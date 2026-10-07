@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Migration;
 
 use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -30,7 +30,7 @@ class Manager
 
     protected ConfigInterface $config;
 
-    protected ConsoleIo $io;
+    protected ConsoleIoInterface $io;
 
     protected ?Environment $environment = null;
 
@@ -48,9 +48,9 @@ class Manager
 
     /**
      * @param \Migrations\Config\ConfigInterface $config Configuration Object
-     * @param \Cake\Console\ConsoleIo $io Console input/output
+     * @param \Cake\Console\ConsoleIoInterface $io Console input/output
      */
-    public function __construct(ConfigInterface $config, ConsoleIo $io)
+    public function __construct(ConfigInterface $config, ConsoleIoInterface $io)
     {
         $this->setConfig($config);
         $this->setIo($io);
@@ -846,10 +846,10 @@ class Manager
     /**
      * Set the io instance
      *
-     * @param \Cake\Console\ConsoleIo $io The io instance to use
+     * @param \Cake\Console\ConsoleIoInterface $io The io instance to use
      * @return $this
      */
-    public function setIo(ConsoleIo $io)
+    public function setIo(ConsoleIoInterface $io): static
     {
         $this->io = $io;
 
@@ -859,9 +859,9 @@ class Manager
     /**
      * Get the io instance
      *
-     * @return \Cake\Console\ConsoleIo $io The io instance to use
+     * @return \Cake\Console\ConsoleIoInterface $io The io instance to use
      */
-    public function getIo(): ConsoleIo
+    public function getIo(): ConsoleIoInterface
     {
         return $this->io;
     }
@@ -871,7 +871,7 @@ class Manager
      *
      * @return $this
      */
-    public function setEnvironment(Environment $environment)
+    public function setEnvironment(Environment $environment): static
     {
         $this->environment = $environment;
 
@@ -884,7 +884,7 @@ class Manager
      * @param \Psr\Container\ContainerInterface $container Container
      * @return $this
      */
-    public function setContainer(ContainerInterface $container)
+    public function setContainer(ContainerInterface $container): static
     {
         $this->container = $container;
 
@@ -897,7 +897,7 @@ class Manager
      * @param \Migrations\MigrationInterface[] $migrations Migrations
      * @return $this
      */
-    public function setMigrations(array $migrations)
+    public function setMigrations(array $migrations): static
     {
         $this->migrations = $migrations;
 
@@ -1051,7 +1051,7 @@ class Manager
      * @param \Migrations\SeedInterface[] $seeds Seeders
      * @return $this
      */
-    public function setSeeds(array $seeds)
+    public function setSeeds(array $seeds): static
     {
         $this->seeds = $seeds;
 
@@ -1240,7 +1240,7 @@ class Manager
      * @param \Migrations\Config\ConfigInterface $config Configuration Object
      * @return $this
      */
-    public function setConfig(ConfigInterface $config)
+    public function setConfig(ConfigInterface $config): static
     {
         $this->config = $config;
 

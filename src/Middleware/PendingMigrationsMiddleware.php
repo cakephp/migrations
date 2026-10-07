@@ -26,7 +26,7 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
 
     protected const SKIP_QUERY_KEY = 'skip-middleware-check';
 
-    protected array $_defaultConfig = [
+    protected array $defaultConfig = [
         'paths' => [
             'migrations' => ROOT . DS . 'config' . DS . 'Migrations' . DS,
         ],
@@ -86,7 +86,7 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
         }
 
         /** @var array<string> $plugins */
-        $plugins = (array)$this->_config['plugins'];
+        $plugins = (array)$this->config['plugins'];
         foreach ($plugins as $plugin) {
             if (!$this->checkPluginMigrations($plugin)) {
                 $pending[$plugin] = 'bin/cake migrations migrate -p ' . $plugin;
@@ -101,15 +101,15 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
      */
     protected function checkAppMigrations(): bool
     {
-        if ($this->_config['app'] === false) {
+        if ($this->config['app'] === false) {
             return true;
         }
 
-        $connection = ConnectionManager::get($this->_config['environment']['connection']);
+        $connection = ConnectionManager::get($this->config['environment']['connection']);
         $database = $connection->config()['database'];
-        $this->_config['environment']['database'] = $database;
+        $this->config['environment']['database'] = $database;
 
-        $manager = $this->getManager($this->_config);
+        $manager = $this->getManager($this->config);
 
         $migrations = $manager->getMigrations();
         foreach ($migrations as $migration) {
@@ -126,9 +126,9 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
      */
     protected function checkPluginMigrations(string $plugin): bool
     {
-        $connection = ConnectionManager::get($this->_config['environment']['connection']);
+        $connection = ConnectionManager::get($this->config['environment']['connection']);
         $database = $connection->config()['database'];
-        $this->_config['environment']['database'] = $database;
+        $this->config['environment']['database'] = $database;
 
         $pluginPath = Plugin::path($plugin);
         if (!is_dir($pluginPath . 'config' . DS . 'Migrations' . DS)) {
@@ -139,7 +139,7 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
             'paths' => [
                 'migrations' => $pluginPath . 'config' . DS . 'Migrations' . DS,
             ],
-        ] + $this->_config;
+        ] + $this->config;
 
         $table = Util::tableName($plugin);
 

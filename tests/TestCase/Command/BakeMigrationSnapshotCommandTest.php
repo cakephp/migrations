@@ -57,7 +57,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
         parent::setUp();
 
         $this->loadPlugins(['SimpleSnapshot']);
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
+        $this->compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
         $this->migrationPath = ROOT . DS . 'config' . DS . 'Migrations' . DS;
 
         $this->generatedFiles = [];
@@ -335,12 +335,12 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     public function assertSameAsFile(string $path, string $result): void
     {
         if (!file_exists($path)) {
-            $path = $this->_compareBasePath . $path;
+            $path = $this->compareBasePath . $path;
         }
 
-        $this->_updateComparisons ??= (bool)env('UPDATE_TEST_COMPARISON_FILES');
+        $this->updateComparisons ??= (bool)env('UPDATE_TEST_COMPARISON_FILES');
 
-        if ($this->_updateComparisons) {
+        if ($this->updateComparisons) {
             file_put_contents($path, $result);
         }
 
@@ -368,7 +368,7 @@ class BakeMigrationSnapshotCommandTest extends TestCase
     {
         $dbenv = getenv('DB');
         $bakeName = Inflector::underscore($bakeName);
-        if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
+        if (file_exists($this->compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);
         } else {
             $this->assertSameAsFile($bakeName . '.php', $result);

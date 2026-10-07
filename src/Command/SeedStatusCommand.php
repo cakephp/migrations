@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
@@ -75,34 +73,27 @@ class SeedStatusCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
         ]);
-
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $config = $manager->getConfig();
-
-        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
-        $io->verbose('<info>using paths</info> ' . $config->getSeedPath());
+        $this->io->verbose('<info>using connection</info> ' . $this->args->getOption('connection'));
+        $this->io->verbose('<info>using paths</info> ' . $config->getSeedPath());
 
         $seeds = $manager->getSeeds();
         $adapter = $manager->getEnvironment()->getAdapter();
-
         // Ensure seed schema table exists
         if (!$adapter->hasTable($adapter->getSeedSchemaTableName())) {
             $adapter->createSeedSchemaTable();
         }
-
         $seedLog = $adapter->getSeedLog();
-
         // Build status list
         $statuses = [];
         foreach ($seeds as $seed) {
@@ -130,31 +121,27 @@ class SeedStatusCommand extends Command
                 'idempotent' => $seed->isIdempotent(),
             ];
         }
-
-        $format = (string)$args->getOption('format');
+        $format = (string)$this->args->getOption('format');
         if ($format === 'json') {
             $json = json_encode($statuses, JSON_PRETTY_PRINT);
             if ($json !== false) {
-                $io->out($json);
+                $this->io->out($json);
             }
 
             return self::CODE_SUCCESS;
         }
-
         // Text format
         if (!$statuses) {
-            $io->warning('No seeds found.');
+            $this->io->warning('No seeds found.');
 
             return self::CODE_SUCCESS;
         }
-
-        $io->out('');
-        $io->out('<info>Current seed execution status:</info>');
-        $io->out('');
+        $this->io->out('');
+        $this->io->out('<info>Current seed execution status:</info>');
+        $this->io->out('');
 
         $maxNameLength = max(array_map(fn(array $s): int => strlen($s['seedName']), $statuses));
         $maxPluginLength = max(array_map(fn(array $s): int => strlen($s['plugin'] ?? ''), $statuses));
-
         foreach ($statuses as $status) {
             $seedName = str_pad($status['seedName'], $maxNameLength);
             $plugin = $status['plugin'] ? str_pad($status['plugin'], $maxPluginLength) : str_repeat(' ', $maxPluginLength);
@@ -163,14 +150,13 @@ class SeedStatusCommand extends Command
             if ($status['status'] === 'executed') {
                 $statusText = '<info>executed</info>';
                 $date = $status['executedAt'] ? ' (' . $status['executedAt'] . ')' : '';
-                $io->out(sprintf('  %s %s  %s%s%s', $statusText, $plugin, $seedName, $date, $idempotent));
+                $this->io->out(sprintf('  %s %s  %s%s%s', $statusText, $plugin, $seedName, $date, $idempotent));
             } else {
                 $statusText = '<comment>pending</comment> ';
-                $io->out(sprintf('  %s %s  %s%s', $statusText, $plugin, $seedName, $idempotent));
+                $this->io->out(sprintf('  %s %s  %s%s', $statusText, $plugin, $seedName, $idempotent));
             }
         }
-
-        $io->out('');
+        $this->io->out('');
 
         return self::CODE_SUCCESS;
     }

@@ -34,7 +34,7 @@ class SeedCommandTest extends TestCase
     {
         $this->exec('migrations migrate -c test -s TestsMigrations --no-lock');
         $this->assertExitSuccess();
-        $this->_in = null;
+        $this->in = null;
     }
 
     public function testHelp(): void

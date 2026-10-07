@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Migration;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Datasource\ConnectionManager;
 use Migrations\Db\Adapter\AdapterFactory;
 use Migrations\Db\Adapter\AdapterInterface;
@@ -27,7 +27,7 @@ class Environment
      */
     protected array $options;
 
-    protected ?ConsoleIo $io = null;
+    protected ?ConsoleIoInterface $io = null;
 
     protected int $currentVersion;
 
@@ -163,7 +163,7 @@ class Environment
      * @param string $name Environment Name
      * @return $this
      */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -186,7 +186,7 @@ class Environment
      * @param array<string, mixed> $options Environment Options
      * @return $this
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): static
     {
         $this->options = $options;
 
@@ -206,10 +206,10 @@ class Environment
     /**
      * Sets the consoleio.
      *
-     * @param \Cake\Console\ConsoleIo $io ConsoleIo
+     * @param \Cake\Console\ConsoleIoInterface $io ConsoleIoInterface
      * @return $this
      */
-    public function setIo(ConsoleIo $io)
+    public function setIo(ConsoleIoInterface $io): static
     {
         $this->io = $io;
 
@@ -219,9 +219,9 @@ class Environment
     /**
      * Get the io instance
      *
-     * @return \Cake\Console\ConsoleIo $io The io instance to use
+     * @return \Cake\Console\ConsoleIoInterface $io The io instance to use
      */
-    public function getIo(): ?ConsoleIo
+    public function getIo(): ?ConsoleIoInterface
     {
         return $this->io;
     }
@@ -253,7 +253,7 @@ class Environment
      * @param int $version Environment Version
      * @return $this
      */
-    public function setCurrentVersion(int $version)
+    public function setCurrentVersion(int $version): static
     {
         $this->currentVersion = $version;
 
@@ -288,7 +288,7 @@ class Environment
      * @param \Migrations\Db\Adapter\AdapterInterface $adapter Database Adapter
      * @return $this
      */
-    public function setAdapter(AdapterInterface $adapter)
+    public function setAdapter(AdapterInterface $adapter): static
     {
         $this->adapter = $adapter;
 
@@ -333,7 +333,7 @@ class Environment
         }
 
         $io = $this->getIo();
-        if ($io instanceof ConsoleIo) {
+        if ($io instanceof ConsoleIoInterface) {
             $adapter->setIo($io);
         }
         $this->setAdapter($adapter);
@@ -347,7 +347,7 @@ class Environment
      * @param string $schemaTableName Schema Table Name
      * @return $this
      */
-    public function setSchemaTableName(string $schemaTableName)
+    public function setSchemaTableName(string $schemaTableName): static
     {
         $this->schemaTableName = $schemaTableName;
 

@@ -449,7 +449,11 @@ class MysqlAdapter extends AbstractAdapter
                     default => null,
                 };
             }
-            $data['type'] = 'binary';
+            $data['type'] = $data['length'] !== null
+                && !in_array($data['length'], TableSchema::$columnLengths, true)
+                && empty($data['fixed'])
+                ? TableSchema::TYPE_VARBINARY
+                : TableSchema::TYPE_BINARY;
         } elseif ($data['type'] === self::TYPE_INTEGER) {
             if (isset($data['length']) && $data['length'] === self::INT_BIG) {
                 $data['type'] = TableSchema::TYPE_BIGINTEGER;
@@ -624,6 +628,8 @@ class MysqlAdapter extends AbstractAdapter
         } elseif ($type === TableSchema::TYPE_TIMESTAMP_FRACTIONAL) {
             $type = 'timestamp';
             $length = $columnData['precision'] ?? $length;
+        } elseif ($type === TableSchema::TYPE_VARBINARY) {
+            $type = self::TYPE_BINARY;
         } elseif ($type === TableSchema::TYPE_BINARY) {
             // TODO could rawType be removed? We should be able to use the abstract type and length only.
             // CakePHP returns BLOB columns as 'binary' with specific lengths
@@ -704,7 +710,7 @@ class MysqlAdapter extends AbstractAdapter
             if ($record['onUpdate'] ?? false) {
                 $column->setUpdate($record['onUpdate']);
             }
-            if ($record['fixed'] ?? false) {
+            if (str_starts_with($record['rawType'] ?? '', 'binary(')) {
                 $column->setFixed(true);
             }
 

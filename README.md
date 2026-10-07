@@ -9,7 +9,10 @@ This is a Database Migrations system for CakePHP.
 
 The plugin provides a complete database migration solution with support for creating, running, and managing migrations.
 
-This branch is for use with CakePHP **5.x**. See [version map](https://github.com/cakephp/migrations/wiki#version-map) for details.
+This branch is for use with CakePHP **6.x**, requiring PHP 8.4 or higher. See [version map](https://github.com/cakephp/migrations/wiki#version-map) for details.
+
+When upgrading from CakePHP 5, regenerate schema dump files with `bin/cake migrations dump`
+before baking a diff. Serialized schema metadata uses CakePHP 6's property names.
 
 ## Installation
 
@@ -17,7 +20,7 @@ You can install this plugin into your CakePHP application using [Composer](https
 
 Run the following command
 ```sh
-composer require cakephp/migrations
+composer require cakephp/migrations:"6.x-dev"
  ```
 
 ## Configuration

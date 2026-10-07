@@ -491,7 +491,7 @@ class Initial extends BaseMigration
         // against the last migrated version, so having an unmigrated file would fail
         unlink($destination);
 
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
+        $this->compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Diff' . DS . lcfirst($scenario) . DS;
 
         $bakeName = $this->getBakeName('TheDiff' . $scenario);
         $targetFolder = 'MigrationsDiff' . $scenario;
@@ -616,7 +616,7 @@ class Initial extends BaseMigration
             $dbenv = $this->getDbType();
         }
         $bakeName = Inflector::underscore($bakeName);
-        if (file_exists($this->_compareBasePath . $dbenv . DS . $bakeName . '.php')) {
+        if (file_exists($this->compareBasePath . $dbenv . DS . $bakeName . '.php')) {
             $this->assertSameAsFile($dbenv . DS . $bakeName . '.php', $result);
         } else {
             $this->assertSameAsFile($bakeName . '.php', $result);
