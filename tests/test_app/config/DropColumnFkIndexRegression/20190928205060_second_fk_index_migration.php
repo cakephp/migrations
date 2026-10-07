@@ -4,7 +4,7 @@ use Migrations\BaseMigration;
 
 class SecondFkIndexMigration extends BaseMigration
 {
-    public function up()
+    public function up(): void
     {
         $this->table('table1', [
             'id' => false,

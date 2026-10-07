@@ -59,8 +59,8 @@
             $this->foreignKey({{ columnsList | raw }})
                 ->setReferencedTable('{{ constraint['references'][0] }}')
                 ->setReferencedColumns({{ columnsReference | raw }})
-                ->setOnDelete('{{ Migration.formatConstraintAction(constraint['delete']) | raw }}')
-                ->setOnUpdate('{{ Migration.formatConstraintAction(constraint['update']) | raw }}')
+                ->setDelete('{{ Migration.formatConstraintAction(constraint['delete']) | raw }}')
+                ->setUpdate('{{ Migration.formatConstraintAction(constraint['update']) | raw }}')
                 ->setName('{{ constraintName }}')
         );
                 {%~ endif %}

@@ -4,7 +4,7 @@ use Migrations\BaseMigration;
 
 class FirstFkIndexMigration extends BaseMigration
 {
-    public function up()
+    public function up(): void
     {
         $this->table('table2', [
                 'id' => false,
@@ -87,7 +87,7 @@ class FirstFkIndexMigration extends BaseMigration
             ->create();
     }
 
-    public function down()
+    public function down(): void
     {
         $this->table('table1', [
             'id' => false,

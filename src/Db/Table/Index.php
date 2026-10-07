@@ -37,6 +37,46 @@ class Index extends DatabaseIndex
     public const FULLTEXT = 'fulltext';
 
     /**
+     * PostgreSQL index access method: Generalized Inverted Index.
+     * Useful for full-text search, arrays, and JSONB columns.
+     *
+     * @var string
+     */
+    public const GIN = 'gin';
+
+    /**
+     * PostgreSQL index access method: Generalized Search Tree.
+     * Useful for geometric data, range types, and full-text search.
+     *
+     * @var string
+     */
+    public const GIST = 'gist';
+
+    /**
+     * PostgreSQL index access method: Space-Partitioned GiST.
+     * Useful for data with natural clustering like IP addresses or phone numbers.
+     *
+     * @var string
+     */
+    public const SPGIST = 'spgist';
+
+    /**
+     * PostgreSQL index access method: Block Range Index.
+     * Highly efficient for large, naturally-ordered tables like time-series data.
+     *
+     * @var string
+     */
+    public const BRIN = 'brin';
+
+    /**
+     * PostgreSQL index access method: Hash index.
+     * Handles simple equality comparisons. Rarely needed since B-tree handles equality efficiently.
+     *
+     * @var string
+     */
+    public const HASH = 'hash';
+
+    /**
      * Constructor
      *
      * @param string $name The name of the index.
@@ -47,6 +87,9 @@ class Index extends DatabaseIndex
      * @param array<string>|null $include The included columns for covering indexes.
      * @param ?string $where The where clause for partial indexes.
      * @param bool $concurrent Whether to create the index concurrently.
+     * @param ?string $algorithm The ALTER TABLE algorithm (MySQL-specific).
+     * @param ?string $lock The ALTER TABLE lock mode (MySQL-specific).
+     * @param array<string, string>|null $opclass The operator class for each column (PostgreSQL).
      */
     public function __construct(
         protected string $name = '',
@@ -57,6 +100,9 @@ class Index extends DatabaseIndex
         protected ?array $include = null,
         protected ?string $where = null,
         protected bool $concurrent = false,
+        protected ?string $algorithm = null,
+        protected ?string $lock = null,
+        protected ?array $opclass = null,
     ) {
     }
 
@@ -150,6 +196,80 @@ class Index extends DatabaseIndex
     }
 
     /**
+     * Sets the ALTER TABLE algorithm (MySQL-specific).
+     *
+     * @param string $algorithm Algorithm
+     * @return $this
+     */
+    public function setAlgorithm(string $algorithm)
+    {
+        $this->algorithm = $algorithm;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ALTER TABLE algorithm.
+     *
+     * @return string|null
+     */
+    public function getAlgorithm(): ?string
+    {
+        return $this->algorithm;
+    }
+
+    /**
+     * Sets the ALTER TABLE lock mode (MySQL-specific).
+     *
+     * @param string $lock Lock mode
+     * @return $this
+     */
+    public function setLock(string $lock)
+    {
+        $this->lock = $lock;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ALTER TABLE lock mode.
+     *
+     * @return string|null
+     */
+    public function getLock(): ?string
+    {
+        return $this->lock;
+    }
+
+    /**
+     * Set the operator class for index columns.
+     *
+     * Operator classes specify which operators the index can use. This is primarily
+     * useful in PostgreSQL for specialized index types like GiST with trigram support.
+     *
+     * Example: ['column_name' => 'gist_trgm_ops']
+     *
+     * @param array<string, string> $opclass Map of column names to operator classes.
+     * @return $this
+     */
+    public function setOpclass(array $opclass)
+    {
+        $this->opclass = $opclass;
+
+        return $this;
+    }
+
+    /**
+     * Get the operator class configuration for index columns.
+     *
+     * @return array<string, string>|null
+     */
+    public function getOpclass(): ?array
+    {
+        return $this->opclass;
+    }
+
+    /**
      * Utility method that maps an array of index options to this object's methods.
      *
      * @param array<string, mixed> $options Options
@@ -159,7 +279,7 @@ class Index extends DatabaseIndex
     public function setOptions(array $options)
     {
         // Valid Options
-        $validOptions = ['concurrently', 'type', 'unique', 'name', 'limit', 'order', 'include', 'where'];
+        $validOptions = ['concurrently', 'type', 'unique', 'name', 'limit', 'order', 'include', 'where', 'algorithm', 'lock', 'opclass'];
         foreach ($options as $option => $value) {
             if (!in_array($option, $validOptions, true)) {
                 throw new RuntimeException(sprintf('"%s" is not a valid index option.', $option));

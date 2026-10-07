@@ -23,9 +23,6 @@ use RuntimeException;
 
 class Migrator
 {
-    /**
-     * @var \Cake\TestSuite\ConnectionHelper
-     */
     protected ConnectionHelper $helper;
 
     /**
@@ -87,6 +84,8 @@ class Migrator
         // Detect all connections involved, and mark those with changed status.
         $connectionsToDrop = [];
         $connectionsList = [];
+        $sets = [];
+        $historyGroups = [];
         foreach ($options as $i => $migrationSet) {
             $migrationSet += ['connection' => 'test'];
             $skip = $migrationSet['skip'] ?? [];
@@ -98,9 +97,29 @@ class Migrator
                 $connectionsList[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
             }
 
+            // Sets sharing a connection and a plugin also share a migration history,
+            // while each of them only has its own source directory on disk. Group
+            // them so that a set is not told that its siblings' applied migrations
+            // are missing.
+            $groupKey = $connectionName . '|' . ($migrationSet['plugin'] ?? '');
+            $historyGroups[$groupKey][] = $migrationSet;
+            $sets[] = ['options' => $migrationSet, 'skip' => $skip, 'group' => $groupKey];
+        }
+
+        $groupMigrationIds = [];
+        foreach ($historyGroups as $groupKey => $group) {
+            $groupMigrationIds[$groupKey] = $this->getSiblingMigrationIds($group);
+        }
+
+        foreach ($sets as $set) {
+            $connectionName = $set['options']['connection'];
+            if (isset($connectionsToDrop[$connectionName])) {
+                continue;
+            }
+
             $migrations = new Migrations();
-            if (!isset($connectionsToDrop[$connectionName]) && $this->shouldDropTables($migrations, $migrationSet)) {
-                $connectionsToDrop[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
+            if ($this->shouldDropTables($migrations, $set['options'], $groupMigrationIds[$set['group']])) {
+                $connectionsToDrop[$connectionName] = ['name' => $connectionName, 'skip' => $set['skip']];
             }
         }
 
@@ -115,7 +134,7 @@ class Migrator
             try {
                 if (!$migrations->migrate($migrationSet)) {
                     throw new RuntimeException(
-                        "Unable to migrate fixtures for `{$migrationSet['connection']}`.",
+                        sprintf('Unable to migrate fixtures for `%s`.', $migrationSet['connection']),
                     );
                 }
             } catch (Exception $e) {
@@ -124,7 +143,7 @@ class Migrator
                     "Migrations failed to apply with message:\n\n" .
                     $e->getMessage() . "\n\n" .
                     'If you are using the `skip` option and running multiple sets of migrations ' .
-                    'on the same connection, you can\'t skip tables managed by CakePHP in the connection.',
+                    "on the same connection, you can't skip tables managed by CakePHP in the connection.",
                     0,
                     $e,
                 );
@@ -162,15 +181,48 @@ class Migrator
     }
 
     /**
+     * Collect the migration ids that exist on disk for a group of migration sets
+     * that share a single migration history.
+     *
+     * Returns an empty list for groups of one, where no sibling source exists.
+     *
+     * @param array<array<string, mixed>> $group Migration sets sharing a history.
+     * @return array<int|string, bool> Migration ids present on disk, keyed by id.
+     */
+    protected function getSiblingMigrationIds(array $group): array
+    {
+        if (count($group) < 2) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($group as $options) {
+            $migrations = new Migrations();
+            foreach ($migrations->status($options) as $migration) {
+                if ($migration['missing'] ?? false) {
+                    continue;
+                }
+                $ids[$migration['id']] = true;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
      * Detect if migrations have changed and the database needs to be wiped.
      *
      * @param \Migrations\Migrations $migrations The migrations service.
      * @param array $options The connection options.
+     * @param array<int|string, bool> $siblingMigrationIds Migration ids found in sources sharing the history.
      * @return bool
      */
-    protected function shouldDropTables(Migrations $migrations, array $options): bool
-    {
-        Log::write('debug', "Reading migrations status for {$options['connection']}...");
+    protected function shouldDropTables(
+        Migrations $migrations,
+        array $options,
+        array $siblingMigrationIds = [],
+    ): bool {
+        Log::write('debug', sprintf('Reading migrations status for %s...', $options['connection']));
 
         $messages = [
             'down' => [],
@@ -178,25 +230,29 @@ class Migrator
         ];
         foreach ($migrations->status($options) as $migration) {
             if ($migration['status'] === 'up' && ($migration['missing'] ?? false)) {
+                // The migration belongs to another source sharing this history.
+                if (isset($siblingMigrationIds[$migration['id']])) {
+                    continue;
+                }
                 $messages['missing'][] = 'Applied but, missing Migration ' .
-                    "source={$migration['name']} id={$migration['id']}";
+                    sprintf('source=%s id=%s', $migration['name'], $migration['id']);
             }
             if ($migration['status'] === 'down') {
-                $messages['down'][] = "Migration to reverse. source={$migration['name']} id={$migration['id']}";
+                $messages['down'][] = sprintf('Migration to reverse. source=%s id=%s', $migration['name'], $migration['id']);
             }
         }
         $output = [];
         $hasProblems = false;
-        $itemize = function ($item) {
+        $itemize = function (string $item): string {
             return '- ' . $item;
         };
-        if (!empty($messages['down'])) {
+        if ($messages['down'] !== []) {
             $hasProblems = true;
             $output[] = 'Migrations needing to be reversed:';
             $output = array_merge($output, array_map($itemize, $messages['down']));
             $output[] = '';
         }
-        if (!empty($messages['missing'])) {
+        if ($messages['missing'] !== []) {
             $hasProblems = true;
             $output[] = 'Applied but missing migrations:';
             $output = array_merge($output, array_map($itemize, $messages['missing']));
@@ -216,7 +272,7 @@ class Migrator
 
     /**
      * Drops the regular tables of the provided connection
-     * and truncates the phinx tables.
+     * and truncates the migration metadata tables.
      *
      * @param string $connection Connection on which tables are dropped.
      * @param string[] $skip A fnmatch compatible list of tables to skip.
@@ -225,29 +281,29 @@ class Migrator
     protected function dropTables(string $connection, array $skip = []): void
     {
         $dropTables = $this->getNonPhinxTables($connection, $skip);
-        if (count($dropTables)) {
+        if ($dropTables !== []) {
             $this->helper->dropTables($connection, $dropTables);
         }
-        $phinxTables = $this->getPhinxTables($connection);
-        if (count($phinxTables)) {
-            $this->helper->truncateTables($connection, $phinxTables);
+        $migrationTables = $this->getMigrationTables($connection);
+        if ($migrationTables !== []) {
+            $this->helper->truncateTables($connection, $migrationTables);
         }
     }
 
     /**
-     * Get the list of tables that are phinxlog
+     * Get the list of migration metadata tables.
      *
      * @param string $connection The connection name to operate on.
-     * @return string[] The list of tables that are not related to phinx in the provided connection.
+     * @return string[] The list of migration metadata tables in the provided connection.
      */
-    protected function getPhinxTables(string $connection): array
+    protected function getMigrationTables(string $connection): array
     {
         $connection = ConnectionManager::get($connection);
         assert($connection instanceof Connection);
         $tables = $connection->getSchemaCollection()->listTables();
 
-        return array_filter($tables, function ($table) {
-            return strpos($table, 'phinxlog') !== false;
+        return array_filter($tables, function (string $table): bool {
+            return str_contains($table, 'phinxlog') || $table === 'cake_migrations';
         });
     }
 
@@ -266,9 +322,9 @@ class Migrator
         $skip[] = '*phinxlog*';
         $skip[] = 'cake_migrations';
 
-        return array_filter($tables, function ($table) use ($skip) {
+        return array_filter($tables, function (string $table) use ($skip): bool {
             foreach ($skip as $pattern) {
-                if (fnmatch($pattern, $table) === true) {
+                if (fnmatch($pattern, $table)) {
                     return false;
                 }
             }

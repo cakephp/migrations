@@ -8,7 +8,7 @@ class UpdateInfoTable extends BaseMigration
     /**
      * Change.
      */
-    public function change()
+    public function change(): void
     {
         // info table
         $info = $this->table('info');

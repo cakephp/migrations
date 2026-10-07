@@ -15,15 +15,11 @@ class RenameColumn extends Action
 {
     /**
      * The column to be renamed
-     *
-     * @var \Migrations\Db\Table\Column
      */
     protected Column $column;
 
     /**
      * The new name for the column
-     *
-     * @var string
      */
     protected string $newName;
 

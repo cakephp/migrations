@@ -15,8 +15,6 @@ class AddColumn extends Action
 {
     /**
      * The column to add
-     *
-     * @var \Migrations\Db\Table\Column
      */
     protected Column $column;
 

@@ -18,10 +18,7 @@ use RuntimeException;
 
 class AbstractAdapterTest extends TestCase
 {
-    /**
-     * @var \Migrations\Db\Adapter\AbstractAdapter|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $adapter;
+    private AbstractAdapter $adapter;
 
     protected function setUp(): void
     {
@@ -35,14 +32,14 @@ class AbstractAdapterTest extends TestCase
         unset($this->adapter);
     }
 
-    public function testOptions()
+    public function testOptions(): void
     {
         $options = $this->adapter->getOptions();
         $this->assertArrayHasKey('foo', $options);
         $this->assertEquals('bar', $options['foo']);
     }
 
-    public function testOptionsSetSchemaTableName()
+    public function testOptionsSetSchemaTableName(): void
     {
         // When unified table mode is enabled, getSchemaTableName() returns cake_migrations
         $expectedDefault = Configure::read('Migrations.legacyTables') === false
@@ -58,7 +55,7 @@ class AbstractAdapterTest extends TestCase
         $this->assertEquals($expectedAfterSet, $this->adapter->getSchemaTableName());
     }
 
-    public function testSchemaTableName()
+    public function testSchemaTableName(): void
     {
         $expectedDefault = Configure::read('Migrations.legacyTables') === false
             ? UnifiedMigrationsTableStorage::TABLE_NAME
@@ -71,7 +68,7 @@ class AbstractAdapterTest extends TestCase
         $this->assertEquals($expectedAfterSet, $this->adapter->getSchemaTableName());
     }
 
-    public function testGetVersionLogInvalidVersionOrderKO()
+    public function testGetVersionLogInvalidVersionOrderKO(): void
     {
         $this->expectExceptionMessage('Invalid version_order configuration option');
         $adapter = new class (['version_order' => 'invalid']) extends AbstractAdapter {
@@ -83,7 +80,7 @@ class AbstractAdapterTest extends TestCase
         $adapter->getVersionLog();
     }
 
-    public function testGetVersionLongDryRun()
+    public function testGetVersionLongDryRun(): void
     {
         $adapter = new class (['version_order' => Config::VERSION_ORDER_CREATION_TIME]) extends AbstractAdapter {
             use DefaultAdapterTrait;
@@ -122,7 +119,7 @@ class AbstractAdapterTest extends TestCase
      * @see https://github.com/cakephp/phinx/issues/1891
      */
     #[DataProvider('currentTimestampDefaultValueProvider')]
-    public function testCurrentTimestampDefaultValueQuoting($default, $columnType, $expected)
+    public function testCurrentTimestampDefaultValueQuoting(string|Literal|bool $default, ?string $columnType, string $expected): void
     {
         $adapter = new class (['version_order' => Config::VERSION_ORDER_CREATION_TIME]) extends AbstractAdapter {
             use DefaultAdapterTrait;

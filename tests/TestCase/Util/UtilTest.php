@@ -12,12 +12,12 @@ use RuntimeException;
 
 class UtilTest extends TestCase
 {
-    private function getCorrectedPath($path)
+    private function getCorrectedPath(string $path): string
     {
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
 
-    public function testGetExistingMigrationClassNames()
+    public function testGetExistingMigrationClassNames(): void
     {
         $expectedResults = [
             'TestMigration',
@@ -31,14 +31,14 @@ class UtilTest extends TestCase
         }
     }
 
-    public function testGetExistingMigrationClassNamesWithFile()
+    public function testGetExistingMigrationClassNamesWithFile(): void
     {
         $file = $this->getCorrectedPath(__DIR__ . '/_files/migrations/20120111235330_test_migration.php');
         $existingClassNames = Util::getExistingMigrationClassNames($file);
         $this->assertCount(0, $existingClassNames);
     }
 
-    public function testGetCurrentTimestamp()
+    public function testGetCurrentTimestamp(): void
     {
         $dt = new DateTime('now', new DateTimeZone('UTC'));
         $expected = $dt->format(Util::DATE_FORMAT);
@@ -104,7 +104,7 @@ class UtilTest extends TestCase
     }
 
     #[DataProvider('providerMapFileName')]
-    public function testMapFileNameToClassName(string $fileName, string $className)
+    public function testMapFileNameToClassName(string $fileName, string $className): void
     {
         $this->assertEquals($className, Util::mapFileNameToClassName($fileName));
     }
@@ -117,7 +117,7 @@ class UtilTest extends TestCase
         $this->assertEquals('DropOrdersTable', Util::mapFileNameToClassName('2024_01_01_000000_DropOrdersTable.php'));
     }
 
-    public function testGlobPath()
+    public function testGlobPath(): void
     {
         $files = Util::glob(__DIR__ . '/_files/migrations/empty.txt');
         $this->assertCount(1, $files);
@@ -130,7 +130,7 @@ class UtilTest extends TestCase
         $this->assertEquals('not_a_migration.php', basename($files[2]));
     }
 
-    public function testGlobAll()
+    public function testGlobAll(): void
     {
         $files = Util::globAll([
             __DIR__ . '/_files/migrations/*.php',
@@ -144,7 +144,7 @@ class UtilTest extends TestCase
         $this->assertEquals('empty.txt', basename($files[3]));
     }
 
-    public function testGetFiles()
+    public function testGetFiles(): void
     {
         $files = Util::getFiles([
             __DIR__ . '/_files/migrations',

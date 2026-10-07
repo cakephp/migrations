@@ -15,8 +15,6 @@ class AddForeignKey extends Action
 {
     /**
      * The foreign key to add
-     *
-     * @var \Migrations\Db\Table\ForeignKey
      */
     protected ForeignKey $foreignKey;
 

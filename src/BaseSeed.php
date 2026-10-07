@@ -25,31 +25,18 @@ class BaseSeed implements SeedInterface
 {
     /**
      * The Adapter instance
-     *
-     * @var \Migrations\Db\Adapter\AdapterInterface
      */
     protected ?AdapterInterface $adapter = null;
 
     /**
      * The ConsoleIo instance
-     *
-     * @var \Cake\Console\ConsoleIo
      */
     protected ?ConsoleIo $io = null;
 
     /**
      * The config instance.
-     *
-     * @var \Migrations\Config\ConfigInterface
      */
-    protected ?ConfigInterface $config;
-
-    /**
-     * No-op constructor.
-     */
-    public function __construct()
-    {
-    }
+    protected ?ConfigInterface $config = null;
 
     /**
      * {@inheritDoc}
@@ -81,7 +68,7 @@ class BaseSeed implements SeedInterface
      */
     public function getAdapter(): AdapterInterface
     {
-        if (!$this->adapter) {
+        if (!$this->adapter instanceof AdapterInterface) {
             throw new RuntimeException('Adapter not set.');
         }
 
@@ -130,10 +117,8 @@ class BaseSeed implements SeedInterface
     public function getName(): string
     {
         $name = static::class;
-        if (str_starts_with($name, 'Migrations\BaseSeed@anonymous')) {
-            if (preg_match('#[/\\\\]([a-zA-Z0-9_]+)\.php:#', $name, $matches)) {
-                $name = $matches[1];
-            }
+        if (str_starts_with($name, 'Migrations\BaseSeed@anonymous') && preg_match('#[/\\\\](\w+)\.php:#', $name, $matches)) {
+            return $matches[1];
         }
 
         return $name;
@@ -238,7 +223,7 @@ class BaseSeed implements SeedInterface
     public function call(string $seeder, array $options = []): void
     {
         $io = $this->getIo();
-        if ($io === null) {
+        if (!$io instanceof ConsoleIo) {
             throw new RuntimeException('ConsoleIo is required for calling other seeders.');
         }
         $io->out('');
@@ -278,8 +263,8 @@ class BaseSeed implements SeedInterface
 
         $options += [
             'connection' => $connection,
-            'plugin' => $pluginName ?? $config['plugin'],
-            'source' => $config['source'],
+            'plugin' => $pluginName ?? ($config instanceof ConfigInterface ? $config['plugin'] : null),
+            'source' => $config instanceof ConfigInterface ? $config['source'] : null,
         ];
         $factory = new ManagerFactory([
             'connection' => $options['connection'],
@@ -287,7 +272,7 @@ class BaseSeed implements SeedInterface
             'source' => $options['source'],
         ]);
         $io = $this->getIo();
-        if ($io === null) {
+        if (!$io instanceof ConsoleIo) {
             throw new RuntimeException('ConsoleIo is required for calling other seeders.');
         }
         $manager = $factory->createManager($io);

@@ -34,7 +34,7 @@ class MarkMigratedTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -51,7 +51,7 @@ class MarkMigratedTest extends TestCase
      *
      * @return void
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         $this->connection->execute('DROP TABLE IF EXISTS migrator_phinxlog');
@@ -65,7 +65,7 @@ class MarkMigratedTest extends TestCase
      *
      * @return void
      */
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations');
 
@@ -102,7 +102,7 @@ class MarkMigratedTest extends TestCase
         $this->assertEquals(4, $result->fetchColumn(0));
     }
 
-    public function testExecuteTarget()
+    public function testExecuteTarget(): void
     {
         $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150704160200');
         $this->assertExitSuccess();
@@ -157,7 +157,7 @@ class MarkMigratedTest extends TestCase
         );
     }
 
-    public function testExecuteTargetWithExclude()
+    public function testExecuteTargetWithExclude(): void
     {
         $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150724233100 --exclude');
         $this->assertExitSuccess();
@@ -206,7 +206,7 @@ class MarkMigratedTest extends TestCase
         );
     }
 
-    public function testExecuteTargetWithOnly()
+    public function testExecuteTargetWithOnly(): void
     {
         $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --target=20150724233100 --only');
         $this->assertExitSuccess();
@@ -252,7 +252,7 @@ class MarkMigratedTest extends TestCase
         );
     }
 
-    public function testExecuteInvalidUseOfExclude()
+    public function testExecuteInvalidUseOfExclude(): void
     {
         $this->exec('migrations mark_migrated --connection=test --source=TestsMigrations --exclude');
 
@@ -287,7 +287,7 @@ class MarkMigratedTest extends TestCase
         try {
             $this->exec('migrations mark_migrated -c test --plugin NotThere');
             $this->fail('Should raise an error or exit with an error');
-        } catch (MissingPluginException $e) {
+        } catch (MissingPluginException) {
             $this->assertTrue(true);
         }
         /** @var \Cake\Database\Connection $connection */

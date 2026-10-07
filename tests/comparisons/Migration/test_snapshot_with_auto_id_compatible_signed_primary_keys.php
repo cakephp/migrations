@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
+class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration implements DirectionalMigrationInterface
 {
     public bool $autoId = false;
 
@@ -11,7 +12,7 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
      * Up Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-up-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-up-method
      *
      * @return void
      */
@@ -375,8 +376,8 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
                 $this->foreignKey('category_id')
                     ->setReferencedTable('categories')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('NO_ACTION')
-                    ->setOnUpdate('NO_ACTION')
+                    ->setDelete('NO_ACTION')
+                    ->setUpdate('NO_ACTION')
                     ->setName('articles_category_fk')
             )
             ->update();
@@ -392,8 +393,8 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
                         'category_id',
                         'id',
                     ])
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
                     ->setName('orders_product_fk')
             )
             ->update();
@@ -403,8 +404,8 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
                 $this->foreignKey('category_id')
                     ->setReferencedTable('categories')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
                     ->setName('products_category_fk')
             )
             ->update();
@@ -414,7 +415,7 @@ class TestSnapshotWithAutoIdCompatibleSignedPrimaryKeys extends BaseMigration
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-down-method
      *
      * @return void
      */

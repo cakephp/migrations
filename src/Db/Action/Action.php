@@ -12,9 +12,6 @@ use Migrations\Db\Table\TableMetadata;
 
 abstract class Action
 {
-    /**
-     * @var \Migrations\Db\Table\TableMetadata
-     */
     protected TableMetadata $table;
 
     /**

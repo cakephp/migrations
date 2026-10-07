@@ -26,7 +26,7 @@ class EntryCommandTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
     }
@@ -36,7 +36,7 @@ class EntryCommandTest extends TestCase
      *
      * @return void
      */
-    public function testExecuteHelp()
+    public function testExecuteHelp(): void
     {
         $this->exec('migrations --help');
 
@@ -51,11 +51,14 @@ class EntryCommandTest extends TestCase
      *
      * @return void
      */
-    public function testExecuteMissingCommand()
+    public function testExecuteMissingCommand(): void
     {
         $this->exec('migrations derp');
 
         $this->assertExitError();
-        $this->assertErrorContains('Could not find migrations command named `derp`');
+        // CakePHP >= 5.4 rejects unknown subcommands before they reach EntryCommand,
+        // so only the parts both error messages have in common are asserted.
+        $this->assertErrorContains('derp');
+        $this->assertErrorContains('--help');
     }
 }

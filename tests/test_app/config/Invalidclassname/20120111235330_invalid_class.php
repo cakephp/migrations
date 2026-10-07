@@ -7,7 +7,7 @@ class DifferentClassName extends BaseMigration
     /**
      * Migrate Up.
      */
-    public function up()
+    public function up(): void
     {
         // do nothing
     }
@@ -15,7 +15,7 @@ class DifferentClassName extends BaseMigration
     /**
      * Migrate Down.
      */
-    public function down()
+    public function down(): void
     {
         // do nothing
     }

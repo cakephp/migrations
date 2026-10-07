@@ -16,8 +16,6 @@ class ColumnParser
 {
     /**
      * Regex used to parse the column definition passed through the shell
-     *
-     * @var string
      */
     protected string $regexpParseColumn = '/
         ^
@@ -36,8 +34,6 @@ class ColumnParser
 
     /**
      * Regex used to parse the field type and length
-     *
-     * @var string
      */
     protected string $regexpParseField = '/(\w+\??)\[([0-9,]+)\]/';
 
@@ -50,6 +46,7 @@ class ColumnParser
     public function parseFields(array $arguments): array
     {
         $fields = [];
+        $primaryKeys = [];
         $arguments = $this->validArguments($arguments);
         foreach ($arguments as $field) {
             preg_match($this->regexpParseColumn, $field, $matches);
@@ -74,7 +71,7 @@ class ColumnParser
                 $type = str_contains($type, '?') ? 'integer?' : 'integer';
             }
 
-            $nullable = str_contains($type, '?');
+            $nullable = str_contains((string)$type, '?');
             $type = $nullable ? str_replace('?', '', $type) : $type;
 
             [$type, $length] = $this->getTypeAndLength($field, $type);
@@ -94,8 +91,20 @@ class ColumnParser
                 }
             }
 
-            if ($isPrimaryKey === true && $type === 'integer') {
+            if ($isPrimaryKey) {
+                $primaryKeys[] = $field;
+            }
+
+            if ($isPrimaryKey && $type === 'integer') {
                 $fields[$field]['options']['autoIncrement'] = true;
+            }
+        }
+
+        // A composite primary key (e.g. a join table) must not auto-increment.
+        // Only a single integer primary key column gets auto-increment.
+        if (count($primaryKeys) > 1) {
+            foreach ($primaryKeys as $field) {
+                unset($fields[$field]['options']['autoIncrement']);
             }
         }
 
@@ -120,15 +129,16 @@ class ColumnParser
             $indexName = Hash::get($matches, 5);
 
             // Skip references - they create foreign keys, not indexes
-            if ($type && str_starts_with($type, 'references')) {
+            if ($type && str_starts_with((string)$type, 'references')) {
                 continue;
             }
-
-            if (
-                in_array($type, ['primary', 'primary_key'], true) ||
-                in_array($indexType, ['primary', 'primary_key'], true) ||
-                $indexType === null
-            ) {
+            if (in_array($type, ['primary', 'primary_key'], true)) {
+                continue;
+            }
+            if (in_array($indexType, ['primary', 'primary_key'], true)) {
+                continue;
+            }
+            if ($indexType === null) {
                 continue;
             }
 
@@ -202,7 +212,7 @@ class ColumnParser
             $indexName = Hash::get($matches, 5);
 
             // Check if type is 'references' or 'references?'
-            $isReference = str_starts_with($type, 'references');
+            $isReference = str_starts_with((string)$type, 'references');
             if (!$isReference) {
                 continue;
             }
@@ -213,7 +223,7 @@ class ColumnParser
             $referencedTable = $indexType;
             if (!$referencedTable) {
                 // Remove common suffixes like _id and pluralize
-                $referencedTable = preg_replace('/_id$/', '', $fieldName);
+                $referencedTable = (string)preg_replace('/_id$/', '', $fieldName);
                 $referencedTable = Inflector::pluralize($referencedTable);
             }
 
@@ -242,7 +252,7 @@ class ColumnParser
     {
         $collection = new Collection($arguments);
 
-        return $collection->filter(function ($value, $field) {
+        return $collection->filter(function ($value, $field): int|false {
             return preg_match($this->regexpParseColumn, (string)$field);
         })->toArray();
     }
@@ -259,11 +269,7 @@ class ColumnParser
     {
         if ($type && preg_match($this->regexpParseField, $type, $matches)) {
             $length = $matches[2];
-            if (str_contains($length, ',')) {
-                $length = array_map('intval', explode(',', $length));
-            } else {
-                $length = (int)$length;
-            }
+            $length = str_contains($length, ',') ? array_map(intval(...), explode(',', $length)) : (int)$length;
 
             return [$matches[1], $length];
         }
@@ -287,9 +293,9 @@ class ColumnParser
         $reflector = new ReflectionClass(AdapterInterface::class);
         $collection = new Collection($reflector->getConstants());
 
-        $validTypes = $collection->filter(function ($value, $constant) {
-            return substr($constant, 0, strlen('TYPE_')) === 'TYPE_' ||
-                   substr($constant, 0, strlen('PHINX_TYPE_')) === 'PHINX_TYPE_';
+        $validTypes = $collection->filter(function ($value, $constant): bool {
+            return str_starts_with($constant, 'TYPE_') ||
+                   str_starts_with($constant, 'PHINX_TYPE_');
         })->toArray();
         $fieldType = $type;
         if ($type === null || !in_array($type, $validTypes, true)) {
@@ -297,7 +303,7 @@ class ColumnParser
                 $fieldType = 'integer';
             } elseif ($field === 'id') {
                 $fieldType = 'integer';
-            } elseif (in_array($field, ['created', 'modified', 'updated'], true) || substr($field, -3) === '_at') {
+            } elseif (in_array($field, ['created', 'modified', 'updated'], true) || str_ends_with($field, '_at')) {
                 $fieldType = 'datetime';
             } elseif (in_array($field, ['latitude', 'longitude', 'lat', 'lng'], true)) {
                 $fieldType = 'decimal';
@@ -402,12 +408,12 @@ class ColumnParser
         }
 
         // Handle integers
-        if (preg_match('/^-?[0-9]+$/', $value)) {
+        if (preg_match('/^-?\d+$/', $value)) {
             return (int)$value;
         }
 
         // Handle floats
-        if (preg_match('/^-?[0-9]+\.[0-9]+$/', $value)) {
+        if (preg_match('/^-?\d+\.\d+$/', $value)) {
             return (float)$value;
         }
 

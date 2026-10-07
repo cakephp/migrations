@@ -30,10 +30,15 @@ use Throwable;
  */
 class RollbackCommand extends Command
 {
-    /**
-     * @use \Cake\Event\EventDispatcherTrait<\Migrations\Command\MigrateCommand>
-     */
     use EventDispatcherTrait;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Rollback reversible migrations.';
+    }
 
     /**
      * The default name added to the application command list
@@ -51,7 +56,7 @@ class RollbackCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'Rollback migrations to a specific migration',
@@ -154,7 +159,7 @@ class RollbackCommand extends Command
         $config = $manager->getConfig();
 
         $versionOrder = $config->getVersionOrder();
-        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
         $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
 
@@ -230,7 +235,6 @@ class RollbackCommand extends Command
             4 => '0101000000',
         ];
 
-        /** @var string $date */
         $dateLength = strlen($date);
         if (!isset($dateStrlenToAppend[$dateLength])) {
             throw new InvalidArgumentException('Invalid date. Format is YYYY[MM[DD[HH[II[SS]]]]].');

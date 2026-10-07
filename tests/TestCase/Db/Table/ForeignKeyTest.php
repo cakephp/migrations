@@ -11,10 +11,7 @@ use RuntimeException;
 
 class ForeignKeyTest extends TestCase
 {
-    /**
-     * @var ForeignKey
-     */
-    private $fk;
+    private ForeignKey $fk;
 
     protected function setUp(): void
     {
@@ -38,7 +35,7 @@ class ForeignKeyTest extends TestCase
         $this->assertEquals(['user_id', 'tenant_id'], $this->fk->getReferencedColumns());
     }
 
-    public function testOnDeleteSetNullCanBeSetThroughOptions()
+    public function testOnDeleteSetNullCanBeSetThroughOptions(): void
     {
         $this->assertEquals(
             ForeignKey::SET_NULL,
@@ -46,30 +43,22 @@ class ForeignKeyTest extends TestCase
         );
     }
 
-    public function testInitiallyActionsEmpty()
+    public function testInitiallyActionsEmpty(): void
     {
         $this->assertSame(ForeignKey::NO_ACTION, $this->fk->getOnDelete());
         $this->assertSame(ForeignKey::NO_ACTION, $this->fk->getOnUpdate());
     }
 
-    /**
-     * @param string $dirtyValue
-     * @param string $valueOfConstant
-     */
     #[DataProvider('actionsProvider')]
-    public function testBothActionsCanBeSetThroughSetters($dirtyValue, $valueOfConstant)
+    public function testBothActionsCanBeSetThroughSetters(string $dirtyValue, string $valueOfConstant): void
     {
         $this->fk->setOnDelete($dirtyValue)->setOnUpdate($dirtyValue);
         $this->assertEquals($valueOfConstant, $this->fk->getOnDelete());
         $this->assertEquals($valueOfConstant, $this->fk->getOnUpdate());
     }
 
-    /**
-     * @param string $dirtyValue
-     * @param string $valueOfConstant
-     */
     #[DataProvider('actionsProvider')]
-    public function testBothActionsCanBeSetThroughOptions($dirtyValue, $valueOfConstant)
+    public function testBothActionsCanBeSetThroughOptions(string $dirtyValue, string $valueOfConstant): void
     {
         $this->fk->setOptions([
             'delete' => $dirtyValue,
@@ -79,21 +68,21 @@ class ForeignKeyTest extends TestCase
         $this->assertEquals($valueOfConstant, $this->fk->getOnUpdate());
     }
 
-    public function testUnknownActionsNotAllowedThroughSetter()
+    public function testUnknownActionsNotAllowedThroughSetter(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         $this->fk->setOnDelete('i m dump');
     }
 
-    public function testUnknownActionsNotAllowedThroughOptions()
+    public function testUnknownActionsNotAllowedThroughOptions(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         $this->fk->setOptions(['update' => 'no yu a dumb']);
     }
 
-    public static function actionsProvider()
+    public static function actionsProvider(): array
     {
         return [
             [ForeignKey::CASCADE, ForeignKey::CASCADE],
@@ -107,7 +96,7 @@ class ForeignKeyTest extends TestCase
         ];
     }
 
-    public function testSetOptionThrowsExceptionIfOptionIsNotString()
+    public function testSetOptionThrowsExceptionIfOptionIsNotString(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('"0" is not a valid foreign key option');

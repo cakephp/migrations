@@ -15,8 +15,6 @@ class RemoveColumn extends Action
 {
     /**
      * The column to be removed
-     *
-     * @var \Migrations\Db\Table\Column
      */
     protected Column $column;
 

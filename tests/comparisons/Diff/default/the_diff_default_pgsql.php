@@ -2,14 +2,15 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TheDiffDefaultPgsql extends BaseMigration
+class TheDiffDefaultPgsql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-up-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-up-method
      *
      * @return void
      */
@@ -64,8 +65,8 @@ class TheDiffDefaultPgsql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('RESTRICT')
-                    ->setOnUpdate('RESTRICT')
+                    ->setDelete('RESTRICT')
+                    ->setUpdate('RESTRICT')
             )
             ->update();
 
@@ -114,8 +115,8 @@ class TheDiffDefaultPgsql extends BaseMigration
                 $this->foreignKey('category_id')
                     ->setReferencedTable('categories')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('NO_ACTION')
-                    ->setOnUpdate('NO_ACTION')
+                    ->setDelete('NO_ACTION')
+                    ->setUpdate('NO_ACTION')
             )
             ->update();
 
@@ -126,7 +127,7 @@ class TheDiffDefaultPgsql extends BaseMigration
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-down-method
      *
      * @return void
      */
@@ -207,8 +208,8 @@ class TheDiffDefaultPgsql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
             )
             ->update();
 

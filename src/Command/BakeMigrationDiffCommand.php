@@ -33,6 +33,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Error;
+use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Migration\ManagerFactory;
 use Migrations\Util\TableFinder;
 use Migrations\Util\UtilTrait;
@@ -49,29 +50,21 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
     /**
      * Array of migrations that have already been migrated
-     *
-     * @var array
      */
     protected array $migratedItems = [];
 
     /**
      * Path to the migration files
-     *
-     * @var string
      */
     protected string $migrationsPath;
 
     /**
      * Migration files that are stored in the self::migrationsPath
-     *
-     * @var array
      */
     protected array $migrationsFiles = [];
 
     /**
      * Name of the phinx log table
-     *
-     * @var string
      */
     protected string $phinxTable;
 
@@ -112,6 +105,14 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
+    public static function getDescription(): string
+    {
+        return 'Create a migration containing the difference between the current schema and migration state.';
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function defaultName(): string
     {
         return 'bake migration_diff';
@@ -120,7 +121,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->setup($args);
 
@@ -169,13 +170,18 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
         $migratedItems = [];
         if ($tableExists) {
-            $query = $connection->selectQuery();
-            /** @var array $migratedItems */
-            $migratedItems = $query
+            $query = $connection->selectQuery()
                 ->select(['version'])
                 ->from($this->phinxTable)
-                ->orderBy(['version DESC'])
-                ->execute()->fetchAll('assoc');
+                ->orderBy(['version DESC']);
+
+            // In unified table mode, filter by the current plugin context
+            if ($this->phinxTable === UnifiedMigrationsTableStorage::TABLE_NAME) {
+                $query->where(['plugin IS' => $this->plugin]);
+            }
+
+            /** @var array $migratedItems */
+            $migratedItems = $query->execute()->fetchAll('assoc');
         }
 
         $this->migratedItems = $migratedItems;
@@ -265,7 +271,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             foreach ($addedColumns as $columnName) {
                 $column = $this->safeGetColumn($currentSchema, $columnName);
                 /** @var int $key */
-                $key = array_search($columnName, $currentColumns);
+                $key = array_search($columnName, $currentColumns, true);
                 if ($key > 0) {
                     $column['after'] = $currentColumns[$key - 1];
                 }
@@ -279,7 +285,18 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // changes in columns meta-data
             foreach ($currentColumns as $columnName) {
                 $column = $this->safeGetColumn($currentSchema, $columnName);
+                if ($column === null) {
+                    continue;
+                }
+                if (!in_array($columnName, $oldColumns, true)) {
+                    continue;
+                }
+
                 $oldColumn = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
+                if ($oldColumn === null) {
+                    continue;
+                }
+
                 unset(
                     $column['collate'],
                     $column['fixed'],
@@ -287,10 +304,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                     $oldColumn['fixed'],
                 );
 
-                if (
-                    in_array($columnName, $oldColumns, true) &&
-                    $column !== $oldColumn
-                ) {
+                if ($column !== $oldColumn) {
                     $changedAttributes = array_diff_assoc($column, $oldColumn);
 
                     foreach (['type', 'length', 'null', 'default'] as $attribute) {
@@ -353,16 +367,14 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 $this->templateData[$table]['columns']['remove'] = [];
             }
             $removedColumns = array_diff($oldColumns, $currentColumns);
-            if ($removedColumns) {
-                foreach ($removedColumns as $columnName) {
-                    $column = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
-                    /** @var int $key */
-                    $key = array_search($columnName, $oldColumns);
-                    if ($key > 0) {
-                        $column['after'] = $oldColumns[$key - 1];
-                    }
-                    $this->templateData[$table]['columns']['remove'][$columnName] = $column;
+            foreach ($removedColumns as $columnName) {
+                $column = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
+                /** @var int $key */
+                $key = array_search($columnName, $oldColumns, true);
+                if ($key > 0) {
+                    $column['after'] = $oldColumns[$key - 1];
                 }
+                $this->templateData[$table]['columns']['remove'][$columnName] = $column;
             }
         }
     }
@@ -385,9 +397,10 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // brand new constraints
             $addedConstraints = array_diff($currentConstraints, $oldConstraints);
             foreach ($addedConstraints as $constraintName) {
-                $this->templateData[$table]['constraints']['add'][$constraintName] =
-                    $currentSchema->getConstraint($constraintName);
                 $constraint = $currentSchema->getConstraint($constraintName);
+                if ($constraint === null) {
+                    continue;
+                }
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['add'][$constraintName] = $constraint;
                 } else {
@@ -399,13 +412,18 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             // if present in both, check if they are the same : if not, remove the old one and add the new one
             foreach ($currentConstraints as $constraintName) {
                 $constraint = $currentSchema->getConstraint($constraintName);
+                if ($constraint === null) {
+                    continue;
+                }
 
+                $oldConstraint = $this->dumpSchema[$table]->getConstraint($constraintName);
                 if (
                     in_array($constraintName, $oldConstraints, true) &&
-                    $constraint !== $this->dumpSchema[$table]->getConstraint($constraintName)
+                    $constraint !== $oldConstraint
                 ) {
-                    $this->templateData[$table]['constraints']['remove'][$constraintName] =
-                        $this->dumpSchema[$table]->getConstraint($constraintName);
+                    if ($oldConstraint !== null) {
+                        $this->templateData[$table]['constraints']['remove'][$constraintName] = $oldConstraint;
+                    }
                     $this->templateData[$table]['constraints']['add'][$constraintName] =
                         $constraint;
                 }
@@ -415,6 +433,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             $removedConstraints = array_diff($oldConstraints, $currentConstraints);
             foreach ($removedConstraints as $constraintName) {
                 $constraint = $this->dumpSchema[$table]->getConstraint($constraintName);
+                if ($constraint === null) {
+                    continue;
+                }
                 if ($constraint['type'] === TableSchema::CONSTRAINT_FOREIGN) {
                     $this->templateData[$table]['constraints']['remove'][$constraintName] = $constraint;
                 } else {
@@ -469,10 +490,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
             $removedIndexes = array_diff($oldIndexes, $currentIndexes);
             $parts = [];
-            if ($removedIndexes) {
-                foreach ($removedIndexes as $index) {
-                    $parts[$index] = $this->dumpSchema[$table]->getIndex($index);
-                }
+            foreach ($removedIndexes as $index) {
+                $parts[$index] = $this->dumpSchema[$table]->getIndex($index);
             }
             $this->templateData[$table]['indexes']['remove'] = array_merge(
                 $this->templateData[$table]['indexes']['remove'],
@@ -484,22 +503,56 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * Checks that the migrations history is in sync with the migrations files
      *
+     * Compares the last migrated version against the last migration file,
+     * but only considers migrations that belong to the current context (app or plugin).
+     * This avoids false positives when migrations from other plugins have been
+     * run more recently than the last app migration.
+     *
+     * @see https://github.com/cakephp/migrations/issues/1060
      * @return bool Whether migrations history is sync or not
      */
     protected function checkSync(): bool
     {
+        // No files and no migrations - nothing to check
         if (!$this->migrationsFiles && !$this->migratedItems) {
             return true;
         }
 
-        if ($this->migratedItems) {
-            $lastVersion = $this->migratedItems[0]['version'];
-            $lastFile = end($this->migrationsFiles);
-
-            return $lastFile && str_contains($lastFile, (string)$lastVersion);
+        // No files in this context - nothing to sync
+        // This allows baking a snapshot for a new plugin even when
+        // the unified migrations table has records from other contexts
+        if (!$this->migrationsFiles) {
+            return true;
         }
 
-        return false;
+        // Have files - need to verify they're synced
+        // Extract version numbers from current context's migration files
+        $fileVersions = [];
+        foreach ($this->migrationsFiles as $file) {
+            $filename = basename((string)$file);
+            if (preg_match('/^(\d+)_/', $filename, $matches)) {
+                $fileVersions[] = $matches[1];
+            }
+        }
+
+        // Filter migrated versions to only those that have corresponding files in this context
+        $contextMigratedVersions = [];
+        foreach ($this->migratedItems as $item) {
+            if (in_array((string)$item['version'], $fileVersions, true)) {
+                $contextMigratedVersions[] = (string)$item['version'];
+            }
+        }
+
+        if ($contextMigratedVersions === []) {
+            // No migrations from this context have been run yet
+            return false;
+        }
+
+        // Get the most recent migrated version within this context
+        $lastVersion = max($contextMigratedVersions);
+        $lastFile = end($this->migrationsFiles);
+
+        return $lastFile && str_contains((string)$lastFile, $lastVersion);
     }
 
     /**
@@ -515,6 +568,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     {
         $io->out('Your migrations history is empty and you do not have any migrations files.');
         $io->out('Falling back to baking a snapshot...');
+
         $newArgs = [];
         $newArgs[] = $name;
 
@@ -604,10 +658,13 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
         }
 
         foreach ($tablesToDescribe as $table) {
-            if (preg_match('/^.*phinxlog$/', $table) === 1) {
+            if (preg_match('/^.*phinxlog$/', (string)$table) === 1) {
                 continue;
             }
-            if ($table === 'cake_migrations' || $table === 'cake_seeds') {
+            if ($table === 'cake_migrations') {
+                continue;
+            }
+            if ($table === 'cake_seeds') {
                 continue;
             }
 

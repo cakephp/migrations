@@ -8,18 +8,18 @@ use PHPUnit\Framework\TestCase;
 
 class LiteralTest extends TestCase
 {
-    public function testToString()
+    public function testToString(): void
     {
         $str = 'test1';
         $instance = new Literal($str);
         $this->assertEquals($str, (string)$instance);
     }
 
-    public function testFrom()
+    public function testFrom(): void
     {
         $str = 'test1';
         $instance = Literal::from($str);
-        $this->assertInstanceOf('\Migrations\Db\Literal', $instance);
+        $this->assertInstanceOf(Literal::class, $instance);
         $this->assertEquals($str, (string)$instance);
     }
 }

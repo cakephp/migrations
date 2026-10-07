@@ -23,11 +23,17 @@ use RuntimeException;
 class ForeignKey extends DatabaseForeignKey
 {
     public const CASCADE = 'CASCADE';
+
     public const RESTRICT = 'RESTRICT';
+
     public const SET_NULL = 'SET NULL';
+
     public const NO_ACTION = 'NO ACTION';
+
     public const DEFERRED = 'DEFERRABLE INITIALLY DEFERRED';
+
     public const IMMEDIATE = 'DEFERRABLE INITIALLY IMMEDIATE';
+
     public const NOT_DEFERRED = 'NOT DEFERRABLE';
 
     /**
@@ -87,6 +93,19 @@ class ForeignKey extends DatabaseForeignKey
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * Narrows the return type from the parent's ?array to array,
+     * since $columns is always initialized as [] in this class.
+     *
+     * @return array<string>
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
      * Utility method that maps an array of index options to this object's methods.
      *
      * @param array<string, mixed> $options Options
@@ -100,11 +119,11 @@ class ForeignKey extends DatabaseForeignKey
                 throw new RuntimeException(sprintf('"%s" is not a valid foreign key option.', $option));
             }
 
-            // handle $options['delete'] as $options['update']
+            // handle $options['delete'] and $options['update']
             if ($option === 'delete') {
-                $this->setOnDelete($value);
+                $this->delete = $this->normalizeAction($value);
             } elseif ($option === 'update') {
-                $this->setOnUpdate($value);
+                $this->update = $this->normalizeAction($value);
             } elseif ($option === 'deferrable') {
                 $this->setDeferrableMode($value);
             } else {
@@ -246,7 +265,9 @@ class ForeignKey extends DatabaseForeignKey
      */
     public function getOnDelete(): ?string
     {
-        return $this->mapAction($this->getDelete());
+        $delete = $this->getDelete();
+
+        return $delete !== null ? $this->mapAction($delete) : null;
     }
 
     /**
@@ -271,6 +292,8 @@ class ForeignKey extends DatabaseForeignKey
      */
     public function getOnUpdate(): ?string
     {
-        return $this->mapAction($this->getUpdate());
+        $update = $this->getUpdate();
+
+        return $update !== null ? $this->mapAction($update) : null;
     }
 }

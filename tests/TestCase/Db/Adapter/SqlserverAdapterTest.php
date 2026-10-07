@@ -22,13 +22,12 @@ use PHPUnit\Framework\TestCase;
 
 class SqlserverAdapterTest extends TestCase
 {
-    /**
-     * @var \Migrations\Db\Adapter\SqlServerAdapter
-     */
-    private $adapter;
+    private SqlserverAdapter $adapter;
 
     private array $config;
+
     private StubConsoleOutput $out;
+
     private ConsoleIo $io;
 
     protected function setUp(): void
@@ -73,12 +72,12 @@ class SqlserverAdapterTest extends TestCase
         return $this->io;
     }
 
-    public function testConnection()
+    public function testConnection(): void
     {
         $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
-    public function testCreatingTheSchemaTableOnConnect()
+    public function testCreatingTheSchemaTableOnConnect(): void
     {
         $this->adapter->connect();
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
@@ -89,25 +88,25 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
     }
 
-    public function testSchemaTableIsCreatedWithPrimaryKey()
+    public function testSchemaTableIsCreatedWithPrimaryKey(): void
     {
         $this->adapter->connect();
         new Table($this->adapter->getSchemaTableName(), [], $this->adapter);
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));
     }
 
-    public function testQuoteTableName()
+    public function testQuoteTableName(): void
     {
         $this->assertEquals('[dbo].[test_table]', $this->adapter->quoteTableName('test_table'));
         $this->assertEquals('[schema].[table]', $this->adapter->quoteTableName('schema.table'));
     }
 
-    public function testQuoteColumnName()
+    public function testQuoteColumnName(): void
     {
         $this->assertEquals('[test_column]', $this->adapter->quoteColumnName('test_column'));
     }
 
-    public function testCreateTable()
+    public function testCreateTable(): void
     {
         $table = new Table('ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -120,7 +119,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableWithSchema()
+    public function testCreateTableWithSchema(): void
     {
         $this->adapter->createSchema('nschema');
 
@@ -138,7 +137,7 @@ class SqlserverAdapterTest extends TestCase
         $this->adapter->dropSchema('nschema');
     }
 
-    public function testCreateTableCustomIdColumn()
+    public function testCreateTableCustomIdColumn(): void
     {
         $table = new Table('ntable', ['id' => 'custom_id'], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -151,7 +150,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableIdentityColumn()
+    public function testCreateTableIdentityColumn(): void
     {
         $table = new Table('ntable', ['id' => false, 'primary_key' => 'id'], $this->adapter);
         $table->addColumn('id', 'integer', ['identity' => true])
@@ -160,7 +159,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ntable', 'id'));
     }
 
-    public function testCreateTableWithNoPrimaryKey()
+    public function testCreateTableWithNoPrimaryKey(): void
     {
         $options = [
             'id' => false,
@@ -171,7 +170,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('atable', 'id'));
     }
 
-    public function testCreateTableWithConflictingPrimaryKeys()
+    public function testCreateTableWithConflictingPrimaryKeys(): void
     {
         $options = [
             'primary_key' => 'user_id',
@@ -183,7 +182,7 @@ class SqlserverAdapterTest extends TestCase
         $table->addColumn('user_id', 'integer')->save();
     }
 
-    public function testCreateTableWithPrimaryKeySetToImplicitId()
+    public function testCreateTableWithPrimaryKeySetToImplicitId(): void
     {
         $options = [
             'primary_key' => 'id',
@@ -195,7 +194,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithPrimaryKeyArraySetToImplicitId()
+    public function testCreateTableWithPrimaryKeyArraySetToImplicitId(): void
     {
         $options = [
             'primary_key' => ['id'],
@@ -207,7 +206,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithMultiplePrimaryKeyArraySetToImplicitId()
+    public function testCreateTableWithMultiplePrimaryKeyArraySetToImplicitId(): void
     {
         $options = [
             'primary_key' => ['id', 'user_id'],
@@ -218,7 +217,7 @@ class SqlserverAdapterTest extends TestCase
         $table->addColumn('user_id', 'integer')->save();
     }
 
-    public function testCreateTableWithMultiplePrimaryKeys()
+    public function testCreateTableWithMultiplePrimaryKeys(): void
     {
         $options = [
             'id' => false,
@@ -233,7 +232,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_email']));
     }
 
-    public function testCreateTableWithPrimaryKeyAsUuid()
+    public function testCreateTableWithPrimaryKeyAsUuid(): void
     {
         $options = [
             'id' => false,
@@ -247,7 +246,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithPrimaryKeyAsBinaryUuid()
+    public function testCreateTableWithPrimaryKeyAsBinaryUuid(): void
     {
         $options = [
             'id' => false,
@@ -261,7 +260,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithMultipleIndexes()
+    public function testCreateTableWithMultipleIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -275,7 +274,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_name']));
     }
 
-    public function testCreateTableWithUniqueIndexes()
+    public function testCreateTableWithUniqueIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -285,7 +284,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
     }
 
-    public function testCreateTableWithNamedIndexes()
+    public function testCreateTableWithNamedIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -319,7 +318,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertStringContainsString('([email]) WHERE is_verified = true', $indexQuery);
     }
 
-    public function testAddPrimaryKey()
+    public function testAddPrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false], $this->adapter);
         $table
@@ -333,7 +332,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testChangePrimaryKey()
+    public function testChangePrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -350,7 +349,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column2', 'column3']));
     }
 
-    public function testDropPrimaryKey()
+    public function testDropPrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -364,7 +363,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testHasPrimaryKeyMultipleColumns()
+    public function testHasPrimaryKeyMultipleColumns(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => ['column1', 'column2', 'column3']], $this->adapter);
         $table
@@ -378,7 +377,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($table->hasPrimaryKey(['column1', 'column2', 'column3', 'column4']));
     }
 
-    public function testHasPrimaryKeyCaseSensitivity()
+    public function testHasPrimaryKeyCaseSensitivity(): void
     {
         $table = new Table('table', ['id' => false, 'primary_key' => ['column1']], $this->adapter);
         $table
@@ -389,7 +388,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($table->hasPrimaryKey('cOlUmN1'));
     }
 
-    public function testChangeCommentFails()
+    public function testChangeCommentFails(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -401,7 +400,7 @@ class SqlserverAdapterTest extends TestCase
             ->save();
     }
 
-    public function testRenameTable()
+    public function testRenameTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -412,7 +411,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable('table2'));
     }
 
-    public function testAddColumn()
+    public function testAddColumn(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -422,7 +421,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($table->hasColumn('email'));
     }
 
-    public function testAddColumnWithDefaultValue()
+    public function testAddColumnWithDefaultValue(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -436,7 +435,7 @@ class SqlserverAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithDefaultZero()
+    public function testAddColumnWithDefaultZero(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -451,7 +450,7 @@ class SqlserverAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithDefaultNull()
+    public function testAddColumnWithDefaultNull(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -465,7 +464,7 @@ class SqlserverAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithNotNullableNoDefault()
+    public function testAddColumnWithNotNullableNoDefault(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table
@@ -480,7 +479,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertNull($columns[1]->getDefault());
     }
 
-    public function testAddColumnWithDefaultBool()
+    public function testAddColumnWithDefaultBool(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -499,7 +498,7 @@ class SqlserverAdapterTest extends TestCase
         }
     }
 
-    public function testRenameColumn()
+    public function testRenameColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -511,7 +510,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column2'));
     }
 
-    public function testRenamingANonExistentColumn()
+    public function testRenamingANonExistentColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -524,13 +523,13 @@ class SqlserverAdapterTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
+                'Expected exception of type InvalidArgumentException, got ' . $e::class,
             );
             $this->assertEquals('The specified column does not exist: column2', $e->getMessage());
         }
     }
 
-    public function testChangeColumnType()
+    public function testChangeColumnType(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -549,7 +548,7 @@ class SqlserverAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnNameAndNull()
+    public function testChangeColumnNameAndNull(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['null' => false])
@@ -569,7 +568,7 @@ class SqlserverAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnDefaults()
+    public function testChangeColumnDefaults(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test'])
@@ -591,7 +590,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertSame('another test', $columns[1]->getDefault());
     }
 
-    public function testChangeColumnDefaultToNull()
+    public function testChangeColumnDefaultToNull(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['null' => true, 'default' => 'test'])
@@ -606,7 +605,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertNull($columns[1]->getDefault());
     }
 
-    public function testChangeColumnDefaultToZero()
+    public function testChangeColumnDefaultToZero(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'integer')
@@ -621,7 +620,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertSame(0, $columns[1]->getDefault());
     }
 
-    public function testDropColumn()
+    public function testDropColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -631,7 +630,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('t', 'column1'));
     }
 
-    public static function columnsProvider()
+    public static function columnsProvider(): array
     {
         return [
             ['column1', 'string', ['null' => true, 'default' => null]],
@@ -655,7 +654,7 @@ class SqlserverAdapterTest extends TestCase
     }
 
     #[DataProvider('columnsProvider')]
-    public function testGetColumns($colName, $type, $options, $actualType = null)
+    public function testGetColumns(string $colName, string $type, array $options, ?string $actualType = null): void
     {
         $table = new Table('t', [], $this->adapter);
         $table
@@ -671,7 +670,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals($actualType ?? $type, $columns[1]->getType());
     }
 
-    public function testAddIndex()
+    public function testAddIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -682,7 +681,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
     }
 
-    public function testAddIndexWithSort()
+    public function testAddIndexWithSort(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -710,7 +709,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals($emailOrder['sort_order'], 'ASC');
     }
 
-    public function testAddIndexWithIncludeColumns()
+    public function testAddIndexWithIncludeColumns(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -747,7 +746,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals($emailOrder['included'], 1);
     }
 
-    public function testGetIndexes()
+    public function testGetIndexes(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -771,7 +770,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals(['email', 'username'], $indexes[2]['columns']);
     }
 
-    public function testDropIndex()
+    public function testDropIndex(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -812,7 +811,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($table4->hasIndex(['fname', 'lname']));
     }
 
-    public function testDropIndexByName()
+    public function testDropIndexByName(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -838,7 +837,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($table2->hasIndex(['fname', 'lname']));
     }
 
-    public function testAddForeignKey()
+    public function testAddForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -856,7 +855,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id'], 'fk1'));
     }
 
-    public function testDropForeignKey()
+    public function testDropForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -872,7 +871,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyWithMultipleColumns()
+    public function testDropForeignKeyWithMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -922,7 +921,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
     }
 
-    public function testDropForeignKeyWithIdenticalMultipleColumns()
+    public function testDropForeignKeyWithIdenticalMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -969,11 +968,8 @@ class SqlserverAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @param array $columns
-     */
     #[DataProvider('nonExistentForeignKeyColumnsProvider')]
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1001,7 +997,7 @@ class SqlserverAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), $columns);
     }
 
-    public function testDropForeignKeyCaseSensitivity()
+    public function testDropForeignKeyCaseSensitivity(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1023,7 +1019,7 @@ class SqlserverAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), ['ref_table_id']);
     }
 
-    public function testDropForeignKeyByName()
+    public function testDropForeignKeyByName(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1044,7 +1040,7 @@ class SqlserverAdapterTest extends TestCase
     }
 
     #[DataProvider('provideForeignKeysToCheck')]
-    public function testHasForeignKey($tableDef, $key, $exp)
+    public function testHasForeignKey(string $tableDef, string|array $key, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
@@ -1052,7 +1048,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
-    public static function provideForeignKeysToCheck()
+    public static function provideForeignKeysToCheck(): array
     {
         return [
             ['create table t(a int)', 'a', false],
@@ -1079,7 +1075,7 @@ class SqlserverAdapterTest extends TestCase
         ];
     }
 
-    public function testHasNamedForeignKey()
+    public function testHasNamedForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1102,13 +1098,13 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'my_constraint2'));
     }
 
-    public function testHasDatabase()
+    public function testHasDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
         $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
-    public function testDropDatabase()
+    public function testDropDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('phinx_temp_database'));
         $this->adapter->createDatabase('phinx_temp_database');
@@ -1116,13 +1112,13 @@ class SqlserverAdapterTest extends TestCase
         $this->adapter->dropDatabase('phinx_temp_database');
     }
 
-    public function testCreateSchema()
+    public function testCreateSchema(): void
     {
         $this->adapter->createSchema('foo');
         $this->assertTrue($this->adapter->hasSchema('foo'));
     }
 
-    public function testDropSchema()
+    public function testDropSchema(): void
     {
         $this->adapter->createSchema('foo');
         $this->assertTrue($this->adapter->hasSchema('foo'));
@@ -1130,7 +1126,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasSchema('foo'));
     }
 
-    public function testDropAllSchemas()
+    public function testDropAllSchemas(): void
     {
         $this->adapter->createSchema('foo');
         $this->adapter->createSchema('bar');
@@ -1142,14 +1138,14 @@ class SqlserverAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasSchema('bar'));
     }
 
-    public function testQuoteSchemaName()
+    public function testQuoteSchemaName(): void
     {
         $this->assertEquals('[schema]', $this->adapter->quoteSchemaName('schema'));
         // Dotted schema names are not supported
         $this->assertEquals('[schema].[schema]', $this->adapter->quoteSchemaName('schema.schema'));
     }
 
-    public function testAddColumnComment()
+    public function testAddColumnComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => $comment = 'Comments from column "field1"'])
@@ -1161,7 +1157,7 @@ class SqlserverAdapterTest extends TestCase
     }
 
     #[Depends('testAddColumnComment')]
-    public function testChangeColumnComment()
+    public function testChangeColumnComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => 'Comments from column "field1"'])
@@ -1176,7 +1172,7 @@ class SqlserverAdapterTest extends TestCase
     }
 
     #[Depends('testAddColumnComment')]
-    public function testRemoveColumnComment()
+    public function testRemoveColumnComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => 'Comments from column "field1"'])
@@ -1193,7 +1189,7 @@ class SqlserverAdapterTest extends TestCase
     /**
      * Test that column names are properly escaped when creating Foreign Keys
      */
-    public function testForignKeysArePropertlyEscaped()
+    public function testForignKeysArePropertlyEscaped(): void
     {
         $userId = 'user';
         $sessionId = 'session';
@@ -1209,7 +1205,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertTrue($foreign->hasForeignKey('user'));
     }
 
-    public function testBulkInsertData()
+    public function testBulkInsertData(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1245,7 +1241,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals(3, $rows[2]['column2']);
     }
 
-    public function testBulkInsertLiteral()
+    public function testBulkInsertLiteral(): void
     {
         $data = [
             [
@@ -1271,12 +1267,12 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals('value1', $rows[0]['column1']);
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column2']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column2']);
         $this->assertEquals('2024-01-01 00:00:00.0000000', $rows[1]['column2']);
         $this->assertEquals('2025-01-01 00:00:00.0000000', $rows[2]['column2']);
     }
 
-    public function testInsertData()
+    public function testInsertData(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1309,7 +1305,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals(3, $rows[2]['column2']);
     }
 
-    public function testInsertLiteral()
+    public function testInsertLiteral(): void
     {
         $data = [
             [
@@ -1340,12 +1336,12 @@ class SqlserverAdapterTest extends TestCase
         $this->assertEquals('test', $rows[0]['column2']);
         $this->assertEquals('test', $rows[1]['column2']);
         $this->assertEquals('foo', $rows[2]['column2']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column3']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column3']);
         $this->assertEquals('2024-01-01 00:00:00.0000000', $rows[1]['column3']);
         $this->assertEquals('2025-01-01 00:00:00.0000000', $rows[2]['column3']);
     }
 
-    public function testTruncateTable()
+    public function testTruncateTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1369,7 +1365,7 @@ class SqlserverAdapterTest extends TestCase
         $this->assertCount(0, $rows);
     }
 
-    public function testDumpCreateTableAndThenInsert()
+    public function testDumpCreateTableAndThenInsert(): void
     {
         $options = $this->adapter->getOptions();
         $options['dryrun'] = true;
@@ -1393,7 +1389,7 @@ class SqlserverAdapterTest extends TestCase
 CREATE TABLE [dbo].[table1] ([column1] NVARCHAR(255) NOT NULL, [column2] INTEGER DEFAULT NULL, CONSTRAINT PK_table1 PRIMARY KEY ([column1]));
 INSERT INTO [dbo].[table1] ([column1], [column2]) VALUES ('id1', 1);
 OUTPUT;
-        $output = join("\n", $this->out->messages());
+        $output = implode("\n", $this->out->messages());
         $actualOutput = str_replace("\r\n", "\n", $output);
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
@@ -1401,7 +1397,7 @@ OUTPUT;
     /**
      * Tests interaction with the query builder
      */
-    public function testQueryBuilder()
+    public function testQueryBuilder(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -1442,7 +1438,7 @@ OUTPUT;
         $stm->closeCursor();
     }
 
-    public function testQueryWithParams()
+    public function testQueryWithParams(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -1473,7 +1469,7 @@ OUTPUT;
         $this->assertEquals(3, $res[0]['c']);
     }
 
-    public function testIdentityInsert()
+    public function testIdentityInsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('name', 'string')
@@ -1500,7 +1496,7 @@ OUTPUT;
         $this->assertEquals(50, $res[1]['id']);
     }
 
-    public function testInsertOrSkipThrowsException()
+    public function testInsertOrSkipThrowsException(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])

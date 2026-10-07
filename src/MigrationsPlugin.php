@@ -26,6 +26,7 @@ use Migrations\Command\DumpCommand;
 use Migrations\Command\EntryCommand;
 use Migrations\Command\MarkMigratedCommand;
 use Migrations\Command\MigrateCommand;
+use Migrations\Command\ResetCommand;
 use Migrations\Command\RollbackCommand;
 use Migrations\Command\SeedCommand;
 use Migrations\Command\SeedResetCommand;
@@ -73,6 +74,7 @@ class MigrationsPlugin extends BasePlugin
             DumpCommand::class,
             MarkMigratedCommand::class,
             MigrateCommand::class,
+            ResetCommand::class,
             RollbackCommand::class,
             StatusCommand::class,
         ];

@@ -8,11 +8,13 @@ declare(strict_types=1);
 
 namespace Migrations\Db;
 
+use Stringable;
+
 /**
  * Represent a value that should be used as a literal value when being
  * interpolated into SQL commands.
  */
-class Literal
+class Literal implements Stringable
 {
     /**
      * @var string The literal's value

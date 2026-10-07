@@ -30,24 +30,18 @@ class BaseMigration implements MigrationInterface
 {
     /**
      * The Adapter instance
-     *
-     * @var \Migrations\Db\Adapter\AdapterInterface
      */
     protected ?AdapterInterface $adapter = null;
 
     /**
      * The ConsoleIo instance
-     *
-     * @var \Cake\Console\ConsoleIo
      */
     protected ?ConsoleIo $io = null;
 
     /**
      * The config instance.
-     *
-     * @var \Migrations\Config\ConfigInterface
      */
-    protected ?ConfigInterface $config;
+    protected ?ConfigInterface $config = null;
 
     /**
      * List of all the table objects created by this migration
@@ -58,15 +52,11 @@ class BaseMigration implements MigrationInterface
 
     /**
      * Is migrating up prop
-     *
-     * @var bool
      */
     protected bool $isMigratingUp = true;
 
     /**
      * The version number.
-     *
-     * @var int
      */
     protected int $version;
 
@@ -77,8 +67,6 @@ class BaseMigration implements MigrationInterface
      * This option is global for all tables created in the migration file.
      * If you set it to false, you have to manually add the primary keys for your
      * tables using the Migrations\Table::addPrimaryKey() method
-     *
-     * @var bool
      */
     public bool $autoId = true;
 
@@ -110,7 +98,7 @@ class BaseMigration implements MigrationInterface
      */
     public function getAdapter(): AdapterInterface
     {
-        if (!$this->adapter) {
+        if (!$this->adapter instanceof AdapterInterface) {
             throw new RuntimeException('Adapter not set.');
         }
 
@@ -458,18 +446,13 @@ class BaseMigration implements MigrationInterface
      */
     public function preFlightCheck(): void
     {
-        if (method_exists($this, MigrationInterface::CHANGE)) {
-            if (
-                method_exists($this, MigrationInterface::UP) ||
-                method_exists($this, MigrationInterface::DOWN)
-            ) {
-                $io = $this->getIo();
-                if ($io) {
-                    $io->out(
-                        '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
-                        ' <warning>Ignoring up() and down()</warning>.',
-                    );
-                }
+        if (method_exists($this, MigrationInterface::CHANGE) && (method_exists($this, MigrationInterface::UP) || method_exists($this, MigrationInterface::DOWN))) {
+            $io = $this->getIo();
+            if ($io instanceof ConsoleIo) {
+                $io->out(
+                    '<comment>warning</comment> Migration contains both change() and up()/down() methods.' .
+                    ' <warning>Ignoring up() and down()</warning>.',
+                );
             }
         }
     }
@@ -496,6 +479,66 @@ class BaseMigration implements MigrationInterface
     public function shouldExecute(): bool
     {
         return true;
+    }
+
+    /**
+     * Creates a view.
+     *
+     * This is a convenience method that creates a dummy table to associate the view with.
+     * Views are not directly associated with tables, but the Table class is used to
+     * manage the migration actions.
+     *
+     * @param string $viewName View name
+     * @param string $definition SQL SELECT statement for the view
+     * @param array<string, mixed> $options View options
+     * @return void
+     */
+    public function createView(string $viewName, string $definition, array $options = []): void
+    {
+        $table = $this->table($viewName);
+        $table->createView($viewName, $definition, $options)->save();
+    }
+
+    /**
+     * Drops a view.
+     *
+     * @param string $viewName View name
+     * @param array<string, mixed> $options View options
+     * @return void
+     */
+    public function dropView(string $viewName, array $options = []): void
+    {
+        $table = $this->table($viewName);
+        $table->dropView($viewName, $options)->save();
+    }
+
+    /**
+     * Creates a trigger on a table.
+     *
+     * @param string $tableName Table name
+     * @param string $triggerName Trigger name
+     * @param string|array<string> $event Event(s) that fire the trigger (INSERT, UPDATE, DELETE)
+     * @param string $definition Trigger body/definition
+     * @param array<string, mixed> $options Trigger options
+     * @return void
+     */
+    public function createTrigger(string $tableName, string $triggerName, string|array $event, string $definition, array $options = []): void
+    {
+        $table = $this->table($tableName);
+        $table->createTrigger($triggerName, $event, $definition, $options)->save();
+    }
+
+    /**
+     * Drops a trigger from a table.
+     *
+     * @param string $tableName Table name
+     * @param string $triggerName Trigger name
+     * @return void
+     */
+    public function dropTrigger(string $tableName, string $triggerName): void
+    {
+        $table = $this->table($tableName);
+        $table->dropTrigger($triggerName)->save();
     }
 
     /**

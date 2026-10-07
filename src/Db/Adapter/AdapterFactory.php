@@ -24,13 +24,20 @@ class AdapterFactory
     protected static ?AdapterFactory $instance = null;
 
     /**
+     * Constructor.
+     */
+    final public function __construct()
+    {
+    }
+
+    /**
      * Get the factory singleton instance.
      *
      * @return static
      */
     public static function instance(): static
     {
-        if (!static::$instance) {
+        if (!static::$instance instanceof AdapterFactory) {
             static::$instance = new static();
         }
 
@@ -72,7 +79,7 @@ class AdapterFactory
     public function registerAdapter(string $name, Closure|string $class)
     {
         if (
-            !($class instanceof Closure || is_subclass_of($class, AdapterInterface::class))
+            !$class instanceof Closure && !is_subclass_of($class, AdapterInterface::class)
         ) {
             throw new RuntimeException(sprintf(
                 'Adapter class `%s` must implement `Migrations\\Db\\Adapter\\AdapterInterface`',

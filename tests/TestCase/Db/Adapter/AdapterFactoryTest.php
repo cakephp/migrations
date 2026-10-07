@@ -5,17 +5,18 @@ namespace Migrations\Test\Db\Adapter;
 
 use Migrations\Db\Adapter\AbstractAdapter;
 use Migrations\Db\Adapter\AdapterFactory;
+use Migrations\Db\Adapter\AdapterInterface;
+use Migrations\Db\Adapter\MysqlAdapter;
+use Migrations\Db\Adapter\TimedOutputAdapter;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;
 
 class AdapterFactoryTest extends TestCase
 {
-    /**
-     * @var \Migrations\Db\Adapter\AdapterFactory
-     */
-    private $factory;
+    private AdapterFactory $factory;
 
     protected function setUp(): void
     {
@@ -27,17 +28,17 @@ class AdapterFactoryTest extends TestCase
         unset($this->factory);
     }
 
-    public function testInstanceIsFactory()
+    public function testInstanceIsFactory(): void
     {
         $this->assertInstanceOf(AdapterFactory::class, $this->factory);
     }
 
-    public function testRegisterAdapter()
+    public function testRegisterAdapter(): void
     {
         $pdo = new class (['foo' => 'bar']) extends AbstractAdapter {
             use DefaultAdapterTrait;
         };
-        $this->factory->registerAdapter('test', function (array $options) use ($pdo) {
+        $this->factory->registerAdapter('test', function (array $options) use ($pdo): object {
             $this->assertEquals('value', $options['key']);
 
             return $pdo;
@@ -46,7 +47,7 @@ class AdapterFactoryTest extends TestCase
         $this->assertEquals($pdo, $this->factory->getAdapter('test', ['key' => 'value']));
     }
 
-    public function testRegisterAdapterFailure()
+    public function testRegisterAdapterFailure(): void
     {
         $adapter = static::class;
 
@@ -56,14 +57,14 @@ class AdapterFactoryTest extends TestCase
         $this->factory->registerAdapter('test', $adapter);
     }
 
-    public function testGetAdapter()
+    public function testGetAdapter(): void
     {
         $adapter = $this->factory->getAdapter('mysql', []);
 
-        $this->assertInstanceOf('Migrations\Db\Adapter\MysqlAdapter', $adapter);
+        $this->assertInstanceOf(MysqlAdapter::class, $adapter);
     }
 
-    public function testGetAdapterFailure()
+    public function testGetAdapterFailure(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Adapter "bad" has not been registered');
@@ -71,12 +72,11 @@ class AdapterFactoryTest extends TestCase
         $this->factory->getAdapter('bad', []);
     }
 
-    public function testRegisterWrapper()
+    public function testRegisterWrapper(): void
     {
         // WrapperFactory::getClass is protected, work around it to avoid
         // creating unnecessary instances and making the test more complex.
-        $method = new ReflectionMethod(get_class($this->factory), 'getWrapperClass');
-        $method->setAccessible(true);
+        $method = new ReflectionMethod($this->factory::class, 'getWrapperClass');
 
         $wrapper = $method->invoke($this->factory, 'record');
         $this->factory->registerWrapper('test', $wrapper);
@@ -84,7 +84,7 @@ class AdapterFactoryTest extends TestCase
         $this->assertEquals($wrapper, $method->invoke($this->factory, 'test'));
     }
 
-    public function testRegisterWrapperFailure()
+    public function testRegisterWrapperFailure(): void
     {
         $wrapper = static::class;
 
@@ -94,19 +94,19 @@ class AdapterFactoryTest extends TestCase
         $this->factory->registerWrapper('test', $wrapper);
     }
 
-    private function getAdapterMock()
+    private function getAdapterMock(): MockObject
     {
-        return $this->getMockBuilder('Migrations\Db\Adapter\AdapterInterface')->getMock();
+        return $this->getMockBuilder(AdapterInterface::class)->getMock();
     }
 
-    public function testGetWrapper()
+    public function testGetWrapper(): void
     {
         $wrapper = $this->factory->getWrapper('timed', $this->getAdapterMock());
 
-        $this->assertInstanceOf('Migrations\Db\Adapter\TimedOutputAdapter', $wrapper);
+        $this->assertInstanceOf(TimedOutputAdapter::class, $wrapper);
     }
 
-    public function testGetWrapperFailure()
+    public function testGetWrapperFailure(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Wrapper "nope" has not been registered');

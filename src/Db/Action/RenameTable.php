@@ -14,8 +14,6 @@ class RenameTable extends Action
 {
     /**
      * The new name for the table
-     *
-     * @var string
      */
     protected string $newName;
 

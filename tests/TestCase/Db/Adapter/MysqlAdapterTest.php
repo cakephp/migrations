@@ -9,6 +9,7 @@ use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\MysqlAdapter;
@@ -28,16 +29,12 @@ use RuntimeException;
 
 class MysqlAdapterTest extends TestCase
 {
-    /**
-     * @var \Migrations\Db\Adapter\MysqlAdapter
-     */
-    private $adapter;
+    private MysqlAdapter $adapter;
 
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
+
     private StubConsoleOutput $out;
+
     private ConsoleIo $io;
 
     protected function setUp(): void
@@ -101,12 +98,12 @@ class MysqlAdapterTest extends TestCase
         return version_compare($version, '10.7.0', '>=');
     }
 
-    public function testConnection()
+    public function testConnection(): void
     {
         $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
-    public function testCreatingTheSchemaTableOnConnect()
+    public function testCreatingTheSchemaTableOnConnect(): void
     {
         $this->adapter->connect();
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
@@ -117,7 +114,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
     }
 
-    public function testSchemaTableIsCreatedWithPrimaryKey()
+    public function testSchemaTableIsCreatedWithPrimaryKey(): void
     {
         // Skip for unified table mode since schema structure is different
         if (Configure::read('Migrations.legacyTables') === false) {
@@ -129,7 +126,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));
     }
 
-    public function testDatabaseNameWithEscapedCharacter()
+    public function testDatabaseNameWithEscapedCharacter(): void
     {
         $this->adapter->dropDatabase($this->config['database'] . '-test');
         $this->adapter->createDatabase($this->config['database'] . '-test', ['charset' => 'utf8mb4']);
@@ -137,24 +134,24 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropDatabase($this->config['database'] . '-test');
     }
 
-    public function testQuoteTableName()
+    public function testQuoteTableName(): void
     {
         $this->assertEquals('`test_table`', $this->adapter->quoteTableName('test_table'));
     }
 
-    public function testQuoteColumnName()
+    public function testQuoteColumnName(): void
     {
         $this->assertEquals('`test_column`', $this->adapter->quoteColumnName('test_column'));
     }
 
-    public function testHasTableUnderstandsSchemaNotation()
+    public function testHasTableUnderstandsSchemaNotation(): void
     {
         $this->assertTrue($this->adapter->hasTable('performance_schema.threads'), 'Failed asserting hasTable understands tables in another schema.');
         $this->assertFalse($this->adapter->hasTable('performance_schema.unknown_table'));
         $this->assertFalse($this->adapter->hasTable('unknown_schema.phinxlog'));
     }
 
-    public function testCreateTable()
+    public function testCreateTable(): void
     {
         $table = new Table('ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -172,7 +169,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($columns[0]->isSigned());
     }
 
-    public function testCreateTableWithComment()
+    public function testCreateTableWithComment(): void
     {
         $tableComment = 'Table comment';
         $table = new Table('ntable', ['comment' => $tableComment], $this->adapter);
@@ -192,7 +189,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($tableComment, $comment['TABLE_COMMENT'], 'Dont set table comment correctly');
     }
 
-    public function testCreateTableWithForeignKeys()
+    public function testCreateTableWithForeignKeys(): void
     {
         $tag_table = new Table('ntable_tag', [], $this->adapter);
         $tag_table->addColumn('realname', 'string')
@@ -223,7 +220,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($foreignKey['REFERENCED_COLUMN_NAME'], 'id');
     }
 
-    public function testCreateTableCustomIdColumn()
+    public function testCreateTableCustomIdColumn(): void
     {
         $table = new Table('ntable', ['id' => 'custom_id'], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -236,7 +233,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableWithNoPrimaryKey()
+    public function testCreateTableWithNoPrimaryKey(): void
     {
         $options = [
             'id' => false,
@@ -247,7 +244,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('atable', 'id'));
     }
 
-    public function testCreateTableWithConflictingPrimaryKeys()
+    public function testCreateTableWithConflictingPrimaryKeys(): void
     {
         $options = [
             'primary_key' => 'user_id',
@@ -259,7 +256,7 @@ class MysqlAdapterTest extends TestCase
         $table->addColumn('user_id', 'integer')->save();
     }
 
-    public function testCreateTableWithPrimaryKeySetToImplicitId()
+    public function testCreateTableWithPrimaryKeySetToImplicitId(): void
     {
         $options = [
             'primary_key' => 'id',
@@ -271,7 +268,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithPrimaryKeyArraySetToImplicitId()
+    public function testCreateTableWithPrimaryKeyArraySetToImplicitId(): void
     {
         $options = [
             'primary_key' => ['id'],
@@ -283,7 +280,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithMultiplePrimaryKeyArraySetToImplicitId()
+    public function testCreateTableWithMultiplePrimaryKeyArraySetToImplicitId(): void
     {
         $options = [
             'primary_key' => ['id', 'user_id'],
@@ -294,7 +291,7 @@ class MysqlAdapterTest extends TestCase
         $table->addColumn('user_id', 'integer')->save();
     }
 
-    public function testCreateTableWithMultiplePrimaryKeys()
+    public function testCreateTableWithMultiplePrimaryKeys(): void
     {
         $options = [
             'id' => false,
@@ -313,7 +310,7 @@ class MysqlAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsUuid()
+    public function testCreateTableWithPrimaryKeyAsUuid(): void
     {
         $options = [
             'id' => false,
@@ -330,7 +327,7 @@ class MysqlAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsBinaryUuid()
+    public function testCreateTableWithPrimaryKeyAsBinaryUuid(): void
     {
         $options = [
             'id' => false,
@@ -344,7 +341,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableBinaryLengthWithIndex()
+    public function testCreateTableBinaryLengthWithIndex(): void
     {
         $table = new Table('ntable', [], $this->adapter);
         $table
@@ -368,7 +365,7 @@ class MysqlAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsNativeUuid()
+    public function testCreateTableWithPrimaryKeyAsNativeUuid(): void
     {
         if (!$this->usingMariaDbWithUuid()) {
             $this->markTestSkipped('Database does not have a native uuid type');
@@ -386,7 +383,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithMultipleIndexes()
+    public function testCreateTableWithMultipleIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -400,7 +397,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_name']));
     }
 
-    public function testCreateTableWithUniqueIndexes()
+    public function testCreateTableWithUniqueIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 191])
@@ -410,7 +407,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
     }
 
-    public function testCreateTableWithFullTextIndex()
+    public function testCreateTableWithFullTextIndex(): void
     {
         $table = new Table('table1', ['engine' => 'MyISAM'], $this->adapter);
         $table->addColumn('email', 'string')
@@ -420,7 +417,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
     }
 
-    public function testCreateTableWithNamedIndex()
+    public function testCreateTableWithNamedIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -431,7 +428,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndexByName('table1', 'myemailindex'));
     }
 
-    public function testCreateTableWithMyISAMEngine()
+    public function testCreateTableWithMyISAMEngine(): void
     {
         $table = new Table('ntable', ['engine' => 'MyISAM'], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -441,7 +438,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('MyISAM', $row['Engine']);
     }
 
-    public function testCreateTableAndInheritDefaultCollation()
+    public function testCreateTableAndInheritDefaultCollation(): void
     {
         $options = $this->config + [
             'charset' => 'utf8mb4',
@@ -457,7 +454,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertContains($row['Collation'], ['utf8mb4_general_ci', 'utf8mb4_0900_ai_ci', 'utf8mb4_uca1400_ai_ci', 'utf8mb4_unicode_ci']);
     }
 
-    public function testCreateTableWithLatin1Collate()
+    public function testCreateTableWithLatin1Collate(): void
     {
         $table = new Table('latin1_table', ['collation' => 'latin1_general_ci'], $this->adapter);
         $table->addColumn('name', 'string')
@@ -467,7 +464,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('latin1_general_ci', $row['Collation']);
     }
 
-    public function testCreateTableWithSignedPK()
+    public function testCreateTableWithSignedPK(): void
     {
         $table = new Table('ntable', ['signed' => true], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -486,7 +483,7 @@ class MysqlAdapterTest extends TestCase
         }
     }
 
-    public function testCreateTableWithUnsignedPK()
+    public function testCreateTableWithUnsignedPK(): void
     {
         $table = new Table('ntable', ['signed' => false], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -505,7 +502,7 @@ class MysqlAdapterTest extends TestCase
         }
     }
 
-    public function testCreateTableWithUnsignedNamedPK()
+    public function testCreateTableWithUnsignedNamedPK(): void
     {
         $table = new Table('ntable', ['id' => 'named_id', 'signed' => false], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -524,7 +521,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableWithSetEnumTypes()
+    public function testCreateTableWithSetEnumTypes(): void
     {
         $table = new Table('enum_test', [], $this->adapter);
         $table->addColumn('status', 'enum', ['values' => ['pending', 'active', 'archived']])
@@ -537,7 +534,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[RunInSeparateProcess]
-    public function testUnsignedPksFeatureFlag()
+    public function testUnsignedPksFeatureFlag(): void
     {
         $this->adapter->connect();
 
@@ -553,7 +550,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[RunInSeparateProcess]
-    public function testAddTimestampsFeatureFlag()
+    public function testAddTimestampsFeatureFlag(): void
     {
         Configure::write('Migrations.add_timestamps_use_datetime', true);
         $this->adapter->connect();
@@ -580,7 +577,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertContains($columns[2]->getDefault(), ['CURRENT_TIMESTAMP', 'current_timestamp()']);
     }
 
-    public function testCreateTableWithSchema()
+    public function testCreateTableWithSchema(): void
     {
         $table = new Table($this->config['database'] . '.ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -589,7 +586,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable('ntable'));
     }
 
-    public function testAddPrimarykey()
+    public function testAddPrimarykey(): void
     {
         $table = new Table('table1', ['id' => false], $this->adapter);
         $table
@@ -603,7 +600,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testChangePrimaryKey()
+    public function testChangePrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -620,7 +617,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column2', 'column3']));
     }
 
-    public function testDropPrimaryKey()
+    public function testDropPrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -634,7 +631,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testAddComment()
+    public function testAddComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -656,7 +653,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('comment1', $rows[0]['TABLE_COMMENT']);
     }
 
-    public function testChangeComment()
+    public function testChangeComment(): void
     {
         $table = new Table('table1', ['comment' => 'comment1'], $this->adapter);
         $table->save();
@@ -678,7 +675,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('comment2', $rows[0]['TABLE_COMMENT']);
     }
 
-    public function testDropComment()
+    public function testDropComment(): void
     {
         $table = new Table('table1', ['comment' => 'comment1'], $this->adapter);
         $table->save();
@@ -700,7 +697,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('', $rows[0]['TABLE_COMMENT']);
     }
 
-    public function testRenameTable()
+    public function testRenameTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -712,7 +709,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable('table2'));
     }
 
-    public function testAddColumn()
+    public function testAddColumn(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -726,7 +723,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('realname', $rows[1]['Field']);
     }
 
-    public function testAddColumnWithDefaultValue()
+    public function testAddColumnWithDefaultValue(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -736,7 +733,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('test', $rows[1]['Default']);
     }
 
-    public function testAddColumnWithDefaultZero()
+    public function testAddColumnWithDefaultZero(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -747,7 +744,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('0', $rows[1]['Default']);
     }
 
-    public function testAddColumnWithDefaultEmptyString()
+    public function testAddColumnWithDefaultEmptyString(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -757,7 +754,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('', $rows[1]['Default']);
     }
 
-    public function testAddColumnWithDefaultBoolean()
+    public function testAddColumnWithDefaultBoolean(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -771,7 +768,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertNull($rows[3]['Default']);
     }
 
-    public function testAddColumnWithDefaultLiteral()
+    public function testAddColumnWithDefaultLiteral(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -785,7 +782,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($rows[2]['Default'] === 'oh hi');
     }
 
-    public function testAddColumnFirst()
+    public function testAddColumnFirst(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -795,7 +792,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertSame('new_id', $rows[0]['Field']);
     }
 
-    public static function integerDataProvider()
+    public static function integerDataProvider(): array
     {
         return [
             ['integer', [], 'int', '11', ''],
@@ -810,7 +807,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('integerDataProvider')]
-    public function testIntegerColumnTypes($phinx_type, $options, $sql_type, $width, $extra)
+    public function testIntegerColumnTypes(string $phinx_type, array $options, string $sql_type, string $width, string $extra): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -896,7 +893,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'last_changed2'));
     }
 
-    public function testRenamingANonExistentColumn()
+    public function testRenamingANonExistentColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -909,13 +906,13 @@ class MysqlAdapterTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
+                'Expected exception of type InvalidArgumentException, got ' . $e::class,
             );
-            $this->assertEquals('The specified column doesn\'t exist: column2', $e->getMessage());
+            $this->assertEquals("The specified column doesn't exist: column2", $e->getMessage());
         }
     }
 
-    public function testChangeColumn()
+    public function testChangeColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -932,7 +929,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column2'));
     }
 
-    public function testChangeColumnDefaultValue()
+    public function testChangeColumnDefaultValue(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test'])
@@ -947,7 +944,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('test1', $rows[1]['Default']);
     }
 
-    public function testChangeColumnDefaultToZero()
+    public function testChangeColumnDefaultToZero(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'integer')
@@ -962,7 +959,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('0', $rows[1]['Default']);
     }
 
-    public function testChangeColumnDefaultToNull()
+    public function testChangeColumnDefaultToNull(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test'])
@@ -976,7 +973,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertNull($rows[1]['Default']);
     }
 
-    public function testChangeColumnPreservesDefaultValue()
+    public function testChangeColumnPreservesDefaultValue(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'original_default', 'null' => false, 'limit' => 100])
@@ -991,7 +988,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('varchar(100)', $rows[1]['Type']);
     }
 
-    public function testChangeColumnPreservesDefaultValueWithDifferentType()
+    public function testChangeColumnPreservesDefaultValueWithDifferentType(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'integer', ['default' => 42, 'null' => false])
@@ -1005,7 +1002,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('NO', $rows[1]['Null']);
     }
 
-    public function testChangeColumnCanExplicitlyOverrideDefault()
+    public function testChangeColumnCanExplicitlyOverrideDefault(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'original_default'])
@@ -1018,7 +1015,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('new_default', $rows[1]['Default']);
     }
 
-    public function testChangeColumnCanDisablePreserveUnspecified()
+    public function testChangeColumnCanDisablePreserveUnspecified(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'original_default', 'limit' => 100])
@@ -1031,7 +1028,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertNull($rows[1]['Default']);
     }
 
-    public function testChangeColumnWithNullTypePreservesType()
+    public function testChangeColumnWithNullTypePreservesType(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
@@ -1046,7 +1043,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('YES', $rows[1]['Null']);
     }
 
-    public function testChangeColumnWithNullTypeOnNonExistentColumnThrows()
+    public function testChangeColumnWithNullTypeOnNonExistentColumnThrows(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage("Cannot preserve column type for 'nonexistent'");
@@ -1058,7 +1055,7 @@ class MysqlAdapterTest extends TestCase
         $table->changeColumn('nonexistent', null, ['null' => true])->save();
     }
 
-    public function testUpdateColumnPreservesAttributes()
+    public function testUpdateColumnPreservesAttributes(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100, 'null' => false])
@@ -1073,7 +1070,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('YES', $rows[1]['Null']);
     }
 
-    public function testChangeColumnDoesNotPreserveByDefault()
+    public function testChangeColumnDoesNotPreserveByDefault(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
@@ -1088,7 +1085,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('YES', $rows[1]['Null']);
     }
 
-    public function testChangeColumnWithPreserveUnspecifiedTrue()
+    public function testChangeColumnWithPreserveUnspecifiedTrue(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100])
@@ -1103,7 +1100,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('YES', $rows[1]['Null']);
     }
 
-    public function testUpdateColumnWithColumnObject()
+    public function testUpdateColumnWithColumnObject(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'test', 'limit' => 100, 'null' => false])
@@ -1122,7 +1119,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('YES', $rows[1]['Null']);
     }
 
-    public function testUpdateColumnWithColumnObjectAndOptionsThrows()
+    public function testUpdateColumnWithColumnObjectAndOptionsThrows(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Cannot specify options array when passing a Column object');
@@ -1140,7 +1137,7 @@ class MysqlAdapterTest extends TestCase
         $table->updateColumn('column1', $newColumn, ['limit' => 500]);
     }
 
-    public function testUpdateColumnWithTypeChangeToText()
+    public function testUpdateColumnWithTypeChangeToText(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
@@ -1160,7 +1157,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertStringContainsString('test', $rows[1]['Default']); // Default should be preserved
     }
 
-    public function testUpdateColumnCanRemoveLengthConstraintWithoutChangingType()
+    public function testUpdateColumnCanRemoveLengthConstraintWithoutChangingType(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['limit' => 100, 'default' => 'test'])
@@ -1180,7 +1177,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('test', $rows[1]['Default']); // Default should be preserved
     }
 
-    public function testUpdateColumnCanRemoveScaleAndPrecision()
+    public function testUpdateColumnCanRemoveScaleAndPrecision(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'decimal', ['precision' => 10, 'scale' => 2, 'default' => '123.45'])
@@ -1199,7 +1196,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('123', $rows[1]['Default']); // Default should be preserved (truncated to integer)
     }
 
-    public function testUpdateColumnCanRemoveComment()
+    public function testUpdateColumnCanRemoveComment(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['limit' => 100, 'comment' => 'Original comment', 'default' => 'test'])
@@ -1219,7 +1216,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('test', $rows[1]['Default']);
     }
 
-    public function testChangeColumnEnum()
+    public function testChangeColumnEnum(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1234,7 +1231,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals("enum('a','b')", $rows[1]['Type']);
     }
 
-    public static function binaryToBlobAutomaticConversionData()
+    public static function binaryToBlobAutomaticConversionData(): array
     {
         return [
             // When creating binary with limit > 255, MySQL auto-converts to BLOB
@@ -1254,7 +1251,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('binaryToBlobAutomaticConversionData')]
-    public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, ?int $expectedLimit)
+    public function testBinaryToBlobAutomaticConversion(?int $limit, string $expectedType, ?int $expectedLimit): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'binary', ['limit' => $limit])
@@ -1264,7 +1261,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertSame($expectedLimit, $columns[1]->getLimit());
     }
 
-    public static function varbinaryToBlobAutomaticConversionData()
+    public static function varbinaryToBlobAutomaticConversionData(): array
     {
         return [
             // When creating varbinary with limit > 255, MySQL auto-converts to BLOB
@@ -1284,7 +1281,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('varbinaryToBlobAutomaticConversionData')]
-    public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, ?int $expectedLimit)
+    public function testVarbinaryToBlobAutomaticConversion(?int $limit, string $expectedType, ?int $expectedLimit): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'varbinary', ['limit' => $limit])
@@ -1294,7 +1291,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertSame($expectedLimit, $columns[1]->getLimit());
     }
 
-    public static function blobColumnsData()
+    public static function blobColumnsData(): array
     {
         return [
           // BLOB columns with various limits - MySQL auto-selects appropriate BLOB subtype
@@ -1327,7 +1324,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('blobColumnsData')]
-    public function testblobColumns(string $type, string $expectedType, ?int $limit, ?int $expectedLimit)
+    public function testblobColumns(string $type, string $expectedType, ?int $limit, ?int $expectedLimit): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('blob_col', $type, ['limit' => $limit])
@@ -1337,7 +1334,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertSame($expectedLimit, $columns[1]->getLimit());
     }
 
-    public static function blobRoundTripData()
+    public static function blobRoundTripData(): array
     {
         return [
             // type, limit, expected type after round-trip, expected limit after round-trip
@@ -1350,7 +1347,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('blobRoundTripData')]
-    public function testBlobRoundTrip(string $type, ?int $limit, string $expectedType, int $expectedLimit)
+    public function testBlobRoundTrip(string $type, ?int $limit, string $expectedType, int $expectedLimit): void
     {
         // Create a table with a BLOB column
         $table = new Table('blob_round_trip_test', [], $this->adapter);
@@ -1369,7 +1366,7 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropTable('blob_round_trip_test');
     }
 
-    public static function textRoundTripData()
+    public static function textRoundTripData(): array
     {
         return [
             // type, limit, expected type after round-trip, expected limit after round-trip
@@ -1377,11 +1374,14 @@ class MysqlAdapterTest extends TestCase
             ['text', MysqlAdapter::TEXT_TINY, 'text', MysqlAdapter::TEXT_TINY],
             ['text', MysqlAdapter::TEXT_MEDIUM, 'text', MysqlAdapter::TEXT_MEDIUM],
             ['text', MysqlAdapter::TEXT_LONG, 'text', MysqlAdapter::TEXT_LONG],
+            // Test backward compatibility: CakePHP's LENGTH_LONG (4294967295) should also work
+            // This ensures migrations generated before the fix still create LONGTEXT correctly
+            ['text', TableSchema::LENGTH_LONG, 'text', MysqlAdapter::TEXT_LONG],
         ];
     }
 
     #[DataProvider('textRoundTripData')]
-    public function testTextRoundTrip(string $type, ?int $limit, string $expectedType, ?int $expectedLimit)
+    public function testTextRoundTrip(string $type, ?int $limit, string $expectedType, ?int $expectedLimit): void
     {
         // Create a table with a TEXT column
         $table = new Table('text_round_trip_test', [], $this->adapter);
@@ -1400,7 +1400,7 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropTable('text_round_trip_test');
     }
 
-    public function testTimestampInvalidLimit()
+    public function testTimestampInvalidLimit(): void
     {
         $this->adapter->connect();
         $version = $this->adapter->getConnection()->getDriver()->version();
@@ -1414,7 +1414,7 @@ class MysqlAdapterTest extends TestCase
         $table->addColumn('column1', 'timestamp', ['limit' => 7])->save();
     }
 
-    public function testDropColumn()
+    public function testDropColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1425,7 +1425,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('t', 'column1'));
     }
 
-    public static function columnsProvider()
+    public static function columnsProvider(): array
     {
         return [
             ['column1', 'string', []],
@@ -1455,7 +1455,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('columnsProvider')]
-    public function testGetColumns($colName, $type, $options)
+    public function testGetColumns(string $colName, string $type, array $options): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn($colName, $type, $options)->save();
@@ -1486,7 +1486,7 @@ class MysqlAdapterTest extends TestCase
         }
     }
 
-    public function testGetColumnsInteger()
+    public function testGetColumnsInteger(): void
     {
         $colName = 'column15';
         $type = 'integer';
@@ -1502,7 +1502,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertNull($columns[1]->getLimit());
     }
 
-    public function testGetColumnsReservedTableName()
+    public function testGetColumnsReservedTableName(): void
     {
         $table = new Table('group', [], $this->adapter);
         $table->addColumn('column1', 'string')->save();
@@ -1510,7 +1510,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertCount(2, $columns);
     }
 
-    public function testAddIndex()
+    public function testAddIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1521,7 +1521,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
     }
 
-    public function testAddIndexWithSort()
+    public function testAddIndexWithSort(): void
     {
         $this->adapter->connect();
         if (!$this->usingMysql8()) {
@@ -1544,7 +1544,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($emailOrder, 'A');
     }
 
-    public function testAddMultipleFulltextIndex()
+    public function testAddMultipleFulltextIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1565,7 +1565,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex(['email', 'bio']));
     }
 
-    public function testAddIndexWithLimit()
+    public function testAddIndexWithLimit(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1582,7 +1582,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($expected_limit, 50);
     }
 
-    public function testAddMultiIndexesWithLimitSpecifier()
+    public function testAddMultiIndexesWithLimitSpecifier(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1606,7 +1606,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($expected_limit, 2);
     }
 
-    public function testAddSingleIndexesWithLimitSpecifier()
+    public function testAddSingleIndexesWithLimitSpecifier(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1624,7 +1624,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($expected_limit, 3);
     }
 
-    public function testDropIndex()
+    public function testDropIndex(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -1674,7 +1674,7 @@ class MysqlAdapterTest extends TestCase
 
         try {
             $table2->removeIndex(['fname'])->save();
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException) {
         }
         $this->assertTrue($table2->hasIndex(['fname', 'lname']));
 
@@ -1689,13 +1689,13 @@ class MysqlAdapterTest extends TestCase
 
         try {
             $table4->removeIndex(['fname'])->save();
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException) {
         }
 
         $this->assertTrue($table4->hasIndex(['fname', 'lname']));
     }
 
-    public function testDropIndexByName()
+    public function testDropIndexByName(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -1717,7 +1717,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($table2->hasIndex(['fname', 'lname']));
     }
 
-    public function testAddForeignKey()
+    public function testAddForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1731,7 +1731,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testAddForeignKeyForTableWithSignedPK()
+    public function testAddForeignKeyForTableWithSignedPK(): void
     {
         $refTable = new Table('ref_table', ['signed' => true], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1745,7 +1745,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKey()
+    public function testDropForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1760,7 +1760,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyWithMultipleColumns()
+    public function testDropForeignKeyWithMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1810,7 +1810,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
     }
 
-    public function testDropForeignKeyWithIdenticalMultipleColumns()
+    public function testDropForeignKeyWithIdenticalMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1848,6 +1848,32 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'ref_table_fk_2'));
     }
 
+    public function testDropForeignKeyWithNameContainingWhitespace(): void
+    {
+        $refTable = new Table('ref_table', [], $this->adapter);
+        $refTable->addColumn('field1', 'string')->save();
+
+        $table = new Table('table', [], $this->adapter);
+        $key = (new ForeignKey())
+            ->setName('ref table fk')
+            ->setColumns(['ref_table_id'])
+            ->setReferencedTable('ref_table')
+            ->setReferencedColumns(['id']);
+        $table
+            ->addColumn('ref_table_id', 'integer', ['signed' => false])
+            ->addForeignKey($key)
+            ->save();
+
+        $this->assertTrue($this->adapter->hasForeignKey($table->getName(), [], 'ref table fk'));
+
+        // The constraint name must be quoted in the DROP statement, otherwise
+        // names with whitespace (or numeric names auto-assigned by MariaDB 12)
+        // produce invalid SQL.
+        $this->adapter->dropForeignKey($table->getName(), [], 'ref table fk');
+
+        $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'ref table fk'));
+    }
+
     public static function nonExistentForeignKeyColumnsProvider(): array
     {
         return [
@@ -1858,11 +1884,8 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @param array $columns
-     */
     #[DataProvider('nonExistentForeignKeyColumnsProvider')]
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1890,7 +1913,7 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), $columns);
     }
 
-    public function testDropForeignKeyCaseInsensitivity()
+    public function testDropForeignKeyCaseInsensitivity(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1905,7 +1928,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyByName()
+    public function testDropForeignKeyByName(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1925,7 +1948,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyForTableWithSignedPK()
+    public function testDropForeignKeyForTableWithSignedPK(): void
     {
         $refTable = new Table('ref_table', ['signed' => true], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1940,7 +1963,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyAsString()
+    public function testDropForeignKeyAsString(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1956,7 +1979,7 @@ class MysqlAdapterTest extends TestCase
     }
 
     #[DataProvider('provideForeignKeysToCheck')]
-    public function testHasForeignKey($tableDef, $key, $exp)
+    public function testHasForeignKey(string $tableDef, string|array $key, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, key(a), key(b), key(a,b), key(a,b,c));');
@@ -1964,7 +1987,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
-    public static function provideForeignKeysToCheck()
+    public static function provideForeignKeysToCheck(): array
     {
         return [
             ['create table t(a int)', 'a', false],
@@ -1990,7 +2013,7 @@ class MysqlAdapterTest extends TestCase
         ];
     }
 
-    public function testHasForeignKeyAsString()
+    public function testHasForeignKeyAsString(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -2005,7 +2028,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), 'ref_table_id2'));
     }
 
-    public function testHasNamedForeignKey()
+    public function testHasNamedForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -2028,7 +2051,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'my_constraint2'));
     }
 
-    public function testHasForeignKeyWithConstraintForTableWithSignedPK()
+    public function testHasForeignKeyWithConstraintForTableWithSignedPK(): void
     {
         $refTable = new Table('ref_table', ['signed' => true], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -2048,7 +2071,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id'], 'my_constraint2'));
     }
 
-    public function testsHasForeignKeyWithSchemaDotTableName()
+    public function testsHasForeignKeyWithSchemaDotTableName(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -2063,13 +2086,13 @@ class MysqlAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($this->config['database'] . '.' . $table->getName(), ['ref_table_id2']));
     }
 
-    public function testHasDatabase()
+    public function testHasDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
         $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
-    public function testDropDatabase()
+    public function testDropDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('phinx_temp_database'));
         $this->adapter->createDatabase('phinx_temp_database');
@@ -2077,7 +2100,7 @@ class MysqlAdapterTest extends TestCase
         $this->adapter->dropDatabase('phinx_temp_database');
     }
 
-    public function testAddColumnWithComment()
+    public function testAddColumnWithComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string', ['comment' => $comment = 'Comments from "column1"'])
@@ -2096,7 +2119,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($comment, $columnWithComment['COLUMN_COMMENT'], "Didn't set column comment correctly");
     }
 
-    public function testAddColumnEnum()
+    public function testAddColumnEnum(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -2130,7 +2153,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($comment, $columnWithComment['COLUMN_COMMENT'], "Didn't set column comment correctly");
     }
 
-    public function testAddGeoSpatialColumns()
+    public function testAddGeoSpatialColumns(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -2141,7 +2164,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('geometry', $rows[1]['Type']);
     }
 
-    public function testHasColumn()
+    public function testHasColumn(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -2151,7 +2174,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($table->hasColumn('column1'));
     }
 
-    public function testHasColumnReservedName()
+    public function testHasColumnReservedName(): void
     {
         $tableQuoted = new Table('group', [], $this->adapter);
         $tableQuoted->addColumn('value', 'string')
@@ -2161,7 +2184,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertTrue($tableQuoted->hasColumn('value'));
     }
 
-    public function testBulkInsertData()
+    public function testBulkInsertData(): void
     {
         $data = [
             [
@@ -2195,7 +2218,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('test', $rows[2]['column3']);
     }
 
-    public function testBulkInsertLiteral()
+    public function testBulkInsertLiteral(): void
     {
         $data = [
             [
@@ -2221,12 +2244,12 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('value1', $rows[0]['column1']);
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column2']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column2']);
         $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column2']);
         $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column2']);
     }
 
-    public function testInsertData()
+    public function testInsertData(): void
     {
         $data = [
             [
@@ -2261,7 +2284,7 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('foo', $rows[2]['column3']);
     }
 
-    public function testInsertLiteral()
+    public function testInsertLiteral(): void
     {
         $data = [
             [
@@ -2292,12 +2315,12 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals('test', $rows[0]['column2']);
         $this->assertEquals('test', $rows[1]['column2']);
         $this->assertEquals('foo', $rows[2]['column2']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column3']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column3']);
         $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column3']);
         $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column3']);
     }
 
-    public function testDumpCreateTable()
+    public function testDumpCreateTable(): void
     {
         $options = $this->adapter->getOptions();
         $options['dryrun'] = true;
@@ -2310,7 +2333,7 @@ class MysqlAdapterTest extends TestCase
             ->addColumn('column3', 'string', ['default' => 'test', 'null' => false])
             ->save();
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         // MySQL version affects default collation (8.0.0+ uses utf8mb4_0900_ai_ci, older uses utf8mb4_general_ci)
         // MariaDB 11.8 uses: utf8mb4_uca1400_ai_ci
         $this->assertMatchesRegularExpression(
@@ -2325,7 +2348,7 @@ class MysqlAdapterTest extends TestCase
      * Then enables dry run mode and inserts a record.
      * Asserts that the insert statement is output and doesn't insert a record.
      */
-    public function testDumpInsert()
+    public function testDumpInsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2350,13 +2373,13 @@ INSERT INTO `table1` (`string_col`) VALUES ('test data');
 INSERT INTO `table1` (`string_col`) VALUES (null);
 INSERT INTO `table1` (`int_col`) VALUES (23);
 OUTPUT;
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
 
         // Add this to be LF - CR/LF systems independent
         $expectedOutput = preg_replace('~\R~u', '', $expectedOutput);
         $actualOutput = preg_replace('~\R~u', '', $actualOutput);
 
-        $this->assertStringContainsString($expectedOutput, trim($actualOutput), 'Passing the --dry-run option doesn\'t dump the insert to the output');
+        $this->assertStringContainsString($expectedOutput, trim((string)$actualOutput), "Passing the --dry-run option doesn't dump the insert to the output");
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
@@ -2369,7 +2392,7 @@ OUTPUT;
      * Then enables dry run mode and inserts some records.
      * Asserts that output contains the insert statement and doesn't insert any record.
      */
-    public function testDumpBulkinsert()
+    public function testDumpBulkinsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2391,8 +2414,8 @@ OUTPUT;
         $expectedOutput = <<<'OUTPUT'
 INSERT INTO `table1` (`string_col`, `int_col`) VALUES ('test_data1', 23), (null, 42);
 OUTPUT;
-        $actualOutput = join("\n", $this->out->messages());
-        $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option doesn\'t dump the bulkinsert to the output');
+        $actualOutput = implode("\n", $this->out->messages());
+        $this->assertStringContainsString($expectedOutput, $actualOutput, "Passing the --dry-run option doesn't dump the bulkinsert to the output");
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
         $this->assertTrue($countQuery->execute());
@@ -2400,7 +2423,7 @@ OUTPUT;
         $this->assertEquals(0, $res[0]['COUNT(*)']);
     }
 
-    public function testDumpCreateTableAndThenInsert()
+    public function testDumpCreateTableAndThenInsert(): void
     {
         $options = $this->adapter->getOptions();
         $options['dryrun'] = true;
@@ -2418,7 +2441,7 @@ OUTPUT;
             'column2' => 1,
         ])->save();
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         // Add this to be LF - CR/LF systems independent
         $actualOutput = preg_replace('~\R~u', '', $actualOutput);
         // MySQL version affects default collation (8.0.0+ uses utf8mb4_0900_ai_ci, older uses utf8mb4_general_ci)
@@ -2432,7 +2455,7 @@ OUTPUT;
     /**
      * Tests interaction with the query builder
      */
-    public function testQueryBuilder()
+    public function testQueryBuilder(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2471,7 +2494,7 @@ OUTPUT;
         $this->assertEquals(1, $stm->rowCount());
     }
 
-    public function testQueryWithParams()
+    public function testQueryWithParams(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2502,7 +2525,7 @@ OUTPUT;
         $this->assertEquals(3, $res[0]['c']);
     }
 
-    public static function geometryTypeProvider()
+    public static function geometryTypeProvider(): array
     {
         return [
             [MysqlAdapter::TYPE_GEOMETRY, 'POINT(0 0)'],
@@ -2512,12 +2535,8 @@ OUTPUT;
         ];
     }
 
-    /**
-     * @param string $type
-     * @param string $geom
-     */
     #[DataProvider('geometryTypeProvider')]
-    public function testGeometrySridSupport($type, $geom)
+    public function testGeometrySridSupport(string $type, string $geom): void
     {
         $this->adapter->connect();
         if (!$this->usingMysql8()) {
@@ -2529,19 +2548,15 @@ OUTPUT;
             ->addColumn('geom', $type, ['srid' => 4326])
             ->save();
 
-        $this->adapter->execute("INSERT INTO table1 (`geom`) VALUES (ST_GeomFromText('{$geom}', 4326))");
+        $this->adapter->execute(sprintf("INSERT INTO table1 (`geom`) VALUES (ST_GeomFromText('%s', 4326))", $geom));
         $rows = $this->adapter->fetchAll('SELECT ST_AsWKT(geom) as wkt, ST_SRID(geom) as srid FROM table1');
         $this->assertCount(1, $rows);
         $this->assertSame($geom, $rows[0]['wkt']);
         $this->assertSame(4326, (int)$rows[0]['srid']);
     }
 
-    /**
-     * @param string $type
-     * @param string $geom
-     */
     #[DataProvider('geometryTypeProvider')]
-    public function testGeometrySridThrowsInsertDifferentSrid($type, $geom)
+    public function testGeometrySridThrowsInsertDifferentSrid(string $type, string $geom): void
     {
         $this->adapter->connect();
         if (!$this->usingMysql8()) {
@@ -2555,10 +2570,10 @@ OUTPUT;
 
         $this->expectException(PDOException::class);
         $this->expectExceptionMessage("SQLSTATE[HY000]: General error: 3643 The SRID of the geometry does not match the SRID of the column 'geom'. The SRID of the geometry is 4322, but the SRID of the column is 4326. Consider changing the SRID of the geometry or the SRID property of the column.");
-        $this->adapter->execute("INSERT INTO table1 (`geom`) VALUES (ST_GeomFromText('{$geom}', 4322))");
+        $this->adapter->execute(sprintf("INSERT INTO table1 (`geom`) VALUES (ST_GeomFromText('%s', 4322))", $geom));
     }
 
-    public static function defaultsCastAsExpressions()
+    public static function defaultsCastAsExpressions(): array
     {
         return [
             [MysqlAdapter::TYPE_JSON, '{"a": true}'],
@@ -2573,20 +2588,21 @@ OUTPUT;
     /**
      * MySQL 8 added support for specifying defaults for the BLOB, TEXT, GEOMETRY, and JSON data types,
      * however requiring that they be wrapped in expressions.
-     *
-     * @param string $type
-     * @param string $default
      */
     #[DataProvider('defaultsCastAsExpressions')]
     public function testDefaultsCastAsExpressionsForCertainTypes(string $type, string $default): void
     {
         if (
-            $this->usingMariaDb() && in_array($type, [
-            MysqlAdapter::TYPE_GEOMETRY,
-            MysqlAdapter::TYPE_POINT,
-            MysqlAdapter::TYPE_LINESTRING,
-            MysqlAdapter::TYPE_POLYGON,
-            ])
+            $this->usingMariaDb() && in_array(
+                $type,
+                [
+                MysqlAdapter::TYPE_GEOMETRY,
+                MysqlAdapter::TYPE_POINT,
+                MysqlAdapter::TYPE_LINESTRING,
+                MysqlAdapter::TYPE_POLYGON,
+                ],
+                true,
+            )
         ) {
             $this->markTestSkipped('GIS is broken with MariaDB');
         }
@@ -2608,13 +2624,13 @@ OUTPUT;
 
         $actualDefault = $columns[0]->getDefault();
         // Normalize quote handling - both MariaDB and MySQL 8.0.13+ may return defaults with quotes
-        if (str_starts_with($actualDefault, "'") && str_ends_with($actualDefault, "'")) {
-            $actualDefault = substr($actualDefault, 1, -1);
+        if (str_starts_with((string)$actualDefault, "'") && str_ends_with((string)$actualDefault, "'")) {
+            $actualDefault = substr((string)$actualDefault, 1, -1);
         }
         $this->assertSame($default, $actualDefault);
     }
 
-    public function testCreateTableWithPrecisionCurrentTimestamp()
+    public function testCreateTableWithPrecisionCurrentTimestamp(): void
     {
         $this->adapter->connect();
         (new Table('exampleCurrentTimestamp3', ['id' => false], $this->adapter))
@@ -2633,7 +2649,7 @@ OUTPUT;
         $this->assertEqualsIgnoringCase('CURRENT_TIMESTAMP(3)', $colDef['COLUMN_DEFAULT']);
     }
 
-    public function testAddCheckConstraint()
+    public function testAddCheckConstraint(): void
     {
         $table = new Table('check_table', [], $this->adapter);
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
@@ -2645,7 +2661,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table', 'price_positive'));
     }
 
-    public function testAddCheckConstraintWithAutoGeneratedName()
+    public function testAddCheckConstraintWithAutoGeneratedName(): void
     {
         $table = new Table('check_table2', [], $this->adapter);
         $table->addColumn('age', 'integer')
@@ -2661,11 +2677,13 @@ OUTPUT;
         $dialect = $driver->schemaDialect();
         $constraints = $dialect->describeCheckConstraints('check_table2');
         $this->assertCount(1, $constraints);
-        $expected = $driver->isMariaDb() ? 'CONSTRAINT_1' : 'check_table2_chk_';
-        $this->assertStringContainsString($expected, $constraints[0]['name']);
+        // The name is generated by migrations (not left to the DB), so it is
+        // identical on MySQL and MariaDB instead of the DB fallback CONSTRAINT_1.
+        $expectedName = 'check_table2_chk_' . substr(md5('age >= 18'), 0, 8);
+        $this->assertSame($expectedName, $constraints[0]['name']);
     }
 
-    public function testHasCheckConstraint()
+    public function testHasCheckConstraint(): void
     {
         $table = new Table('check_table3', [], $this->adapter);
         $table->addColumn('quantity', 'integer')
@@ -2679,7 +2697,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table3', 'quantity_positive'));
     }
 
-    public function testDropCheckConstraint()
+    public function testDropCheckConstraint(): void
     {
         $table = new Table('check_table4', [], $this->adapter);
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
@@ -2693,7 +2711,7 @@ OUTPUT;
         $this->assertFalse($this->adapter->hasCheckConstraint('check_table4', 'price_check'));
     }
 
-    public function testCheckConstraintWithComplexExpression()
+    public function testCheckConstraintWithComplexExpression(): void
     {
         $table = new Table('check_table5', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -2710,7 +2728,7 @@ OUTPUT;
         // Verify the constraint is actually enforced
         $quotedTableName = $this->adapter->getConnection()->getDriver()->quoteIdentifier('check_table5');
         $this->expectException(PDOException::class);
-        $this->adapter->execute("INSERT INTO {$quotedTableName} (email, status) VALUES ('test@example.com', 'invalid')");
+        $this->adapter->execute(sprintf("INSERT INTO %s (email, status) VALUES ('test@example.com', 'invalid')", $quotedTableName));
     }
 
     /**
@@ -2723,7 +2741,7 @@ OUTPUT;
      * The 5.x branch uses CakePHP's database layer instead of phinx,
      * so we need to verify it handles scale=0 correctly.
      */
-    public function testDecimalWithScaleZero()
+    public function testDecimalWithScaleZero(): void
     {
         // Create table with DECIMAL(65,0)
         $table = new Table('decimal_scale_zero_test', [], $this->adapter);
@@ -2757,7 +2775,7 @@ OUTPUT;
         );
     }
 
-    public function testInsertOrSkipWithDuplicates()
+    public function testInsertOrSkipWithDuplicates(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -2780,7 +2798,7 @@ OUTPUT;
         $this->assertEquals('John', $rows[0]['name']);
     }
 
-    public function testInsertModeResetsAfterInsertOrSkip()
+    public function testInsertModeResetsAfterInsertOrSkip(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -2800,7 +2818,7 @@ OUTPUT;
         ])->save();
     }
 
-    public function testBulkinsertOrSkipWithDuplicates()
+    public function testBulkinsertOrSkipWithDuplicates(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('sku', 'string', ['limit' => 50])
@@ -2827,7 +2845,7 @@ OUTPUT;
         $this->assertEquals('30.00', $rows[2]['price']);
     }
 
-    public function testInsertOrSkipWithoutDuplicates()
+    public function testInsertOrSkipWithoutDuplicates(): void
     {
         $table = new Table('categories', [], $this->adapter);
         $table->addColumn('name', 'string')
@@ -2843,7 +2861,111 @@ OUTPUT;
         $this->assertCount(2, $rows);
     }
 
-    public function testAddColumnWithAlgorithmInstant()
+    public function testCreateView(): void
+    {
+        // Create a base table
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->addColumn('email', 'string')
+            ->create();
+
+        // Insert some data
+        $table->insert([
+            ['name' => 'Alice', 'email' => 'alice@example.com'],
+            ['name' => 'Bob', 'email' => 'bob@example.com'],
+        ])->save();
+
+        // Create a view
+        $viewTable = new Table('user_emails', [], $this->adapter);
+        $viewTable->createView('user_emails', 'SELECT name, email FROM users')
+            ->save();
+
+        // Query the view
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_emails');
+        $this->assertCount(2, $rows);
+        $this->assertEquals('Alice', $rows[0]['name']);
+        $this->assertEquals('alice@example.com', $rows[0]['email']);
+    }
+
+    public function testDropView(): void
+    {
+        // Create a base table
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')->create();
+
+        // Create a view
+        $viewTable = new Table('user_names', [], $this->adapter);
+        $viewTable->createView('user_names', 'SELECT name FROM users')->save();
+
+        // Verify view exists
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_names');
+        $this->assertIsArray($rows);
+
+        // Drop the view
+        $viewTable->dropView('user_names')->save();
+
+        // Verify view is dropped
+        $this->expectException(PDOException::class);
+        $this->adapter->fetchAll('SELECT * FROM user_names');
+    }
+
+    public function testCreateTrigger(): void
+    {
+        // Create tables
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')
+            ->addColumn('created_count', 'integer', ['default' => 0])
+            ->create();
+
+        $logTable = new Table('user_log', [], $this->adapter);
+        $logTable->addColumn('action', 'string')->create();
+
+        // Create a trigger
+        $table->createTrigger(
+            'log_user_insert',
+            'INSERT',
+            "INSERT INTO user_log (action) VALUES ('user_created')",
+            ['timing' => 'AFTER'],
+        )->save();
+
+        // Insert data to trigger the trigger
+        $table->insert(['name' => 'Alice', 'created_count' => 0])->save();
+
+        // Verify trigger fired
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_log');
+        $this->assertCount(1, $rows);
+        $this->assertEquals('user_created', $rows[0]['action']);
+    }
+
+    public function testDropTrigger(): void
+    {
+        // Create table
+        $table = new Table('users', [], $this->adapter);
+        $table->addColumn('name', 'string')->create();
+
+        $logTable = new Table('user_log', [], $this->adapter);
+        $logTable->addColumn('action', 'string')->create();
+
+        // Create a trigger
+        $table->createTrigger(
+            'log_user_insert',
+            'INSERT',
+            "INSERT INTO user_log (action) VALUES ('user_created')",
+            ['timing' => 'AFTER'],
+        )->save();
+
+        // Drop the trigger
+        $table->dropTrigger('log_user_insert')->save();
+
+        // Insert data - trigger should not fire
+        $table->insert(['name' => 'Bob'])->save();
+
+        // Verify trigger did not fire
+        $rows = $this->adapter->fetchAll('SELECT * FROM user_log');
+        $this->assertCount(0, $rows);
+    }
+
+    public function testAddColumnWithAlgorithmInstant(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -2857,7 +2979,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('users', 'status'));
     }
 
-    public function testAddColumnWithAlgorithmAndLock()
+    public function testAddColumnWithAlgorithmAndLock(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('name', 'string')
@@ -2875,7 +2997,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('products', 'price'));
     }
 
-    public function testChangeColumnWithAlgorithm()
+    public function testChangeColumnWithAlgorithm(): void
     {
         $table = new Table('items', [], $this->adapter);
         $table->addColumn('description', 'string', ['limit' => 100])
@@ -2895,7 +3017,7 @@ OUTPUT;
         }
     }
 
-    public function testBatchedOperationsWithSameAlgorithm()
+    public function testBatchedOperationsWithSameAlgorithm(): void
     {
         $table = new Table('batch_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2915,7 +3037,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('batch_test', 'col3'));
     }
 
-    public function testBatchedOperationsWithConflictingAlgorithmsThrowsException()
+    public function testBatchedOperationsWithConflictingAlgorithmsThrowsException(): void
     {
         $table = new Table('conflict_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2935,7 +3057,7 @@ OUTPUT;
         ->update();
     }
 
-    public function testBatchedOperationsWithConflictingLocksThrowsException()
+    public function testBatchedOperationsWithConflictingLocksThrowsException(): void
     {
         $table = new Table('lock_conflict_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2957,7 +3079,7 @@ OUTPUT;
         ->update();
     }
 
-    public function testInvalidAlgorithmThrowsException()
+    public function testInvalidAlgorithmThrowsException(): void
     {
         $table = new Table('invalid_algo', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2971,7 +3093,7 @@ OUTPUT;
         ])->update();
     }
 
-    public function testInvalidLockThrowsException()
+    public function testInvalidLockThrowsException(): void
     {
         $table = new Table('invalid_lock', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -2985,7 +3107,7 @@ OUTPUT;
         ])->update();
     }
 
-    public function testAlgorithmInstantWithExplicitLockThrowsException()
+    public function testAlgorithmInstantWithExplicitLockThrowsException(): void
     {
         $table = new Table('instant_lock_test', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -3001,7 +3123,7 @@ OUTPUT;
         ])->update();
     }
 
-    public function testAlgorithmConstantsAreDefined()
+    public function testAlgorithmConstantsAreDefined(): void
     {
         $this->assertEquals('DEFAULT', MysqlAdapter::ALGORITHM_DEFAULT);
         $this->assertEquals('INSTANT', MysqlAdapter::ALGORITHM_INSTANT);
@@ -3009,7 +3131,7 @@ OUTPUT;
         $this->assertEquals('COPY', MysqlAdapter::ALGORITHM_COPY);
     }
 
-    public function testLockConstantsAreDefined()
+    public function testLockConstantsAreDefined(): void
     {
         $this->assertEquals('DEFAULT', MysqlAdapter::LOCK_DEFAULT);
         $this->assertEquals('NONE', MysqlAdapter::LOCK_NONE);
@@ -3017,7 +3139,7 @@ OUTPUT;
         $this->assertEquals('EXCLUSIVE', MysqlAdapter::LOCK_EXCLUSIVE);
     }
 
-    public function testAlgorithmWithMixedCase()
+    public function testAlgorithmWithMixedCase(): void
     {
         $table = new Table('mixed_case', [], $this->adapter);
         $table->addColumn('col1', 'string')
@@ -3033,7 +3155,283 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('mixed_case', 'col2'));
     }
 
-    public function testInsertOrUpdateWithDuplicates()
+    public function testAddColumnWithAlgorithmAndLockSqlContainsClause(): void
+    {
+        $table = new Table('col_sql_verify', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addColumn('col2', 'string', [
+            'null' => true,
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasColumn('col_sql_verify', 'col2'));
+    }
+
+    public function testAddColumnWithFluentColumnBuilder(): void
+    {
+        $table = new Table('col_fluent', [], $this->adapter);
+        $table->addColumn('col1', 'string')
+            ->create();
+
+        $column = new Column();
+        $column->setName('col2')
+            ->setType('string')
+            ->setNull(true)
+            ->setAlgorithm(MysqlAdapter::ALGORITHM_INPLACE)
+            ->setLock(MysqlAdapter::LOCK_NONE);
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addColumn($column)->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasColumn('col_fluent', 'col2'));
+    }
+
+    public function testAddIndexWithAlgorithm(): void
+    {
+        $table = new Table('index_algo', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_algo', ['email']));
+    }
+
+    public function testAddIndexWithAlgorithmAndLock(): void
+    {
+        $table = new Table('index_algo_lock', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_algo_lock', ['email']));
+    }
+
+    public function testAddIndexWithAlgorithmCopy(): void
+    {
+        $table = new Table('index_copy', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_COPY,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_copy', ['email']));
+    }
+
+    public function testAddIndexWithAlgorithmMixedCase(): void
+    {
+        $table = new Table('index_case', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => 'inplace',
+            'lock' => 'none',
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_case', ['email']));
+    }
+
+    public function testAddIndexWithInvalidAlgorithmThrowsException(): void
+    {
+        $table = new Table('index_invalid_algo', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid algorithm');
+
+        $table->addIndex('email', [
+            'algorithm' => 'INVALID',
+        ])->update();
+    }
+
+    public function testAddIndexWithInvalidLockThrowsException(): void
+    {
+        $table = new Table('index_invalid_lock', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid lock');
+
+        $table->addIndex('email', [
+            'lock' => 'INVALID',
+        ])->update();
+    }
+
+    public function testAddIndexWithAlgorithmInstantAndExplicitLockThrowsException(): void
+    {
+        $table = new Table('index_instant_lock', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ALGORITHM=INSTANT cannot be combined with LOCK=NONE');
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+    }
+
+    public function testBatchedIndexesWithSameAlgorithm(): void
+    {
+        $table = new Table('index_batch', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->addColumn('name', 'string')
+            ->create();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->addIndex('name', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_batch', ['email']));
+        $this->assertTrue($this->adapter->hasIndex('index_batch', ['name']));
+    }
+
+    public function testBatchedIndexesWithConflictingAlgorithmsThrowsException(): void
+    {
+        $table = new Table('index_batch_conflict', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->addColumn('name', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Conflicting algorithm specifications');
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+        ])
+        ->addIndex('name', [
+            'algorithm' => MysqlAdapter::ALGORITHM_COPY,
+        ])
+        ->update();
+    }
+
+    public function testBatchedIndexesWithConflictingLocksThrowsException(): void
+    {
+        $table = new Table('index_lock_conflict', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->addColumn('name', 'string')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Conflicting lock specifications');
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])
+        ->addIndex('name', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_SHARED,
+        ])
+        ->update();
+    }
+
+    public function testAddFulltextIndexWithAlgorithmAndLock(): void
+    {
+        $table = new Table('index_fulltext_algo', [], $this->adapter);
+        $table->addColumn('content', 'text')
+            ->create();
+
+        $table->addIndex('content', [
+            'type' => 'fulltext',
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_SHARED,
+        ])->update();
+
+        $this->assertTrue($this->adapter->hasIndex('index_fulltext_algo', ['content']));
+    }
+
+    public function testAddFulltextIndexWithInstantAndLockThrowsException(): void
+    {
+        $table = new Table('index_fulltext_instant', [], $this->adapter);
+        $table->addColumn('content', 'text')
+            ->create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ALGORITHM=INSTANT cannot be combined with LOCK=NONE');
+
+        $table->addIndex('content', [
+            'type' => 'fulltext',
+            'algorithm' => MysqlAdapter::ALGORITHM_INSTANT,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+    }
+
+    public function testAddIndexWithAlgorithmAndLockSqlContainsClause(): void
+    {
+        $table = new Table('idx_sql_verify', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addIndex('email', [
+            'algorithm' => MysqlAdapter::ALGORITHM_INPLACE,
+            'lock' => MysqlAdapter::LOCK_NONE,
+        ])->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasIndex('idx_sql_verify', ['email']));
+    }
+
+    public function testAddIndexWithFluentIndexBuilder(): void
+    {
+        $table = new Table('idx_fluent', [], $this->adapter);
+        $table->addColumn('email', 'string')
+            ->create();
+
+        $index = new Index();
+        $index->setColumns('email')
+            ->setAlgorithm(MysqlAdapter::ALGORITHM_INPLACE)
+            ->setLock(MysqlAdapter::LOCK_NONE);
+
+        $this->io->level(ConsoleIo::VERBOSE);
+        $this->out->clear();
+
+        $table->addIndex($index)->update();
+
+        $output = $this->out->output();
+        $this->assertStringContainsString('ALGORITHM=INPLACE', $output);
+        $this->assertStringContainsString('LOCK=NONE', $output);
+        $this->assertTrue($this->adapter->hasIndex('idx_fluent', ['email']));
+    }
+
+    public function testInsertOrUpdateWithDuplicates(): void
     {
         $table = new Table('currencies', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 3])
@@ -3066,7 +3464,7 @@ OUTPUT;
         $this->assertEquals('1.0500', $rows[2]['rate']); // USD updated
     }
 
-    public function testInsertOrUpdateWithMultipleUpdateColumns()
+    public function testInsertOrUpdateWithMultipleUpdateColumns(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('sku', 'string', ['limit' => 50])
@@ -3091,7 +3489,7 @@ OUTPUT;
         $this->assertEquals(50, $rows[0]['stock']);
     }
 
-    public function testInsertOrUpdateModeResetsAfterSave()
+    public function testInsertOrUpdateModeResetsAfterSave(): void
     {
         $table = new Table('items', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 10])
@@ -3111,7 +3509,7 @@ OUTPUT;
         ])->save();
     }
 
-    public function testInsertOrUpdateWithEmptyConflictColumnsDoesNotWarn()
+    public function testInsertOrUpdateWithEmptyConflictColumnsDoesNotWarn(): void
     {
         $table = new Table('currencies', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 3])
@@ -3120,7 +3518,7 @@ OUTPUT;
             ->create();
 
         $warning = null;
-        set_error_handler(function (int $errno, string $errstr) use (&$warning) {
+        set_error_handler(function (int $errno, string $errstr) use (&$warning): true {
             $warning = $errstr;
 
             return true;
@@ -3143,7 +3541,7 @@ OUTPUT;
         $this->assertEquals('1.0000', $rows[1]['rate']);
     }
 
-    public function testCreateTableWithRangeColumnsPartitioning()
+    public function testCreateTableWithRangeColumnsPartitioning(): void
     {
         // MySQL requires RANGE COLUMNS for DATE columns
         $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
@@ -3161,7 +3559,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasColumn('partitioned_orders', 'order_date'));
     }
 
-    public function testCreateTableWithListColumnsPartitioning()
+    public function testCreateTableWithListColumnsPartitioning(): void
     {
         // MySQL requires LIST COLUMNS for STRING columns
         $table = new Table('partitioned_customers', ['id' => false, 'primary_key' => ['id', 'region']], $this->adapter);
@@ -3176,7 +3574,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasTable('partitioned_customers'));
     }
 
-    public function testCreateTableWithHashPartitioning()
+    public function testCreateTableWithHashPartitioning(): void
     {
         // MySQL requires partition column in primary key
         $table = new Table('partitioned_sessions', ['id' => false, 'primary_key' => ['id', 'user_id']], $this->adapter);
@@ -3189,7 +3587,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasTable('partitioned_sessions'));
     }
 
-    public function testCreateTableWithKeyPartitioning()
+    public function testCreateTableWithKeyPartitioning(): void
     {
         $table = new Table('partitioned_cache', ['id' => false, 'primary_key' => ['cache_key']], $this->adapter);
         $table->addColumn('cache_key', 'string', ['limit' => 255])
@@ -3200,7 +3598,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasTable('partitioned_cache'));
     }
 
-    public function testCreateTableWithRangePartitioningByInteger()
+    public function testCreateTableWithRangePartitioningByInteger(): void
     {
         $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
         $table->addColumn('id', 'biginteger')
@@ -3214,7 +3612,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasTable('partitioned_logs'));
     }
 
-    public function testCreateTableWithExpressionPartitioning()
+    public function testCreateTableWithExpressionPartitioning(): void
     {
         $table = new Table('partitioned_events', ['id' => false, 'primary_key' => ['id', 'created_at']], $this->adapter);
         $table->addColumn('id', 'integer')
@@ -3228,7 +3626,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasTable('partitioned_events'));
     }
 
-    public function testAddSinglePartitionToExistingTable()
+    public function testAddSinglePartitionToExistingTable(): void
     {
         // Create a partitioned table with room to add more partitions
         $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
@@ -3256,7 +3654,7 @@ OUTPUT;
         $this->assertCount(1, $rows);
     }
 
-    public function testAddMultiplePartitionsToExistingTable()
+    public function testAddMultiplePartitionsToExistingTable(): void
     {
         // Create a partitioned table with room to add more partitions
         $table = new Table('partitioned_sales', ['id' => false, 'primary_key' => ['id', 'sale_date']], $this->adapter);
@@ -3293,7 +3691,7 @@ OUTPUT;
         $this->assertCount(3, $rows);
     }
 
-    public function testDropSinglePartitionFromExistingTable()
+    public function testDropSinglePartitionFromExistingTable(): void
     {
         // Create a partitioned table with multiple partitions
         $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
@@ -3330,7 +3728,7 @@ OUTPUT;
         $this->assertCount(1, $rows);
     }
 
-    public function testDropMultiplePartitionsFromExistingTable()
+    public function testDropMultiplePartitionsFromExistingTable(): void
     {
         // Create a partitioned table with multiple partitions
         $table = new Table('partitioned_archive', ['id' => false, 'primary_key' => ['id']], $this->adapter);
@@ -3373,7 +3771,7 @@ OUTPUT;
         $this->assertCount(1, $rows);
     }
 
-    public function testAddMultipleListPartitionsToExistingTable()
+    public function testAddMultipleListPartitionsToExistingTable(): void
     {
         // Create a LIST partitioned table
         $table = new Table('partitioned_regions', ['id' => false, 'primary_key' => ['id', 'region_id']], $this->adapter);
@@ -3405,7 +3803,7 @@ OUTPUT;
         $this->assertCount(2, $rows);
     }
 
-    public function testAddPartitionsWithMaxvalue()
+    public function testAddPartitionsWithMaxvalue(): void
     {
         // Create a partitioned table without MAXVALUE partition
         $table = new Table('partitioned_data', ['id' => false, 'primary_key' => ['id']], $this->adapter);
@@ -3540,5 +3938,54 @@ OUTPUT;
         $rows = $this->adapter->fetchAll('SELECT * FROM combined_test WHERE created_year = 2024');
         $this->assertCount(1, $rows);
         $this->assertEquals('A description', $rows[0]['description']);
+    }
+
+    public function testBinaryColumnWithFixedOption(): void
+    {
+        $table = new Table('binary_fixed_test', [], $this->adapter);
+        $table->addColumn('hash', 'binary', ['limit' => 20, 'fixed' => true])
+            ->addColumn('data', 'binary', ['limit' => 20])
+            ->save();
+
+        $this->assertTrue($this->adapter->hasColumn('binary_fixed_test', 'hash'));
+        $this->assertTrue($this->adapter->hasColumn('binary_fixed_test', 'data'));
+
+        // Check that the fixed column is created as BINARY and the non-fixed as VARBINARY
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM binary_fixed_test');
+        $hashColumn = null;
+        $dataColumn = null;
+        foreach ($rows as $row) {
+            if ($row['Field'] === 'hash') {
+                $hashColumn = $row;
+            }
+            if ($row['Field'] === 'data') {
+                $dataColumn = $row;
+            }
+        }
+
+        $this->assertNotNull($hashColumn);
+        $this->assertNotNull($dataColumn);
+        $this->assertSame('binary(20)', $hashColumn['Type']);
+        $this->assertSame('varbinary(20)', $dataColumn['Type']);
+
+        // Verify the fixed attribute is reflected back
+        $columns = $this->adapter->getColumns('binary_fixed_test');
+        $hashCol = null;
+        $dataCol = null;
+        foreach ($columns as $col) {
+            if ($col->getName() === 'hash') {
+                $hashCol = $col;
+            }
+            if ($col->getName() === 'data') {
+                $dataCol = $col;
+            }
+        }
+
+        $this->assertNotNull($hashCol);
+        $this->assertNotNull($dataCol);
+        $this->assertSame('binary', $hashCol->getType());
+        $this->assertSame('binary', $dataCol->getType());
+        $this->assertTrue($hashCol->getFixed());
+        $this->assertNull($dataCol->getFixed());
     }
 }

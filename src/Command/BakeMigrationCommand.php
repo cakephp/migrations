@@ -29,9 +29,6 @@ use Migrations\Util\ColumnParser;
  */
 class BakeMigrationCommand extends BakeSimpleMigrationCommand
 {
-    /**
-     * @var string
-     */
     protected string $_name;
 
     /**
@@ -45,7 +42,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         EventManager::instance()->on('Bake.initialize', function (Event $event): void {
             /** @var \Bake\View\BakeView $view */
@@ -95,7 +92,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
         $action = $this->detectAction($className);
 
         if (!$action && count($fields)) {
-            $this->io->abort('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`. See: https://book.cakephp.org/migrations/5/en/index.html#migrations-file-name');
+            $this->io->abort('When applying fields the migration name should start with one of the following prefixes: `Create`, `Drop`, `Add`, `Remove`, `Alter`. See: https://book.cakephp.org/migrations/5/getting-started/creating-migrations.html#migration-file-names');
         }
 
         if (!$action) {
@@ -248,7 +245,7 @@ TEXT;
     /**
      * @inheritDoc
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser = parent::buildOptionParser($parser);
 

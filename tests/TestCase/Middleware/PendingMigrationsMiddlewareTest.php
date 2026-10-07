@@ -37,7 +37,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $connection = ConnectionManager::get('test');
@@ -51,7 +51,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
         );
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         ConnectionManager::drop('custom');
@@ -66,7 +66,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
         $middleware = new PendingMigrationsMiddleware();
 
         $request = new ServerRequest();
-        $handler = new TestRequestHandler(function ($req) {
+        $handler = new TestRequestHandler(function ($req): Response {
             return new Response();
         });
 
@@ -95,11 +95,12 @@ class PendingMigrationsMiddlewareTest extends TestCase
             ],
         ];
         $config = new Config($config);
+
         $manager = new Manager($config, $this->io);
         $manager->migrate(null, true);
 
         $request = new ServerRequest();
-        $handler = new TestRequestHandler(function ($req) {
+        $handler = new TestRequestHandler(function ($req): Response {
             return new Response();
         });
         $result = $middleware->process($request, $handler);
@@ -118,7 +119,7 @@ class PendingMigrationsMiddlewareTest extends TestCase
         ]);
 
         $request = new ServerRequest();
-        $handler = new TestRequestHandler(function ($req) {
+        $handler = new TestRequestHandler(function ($req): Response {
             return new Response();
         });
 
@@ -151,11 +152,12 @@ class PendingMigrationsMiddlewareTest extends TestCase
             ],
         ];
         $config = new Config($config);
+
         $manager = new Manager($config, $this->io);
         $manager->migrate(null, true);
 
         $request = new ServerRequest();
-        $handler = new TestRequestHandler(function ($req) {
+        $handler = new TestRequestHandler(function ($req): Response {
             return new Response();
         });
 

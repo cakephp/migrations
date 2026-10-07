@@ -2,14 +2,15 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class AddCategoryIdToProducts extends BaseMigration
+class AddCategoryIdToProducts extends BaseMigration implements ReversibleMigrationInterface
 {
     /**
      * Change Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-change-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-change-method
      *
      * @return void
      */
@@ -25,8 +26,8 @@ class AddCategoryIdToProducts extends BaseMigration
             $this->foreignKey('category_id')
                 ->setReferencedTable('categories')
                 ->setReferencedColumns('id')
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
+                ->setDelete('CASCADE')
+                ->setUpdate('CASCADE')
                 ->setName('fk_category_id')
         );
         $table->update();

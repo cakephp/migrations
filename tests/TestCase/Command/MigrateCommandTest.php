@@ -13,7 +13,7 @@ class MigrateCommandTest extends TestCase
 {
     protected array $createdFiles = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -21,7 +21,7 @@ class MigrateCommandTest extends TestCase
         $this->clearMigrationRecords('test', 'Migrator');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         foreach ($this->createdFiles as $file) {
@@ -30,7 +30,7 @@ class MigrateCommandTest extends TestCase
         ConnectionManager::drop('invalid');
     }
 
-    public function testHelp()
+    public function testHelp(): void
     {
         $this->exec('migrations migrate --help');
 
@@ -127,7 +127,7 @@ class MigrateCommandTest extends TestCase
     /**
      * Test dry-run
      */
-    public function testMigrateDryRun()
+    public function testMigrateDryRun(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --dry-run');
@@ -146,7 +146,7 @@ class MigrateCommandTest extends TestCase
     /**
      * Test that migrations only run to a certain date
      */
-    public function testMigrateDate()
+    public function testMigrateDate(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --date 2020-01-01');
@@ -162,7 +162,7 @@ class MigrateCommandTest extends TestCase
     /**
      * Test output for dates with no matching migrations
      */
-    public function testMigrateDateNotFound()
+    public function testMigrateDateNotFound(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --date 2000-01-01');
@@ -179,7 +179,7 @@ class MigrateCommandTest extends TestCase
     /**
      * Test advancing migrations with an offset.
      */
-    public function testMigrateTarget()
+    public function testMigrateTarget(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --target 20150416223600');
@@ -196,7 +196,7 @@ class MigrateCommandTest extends TestCase
         $this->assertFileExists($dumpFile);
     }
 
-    public function testMigrateTargetNotFound()
+    public function testMigrateTargetNotFound(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --target 99');
@@ -214,7 +214,7 @@ class MigrateCommandTest extends TestCase
         $this->assertFileExists($dumpFile);
     }
 
-    public function testMigrateFakeAll()
+    public function testMigrateFakeAll(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --fake');
@@ -232,7 +232,7 @@ class MigrateCommandTest extends TestCase
         $this->assertFileExists($dumpFile);
     }
 
-    public function testMigratePlugin()
+    public function testMigratePlugin(): void
     {
         $this->loadPlugins(['Migrator']);
         $migrationPath = ROOT . DS . 'Plugin' . DS . 'Migrator' . DS . 'config' . DS . 'Migrations';
@@ -250,12 +250,12 @@ class MigrateCommandTest extends TestCase
         $this->assertFileExists($dumpFile);
     }
 
-    public function testMigratePluginInvalid()
+    public function testMigratePluginInvalid(): void
     {
         try {
             $this->exec('migrations migrate -c test --plugin NotThere');
             $this->fail('Should raise an error or exit with an error');
-        } catch (MissingPluginException $e) {
+        } catch (MissingPluginException) {
             $this->assertTrue(true);
         }
 
@@ -270,7 +270,7 @@ class MigrateCommandTest extends TestCase
      *
      * @return void
      */
-    public function testMigrateWithNoLock()
+    public function testMigrateWithNoLock(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
         $this->exec('migrations migrate -c test --no-lock');

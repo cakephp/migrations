@@ -23,6 +23,7 @@ use Cake\I18n\DateTime;
 use Exception;
 use InvalidArgumentException;
 use Migrations\Config\Config;
+use Migrations\Db\Action\AddCheckConstraint;
 use Migrations\Db\Action\AddColumn;
 use Migrations\Db\Action\AddForeignKey;
 use Migrations\Db\Action\AddIndex;
@@ -30,10 +31,15 @@ use Migrations\Db\Action\AddPartition;
 use Migrations\Db\Action\ChangeColumn;
 use Migrations\Db\Action\ChangeComment;
 use Migrations\Db\Action\ChangePrimaryKey;
+use Migrations\Db\Action\CreateTrigger;
+use Migrations\Db\Action\CreateView;
+use Migrations\Db\Action\DropCheckConstraint;
 use Migrations\Db\Action\DropForeignKey;
 use Migrations\Db\Action\DropIndex;
 use Migrations\Db\Action\DropPartition;
 use Migrations\Db\Action\DropTable;
+use Migrations\Db\Action\DropTrigger;
+use Migrations\Db\Action\DropView;
 use Migrations\Db\Action\RemoveColumn;
 use Migrations\Db\Action\RenameColumn;
 use Migrations\Db\Action\RenameTable;
@@ -48,8 +54,11 @@ use Migrations\Db\Table\ForeignKey;
 use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Partition;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use Migrations\MigrationInterface;
 use Migrations\SeedInterface;
+use Migrations\Util\Util;
 use PDOException;
 use RuntimeException;
 use function Cake\Core\deprecationWarning;
@@ -64,9 +73,6 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected array $options = [];
 
-    /**
-     * @var \Cake\Console\ConsoleIo
-     */
     protected ConsoleIo $io;
 
     /**
@@ -74,24 +80,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected array $createdTables = [];
 
-    /**
-     * @var string
-     */
     protected string $schemaTableName = 'phinxlog';
 
-    /**
-     * @var string
-     */
     protected string $seedSchemaTableName = 'cake_seeds';
 
-    /**
-     * @var array
-     */
     protected array $dataDomain = [];
 
-    /**
-     * @var \Cake\Database\Connection|null
-     */
     protected ?Connection $connection = null;
 
     /**
@@ -103,7 +97,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function __construct(array $options, ?ConsoleIo $io = null)
     {
         $this->setOptions($options);
-        if ($io !== null) {
+        if ($io instanceof ConsoleIo) {
             $this->setIo($io);
         }
     }
@@ -197,9 +191,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function getConnection(): Connection
     {
-        if ($this->connection === null) {
+        if (!$this->connection instanceof Connection) {
             $this->connection = $this->getOption('connection');
             $this->connect();
+        }
+        if (!$this->connection instanceof Connection) {
+            throw new RuntimeException('Unable to establish database connection. Ensure a connection is configured.');
         }
 
         return $this->connection;
@@ -294,9 +291,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     {
         $io = $this->getIo();
         if (
-            $io === null || (
+            !$io instanceof ConsoleIo || (
                 !$this->isDryRunEnabled() &&
-                $io->level() != ConsoleIo::VERBOSE
+                $io->level() !== ConsoleIo::VERBOSE
             )
         ) {
             return;
@@ -465,7 +462,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     protected function addCreatedTable(string $tableName): void
     {
         $tableName = $this->quoteTableName($tableName);
-        if (substr_compare($tableName, 'phinxlog', -strlen('phinxlog')) !== 0) {
+        if (!str_ends_with($tableName, 'phinxlog')) {
             $this->createdTables[] = $tableName;
         }
     }
@@ -694,22 +691,18 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
-            $sql .= ' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $upsertClause . ';';
-
-            return $sql;
-        } else {
-            $values = [];
-            foreach ($row as $value) {
-                $placeholder = '?';
-                if ($value instanceof Literal) {
-                    $placeholder = (string)$value;
-                }
-                $values[] = $placeholder;
-            }
-            $sql .= ' VALUES (' . implode(',', $values) . ')' . $upsertClause;
-
-            return $sql;
+            return $sql . (' VALUES (' . implode(', ', array_map($this->quoteValue(...), $row)) . ')' . $upsertClause . ';');
         }
+        $values = [];
+        foreach ($row as $value) {
+            $placeholder = '?';
+            if ($value instanceof Literal) {
+                $placeholder = (string)$value;
+            }
+            $values[] = $placeholder;
+        }
+
+        return $sql . (' VALUES (' . implode(',', $values) . ')' . $upsertClause);
     }
 
     /**
@@ -748,7 +741,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if ($conflictColumns !== null && $conflictColumns !== []) {
             trigger_error(
                 'The $conflictColumns parameter is ignored by MySQL. ' .
-                'MySQL\'s ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.',
+                "MySQL's ON DUPLICATE KEY UPDATE applies to all unique constraints on the table.",
                 E_USER_WARNING,
             );
         }
@@ -849,7 +842,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * Generates the SQL for a bulk insert.
      *
      * @param \Migrations\Db\Table\TableMetadata $table The table to insert into
-     * @param array $rows The rows to insert
+     * @param array<int, array<string, mixed>> $rows The rows to insert
      * @param \Migrations\Db\InsertMode|null $mode Insert mode
      * @param array<string>|null $updateColumns Columns to update on upsert conflict
      * @param array<string>|null $conflictColumns Columns that define uniqueness for upsert (unused in MySQL)
@@ -867,38 +860,35 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $this->getInsertPrefix($mode),
             $this->quoteTableName($table->getName()),
         );
-        $current = current($rows);
-        $keys = array_keys($current);
+        $current = (array)current($rows);
+        $keys = array_map(strval(...), array_keys($current));
 
         $sql .= '(' . implode(', ', array_map($this->quoteColumnName(...), $keys)) . ') VALUES ';
 
         $upsertClause = $this->getUpsertClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
-            $values = array_map(function ($row) {
+            $values = array_map(function (array $row): string {
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
-            $sql .= implode(', ', $values) . $upsertClause . ';';
 
-            return $sql;
-        } else {
-            $queries = [];
-            foreach ($rows as $row) {
-                $values = [];
-                foreach ($row as $v) {
-                    $placeholder = '?';
-                    if ($v instanceof Literal) {
-                        $placeholder = (string)$v;
-                    }
-                    $values[] = $placeholder;
-                }
-                $query = '(' . implode(', ', $values) . ')';
-                $queries[] = $query;
-            }
-            $sql .= implode(',', $queries) . $upsertClause;
-
-            return $sql;
+            return $sql . (implode(', ', $values) . $upsertClause . ';');
         }
+        $queries = [];
+        foreach ($rows as $row) {
+            $values = [];
+            foreach ($row as $v) {
+                $placeholder = '?';
+                if ($v instanceof Literal) {
+                    $placeholder = (string)$v;
+                }
+                $values[] = $placeholder;
+            }
+            $query = '(' . implode(', ', $values) . ')';
+            $queries[] = $query;
+        }
+
+        return $sql . implode(',', $queries) . $upsertClause;
     }
 
     /**
@@ -969,7 +959,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
         // Autodetect mode (config is null or not set)
         // Check if the main legacy phinxlog table exists
-        if ($this->connection !== null) {
+        if ($this->connection instanceof Connection) {
             $dialect = $this->connection->getDriver()->schemaDialect();
             if ($dialect->hasTable('phinxlog')) {
                 return false;
@@ -987,16 +977,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function getVersionLog(): array
     {
-        switch ($this->options['version_order']) {
-            case Config::VERSION_ORDER_CREATION_TIME:
-                $orderBy = ['version' => 'ASC'];
-                break;
-            case Config::VERSION_ORDER_EXECUTION_TIME:
-                $orderBy = ['start_time' => 'ASC', 'version' => 'ASC'];
-                break;
-            default:
-                throw new RuntimeException('Invalid version_order configuration option');
-        }
+        $orderBy = match ($this->options['version_order']) {
+            Config::VERSION_ORDER_CREATION_TIME => ['version' => 'ASC'],
+            Config::VERSION_ORDER_EXECUTION_TIME => ['start_time' => 'ASC', 'version' => 'ASC'],
+            default => throw new RuntimeException('Invalid version_order configuration option'),
+        };
         $query = $this->migrationsTable()->getVersions($orderBy);
 
         // This will throw an exception if doing a --dry-run without any migrations as phinxlog
@@ -1112,17 +1097,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function seedExecuted(SeedInterface $seed, string $executedTime): AdapterInterface
     {
-        $plugin = null;
-        $className = get_class($seed);
-
-        if (str_contains($className, '\\')) {
-            $parts = explode('\\', $className);
-            $appNamespace = Configure::read('App.namespace', 'App');
-            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                $plugin = $parts[0];
-            }
-        }
-
+        $plugin = $this->resolveSeedPlugin($seed);
         $seedName = substr($seed->getName(), 0, 100);
 
         $query = $this->getInsertBuilder();
@@ -1143,29 +1118,49 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     public function removeSeedFromLog(SeedInterface $seed): AdapterInterface
     {
-        $plugin = null;
-        $className = get_class($seed);
-
-        if (str_contains($className, '\\')) {
-            $parts = explode('\\', $className);
-            $appNamespace = Configure::read('App.namespace', 'App');
-            if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                $plugin = $parts[0];
-            }
-        }
-
+        $plugin = $this->resolveSeedPlugin($seed);
         $seedName = $seed->getName();
+
+        $conditions = ['seed_name' => $seedName];
+        if ($plugin !== null) {
+            // Also remove entries logged before plugin attribution was fixed.
+            $conditions['OR'] = [
+                'plugin' => $plugin,
+                'plugin IS' => null,
+            ];
+        } else {
+            $conditions['plugin IS'] = null;
+        }
 
         $query = $this->getDeleteBuilder();
         $query->delete()
             ->from($this->getSeedSchemaTableName())
-            ->where([
-                'seed_name' => $seedName,
-                'plugin IS' => $plugin,
-            ]);
+            ->where($conditions);
         $this->executeQuery($query);
 
         return $this;
+    }
+
+    /**
+     * Resolve the plugin a seed belongs to.
+     *
+     * Seed classes are not namespaced, so the plugin cannot be derived from the class
+     * name. The plugin of the current run is used instead, matching how migrations are
+     * tracked.
+     *
+     * @param \Migrations\SeedInterface $seed The seed to resolve the plugin for.
+     * @return string|null The plugin name or null for application seeds.
+     */
+    protected function resolveSeedPlugin(SeedInterface $seed): ?string
+    {
+        $plugin = Util::getSeedPlugin($seed);
+        if ($plugin !== null) {
+            return $plugin;
+        }
+
+        $option = $this->getOption('plugin');
+
+        return $option ? (string)$option : null;
     }
 
     /**
@@ -1278,7 +1273,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
             $default = $this->castToBool((bool)$default);
         }
 
-        return isset($default) ? " DEFAULT $default" : '';
+        return isset($default) ? ' DEFAULT ' . $default : '';
     }
 
     /**
@@ -1291,7 +1286,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     protected function executeAlterSteps(string $tableName, AlterInstructions $instructions): void
     {
         $alter = sprintf('ALTER TABLE %s %%s', $this->quoteTableName($tableName));
-        $instructions->execute($alter, [$this, 'execute']);
+        $instructions->execute($alter, $this->execute(...));
     }
 
     /**
@@ -1636,6 +1631,41 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     abstract protected function getChangeCommentInstructions(TableMetadata $table, ?string $newComment): AlterInstructions;
 
     /**
+     * Returns the instructions to create a view.
+     *
+     * @param \Migrations\Db\Table\View $view The view to create
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getCreateViewInstructions(View $view): AlterInstructions;
+
+    /**
+     * Returns the instructions to drop a view.
+     *
+     * @param string $viewName The name of the view to drop
+     * @param bool $materialized Whether this is a materialized view (PostgreSQL only)
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions;
+
+    /**
+     * Returns the instructions to create a trigger.
+     *
+     * @param string $tableName The name of the table for the trigger
+     * @param \Migrations\Db\Table\Trigger $trigger The trigger to create
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions;
+
+    /**
+     * Returns the instructions to drop a trigger.
+     *
+     * @param string $tableName The name of the table for the trigger
+     * @param string $triggerName The name of the trigger to drop
+     * @return \Migrations\Db\AlterInstructions
+     */
+    abstract protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions;
+
+    /**
      * {@inheritDoc}
      *
      * @throws \InvalidArgumentException
@@ -1687,17 +1717,19 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
                 case $action instanceof DropForeignKey && $action->getForeignKey()->getName():
                     /** @var \Migrations\Db\Action\DropForeignKey $action */
+                    $fkName = (string)$action->getForeignKey()->getName();
                     $instructions->merge($this->getDropForeignKeyInstructions(
                         $table->getName(),
-                        (string)$action->getForeignKey()->getName(),
+                        $fkName,
                     ));
                     break;
 
                 case $action instanceof DropIndex && $action->getIndex()->getName():
                     /** @var \Migrations\Db\Action\DropIndex $action */
+                    $indexName = (string)$action->getIndex()->getName();
                     $instructions->merge($this->getDropIndexByNameInstructions(
                         $table->getName(),
-                        (string)$action->getIndex()->getName(),
+                        $indexName,
                     ));
                     break;
 
@@ -1710,7 +1742,6 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     break;
 
                 case $action instanceof DropTable:
-                    /** @var \Migrations\Db\Action\DropTable $action */
                     $instructions->merge($this->getDropTableInstructions(
                         $table->getName(),
                     ));
@@ -1720,7 +1751,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     /** @var \Migrations\Db\Action\RemoveColumn $action */
                     $instructions->merge($this->getDropColumnInstructions(
                         $table->getName(),
-                        (string)$action->getColumn()->getName(),
+                        $action->getColumn()->getName(),
                     ));
                     break;
 
@@ -1728,7 +1759,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     /** @var \Migrations\Db\Action\RenameColumn $action */
                     $instructions->merge($this->getRenameColumnInstructions(
                         $table->getName(),
-                        (string)$action->getColumn()->getName(),
+                        $action->getColumn()->getName(),
                         $action->getNewName(),
                     ));
                     break;
@@ -1775,9 +1806,54 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
                     ));
                     break;
 
+                case $action instanceof CreateView:
+                    /** @var \Migrations\Db\Action\CreateView $action */
+                    $instructions->merge($this->getCreateViewInstructions($action->getView()));
+                    break;
+
+                case $action instanceof DropView:
+                    /** @var \Migrations\Db\Action\DropView $action */
+                    $instructions->merge($this->getDropViewInstructions(
+                        $action->getViewName(),
+                        $action->getMaterialized(),
+                    ));
+                    break;
+
+                case $action instanceof CreateTrigger:
+                    /** @var \Migrations\Db\Action\CreateTrigger $action */
+                    $instructions->merge($this->getCreateTriggerInstructions(
+                        $table->getName(),
+                        $action->getTrigger(),
+                    ));
+                    break;
+
+                case $action instanceof DropTrigger:
+                    /** @var \Migrations\Db\Action\DropTrigger $action */
+                    $instructions->merge($this->getDropTriggerInstructions(
+                        $table->getName(),
+                        $action->getTriggerName(),
+                    ));
+                    break;
+
+                case $action instanceof AddCheckConstraint:
+                    /** @var \Migrations\Db\Action\AddCheckConstraint $action */
+                    $instructions->merge($this->getAddCheckConstraintInstructions(
+                        $table,
+                        $action->getCheckConstraint(),
+                    ));
+                    break;
+
+                case $action instanceof DropCheckConstraint:
+                    /** @var \Migrations\Db\Action\DropCheckConstraint $action */
+                    $instructions->merge($this->getDropCheckConstraintInstructions(
+                        $table->getName(),
+                        $action->getConstraintName(),
+                    ));
+                    break;
+
                 default:
                     throw new InvalidArgumentException(
-                        sprintf("Don't know how to execute action `%s`", get_class($action)),
+                        sprintf("Don't know how to execute action `%s`", $action::class),
                     );
             }
         }

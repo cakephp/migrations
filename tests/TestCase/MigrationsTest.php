@@ -55,7 +55,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -108,7 +108,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         unset($this->Connection, $this->migrations);
@@ -125,7 +125,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testStatus()
+    public function testStatus(): void
     {
         $result = $this->migrations->status();
         $expected = [
@@ -158,7 +158,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMigrateAndRollback()
+    public function testMigrateAndRollback(): void
     {
         if ($this->Connection->getDriver() instanceof Sqlserver) {
             // TODO This test currently fails in CI because numbers table
@@ -252,7 +252,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testCreateWithEncoding()
+    public function testCreateWithEncoding(): void
     {
         $this->skipIf(env('DB') !== 'mysql', 'Requires MySQL');
 
@@ -279,7 +279,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedAll()
+    public function testMarkMigratedAll(): void
     {
         $markMigrated = $this->migrations->markMigrated();
         $this->assertTrue($markMigrated);
@@ -316,7 +316,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedAllAsVersion()
+    public function testMarkMigratedAllAsVersion(): void
     {
         $markMigrated = $this->migrations->markMigrated('all');
         $this->assertTrue($markMigrated);
@@ -352,7 +352,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedTarget()
+    public function testMarkMigratedTarget(): void
     {
         $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150704160200']);
         $this->assertTrue($markMigrated);
@@ -394,7 +394,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedTargetError()
+    public function testMarkMigratedTargetError(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Migration `20150704160610` was not found !');
@@ -407,7 +407,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedTargetExclude()
+    public function testMarkMigratedTargetExclude(): void
     {
         $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150704160200', 'exclude' => true]);
         $this->assertTrue($markMigrated);
@@ -449,7 +449,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedTargetOnly()
+    public function testMarkMigratedTargetOnly(): void
     {
         $markMigrated = $this->migrations->markMigrated(null, ['target' => '20150724233100', 'only' => true]);
         $this->assertTrue($markMigrated);
@@ -491,7 +491,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedTargetExcludeOnly()
+    public function testMarkMigratedTargetExcludeOnly(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('You should use `exclude` OR `only` (not both) along with a `target` argument');
@@ -504,7 +504,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMarkMigratedVersion()
+    public function testMarkMigratedVersion(): void
     {
         $markMigrated = $this->migrations->markMigrated(20150704160200);
         $this->assertTrue($markMigrated);
@@ -546,7 +546,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testOverrideOptions()
+    public function testOverrideOptions(): void
     {
         $result = $this->migrations->status();
         $expectedStatus = [
@@ -614,7 +614,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testMigrateDateOption()
+    public function testMigrateDateOption(): void
     {
         // If we want to migrate to a date before the first first migration date,
         // we should not migrate anything
@@ -674,6 +674,7 @@ class MigrationsTest extends TestCase
         // If we want to migrate to a date after the last migration date,
         // we should migrate everything
         $this->migrations->migrate(['date' => '20150730']);
+
         $expectedStatus = [
             [
                 'status' => 'up',
@@ -790,7 +791,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testSeed()
+    public function testSeed(): void
     {
         $this->migrations->migrate();
         $seed = $this->migrations->seed(['source' => 'Seeds']);
@@ -866,7 +867,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testSeedOneSeeder()
+    public function testSeedOneSeeder(): void
     {
         $this->migrations->migrate();
 
@@ -915,7 +916,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testSeedOneSeederShortName()
+    public function testSeedOneSeederShortName(): void
     {
         $this->migrations->migrate();
 
@@ -964,7 +965,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testSeedCallSeeder()
+    public function testSeedCallSeeder(): void
     {
         $this->migrations->migrate();
 
@@ -1025,7 +1026,7 @@ class MigrationsTest extends TestCase
      *
      * @return void
      */
-    public function testSeedWrongSeed()
+    public function testSeedWrongSeed(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The seed `DerpSeed` does not exist');
@@ -1086,7 +1087,7 @@ class MigrationsTest extends TestCase
             'parts', 'special_pks', 'special_tags', 'texts', 'users',
         ];
         foreach ($cleanup as $item) {
-            $snapshotConn->execute("DROP TABLE IF EXISTS {$item}");
+            $snapshotConn->execute('DROP TABLE IF EXISTS ' . $item);
         }
 
         $migrations = new Migrations([
@@ -1103,7 +1104,7 @@ class MigrationsTest extends TestCase
     /**
      * Tests that migrating in case of error throws an exception
      */
-    public function testMigrateErrors()
+    public function testMigrateErrors(): void
     {
         $this->expectException(Exception::class);
         $this->migrations->markMigrated(20150704160200);
@@ -1113,7 +1114,7 @@ class MigrationsTest extends TestCase
     /**
      * Tests that rolling back in case of error throws an exception
      */
-    public function testRollbackErrors()
+    public function testRollbackErrors(): void
     {
         $this->expectException(Exception::class);
         $this->migrations->markMigrated('all');
@@ -1124,7 +1125,7 @@ class MigrationsTest extends TestCase
      * Tests that marking migrated a non-existant migrations returns an error
      * and can return a error message
      */
-    public function testMarkMigratedErrors()
+    public function testMarkMigratedErrors(): void
     {
         $this->expectException(Exception::class);
         $this->migrations->markMigrated(20150704000000);

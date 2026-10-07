@@ -15,8 +15,6 @@ class DropIndex extends Action
 {
     /**
      * The index to drop
-     *
-     * @var \Migrations\Db\Table\Index
      */
     protected Index $index;
 

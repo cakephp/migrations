@@ -27,6 +27,14 @@ use Migrations\Migration\ManagerFactory;
 class MarkMigratedCommand extends Command
 {
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Mark one or more migrations as run.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string
@@ -42,7 +50,7 @@ class MarkMigratedCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'Mark a migration as applied',
@@ -95,9 +103,12 @@ class MarkMigratedCommand extends Command
      */
     protected function invalidOnlyOrExclude(Arguments $args): bool
     {
-        return ($args->getOption('exclude') && $args->getOption('only')) ||
-            ($args->getOption('exclude') || $args->getOption('only')) &&
-            $args->getOption('target') === null;
+        if ($args->getOption('exclude') && $args->getOption('only')) {
+            return true;
+        }
+
+        return ($args->getOption('exclude') || $args->getOption('only')) &&
+        $args->getOption('target') === null;
     }
 
     /**
@@ -135,7 +146,7 @@ class MarkMigratedCommand extends Command
         }
 
         $output = $manager->markVersionsAsMigrated($path, $versions);
-        array_map(fn($line) => $io->out($line), $output);
+        array_map(fn(string $line): ?int => $io->out($line), $output);
 
         return self::CODE_SUCCESS;
     }

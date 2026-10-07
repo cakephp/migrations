@@ -16,6 +16,7 @@ namespace Migrations\Test\TestCase\TestSuite;
 use Cake\Chronos\ChronosDate;
 use Cake\Core\Configure;
 use Cake\Database\Driver\Postgres;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\ConnectionHelper;
 use Cake\TestSuite\TestCase;
@@ -32,30 +33,77 @@ class MigratorTest extends TestCase
     protected $restore;
 
     /**
-     * Get the migration table name for the Migrator plugin.
+     * Get the migration table name for a plugin, or for the application when null.
      *
+     * @param string|null $plugin The plugin name.
      * @return string
      */
-    protected function getMigratorTableName(): string
+    protected function getMigratorTableName(?string $plugin = 'Migrator'): string
     {
-        return Configure::read('Migrations.legacyTables') === false
-            ? UnifiedMigrationsTableStorage::TABLE_NAME
-            : 'migrator_phinxlog';
+        if (Configure::read('Migrations.legacyTables') === false) {
+            return UnifiedMigrationsTableStorage::TABLE_NAME;
+        }
+
+        return $plugin === null ? 'phinxlog' : 'migrator_phinxlog';
     }
 
     /**
      * Build a WHERE clause for filtering by plugin in unified mode.
      *
+     * @param string|null $plugin The plugin name.
      * @return array
      */
-    protected function getMigratorWhereClause(): array
+    protected function getMigratorWhereClause(?string $plugin = 'Migrator'): array
     {
-        return Configure::read('Migrations.legacyTables') === false
-            ? ['plugin' => 'Migrator']
-            : [];
+        if (Configure::read('Migrations.legacyTables') !== false) {
+            return [];
+        }
+
+        return $plugin === null ? ['plugin IS' => null] : ['plugin' => $plugin];
     }
 
-    public function setUp(): void
+    protected function makeInspectableMigrator(): Migrator
+    {
+        return new class () extends Migrator {
+            /**
+             * @return array<string>
+             */
+            public function exposedGetMigrationTables(string $connection): array
+            {
+                return array_values($this->getMigrationTables($connection));
+            }
+
+            /**
+             * @return array<string>
+             */
+            public function exposedGetNonPhinxTables(string $connection, array $skip = []): array
+            {
+                return array_values($this->getNonPhinxTables($connection, $skip));
+            }
+        };
+    }
+
+    protected function createPortableTable(string $name, bool $withPlugin = false): void
+    {
+        $connection = ConnectionManager::get('test');
+        $schema = new TableSchema($name);
+        $schema
+            ->addColumn('version', ['type' => 'biginteger', 'null' => false])
+            ->addColumn('migration_name', ['type' => 'string', 'limit' => 100, 'null' => false])
+            ->addColumn('start_time', ['type' => 'timestamp', 'default' => null, 'null' => true])
+            ->addColumn('end_time', ['type' => 'timestamp', 'default' => null, 'null' => true])
+            ->addColumn('breakpoint', ['type' => 'boolean', 'default' => false, 'null' => false]);
+
+        if ($withPlugin) {
+            $schema->addColumn('plugin', ['type' => 'string', 'limit' => 100, 'default' => null, 'null' => true]);
+        }
+
+        foreach ($schema->createSql($connection) as $statement) {
+            $connection->execute($statement);
+        }
+    }
+
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -67,7 +115,7 @@ class MigratorTest extends TestCase
         (new ConnectionHelper())->dropTables('test');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         if ($this->restore) {
@@ -93,6 +141,32 @@ class MigratorTest extends TestCase
         $this->assertContains('migrator', $tables);
 
         $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
+    }
+
+    public function testGetMigrationTablesIncludesUnifiedLedger(): void
+    {
+        $this->skipIf(Configure::read('Migrations.legacyTables') !== false);
+
+        $connection = ConnectionManager::get('test');
+        $connection->execute('CREATE TABLE sample_table (id INT)');
+        $this->createPortableTable('cake_migrations', true);
+
+        $migrator = $this->makeInspectableMigrator();
+
+        $this->assertSame(['cake_migrations'], $migrator->exposedGetMigrationTables('test'));
+        $this->assertSame(['sample_table'], $migrator->exposedGetNonPhinxTables('test'));
+    }
+
+    public function testGetMigrationTablesIncludesLegacyLedger(): void
+    {
+        $connection = ConnectionManager::get('test');
+        $connection->execute('CREATE TABLE sample_table (id INT)');
+        $this->createPortableTable('app_phinxlog');
+
+        $migrator = $this->makeInspectableMigrator();
+
+        $this->assertSame(['app_phinxlog'], $migrator->exposedGetMigrationTables('test'));
+        $this->assertSame(['sample_table'], $migrator->exposedGetNonPhinxTables('test'));
     }
 
     public function testMigrateDropNoTruncate(): void
@@ -150,8 +224,6 @@ class MigratorTest extends TestCase
     {
         $connection = ConnectionManager::get('test');
         $this->skipIf($connection->getDriver() instanceof Postgres);
-        // Skip for unified mode - migration history detection works differently
-        $this->skipIf(Configure::read('Migrations.legacyTables') === false);
 
         $migrator = new Migrator();
         // Run migrations for the first time.
@@ -159,6 +231,9 @@ class MigratorTest extends TestCase
             ['plugin' => 'Migrator'],
             ['plugin' => 'Migrator', 'source' => 'Migrations2'],
         ]);
+
+        // Forget one applied migration so that the next run has a reason to drop.
+        $this->forgetMigration('20211001000000');
 
         // Run migrations the second time. Skip clauses will cause problems.
         try {
@@ -185,24 +260,35 @@ class MigratorTest extends TestCase
         $this->assertCount(0, $connection->selectQuery()->select(['*'])->from('migrator')->execute()->fetchAll());
     }
 
-    private function setMigrationEndDateToYesterday()
+    private function setMigrationEndDateToYesterday(?string $plugin = 'Migrator'): void
     {
         $query = ConnectionManager::get('test')->updateQuery()
-            ->update($this->getMigratorTableName())
+            ->update($this->getMigratorTableName($plugin))
             ->set('end_time', ChronosDate::yesterday(), 'timestamp');
-        $where = $this->getMigratorWhereClause();
+        $where = $this->getMigratorWhereClause($plugin);
         if ($where) {
             $query->where($where);
         }
         $query->execute();
     }
 
-    private function fetchMigrationEndDate(): ChronosDate
+    private function forgetMigration(string $version): void
+    {
+        $query = ConnectionManager::get('test')->deleteQuery()
+            ->delete($this->getMigratorTableName())
+            ->where(['version' => $version]);
+        foreach ($this->getMigratorWhereClause() as $field => $value) {
+            $query->where([$field => $value]);
+        }
+        $query->execute();
+    }
+
+    private function fetchMigrationEndDate(?string $plugin = 'Migrator'): ChronosDate
     {
         $query = ConnectionManager::get('test')->selectQuery()
             ->select('end_time')
-            ->from($this->getMigratorTableName());
-        $where = $this->getMigratorWhereClause();
+            ->from($this->getMigratorTableName($plugin));
+        $where = $this->getMigratorWhereClause($plugin);
         if ($where) {
             $query->where($where);
         }
@@ -253,6 +339,49 @@ class MigratorTest extends TestCase
         // Ensure that the end time is unchanged, meaning that the phinx table was not dropped
         // and the migrations were not re-run
         $this->assertTrue($this->fetchMigrationEndDate()->isYesterday());
+    }
+
+    public function testSkipMigrationDroppingWithTwoSourcesSharingHistory(): void
+    {
+        // Both sets resolve to the same migration history: same connection and
+        // same plugin. Each source only sees its own files on disk, so the
+        // other source's applied migrations must not be treated as missing.
+        $sets = [
+            ['plugin' => 'Migrator'],
+            ['plugin' => 'Migrator', 'source' => 'Migrations2'],
+        ];
+
+        $migrator = new Migrator();
+        $migrator->runMany($sets, false);
+
+        $this->setMigrationEndDateToYesterday();
+
+        $migrator->runMany($sets, false);
+
+        // Ensure that the end time is unchanged, meaning that the tables were not
+        // dropped and the migrations were not re-run.
+        $this->assertTrue($this->fetchMigrationEndDate()->isYesterday());
+    }
+
+    public function testSkipMigrationDroppingWithTwoAppSourcesSharingHistory(): void
+    {
+        // Two application sources on the same connection: no plugin, so both
+        // record into the same migration history.
+        $sets = [
+            ['source' => '../Plugin/Migrator/config/Migrations'],
+            ['source' => '../Plugin/Migrator/config/Migrations2'],
+        ];
+
+        $migrator = new Migrator();
+        $migrator->runMany($sets, false);
+
+        $this->setMigrationEndDateToYesterday(null);
+
+        $migrator->runMany($sets, false);
+
+        // Ensure that the end time is unchanged, meaning that the tables were not
+        // dropped and the migrations were not re-run.
+        $this->assertTrue($this->fetchMigrationEndDate(null)->isYesterday());
     }
 
     public function testDropMigrationsIfDownMigrations(): void

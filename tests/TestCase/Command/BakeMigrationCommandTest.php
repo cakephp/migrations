@@ -33,14 +33,14 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*Users.php');
@@ -84,7 +84,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testNoContents()
+    public function testNoContents(): void
     {
         $this->exec('bake migration NoContents --connection test');
 
@@ -101,7 +101,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return array
      */
-    public static function nameVariations()
+    public static function nameVariations(): array
     {
         return [
             ['name', '.php'],
@@ -118,9 +118,9 @@ class BakeMigrationCommandTest extends TestCase
      * @return void
      */
     #[DataProvider('nameVariations')]
-    public function testCreate($name, $fileSuffix)
+    public function testCreate(string $name, string $fileSuffix): void
     {
-        $this->exec("bake migration CreateUsers  {$name} --connection test");
+        $this->exec(sprintf('bake migration CreateUsers  %s --connection test', $name));
 
         $file = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_CreateUsers.php');
         $filePath = current($file);
@@ -133,7 +133,7 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * Tests that baking a migration with the name as another will throw an exception.
      */
-    public function testCreateDuplicateName()
+    public function testCreateDuplicateName(): void
     {
         $this->exec('bake migration CreateUsers --connection test');
         $this->exec('bake migration CreateUsers --connection test');
@@ -144,7 +144,7 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * Tests that baking a migration with the name as reserved keyword triggers prefixing.
      */
-    public function testCreateWithReservedKeyword()
+    public function testCreateWithReservedKeyword(): void
     {
         $this->exec('bake migration New --connection test', ['Prefix']);
 
@@ -152,7 +152,7 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertOutputRegExp('/Wrote.*?PrefixNew\.php/');
     }
 
-    public function testCreateBuiltInAlias()
+    public function testCreateBuiltInAlias(): void
     {
         $this->exec('migrations create CreateUsers --connection test');
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
@@ -162,7 +162,7 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * Tests that baking a migration with the "drop" string inside the name generates a valid drop migration.
      */
-    public function testCreateDropMigration()
+    public function testCreateDropMigration(): void
     {
         $this->exec('bake migration DropUsers --connection test');
         $this->assertOutputRegExp('/Wrote.*?DropUsers\.php/');
@@ -178,7 +178,7 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * Tests that baking a migration with the name as another with the parameter "force", will delete the existing file.
      */
-    public function testCreateDuplicateNameWithForce()
+    public function testCreateDuplicateNameWithForce(): void
     {
         $this->exec('bake migration CreateUsers --connection test --force');
 
@@ -197,7 +197,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAddPrimaryKeyToExistingTable()
+    public function testAddPrimaryKeyToExistingTable(): void
     {
         $this->exec('bake migration AddPkToUsers somefield:primary_key --connection test');
 
@@ -211,7 +211,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAddPrimaryKeyToExistingUsersTable()
+    public function testAddPrimaryKeyToExistingUsersTable(): void
     {
         $this->exec('bake migration AlterUsers somefield:primary_key --connection test');
 
@@ -222,7 +222,7 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * @return void
      */
-    public function testDetectAction()
+    public function testDetectAction(): void
     {
         $command = new BakeMigrationCommand();
         $this->assertEquals(
@@ -382,7 +382,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testActionWithoutValidPrefix()
+    public function testActionWithoutValidPrefix(): void
     {
         $this->exec('bake migration SleepUsers name:string --connection test');
 
@@ -395,7 +395,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testCreateAnonymousStyle()
+    public function testCreateAnonymousStyle(): void
     {
         $this->exec('bake migration CreateUsers name:string --style=anonymous --connection test');
 
@@ -403,7 +403,7 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertCount(1, $files);
 
         $filePath = current($files);
-        $fileName = basename($filePath);
+        $fileName = basename((string)$filePath);
 
         // Check the file name format
         $this->assertMatchesRegularExpression('/^\d{4}_\d{2}_\d{2}_\d{6}_CreateUsers\.php$/', $fileName);
@@ -422,7 +422,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testCreateAnonymousStyleWithConfigure()
+    public function testCreateAnonymousStyleWithConfigure(): void
     {
         Configure::write('Migrations.style', 'anonymous');
 
@@ -432,7 +432,7 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertCount(1, $files);
 
         $filePath = current($files);
-        $fileName = basename($filePath);
+        $fileName = basename((string)$filePath);
 
         // Check the file name format
         $this->assertMatchesRegularExpression('/^\d{4}_\d{2}_\d{2}_\d{6}_CreateUsers\.php$/', $fileName);
@@ -451,7 +451,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testCreateWithReferences()
+    public function testCreateWithReferences(): void
     {
         $this->exec('bake migration CreatePosts title:string user_id:references --connection test');
 
@@ -468,7 +468,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testCreateWithReferencesCustomTable()
+    public function testCreateWithReferencesCustomTable(): void
     {
         $this->exec('bake migration CreateArticles title:string author_id:references:authors --connection test');
 
@@ -485,7 +485,7 @@ class BakeMigrationCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAddFieldWithReference()
+    public function testAddFieldWithReference(): void
     {
         $this->exec('bake migration AddCategoryIdToProducts category_id:references --connection test');
 
@@ -497,10 +497,10 @@ class BakeMigrationCommandTest extends TestCase
         $this->assertSameAsFile(__FUNCTION__ . '.php', $result);
     }
 
-    public function testBakeMigrationWithoutBake()
+    public function testBakeMigrationWithoutBake(): void
     {
         // Make sure to unload the Bake plugin
-        $this->createApp()->getEventManager()->on('Console.buildCommands', function ($event, $commands) {
+        $this->createApp()->getEventManager()->on('Console.buildCommands', function ($event, $commands): void {
             Plugin::getCollection()->remove('Bake');
         });
 

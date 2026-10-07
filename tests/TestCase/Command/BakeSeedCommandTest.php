@@ -46,7 +46,7 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Seeds' . DS;
@@ -57,7 +57,7 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBasicBaking()
+    public function testBasicBaking(): void
     {
         $this->generatedFile = ROOT . DS . 'config/Seeds/ArticlesSeed.php';
         $this->exec('bake seed Articles --connection test');
@@ -72,7 +72,7 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testBakeWithApplicationTemplate()
+    public function testBakeWithApplicationTemplate(): void
     {
         copy(
             ROOT . '/App/Template/plugin/Migrations/bake/Seed/custom-seed.twig',
@@ -93,13 +93,13 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testWithData()
+    public function testWithData(): void
     {
         $this->generatedFile = ROOT . DS . 'config/Seeds/EventsSeed.php';
         $this->exec('bake seed Events --connection test --data');
 
         $path = __FUNCTION__ . '.php';
-        if (in_array(getenv('DB'), ['pgsql', 'sqlserver'])) {
+        if (in_array(getenv('DB'), ['pgsql', 'sqlserver'], true)) {
             $path = getenv('DB') . DS . $path;
         } elseif (PHP_VERSION_ID >= 80100) {
             $path = 'php81' . DS . $path;
@@ -115,7 +115,7 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testWithDataAndFields()
+    public function testWithDataAndFields(): void
     {
         $this->generatedFile = ROOT . DS . 'config/Seeds/EventsSeed.php';
         $this->exec('bake seed Events --connection test --data --fields title,description');
@@ -130,13 +130,13 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testWithDataAndLimit()
+    public function testWithDataAndLimit(): void
     {
         $this->generatedFile = ROOT . DS . 'config/Seeds/EventsSeed.php';
         $this->exec('bake seed Events --connection test --data --limit 2');
 
         $path = __FUNCTION__ . '.php';
-        if (in_array(getenv('DB'), ['pgsql', 'sqlserver'])) {
+        if (in_array(getenv('DB'), ['pgsql', 'sqlserver'], true)) {
             $path = getenv('DB') . DS . $path;
         } elseif (PHP_VERSION_ID >= 80100) {
             $path = 'php81' . DS . $path;
@@ -152,7 +152,7 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testPrettifyArray()
+    public function testPrettifyArray(): void
     {
         $this->generatedFile = ROOT . DS . 'config/Seeds/TextsSeed.php';
         $this->exec('bake seed Texts --connection test --data');
@@ -167,7 +167,7 @@ class BakeSeedCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAnonymousStyleWithConfigure()
+    public function testAnonymousStyleWithConfigure(): void
     {
         Configure::write('Migrations.style', 'anonymous');
 

@@ -39,7 +39,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected $generatedFiles = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -47,7 +47,7 @@ abstract class TestCase extends BaseTestCase
         $this->loadPlugins(['Cake/TwigView']);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
 
@@ -72,9 +72,9 @@ abstract class TestCase extends BaseTestCase
      * @param string $name plugin name to load
      * @return void
      */
-    protected function _loadTestPlugin($name)
+    protected function _loadTestPlugin(string $name)
     {
-        $root = dirname(dirname(__FILE__)) . DS;
+        $root = dirname(__FILE__, 2) . DS;
         $path = $root . 'test_app' . DS . 'Plugin' . DS . $name . DS;
 
         $this->loadPlugins([
@@ -91,7 +91,7 @@ abstract class TestCase extends BaseTestCase
      * @param string $message The message to use if a check fails.
      * @return void
      */
-    protected function assertFilesExist(array $files, $message = '')
+    protected function assertFilesExist(array $files, string $message = '')
     {
         foreach ($files as $file) {
             $this->assertFileExists($file, $message);
@@ -106,7 +106,7 @@ abstract class TestCase extends BaseTestCase
      * @param string $message The error message.
      * @return void
      */
-    protected function assertFileContains($expected, $path, $message = '')
+    protected function assertFileContains(string $expected, string $path, string $message = '')
     {
         $this->assertFileExists($path, 'Cannot test contents, file does not exist.');
 
@@ -122,7 +122,7 @@ abstract class TestCase extends BaseTestCase
      * @param string $message The error message.
      * @return void
      */
-    protected function assertFileNotContains($expected, $path, $message = '')
+    protected function assertFileNotContains(string $expected, string $path, string $message = '')
     {
         $this->assertFileExists($path, 'Cannot test contents, file does not exist.');
 

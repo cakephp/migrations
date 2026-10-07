@@ -16,9 +16,11 @@ namespace Migrations\Test\TestCase\View\Helper;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\Collection;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\TestSuite\TestCase;
 use Cake\View\View;
+use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\View\Helper\MigrationHelper;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -74,7 +76,7 @@ class MigrationHelperTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -139,34 +141,34 @@ class MigrationHelperTest extends TestCase
      *
      * @return void
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         unset($this->helper, $this->view, $this->collection, $this->connection);
     }
 
-    public function testTableMethod()
+    public function testTableMethod(): void
     {
         $this->assertSame('drop', $this->helper->tableMethod('drop_table'));
         $this->assertSame('create', $this->helper->tableMethod('create_table'));
         $this->assertSame('update', $this->helper->tableMethod('other_method'));
     }
 
-    public function testIndexMethod()
+    public function testIndexMethod(): void
     {
         $this->assertSame('removeIndex', $this->helper->indexMethod('drop_field'));
         $this->assertSame('addIndex', $this->helper->indexMethod('add_field'));
         $this->assertSame('addIndex', $this->helper->indexMethod('alter_field'));
     }
 
-    public function testColumnMethod()
+    public function testColumnMethod(): void
     {
         $this->assertSame('removeColumn', $this->helper->columnMethod('drop_field'));
         $this->assertSame('addColumn', $this->helper->columnMethod('add_field'));
         $this->assertSame('changeColumn', $this->helper->columnMethod('alter_field'));
     }
 
-    public function testColumns()
+    public function testColumns(): void
     {
         $extra = [];
         if ($this->connection->getDriver() instanceof Sqlserver) {
@@ -216,7 +218,7 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->columns('users'));
     }
 
-    public function testColumn()
+    public function testColumn(): void
     {
         $tableSchema = $this->collection->describe('users');
 
@@ -287,7 +289,7 @@ class MigrationHelperTest extends TestCase
         ], $this->helper->column($tableSchema, 'updated'));
     }
 
-    public function testValue()
+    public function testValue(): void
     {
         $this->assertSame('null', $this->helper->value(null));
         $this->assertSame('null', $this->helper->value('null'));
@@ -307,7 +309,7 @@ class MigrationHelperTest extends TestCase
         $this->assertSame("'o\\\"ne'", $this->helper->value('o"ne'));
     }
 
-    public function testAttributes()
+    public function testAttributes(): void
     {
         $attributes = [
             'null' => false,
@@ -379,7 +381,58 @@ class MigrationHelperTest extends TestCase
         $this->assertEquals($attributes, $result);
     }
 
-    public function testStringifyList()
+    /**
+     * Test that attributes() preserves the onUpdate attribute
+     *
+     * `onUpdate` is a first-class column key in CakePHP's TableSchema for datetime
+     * and timestamp types, so attributes() must not filter it out. The schema is
+     * built by hand rather than reflected so this holds for every driver.
+     */
+    public function testAttributesPreservesOnUpdate(): void
+    {
+        $tableSchema = new TableSchema('on_update_columns');
+        $tableSchema->addColumn('modified', [
+            'type' => 'datetime',
+            'null' => false,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ]);
+        $tableSchema->addColumn('plain', [
+            'type' => 'datetime',
+            'null' => true,
+        ]);
+
+        $modified = $this->helper->attributes($tableSchema, 'modified');
+        $this->assertArrayHasKey('onUpdate', $modified, 'onUpdate should survive attributes()');
+        $this->assertSame('CURRENT_TIMESTAMP', $modified['onUpdate']);
+
+        $plain = $this->helper->attributes($tableSchema, 'plain');
+        $this->assertArrayNotHasKey('onUpdate', $plain, 'columns without ON UPDATE should not gain the key');
+    }
+
+    /**
+     * Test that a column with an ON UPDATE clause bakes the Phinx `update` option
+     *
+     * Guards the whole snapshot path: attributes() must preserve `onUpdate` and
+     * getColumnOption() must translate it to Phinx's `update` option. Either half
+     * regressing silently drops the clause from generated migrations.
+     */
+    public function testColumnsRendersOnUpdateAsUpdateOption(): void
+    {
+        $tableSchema = new TableSchema('on_update_columns');
+        $tableSchema->addColumn('modified', [
+            'type' => 'datetime',
+            'null' => false,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ]);
+
+        $columns = $this->helper->columns($tableSchema);
+        $options = $this->helper->getColumnOption($columns['modified']['options']);
+
+        $this->assertArrayNotHasKey('onUpdate', $options);
+        $this->assertSame('CURRENT_TIMESTAMP', $options['update']);
+    }
+
+    public function testStringifyList(): void
     {
         $this->assertSame('', $this->helper->stringifyList([]));
         $this->assertSame("
@@ -455,5 +508,118 @@ class MigrationHelperTest extends TestCase
         $this->assertArrayNotHasKey('collate', $result, 'collate should be converted to collation');
         $this->assertArrayHasKey('collation', $result, 'collation should be set from collate value');
         $this->assertSame('en_US.UTF-8', $result['collation']);
+    }
+
+    /**
+     * Test that getColumnOption converts onUpdate to update
+     *
+     * CakePHP reflects `ON UPDATE` clauses as 'onUpdate', but Phinx uses the
+     * 'update' column option, so this must be converted for the clause to
+     * survive a snapshot.
+     */
+    public function testGetColumnOptionConvertsOnUpdateToUpdate(): void
+    {
+        $options = [
+            'null' => true,
+            'default' => null,
+            'onUpdate' => 'CURRENT_TIMESTAMP',
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('onUpdate', $result, 'onUpdate should be converted to update');
+        $this->assertArrayHasKey('update', $result, 'update should be set from onUpdate value');
+        $this->assertSame('CURRENT_TIMESTAMP', $result['update']);
+    }
+
+    /**
+     * Test that getColumnOption removes null onUpdate
+     *
+     * Column::toArray() always emits an 'onUpdate' key, so columns without an
+     * `ON UPDATE` clause carry a null. Column::setUpdate() is not nullable, so
+     * passing it through would be a TypeError.
+     */
+    public function testGetColumnOptionRemovesNullOnUpdate(): void
+    {
+        $options = [
+            'null' => true,
+            'default' => null,
+            'onUpdate' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('onUpdate', $result, 'onUpdate => null should be removed');
+        $this->assertArrayNotHasKey('update', $result, 'update should not be set when onUpdate is null');
+    }
+
+    /**
+     * Test that getColumnOption includes the fixed option for binary columns
+     */
+    public function testGetColumnOptionIncludesFixed(): void
+    {
+        $options = [
+            'length' => 20,
+            'null' => true,
+            'default' => null,
+            'fixed' => true,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayHasKey('fixed', $result);
+        $this->assertTrue($result['fixed']);
+    }
+
+    /**
+     * Test that getColumnOption excludes fixed when not set
+     */
+    public function testGetColumnOptionExcludesFixedWhenNotSet(): void
+    {
+        $options = [
+            'length' => 20,
+            'null' => true,
+            'default' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayNotHasKey('fixed', $result);
+    }
+
+    /**
+     * Test that getColumnOption converts CakePHP's LENGTH_LONG to migrations TEXT_LONG
+     *
+     * CakePHP uses LENGTH_LONG = 4294967295 for LONGTEXT, but migrations expects
+     * TEXT_LONG = 2147483647. This ensures generated migrations use the correct value.
+     */
+    public function testGetColumnOptionConvertsLengthLongToTextLong(): void
+    {
+        $options = [
+            'limit' => TableSchema::LENGTH_LONG, // 4294967295
+            'null' => true,
+            'default' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertArrayHasKey('limit', $result);
+        $this->assertSame(MysqlAdapter::TEXT_LONG, $result['limit']); // 2147483647
+    }
+
+    /**
+     * Test that getColumnOption preserves other limit values unchanged
+     */
+    public function testGetColumnOptionPreservesOtherLimits(): void
+    {
+        $options = [
+            'limit' => 255, // TEXT_TINY / LENGTH_TINY - same value
+            'null' => true,
+            'default' => null,
+        ];
+
+        $result = $this->helper->getColumnOption($options);
+
+        $this->assertSame(255, $result['limit']);
     }
 }

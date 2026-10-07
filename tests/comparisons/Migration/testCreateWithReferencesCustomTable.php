@@ -2,14 +2,15 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\ReversibleMigrationInterface;
 
-class CreateArticles extends BaseMigration
+class CreateArticles extends BaseMigration implements ReversibleMigrationInterface
 {
     /**
      * Change Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-change-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-change-method
      *
      * @return void
      */
@@ -30,8 +31,8 @@ class CreateArticles extends BaseMigration
             $this->foreignKey('author_id')
                 ->setReferencedTable('authors')
                 ->setReferencedColumns('id')
-                ->setOnDelete('CASCADE')
-                ->setOnUpdate('CASCADE')
+                ->setDelete('CASCADE')
+                ->setUpdate('CASCADE')
                 ->setName('fk_author_id')
         );
         $table->create();

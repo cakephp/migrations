@@ -8,6 +8,7 @@ use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
+use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\PostgresAdapter;
@@ -27,13 +28,12 @@ use RuntimeException;
 
 class PostgresAdapterTest extends TestCase
 {
-    /**
-     * @var \Migrations\Db\Adapter\PostgresAdapter
-     */
-    private $adapter;
+    private PostgresAdapter $adapter;
 
     private array $config;
+
     private StubConsoleOutput $out;
+
     private ConsoleIo $io;
 
     /**
@@ -41,7 +41,7 @@ class PostgresAdapterTest extends TestCase
      *
      * @return bool
      */
-    private static function isPostgresAvailable()
+    private function isPostgresAvailable()
     {
         static $available;
 
@@ -67,7 +67,7 @@ class PostgresAdapterTest extends TestCase
             'database' => $config['database'],
         ];
 
-        if (!self::isPostgresAvailable()) {
+        if (!$this->isPostgresAvailable()) {
             $this->markTestSkipped('Postgres is not available.  Please install php-pdo-pgsql or equivalent package.');
         }
 
@@ -110,17 +110,17 @@ class PostgresAdapterTest extends TestCase
         return version_compare($version, '10.0.0', '>=');
     }
 
-    public function testAdapterType()
+    public function testAdapterType(): void
     {
         $this->assertEquals('pgsql', $this->adapter->getAdapterType());
     }
 
-    public function testConnection()
+    public function testConnection(): void
     {
         $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
-    public function testCreatingTheSchemaTableOnConnect()
+    public function testCreatingTheSchemaTableOnConnect(): void
     {
         $this->adapter->connect();
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
@@ -131,21 +131,21 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable($this->adapter->getSchemaTableName()));
     }
 
-    public function testSchemaTableIsCreatedWithPrimaryKey()
+    public function testSchemaTableIsCreatedWithPrimaryKey(): void
     {
         $this->adapter->connect();
         new Table($this->adapter->getSchemaTableName(), [], $this->adapter);
         $this->assertTrue($this->adapter->hasIndex($this->adapter->getSchemaTableName(), ['version']));
     }
 
-    public function testQuoteSchemaName()
+    public function testQuoteSchemaName(): void
     {
         $this->assertEquals('"schema"', $this->adapter->quoteSchemaName('schema'));
         // No . is supported in schema name.
         $this->assertEquals('"schema"."schema"', $this->adapter->quoteSchemaName('schema.schema'));
     }
 
-    public function testGetGlobalSchemaName()
+    public function testGetGlobalSchemaName(): void
     {
         $config = ConnectionManager::getConfig('test');
         $config['schema'] = 'test_schema';
@@ -169,20 +169,20 @@ class PostgresAdapterTest extends TestCase
         ConnectionManager::drop('test-schema');
     }
 
-    public function testQuoteTableName()
+    public function testQuoteTableName(): void
     {
         $this->assertEquals('"public"."table"', $this->adapter->quoteTableName('table'));
         $this->assertEquals('"table"."table"', $this->adapter->quoteTableName('table.table'));
     }
 
-    public function testQuoteColumnName()
+    public function testQuoteColumnName(): void
     {
         $this->assertEquals('"string"', $this->adapter->quoteColumnName('string'));
         // No . is supported in column name.
         $this->assertEquals('"string"."string"', $this->adapter->quoteColumnName('string.string'));
     }
 
-    public function testCreateTable()
+    public function testCreateTable(): void
     {
         $table = new Table('ntable', [], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -195,7 +195,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableWithSchema()
+    public function testCreateTableWithSchema(): void
     {
         $this->adapter->createSchema('nschema');
 
@@ -212,7 +212,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('nschema');
     }
 
-    public function testCreateTableCustomIdColumn()
+    public function testCreateTableCustomIdColumn(): void
     {
         $table = new Table('ntable', ['id' => 'custom_id'], $this->adapter);
         $table->addColumn('realname', 'string')
@@ -225,7 +225,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('ntable', 'address'));
     }
 
-    public function testCreateTableWithNoPrimaryKey()
+    public function testCreateTableWithNoPrimaryKey(): void
     {
         $options = [
             'id' => false,
@@ -236,7 +236,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('atable', 'id'));
     }
 
-    public function testCreateTableWithConflictingPrimaryKeys()
+    public function testCreateTableWithConflictingPrimaryKeys(): void
     {
         $options = [
             'primary_key' => 'user_id',
@@ -248,7 +248,7 @@ class PostgresAdapterTest extends TestCase
         $table->addColumn('user_id', 'integer')->save();
     }
 
-    public function testCreateTableWithPrimaryKeySetToImplicitId()
+    public function testCreateTableWithPrimaryKeySetToImplicitId(): void
     {
         $options = [
             'primary_key' => 'id',
@@ -260,7 +260,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithPrimaryKeyArraySetToImplicitId()
+    public function testCreateTableWithPrimaryKeyArraySetToImplicitId(): void
     {
         $options = [
             'primary_key' => ['id'],
@@ -272,7 +272,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithMultiplePrimaryKeyArraySetToImplicitId()
+    public function testCreateTableWithMultiplePrimaryKeyArraySetToImplicitId(): void
     {
         $options = [
             'primary_key' => ['id', 'user_id'],
@@ -283,7 +283,7 @@ class PostgresAdapterTest extends TestCase
         $table->addColumn('user_id', 'integer')->save();
     }
 
-    public function testCreateTableWithMultiplePrimaryKeys()
+    public function testCreateTableWithMultiplePrimaryKeys(): void
     {
         $options = [
             'id' => false,
@@ -298,7 +298,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['tag_id', 'user_email']));
     }
 
-    public function testCreateTableWithMultiplePrimaryKeysWithSchema()
+    public function testCreateTableWithMultiplePrimaryKeysWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -320,7 +320,7 @@ class PostgresAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsUuid()
+    public function testCreateTableWithPrimaryKeyAsUuid(): void
     {
         $options = [
             'id' => false,
@@ -337,7 +337,7 @@ class PostgresAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsBinaryUuid()
+    public function testCreateTableWithPrimaryKeyAsBinaryUuid(): void
     {
         $options = [
             'id' => false,
@@ -354,7 +354,7 @@ class PostgresAdapterTest extends TestCase
     /**
      * @return void
      */
-    public function testCreateTableWithPrimaryKeyAsNativeUuid()
+    public function testCreateTableWithPrimaryKeyAsNativeUuid(): void
     {
         $options = [
             'id' => false,
@@ -368,7 +368,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('ztable', 'user_id'));
     }
 
-    public function testCreateTableWithMultipleIndexes()
+    public function testCreateTableWithMultipleIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -382,7 +382,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_name']));
     }
 
-    public function testCreateTableWithUniqueIndexes()
+    public function testCreateTableWithUniqueIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -392,7 +392,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasIndex('table1', ['email', 'user_email']));
     }
 
-    public function testCreateTableWithNamedIndexes()
+    public function testCreateTableWithNamedIndexes(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -465,7 +465,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertStringContainsString('("email") WHERE is_verified = true', $indexQuery);
     }
 
-    public function testAddPrimaryKey()
+    public function testAddPrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false], $this->adapter);
         $table
@@ -479,7 +479,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testChangePrimaryKey()
+    public function testChangePrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -496,7 +496,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasPrimaryKey('table1', ['column2', 'column3']));
     }
 
-    public function testDropPrimaryKey()
+    public function testDropPrimaryKey(): void
     {
         $table = new Table('table1', ['id' => false, 'primary_key' => 'column1'], $this->adapter);
         $table
@@ -510,7 +510,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasPrimaryKey('table1', ['column1']));
     }
 
-    public function testAddComment()
+    public function testAddComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -531,7 +531,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals('comment1', $rows[0]['description']);
     }
 
-    public function testChangeComment()
+    public function testChangeComment(): void
     {
         $table = new Table('table1', ['comment' => 'comment1'], $this->adapter);
         $table->save();
@@ -552,7 +552,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals('comment2', $rows[0]['description']);
     }
 
-    public function testDropComment()
+    public function testDropComment(): void
     {
         $table = new Table('table1', ['comment' => 'comment1'], $this->adapter);
         $table->save();
@@ -573,7 +573,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEmpty($rows);
     }
 
-    public function testRenameTable()
+    public function testRenameTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -585,7 +585,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasTable('table2'));
     }
 
-    public function testRenameTableWithSchema()
+    public function testRenameTableWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -600,7 +600,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testAddColumn()
+    public function testAddColumn(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -610,7 +610,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($table->hasColumn('email'));
     }
 
-    public function testAddColumnWithDefaultValue()
+    public function testAddColumnWithDefaultValue(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -624,7 +624,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithDefaultZero()
+    public function testAddColumnWithDefaultZero(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -639,13 +639,14 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithAutoIdentity()
+    public function testAddColumnWithAutoIdentity(): void
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
         $table = new Table('table1', [], $this->adapter);
         $table->save();
+
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'id') {
@@ -658,7 +659,7 @@ class PostgresAdapterTest extends TestCase
     /**
      * Test that shims from PHINX_TYPE_JSONB to 'json' type work.
      */
-    public function testAddColumnJsonbCompat()
+    public function testAddColumnJsonbCompat(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -666,6 +667,34 @@ class PostgresAdapterTest extends TestCase
         $table->addColumn('config', 'jsonb')
               ->save();
         $this->assertTrue($table->hasColumn('config'));
+    }
+
+    /**
+     * Test that adding a column with the citext type works.
+     *
+     * Requires the `citext` extension to be enabled on the database; the setUp
+     * above creates the extension when missing.
+     */
+    public function testAddColumnCitext(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('nickname'));
+        $table->addColumn('nickname', 'citext', ['null' => true])
+              ->save();
+        $this->assertTrue($table->hasColumn('nickname'));
+
+        $columns = $this->adapter->getColumns('table1');
+        $nickname = null;
+        foreach ($columns as $column) {
+            if ($column->getName() === 'nickname') {
+                $nickname = $column;
+                break;
+            }
+        }
+        $this->assertNotNull($nickname);
+        $this->assertSame('citext', $nickname->getType());
+        $this->assertTrue($nickname->isNull());
     }
 
     public static function providerAddColumnIdentity(): array
@@ -678,15 +707,16 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[DataProvider('providerAddColumnIdentity')]
-    public function testAddColumnIdentity($generated, $addToColumn)
+    public function testAddColumnIdentity(string $generated, bool $addToColumn): void
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
         }
         $table = new Table('table1', ['id' => false], $this->adapter);
         $table->save();
+
         $options = ['identity' => true];
-        if ($addToColumn !== false) {
+        if ($addToColumn) {
             $options['generated'] = $generated;
         }
         $table->addColumn('id', 'integer', $options)
@@ -700,7 +730,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithDefaultBoolean()
+    public function testAddColumnWithDefaultBoolean(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -724,7 +754,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testAddColumnWithBooleanIgnoreLimitCastDefault()
+    public function testAddColumnWithBooleanIgnoreLimitCastDefault(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -758,7 +788,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertNull($column->getLimit());
     }
 
-    public function testAddColumnWithComment()
+    public function testAddColumnWithComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -788,7 +818,7 @@ class PostgresAdapterTest extends TestCase
         );
     }
 
-    public function testAddStringWithLimit()
+    public function testAddStringWithLimit(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -807,7 +837,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testAddDecimalWithPrecisionAndScale()
+    public function testAddDecimalWithPrecisionAndScale(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -829,7 +859,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testAddTimestampWithPrecision()
+    public function testAddTimestampWithPrecision(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->save();
@@ -853,7 +883,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testRenameColumn()
+    public function testRenameColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -865,7 +895,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'column2'));
     }
 
-    public function testRenameColumnIsCaseSensitive()
+    public function testRenameColumnIsCaseSensitive(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('columnOne', 'string')
@@ -877,7 +907,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasColumn('t', 'columnTwo'));
     }
 
-    public function testRenamingANonExistentColumn()
+    public function testRenamingANonExistentColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -890,13 +920,13 @@ class PostgresAdapterTest extends TestCase
             $this->assertInstanceOf(
                 'InvalidArgumentException',
                 $e,
-                'Expected exception of type InvalidArgumentException, got ' . get_class($e),
+                'Expected exception of type InvalidArgumentException, got ' . $e::class,
             );
             $this->assertEquals('The specified column does not exist: column2', $e->getMessage());
         }
     }
 
-    public function testChangeColumn()
+    public function testChangeColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -922,7 +952,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[DataProvider('providerChangeColumnIdentity')]
-    public function testChangeColumnIdentity($generated)
+    public function testChangeColumnIdentity(string $generated): void
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
@@ -933,6 +963,7 @@ class PostgresAdapterTest extends TestCase
 
         $table->changeColumn('column1', 'integer', ['identity' => true, 'generated' => PostgresAdapter::GENERATED_ALWAYS]);
         $table->save();
+
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'column1') {
@@ -942,7 +973,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnDropIdentity()
+    public function testChangeColumnDropIdentity(): void
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
@@ -951,6 +982,7 @@ class PostgresAdapterTest extends TestCase
         $table->save();
         $table->changeColumn('id', 'integer', ['identity' => false]);
         $table->save();
+
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'id') {
@@ -959,7 +991,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnChangeIdentity()
+    public function testChangeColumnChangeIdentity(): void
     {
         if (!$this->usingPostgres10()) {
             $this->markTestSkipped('Test Skipped because of PostgreSQL version is < 10.0');
@@ -968,6 +1000,7 @@ class PostgresAdapterTest extends TestCase
         $table->save();
         $table->changeColumn('id', 'integer', ['identity' => true, 'generated' => PostgresAdapter::GENERATED_BY_DEFAULT]);
         $table->save();
+
         $columns = $this->adapter->getColumns('table1');
         foreach ($columns as $column) {
             if ($column->getName() === 'id') {
@@ -977,7 +1010,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public static function integersProvider()
+    public static function integersProvider(): array
     {
         return [
             ['smallinteger', 32767],
@@ -987,7 +1020,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[DataProvider('integersProvider')]
-    public function testChangeColumnFromTextToInteger($type, $value)
+    public function testChangeColumnFromTextToInteger(string $type, int $value): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'text')
@@ -1002,7 +1035,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertSame($value, $row['column1']);
     }
 
-    public function testChangeBooleanOptions()
+    public function testChangeBooleanOptions(): void
     {
         $table = new Table('t', ['id' => false], $this->adapter);
         $table->addColumn('my_bool', 'boolean', ['default' => true, 'null' => true])
@@ -1020,12 +1053,12 @@ class PostgresAdapterTest extends TestCase
 
         $rows = $this->adapter->fetchAll('SELECT * FROM t');
         $this->assertCount(3, $rows);
-        $this->assertSame([true, false, null], array_map(function ($row) {
+        $this->assertSame([true, false, null], array_map(function (array $row) {
             return $row['my_bool'];
         }, $rows));
     }
 
-    public function testChangeColumnFromIntegerToBoolean()
+    public function testChangeColumnFromIntegerToBoolean(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'integer', ['default' => 0])
@@ -1041,7 +1074,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnCharToUuid()
+    public function testChangeColumnCharToUuid(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'char', ['default' => null, 'limit' => 36])
@@ -1059,7 +1092,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnCharToNativeUuid()
+    public function testChangeColumnCharToNativeUuid(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'char', ['default' => null, 'limit' => 36])
@@ -1077,7 +1110,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnWithDefault()
+    public function testChangeColumnWithDefault(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1100,7 +1133,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testChangeColumnWithDropDefault()
+    public function testChangeColumnWithDropDefault(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string', ['default' => 'Test'])
@@ -1127,7 +1160,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testDropColumn()
+    public function testDropColumn(): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -1138,7 +1171,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasColumn('t', 'column1'));
     }
 
-    public static function columnsProvider()
+    public static function columnsProvider(): array
     {
         return [
             ['column1', 'string', []],
@@ -1161,7 +1194,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[DataProvider('columnsProvider')]
-    public function testGetColumns($colName, $type, $options, $actualType = null)
+    public function testGetColumns(string $colName, string $type, array $options, ?string $actualType = null): void
     {
         $table = new Table('t', [], $this->adapter);
         $table->addColumn($colName, $type, $options)->save();
@@ -1182,7 +1215,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[DataProvider('columnsProvider')]
-    public function testGetColumnsWithSchema($colName, $type, $options, $actualType = null)
+    public function testGetColumnsWithSchema(string $colName, string $type, array $options, ?string $actualType = null): void
     {
         $this->adapter->createSchema('tschema');
 
@@ -1206,7 +1239,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('tschema');
     }
 
-    public function testAddIndex()
+    public function testAddIndex(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1217,7 +1250,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('email'));
     }
 
-    public function testAddIndexWithSort()
+    public function testAddIndexWithSort(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('email', 'string')
@@ -1259,7 +1292,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($emailOrder['sort_order'], 'ASC');
     }
 
-    public function testAddIndexWithIncludeColumns()
+    public function testAddIndexWithIncludeColumns(): void
     {
         if (!version_compare($this->adapter->fetchAll('SHOW server_version;')[0]['server_version'], '11.0.0', '>=')) {
             $this->markTestSkipped('Cannot test index include collumns (non-key columns) on postgresql versions less than 11');
@@ -1312,7 +1345,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($indexColumn['index_column'], 'INCLUDED');
     }
 
-    public function testAddIndexWithSchema()
+    public function testAddIndexWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -1327,7 +1360,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testAddIndexWithNameWithSchema()
+    public function testAddIndexWithNameWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -1342,7 +1375,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testAddIndexIsCaseSensitive()
+    public function testAddIndexIsCaseSensitive(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('theEmail', 'string')
@@ -1353,7 +1386,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($table->hasIndex('theEmail'));
     }
 
-    public function testDropIndex()
+    public function testDropIndex(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -1394,7 +1427,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($table4->hasIndex(['fname', 'lname']));
     }
 
-    public function testDropIndexWithSchema()
+    public function testDropIndexWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -1439,7 +1472,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testDropIndexByName()
+    public function testDropIndexByName(): void
     {
         // single column index
         $table = new Table('table1', [], $this->adapter);
@@ -1464,7 +1497,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($table2->hasIndex(['fname', 'lname']));
     }
 
-    public function testDropIndexByNameWithSchema()
+    public function testDropIndexByNameWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -1493,7 +1526,163 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testAddForeignKey()
+    public function testAddGistIndex(): void
+    {
+        // GiST indexes require specific data types with GiST support.
+        // We use int4range which has built-in GiST support in PostgreSQL.
+        $this->adapter->execute('CREATE TABLE table1 (id SERIAL PRIMARY KEY, int_range int4range)');
+
+        $table = new Table('table1', [], $this->adapter);
+        $table->addIndex('int_range', ['type' => 'gist'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('int_range'));
+
+        // Verify the index uses the GIST access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_int_range'",
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('gist', $rows[0]['access_method']);
+    }
+
+    public function testAddGinIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('tags', 'jsonb')
+              ->save();
+
+        $table->addIndex('tags', ['type' => 'gin'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('tags'));
+
+        // Verify the index uses the GIN access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_tags'",
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('gin', $rows[0]['access_method']);
+    }
+
+    public function testAddBrinIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('created_at', 'timestamp')
+              ->save();
+
+        $table->addIndex('created_at', ['type' => 'brin'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('created_at'));
+
+        // Verify the index uses the BRIN access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_created_at'",
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('brin', $rows[0]['access_method']);
+    }
+
+    public function testAddHashIndex(): void
+    {
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('session_id', 'string', ['limit' => 64])
+              ->save();
+
+        $table->addIndex('session_id', ['type' => 'hash'])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('session_id'));
+
+        // Verify the index uses the HASH access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_session_id'",
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('hash', $rows[0]['access_method']);
+    }
+
+    public function testAddSpgistIndex(): void
+    {
+        // SP-GiST indexes on text require the text_ops operator class
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('data', 'text')
+              ->save();
+
+        $table->addIndex('data', ['type' => 'spgist', 'opclass' => ['data' => 'text_ops']])
+              ->save();
+
+        $this->assertTrue($table->hasIndex('data'));
+
+        // Verify the index uses the SP-GIST access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_data'",
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('spgist', $rows[0]['access_method']);
+    }
+
+    public function testAddIndexWithOpclass(): void
+    {
+        // Test opclass with GiST using pg_trgm extension
+        // Skip if extension is not available
+        try {
+            $this->adapter->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+        } catch (Exception) {
+            $this->markTestSkipped('pg_trgm extension is not available');
+        }
+
+        $table = new Table('table1', [], $this->adapter);
+        $table->addColumn('name', 'string')
+              ->save();
+
+        $table->addIndex('name', [
+            'type' => 'gist',
+            'opclass' => ['name' => 'gist_trgm_ops'],
+        ])->save();
+
+        $this->assertTrue($table->hasIndex('name'));
+
+        // Verify the index was created with the correct access method
+        $rows = $this->adapter->fetchAll(
+            "SELECT am.amname as access_method
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indexrelid
+             JOIN pg_am am ON am.oid = c.relam
+             JOIN pg_class t ON t.oid = i.indrelid
+             WHERE t.relname = 'table1' AND c.relname = 'table1_name'",
+        );
+        $this->assertCount(1, $rows);
+        $this->assertEquals('gist', $rows[0]['access_method']);
+    }
+
+    public function testAddForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1507,7 +1696,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testAddForeignKeyWithSchema()
+    public function testAddForeignKeyWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
         $this->adapter->createSchema('schema2');
@@ -1527,7 +1716,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema2');
     }
 
-    public function testAddForeignKeyDeferrable()
+    public function testAddForeignKeyDeferrable(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1548,7 +1737,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKey()
+    public function testDropForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1563,7 +1752,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_id']));
     }
 
-    public function testDropForeignKeyWithMultipleColumns()
+    public function testDropForeignKeyWithMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1614,7 +1803,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), ['ref_table_field1', 'ref_table_id']));
     }
 
-    public function testDropForeignKeyWithIdenticalMultipleColumns()
+    public function testDropForeignKeyWithIdenticalMultipleColumns(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1662,11 +1851,8 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    /**
-     * @param array $columns
-     */
     #[DataProvider('nonExistentForeignKeyColumnsProvider')]
-    public function testDropForeignKeyByNonExistentKeyColumns(array $columns)
+    public function testDropForeignKeyByNonExistentKeyColumns(array $columns): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable
@@ -1694,7 +1880,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), $columns);
     }
 
-    public function testDropForeignKeyCaseSensitivity()
+    public function testDropForeignKeyCaseSensitivity(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1716,7 +1902,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropForeignKey($table->getName(), ['ref_table_id']);
     }
 
-    public function testDropForeignKeyByName()
+    public function testDropForeignKeyByName(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1737,7 +1923,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[DataProvider('provideForeignKeysToCheck')]
-    public function testHasForeignKey($tableDef, $key, $exp)
+    public function testHasForeignKey(string $tableDef, string|array $key, bool $exp): void
     {
         $conn = $this->adapter->getConnection();
         $conn->execute('CREATE TABLE other(a int, b int, c int, unique(a), unique(b), unique(a,b), unique(a,b,c));');
@@ -1745,7 +1931,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertSame($exp, $this->adapter->hasForeignKey('t', $key));
     }
 
-    public static function provideForeignKeysToCheck()
+    public static function provideForeignKeysToCheck(): array
     {
         return [
             ['create table t(a int)', 'a', false],
@@ -1771,7 +1957,7 @@ class PostgresAdapterTest extends TestCase
         ];
     }
 
-    public function testHasNamedForeignKey()
+    public function testHasNamedForeignKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->save();
@@ -1794,7 +1980,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasForeignKey($table->getName(), [], 'my_constraint2'));
     }
 
-    public function testDropForeignKeyWithSchema()
+    public function testDropForeignKeyWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
         $this->adapter->createSchema('schema2');
@@ -1815,7 +2001,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema2');
     }
 
-    public function testDropForeignKeyNotDroppingPrimaryKey()
+    public function testDropForeignKeyNotDroppingPrimaryKey(): void
     {
         $refTable = new Table('ref_table', [], $this->adapter);
         $refTable->addColumn('field1', 'string')->save();
@@ -1833,13 +2019,13 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($this->adapter->hasIndexByName('table', 'table_pkey'));
     }
 
-    public function testHasDatabase()
+    public function testHasDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('fake_database_name'));
         $this->assertTrue($this->adapter->hasDatabase($this->config['database']));
     }
 
-    public function testDropDatabase()
+    public function testDropDatabase(): void
     {
         $this->assertFalse($this->adapter->hasDatabase('phinx_temp_database'));
         $this->adapter->createDatabase('phinx_temp_database');
@@ -1847,13 +2033,13 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropDatabase('phinx_temp_database');
     }
 
-    public function testCreateSchema()
+    public function testCreateSchema(): void
     {
         $this->adapter->createSchema('foo');
         $this->assertTrue($this->adapter->hasSchema('foo'));
     }
 
-    public function testDropSchema()
+    public function testDropSchema(): void
     {
         $this->adapter->createSchema('foo');
         $this->assertTrue($this->adapter->hasSchema('foo'));
@@ -1861,7 +2047,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasSchema('foo'));
     }
 
-    public function testDropAllSchemas()
+    public function testDropAllSchemas(): void
     {
         $this->adapter->createSchema('foo');
         $this->adapter->createSchema('bar');
@@ -1873,7 +2059,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertFalse($this->adapter->hasSchema('bar'));
     }
 
-    public function testCreateTableWithComment()
+    public function testCreateTableWithComment(): void
     {
         $tableComment = 'Table comment';
         $table = new Table('ntable', ['comment' => $tableComment], $this->adapter);
@@ -1895,7 +2081,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($tableComment, $rows[0]['description'], 'Dont set table comment correctly');
     }
 
-    public function testCanAddColumnComment()
+    public function testCanAddColumnComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn(
@@ -1918,7 +2104,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals($comment, $row['column_comment'], 'Dont set column comment correctly');
     }
 
-    public function testCanAddCommentForColumnWithReservedName()
+    public function testCanAddCommentForColumnWithReservedName(): void
     {
         $table = new Table('user', [], $this->adapter);
         $table->addColumn('index', 'string', ['comment' => $comment = 'Comments from column "index"'])
@@ -1943,7 +2129,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[Depends('testCanAddColumnComment')]
-    public function testCanChangeColumnComment()
+    public function testCanChangeColumnComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => 'Comments from column "field1"'])
@@ -1970,7 +2156,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[Depends('testCanAddColumnComment')]
-    public function testCanRemoveColumnComment()
+    public function testCanRemoveColumnComment(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('field1', 'string', ['comment' => 'Comments from column "field1"'])
@@ -1994,7 +2180,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[Depends('testCanAddColumnComment')]
-    public function testCanAddMultipleCommentsToOneTable()
+    public function testCanAddMultipleCommentsToOneTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('comment1', 'string', [
@@ -2033,7 +2219,7 @@ class PostgresAdapterTest extends TestCase
     }
 
     #[Depends('testCanAddColumnComment')]
-    public function testColumnsAreResetBetweenTables()
+    public function testColumnsAreResetBetweenTables(): void
     {
         $table = new Table('widgets', [], $this->adapter);
         $table->addColumn('transport', 'string', [
@@ -2062,7 +2248,7 @@ class PostgresAdapterTest extends TestCase
     /**
      * Test that column names are properly escaped when creating Foreign Keys
      */
-    public function testForeignKeysAreProperlyEscaped()
+    public function testForeignKeysAreProperlyEscaped(): void
     {
         $userId = 'user';
         $sessionId = 'session';
@@ -2082,7 +2268,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertTrue($foreign->hasForeignKey('user'));
     }
 
-    public function testForeignKeysAreProperlyEscapedWithSchema()
+    public function testForeignKeysAreProperlyEscapedWithSchema(): void
     {
         $this->adapter->createSchema('schema_users');
 
@@ -2110,7 +2296,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema_users');
     }
 
-    public function testForeignKeysAreProperlyEscapedWithSchema2()
+    public function testForeignKeysAreProperlyEscapedWithSchema2(): void
     {
         $this->adapter->createSchema('schema_users');
         $this->adapter->createSchema('schema_sessions');
@@ -2140,7 +2326,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema_sessions');
     }
 
-    public function testTimestampWithTimezone()
+    public function testTimestampWithTimezone(): void
     {
         $table = new Table('tztable', ['id' => false], $this->adapter);
         $table
@@ -2154,7 +2340,7 @@ class PostgresAdapterTest extends TestCase
 
         $columns = $this->adapter->getColumns('tztable');
         foreach ($columns as $column) {
-            if (substr($column->getName(), -4) === 'notz') {
+            if (str_ends_with((string)$column->getName(), 'notz')) {
                 $this->assertFalse($column->isTimezone(), 'column: ' . $column->getName());
             } else {
                 $this->assertTrue($column->isTimezone(), 'column: ' . $column->getName());
@@ -2162,7 +2348,7 @@ class PostgresAdapterTest extends TestCase
         }
     }
 
-    public function testTimestampWithTimezoneWithSchema()
+    public function testTimestampWithTimezoneWithSchema(): void
     {
         $this->adapter->createSchema('tzschema');
 
@@ -2178,7 +2364,7 @@ class PostgresAdapterTest extends TestCase
 
         $columns = $this->adapter->getColumns('tzschema.tztable');
         foreach ($columns as $column) {
-            if (substr($column->getName(), -4) === 'notz') {
+            if (str_ends_with((string)$column->getName(), 'notz')) {
                 $this->assertFalse($column->isTimezone(), 'column: ' . $column->getName());
             } else {
                 $this->assertTrue($column->isTimezone(), 'column: ' . $column->getName());
@@ -2188,7 +2374,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('tzschema');
     }
 
-    public function testBulkInsertData()
+    public function testBulkInsertData(): void
     {
         $data = [
             [
@@ -2222,7 +2408,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals('test', $rows[2]['column3']);
     }
 
-    public function testBulkInsertBoolean()
+    public function testBulkInsertBoolean(): void
     {
         $data = [
             [
@@ -2246,7 +2432,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertNull($rows[2]['column1']);
     }
 
-    public function testBulkInsertLiteral()
+    public function testBulkInsertLiteral(): void
     {
         $data = [
             [
@@ -2272,12 +2458,12 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals('value1', $rows[0]['column1']);
         $this->assertEquals('value2', $rows[1]['column1']);
         $this->assertEquals('value3', $rows[2]['column1']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column2']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column2']);
         $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column2']);
         $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column2']);
     }
 
-    public function testInsertData()
+    public function testInsertData(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -2301,7 +2487,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals(2, $rows[1]['column2']);
     }
 
-    public function testInsertLiteral()
+    public function testInsertLiteral(): void
     {
         $data = [
             [
@@ -2332,12 +2518,12 @@ class PostgresAdapterTest extends TestCase
         $this->assertEquals('test', $rows[0]['column2']);
         $this->assertEquals('test', $rows[1]['column2']);
         $this->assertEquals('foo', $rows[2]['column2']);
-        $this->assertMatchesRegularExpression('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $rows[0]['column3']);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $rows[0]['column3']);
         $this->assertEquals('2024-01-01 00:00:00', $rows[1]['column3']);
         $this->assertEquals('2025-01-01 00:00:00', $rows[2]['column3']);
     }
 
-    public function testInsertBoolean()
+    public function testInsertBoolean(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'boolean', ['null' => true])
@@ -2362,7 +2548,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertNull($rows[2]['column1']);
     }
 
-    public function testInsertDataWithSchema()
+    public function testInsertDataWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -2390,7 +2576,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testTruncateTable()
+    public function testTruncateTable(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('column1', 'string')
@@ -2414,7 +2600,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertCount(0, $rows);
     }
 
-    public function testTruncateTableWithSchema()
+    public function testTruncateTableWithSchema(): void
     {
         $this->adapter->createSchema('schema1');
 
@@ -2442,7 +2628,7 @@ class PostgresAdapterTest extends TestCase
         $this->adapter->dropSchema('schema1');
     }
 
-    public function testDumpCreateTable()
+    public function testDumpCreateTable(): void
     {
         $options = $this->adapter->getOptions();
         $options['dryrun'] = true;
@@ -2455,7 +2641,7 @@ class PostgresAdapterTest extends TestCase
             ->addColumn('column3', 'string', ['default' => 'test', 'null' => false])
             ->save();
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         // Check for key parts of the CREATE TABLE statement
         // The identity column syntax varies between CakePHP/database versions
         $this->assertStringContainsString(
@@ -2469,7 +2655,7 @@ class PostgresAdapterTest extends TestCase
         $this->assertStringContainsString('CONSTRAINT "table1_pkey" PRIMARY KEY ("id")', $actualOutput);
     }
 
-    public function testDumpCreateTableWithSchema()
+    public function testDumpCreateTableWithSchema(): void
     {
         $options = $this->adapter->getOptions();
         $options['dryrun'] = true;
@@ -2482,7 +2668,7 @@ class PostgresAdapterTest extends TestCase
             ->addColumn('column3', 'string', ['default' => 'test', 'null' => false])
             ->save();
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         // Check for key parts of the CREATE TABLE statement
         // The identity column syntax varies between CakePHP/database versions
         $this->assertStringContainsString(
@@ -2501,7 +2687,7 @@ class PostgresAdapterTest extends TestCase
      * Then enables dry run mode and inserts a record.
      * Asserts that output contains the insert statement and doesn't insert a record.
      */
-    public function testDumpInsert()
+    public function testDumpInsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2538,11 +2724,11 @@ INSERT INTO "public"."table1" ("int_col") VALUES (23);
 OUTPUT;
         }
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
-            'Passing the --dry-run option doesn\'t dump the insert to the output',
+            "Passing the --dry-run option doesn't dump the insert to the output",
         );
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
@@ -2556,7 +2742,7 @@ OUTPUT;
      * Then enables dry run mode and inserts some records.
      * Asserts that output contains the insert statement and doesn't insert any record.
      */
-    public function testDumpBulkinsert()
+    public function testDumpBulkinsert(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2588,11 +2774,11 @@ INSERT INTO "public"."table1" ("string_col", "int_col") VALUES ('test_data1', 23
 OUTPUT;
         }
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         $this->assertStringContainsString(
             $expectedOutput,
             $actualOutput,
-            'Passing the --dry-run option doesn\'t dump the bulkinsert to the output',
+            "Passing the --dry-run option doesn't dump the bulkinsert to the output",
         );
 
         $countQuery = $this->adapter->query('SELECT COUNT(*) FROM table1');
@@ -2601,7 +2787,7 @@ OUTPUT;
         $this->assertEquals(0, $res[0]['count']);
     }
 
-    public function testDumpCreateTableAndThenInsert()
+    public function testDumpCreateTableAndThenInsert(): void
     {
         $options = $this->adapter->getOptions();
         $options['dryrun'] = true;
@@ -2630,14 +2816,14 @@ INSERT INTO "schema1"."table1" ("column1", "column2") VALUES ('id1', 1);
 OUTPUT;
         }
 
-        $actualOutput = join("\n", $this->out->messages());
+        $actualOutput = implode("\n", $this->out->messages());
         $this->assertStringContainsString($expectedOutput, $actualOutput, 'Passing the --dry-run option does not dump create and then insert table queries to the output');
     }
 
     /**
      * Tests interaction with the query builder
      */
-    public function testQueryBuilder()
+    public function testQueryBuilder(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2676,7 +2862,7 @@ OUTPUT;
         $this->assertEquals(1, $stm->rowCount());
     }
 
-    public function testQueryWithParams()
+    public function testQueryWithParams(): void
     {
         $table = new Table('table1', [], $this->adapter);
         $table->addColumn('string_col', 'string')
@@ -2707,7 +2893,7 @@ OUTPUT;
         $this->assertEquals(3, $res[0]['c']);
     }
 
-    public function testRenameMixedCaseTableAndColumns()
+    public function testRenameMixedCaseTableAndColumns(): void
     {
         $table = new Table('OrganizationSettings', [], $this->adapter);
         $table->addColumn('SettingType', 'string')
@@ -2752,7 +2938,7 @@ OUTPUT;
         $this->assertFalse($column->isNull());
     }
 
-    public function testAddCheckConstraint()
+    public function testAddCheckConstraint(): void
     {
         $table = new Table('check_table', [], $this->adapter);
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
@@ -2764,7 +2950,22 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table', 'price_positive'));
     }
 
-    public function testHasCheckConstraint()
+    public function testAddCheckConstraintAutoGeneratesName(): void
+    {
+        $table = new Table('check_table_auto', [], $this->adapter);
+        $table->addColumn('quantity', 'integer')
+              ->create();
+
+        $expression = 'quantity >= 0';
+        // An empty name must trigger auto-generation, not emit invalid `ADD CONSTRAINT CHECK`.
+        $checkConstraint = new CheckConstraint('', $expression);
+        $this->adapter->addCheckConstraint($table->getTable(), $checkConstraint);
+
+        $expectedName = 'check_table_auto_chk_' . substr(md5($expression), 0, 8);
+        $this->assertTrue($this->adapter->hasCheckConstraint('check_table_auto', $expectedName));
+    }
+
+    public function testHasCheckConstraint(): void
     {
         $table = new Table('check_table3', [], $this->adapter);
         $table->addColumn('quantity', 'integer')
@@ -2778,7 +2979,7 @@ OUTPUT;
         $this->assertTrue($this->adapter->hasCheckConstraint('check_table3', 'quantity_positive'));
     }
 
-    public function testDropCheckConstraint()
+    public function testDropCheckConstraint(): void
     {
         $table = new Table('check_table4', [], $this->adapter);
         $table->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
@@ -2792,7 +2993,7 @@ OUTPUT;
         $this->assertFalse($this->adapter->hasCheckConstraint('check_table4', 'price_check'));
     }
 
-    public function testCheckConstraintWithComplexExpression()
+    public function testCheckConstraintWithComplexExpression(): void
     {
         $table = new Table('check_table5', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -2809,10 +3010,10 @@ OUTPUT;
         // Verify the constraint is actually enforced
         $quotedTableName = $this->adapter->getConnection()->getDriver()->quoteIdentifier('check_table5');
         $this->expectException(PDOException::class);
-        $this->adapter->execute("INSERT INTO {$quotedTableName} (email, status) VALUES ('test@example.com', 'invalid')");
+        $this->adapter->execute(sprintf("INSERT INTO %s (email, status) VALUES ('test@example.com', 'invalid')", $quotedTableName));
     }
 
-    public function testInsertOrSkipWithDuplicates()
+    public function testInsertOrSkipWithDuplicates(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -2835,7 +3036,7 @@ OUTPUT;
         $this->assertEquals('John', $rows[0]['name']);
     }
 
-    public function testInsertModeResetsAfterInsertOrSkip()
+    public function testInsertModeResetsAfterInsertOrSkip(): void
     {
         $table = new Table('users', [], $this->adapter);
         $table->addColumn('email', 'string', ['limit' => 255])
@@ -2855,7 +3056,7 @@ OUTPUT;
         ])->save();
     }
 
-    public function testBulkinsertOrSkipWithDuplicates()
+    public function testBulkinsertOrSkipWithDuplicates(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('sku', 'string', ['limit' => 50])
@@ -2882,7 +3083,7 @@ OUTPUT;
         $this->assertEquals('30.00', $rows[2]['price']);
     }
 
-    public function testInsertOrSkipWithoutDuplicates()
+    public function testInsertOrSkipWithoutDuplicates(): void
     {
         $table = new Table('categories', [], $this->adapter);
         $table->addColumn('name', 'string')
@@ -2898,7 +3099,7 @@ OUTPUT;
         $this->assertCount(2, $rows);
     }
 
-    public function testInsertOrUpdateWithDuplicates()
+    public function testInsertOrUpdateWithDuplicates(): void
     {
         $table = new Table('currencies', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 3])
@@ -2931,7 +3132,7 @@ OUTPUT;
         $this->assertEquals('1.0500', $rows[2]['rate']); // USD updated
     }
 
-    public function testInsertOrUpdateWithMultipleUpdateColumns()
+    public function testInsertOrUpdateWithMultipleUpdateColumns(): void
     {
         $table = new Table('products', [], $this->adapter);
         $table->addColumn('sku', 'string', ['limit' => 50])
@@ -2956,7 +3157,7 @@ OUTPUT;
         $this->assertEquals(50, $rows[0]['stock']);
     }
 
-    public function testInsertOrUpdateModeResetsAfterSave()
+    public function testInsertOrUpdateModeResetsAfterSave(): void
     {
         $table = new Table('items', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 10])
@@ -2976,7 +3177,7 @@ OUTPUT;
         ])->save();
     }
 
-    public function testInsertOrUpdateRequiresConflictColumns()
+    public function testInsertOrUpdateRequiresConflictColumns(): void
     {
         $table = new Table('currencies', [], $this->adapter);
         $table->addColumn('code', 'string', ['limit' => 3])
@@ -2992,7 +3193,7 @@ OUTPUT;
         ], ['rate'], [])->save();
     }
 
-    public function testAddSinglePartitionToExistingTable()
+    public function testAddSinglePartitionToExistingTable(): void
     {
         // Create a partitioned table with room to add more partitions
         $table = new Table('partitioned_orders', ['id' => false, 'primary_key' => ['id', 'order_date']], $this->adapter);
@@ -3023,7 +3224,7 @@ OUTPUT;
         $this->adapter->dropTable('partitioned_orders');
     }
 
-    public function testAddMultiplePartitionsToExistingTable()
+    public function testAddMultiplePartitionsToExistingTable(): void
     {
         // Create a partitioned table
         $table = new Table('partitioned_sales', ['id' => false, 'primary_key' => ['id', 'sale_date']], $this->adapter);
@@ -3061,7 +3262,7 @@ OUTPUT;
         $this->adapter->dropTable('partitioned_sales');
     }
 
-    public function testDropSinglePartitionFromExistingTable()
+    public function testDropSinglePartitionFromExistingTable(): void
     {
         // Create a partitioned table with multiple partitions
         $table = new Table('partitioned_logs', ['id' => false, 'primary_key' => ['id']], $this->adapter);
@@ -3103,7 +3304,7 @@ OUTPUT;
         $this->adapter->dropTable('partitioned_logs');
     }
 
-    public function testDropMultiplePartitionsFromExistingTable()
+    public function testDropMultiplePartitionsFromExistingTable(): void
     {
         // Create a partitioned table with multiple partitions
         $table = new Table('partitioned_archive', ['id' => false, 'primary_key' => ['id']], $this->adapter);

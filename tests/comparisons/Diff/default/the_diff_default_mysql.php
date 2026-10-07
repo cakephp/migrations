@@ -2,21 +2,22 @@
 declare(strict_types=1);
 
 use Migrations\BaseMigration;
+use Migrations\DirectionalMigrationInterface;
 
-class TheDiffDefaultMysql extends BaseMigration
+class TheDiffDefaultMysql extends BaseMigration implements DirectionalMigrationInterface
 {
     /**
      * Up Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-up-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-up-method
      *
      * @return void
      */
     public function up(): void
     {
         $this->table('articles')
-            ->dropForeignKey([], 'articles_ibfk_1')
+            ->dropForeignKey([], 'articles_user_id')
             ->removeIndexByName('UNIQUE_SLUG')
             ->removeIndexByName('rating_index')
             ->removeIndexByName('BY_NAME')
@@ -86,7 +87,7 @@ class TheDiffDefaultMysql extends BaseMigration
             ])
             ->addIndex(
                 $this->index('user_id')
-                    ->setName('categories_ibfk_1')
+                    ->setName('categories_user_id')
             )
             ->addIndex(
                 $this->index('name')
@@ -99,9 +100,9 @@ class TheDiffDefaultMysql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('RESTRICT')
-                    ->setOnUpdate('RESTRICT')
-                    ->setName('categories_ibfk_1')
+                    ->setDelete('RESTRICT')
+                    ->setUpdate('RESTRICT')
+                    ->setName('categories_user_id')
             )
             ->update();
 
@@ -139,7 +140,7 @@ class TheDiffDefaultMysql extends BaseMigration
      * Down Method.
      *
      * More information on this method is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html#the-down-method
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html#the-down-method
      *
      * @return void
      */
@@ -232,9 +233,9 @@ class TheDiffDefaultMysql extends BaseMigration
                 $this->foreignKey('user_id')
                     ->setReferencedTable('users')
                     ->setReferencedColumns('id')
-                    ->setOnDelete('CASCADE')
-                    ->setOnUpdate('CASCADE')
-                    ->setName('articles_ibfk_1')
+                    ->setDelete('CASCADE')
+                    ->setUpdate('CASCADE')
+                    ->setName('articles_user_id')
             )
             ->update();
 

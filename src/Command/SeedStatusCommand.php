@@ -17,7 +17,6 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Core\Configure;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
 use Migrations\Util\Util;
@@ -43,7 +42,7 @@ class SeedStatusCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'The <info>status</info> command prints a list of all seeds, along with their execution status',
@@ -91,7 +90,7 @@ class SeedStatusCommand extends Command
         $manager = $factory->createManager($io);
         $config = $manager->getConfig();
 
-        $io->verbose('<info>using connection</info> ' . (string)$args->getOption('connection'));
+        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
         $io->verbose('<info>using paths</info> ' . $config->getSeedPath());
 
         $seeds = $manager->getSeeds();
@@ -106,24 +105,14 @@ class SeedStatusCommand extends Command
 
         // Build status list
         $statuses = [];
-        $appNamespace = Configure::read('App.namespace', 'App');
         foreach ($seeds as $seed) {
-            $plugin = null;
-            $className = get_class($seed);
-
-            if (str_contains($className, '\\')) {
-                $parts = explode('\\', $className);
-                if (count($parts) > 1 && $parts[0] !== $appNamespace) {
-                    $plugin = $parts[0];
-                }
-            }
-
+            $plugin = Util::getSeedPlugin($seed);
             $seedName = $seed->getName();
             $executed = false;
             $executedAt = null;
 
             foreach ($seedLog as $entry) {
-                if ($entry['seed_name'] === $seedName && $entry['plugin'] === $plugin) {
+                if ($entry['seed_name'] === $seedName && Util::matchesSeedPlugin($entry['plugin'], $plugin)) {
                     $executed = true;
                     $executedAt = $entry['executed_at'];
                     break;
@@ -163,8 +152,8 @@ class SeedStatusCommand extends Command
         $io->out('<info>Current seed execution status:</info>');
         $io->out('');
 
-        $maxNameLength = max(array_map(fn($s) => strlen($s['seedName']), $statuses));
-        $maxPluginLength = max(array_map(fn($s) => strlen($s['plugin'] ?? ''), $statuses));
+        $maxNameLength = max(array_map(fn(array $s): int => strlen($s['seedName']), $statuses));
+        $maxPluginLength = max(array_map(fn(array $s): int => strlen($s['plugin'] ?? ''), $statuses));
 
         foreach ($statuses as $status) {
             $seedName = str_pad($status['seedName'], $maxNameLength);
@@ -174,10 +163,10 @@ class SeedStatusCommand extends Command
             if ($status['status'] === 'executed') {
                 $statusText = '<info>executed</info>';
                 $date = $status['executedAt'] ? ' (' . $status['executedAt'] . ')' : '';
-                $io->out("  {$statusText} {$plugin}  {$seedName}{$date}{$idempotent}");
+                $io->out(sprintf('  %s %s  %s%s%s', $statusText, $plugin, $seedName, $date, $idempotent));
             } else {
                 $statusText = '<comment>pending</comment> ';
-                $io->out("  {$statusText} {$plugin}  {$seedName}{$idempotent}");
+                $io->out(sprintf('  %s %s  %s%s', $statusText, $plugin, $seedName, $idempotent));
             }
         }
 

@@ -4,7 +4,7 @@ use Migrations\BaseMigration;
 
 class FirstDropFkMigration extends BaseMigration
 {
-    public function change()
+    public function change(): void
     {
         $this->table('orders')
             ->addColumn('order_date', 'timestamp')

@@ -35,10 +35,15 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     use SnapshotTrait;
     use UtilTrait;
 
-    /**
-     * @var string
-     */
     protected string $_name;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Create a migration snapshot of the current schema.';
+    }
 
     /**
      * @inheritDoc
@@ -51,7 +56,7 @@ class BakeMigrationSnapshotCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $collection = $this->getCollection($this->connection);
 

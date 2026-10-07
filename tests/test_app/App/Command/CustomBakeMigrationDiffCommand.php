@@ -23,7 +23,7 @@ class CustomBakeMigrationDiffCommand extends BakeMigrationDiffCommand
     /**
      * @inheritDoc
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         return parent::buildOptionParser($parser)
             ->addOption('test-target-folder')

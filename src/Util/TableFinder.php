@@ -17,6 +17,7 @@ use Cake\Core\App;
 use Cake\Core\Plugin as CorePlugin;
 use Cake\Database\Schema\CollectionInterface;
 use Cake\Datasource\ConnectionManager;
+use Cake\ORM\Association;
 use Cake\ORM\TableRegistry;
 use ReflectionClass;
 
@@ -34,8 +35,6 @@ class TableFinder
 
     /**
      * Regex of Table name to skip
-     *
-     * @var string
      */
     public string $skipTablesRegex = '_phinxlog';
 
@@ -82,7 +81,7 @@ class TableFinder
 
                     $config = (array)ConnectionManager::getConfig($this->connection);
                     $key = isset($config['schema']) ? 'schema' : 'database';
-                    if (isset($split[0], $split[1]) && $config[$key] === $split[1]) {
+                    if (isset($split[1]) && $config[$key] === $split[1]) {
                         $table = $split[0];
                     }
                 }
@@ -94,7 +93,7 @@ class TableFinder
             $tables = $tableNamesInPlugin;
         } else {
             foreach ($tables as $num => $table) {
-                if (in_array($table, $this->skipTables, true) || (strpos($table, $this->skipTablesRegex) !== false)) {
+                if (in_array($table, $this->skipTables, true) || (str_contains($table, $this->skipTablesRegex))) {
                     unset($tables[$num]);
                     continue;
                 }
@@ -138,17 +137,13 @@ class TableFinder
     public function findTables(?string $pluginName = null): array
     {
         $path = 'Model' . DS . 'Table' . DS;
-        if ($pluginName) {
-            $path = CorePlugin::path($pluginName) . 'src' . DS . $path;
-        } else {
-            $path = APP . $path;
-        }
+        $path = $pluginName ? CorePlugin::path($pluginName) . 'src' . DS . $path : APP . $path;
 
         if (!is_dir($path)) {
             return [];
         }
 
-        return array_map('basename', glob($path . '*.php') ?: []);
+        return array_map(basename(...), glob($path . '*.php') ?: []);
     }
 
     /**
@@ -183,9 +178,10 @@ class TableFinder
 
         $table = TableRegistry::getTableLocator()->get($className);
         foreach ($table->associations()->keys() as $key) {
-            if ($table->associations()->get($key)->type() === 'belongsToMany') {
+            $association = $table->associations()->get($key);
+            if ($association instanceof Association && $association->type() === 'belongsToMany') {
                 /** @var \Cake\ORM\Association\BelongsToMany $belongsToMany */
-                $belongsToMany = $table->associations()->get($key);
+                $belongsToMany = $association;
                 $tables[] = $belongsToMany->junction()->getTable();
             }
         }
@@ -195,7 +191,7 @@ class TableFinder
             $config = ConnectionManager::getConfig($this->connection);
             if (is_array($config)) {
                 $key = isset($config['schema']) ? 'schema' : 'database';
-                if (isset($splitted[0]) && $config[$key] === $splitted[1]) {
+                if ($config[$key] === $splitted[1]) {
                     $tableName = $splitted[0];
                 }
             }

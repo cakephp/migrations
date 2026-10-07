@@ -31,8 +31,6 @@ class BuiltinBackend implements BackendInterface
 {
     /**
      * Manager instance
-     *
-     * @var \Migrations\Migration\Manager|null
      */
     protected ?Manager $manager = null;
 
@@ -47,8 +45,6 @@ class BuiltinBackend implements BackendInterface
      * Current command being run.
      * Useful if some logic needs to be applied in the ConfigurationTrait depending
      * on the command
-     *
-     * @var string
      */
     protected string $command;
 

@@ -42,80 +42,81 @@ use RuntimeException;
 class Column extends DatabaseColumn
 {
     public const BIGINTEGER = TableSchemaInterface::TYPE_BIGINTEGER;
+
     public const SMALLINTEGER = TableSchemaInterface::TYPE_SMALLINTEGER;
+
     public const TINYINTEGER = TableSchemaInterface::TYPE_TINYINTEGER;
+
     public const BINARY = TableSchemaInterface::TYPE_BINARY;
+
     public const BOOLEAN = TableSchemaInterface::TYPE_BOOLEAN;
+
     public const CHAR = TableSchemaInterface::TYPE_CHAR;
+
     public const DATE = TableSchemaInterface::TYPE_DATE;
+
     public const DATETIME = TableSchemaInterface::TYPE_DATETIME;
+
     public const DECIMAL = TableSchemaInterface::TYPE_DECIMAL;
+
     public const FLOAT = TableSchemaInterface::TYPE_FLOAT;
+
     public const INTEGER = TableSchemaInterface::TYPE_INTEGER;
+
     public const STRING = TableSchemaInterface::TYPE_STRING;
+
     public const TEXT = TableSchemaInterface::TYPE_TEXT;
+
     public const TIME = TableSchemaInterface::TYPE_TIME;
+
     public const TIMESTAMP = TableSchemaInterface::TYPE_TIMESTAMP;
+
     public const UUID = TableSchemaInterface::TYPE_UUID;
+
     public const BINARYUUID = TableSchemaInterface::TYPE_BINARY_UUID;
+
     public const NATIVEUUID = TableSchemaInterface::TYPE_NATIVE_UUID;
+
     /** MySQL-only column type */
     public const YEAR = TableSchemaInterface::TYPE_YEAR;
+
     /** MySQL/Postgres-only column type */
     public const JSON = TableSchemaInterface::TYPE_JSON;
+
     /** Postgres-only column type */
     public const CIDR = TableSchemaInterface::TYPE_CIDR;
+
     /** Postgres-only column type */
     public const INET = TableSchemaInterface::TYPE_INET;
+
     /** Postgres-only column type */
     public const MACADDR = TableSchemaInterface::TYPE_MACADDR;
+
+    /** Postgres-only column type, requires the `citext` extension */
+    public const CITEXT = TableSchemaInterface::TYPE_CITEXT;
+
     /** Postgres-only column type */
     public const INTERVAL = TableSchemaInterface::TYPE_INTERVAL;
 
-    /**
-     * @var int|null
-     */
     protected ?int $seed = null;
 
-    /**
-     * @var int|null
-     */
     protected ?int $scale = null;
 
-    /**
-     * @var string|null
-     */
     protected ?string $update = null;
 
-    /**
-     * @var bool
-     */
     protected bool $timezone = false;
 
-    /**
-     * @var array
-     */
     protected array $properties = [];
 
-    /**
-     * @var string|null
-     */
     protected ?string $collation = null;
 
-    /**
-     * @var array|null
-     */
     protected ?array $values = null;
 
-    /**
-     * @var string|null
-     */
     protected ?string $algorithm = null;
 
-    /**
-     * @var string|null
-     */
     protected ?string $lock = null;
+
+    protected ?bool $fixed = null;
 
     /**
      * Column constructor
@@ -137,7 +138,6 @@ class Column extends DatabaseColumn
      * @param int|null $srid The SRID for spatial columns.
      * @param string|null $encoding The character set encoding for the column.
      * @param string|null $baseType The base type for the column.
-     * @return void
      */
     public function __construct(
         protected string $name = '',
@@ -177,9 +177,12 @@ class Column extends DatabaseColumn
     /**
      * Gets the column name.
      *
-     * @return string|null
+     * Narrows the return type from the parent's ?string to string,
+     * since $name is typed as string (not ?string) in this class.
+     *
+     * @return string
      */
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -229,7 +232,7 @@ class Column extends DatabaseColumn
      */
     public function getNull(): bool
     {
-        return $this->null;
+        return $this->null ?? false;
     }
 
     /**
@@ -547,14 +550,9 @@ class Column extends DatabaseColumn
         if ($this->identity && Configure::read('Migrations.unsigned_primary_keys')) {
             return true;
         }
-
         // Check general integer configuration
-        if (Configure::read('Migrations.unsigned_ints')) {
-            return true;
-        }
-
         // Default to signed for backward compatibility
-        return false;
+        return (bool)Configure::read('Migrations.unsigned_ints');
     }
 
     /**
@@ -773,6 +771,31 @@ class Column extends DatabaseColumn
     }
 
     /**
+     * Sets whether field should use fixed-length storage (for binary columns).
+     *
+     * When true, binary columns will use BINARY(n) instead of VARBINARY(n).
+     *
+     * @param bool|null $fixed Fixed
+     * @return $this
+     */
+    public function setFixed(?bool $fixed)
+    {
+        $this->fixed = $fixed;
+
+        return $this;
+    }
+
+    /**
+     * Gets whether field should use fixed-length storage.
+     *
+     * @return bool|null
+     */
+    public function getFixed(): ?bool
+    {
+        return $this->fixed;
+    }
+
+    /**
      * Gets all allowed options. Each option must have a corresponding `setFoo` method.
      *
      * @return array
@@ -802,6 +825,7 @@ class Column extends DatabaseColumn
             'generated',
             'algorithm',
             'lock',
+            'fixed',
         ];
     }
 
@@ -894,6 +918,7 @@ class Column extends DatabaseColumn
             'default' => $default,
             'generated' => $this->getGenerated(),
             'unsigned' => $this->getUnsigned(),
+            'fixed' => $this->getFixed(),
             'onUpdate' => $this->getUpdate(),
             'collate' => $this->getCollation(),
             'precision' => $precision,

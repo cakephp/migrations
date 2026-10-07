@@ -30,9 +30,6 @@ use Migrations\SeedInterface;
  */
 abstract class AdapterWrapper implements WrapperInterface
 {
-    /**
-     * @var \Migrations\Db\Adapter\AdapterInterface
-     */
     protected AdapterInterface $adapter;
 
     /**
@@ -589,5 +586,21 @@ abstract class AdapterWrapper implements WrapperInterface
     public function getSchemaTableName(): string
     {
         return $this->getAdapter()->getSchemaTableName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        $this->getAdapter()->disableForeignKeyConstraints();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        $this->getAdapter()->enableForeignKeyConstraints();
     }
 }

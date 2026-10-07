@@ -23,12 +23,21 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Partition;
 use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use RuntimeException;
 
 class PostgresAdapter extends AbstractAdapter
 {
+    /**
+     * Maximum length for identifiers (table names, column names, constraint names, etc.)
+     */
+    protected const IDENTIFIER_MAX_LENGTH = 63;
+
     public const GENERATED_ALWAYS = 'ALWAYS';
+
     public const GENERATED_BY_DEFAULT = 'BY DEFAULT';
+
     /**
      * Allow insert when a column was created with the GENERATED ALWAYS clause.
      * This is required for seeding the database.
@@ -44,12 +53,24 @@ class PostgresAdapter extends AbstractAdapter
         self::TYPE_CIDR,
         self::TYPE_INET,
         self::TYPE_MACADDR,
+        self::TYPE_CITEXT,
         self::TYPE_INTERVAL,
         self::TYPE_BINARY_UUID,
         self::TYPE_NATIVE_UUID,
     ];
 
-    private const GIN_INDEX_TYPE = 'gin';
+    /**
+     * PostgreSQL index access methods that require USING clause.
+     *
+     * @var array<string>
+     */
+    private const ACCESS_METHOD_TYPES = [
+        Index::GIN,
+        Index::GIST,
+        Index::SPGIST,
+        Index::BRIN,
+        Index::HASH,
+    ];
 
     /**
      * Columns with comments
@@ -60,8 +81,6 @@ class PostgresAdapter extends AbstractAdapter
 
     /**
      * Use identity columns if available (Postgres >= 10.0)
-     *
-     * @var bool
      */
     protected bool $useIdentity;
 
@@ -169,7 +188,7 @@ class PostgresAdapter extends AbstractAdapter
             if (is_string($options['primary_key'])) { // handle primary_key => 'id'
                 $sql .= $this->quoteColumnName($options['primary_key']);
             } elseif (is_array($options['primary_key'])) { // handle primary_key => array('tag_id', 'resource_id')
-                $sql .= implode(',', array_map([$this, 'quoteColumnName'], $options['primary_key']));
+                $sql .= implode(',', array_map($this->quoteColumnName(...), $options['primary_key']));
             }
             $sql .= ')';
         } else {
@@ -180,24 +199,20 @@ class PostgresAdapter extends AbstractAdapter
 
         // add partitioning clause
         $partition = $table->getPartition();
-        if ($partition !== null) {
+        if ($partition instanceof Partition) {
             $sql .= ' ' . $this->getPartitionSqlDefinition($partition);
         }
 
         $queries[] = $sql;
 
         // process column comments
-        if ($this->columnsWithComments) {
-            foreach ($this->columnsWithComments as $column) {
-                $queries[] = $this->getColumnCommentSqlDefinition($column, $table->getName());
-            }
+        foreach ($this->columnsWithComments as $column) {
+            $queries[] = $this->getColumnCommentSqlDefinition($column, $table->getName());
         }
 
         // set the indexes
-        if ($indexes) {
-            foreach ($indexes as $index) {
-                $queries[] = $this->getIndexSqlDefinition($index, $table->getName());
-            }
+        foreach ($indexes as $index) {
+            $queries[] = $this->getIndexSqlDefinition($index, $table->getName());
         }
 
         // process table comments
@@ -210,7 +225,7 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         // create partition tables for PostgreSQL declarative partitioning
-        if ($partition !== null) {
+        if ($partition instanceof Partition) {
             foreach ($partition->getDefinitions() as $definition) {
                 $queries[] = $this->getPartitionTableSql($table->getName(), $partition, $definition);
             }
@@ -275,7 +290,7 @@ class PostgresAdapter extends AbstractAdapter
             if (is_string($newColumns)) { // handle primary_key => 'id'
                 $sql .= $this->quoteColumnName($newColumns);
             } else { // handle primary_key => array('tag_id', 'resource_id')
-                $sql .= implode(',', array_map([$this, 'quoteColumnName'], $newColumns));
+                $sql .= implode(',', array_map($this->quoteColumnName(...), $newColumns));
             }
             $sql .= ')';
             $instructions->addAlter($sql);
@@ -326,7 +341,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getDropTableInstructions(string $tableName): AlterInstructions
     {
         $this->removeCreatedTable($tableName);
-        $sql = sprintf('DROP TABLE %s', $this->quoteTableName($tableName));
+        $sql = sprintf('DROP TABLE %s CASCADE', $this->quoteTableName($tableName));
 
         return new AlterInstructions([], [$sql]);
     }
@@ -342,6 +357,24 @@ class PostgresAdapter extends AbstractAdapter
         );
 
         $this->execute($sql);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function disableForeignKeyConstraints(): void
+    {
+        // PostgreSQL uses CASCADE on DROP TABLE instead of disabling FK checks.
+        // This method is a no-op for PostgreSQL since dropTable already uses CASCADE.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enableForeignKeyConstraints(): void
+    {
+        // PostgreSQL uses CASCADE on DROP TABLE instead of disabling FK checks.
+        // This method is a no-op for PostgreSQL.
     }
 
     /**
@@ -421,7 +454,7 @@ class PostgresAdapter extends AbstractAdapter
         ];
         $result = $this->query($sql, $params)->fetch('assoc');
         if (!$result || !(bool)$result['column_exists']) {
-            throw new InvalidArgumentException("The specified column does not exist: $columnName");
+            throw new InvalidArgumentException('The specified column does not exist: ' . $columnName);
         }
 
         $instructions = new AlterInstructions();
@@ -455,9 +488,9 @@ class PostgresAdapter extends AbstractAdapter
 
         $columnSql = $dialect->columnDefinitionSql($this->mapColumnData($newColumn->toArray()));
         // Remove the column name from $columnSql
-        $columnType = preg_replace('/^"?(?:[^"]+)"?\s+/', '', $columnSql);
+        $columnType = (string)preg_replace('/^"?(?:[^"]+)"?\s+/', '', $columnSql);
         // Remove generated clause
-        $columnType = preg_replace('/GENERATED (?:ALWAYS|BY DEFAULT) AS IDENTITY/', '', $columnType);
+        $columnType = (string)preg_replace('/GENERATED (?:ALWAYS|BY DEFAULT) AS IDENTITY/', '', $columnType);
 
         $sql = sprintf(
             'ALTER COLUMN %s TYPE %s',
@@ -470,23 +503,23 @@ class PostgresAdapter extends AbstractAdapter
                 $quotedColumnName,
             );
         }
-        if (in_array($newColumn->getType(), ['uuid', 'nativeuuid', 'binaryuuid'])) {
+        if (in_array($newColumn->getType(), ['uuid', 'nativeuuid', 'binaryuuid'], true)) {
             $sql .= sprintf(
                 ' USING (%s::uuid)',
                 $quotedColumnName,
             );
         }
-        if (in_array($newColumn->getType(), ['json'])) {
+        if ($newColumn->getType() === 'json') {
             $sql .= sprintf(
                 ' USING (%s::jsonb)',
                 $quotedColumnName,
             );
         }
         // NULL and DEFAULT cannot be set while changing column type
-        $sql = preg_replace('/ NOT NULL/', '', $sql);
-        $sql = preg_replace('/ DEFAULT NULL/', '', $sql);
+        $sql = (string)preg_replace('/ NOT NULL/', '', $sql);
+        $sql = (string)preg_replace('/ DEFAULT NULL/', '', $sql);
         // If it is set, DEFAULT is the last definition
-        $sql = preg_replace('/DEFAULT .*/', '', $sql);
+        $sql = (string)preg_replace('/DEFAULT .*/', '', $sql);
         if ($newColumn->getType() === 'boolean') {
             $sql .= sprintf(
                 ' USING (CASE WHEN %s IS NULL THEN NULL WHEN %s::int=0 THEN FALSE ELSE TRUE END)',
@@ -497,7 +530,7 @@ class PostgresAdapter extends AbstractAdapter
         $instructions->addAlter($sql);
 
         $column = $this->getColumn($tableName, $columnName);
-        assert($column !== null, 'Column must exist');
+        assert($column instanceof Column, 'Column must exist');
 
         if ($this->useIdentity) {
             // process identity
@@ -505,11 +538,12 @@ class PostgresAdapter extends AbstractAdapter
                 'ALTER COLUMN %s',
                 $quotedColumnName,
             );
-            if ($newColumn->isIdentity() && $newColumn->getGenerated() !== null) {
+            $generated = $newColumn->getGenerated();
+            if ($newColumn->isIdentity() && $generated !== null) {
                 if ($column->isIdentity()) {
-                    $sql .= sprintf(' SET GENERATED %s', (string)$newColumn->getGenerated());
+                    $sql .= sprintf(' SET GENERATED %s', $generated);
                 } else {
-                    $sql .= sprintf(' ADD GENERATED %s AS IDENTITY', (string)$newColumn->getGenerated());
+                    $sql .= sprintf(' ADD GENERATED %s AS IDENTITY', $generated);
                 }
             } else {
                 $sql .= ' DROP IDENTITY IF EXISTS';
@@ -535,7 +569,7 @@ class PostgresAdapter extends AbstractAdapter
             $instructions->addAlter(sprintf(
                 'ALTER COLUMN %s SET %s',
                 $quotedColumnName,
-                $this->getDefaultValueDefinition($newColumn->getDefault(), (string)$newColumn->getType()),
+                $this->getDefaultValueDefinition($newColumn->getDefault(), $newColumn->getType()),
             ));
         } elseif (!$newColumn->getIdentity()) {
             //drop default
@@ -546,12 +580,13 @@ class PostgresAdapter extends AbstractAdapter
         }
 
         // rename column
-        if ($columnName !== $newColumn->getName()) {
+        $newColumnName = $newColumn->getName();
+        if ($columnName !== $newColumnName) {
             $instructions->addPostStep(sprintf(
                 'ALTER TABLE %s RENAME COLUMN %s TO %s',
                 $this->quoteTableName($tableName),
                 $quotedColumnName,
-                $this->quoteColumnName((string)$newColumn->getName()),
+                $this->quoteColumnName($newColumnName),
             ));
         }
 
@@ -602,9 +637,8 @@ class PostgresAdapter extends AbstractAdapter
     protected function getIndexes(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        $indexes = $dialect->describeIndexes($tableName);
 
-        return $indexes;
+        return $dialect->describeIndexes($tableName);
     }
 
     /**
@@ -675,14 +709,13 @@ class PostgresAdapter extends AbstractAdapter
 
         if ($constraint) {
             return $primaryKey['constraint'] === $constraint;
-        } else {
-            if (is_string($columns)) {
-                $columns = [$columns]; // str to array
-            }
-            $missingColumns = array_diff($columns, $primaryKey['columns']);
-
-            return empty($missingColumns);
         }
+        if (is_string($columns)) {
+            $columns = [$columns]; // str to array
+        }
+        $missingColumns = array_diff($columns, $primaryKey['columns']);
+
+        return $missingColumns === [];
     }
 
     /**
@@ -713,9 +746,8 @@ class PostgresAdapter extends AbstractAdapter
     protected function getForeignKeys(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        $foreignKeys = $dialect->describeForeignKeys($tableName);
 
-        return $foreignKeys;
+        return $dialect->describeForeignKeys($tableName);
     }
 
     /**
@@ -784,9 +816,8 @@ class PostgresAdapter extends AbstractAdapter
     protected function getCheckConstraints(string $tableName): array
     {
         $dialect = $this->getSchemaDialect();
-        $constraints = $dialect->describeCheckConstraints($tableName);
 
-        return $constraints;
+        return $dialect->describeCheckConstraints($tableName);
     }
 
     /**
@@ -795,7 +826,7 @@ class PostgresAdapter extends AbstractAdapter
     protected function getAddCheckConstraintInstructions(TableMetadata $table, CheckConstraint $checkConstraint): AlterInstructions
     {
         $constraintName = $checkConstraint->getName();
-        if ($constraintName === null) {
+        if ($constraintName === null || $constraintName === '') {
             // Auto-generate constraint name if not provided
             $parts = $this->getSchemaName($table->getName());
             $constraintName = $parts['table'] . '_chk_' . substr(md5($checkConstraint->getExpression()), 0, 8);
@@ -873,6 +904,7 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function getColumnCommentSqlDefinition(Column $column, string $tableName): string
     {
+        $columnName = $column->getName();
         $comment = (string)$column->getComment();
         // passing 'null' is to remove column comment
         $comment = strcasecmp($comment, 'NULL') !== 0
@@ -882,7 +914,7 @@ class PostgresAdapter extends AbstractAdapter
         return sprintf(
             'COMMENT ON COLUMN %s.%s IS %s;',
             $this->quoteTableName($tableName),
-            $this->quoteColumnName((string)$column->getName()),
+            $this->quoteColumnName($columnName),
             $comment,
         );
     }
@@ -900,13 +932,21 @@ class PostgresAdapter extends AbstractAdapter
         $columnNames = (array)$index->getColumns();
 
         $indexName = $index->getName();
-        if ($indexName === null || strlen($indexName) === 0) {
+        if ($indexName === null || $indexName === '') {
             $indexName = sprintf('%s_%s', $parts['table'], implode('_', $columnNames));
         }
 
         $order = $index->getOrder() ?? [];
-        $columnNames = array_map(function ($columnName) use ($order) {
+        $opclass = $index->getOpclass() ?? [];
+        $columnNames = array_map(function (string $columnName) use ($order, $opclass): string {
             $ret = '"' . $columnName . '"';
+
+            // Add operator class if specified (e.g., gist_trgm_ops)
+            if (isset($opclass[$columnName])) {
+                $ret .= ' ' . $opclass[$columnName];
+            }
+
+            // Add ordering if specified (e.g., ASC NULLS FIRST)
             if (isset($order[$columnName])) {
                 $ret .= ' ' . $order[$columnName];
             }
@@ -917,23 +957,25 @@ class PostgresAdapter extends AbstractAdapter
         $include = $index->getInclude();
         $includedColumns = $include ? sprintf(' INCLUDE ("%s")', implode('","', $include)) : '';
 
-        $createIndexSentence = 'CREATE %sINDEX%s %s ON %s ';
-        if ($index->getType() === self::GIN_INDEX_TYPE) {
-            $createIndexSentence .= ' USING ' . $index->getType() . '(%s) %s;';
-        } else {
-            $createIndexSentence .= '(%s)%s%s;';
+        // Build USING clause for access method types (gin, gist, spgist, brin, hash)
+        $indexType = $index->getType();
+        $usingClause = '';
+        if (in_array($indexType, self::ACCESS_METHOD_TYPES, true)) {
+            $usingClause = ' USING ' . $indexType;
         }
-        $where = (string)$index->getWhere();
-        if ($where) {
-            $where = ' WHERE ' . $where;
+        $where = '';
+        $whereClause = $index->getWhere();
+        if ($whereClause) {
+            $where = ' WHERE ' . $whereClause;
         }
 
         return sprintf(
-            $createIndexSentence,
-            $index->getType() === Index::UNIQUE ? 'UNIQUE ' : '',
+            'CREATE %sINDEX%s %s ON %s%s (%s)%s%s;',
+            $indexType === Index::UNIQUE ? 'UNIQUE ' : '',
             $index->getConcurrently() ? ' CONCURRENTLY' : '',
-            $this->quoteColumnName((string)$indexName),
+            $this->quoteColumnName($indexName),
             $this->quoteTableName($tableName),
+            $usingClause,
             implode(',', $columnNames),
             $includedColumns,
             $where,
@@ -949,27 +991,57 @@ class PostgresAdapter extends AbstractAdapter
      */
     protected function getForeignKeySqlDefinition(ForeignKey $foreignKey, string $tableName): string
     {
-        $parts = $this->getSchemaName($tableName);
-
-        $constraintName = $foreignKey->getName() ?: (
-            $parts['table'] . '_' . implode('_', $foreignKey->getColumns()) . '_fkey'
-        );
+        $constraintName = $foreignKey->getName() ?: $this->getUniqueForeignKeyName($tableName, $foreignKey->getColumns());
         $columnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getColumns()));
         $refColumnList = implode(', ', array_map($this->quoteColumnName(...), $foreignKey->getReferencedColumns()));
+        $referencedTable = $foreignKey->getReferencedTable();
+        if ($referencedTable === null) {
+            throw new InvalidArgumentException('Foreign key must have a referenced table.');
+        }
         $def = ' CONSTRAINT ' . $this->quoteColumnName($constraintName) .
         ' FOREIGN KEY (' . $columnList . ')' .
-        ' REFERENCES ' . $this->quoteTableName($foreignKey->getReferencedTable()) . ' (' . $refColumnList . ')';
+        ' REFERENCES ' . $this->quoteTableName($referencedTable) . ' (' . $refColumnList . ')';
         if ($foreignKey->getOnDelete()) {
-            $def .= " ON DELETE {$foreignKey->getOnDelete()}";
+            $def .= ' ON DELETE ' . $foreignKey->getOnDelete();
         }
         if ($foreignKey->getOnUpdate()) {
-            $def .= " ON UPDATE {$foreignKey->getOnUpdate()}";
+            $def .= ' ON UPDATE ' . $foreignKey->getOnUpdate();
         }
         if ($foreignKey->getDeferrableMode()) {
-            $def .= " {$foreignKey->getDeferrableMode()}";
+            $def .= ' ' . $foreignKey->getDeferrableMode();
         }
 
         return $def;
+    }
+
+    /**
+     * Generate a unique foreign key constraint name.
+     *
+     * @param string $tableName Table name
+     * @param array<string> $columns Column names
+     * @return string
+     */
+    protected function getUniqueForeignKeyName(string $tableName, array $columns): string
+    {
+        $parts = $this->getSchemaName($tableName);
+        $baseName = $parts['table'] . '_' . implode('_', $columns) . '_fkey';
+        $maxLength = static::IDENTIFIER_MAX_LENGTH - 3;
+        if (strlen($baseName) > $maxLength) {
+            $baseName = substr($baseName, 0, $maxLength);
+        }
+        $existingKeys = $this->getForeignKeys($tableName);
+        $existingNames = array_column($existingKeys, 'name');
+
+        if (!in_array($baseName, $existingNames, true)) {
+            return $baseName;
+        }
+
+        $counter = 2;
+        while (in_array($baseName . '_' . $counter, $existingNames, true)) {
+            $counter++;
+        }
+
+        return $baseName . '_' . $counter;
     }
 
     /**
@@ -1107,7 +1179,11 @@ class PostgresAdapter extends AbstractAdapter
     public function isValidColumnType(Column $column): bool
     {
         // If not a standard column type, maybe it is array type?
-        return parent::isValidColumnType($column) || $this->isArrayType($column->getType());
+        if (parent::isValidColumnType($column)) {
+            return true;
+        }
+
+        return $this->isArrayType($column->getType());
     }
 
     /**
@@ -1135,7 +1211,7 @@ class PostgresAdapter extends AbstractAdapter
     {
         $schema = $this->getGlobalSchemaName();
         $table = $tableName;
-        if (strpos($tableName, '.') !== false) {
+        if (str_contains($tableName, '.')) {
             [$schema, $table] = explode('.', $tableName);
         }
 
@@ -1260,7 +1336,7 @@ class PostgresAdapter extends AbstractAdapter
         $conflictClause = $this->getConflictClause($mode, $updateColumns, $conflictColumns);
 
         if ($this->isDryRunEnabled()) {
-            $values = array_map(function ($row) {
+            $values = array_map(function ($row): string {
                 return '(' . implode(', ', array_map($this->quoteValue(...), $row)) . ')';
             }, $rows);
             $sql .= implode(', ', $values) . $conflictClause . ';';
@@ -1327,7 +1403,7 @@ class PostgresAdapter extends AbstractAdapter
             }
             $quotedConflictColumns = array_map($this->quoteColumnName(...), $conflictColumns);
             $updates = [];
-            foreach ($updateColumns as $column) {
+            foreach ($updateColumns ?? [] as $column) {
                 $quotedColumn = $this->quoteColumnName($column);
                 $updates[] = $quotedColumn . ' = EXCLUDED.' . $quotedColumn;
             }
@@ -1357,7 +1433,7 @@ class PostgresAdapter extends AbstractAdapter
         if ($columns instanceof Literal) {
             $columnsSql = (string)$columns;
         } else {
-            $columnsSql = implode(', ', array_map(fn($col) => $this->quoteColumnName($col), $columns));
+            $columnsSql = implode(', ', array_map($this->quoteColumnName(...), $columns));
         }
 
         return sprintf('PARTITION BY %s (%s)', $type, $columnsSql);
@@ -1388,7 +1464,7 @@ class PostgresAdapter extends AbstractAdapter
         } elseif ($type === Partition::TYPE_LIST) {
             $sql .= ' FOR VALUES IN (';
             if (is_array($value)) {
-                $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+                $sql .= implode(', ', array_map($this->quotePartitionValue(...), $value));
             } else {
                 $sql .= $this->quotePartitionValue($value);
             }
@@ -1507,7 +1583,7 @@ class PostgresAdapter extends AbstractAdapter
         } elseif (is_array($value)) {
             // LIST partition
             $sql .= ' FOR VALUES IN (';
-            $sql .= implode(', ', array_map(fn($v) => $this->quotePartitionValue($v), $value));
+            $sql .= implode(', ', array_map($this->quotePartitionValue(...), $value));
             $sql .= ')';
         } else {
             // Simple RANGE (upper bound only)
@@ -1570,5 +1646,80 @@ class PostgresAdapter extends AbstractAdapter
         // names which is postgres, but pgsql is required for
         // compatibility.
         return 'pgsql';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateViewInstructions(View $view): AlterInstructions
+    {
+        $viewType = $view->getMaterialized() ? 'MATERIALIZED VIEW' : 'VIEW';
+        $replace = '';
+
+        if ($view->getReplace() && !$view->getMaterialized()) {
+            $replace = 'OR REPLACE ';
+        }
+
+        $sql = sprintf(
+            'CREATE %s%s %s AS %s',
+            $replace,
+            $viewType,
+            $this->quoteTableName($view->getName()),
+            $view->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropViewInstructions(string $viewName, bool $materialized = false): AlterInstructions
+    {
+        $viewType = $materialized ? 'MATERIALIZED VIEW' : 'VIEW';
+        $sql = sprintf(
+            'DROP %s IF EXISTS %s',
+            $viewType,
+            $this->quoteTableName($viewName),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getCreateTriggerInstructions(string $tableName, Trigger $trigger): AlterInstructions
+    {
+        $events = is_array($trigger->getEvent()) ? $trigger->getEvent() : [$trigger->getEvent()];
+        $eventStr = implode(' OR ', $events);
+
+        $forEach = $trigger->getForEach() ? 'FOR EACH ROW' : 'FOR EACH STATEMENT';
+
+        $sql = sprintf(
+            'CREATE TRIGGER %s %s %s ON %s %s EXECUTE FUNCTION %s',
+            $this->quoteColumnName($trigger->getName()),
+            $trigger->getTiming(),
+            $eventStr,
+            $this->quoteTableName($tableName),
+            $forEach,
+            $trigger->getDefinition(),
+        );
+
+        return new AlterInstructions([], [$sql]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDropTriggerInstructions(string $tableName, string $triggerName): AlterInstructions
+    {
+        $sql = sprintf(
+            'DROP TRIGGER IF EXISTS %s ON %s',
+            $this->quoteColumnName($triggerName),
+            $this->quoteTableName($tableName),
+        );
+
+        return new AlterInstructions([], [$sql]);
     }
 }

@@ -33,8 +33,6 @@ class Migrations
      * Current command being run.
      * Useful if some logic needs to be applied in the ConfigurationTrait depending
      * on the command
-     *
-     * @var string
      */
     protected string $command = '';
 

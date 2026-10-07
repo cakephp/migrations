@@ -1,0 +1,45 @@
+{
+  "/": [
+    {
+      "text": "Getting Started",
+      "collapsed": false,
+      "items": [
+        { "text": "Migrations 5.x", "link": "/" },
+        { "text": "Installation and Overview", "link": "/getting-started/installation-and-overview" },
+        { "text": "Creating Migrations", "link": "/getting-started/creating-migrations" },
+        { "text": "Snapshots and Diffs", "link": "/getting-started/snapshots-and-diffs" },
+        { "text": "Running and Managing Migrations", "link": "/getting-started/running-and-managing-migrations" }
+      ]
+    },
+    {
+      "text": "Guides",
+      "collapsed": false,
+      "items": [
+        { "text": "Integration and Deployment", "link": "/advanced/integration-and-deployment" },
+        {
+          "text": "Writing Migrations",
+          "link": "/guides/writing-migrations/migration-methods",
+          "items": [
+            { "text": "Migration Methods", "link": "/guides/writing-migrations/migration-methods" },
+            { "text": "Columns and Table Operations", "link": "/guides/writing-migrations/columns-and-table-operations" },
+            { "text": "Indexes and Constraints", "link": "/guides/writing-migrations/indexes-and-constraints" },
+            { "text": "Schema Introspection and Platform Limitations", "link": "/guides/writing-migrations/schema-introspection-and-platform-limitations" }
+          ]
+        },
+        { "text": "Using the Query Builder", "link": "/guides/using-the-query-builder" },
+        { "text": "Executing Queries", "link": "/guides/executing-queries" },
+        { "text": "Inserting Data", "link": "/guides/inserting-data" },
+        { "text": "Database Seeding", "link": "/guides/seeding" }
+      ]
+    },
+    {
+      "text": "Upgrade Guides",
+      "collapsed": true,
+      "items": [
+        { "text": "Upgrading from 4.x to 5.x", "link": "/upgrades/upgrading-from-4-x" },
+        { "text": "Upgrading to the Builtin Backend", "link": "/upgrades/upgrading-to-builtin-backend" },
+        { "text": "Upgrading to Capability Interfaces", "link": "/upgrades/upgrading-to-capability-interfaces" }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@ class TestMigration extends BaseMigration
     /**
      * Migrate Up.
      */
-    public function up()
+    public function up(): void
     {
         // do nothing
     }
@@ -16,7 +16,7 @@ class TestMigration extends BaseMigration
     /**
      * Migrate Down.
      */
-    public function down()
+    public function down(): void
     {
         // do nothing
     }

@@ -12,7 +12,9 @@ use Cake\Core\Configure;
 use Cake\Utility\Inflector;
 use DateTime;
 use DateTimeZone;
+use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
+use Migrations\SeedInterface;
 use RuntimeException;
 
 /**
@@ -37,7 +39,7 @@ class Util
      * @var string
      * @phpstan-var non-empty-string
      */
-    protected const MIGRATION_FILE_NAME_NO_NAME_PATTERN = '/^[0-9]{14}\.php$/';
+    protected const MIGRATION_FILE_NAME_NO_NAME_PATTERN = '/^\d{14}\.php$/';
 
     /**
      * Enhanced migration file name pattern with readable timestamp and CamelCase
@@ -115,7 +117,7 @@ class Util
         }
 
         // Traditional format
-        preg_match('/^[0-9]+/', $baseName, $matches);
+        preg_match('/^\d+/', $baseName, $matches);
         $value = (int)($matches[0] ?? null);
         if (!$value) {
             throw new RuntimeException(sprintf('Cannot get a valid version from filename `%s`', $fileName));
@@ -134,13 +136,12 @@ class Util
      */
     public static function mapClassNameToFileName(string $className): string
     {
-        $snake = function ($matches) {
-            return '_' . strtolower($matches[0]);
+        $snake = function ($matches): string {
+            return '_' . strtolower((string)$matches[0]);
         };
         $fileName = preg_replace_callback('/\d+|[A-Z]/', $snake, $className);
-        $fileName = static::getCurrentTimestamp() . "$fileName.php";
 
-        return $fileName;
+        return static::getCurrentTimestamp() . $fileName . '.php';
     }
 
     /**
@@ -210,6 +211,46 @@ class Util
     }
 
     /**
+     * Get the plugin a seed belongs to.
+     *
+     * Seed classes are not namespaced, so the plugin cannot be derived from the class
+     * name. The plugin of the run the seed was loaded in is used instead.
+     *
+     * @param \Migrations\SeedInterface $seed The seed to get the plugin for.
+     * @return string|null The plugin name, or null for application seeds.
+     */
+    public static function getSeedPlugin(SeedInterface $seed): ?string
+    {
+        $config = $seed->getConfig();
+        if (!$config instanceof ConfigInterface || !isset($config['plugin'])) {
+            return null;
+        }
+
+        return (string)$config['plugin'] ?: null;
+    }
+
+    /**
+     * Check whether a seed log entry belongs to the given plugin.
+     *
+     * Seeds executed before plugin attribution was fixed were logged without a plugin.
+     * Those entries are still matched for plugin seeds so that they are not executed twice.
+     * As a trade-off, an application seed sharing its name with a plugin seed can be
+     * matched as well, which is preferred over re-running a seed that already ran.
+     *
+     * @param string|null $entryPlugin The plugin stored in the seed log entry.
+     * @param string|null $plugin The plugin of the seed being checked.
+     * @return bool
+     */
+    public static function matchesSeedPlugin(?string $entryPlugin, ?string $plugin): bool
+    {
+        if ($entryPlugin === $plugin) {
+            return true;
+        }
+
+        return $plugin !== null && $entryPlugin === null;
+    }
+
+    /**
      * Expands a set of paths with curly braces (if supported by the OS).
      *
      * @param string[] $paths Paths
@@ -250,7 +291,7 @@ class Util
      */
     public static function getFiles(string|array $paths): array
     {
-        $files = static::globAll(array_map(function ($path) {
+        $files = static::globAll(array_map(function (string $path): string {
             return $path . DIRECTORY_SEPARATOR . '*.php';
         }, (array)$paths));
         // glob() can return the same file multiple times
@@ -263,7 +304,6 @@ class Util
     }
 
     /**
-     * @param string|null $plugin
      * @return string
      */
     public static function tableName(?string $plugin): string

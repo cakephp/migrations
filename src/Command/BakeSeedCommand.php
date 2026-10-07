@@ -32,22 +32,23 @@ class BakeSeedCommand extends SimpleBakeCommand
 {
     /**
      * path to Migration directory
-     *
-     * @var string
      */
     public string $pathFragment = 'config/Seeds/';
 
-    /**
-     * @var string
-     */
     protected string $_name;
 
     /**
      * Arguments
-     *
-     * @var \Cake\Console\Arguments|null
      */
-    protected ?Arguments $args = null;
+    protected Arguments $args;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Create a migration seed.';
+    }
 
     /**
      * @inheritDoc
@@ -91,7 +92,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      */
     public function template(): string
     {
-        $style = $this->args?->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
+        $style = $this->args->getOption('style') ?? Configure::read('Migrations.style', 'traditional');
         if ($style === 'anonymous') {
             return 'Migrations.Seed/seed-anonymous';
         }
@@ -123,8 +124,7 @@ class BakeSeedCommand extends SimpleBakeCommand
         if ($arguments->getOption('data')) {
             $limit = (int)$arguments->getOption('limit');
 
-            /** @var string $fields */
-            $fields = $arguments->getOption('fields') ?: '*';
+            $fields = (string)$arguments->getOption('fields') ?: '*';
             if ($fields !== '*') {
                 $fields = explode(',', $fields);
             }
@@ -160,7 +160,7 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         $this->args = $args;
         /** @var array<string, bool|string|null> $options */
@@ -180,7 +180,7 @@ class BakeSeedCommand extends SimpleBakeCommand
      * @param \Cake\Console\ConsoleOptionParser $parser Option parser to update.
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser = parent::buildOptionParser($parser);
 
@@ -221,6 +221,7 @@ class BakeSeedCommand extends SimpleBakeCommand
         $lines = explode("\n", $content);
 
         $inString = false;
+        $removeKeys = [];
 
         foreach ($lines as $k => &$line) {
             if ($k === 0) {
@@ -244,7 +245,7 @@ class BakeSeedCommand extends SimpleBakeCommand
                     $tabCount--;
                 } elseif (preg_match("/^\d+\s\=\>\s$/", $line)) {
                     // Mark '0 =>' kind of lines to remove
-                    $line = false;
+                    $removeKeys[] = $k;
                     continue;
                 }
 
@@ -257,7 +258,7 @@ class BakeSeedCommand extends SimpleBakeCommand
                 if ($line[$j] === '\\') {
                     // skip character right after an escape \
                     $j++;
-                } elseif ($line[$j] === '\'') {
+                } elseif ($line[$j] === "'") {
                     // check string open/end
                     $inString = !$inString;
                 }
@@ -271,10 +272,9 @@ class BakeSeedCommand extends SimpleBakeCommand
         }
         unset($line);
 
-        // Remove marked lines
-        $lines = array_filter($lines, function ($line) {
-            return $line !== false;
-        });
+        foreach ($removeKeys as $key) {
+            unset($lines[$key]);
+        }
 
         return implode("\n", $lines);
     }

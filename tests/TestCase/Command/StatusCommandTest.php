@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
+use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Core\Exception\MissingPluginException;
+use Migrations\Command\StatusCommand;
 use Migrations\Test\TestCase\TestCase;
 use RuntimeException;
 
 class StatusCommandTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -41,7 +43,7 @@ class StatusCommandTest extends TestCase
         $this->exec('migrations status -c test --format json');
         $this->assertExitSuccess();
 
-        assert(isset($this->_out));
+        assert($this->_out instanceof StubConsoleOutput);
         $output = $this->_out->messages();
         $parsed = json_decode($output[0], true);
         $this->assertTrue(is_array($parsed));
@@ -103,5 +105,81 @@ class StatusCommandTest extends TestCase
         $this->assertExitSuccess();
         $this->assertOutputContains('--cleanup');
         $this->assertOutputContains('Remove MISSING migrations from the');
+    }
+
+    public function testAllHelp(): void
+    {
+        $this->exec('migrations status --help');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('--all');
+        $this->assertOutputContains('every loaded plugin');
+    }
+
+    public function testAllAppOnlyExitCodeDownWhenPending(): void
+    {
+        $this->exec('migrations status -c test --all');
+        // App has unmigrated migrations, so the exit code signals pending.
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+        // Default output is summary only — no per-section table.
+        $this->assertOutputContains('Summary:');
+        $this->assertOutputContains('APP:');
+        $this->assertOutputContains('pending');
+        $this->assertOutputNotContains('Migration ID');
+    }
+
+    public function testAllIncludesLoadedPluginWithMigrations(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+        $this->assertOutputContains('Summary:');
+        $this->assertOutputContains('- APP:');
+        $this->assertOutputContains('- Migrator:');
+        $this->assertOutputNotContains('Plugin:');
+    }
+
+    public function testAllVerboseShowsPerSectionTables(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all -v');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+        $this->assertOutputContains('Migration ID');
+        // Plugin section header reads as just the plugin name now.
+        $this->assertOutputContains('Migrator');
+        $this->assertOutputNotContains('Plugin: Migrator');
+        // Summary still rendered after the tables.
+        $this->assertOutputContains('Summary:');
+    }
+
+    public function testAllJsonOutput(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all --format json');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+
+        assert($this->_out instanceof StubConsoleOutput);
+        $messages = $this->_out->messages();
+        $jsonLine = end($messages);
+        $parsed = json_decode((string)$jsonLine, true);
+        $this->assertIsArray($parsed);
+        $this->assertArrayHasKey('app', $parsed);
+        $this->assertArrayHasKey('Migrator', $parsed);
+        $this->assertIsArray($parsed['app']);
+        $this->assertIsArray($parsed['Migrator']);
+    }
+
+    public function testAllRejectsPluginOption(): void
+    {
+        $this->loadPlugins(['Migrator']);
+        $this->exec('migrations status -c test --all -p Migrator');
+        $this->assertExitError();
+        $this->assertErrorContains('cannot be combined with --plugin');
+    }
+
+    public function testAllRejectsCleanupOption(): void
+    {
+        $this->exec('migrations status -c test --all --cleanup');
+        $this->assertExitError();
+        $this->assertErrorContains('cannot be combined with --cleanup');
     }
 }

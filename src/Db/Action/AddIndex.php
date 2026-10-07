@@ -15,8 +15,6 @@ class AddIndex extends Action
 {
     /**
      * The index to add to the table
-     *
-     * @var \Migrations\Db\Table\Index
      */
     protected Index $index;
 

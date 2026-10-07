@@ -28,9 +28,6 @@ class Config implements ConfigInterface
      */
     public const VERSION_ORDER_EXECUTION_TIME = 'execution';
 
-    /**
-     * @var array
-     */
     protected array $values = [];
 
     /**
@@ -114,7 +111,7 @@ class Config implements ConfigInterface
     {
         $versionOrder = $this->getVersionOrder();
 
-        return $versionOrder == self::VERSION_ORDER_CREATION_TIME;
+        return $versionOrder === self::VERSION_ORDER_CREATION_TIME;
     }
 
     /**

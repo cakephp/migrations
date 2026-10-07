@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Plan\Solver;
 
+use Migrations\Db\Action\Action;
 use Migrations\Db\Plan\AlterTable;
 
 /**
@@ -21,16 +22,12 @@ class ActionSplitter
 {
     /**
      * The fully qualified class name of the Action class to match for conflicts
-     *
-     * @var string
      */
     protected string $conflictClass;
 
     /**
      * The fully qualified class name of the Action class to match for conflicts, which
      * is the dual of $conflictClass. For example `AddColumn` and `DropColumn` are duals.
-     *
-     * @var string
      */
     protected string $conflictClassDual;
 
@@ -70,7 +67,7 @@ class ActionSplitter
      */
     public function __invoke(AlterTable $alter): array
     {
-        $conflictActions = array_filter($alter->getActions(), function ($action) {
+        $conflictActions = array_filter($alter->getActions(), function (Action $action): bool {
             return $action instanceof $this->conflictClass;
         });
 

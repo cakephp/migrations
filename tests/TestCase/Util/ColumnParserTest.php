@@ -31,13 +31,13 @@ class ColumnParserTest extends TestCase
      *
      * @return void
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->columnParser = new ColumnParser();
     }
 
-    public function testParseFields()
+    public function testParseFields(): void
     {
         $this->assertEquals([
             'id' => [
@@ -227,7 +227,41 @@ class ColumnParserTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testParseIndexes()
+    /**
+     * A composite primary key (e.g. a join table) must not auto-increment its
+     * integer columns, otherwise MySQL rejects the table with
+     * "there can be only one auto column".
+     *
+     * @return void
+     */
+    public function testParseFieldsCompositePrimaryKey(): void
+    {
+        $expected = [
+            'article_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+            'tag_id' => [
+                'columnType' => 'integer',
+                'options' => [
+                    'null' => false,
+                    'default' => null,
+                    'limit' => 11,
+                ],
+            ],
+        ];
+        $actual = $this->columnParser->parseFields([
+            'article_id:integer:primary',
+            'tag_id:integer:primary',
+        ]);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testParseIndexes(): void
     {
         $this->assertEquals(['UNIQUE_ID' => [
             'columns' => ['id'],
@@ -247,7 +281,7 @@ class ColumnParserTest extends TestCase
         ]));
     }
 
-    public function testParsePrimaryKey()
+    public function testParsePrimaryKey(): void
     {
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:primary']));
         $this->assertEquals(['id'], $this->columnParser->parsePrimaryKey(['id:integer:primary']));
@@ -258,7 +292,7 @@ class ColumnParserTest extends TestCase
         );
     }
 
-    public function testValidArguments()
+    public function testValidArguments(): void
     {
         $this->assertEquals(
             ['id'],
@@ -310,7 +344,7 @@ class ColumnParserTest extends TestCase
         );
     }
 
-    public function testGetType()
+    public function testGetType(): void
     {
         $this->assertSame('integer', $this->columnParser->getType('id', null));
         $this->assertSame('integer', $this->columnParser->getType('id', 'primary_key'));
@@ -332,7 +366,7 @@ class ColumnParserTest extends TestCase
         $this->assertSame('decimal', $this->columnParser->getType('longitude', null));
     }
 
-    public function testGetTypeAndLength()
+    public function testGetTypeAndLength(): void
     {
         $this->assertEquals(['string', 255], $this->columnParser->getTypeAndLength('name', 'string'));
         $this->assertEquals(['integer', 11], $this->columnParser->getTypeAndLength('counter', 'integer'));
@@ -346,7 +380,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals(['decimal', [10, 6]], $this->columnParser->getTypeAndLength('latitude', 'decimal[10,6]'));
     }
 
-    public function testGetTypeAndLengthReturnsIntegerTypes()
+    public function testGetTypeAndLengthReturnsIntegerTypes(): void
     {
         // Test that lengths are returned as integers, not strings
         [, $length] = $this->columnParser->getTypeAndLength('name', 'string[128]');
@@ -376,7 +410,7 @@ class ColumnParserTest extends TestCase
         $this->assertSame(11, $length);
     }
 
-    public function testGetLength()
+    public function testGetLength(): void
     {
         $this->assertSame(255, $this->columnParser->getLength('string'));
         $this->assertSame(11, $this->columnParser->getLength('integer'));
@@ -385,7 +419,7 @@ class ColumnParserTest extends TestCase
         $this->assertNull($this->columnParser->getLength('text'));
     }
 
-    public function testGetIndexName()
+    public function testGetIndexName(): void
     {
         $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', true));
         $this->assertSame('SOME_INDEX', $this->columnParser->getIndexName('id', null, 'SOME_INDEX', false));
@@ -398,7 +432,7 @@ class ColumnParserTest extends TestCase
         $this->assertSame('PRIMARY', $this->columnParser->getIndexName('id', 'primary', null, true));
     }
 
-    public function testParseFieldsWithReferences()
+    public function testParseFieldsWithReferences(): void
     {
         // Test basic references - should convert to integer
         $expected = [
@@ -443,7 +477,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testParseFieldsWithDefaultValues()
+    public function testParseFieldsWithDefaultValues(): void
     {
         // Test boolean default true
         $expected = [
@@ -557,7 +591,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testParseDefaultValue()
+    public function testParseDefaultValue(): void
     {
         // Test null and empty values
         $this->assertNull($this->columnParser->parseDefaultValue(null, 'string'));
@@ -588,7 +622,7 @@ class ColumnParserTest extends TestCase
         $this->assertSame('CURRENT_TIMESTAMP', $this->columnParser->parseDefaultValue('CURRENT_TIMESTAMP', 'datetime'));
     }
 
-    public function testParseIndexesWithDefaultValues()
+    public function testParseIndexesWithDefaultValues(): void
     {
         // Ensure indexes still work with default values in the definition
         $expected = [
@@ -611,7 +645,7 @@ class ColumnParserTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testValidArgumentsWithDefaultValues()
+    public function testValidArgumentsWithDefaultValues(): void
     {
         $this->assertEquals(
             ['active:boolean:default[true]'],
@@ -627,7 +661,7 @@ class ColumnParserTest extends TestCase
         );
     }
 
-    public function testParseForeignKeys()
+    public function testParseForeignKeys(): void
     {
         // Test basic reference - infer table name from field
         $expected = [

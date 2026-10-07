@@ -18,11 +18,12 @@ use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Schema\CollectionInterface;
+use Cake\Database\Schema\TableSchema;
 use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\View\Helper;
-use Cake\View\View;
+use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Table\ForeignKey;
 
 /**
@@ -72,22 +73,6 @@ class MigrationHelper extends Helper
     public function getReturnedData(): array
     {
         return $this->returnedData;
-    }
-
-    /**
-     * Constructor
-     *
-     * ### Settings
-     *
-     * - `collection` \Cake\Database\Schema\Collection
-     * - `connection` \Cake\Database\Connection
-     *
-     * @param \Cake\View\View $View The View this helper is being attached to.
-     * @param array $config Configuration settings for the helper.
-     */
-    public function __construct(View $View, array $config = [])
-    {
-        parent::__construct($View, $config);
     }
 
     /**
@@ -204,10 +189,8 @@ class MigrationHelper extends Helper
 
         $tableIndexes = $tableSchema->indexes();
         $indexes = [];
-        if ($tableIndexes) {
-            foreach ($tableIndexes as $name) {
-                $indexes[$name] = $tableSchema->getIndex($name);
-            }
+        foreach ($tableIndexes as $name) {
+            $indexes[$name] = $tableSchema->getIndex($name);
         }
 
         return $indexes;
@@ -389,6 +372,8 @@ class MigrationHelper extends Helper
             'scale',
             'after',
             'collate',
+            'fixed',
+            'onUpdate',
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -399,6 +384,13 @@ class MigrationHelper extends Helper
         }
         if (empty($columnOptions['collate'])) {
             unset($columnOptions['collate']);
+        }
+        if (empty($columnOptions['onUpdate'])) {
+            unset($columnOptions['onUpdate']);
+        }
+        // isset() returns false for null values, so this handles both missing and null cases
+        if (!isset($columnOptions['fixed'])) {
+            unset($columnOptions['fixed']);
         }
 
         // currently only MySQL supports the signed option
@@ -416,6 +408,12 @@ class MigrationHelper extends Helper
             // Phinx uses 'collation' not 'collate'
             $columnOptions['collation'] = $columnOptions['collate'];
             unset($columnOptions['collate']);
+        }
+
+        if (!empty($columnOptions['onUpdate'])) {
+            // Phinx uses 'update' not 'onUpdate'
+            $columnOptions['update'] = $columnOptions['onUpdate'];
+            unset($columnOptions['onUpdate']);
         }
 
         // Handle precision/scale conversion between CakePHP's TableSchema format and SQL standard format.
@@ -440,6 +438,13 @@ class MigrationHelper extends Helper
             }
         }
 
+        // Convert CakePHP's LENGTH_LONG to migrations TEXT_LONG for text columns
+        // CakePHP uses LENGTH_LONG = 4294967295, but migrations expects TEXT_LONG = 2147483647
+        // (LENGTH_TINY and LENGTH_MEDIUM have the same values as TEXT_TINY and TEXT_MEDIUM)
+        if (isset($columnOptions['limit']) && $columnOptions['limit'] === TableSchema::LENGTH_LONG) {
+            $columnOptions['limit'] = MysqlAdapter::TEXT_LONG;
+        }
+
         return $columnOptions;
     }
 
@@ -452,7 +457,7 @@ class MigrationHelper extends Helper
      */
     public function value(string|float|int|bool|null $value, bool $numbersAsString = false): string|float
     {
-        if ($value === null || $value === 'null' || $value === 'NULL') {
+        if (in_array($value, [null, 'null', 'NULL'], true)) {
             return 'null';
         }
 
@@ -495,7 +500,8 @@ class MigrationHelper extends Helper
             'comment', 'unsigned',
             'signed', 'properties',
             'autoIncrement', 'unique',
-            'collate',
+            'collate', 'fixed',
+            'onUpdate',
         ];
 
         $attributes = [];
@@ -543,6 +549,10 @@ class MigrationHelper extends Helper
         $defaultCollation = $tableSchema->getOptions()['collation'] ?? null;
         if (empty($attributes['collate']) || $attributes['collate'] == $defaultCollation) {
             unset($attributes['collate']);
+        }
+
+        if (empty($attributes['onUpdate'])) {
+            unset($attributes['onUpdate']);
         }
 
         ksort($attributes);
@@ -593,7 +603,7 @@ class MigrationHelper extends Helper
                 $v = $this->value($v, $k === 'default');
             }
             if (!is_numeric($k)) {
-                $v = "'$k' => $v";
+                $v = sprintf("'%s' => %s", $k, $v);
             }
         }
 
@@ -618,14 +628,14 @@ class MigrationHelper extends Helper
      */
     public function tableStatement(string $table, bool $reset = false): string
     {
-        if ($reset === true) {
+        if ($reset) {
             unset($this->tableStatementStatus[$table]);
         }
 
         if (!isset($this->tableStatementStatus[$table])) {
             $this->tableStatementStatus[$table] = true;
 
-            return '$this->table(\'' . addslashes($table) . '\')';
+            return '$this->table(\'' . addslashes($table) . "')";
         }
 
         return '';
@@ -692,7 +702,7 @@ class MigrationHelper extends Helper
         $indexes = $this->indexes($table);
         $foreignKeys = [];
         foreach ($constraints as $constraint) {
-            if ($constraint['type'] === 'foreign') {
+            if (isset($constraint['type']) && $constraint['type'] === 'foreign') {
                 $foreignKeys[] = $constraint['columns'];
             }
         }
@@ -713,14 +723,11 @@ class MigrationHelper extends Helper
             'tables' => [],
         ];
         foreach ($tables as $table) {
-            $tableName = $table;
-            if ($table instanceof TableSchemaInterface) {
-                $tableName = $table->name();
-            }
+            $tableName = $table instanceof TableSchemaInterface ? $table->name() : $table;
             $data = $this->getCreateTableData($table);
             $tableConstraintsNoUnique = array_filter(
                 $data['constraints'],
-                function ($constraint) {
+                function (array $constraint): bool {
                     return $constraint['type'] !== 'unique';
                 },
             );

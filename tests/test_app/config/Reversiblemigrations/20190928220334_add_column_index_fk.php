@@ -12,7 +12,7 @@ class AddColumnIndexFk extends BaseMigration
      * Write your reversible migrations using this method.
      *
      * More information on writing migrations is available here:
-     * https://book.cakephp.org/migrations/5/en/migrations.html
+     * https://book.cakephp.org/migrations/5/guides/writing-migrations/migration-methods.html
      *
      * The following commands can be used in this method and Migrations will
      * automatically reverse them when rolling back:
@@ -31,7 +31,7 @@ class AddColumnIndexFk extends BaseMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+    public function change(): void
     {
         $table = $this->table('statuses')
             ->addColumn('user_id', Column::INTEGER, [

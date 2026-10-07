@@ -3,13 +3,17 @@ name: CI
 on:
   push:
     branches:
-      - 3.x
       - 4.x
       - 4.next
       - 5.x
+      - 5.next
+    paths-ignore:
+      - docs/**
   pull_request:
     branches:
       - '*'
+    paths-ignore:
+      - docs/**
   workflow_dispatch:
 
 permissions:
@@ -54,7 +58,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -114,7 +118,7 @@ jobs:
         run: echo "date=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}-${{ matrix.prefer-lowest }}
@@ -162,7 +166,7 @@ jobs:
 
       - name: Code Coverage Report
         if: success() && matrix.php-version == '8.1' && matrix.db-type == 'mysql'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
 
   testsuite-windows:
     runs-on: windows-2022
@@ -173,7 +177,7 @@ jobs:
       PHP_VERSION: '8.2'
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         persist-credentials: false
 
@@ -191,7 +195,7 @@ jobs:
         key: ${{ steps.key-date.outputs.date }}
 
     - name: Cache PHP extensions
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ steps.php-ext-cache.outputs.dir }}
         key: ${{ runner.os }}-php-ext-${{ steps.php-ext-cache.outputs.key }}
@@ -219,7 +223,7 @@ jobs:
       run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
     - name: Cache composer dependencies
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}-${{ matrix.prefer-lowest }}
@@ -236,7 +240,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
     - name: Submit code coverage
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v7
 
   cs-stan:
     uses: cakephp/.github/.github/workflows/cs-stan.yml@5.x

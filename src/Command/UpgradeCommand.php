@@ -17,6 +17,7 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Plugin;
 use Cake\Database\Connection;
 use Cake\Database\Exception\QueryException;
 use Cake\Datasource\ConnectionManager;
@@ -35,6 +36,14 @@ use Migrations\Migration\ManagerFactory;
 class UpgradeCommand extends Command
 {
     /**
+     * @inheritDoc
+     */
+    public static function getDescription(): string
+    {
+        return 'Upgrade migration storage to use <info>cake_migrations</info>.';
+    }
+
+    /**
      * The default name added to the application command list
      *
      * @return string
@@ -50,7 +59,7 @@ class UpgradeCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The option parser to configure
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->setDescription([
             'Upgrades migration tracking from legacy phinxlog tables to unified cake_migrations table.',
@@ -113,20 +122,20 @@ class UpgradeCommand extends Command
 
         $io->out(sprintf('Found <info>%d</info> phinxlog table(s):', count($legacyTables)));
         foreach ($legacyTables as $table => $plugin) {
-            $pluginLabel = $plugin === null ? '(app)' : "({$plugin})";
-            $io->out("  - {$table} {$pluginLabel}");
+            $pluginLabel = $plugin === null ? '(app)' : sprintf('(%s)', $plugin);
+            $io->out(sprintf('  - %s %s', $table, $pluginLabel));
         }
         $io->out('');
 
         // Create unified table if needed
         $unifiedTableName = UnifiedMigrationsTableStorage::TABLE_NAME;
         if (!$this->tableExists($connection, $unifiedTableName)) {
-            $io->out("Creating unified table <info>{$unifiedTableName}</info>...");
+            $io->out(sprintf('Creating unified table <info>%s</info>...', $unifiedTableName));
             if (!$dryRun) {
                 $this->createUnifiedTable($connection, $io);
             }
         } else {
-            $io->out("Unified table <info>{$unifiedTableName}</info> already exists.");
+            $io->out(sprintf('Unified table <info>%s</info> already exists.', $unifiedTableName));
         }
         $io->out('');
 
@@ -143,10 +152,10 @@ class UpgradeCommand extends Command
         if (!$dryRun) {
             // Clean up legacy tables
             $io->out('');
-            foreach ($legacyTables as $tableName => $plugin) {
+            foreach (array_keys($legacyTables) as $tableName) {
                 if ($dropTables) {
-                    $io->out("Dropping legacy table <info>{$tableName}</info>...");
-                    $connection->execute("DROP TABLE {$connection->getDriver()->quoteIdentifier($tableName)}");
+                    $io->out(sprintf('Dropping legacy table <info>%s</info>...', $tableName));
+                    $connection->execute('DROP TABLE ' . $connection->getDriver()->quoteIdentifier($tableName));
                 } else {
                     $io->out('Retaining legacy table. You should drop these tables once you have verified your upgrade.');
                 }
@@ -156,10 +165,13 @@ class UpgradeCommand extends Command
             $io->success('Upgrade complete!');
             $io->out('');
             $io->out('Next steps:');
-            $io->out('  1. Set <info>\'Migrations\' => [\'legacyTables\' => false]</info> in your config');
-            $io->out('  2. Test your application');
-            if (!$dropTables) {
-                $io->out('  3. Optionally drop the empty phinxlog tables (re-run `bin/cake migrations upgrade --drop-tables`)');
+            if ($dropTables) {
+                $io->out("  1. Set <info>'Migrations' => ['legacyTables' => false]</info> in your config");
+                $io->out('  2. Test your application');
+            } else {
+                $io->out('  1. Test your application');
+                $io->out('  2. Drop the phinxlog tables (re-run `bin/cake migrations upgrade --drop-tables`)');
+                $io->out("  3. Set <info>'Migrations' => ['legacyTables' => false]</info> in your config");
             }
         } else {
             $io->out('');
@@ -181,18 +193,49 @@ class UpgradeCommand extends Command
         $tables = $schema->listTables();
         $legacyTables = [];
 
+        // Build a map of expected table prefixes to plugin names for loaded plugins
+        // This allows matching plugins with special characters like CakeDC/Users
+        $pluginPrefixMap = $this->buildPluginPrefixMap();
+
         foreach ($tables as $table) {
             if ($table === 'phinxlog') {
                 $legacyTables[$table] = null;
             } elseif (str_ends_with($table, '_phinxlog')) {
                 // Extract plugin name from table name
                 $prefix = substr($table, 0, -9); // Remove '_phinxlog'
-                $plugin = Inflector::camelize($prefix);
+
+                // Try to match against loaded plugins first
+                if (isset($pluginPrefixMap[$prefix])) {
+                    $plugin = $pluginPrefixMap[$prefix];
+                } else {
+                    // Fall back to camelizing the prefix
+                    $plugin = Inflector::camelize($prefix);
+                }
                 $legacyTables[$table] = $plugin;
             }
         }
 
         return $legacyTables;
+    }
+
+    /**
+     * Build a map of table prefixes to plugin names for all loaded plugins.
+     *
+     * This handles plugins with special characters like CakeDC/Users where
+     * the table prefix is cake_d_c_users but the plugin name is CakeDC/Users.
+     *
+     * @return array<string, string> Map of table prefix => plugin name
+     */
+    protected function buildPluginPrefixMap(): array
+    {
+        $map = [];
+        foreach (Plugin::loaded() as $plugin) {
+            $prefix = Inflector::underscore($plugin);
+            $prefix = str_replace(['\\', '/', '.'], '_', $prefix);
+            $map[$prefix] = $plugin;
+        }
+
+        return $map;
     }
 
     /**
@@ -264,7 +307,7 @@ class UpgradeCommand extends Command
         $rows = $query->execute()->fetchAll('assoc');
 
         $count = count($rows);
-        $io->out("Migrating <info>{$count}</info> record(s) from <info>{$tableName}</info> ({$pluginLabel})...");
+        $io->out(sprintf('Migrating <info>%d</info> record(s) from <info>%s</info> (%s)...', $count, $tableName, $pluginLabel));
 
         if ($dryRun || $count === 0) {
             return $count;
@@ -285,7 +328,7 @@ class UpgradeCommand extends Command
                         'breakpoint' => (int)($row['breakpoint'] ?? 0),
                     ]);
                 $insertQuery->execute();
-            } catch (QueryException $e) {
+            } catch (QueryException) {
                 $io->out('Already migrated <info>' . $row['migration_name'] . '</info>.');
             }
         }

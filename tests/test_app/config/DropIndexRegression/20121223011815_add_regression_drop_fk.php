@@ -7,7 +7,7 @@ class AddRegressionDropFk extends BaseMigration
     /**
      * Change.
      */
-    public function change()
+    public function change(): void
     {
         $table = $this->table('my_table');
         $table
