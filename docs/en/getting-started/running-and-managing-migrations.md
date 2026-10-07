@@ -90,6 +90,27 @@ in CI.
 e.g. `{"app": [...], "PluginName": [...]}`. `--all` cannot be combined with
 `--plugin` or `--cleanup`.
 
+### Validating Migration Files
+
+Migration classes are only loaded when the migration they contain is executed.
+A migration file that cannot be loaded, for example one still extending the
+removed `Migrations\AbstractMigration` class, will therefore not fail `status`
+or the `PendingMigrationsMiddleware`. The `--validate` option loads every
+migration class and reports the ones that cannot be loaded:
+
+```bash
+bin/cake migrations status --validate
+```
+
+When any migration cannot be loaded, the offending versions are printed to
+stderr and the command exits with `1`, which makes it a useful CI check.
+Otherwise the regular status output follows. The option can be combined with
+`--all` to validate the app and every loaded plugin in one call.
+
+The same check is available programmatically through
+`Manager::validateMigrations()`, which returns the error messages indexed by
+migration version.
+
 ### Cleaning Up Missing Migrations
 
 Sometimes migration files may be deleted from the filesystem but still exist in

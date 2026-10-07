@@ -19,6 +19,7 @@ use Migrations\SeedInterface;
 use Migrations\Util\Util;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
+use Throwable;
 
 class Manager
 {
@@ -38,6 +39,20 @@ class Manager
      * @var \Migrations\MigrationInterface[]|null
      */
     protected ?array $migrations = null;
+
+    /**
+     * Migration file paths indexed by version and sorted in ascending order.
+     *
+     * @var array<int, string>|null
+     */
+    protected ?array $migrationPaths = null;
+
+    /**
+     * Migrations that have been loaded from their files, indexed by version.
+     *
+     * @var array<int, \Migrations\MigrationInterface>
+     */
+    protected array $loadedMigrations = [];
 
     /**
      * @var \Migrations\SeedInterface[]|null
@@ -67,27 +82,24 @@ class Manager
     {
         $migrations = [];
         $isJson = $format === 'json';
-        $defaultMigrations = $this->getMigrations();
-        if ($defaultMigrations) {
+        $defaultVersions = $this->getMigrationVersions();
+        if ($defaultVersions) {
             $env = $this->getEnvironment();
             $versions = $env->getVersionLog();
 
-            foreach ($defaultMigrations as $migration) {
-                if (array_key_exists($migration->getVersion(), $versions)) {
+            foreach ($defaultVersions as $version) {
+                if (array_key_exists($version, $versions)) {
                     $status = 'up';
-                    unset($versions[$migration->getVersion()]);
+                    unset($versions[$version]);
                 } else {
                     $status = 'down';
                 }
 
-                $version = $migration->getVersion();
-                $migrationParams = [
+                $migrations[$version] = [
                     'status' => $status,
-                    'id' => $migration->getVersion(),
-                    'name' => $migration->getName(),
+                    'id' => $version,
+                    'name' => $this->getMigrationName($version),
                 ];
-
-                $migrations[$version] = $migrationParams;
             }
 
             foreach ($versions as $missing) {
@@ -123,8 +135,7 @@ class Manager
      */
     public function migrateToDateTime(DateTime $dateTime, bool $fake = false): void
     {
-        /** @var array<int> $versions */
-        $versions = array_keys($this->getMigrations());
+        $versions = $this->getMigrationVersions();
         $dateString = $dateTime->format('Ymdhis');
         $versionToMigrate = null;
         foreach ($versions as $version) {
@@ -344,8 +355,7 @@ class Manager
      */
     public function getVersionsToMark(Arguments $args): array
     {
-        $migrations = $this->getMigrations();
-        $versions = array_keys($migrations);
+        $versions = $this->getMigrationVersions();
 
         $versionArg = null;
         if ($args->hasArgument('version')) {
@@ -434,19 +444,19 @@ class Manager
      */
     public function migrate(?int $version = null, bool $fake = false, ?int $count = null): void
     {
-        $migrations = $this->getMigrations();
+        $migrationVersions = $this->getMigrationVersions();
         $env = $this->getEnvironment();
         $versions = $env->getVersions();
         $current = $env->getCurrentVersion();
 
-        if (!$versions && !$migrations) {
+        if (!$versions && !$migrationVersions) {
             return;
         }
 
         if ($version === null) {
-            $candidates = [...$versions, ...array_keys($migrations)];
+            $candidates = [...$versions, ...$migrationVersions];
             $version = $candidates ? max($candidates) : 0;
-        } elseif ($version !== 0 && !isset($migrations[$version])) {
+        } elseif ($version !== 0 && !in_array($version, $migrationVersions, true)) {
             $this->getIo()->out(sprintf(
                 '<comment>warning</comment> %s is not a valid version',
                 $version,
@@ -460,27 +470,25 @@ class Manager
 
         if ($direction === MigrationInterface::DOWN) {
             // run downs first
-            krsort($migrations);
-            foreach ($migrations as $migration) {
-                if ($migration->getVersion() <= $version) {
+            foreach (array_reverse($migrationVersions) as $migrationVersion) {
+                if ($migrationVersion <= $version) {
                     break;
                 }
 
-                if (in_array($migration->getVersion(), $versions)) {
-                    $this->executeMigration($migration, MigrationInterface::DOWN, $fake);
+                if (in_array($migrationVersion, $versions)) {
+                    $this->executeMigration($this->getMigration($migrationVersion), MigrationInterface::DOWN, $fake);
                 }
             }
         }
 
-        ksort($migrations);
         $done = 0;
-        foreach ($migrations as $migration) {
-            if ($migration->getVersion() > $version || ($count && $done >= $count)) {
+        foreach ($migrationVersions as $migrationVersion) {
+            if ($migrationVersion > $version || ($count && $done >= $count)) {
                 break;
             }
 
-            if (!in_array($migration->getVersion(), $versions)) {
-                $this->executeMigration($migration, MigrationInterface::UP, $fake);
+            if (!in_array($migrationVersion, $versions)) {
+                $this->executeMigration($this->getMigration($migrationVersion), MigrationInterface::UP, $fake);
                 $done++;
             }
         }
@@ -690,14 +698,14 @@ class Manager
      */
     public function rollback(int|string|null $target = null, bool $force = false, bool $targetMustMatchVersion = true, bool $fake = false): void
     {
-        // note that the migrations are indexed by name (aka creation time) in ascending order
-        $migrations = $this->getMigrations();
+        // note that the migration versions (aka creation time) are sorted in ascending order
+        $migrationVersions = array_flip($this->getMigrationVersions());
 
         // note that the version log are also indexed by name with the proper ascending order according to the version order
         $executedVersions = $this->getEnvironment()->getVersionLog();
 
-        // get a list of migrations sorted in the opposite way of the executed versions
-        $sortedMigrations = [];
+        // get a list of migration versions sorted in the opposite way of the executed versions
+        $sortedVersions = [];
         $io = $this->getIo();
 
         foreach ($executedVersions as $versionCreationTime => &$executedVersion) {
@@ -709,8 +717,8 @@ class Manager
                 $executedVersion['start_time'] = $dateTime->format('YmdHis');
             }
 
-            if (isset($migrations[$versionCreationTime])) {
-                array_unshift($sortedMigrations, $migrations[$versionCreationTime]);
+            if (isset($migrationVersions[$versionCreationTime])) {
+                array_unshift($sortedVersions, $versionCreationTime);
             } else {
                 // this means the version is missing so we unset it so that we don't consider it when rolling back
                 // migrations (or choosing the last up version as target)
@@ -753,7 +761,7 @@ class Manager
         }
 
         // If the target must match a version, check the target version exists
-        if ($targetMustMatchVersion && $target !== 0 && !isset($migrations[$target])) {
+        if ($targetMustMatchVersion && $target !== 0 && !isset($migrationVersions[$target])) {
             $io->out(sprintf('<error>Target version (%s) not found</error>', $target));
 
             return;
@@ -762,13 +770,13 @@ class Manager
         // Rollback all versions until we find the wanted rollback target
         $rollbacked = false;
 
-        foreach ($sortedMigrations as $migration) {
-            if ($targetMustMatchVersion && $migration->getVersion() == $target) {
+        foreach ($sortedVersions as $migrationVersion) {
+            if ($targetMustMatchVersion && $migrationVersion == $target) {
                 break;
             }
 
-            if (in_array($migration->getVersion(), $executedVersionCreationTimes)) {
-                $executedArray = $executedVersions[$migration->getVersion()];
+            if (in_array($migrationVersion, $executedVersionCreationTimes)) {
+                $executedArray = $executedVersions[$migrationVersion];
 
                 if (!$targetMustMatchVersion && ($this->getConfig()->isVersionOrderCreationTime() && $executedArray['version'] <= $target || !$this->getConfig()->isVersionOrderCreationTime() && $executedArray['start_time'] <= $target)) {
                     break;
@@ -778,7 +786,7 @@ class Manager
                     $io->out('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
                     break;
                 }
-                $this->executeMigration($migration, MigrationInterface::DOWN, $fake);
+                $this->executeMigration($this->getMigration((int)$migrationVersion), MigrationInterface::DOWN, $fake);
                 $rollbacked = true;
             }
         }
@@ -908,105 +916,228 @@ class Manager
      * Gets an array of the database migrations, indexed by migration name (aka creation time) and sorted in ascending
      * order
      *
+     * This loads every migration class. Prefer getMigrationVersions() when the migration instances are not needed.
+     *
      * @throws \InvalidArgumentException
      * @return \Migrations\MigrationInterface[]
      */
     public function getMigrations(): array
     {
-        if ($this->migrations === null) {
-            $phpFiles = $this->getMigrationFiles();
-
-            $io = $this->getIo();
-            $io->verbose('Migration file');
-            $io->verbose(
-                array_map(
-                    function (string $phpFile): string {
-                        return sprintf('    <info>%s</info>', $phpFile);
-                    },
-                    $phpFiles,
-                ),
-            );
-
-            // filter the files to only get the ones that match our naming scheme
-            $fileNames = [];
-            /** @var \Migrations\MigrationInterface[] $versions */
-            $versions = [];
-
-            $io = $this->getIo();
-            foreach ($phpFiles as $filePath) {
-                if (Util::isValidMigrationFileName(basename($filePath))) {
-                    $io->verbose(sprintf('Valid migration file <info>%s</info>.', $filePath));
-
-                    $version = Util::getVersionFromFileName(basename($filePath));
-
-                    if (isset($versions[$version])) {
-                        throw new InvalidArgumentException(sprintf('Duplicate migration - "%s" has the same version as "%s"', $filePath, $versions[$version]->getVersion()));
-                    }
-
-                    // convert the filename to a class name
-                    $class = Util::mapFileNameToClassName(basename($filePath));
-
-                    if (isset($fileNames[$class])) {
-                        throw new InvalidArgumentException(sprintf(
-                            'Migration "%s" has the same name as "%s"',
-                            basename($filePath),
-                            $fileNames[$class],
-                        ));
-                    }
-
-                    $fileNames[$class] = basename($filePath);
-
-                    $io->verbose(sprintf('Loading class <info>%s</info> from <info>%s</info>.', $class, $filePath));
-
-                    $this->checkMigrationClass($filePath);
-
-                    $orig_display_errors_setting = ini_get('display_errors');
-                    ini_set('display_errors', 'On');
-
-                    // For anonymous classes, we need to use require instead of require_once
-                    // to get the returned instance
-                    $migrationInstance = null;
-                    if (!class_exists($class)) {
-                        $migrationInstance = require $filePath;
-                    } else {
-                        require_once $filePath;
-                    }
-
-                    ini_set('display_errors', $orig_display_errors_setting);
-
-                    // Check if the file returns an anonymous class instance
-                    if ($migrationInstance instanceof MigrationInterface) {
-                        $io->verbose(sprintf('Using anonymous class from <info>%s</info>.', $filePath));
-                        $migration = $migrationInstance;
-                        $migration->setVersion($version);
-                    } elseif (class_exists($class)) {
-                        // Fall back to traditional class-based migration
-                        $io->verbose(sprintf('Constructing <info>%s</info>.', $class));
-                        $migration = new $class($version);
-                    } else {
-                        throw new InvalidArgumentException(sprintf(
-                            'Could not find class `%s` in file `%s` and file did not return a migration instance',
-                            $class,
-                            $filePath,
-                        ));
-                    }
-
-                    /** @var \Migrations\MigrationInterface $migration */
-                    $config = $this->getConfig();
-                    $migration->setConfig($config);
-                    $migration->setIo($io);
-
-                    $versions[$version] = $migration;
-                } else {
-                    $io->verbose(sprintf('Invalid migration file <error>%s</error>.', $filePath));
-                }
-            }
-
-            ksort($versions);
-            $this->setMigrations($versions);
+        if ($this->migrations !== null) {
+            return $this->migrations;
         }
 
-        return (array)$this->migrations;
+        $migrations = [];
+        foreach ($this->getMigrationVersions() as $version) {
+            $migrations[$version] = $this->getMigration($version);
+        }
+
+        return $migrations;
+    }
+
+    /**
+     * Gets the versions of the database migrations sorted in ascending order, without loading the migration classes.
+     *
+     * @throws \InvalidArgumentException
+     * @return list<int>
+     */
+    public function getMigrationVersions(): array
+    {
+        if ($this->migrations !== null) {
+            $versions = array_keys($this->migrations);
+            sort($versions);
+
+            return $versions;
+        }
+
+        return array_keys($this->getMigrationPaths());
+    }
+
+    /**
+     * Gets a single database migration, loading its class if it has not been loaded yet.
+     *
+     * @param int $version Version of the migration
+     * @throws \InvalidArgumentException
+     * @return \Migrations\MigrationInterface
+     */
+    public function getMigration(int $version): MigrationInterface
+    {
+        if ($this->migrations !== null) {
+            if (!isset($this->migrations[$version])) {
+                throw new InvalidArgumentException(sprintf('Migration `%d` was not found', $version));
+            }
+
+            return $this->migrations[$version];
+        }
+
+        if (!isset($this->loadedMigrations[$version])) {
+            $paths = $this->getMigrationPaths();
+            if (!isset($paths[$version])) {
+                throw new InvalidArgumentException(sprintf('Migration `%d` was not found', $version));
+            }
+
+            $this->loadedMigrations[$version] = $this->loadMigration($version, $paths[$version]);
+        }
+
+        return $this->loadedMigrations[$version];
+    }
+
+    /**
+     * Loads every migration class and collects the errors that prevent them from being loaded.
+     *
+     * Migration classes are loaded when the migration they contain is executed, so a broken
+     * migration file is only reported when that migration runs. This loads all of them upfront
+     * so that the migration files can be validated explicitly, for example in CI.
+     *
+     * @throws \InvalidArgumentException When two migrations share a version or a name
+     * @return array<int, string> Error messages indexed by migration version.
+     */
+    public function validateMigrations(): array
+    {
+        $errors = [];
+        foreach ($this->getMigrationVersions() as $version) {
+            try {
+                $this->getMigration($version);
+            } catch (Throwable $e) {
+                $errors[$version] = $e->getMessage();
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Gets the name of a database migration without loading its class.
+     *
+     * @param int $version Version of the migration
+     * @return string
+     */
+    protected function getMigrationName(int $version): string
+    {
+        if ($this->migrations !== null) {
+            return $this->getMigration($version)->getName();
+        }
+
+        return Util::mapFileNameToClassName(basename($this->getMigrationPaths()[$version]));
+    }
+
+    /**
+     * Gets the paths of the migration files indexed by version and sorted in ascending order
+     *
+     * @throws \InvalidArgumentException
+     * @return array<int, string>
+     */
+    protected function getMigrationPaths(): array
+    {
+        if ($this->migrationPaths !== null) {
+            return $this->migrationPaths;
+        }
+
+        $phpFiles = $this->getMigrationFiles();
+
+        $io = $this->getIo();
+        $io->verbose('Migration file');
+        $io->verbose(
+            array_map(
+                function (string $phpFile): string {
+                    return sprintf('    <info>%s</info>', $phpFile);
+                },
+                $phpFiles,
+            ),
+        );
+
+        // filter the files to only get the ones that match our naming scheme
+        $fileNames = [];
+        $paths = [];
+
+        foreach ($phpFiles as $filePath) {
+            if (!Util::isValidMigrationFileName(basename($filePath))) {
+                $io->verbose(sprintf('Invalid migration file <error>%s</error>.', $filePath));
+                continue;
+            }
+
+            $io->verbose(sprintf('Valid migration file <info>%s</info>.', $filePath));
+
+            $version = Util::getVersionFromFileName(basename($filePath));
+
+            if (isset($paths[$version])) {
+                throw new InvalidArgumentException(sprintf('Duplicate migration - "%s" has the same version as "%s"', $filePath, $version));
+            }
+
+            // convert the filename to a class name
+            $class = Util::mapFileNameToClassName(basename($filePath));
+
+            if (isset($fileNames[$class])) {
+                throw new InvalidArgumentException(sprintf(
+                    'Migration "%s" has the same name as "%s"',
+                    basename($filePath),
+                    $fileNames[$class],
+                ));
+            }
+
+            $fileNames[$class] = basename($filePath);
+            $paths[$version] = $filePath;
+        }
+
+        ksort($paths);
+        $this->migrationPaths = $paths;
+
+        return $paths;
+    }
+
+    /**
+     * Loads a migration class from its file and creates the migration instance.
+     *
+     * @param int $version Version of the migration
+     * @param string $filePath Path to the migration file
+     * @throws \InvalidArgumentException
+     * @return \Migrations\MigrationInterface
+     */
+    protected function loadMigration(int $version, string $filePath): MigrationInterface
+    {
+        $io = $this->getIo();
+        $class = Util::mapFileNameToClassName(basename($filePath));
+
+        $io->verbose(sprintf('Loading class <info>%s</info> from <info>%s</info>.', $class, $filePath));
+
+        $this->checkMigrationClass($filePath);
+
+        $orig_display_errors_setting = ini_get('display_errors');
+        ini_set('display_errors', 'On');
+
+        // For anonymous classes, we need to use require instead of require_once
+        // to get the returned instance
+        $migrationInstance = null;
+        if (!class_exists($class)) {
+            $migrationInstance = require $filePath;
+        } else {
+            require_once $filePath;
+        }
+
+        ini_set('display_errors', $orig_display_errors_setting);
+
+        // Check if the file returns an anonymous class instance
+        if ($migrationInstance instanceof MigrationInterface) {
+            $io->verbose(sprintf('Using anonymous class from <info>%s</info>.', $filePath));
+            $migration = $migrationInstance;
+            $migration->setVersion($version);
+        } elseif (class_exists($class)) {
+            // Fall back to traditional class-based migration
+            $io->verbose(sprintf('Constructing <info>%s</info>.', $class));
+            $migration = new $class($version);
+        } else {
+            throw new InvalidArgumentException(sprintf(
+                'Could not find class `%s` in file `%s` and file did not return a migration instance',
+                $class,
+                $filePath,
+            ));
+        }
+
+        /** @var \Migrations\MigrationInterface $migration */
+        $migration->setConfig($this->getConfig());
+        $migration->setIo($io);
+
+        return $migration;
     }
 
     /**
@@ -1277,11 +1408,11 @@ class Manager
      */
     protected function markBreakpoint(?int $version, int $mark): void
     {
-        $migrations = $this->getMigrations();
+        $migrationVersions = array_flip($this->getMigrationVersions());
         $env = $this->getEnvironment();
         $versions = $env->getVersionLog();
 
-        if (!$versions || !$migrations) {
+        if (!$versions || !$migrationVersions) {
             return;
         }
 
@@ -1291,7 +1422,7 @@ class Manager
         }
 
         $io = $this->getIo();
-        if ($version !== 0 && (!isset($versions[$version]) || !isset($migrations[$version]))) {
+        if ($version !== 0 && (!isset($versions[$version]) || !isset($migrationVersions[$version]))) {
             $io->out(sprintf(
                 '<comment>warning</comment> %s is not a valid version',
                 $version,
@@ -1300,18 +1431,20 @@ class Manager
             return;
         }
 
+        $migration = $this->getMigration((int)$version);
+
         switch ($mark) {
             case self::BREAKPOINT_TOGGLE:
-                $env->getAdapter()->toggleBreakpoint($migrations[$version]);
+                $env->getAdapter()->toggleBreakpoint($migration);
                 break;
             case self::BREAKPOINT_SET:
                 if ((int)$versions[$version]['breakpoint'] === 0) {
-                    $env->getAdapter()->setBreakpoint($migrations[$version]);
+                    $env->getAdapter()->setBreakpoint($migration);
                 }
                 break;
             case self::BREAKPOINT_UNSET:
                 if ((int)$versions[$version]['breakpoint'] === 1) {
-                    $env->getAdapter()->unsetBreakpoint($migrations[$version]);
+                    $env->getAdapter()->unsetBreakpoint($migration);
                 }
                 break;
         }
@@ -1321,7 +1454,7 @@ class Manager
         $io->out(
             ' Breakpoint ' . ($versions[$version]['breakpoint'] ? 'set' : 'cleared') .
             ' for <info>' . $version . '</info>' .
-            ' <comment>' . $migrations[$version]->getName() . '</comment>',
+            ' <comment>' . $migration->getName() . '</comment>',
         );
     }
 
@@ -1368,6 +1501,8 @@ class Manager
     public function resetMigrations(): void
     {
         $this->migrations = null;
+        $this->migrationPaths = null;
+        $this->loadedMigrations = [];
     }
 
     /**
@@ -1404,7 +1539,7 @@ class Manager
      */
     public function cleanupMissingMigrations(): int
     {
-        $defaultMigrations = $this->getMigrations();
+        $migrationVersions = array_flip($this->getMigrationVersions());
         $env = $this->getEnvironment();
         $versions = $env->getVersionLog();
         $adapter = $env->getAdapter();
@@ -1412,7 +1547,7 @@ class Manager
         // Find missing migrations (those in migration table but not in filesystem)
         $missingVersions = [];
         foreach (array_keys($versions) as $versionId) {
-            if (!isset($defaultMigrations[$versionId])) {
+            if (!isset($migrationVersions[$versionId])) {
                 $missingVersions[] = $versionId;
             }
         }

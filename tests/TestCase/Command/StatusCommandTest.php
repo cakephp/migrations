@@ -182,4 +182,36 @@ class StatusCommandTest extends TestCase
         $this->assertExitError();
         $this->assertErrorContains('cannot be combined with --cleanup');
     }
+
+    public function testValidateHelp(): void
+    {
+        $this->exec('migrations status --help');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('--validate');
+        $this->assertOutputContains('Load every migration class');
+    }
+
+    public function testValidateWithValidMigrations(): void
+    {
+        $this->exec('migrations status -c test --validate');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('migrations can be loaded');
+        // The status table is still printed.
+        $this->assertOutputContains('Migration ID');
+    }
+
+    public function testValidateWithMigrationThatCannotBeLoaded(): void
+    {
+        $this->exec('migrations status -c test -s LegacyAbstractMigration --validate');
+        $this->assertExitError();
+        $this->assertErrorContains('could not be loaded');
+        $this->assertErrorContains('20260327000000');
+        $this->assertOutputNotContains('Migration ID');
+    }
+
+    public function testAllValidatesEverySection(): void
+    {
+        $this->exec('migrations status -c test --all --validate');
+        $this->assertExitCode(StatusCommand::CODE_STATUS_DOWN);
+    }
 }
