@@ -46,7 +46,7 @@ class AddColumn extends Action
         $column->setType($type);
         $column->setOptions($options); // map options to column methods
 
-        return new AddColumn($table, $column);
+        return new self($table, $column);
     }
 
     /**

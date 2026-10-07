@@ -49,7 +49,7 @@ class Intent
      * @param \Migrations\Db\Plan\Intent $another The other intent to merge in
      * @return void
      */
-    public function merge(Intent $another): void
+    public function merge(self $another): void
     {
         $this->actions = array_merge($this->actions, $another->getActions());
     }
