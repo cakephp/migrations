@@ -80,11 +80,11 @@ class Environment
             // (statically narrowable for IDEs and static analysis), then a
             // method_exists fallback for migrations that haven't yet adopted
             // either ReversibleMigrationInterface or DirectionalMigrationInterface.
-            $isReversible = $migration instanceof ReversibleMigrationInterface
+            if (
+                $migration instanceof ReversibleMigrationInterface
                 || (!$migration instanceof DirectionalMigrationInterface
-                    && method_exists($migration, MigrationInterface::CHANGE));
-
-            if ($isReversible) {
+                    && method_exists($migration, MigrationInterface::CHANGE))
+            ) {
                 if ($direction === MigrationInterface::DOWN) {
                     // Create an instance of the RecordingAdapter so we can record all
                     // of the migration commands for reverse playback
