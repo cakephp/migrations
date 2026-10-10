@@ -108,6 +108,18 @@ class TableTest extends TestCase
         }
     }
 
+    public function testAddColumnWithSpecificColumnType(): void
+    {
+        PostgresAdapter::addSpecificColumnType('my_custom_type');
+        $adapter = new PostgresAdapter([]);
+        $table = new Table('ntable', [], $adapter);
+        $table->addColumn('email', 'my_custom_type');
+
+        $actions = $this->getPendingActions($table);
+        $this->assertInstanceOf(AddColumn::class, $actions[0]);
+        $this->assertEquals('my_custom_type', $actions[0]->getColumn()->getType());
+    }
+
     public function testAddComment(): void
     {
         $adapter = new MysqlAdapter([]);
