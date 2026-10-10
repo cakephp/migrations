@@ -93,9 +93,7 @@ class Migrator
 
             $options[$i] = $migrationSet;
             $connectionName = $migrationSet['connection'];
-            if (!isset($connectionsList[$connectionName])) {
-                $connectionsList[$connectionName] = ['name' => $connectionName, 'skip' => $skip];
-            }
+            $connectionsList[$connectionName] ??= ['name' => $connectionName, 'skip' => $skip];
 
             // Sets sharing a connection and a plugin also share a migration history,
             // while each of them only has its own source directory on disk. Group

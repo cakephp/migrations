@@ -441,14 +441,12 @@ class MysqlAdapter extends AbstractAdapter
                     break;
                 }
             }
-            if ($data['length'] === null) {
-                $data['length'] = match ($data['type']) {
-                    self::PHINX_TYPE_TINYBLOB => TableSchema::LENGTH_TINY,
-                    self::PHINX_TYPE_MEDIUMBLOB => TableSchema::LENGTH_MEDIUM,
-                    self::PHINX_TYPE_LONGBLOB => TableSchema::LENGTH_LONG,
-                    default => null,
-                };
-            }
+            $data['length'] ??= match ($data['type']) {
+                self::PHINX_TYPE_TINYBLOB => TableSchema::LENGTH_TINY,
+                self::PHINX_TYPE_MEDIUMBLOB => TableSchema::LENGTH_MEDIUM,
+                self::PHINX_TYPE_LONGBLOB => TableSchema::LENGTH_LONG,
+                default => null,
+            };
             $data['type'] = 'binary';
         } elseif ($data['type'] === self::TYPE_INTEGER) {
             if (isset($data['length']) && $data['length'] === self::INT_BIG) {

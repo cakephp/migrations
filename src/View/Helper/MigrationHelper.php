@@ -424,10 +424,7 @@ class MigrationHelper extends Helper
         } else {
             // Convert CakePHP's precision (decimal places) to Migrations' scale
             // Only convert if scale is not already set (for decimal columns from diff)
-            if (!isset($columnOptions['scale'])) {
-                $columnOptions['scale'] = $columnOptions['precision'];
-            }
-
+            $columnOptions['scale'] ??= $columnOptions['precision'];
             if (isset($columnOptions['limit'])) {
                 $columnOptions['precision'] = $columnOptions['limit'];
                 unset($columnOptions['limit']);
