@@ -111,9 +111,8 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
 
         $manager = $this->getManager($this->_config);
 
-        $migrations = $manager->getMigrations();
-        foreach ($migrations as $migration) {
-            if (!$manager->isMigrated($migration->getVersion())) {
+        foreach ($manager->getMigrationVersions() as $version) {
+            if (!$manager->isMigrated($version)) {
                 return false;
             }
         }
@@ -146,9 +145,8 @@ class PendingMigrationsMiddleware implements MiddlewareInterface
         $config['environment']['migration_table'] = $table;
         $manager = $this->getManager($config);
 
-        $migrations = $manager->getMigrations();
-        foreach ($migrations as $migration) {
-            if (!$manager->isMigrated($migration->getVersion())) {
+        foreach ($manager->getMigrationVersions() as $version) {
+            if (!$manager->isMigrated($version)) {
                 return false;
             }
         }

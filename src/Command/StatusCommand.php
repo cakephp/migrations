@@ -20,6 +20,7 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
 use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
+use Migrations\Migration\Manager;
 use Migrations\Migration\ManagerFactory;
 
 /**
@@ -78,6 +79,8 @@ class StatusCommand extends Command
             'Add <info>-v</info> to also print the per-section migration tables.',
             '<info>migrations status --cleanup</info>',
             'Remove *MISSING* migrations from the migration tracking table',
+            '<info>migrations status --validate</info>',
+            'Load every migration class and fail if any of them cannot be loaded.',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
@@ -102,6 +105,11 @@ class StatusCommand extends Command
             'default' => 'text',
         ])->addOption('cleanup', [
             'help' => 'Remove MISSING migrations from the migration tracking table',
+            'boolean' => true,
+            'default' => false,
+        ])->addOption('validate', [
+            'help' => 'Load every migration class and fail if any of them cannot be loaded. '
+                . 'Migration classes are otherwise only loaded when they are executed.',
             'boolean' => true,
             'default' => false,
         ]);
@@ -145,6 +153,20 @@ class StatusCommand extends Command
             'dry-run' => $args->getOption('dry-run'),
         ]);
         $manager = $factory->createManager($io);
+
+        if ($args->getOption('validate')) {
+            /** @var string|null $plugin */
+            $plugin = $args->getOption('plugin');
+            if (!$this->validateMigrations($manager, $io, $plugin ?? 'app')) {
+                return Command::CODE_ERROR;
+            }
+            if ($format !== 'json') {
+                $io->out(sprintf(
+                    '<success>All %d migrations can be loaded.</success>',
+                    count($manager->getMigrationVersions()),
+                ));
+            }
+        }
 
         if ($clean) {
             $removed = $manager->cleanupMissingMigrations();
@@ -200,6 +222,8 @@ class StatusCommand extends Command
         }
 
         $verbose = (bool)$args->getOption('verbose');
+        $validate = (bool)$args->getOption('validate');
+        $validationFailed = false;
         $jsonResults = [];
         $summary = [];
         $exitCode = Command::CODE_SUCCESS;
@@ -212,6 +236,11 @@ class StatusCommand extends Command
                 'dry-run' => $args->getOption('dry-run'),
             ]);
             $manager = $factory->createManager($io);
+
+            if ($validate && !$this->validateMigrations($manager, $io, $label)) {
+                $validationFailed = true;
+            }
+
             $migrations = $manager->printStatus($format);
 
             $sectionExit = $this->statusExitCode($migrations);
@@ -241,6 +270,10 @@ class StatusCommand extends Command
             $this->display($migrations, $io, $manager->getSchemaTableName());
         }
 
+        if ($validationFailed) {
+            return Command::CODE_ERROR;
+        }
+
         if ($format === 'json') {
             $flags = 0;
             if ($verbose) {
@@ -254,6 +287,33 @@ class StatusCommand extends Command
         $this->displaySummary($io, $summary);
 
         return $exitCode;
+    }
+
+    /**
+     * Load every migration class and print the ones that could not be loaded.
+     *
+     * @param \Migrations\Migration\Manager $manager The manager to load migrations with.
+     * @param \Cake\Console\ConsoleIo $io The console io.
+     * @param string $label The section the migrations belong to.
+     * @return bool True when every migration class could be loaded.
+     */
+    protected function validateMigrations(Manager $manager, ConsoleIo $io, string $label): bool
+    {
+        $errors = $manager->validateMigrations();
+        if (!$errors) {
+            return true;
+        }
+
+        $io->err(sprintf(
+            '<error>%s: %d migration(s) could not be loaded:</error>',
+            $label === 'app' ? 'APP' : $label,
+            count($errors),
+        ));
+        foreach ($errors as $version => $message) {
+            $io->err(sprintf('  - %d: %s', $version, $message));
+        }
+
+        return false;
     }
 
     /**
