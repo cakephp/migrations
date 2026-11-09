@@ -63,7 +63,7 @@ class ManagerTest extends TestCase
             throw new RuntimeException('Cannot read configuration for test connection');
         }
 
-        return $config['scheme'];
+        return $config['scheme'] === 'mariadb' ? 'mysql' : $config['scheme'];
     }
 
     protected function getOutput(): string

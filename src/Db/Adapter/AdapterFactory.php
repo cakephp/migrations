@@ -51,6 +51,7 @@ class AdapterFactory
      * @phpstan-var array<string, class-string<\Migrations\Db\Adapter\AdapterInterface>|\Closure>
      */
     protected array $adapters = [
+        'mariadb' => MysqlAdapter::class,
         'mysql' => MysqlAdapter::class,
         'postgres' => PostgresAdapter::class,
         'sqlite' => SqliteAdapter::class,

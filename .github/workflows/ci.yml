@@ -138,9 +138,9 @@ jobs:
           fi
           if [[ ${{ matrix.db-type }} == 'mariadb' ]]; then
             export DB='mysql'
-            export DB_URL='mysql://root:root@127.0.0.1/cakephp_test'
-            export DB_URL_COMPARE='mysql://root:root@127.0.0.1/cakephp_comparisons'
-            export DB_URL_SNAPSHOT='mysql://root:root@127.0.0.1/cakephp_snapshot'
+            export DB_URL='mariadb://root:root@127.0.0.1/cakephp_test'
+            export DB_URL_COMPARE='mariadb://root:root@127.0.0.1/cakephp_comparisons'
+            export DB_URL_SNAPSHOT='mariadb://root:root@127.0.0.1/cakephp_snapshot'
           fi
           if [[ ${{ matrix.db-type }} == 'mysql' ]]; then
             export DB='mysql'

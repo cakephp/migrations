@@ -42,7 +42,7 @@ class MysqlAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
-        if ($config['scheme'] !== 'mysql') {
+        if (!in_array($config['scheme'], ['mysql', 'mariadb'], true)) {
             $this->markTestSkipped('Mysql tests disabled.');
         }
         // Emulate the results of Util::parseDsn()
