@@ -24,6 +24,7 @@ use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\TestSuite\Migrator;
 use PHPUnit\Framework\Attributes\Depends;
 use RuntimeException;
+use function Cake\Database\Expression\equals;
 
 class MigratorTest extends TestCase
 {
@@ -59,7 +60,7 @@ class MigratorTest extends TestCase
             return [];
         }
 
-        return $plugin === null ? ['plugin IS' => null] : ['plugin' => $plugin];
+        return $plugin === null ? ['plugin' => equals(null)] : ['plugin' => $plugin];
     }
 
     protected function makeInspectableMigrator(): Migrator

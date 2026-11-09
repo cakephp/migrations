@@ -37,6 +37,7 @@ use Migrations\Util\TableFinder;
 use Migrations\Util\UtilTrait;
 use ReflectionException;
 use ReflectionProperty;
+use function Cake\Database\Expression\equals;
 
 /**
  * Task class for generating migration diff files.
@@ -172,7 +173,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
 
             // In unified table mode, filter by the current plugin context
             if ($this->phinxTable === UnifiedMigrationsTableStorage::TABLE_NAME) {
-                $query->where(['plugin IS' => $this->plugin]);
+                $query->where(['plugin' => equals($this->plugin)]);
             }
 
             $migratedItems = $query->execute()->fetchAll('assoc');

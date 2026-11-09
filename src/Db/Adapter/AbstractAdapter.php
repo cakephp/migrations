@@ -62,6 +62,7 @@ use Migrations\Util\Util;
 use PDOException;
 use RuntimeException;
 use function Cake\Core\deprecationWarning;
+use function Cake\Database\Expression\equals;
 
 /**
  * Base Abstract Database Adapter.
@@ -1125,11 +1126,11 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
         if ($plugin !== null) {
             // Also remove entries logged before plugin attribution was fixed.
             $conditions['OR'] = [
-                'plugin' => $plugin,
-                'plugin IS' => null,
+                ['plugin' => $plugin],
+                ['plugin' => equals(null)],
             ];
         } else {
-            $conditions['plugin IS'] = null;
+            $conditions['plugin'] = equals(null);
         }
 
         $query = $this->getDeleteBuilder();

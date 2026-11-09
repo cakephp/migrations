@@ -913,6 +913,7 @@ class ManagerTest extends TestCase
 
         $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
+
         $target = $version === null ? null : ($availableRollbacks[$version]['migration_name'] ?? $version);
         $this->manager->rollback($target);
 

@@ -26,6 +26,8 @@ use Migrations\Db\Table\TableMetadata;
 use Migrations\Db\Table\Trigger;
 use Migrations\Db\Table\View;
 use RuntimeException;
+use function Cake\Database\Expression\comparison;
+use function Cake\Database\Expression\notEquals;
 
 class PostgresAdapter extends AbstractAdapter
 {
@@ -1153,8 +1155,8 @@ class PostgresAdapter extends AbstractAdapter
         $query->select(['schema_name'])
             ->from('information_schema.schemata')
             ->where([
-                ['schema_name !=' => 'information_schema'],
-                ['schema_name !~' => '^pg_'],
+                ['schema_name' => notEquals('information_schema')],
+                ['schema_name' => comparison('!~', '^pg_')],
             ]);
         $items = $query->execute()->fetchAll('assoc');
         $schemaNames = [];
