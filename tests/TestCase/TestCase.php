@@ -23,6 +23,7 @@ use Cake\Routing\Router;
 use Cake\TestSuite\StringCompareTrait;
 use Cake\TestSuite\TestCase as BaseTestCase;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
+use function Cake\Database\Expression\equals;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -180,7 +181,7 @@ abstract class TestCase extends BaseTestCase
         if ($this->isUsingUnifiedTable()) {
             $query = $connection->deleteQuery()
                 ->delete($tableName)
-                ->where(['plugin IS' => $plugin]);
+                ->where(['plugin' => equals($plugin)]);
         } else {
             $query = $connection->deleteQuery()
                 ->delete($tableName);
@@ -211,7 +212,7 @@ abstract class TestCase extends BaseTestCase
             ->from($tableName);
 
         if ($this->isUsingUnifiedTable()) {
-            $query->where(['plugin IS' => $plugin]);
+            $query->where(['plugin' => equals($plugin)]);
         }
 
         $result = $query->execute()->fetch('assoc');

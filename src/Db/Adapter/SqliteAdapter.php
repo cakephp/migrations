@@ -25,6 +25,8 @@ use Migrations\Db\Table\Trigger;
 use Migrations\Db\Table\View;
 use PDOException;
 use RuntimeException;
+use function Cake\Database\Expression\in;
+use function Cake\Database\Expression\isNotNull;
 use const FILTER_VALIDATE_BOOLEAN;
 
 /**
@@ -693,9 +695,9 @@ PCRE_PATTERN;
                 ->select('*')
                 ->from('sqlite_master')
                 ->where([
-                    'type IN' => ['index', 'trigger'],
+                    'type' => in(['index', 'trigger']),
                     'tbl_name' => $tableName,
-                    'sql IS NOT' => null,
+                    'sql' => isNotNull(),
                 ]);
             $rows = $query->execute()->fetchAll('assoc');
 

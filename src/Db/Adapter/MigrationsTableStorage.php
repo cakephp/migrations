@@ -20,6 +20,8 @@ use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Table;
 use Migrations\MigrationInterface;
+use function Cake\Database\Expression\in;
+use function Cake\Database\Expression\notEquals;
 
 /**
  * Backwards compatibility layer for migration table storage.
@@ -72,7 +74,7 @@ class MigrationsTableStorage
     {
         $this->adapter->beginTransaction();
         try {
-            $where = ['version IN' => $missingVersions];
+            $where = ['version' => in($missingVersions)];
             $delete = $this->adapter->getDeleteBuilder()
                 ->from($this->schemaTableName)
                 ->where($where);
@@ -159,7 +161,7 @@ class MigrationsTableStorage
                 'start_time' => $query->identifier('start_time'),
             ])
             ->where([
-                'breakpoint !=' => 0,
+                'breakpoint' => notEquals(0),
             ]);
 
         return $this->adapter->executeQuery($query);

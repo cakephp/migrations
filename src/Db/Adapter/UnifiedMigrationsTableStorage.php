@@ -20,6 +20,9 @@ use Exception;
 use InvalidArgumentException;
 use Migrations\Db\Table;
 use Migrations\MigrationInterface;
+use function Cake\Database\Expression\equals;
+use function Cake\Database\Expression\in;
+use function Cake\Database\Expression\notEquals;
 
 /**
  * Unified migration table storage.
@@ -59,8 +62,8 @@ class UnifiedMigrationsTableStorage
     {
         $this->adapter->beginTransaction();
         try {
-            $where = ['version IN' => $missingVersions];
-            $where['plugin IS'] = $this->adapter->getOption('plugin');
+            $where = ['version' => in($missingVersions)];
+            $where['plugin'] = equals($this->adapter->getOption('plugin'));
 
             $delete = $this->adapter->getDeleteBuilder()
                 ->from(self::TABLE_NAME)
@@ -84,7 +87,7 @@ class UnifiedMigrationsTableStorage
         $query = $this->adapter->getSelectBuilder();
         $query->select('*')
             ->from(self::TABLE_NAME)
-            ->where(['plugin IS' => $this->plugin])
+            ->where(['plugin' => equals($this->plugin)])
             ->orderBy($orderBy);
 
         return $query;
@@ -127,7 +130,7 @@ class UnifiedMigrationsTableStorage
             ->from(self::TABLE_NAME)
             ->where([
                 'version' => (string)$migration->getVersion(),
-                'plugin IS' => $this->plugin,
+                'plugin' => equals($this->plugin),
             ]);
 
         $this->adapter->executeQuery($query);
@@ -176,8 +179,8 @@ class UnifiedMigrationsTableStorage
                 'start_time' => $query->identifier('start_time'),
             ])
             ->where([
-                'breakpoint !=' => 0,
-                'plugin IS' => $this->plugin,
+                'breakpoint' => notEquals(0),
+                'plugin' => equals($this->plugin),
             ]);
 
         return $this->adapter->executeQuery($query);
@@ -200,7 +203,7 @@ class UnifiedMigrationsTableStorage
             ])
             ->where([
                 'version' => $migration->getVersion(),
-                'plugin IS' => $this->plugin,
+                'plugin' => equals($this->plugin),
             ]);
 
         $this->adapter->executeQuery($query);

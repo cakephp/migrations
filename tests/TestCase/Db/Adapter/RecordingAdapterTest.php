@@ -22,12 +22,9 @@ class RecordingAdapterTest extends TestCase
 
     protected function setUp(): void
     {
-        $stub = $this->getMockBuilder(AbstractAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
+        $stub = $this->createStub(AbstractAdapter::class);
 
-        $stub->expects($this->any())
-            ->method('isValidColumnType')
+        $stub->method('isValidColumnType')
             ->willReturn(true);
 
         $this->adapter = new RecordingAdapter($stub);
@@ -65,13 +62,11 @@ class RecordingAdapterTest extends TestCase
     {
         $this->adapter
             ->getAdapter()
-            ->expects($this->any())
             ->method('hasTable')
             ->willReturn(true);
 
         $this->adapter
             ->getAdapter()
-            ->expects($this->any())
             ->method('getColumnForType')
             ->willReturnCallback(function (string $columnName, string $type, array $options): Column {
                 return (new Column())
@@ -94,7 +89,6 @@ class RecordingAdapterTest extends TestCase
     {
         $this->adapter
             ->getAdapter()
-            ->expects($this->any())
             ->method('hasTable')
             ->willReturn(true);
 
@@ -112,7 +106,6 @@ class RecordingAdapterTest extends TestCase
     {
         $this->adapter
             ->getAdapter()
-            ->expects($this->any())
             ->method('hasTable')
             ->willReturn(true);
 
@@ -130,7 +123,6 @@ class RecordingAdapterTest extends TestCase
     {
         $this->adapter
             ->getAdapter()
-            ->expects($this->any())
             ->method('hasTable')
             ->willReturn(true);
 
@@ -148,7 +140,6 @@ class RecordingAdapterTest extends TestCase
     {
         $this->adapter
             ->getAdapter()
-            ->expects($this->any())
             ->method('hasTable')
             ->willReturn(true);
 

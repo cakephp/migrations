@@ -311,9 +311,7 @@ class TableTest extends TestCase
 
     public function testInsert(): void
     {
-        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
+        $adapterStub = $this->createStub(MysqlAdapter::class);
         $table = new Table('ntable', [], $adapterStub);
         $data = [
             'column1' => 'value1',
@@ -328,9 +326,7 @@ class TableTest extends TestCase
 
     public function testInsertMultipleRowsWithoutZeroKey(): void
     {
-        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
+        $adapterStub = $this->createStub(MysqlAdapter::class);
         $table = new Table('ntable', [], $adapterStub);
         $data = [
             1 => [
@@ -407,8 +403,7 @@ class TableTest extends TestCase
             ],
         ];
 
-        $adapterStub->expects($this->any())
-            ->method('isValidColumnType')
+        $adapterStub->method('isValidColumnType')
             ->willReturn(true);
         $adapterStub->expects($this->exactly(1))
             ->method('bulkinsert')
@@ -427,9 +422,7 @@ class TableTest extends TestCase
 
     public function testResetAfterAddingData(): void
     {
-        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
+        $adapterStub = $this->createStub(MysqlAdapter::class);
         $table = new Table('ntable', [], $adapterStub);
         $columns = ['column1'];
         $table->insert($columns)->save();
@@ -438,9 +431,7 @@ class TableTest extends TestCase
 
     public function testPendingAfterAddingData(): void
     {
-        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
+        $adapterStub = $this->createStub(MysqlAdapter::class);
         $table = new Table('ntable', [], $adapterStub);
         $columns = ['column1'];
         $table->insert($columns);
@@ -449,11 +440,8 @@ class TableTest extends TestCase
 
     public function testPendingAfterAddingColumn(): void
     {
-        $adapterStub = $this->getMockBuilder(MysqlAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
-        $adapterStub->expects($this->any())
-            ->method('isValidColumnType')
+        $adapterStub = $this->createStub(MysqlAdapter::class);
+        $adapterStub->method('isValidColumnType')
             ->willReturn(true);
         $table = new Table('ntable', [], $adapterStub);
         $table->addColumn('column1', 'integer', ['null' => true]);

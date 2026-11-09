@@ -63,7 +63,7 @@ class ManagerTest extends TestCase
             throw new RuntimeException('Cannot read configuration for test connection');
         }
 
-        return $config['scheme'];
+        return $config['scheme'] === 'mariadb' ? 'mysql' : $config['scheme'];
     }
 
     protected function getOutput(): string
@@ -303,9 +303,7 @@ class ManagerTest extends TestCase
     public function testPrintStatusMethodWithNoMigrations(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
+        $envStub = $this->createStub(Environment::class);
 
         // override the migrations directory to an empty one
         $configArray = $this->getConfigArray();
@@ -716,30 +714,23 @@ class ManagerTest extends TestCase
     public function testMigrationsByCount(array $availableMigrations, int $count, ?string $expectedMigration, string $message): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
+        $envStub = $this->createStub(Environment::class);
 
         // getVersions returns already executed migrations, so it should be empty for new migrations
-        $envStub->expects($this->any())
-            ->method('getVersions')
+        $envStub->method('getVersions')
             ->willReturn([]);
 
         // getCurrentVersion returns 0 when no migrations have been run
-        $envStub->expects($this->any())
-            ->method('getCurrentVersion')
+        $envStub->method('getCurrentVersion')
             ->willReturn(0);
 
         // Mock getMigrations to return the available migrations
         $migrations = [];
         foreach ($availableMigrations as $version) {
-            $migration = $this->getMockBuilder(MigrationInterface::class)
-                ->getMock();
-            $migration->expects($this->any())
-                ->method('getVersion')
+            $migration = $this->createStub(MigrationInterface::class);
+            $migration->method('getVersion')
                 ->willReturn((int)$version);
-            $migration->expects($this->any())
-                ->method('getName')
+            $migration->method('getName')
                 ->willReturn('TestMigration');
             $migrations[$version] = $migration;
         }
@@ -768,11 +759,8 @@ class ManagerTest extends TestCase
     public function testRollbackToVersion(array $availableRollbacks, ?string $version, string|array|null $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRollbacks);
 
         $this->manager->setEnvironment($envStub);
@@ -801,11 +789,8 @@ class ManagerTest extends TestCase
     public function testRollbackToDate(array $availableRollbacks, string $version, string|array|null $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRollbacks);
 
         $this->manager->setEnvironment($envStub);
@@ -833,26 +818,19 @@ class ManagerTest extends TestCase
     public function testRollbackByCount(array $availableRollbacks, int $count, string|array|null $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRollbacks);
 
         // Mock getMigrations to return migrations matching the version log
         $migrations = [];
         foreach ($availableRollbacks as $version => $details) {
-            $migration = $this->getMockBuilder(MigrationInterface::class)
-                ->getMock();
-            $migration->expects($this->any())
-                ->method('getVersion')
+            $migration = $this->createStub(MigrationInterface::class);
+            $migration->method('getVersion')
                 ->willReturn((int)$version);
-            $migration->expects($this->any())
-                ->method('getName')
+            $migration->method('getName')
                 ->willReturn($details['migration_name'] ?: 'TestMigration');
-            $migration->expects($this->any())
-                ->method('shouldExecute')
+            $migration->method('shouldExecute')
                 ->willReturn(true);
             $migrations[$version] = $migration;
         }
@@ -888,11 +866,8 @@ class ManagerTest extends TestCase
     public function testRollbackToVersionByExecutionTime(array $availableRollbacks, ?string $version, string|array $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRollbacks);
 
         // get a manager with a config whose version order is set to execution time
@@ -927,11 +902,8 @@ class ManagerTest extends TestCase
     public function testRollbackToVersionByName(array $availableRollbacks, ?string $version, string|array $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRollbacks);
 
         // get a manager with a config whose version order is set to execution time
@@ -941,7 +913,9 @@ class ManagerTest extends TestCase
 
         $this->manager = new Manager($config, $this->io);
         $this->manager->setEnvironment($envStub);
-        $this->manager->rollback($availableRollbacks[$version]['migration_name'] ?? $version);
+
+        $target = $version === null ? null : ($availableRollbacks[$version]['migration_name'] ?? $version);
+        $this->manager->rollback($target);
 
         $output = $this->getOutput();
 
@@ -966,11 +940,8 @@ class ManagerTest extends TestCase
     public function testRollbackToDateByExecutionTime(array $availableRollbacks, ?string $date, string|array|null $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRollbacks);
 
         // get a manager with a config whose version order is set to execution time
@@ -1001,17 +972,13 @@ class ManagerTest extends TestCase
     public function testRollbackToVersionWithSingleMigrationDoesNotFail(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-                ->method('getVersionLog')
-                ->willReturn([
-                    '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
-                ]);
-        $envStub->expects($this->any())
-                ->method('getVersions')
-                ->willReturn([20120111235330]);
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
+            ->willReturn([
+                '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
+            ]);
+        $envStub->method('getVersions')
+            ->willReturn([20120111235330]);
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
@@ -1027,25 +994,21 @@ class ManagerTest extends TestCase
     public function testRollbackToVersionWithTwoMigrations(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-                ->method('getVersionLog')
-                ->willReturn(
-                    [
-                        '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
-                        '20120116183504' => ['version' => '20120815145812', 'migration' => '', 'breakpoint' => 0],
-                    ],
-                );
-        $envStub->expects($this->any())
-                ->method('getVersions')
-                ->willReturn(
-                    [
-                        20120111235330,
-                        20120116183504,
-                    ],
-                );
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
+            ->willReturn(
+                [
+                    '20120111235330' => ['version' => '20120111235330', 'migration' => '', 'breakpoint' => 0],
+                    '20120116183504' => ['version' => '20120815145812', 'migration' => '', 'breakpoint' => 0],
+                ],
+            );
+        $envStub->method('getVersions')
+            ->willReturn(
+                [
+                    20120111235330,
+                    20120116183504,
+                ],
+            );
 
         $this->manager->setEnvironment($envStub);
         $this->manager->rollback();
@@ -1062,11 +1025,8 @@ class ManagerTest extends TestCase
     public function testRollbackLast(array $availableRolbacks, string $versionOrder, string $expectedOutput): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
-        $envStub->expects($this->any())
-            ->method('getVersionLog')
+        $envStub = $this->createStub(Environment::class);
+        $envStub->method('getVersionLog')
             ->willReturn($availableRolbacks);
 
         // get a manager with a config whose version order is set to execution time
@@ -2416,9 +2376,7 @@ class ManagerTest extends TestCase
     public function testExecuteSeedWorksAsExpected(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
+        $envStub = $this->createStub(Environment::class);
         $this->manager->setEnvironment($envStub);
         $this->manager->seed();
 
@@ -2431,9 +2389,7 @@ class ManagerTest extends TestCase
     public function testExecuteASingleSeedWorksAsExpected(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
+        $envStub = $this->createStub(Environment::class);
         $this->manager->setEnvironment($envStub);
         $this->manager->seed('UserSeeder');
 
@@ -2444,9 +2400,7 @@ class ManagerTest extends TestCase
     public function testExecuteANonExistentSeedWorksAsExpected(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
+        $envStub = $this->createStub(Environment::class);
         $this->manager->setEnvironment($envStub);
 
         $this->expectException(InvalidArgumentException::class);
@@ -2466,9 +2420,7 @@ class ManagerTest extends TestCase
     public function testSeedWillNotBeExecuted(): void
     {
         // stub environment
-        $envStub = $this->getMockBuilder(Environment::class)
-            ->setConstructorArgs(['mockenv', []])
-            ->getMock();
+        $envStub = $this->createStub(Environment::class);
         $this->manager->setEnvironment($envStub);
         $this->manager->seed('UserSeederNotExecuted');
 

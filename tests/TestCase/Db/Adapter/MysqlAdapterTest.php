@@ -26,6 +26,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use function Cake\Database\Expression\greaterThanOrEquals;
+use function Cake\Database\Expression\lessThan;
 
 class MysqlAdapterTest extends TestCase
 {
@@ -40,7 +42,7 @@ class MysqlAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
-        if ($config['scheme'] !== 'mysql') {
+        if (!in_array($config['scheme'], ['mysql', 'mariadb'], true)) {
             $this->markTestSkipped('Mysql tests disabled.');
         }
         // Emulate the results of Util::parseDsn()
@@ -2476,7 +2478,7 @@ OUTPUT;
         $stm = $builder
             ->select('*')
             ->from('table1')
-            ->where(['int_col >=' => 2])
+            ->where(['int_col' => greaterThanOrEquals(2)])
             ->execute();
 
         $this->assertEquals(1, $stm->rowCount());
@@ -2488,7 +2490,7 @@ OUTPUT;
         $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
-            ->where(['int_col <' => 2])
+            ->where(['int_col' => lessThan(2)])
             ->execute();
 
         $this->assertEquals(1, $stm->rowCount());
