@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
@@ -786,17 +786,17 @@ interface AdapterInterface
     /**
      * Sets the consoleio.
      *
-     * @param \Cake\Console\ConsoleIo $io ConsoleIo
+     * @param \Cake\Console\ConsoleIoInterface $io ConsoleIoInterface
      * @return $this
      */
-    public function setIo(ConsoleIo $io);
+    public function setIo(ConsoleIoInterface $io);
 
     /**
      * Get the io instance
      *
-     * @return \Cake\Console\ConsoleIo $io The io instance to use
+     * @return \Cake\Console\ConsoleIoInterface $io The io instance to use
      */
-    public function getIo(): ?ConsoleIo;
+    public function getIo(): ?ConsoleIoInterface;
 
     /**
      * Get the Connection for this adapter.

@@ -34,7 +34,7 @@ class SeedCommandTest extends TestCase
     {
         $this->exec('migrations migrate -c test -s TestsMigrations --no-lock');
         $this->assertExitSuccess();
-        $this->_in = null;
+        $this->in = null;
     }
 
     public function testHelp(): void
@@ -499,7 +499,7 @@ class SeedCommandTest extends TestCase
 
     public function testSeederPluginIsTrackedWithPluginName(): void
     {
-        $this->_loadTestPlugin('TestBlog');
+        $this->loadTestPlugin('TestBlog');
         $this->createTables();
 
         $this->exec('seeds run -c test -p TestBlog --source CallSeeds PluginLettersSeed');
@@ -520,7 +520,7 @@ class SeedCommandTest extends TestCase
 
     public function testSeederPluginLegacyLogEntryIsNotRunAgain(): void
     {
-        $this->_loadTestPlugin('TestBlog');
+        $this->loadTestPlugin('TestBlog');
         $this->createTables();
 
         /** @var \Cake\Database\Connection $connection */
@@ -557,7 +557,7 @@ class SeedCommandTest extends TestCase
 
     public function testSeedStatusCommandWithPlugin(): void
     {
-        $this->_loadTestPlugin('TestBlog');
+        $this->loadTestPlugin('TestBlog');
         $this->createTables();
 
         $this->exec('seeds run -c test -p TestBlog --source CallSeeds PluginLettersSeed');
@@ -573,7 +573,7 @@ class SeedCommandTest extends TestCase
 
     public function testSeedResetCommandWithPlugin(): void
     {
-        $this->_loadTestPlugin('TestBlog');
+        $this->loadTestPlugin('TestBlog');
         $this->createTables();
 
         $this->exec('seeds run -c test -p TestBlog --source CallSeeds PluginLettersSeed');

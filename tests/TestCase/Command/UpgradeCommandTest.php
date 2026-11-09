@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Migrations\Test\TestCase\Command;
 
+use Cake\Core\BasePlugin;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Exception;
@@ -202,7 +203,7 @@ class UpgradeCommandTest extends TestCase
 
         // Load a fake plugin with a slash in the name using loadPlugins
         // which properly integrates with the console application
-        $this->loadPlugins(['CakeDC/Users' => ['path' => TMP]]);
+        $this->loadPlugins([new BasePlugin(['name' => 'CakeDC/Users', 'path' => TMP])]);
 
         try {
             $this->exec('migrations upgrade -c test');

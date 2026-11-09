@@ -72,7 +72,7 @@ abstract class TestCase extends BaseTestCase
      * @param string $name plugin name to load
      * @return void
      */
-    protected function _loadTestPlugin(string $name)
+    protected function loadTestPlugin(string $name)
     {
         $root = dirname(__FILE__, 2) . DS;
         $path = $root . 'test_app' . DS . 'Plugin' . DS . $name . DS;

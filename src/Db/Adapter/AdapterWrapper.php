@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations\Db\Adapter;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Database\Connection;
 use Cake\Database\Query;
 use Cake\Database\Query\DeleteQuery;
@@ -565,7 +565,7 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function setIo(ConsoleIo $io)
+    public function setIo(ConsoleIoInterface $io)
     {
         $this->getAdapter()->setIo($io);
 
@@ -575,7 +575,7 @@ abstract class AdapterWrapper implements WrapperInterface
     /**
      * @inheritDoc
      */
-    public function getIo(): ?ConsoleIo
+    public function getIo(): ?ConsoleIoInterface
     {
         return $this->getAdapter()->getIo();
     }

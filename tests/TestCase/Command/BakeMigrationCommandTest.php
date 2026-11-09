@@ -37,7 +37,7 @@ class BakeMigrationCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->_compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
+        $this->compareBasePath = Plugin::path('Migrations') . 'tests' . DS . 'comparisons' . DS . 'Migration' . DS;
     }
 
     protected function tearDown(): void

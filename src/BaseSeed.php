@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Migrations;
 
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Migrations\Config\ConfigInterface;
 use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Table;
@@ -29,9 +29,9 @@ class BaseSeed implements SeedInterface
     protected ?AdapterInterface $adapter = null;
 
     /**
-     * The ConsoleIo instance
+     * The ConsoleIoInterface instance
      */
-    protected ?ConsoleIo $io = null;
+    protected ?ConsoleIoInterface $io = null;
 
     /**
      * The config instance.
@@ -78,7 +78,7 @@ class BaseSeed implements SeedInterface
     /**
      * {@inheritDoc}
      */
-    public function setIo(ConsoleIo $io)
+    public function setIo(ConsoleIoInterface $io)
     {
         $this->io = $io;
 
@@ -88,7 +88,7 @@ class BaseSeed implements SeedInterface
     /**
      * {@inheritDoc}
      */
-    public function getIo(): ?ConsoleIo
+    public function getIo(): ?ConsoleIoInterface
     {
         return $this->io;
     }
@@ -223,8 +223,8 @@ class BaseSeed implements SeedInterface
     public function call(string $seeder, array $options = []): void
     {
         $io = $this->getIo();
-        if (!$io instanceof ConsoleIo) {
-            throw new RuntimeException('ConsoleIo is required for calling other seeders.');
+        if (!$io instanceof ConsoleIoInterface) {
+            throw new RuntimeException('ConsoleIoInterface is required for calling other seeders.');
         }
         $io->out('');
         $io->out(
@@ -272,8 +272,8 @@ class BaseSeed implements SeedInterface
             'source' => $options['source'],
         ]);
         $io = $this->getIo();
-        if (!$io instanceof ConsoleIo) {
-            throw new RuntimeException('ConsoleIo is required for calling other seeders.');
+        if (!$io instanceof ConsoleIoInterface) {
+            throw new RuntimeException('ConsoleIoInterface is required for calling other seeders.');
         }
         $manager = $factory->createManager($io);
         $manager->seed($seeder);

@@ -7,6 +7,7 @@ on:
       - 4.next
       - 5.x
       - 5.next
+      - 6.x
     paths-ignore:
       - docs/**
   pull_request:
@@ -25,20 +26,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.2', '8.5']
+        php-version: ['8.4', '8.5']
         db-type: [mariadb, mysql, pgsql, sqlite]
         prefer-lowest: ['']
         legacy-tables: ['']
         include:
-          - php-version: '8.2'
+          - php-version: '8.4'
             db-type: 'sqlite'
             prefer-lowest: 'prefer-lowest'
-          - php-version: '8.3'
+          - php-version: '8.4'
             db-type: 'mysql'
-          - php-version: '8.3'
+          - php-version: '8.4'
             db-type: 'pgsql'
           # Test unified cake_migrations table (non-legacy mode)
-          - php-version: '8.3'
+          - php-version: '8.4'
             db-type: 'mysql'
             legacy-tables: 'false'
     services:
@@ -125,9 +126,7 @@ jobs:
 
       - name: Composer install
         run: |
-          if [[ ${{ matrix.php-version }} == '8.2' || ${{ matrix.php-version }} == '8.3' || ${{ matrix.php-version }} == '8.4' ]]; then
-            composer install
-          elif ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
+          if ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
             composer update --prefer-lowest --prefer-stable
           else
             composer update
@@ -158,23 +157,23 @@ jobs:
           if [[ -n '${{ matrix.legacy-tables }}' ]]; then
             export LEGACY_TABLES='${{ matrix.legacy-tables }}'
           fi
-          if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.db-type }} == 'mysql' ]]; then
+          if [[ ${{ matrix.php-version }} == '8.4' && ${{ matrix.db-type }} == 'mysql' ]]; then
             vendor/bin/phpunit --coverage-clover=coverage.xml
           else
             vendor/bin/phpunit
           fi
 
       - name: Code Coverage Report
-        if: success() && matrix.php-version == '8.1' && matrix.db-type == 'mysql'
+        if: success() && matrix.php-version == '8.4' && matrix.db-type == 'mysql'
         uses: codecov/codecov-action@v7
 
   testsuite-windows:
     runs-on: windows-2022
-    name: Windows - PHP 8.2 & SQL Server
+    name: Windows - PHP 8.4 & SQL Server
 
     env:
       EXTENSIONS: mbstring, intl, pdo_sqlsrv
-      PHP_VERSION: '8.2'
+      PHP_VERSION: '8.4'
 
     steps:
     - uses: actions/checkout@v7
@@ -243,5 +242,5 @@ jobs:
       uses: codecov/codecov-action@v7
 
   cs-stan:
-    uses: cakephp/.github/.github/workflows/cs-stan.yml@5.x
+    uses: cakephp/.github/.github/workflows/cs-stan.yml@6.x
     secrets: inherit

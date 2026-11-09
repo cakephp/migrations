@@ -51,7 +51,7 @@ class RenameColumn extends Action
         $column = new Column();
         $column->setName($columnName);
 
-        return new RenameColumn($table, $column, $newName);
+        return new self($table, $column, $newName);
     }
 
     /**

@@ -43,7 +43,7 @@ class DropIndex extends Action
         $index = new Index();
         $index->setColumns($columns);
 
-        return new DropIndex($table, $index);
+        return new self($table, $index);
     }
 
     /**
@@ -59,7 +59,7 @@ class DropIndex extends Action
         $index = new Index();
         $index->setName($name);
 
-        return new DropIndex($table, $index);
+        return new self($table, $index);
     }
 
     /**

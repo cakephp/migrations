@@ -15,7 +15,6 @@ namespace Migrations\Command;
 
 use Cake\Command\Command;
 use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
 use Cake\Datasource\ConnectionManager;
@@ -53,6 +52,7 @@ class DumpCommand extends Command
     /**
      * Extract options for the dump command from another migrations option parser.
      *
+     * @param \Cake\Console\Arguments $args The command arguments.
      * @return array<int|string, mixed>
      */
     public static function extractArgs(Arguments $args): array
@@ -106,53 +106,47 @@ class DumpCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
         ]);
         $config = $factory->createConfig();
         $path = $config->getMigrationPath();
-
         if (!is_dir($path)) {
-            $io->verbose('<info>No migrations directory found, skipping dump.</info>');
+            $this->io->verbose('<info>No migrations directory found, skipping dump.</info>');
 
             return self::CODE_SUCCESS;
         }
         $connectionName = (string)$config->getConnection();
         $connection = ConnectionManager::get($connectionName);
         assert($connection instanceof Connection);
-
         $collection = $connection->getSchemaCollection();
         $options = [
             'require-table' => false,
-            'plugin' => $args->getOption('plugin'),
+            'plugin' => $this->args->getOption('plugin'),
         ];
         // The connection property is used by the trait methods.
         $this->connection = $connectionName;
         $finder = new TableFinder($connectionName);
         $tables = $finder->getTablesToBake($collection, $options);
-
         $dump = [];
         foreach ($tables as $table) {
             $schema = $collection->describe($table);
             $dump[$table] = $schema;
         }
-
         $filePath = $path . DS . 'schema-dump-' . $connectionName . '.lock';
-        $io->verbose(sprintf('<info>Writing dump file `%s`...</info>', $filePath));
+        $this->io->verbose(sprintf('<info>Writing dump file `%s`...</info>', $filePath));
         if (file_put_contents($filePath, serialize($dump))) {
-            $io->verbose(sprintf('<info>Dump file `%s` was successfully written</info>', $filePath));
+            $this->io->verbose(sprintf('<info>Dump file `%s` was successfully written</info>', $filePath));
 
             return self::CODE_SUCCESS;
         }
-        $io->err(sprintf('<error>An error occurred while writing dump file `%s`</error>', $filePath));
+        $this->io->err(sprintf('<error>An error occurred while writing dump file `%s`</error>', $filePath));
 
         return self::CODE_ERROR;
     }

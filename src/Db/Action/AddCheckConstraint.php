@@ -48,7 +48,7 @@ class AddCheckConstraint extends Action
 
         $checkConstraint = new CheckConstraint($name, $expression);
 
-        return new AddCheckConstraint($table, $checkConstraint);
+        return new self($table, $checkConstraint);
     }
 
     /**

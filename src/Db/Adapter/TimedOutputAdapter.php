@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Migrations\Db\InsertMode;
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
@@ -54,7 +54,7 @@ class TimedOutputAdapter extends AdapterWrapper implements DirectActionInterface
     public function writeCommand(string $command, array $args = []): void
     {
         $io = $this->getIo();
-        if ($io instanceof ConsoleIo && $io->level() < ConsoleIo::VERBOSE) {
+        if ($io instanceof ConsoleIoInterface && $io->level() < ConsoleIoInterface::VERBOSE) {
             return;
         }
         if ($args !== []) {

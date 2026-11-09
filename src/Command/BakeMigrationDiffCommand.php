@@ -15,8 +15,6 @@ declare(strict_types=1);
  */
 namespace Migrations\Command;
 
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Connection;
 use Cake\Database\Schema\CachedCollection;
@@ -121,17 +119,17 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name): void
     {
-        $this->setup($args);
+        $this->setup();
 
         if (!$this->checkSync()) {
-            $io->abort('Your migrations history is not in sync with your migrations files. ' .
+            $this->io->abort('Your migrations history is not in sync with your migrations files. ' .
                 'Make sure all your migrations have been migrated before baking a diff.');
         }
 
         if (!$this->migrationsFiles && !$this->migratedItems) {
-            $this->bakeSnapshot($name, $args, $io);
+            $this->bakeSnapshot($name);
         }
 
         $collection = $this->getCollection($this->connection);
@@ -148,26 +146,23 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             ]);
         });
 
-        parent::bake($name, $args, $io);
+        parent::bake($name);
     }
 
     /**
      * Sets up everything the baking process needs
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
      * @return void
      */
-    protected function setup(Arguments $args): void
+    protected function setup(): void
     {
-        $this->migrationsPath = $this->getPath($args);
+        $this->migrationsPath = $this->getPath();
         $this->migrationsFiles = glob($this->migrationsPath . '*.php') ?: [];
         $this->phinxTable = $this->getPhinxTable($this->plugin);
-
         $connection = ConnectionManager::get($this->connection);
         assert($connection instanceof Connection);
         $this->tables = $connection->getSchemaCollection()->listTables();
         $tableExists = in_array($this->phinxTable, $this->tables, true);
-
         $migratedItems = [];
         if ($tableExists) {
             $query = $connection->selectQuery()
@@ -180,10 +175,8 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                 $query->where(['plugin IS' => $this->plugin]);
             }
 
-            /** @var array $migratedItems */
             $migratedItems = $query->execute()->fetchAll('assoc');
         }
-
         $this->migratedItems = $migratedItems;
     }
 
@@ -204,9 +197,9 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function templateData(Arguments $arguments): array
+    public function templateData(): array
     {
-        $this->dumpSchema = $this->getDumpSchema($arguments);
+        $this->dumpSchema = $this->getDumpSchema();
         $this->currentSchema = $this->getCurrentSchema();
         $this->commonTables = array_intersect_key($this->currentSchema, $this->dumpSchema);
 
@@ -560,23 +553,21 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * there are no migration files.
      *
      * @param string $name Name.
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null Value of the snapshot baking dispatch process
      */
-    protected function bakeSnapshot(string $name, Arguments $args, ConsoleIo $io): ?int
+    protected function bakeSnapshot(string $name): ?int
     {
-        $io->out('Your migrations history is empty and you do not have any migrations files.');
-        $io->out('Falling back to baking a snapshot...');
+        $this->io->out('Your migrations history is empty and you do not have any migrations files.');
+        $this->io->out('Falling back to baking a snapshot...');
 
         $newArgs = [];
         $newArgs[] = $name;
 
-        $newArgs = array_merge($newArgs, $this->parseOptions($args));
-        $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs, $io);
+        $newArgs = array_merge($newArgs, $this->parseOptions());
+        $exitCode = $this->executeCommand(BakeMigrationSnapshotCommand::class, $newArgs);
 
         if ($exitCode === 1) {
-            $io->abort('Something went wrong during the snapshot baking. Please try again.');
+            $this->io->abort('Something went wrong during the snapshot baking. Please try again.');
         }
 
         return $exitCode;
@@ -586,33 +577,27 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
      * Fetch the correct schema dump based on the arguments and options passed to the shell call
      * and returns it as an array
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
      * @return array<string, \Cake\Database\Schema\TableSchemaInterface> Full database schema.
      */
-    protected function getDumpSchema(Arguments $args): array
+    protected function getDumpSchema(): array
     {
         $options = [];
-
         $connectionName = 'default';
-        if ($args->getOption('connection')) {
-            $connectionName = $inputArgs['--connection'] = $args->getOption('connection');
+        if ($this->args->getOption('connection')) {
+            $connectionName = $inputArgs['--connection'] = $this->args->getOption('connection');
         }
         $options['connection'] = $connectionName;
-        $options['source'] = $args->getOption('source');
-        $options['plugin'] = $args->getOption('plugin');
-
+        $options['source'] = $this->args->getOption('source');
+        $options['plugin'] = $this->args->getOption('plugin');
         $factory = new ManagerFactory($options);
         $config = $factory->createConfig();
-
         $path = $config->getMigrationPath() . DS . 'schema-dump-' . $connectionName . '.lock';
         if (!file_exists($path)) {
             $msg = 'Unable to retrieve the schema dump file. You can create a dump file using ' .
                 'the `cake migrations dump` command';
             $this->io->abort($msg);
         }
-
         $contents = (string)file_get_contents($path);
-
         // Use allowed_classes to restrict deserialization to safe CakePHP schema classes
         return unserialize($contents, [
             'allowed_classes' => [

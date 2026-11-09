@@ -52,7 +52,7 @@ class DropForeignKey extends Action
             $foreignKey->setName($constraint);
         }
 
-        return new DropForeignKey($table, $foreignKey);
+        return new self($table, $foreignKey);
     }
 
     /**

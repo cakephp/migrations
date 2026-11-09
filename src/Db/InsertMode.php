@@ -13,6 +13,7 @@ namespace Migrations\Db;
  *
  * Defines different insertion strategies for handling duplicate key conflicts.
  */
+// phpcs:ignore CakePHP.NamingConventions.ValidEnumName.InvalidEnumName -- Preserve the public enum name used by migration adapters.
 enum InsertMode: string
 {
     /**

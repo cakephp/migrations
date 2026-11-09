@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Migrations\Db\Adapter;
 
 use BadMethodCallException;
-use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Core\Configure;
 use Cake\Database\Connection;
 use Cake\Database\Query;
@@ -73,7 +73,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      */
     protected array $options = [];
 
-    protected ConsoleIo $io;
+    protected ConsoleIoInterface $io;
 
     /**
      * @var string[]
@@ -92,12 +92,12 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * Class Constructor.
      *
      * @param array<string, mixed> $options Options
-     * @param \Cake\Console\ConsoleIo|null $io Console input/output
+     * @param \Cake\Console\ConsoleIoInterface|null $io Console input/output
      */
-    public function __construct(array $options, ?ConsoleIo $io = null)
+    public function __construct(array $options, ?ConsoleIoInterface $io = null)
     {
         $this->setOptions($options);
-        if ($io instanceof ConsoleIo) {
+        if ($io instanceof ConsoleIoInterface) {
             $this->setIo($io);
         }
     }
@@ -291,9 +291,9 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     {
         $io = $this->getIo();
         if (
-            !$io instanceof ConsoleIo || (
+            !$io instanceof ConsoleIoInterface || (
                 !$this->isDryRunEnabled() &&
-                $io->level() !== ConsoleIo::VERBOSE
+                $io->level() !== ConsoleIoInterface::VERBOSE
             )
         ) {
             return;
@@ -326,7 +326,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @param string $schemaTableName Schema Table Name
      * @return $this
      */
-    public function setSchemaTableName(string $schemaTableName)
+    public function setSchemaTableName(string $schemaTableName): static
     {
         $this->schemaTableName = $schemaTableName;
 
@@ -349,7 +349,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
      * @param string $seedSchemaTableName Seed Schema Table Name
      * @return $this
      */
-    public function setSeedSchemaTableName(string $seedSchemaTableName)
+    public function setSeedSchemaTableName(string $seedSchemaTableName): static
     {
         $this->seedSchemaTableName = $seedSchemaTableName;
 
@@ -428,7 +428,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * @inheritDoc
      */
-    public function setIo(ConsoleIo $io)
+    public function setIo(ConsoleIoInterface $io)
     {
         $this->io = $io;
 
@@ -438,7 +438,7 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     /**
      * @inheritDoc
      */
-    public function getIo(): ?ConsoleIo
+    public function getIo(): ?ConsoleIoInterface
     {
         return $this->io ?? null;
     }

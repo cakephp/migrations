@@ -15,7 +15,7 @@ class DumpCommandTest extends TestCase
 {
     protected Connection $connection;
 
-    protected string $_compareBasePath;
+    protected string $compareBasePath;
 
     protected string $dumpFile;
 

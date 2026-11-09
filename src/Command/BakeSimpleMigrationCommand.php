@@ -17,8 +17,6 @@ namespace Migrations\Command;
 
 use Bake\Command\SimpleBakeCommand;
 use Bake\Utility\TemplateRenderer;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
@@ -48,16 +46,6 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     public string $pathFragment = 'config';
 
     /**
-     * Console IO
-     */
-    protected ConsoleIo $io;
-
-    /**
-     * Arguments
-     */
-    protected Arguments $args;
-
-    /**
      * @inheritDoc
      */
     public function name(): string
@@ -84,7 +72,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             $time = substr($timestamp, 8);
             $camelName = Inflector::camelize($name);
 
-            $path = $this->getPath($this->args);
+            $path = $this->getPath();
             $offset = 0;
             while (glob($path . $readableDate . '_' . $time . '_*.php')) {
                 $timestamp = Util::getCurrentTimestamp(++$offset);
@@ -100,7 +88,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         $timestamp = Util::getCurrentTimestamp();
         $suffix = '_' . Inflector::camelize($name) . '.php';
 
-        $path = $this->getPath($this->args);
+        $path = $this->getPath();
         $offset = 0;
         while (glob($path . $timestamp . '_*.php')) {
             $timestamp = Util::getCurrentTimestamp(++$offset);
@@ -112,12 +100,12 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function getPath(Arguments $args): string
+    public function getPath(): string
     {
-        $migrationFolder = $this->pathFragment . DS . $args->getOption('source') . DS;
+        $migrationFolder = $this->pathFragment . DS . $this->args->getOption('source') . DS;
         $path = ROOT . DS . $migrationFolder;
         if ($this->plugin) {
-            $path = $this->_pluginPath($this->plugin) . $migrationFolder;
+            $path = $this->pluginPath($this->plugin) . $migrationFolder;
         }
 
         return str_replace('/', DS, $path);
@@ -126,21 +114,21 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         if (!Plugin::isLoaded('Bake')) {
-            $io->err('Bake plugin is not loaded. Please load it first to generate a migration.');
+            $this->io->err('Bake plugin is not loaded. Please load it first to generate a migration.');
             $this->abort();
         }
-        $this->extractCommonProperties($args);
-        $name = $args->getArgumentAt(0);
+        $this->extractCommonProperties($this->args);
+        $name = $this->args->getArgumentAt(0);
         if (!$name) {
-            $io->err('You must provide a name to bake a ' . $this->name());
+            $this->io->err('You must provide a name to bake a ' . $this->name());
             $this->abort();
         }
-        $name = $this->_getName($name);
+        $name = $this->getNameWithoutPrefix($name);
         $name = Inflector::camelize($name);
-        $this->bake($name, $args, $io);
+        $this->bake($name);
 
         return static::CODE_SUCCESS;
     }
@@ -148,20 +136,18 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name): void
     {
-        $this->io = $io;
-        $this->args = $args;
         if ($this->isReservedKeyword($name)) {
-            $prefix = $io->ask('Reserved keywords cannot be used for class names. What prefix would you like to use? Defaults to `Migration`.', 'Migration');
+            $prefix = $this->io->ask('Reserved keywords cannot be used for class names. What prefix would you like to use? Defaults to `Migration`.', 'Migration');
             $name = $prefix . ucfirst($name);
         }
 
-        $migrationWithSameName = glob($this->getPath($args) . '*_' . $name . '.php');
+        $migrationWithSameName = glob($this->getPath() . '*_' . $name . '.php');
         if ($migrationWithSameName) {
-            $force = $args->getOption('force');
+            $force = $this->args->getOption('force');
             if (!$force) {
-                $io->abort(
+                $this->io->abort(
                     sprintf(
                         'A migration with the name `%s` already exists. Please use a different name.',
                         $name,
@@ -169,41 +155,39 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
                 );
             }
 
-            $io->info(sprintf('A migration with the name `%s` already exists, it will be deleted.', $name));
+            $this->io->info(sprintf('A migration with the name `%s` already exists, it will be deleted.', $name));
             foreach ($migrationWithSameName as $migration) {
-                $io->info(sprintf('Deleting migration file `%s`...', $migration));
+                $this->io->info(sprintf('Deleting migration file `%s`...', $migration));
                 if (unlink($migration)) {
-                    $io->success(sprintf('Deleted `%s`', $migration));
+                    $this->io->success(sprintf('Deleted `%s`', $migration));
                 } else {
-                    $io->err(sprintf('An error occurred while deleting `%s`', $migration));
+                    $this->io->err(sprintf('An error occurred while deleting `%s`', $migration));
                 }
             }
         }
 
         $renderer = new TemplateRenderer($this->theme);
         $renderer->set('name', $name);
-        $renderer->set($this->templateData($args));
+        $renderer->set($this->templateData());
 
         $contents = $renderer->generate($this->template());
 
-        $path = $this->getPath($args);
+        $path = $this->getPath();
         $filename = $path . $this->fileName($name);
-        $this->createFile($filename, $contents, $args, $io);
+        $this->createFile($filename, $contents);
 
         $emptyFile = $path . '.gitkeep';
-        $this->deleteEmptyFile($emptyFile, $io);
+        $this->deleteEmptyFile($emptyFile);
     }
 
     /**
      * @param string $path Where to put the file.
      * @param string $contents Content to put in the file.
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return bool Success
      */
-    protected function createFile(string $path, string $contents, Arguments $args, ConsoleIo $io): bool
+    protected function createFile(string $path, string $contents): bool
     {
-        return $io->createFile($path, $contents);
+        return $this->io->createFile($path, $contents);
     }
 
     /**
@@ -220,7 +204,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
             $this->io->abort('Choose a migration name to bake in CamelCase format');
         }
 
-        $name = $this->_getName($name);
+        $name = $this->getNameWithoutPrefix($name);
         $name = Inflector::camelize($name);
 
         if (!preg_match('/^[A-Z]{1}[a-zA-Z0-9]+$/', $name)) {
@@ -238,7 +222,7 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
      */
     protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
-        $parser = $this->_setCommonOptions($parser);
+        $parser = $this->setCommonOptions($parser);
 
         $parser->setDescription(
             'Bake migration class.',

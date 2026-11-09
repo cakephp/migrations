@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
 use Migrations\Config\ConfigInterface;
@@ -112,65 +110,58 @@ class StatusCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         /** @var string|null $format */
-        $format = $args->getOption('format');
-        $clean = $args->getOption('cleanup');
-        $all = (bool)$args->getOption('all');
-
+        $format = $this->args->getOption('format');
+        $clean = $this->args->getOption('cleanup');
+        $all = (bool)$this->args->getOption('all');
         if ($all) {
-            if ($args->getOption('plugin')) {
-                $io->err('<error>The --all option cannot be combined with --plugin.</error>');
+            if ($this->args->getOption('plugin')) {
+                $this->io->err('<error>The --all option cannot be combined with --plugin.</error>');
 
                 return Command::CODE_ERROR;
             }
             if ($clean) {
-                $io->err('<error>The --all option cannot be combined with --cleanup.</error>');
+                $this->io->err('<error>The --all option cannot be combined with --cleanup.</error>');
 
                 return Command::CODE_ERROR;
             }
 
-            return $this->executeAll($args, $io, $format);
+            return $this->executeAll($format);
         }
-
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
-            'dry-run' => $args->getOption('dry-run'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
+            'dry-run' => $this->args->getOption('dry-run'),
         ]);
-        $manager = $factory->createManager($io);
-
+        $manager = $factory->createManager($this->io);
         if ($clean) {
             $removed = $manager->cleanupMissingMigrations();
             if ($removed === 0) {
-                $io->out('<info>No missing migrations to clean up.</info>');
+                $this->io->out('<info>No missing migrations to clean up.</info>');
             } else {
-                $io->out(sprintf('<info>Removed %d missing migration(s) from migration log.</info>', $removed));
+                $this->io->out(sprintf('<info>Removed %d missing migration(s) from migration log.</info>', $removed));
             }
 
             return Command::CODE_SUCCESS;
         }
-
         $migrations = $manager->printStatus($format);
         $tableName = $manager->getSchemaTableName();
-
         switch ($format) {
             case 'json':
                 $flags = 0;
-                if ($args->getOption('verbose')) {
+                if ($this->args->getOption('verbose')) {
                     $flags = JSON_PRETTY_PRINT;
                 }
                 $migrationString = (string)json_encode($migrations, $flags);
-                $io->out($migrationString);
+                $this->io->out($migrationString);
                 break;
             default:
-                $this->display($migrations, $io, $tableName);
+                $this->display($migrations, $tableName);
                 break;
         }
 
@@ -181,25 +172,23 @@ class StatusCommand extends Command
      * Execute the status command for the app and every loaded plugin
      * that ships migrations.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io.
      * @param string|null $format Output format.
      * @return int The exit code: CODE_STATUS_MISSING (2) when there are missing entries,
      *   CODE_STATUS_DOWN (3) when there are pending down migrations, CODE_SUCCESS otherwise.
      */
-    protected function executeAll(Arguments $args, ConsoleIo $io, ?string $format): int
+    protected function executeAll(?string $format): int
     {
         $sections = ['app' => null];
         foreach (Plugin::loaded() as $pluginName) {
             $migrationsPath = Plugin::path($pluginName) . 'config' . DS
-                . $args->getOption('source') . DS;
+                . $this->args->getOption('source') . DS;
             if (!is_dir($migrationsPath)) {
                 continue;
             }
             $sections[$pluginName] = $pluginName;
         }
 
-        $verbose = (bool)$args->getOption('verbose');
+        $verbose = (bool)$this->args->getOption('verbose');
         $jsonResults = [];
         $summary = [];
         $exitCode = Command::CODE_SUCCESS;
@@ -207,11 +196,11 @@ class StatusCommand extends Command
         foreach ($sections as $label => $plugin) {
             $factory = new ManagerFactory([
                 'plugin' => $plugin,
-                'source' => $args->getOption('source'),
-                'connection' => $args->getOption('connection'),
-                'dry-run' => $args->getOption('dry-run'),
+                'source' => $this->args->getOption('source'),
+                'connection' => $this->args->getOption('connection'),
+                'dry-run' => $this->args->getOption('dry-run'),
             ]);
-            $manager = $factory->createManager($io);
+            $manager = $factory->createManager($this->io);
             $migrations = $manager->printStatus($format);
 
             $sectionExit = $this->statusExitCode($migrations);
@@ -234,11 +223,11 @@ class StatusCommand extends Command
             }
 
             $heading = $label === 'app' ? 'APP' : $label;
-            $io->out('');
-            $io->out('==================================================');
-            $io->out(sprintf('<info>%s</info>', $heading));
-            $io->out('==================================================');
-            $this->display($migrations, $io, $manager->getSchemaTableName());
+            $this->io->out('');
+            $this->io->out('==================================================');
+            $this->io->out(sprintf('<info>%s</info>', $heading));
+            $this->io->out('==================================================');
+            $this->display($migrations, $manager->getSchemaTableName());
         }
 
         if ($format === 'json') {
@@ -246,12 +235,12 @@ class StatusCommand extends Command
             if ($verbose) {
                 $flags = JSON_PRETTY_PRINT;
             }
-            $io->out((string)json_encode($jsonResults, $flags));
+            $this->io->out((string)json_encode($jsonResults, $flags));
 
             return $exitCode;
         }
 
-        $this->displaySummary($io, $summary);
+        $this->displaySummary($summary);
 
         return $exitCode;
     }
@@ -282,20 +271,19 @@ class StatusCommand extends Command
     /**
      * Render the trailing summary block listing sections that need action.
      *
-     * @param \Cake\Console\ConsoleIo $io The console io.
      * @param array<string, array{down: int, missing: int}> $summary
      * @return void
      */
-    protected function displaySummary(ConsoleIo $io, array $summary): void
+    protected function displaySummary(array $summary): void
     {
         $needsAction = array_filter(
             $summary,
             fn(array $counts): bool => $counts['down'] > 0 || $counts['missing'] > 0,
         );
 
-        $io->out('');
+        $this->io->out('');
         if (!$needsAction) {
-            $io->out(sprintf(
+            $this->io->out(sprintf(
                 '<success>Summary: all %d sections are up to date.</success>',
                 count($summary),
             ));
@@ -303,7 +291,7 @@ class StatusCommand extends Command
             return;
         }
 
-        $io->out(sprintf(
+        $this->io->out(sprintf(
             '<warning>Summary: %d of %d sections require action:</warning>',
             count($needsAction),
             count($summary),
@@ -317,7 +305,7 @@ class StatusCommand extends Command
             if ($counts['missing'] > 0) {
                 $parts[] = sprintf('%d missing', $counts['missing']);
             }
-            $io->out(sprintf('  - %s: %s', $heading, implode(', ', $parts)));
+            $this->io->out(sprintf('  - %s: %s', $heading, implode(', ', $parts)));
         }
     }
 
@@ -346,17 +334,16 @@ class StatusCommand extends Command
     /**
      * Print migration status to stdout.
      *
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @param string $tableName The migration tracking table name
      * @return void
      */
-    protected function display(array $migrations, ConsoleIo $io, string $tableName): void
+    protected function display(array $migrations, string $tableName): void
     {
-        $io->out(sprintf('using migration table <info>%s</info>', $tableName));
+        $this->io->out(sprintf('using migration table <info>%s</info>', $tableName));
         if ($tableName !== UnifiedMigrationsTableStorage::TABLE_NAME) {
-            $io->warning('You are using legacy phinxlog tables. Run `migrations upgrade` to switch to the unified `cake_migrations` table.');
+            $this->io->warning('You are using legacy phinxlog tables. Run `migrations upgrade` to switch to the unified `cake_migrations` table.');
         }
-        $io->out('');
+        $this->io->out('');
 
         if ($migrations) {
             $rows = [];
@@ -374,12 +361,12 @@ class StatusCommand extends Command
                 }
                 $rows[] = [$status, sprintf('%14.0f ', $migration['id']), $name . $missingComment];
             }
-            $io->helper('table')->output($rows);
+            $this->io->helper('table')->output($rows);
         } else {
             $msg = 'There are no available migrations. Try creating one using the <info>create</info> command.';
-            $io->err('');
-            $io->err($msg);
-            $io->err('');
+            $this->io->err('');
+            $this->io->err($msg);
+            $this->io->err('');
         }
     }
 }

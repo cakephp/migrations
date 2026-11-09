@@ -41,7 +41,7 @@ class Literal implements Stringable
      * @param string $value The literal's value
      * @return self
      */
-    public static function from(string $value): Literal
+    public static function from(string $value): self
     {
         return new self($value);
     }

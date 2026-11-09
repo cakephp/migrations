@@ -17,7 +17,6 @@ namespace Migrations\Command;
 
 use Bake\Command\SimpleBakeCommand;
 use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
@@ -36,11 +35,6 @@ class BakeSeedCommand extends SimpleBakeCommand
     public string $pathFragment = 'config/Seeds/';
 
     protected string $_name;
-
-    /**
-     * Arguments
-     */
-    protected Arguments $args;
 
     /**
      * @inheritDoc
@@ -77,11 +71,11 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function getPath(Arguments $args): string
+    public function getPath(): string
     {
         $path = ROOT . DS . $this->pathFragment;
         if ($this->plugin) {
-            $path = $this->_pluginPath($this->plugin) . $this->pathFragment;
+            $path = $this->pluginPath($this->plugin) . $this->pathFragment;
         }
 
         return str_replace('/', DS, $path);
@@ -103,28 +97,27 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * Get template data.
      *
-     * @param \Cake\Console\Arguments $arguments The arguments for the command
      * @return array
      * @phpstan-return array<string, mixed>
      */
-    public function templateData(Arguments $arguments): array
+    public function templateData(): array
     {
         $namespace = Configure::read('App.namespace');
         if ($this->plugin) {
-            $namespace = $this->_pluginNamespace($this->plugin);
+            $namespace = $this->pluginNamespace($this->plugin);
         }
 
-        $table = Inflector::underscore((string)$arguments->getArgumentAt(0));
-        if ($arguments->hasOption('table')) {
+        $table = Inflector::underscore((string)$this->args->getArgumentAt(0));
+        if ($this->args->hasOption('table')) {
             /** @var string $table */
-            $table = $arguments->getOption('table');
+            $table = $this->args->getOption('table');
         }
 
         $records = false;
-        if ($arguments->getOption('data')) {
-            $limit = (int)$arguments->getOption('limit');
+        if ($this->args->getOption('data')) {
+            $limit = (int)$this->args->getOption('limit');
 
-            $fields = (string)$arguments->getOption('fields') ?: '*';
+            $fields = (string)$this->args->getOption('fields') ?: '*';
             if ($fields !== '*') {
                 $fields = explode(',', $fields);
             }
@@ -160,18 +153,18 @@ class BakeSeedCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name): void
     {
-        $this->args = $args;
         /** @var array<string, bool|string|null> $options */
-        $options = array_merge($args->getOptions(), ['no-test' => true]);
+        $options = array_merge($this->args->getOptions(), ['no-test' => true]);
         $newArgs = new Arguments(
-            $args->getArguments(),
+            $this->args->getArguments(),
             $options,
             ['name'],
         );
         $this->_name = $name;
-        parent::bake($name, $newArgs, $io);
+        $this->args = $newArgs;
+        parent::bake($name);
     }
 
     /**

@@ -44,6 +44,8 @@ use Migrations\Db\Table\Index;
 use Migrations\Db\Table\Partition;
 use Migrations\Db\Table\PartitionDefinition;
 use Migrations\Db\Table\TableMetadata;
+use Migrations\Db\Table\Trigger;
+use Migrations\Db\Table\View;
 use RuntimeException;
 
 /**
@@ -145,7 +147,7 @@ class Table
      * @param \Migrations\Db\Adapter\AdapterInterface $adapter Database Adapter
      * @return $this
      */
-    public function setAdapter(AdapterInterface $adapter)
+    public function setAdapter(AdapterInterface $adapter): static
     {
         $this->adapter = $adapter;
 
@@ -196,7 +198,7 @@ class Table
      *
      * @return $this
      */
-    public function drop()
+    public function drop(): static
     {
         $this->actions->addAction(new DropTable($this->table));
 
@@ -209,7 +211,7 @@ class Table
      * @param string $newTableName New Table Name
      * @return $this
      */
-    public function rename(string $newTableName)
+    public function rename(string $newTableName): static
     {
         $this->actions->addAction(new RenameTable($this->table, $newTableName));
 
@@ -222,7 +224,7 @@ class Table
      * @param string|string[]|null $columns Column name(s) to belong to the primary key, or null to drop the key
      * @return $this
      */
-    public function changePrimaryKey(string|array|null $columns)
+    public function changePrimaryKey(string|array|null $columns): static
     {
         $this->actions->addAction(new ChangePrimaryKey($this->table, $columns));
 
@@ -247,7 +249,7 @@ class Table
      * @param string|null $comment New comment string, or null to drop the comment
      * @return $this
      */
-    public function changeComment(?string $comment)
+    public function changeComment(?string $comment): static
     {
         $this->actions->addAction(new ChangeComment($this->table, $comment));
 
@@ -288,7 +290,7 @@ class Table
      * @param array<string, mixed> $data Data
      * @return $this
      */
-    public function setData(array $data)
+    public function setData(array $data): static
     {
         $this->data = $data;
 
@@ -332,7 +334,7 @@ class Table
      * @param string|string[] $columns Table Column(s)
      * @return $this
      */
-    public function addPrimaryKey(string|array $columns)
+    public function addPrimaryKey(string|array $columns): static
     {
         $this->primaryKey = $columns;
 
@@ -353,7 +355,7 @@ class Table
      * @throws \InvalidArgumentException
      * @return $this
      */
-    public function addColumn(string|Column $columnName, ?string $type = null, array $options = [])
+    public function addColumn(string|Column $columnName, ?string $type = null, array $options = []): static
     {
         if ($columnName instanceof Column) {
             $action = new AddColumn($this->table, $columnName);
@@ -384,7 +386,7 @@ class Table
      * @param string $columnName Column Name
      * @return $this
      */
-    public function removeColumn(string $columnName)
+    public function removeColumn(string $columnName): static
     {
         $action = RemoveColumn::build($this->table, $columnName);
         $this->actions->addAction($action);
@@ -399,7 +401,7 @@ class Table
      * @param string $newName New Column Name
      * @return $this
      */
-    public function renameColumn(string $oldName, string $newName)
+    public function renameColumn(string $oldName, string $newName): static
     {
         $action = RenameColumn::build($this->table, $oldName, $newName);
         $this->actions->addAction($action);
@@ -419,7 +421,7 @@ class Table
      * @param array<string, mixed> $options Options
      * @return $this
      */
-    public function updateColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
+    public function updateColumn(string $columnName, string|Column|null $newColumnType, array $options = []): static
     {
         if (!($newColumnType instanceof Column)) {
             $options['preserveUnspecified'] = true;
@@ -439,7 +441,7 @@ class Table
      * @param array<string, mixed> $options Options
      * @return $this
      */
-    public function changeColumn(string $columnName, string|Column|null $newColumnType, array $options = [])
+    public function changeColumn(string $columnName, string|Column|null $newColumnType, array $options = []): static
     {
         if ($newColumnType instanceof Column) {
             if ($options) {
@@ -506,7 +508,7 @@ class Table
      * @param array<string, mixed> $options Index Options
      * @return $this
      */
-    public function addIndex(string|array|Index $columns, array $options = [])
+    public function addIndex(string|array|Index $columns, array $options = []): static
     {
         $action = AddIndex::build($this->table, $columns, $options);
         $this->actions->addAction($action);
@@ -520,7 +522,7 @@ class Table
      * @param string|string[] $columns Columns
      * @return $this
      */
-    public function removeIndex(string|array $columns)
+    public function removeIndex(string|array $columns): static
     {
         $action = DropIndex::build($this->table, is_string($columns) ? [$columns] : $columns);
         $this->actions->addAction($action);
@@ -534,7 +536,7 @@ class Table
      * @param string $name Index name
      * @return $this
      */
-    public function removeIndexByName(string $name)
+    public function removeIndexByName(string $name): static
     {
         $action = DropIndex::buildFromName($this->table, $name);
         $this->actions->addAction($action);
@@ -576,7 +578,7 @@ class Table
      * @param array<string, mixed> $options Options
      * @return $this
      */
-    public function addForeignKey(string|array|ForeignKey $columns, string|TableMetadata|null $referencedTable = null, string|array $referencedColumns = ['id'], array $options = [])
+    public function addForeignKey(string|array|ForeignKey $columns, string|TableMetadata|null $referencedTable = null, string|array $referencedColumns = ['id'], array $options = []): static
     {
         if ($columns instanceof ForeignKey) {
             $action = new AddForeignKey($this->table, $columns);
@@ -598,7 +600,7 @@ class Table
      * @param string|null $constraint Constraint names
      * @return $this
      */
-    public function dropForeignKey(string|array $columns, ?string $constraint = null)
+    public function dropForeignKey(string|array $columns, ?string $constraint = null): static
     {
         $action = DropForeignKey::build($this->table, $columns, $constraint);
         $this->actions->addAction($action);
@@ -625,7 +627,7 @@ class Table
      * @param array<string, mixed> $options Options for the check constraint (e.g., 'name')
      * @return $this
      */
-    public function addCheckConstraint(string|CheckConstraint $expression, array $options = [])
+    public function addCheckConstraint(string|CheckConstraint $expression, array $options = []): static
     {
         if ($expression instanceof CheckConstraint) {
             $action = new AddCheckConstraint($this->table, $expression);
@@ -643,7 +645,7 @@ class Table
      * @param string $constraintName The name of the check constraint to drop
      * @return $this
      */
-    public function dropCheckConstraint(string $constraintName)
+    public function dropCheckConstraint(string $constraintName): static
     {
         $action = new DropCheckConstraint($this->table, $constraintName);
         $this->actions->addAction($action);
@@ -670,7 +672,7 @@ class Table
      * @param array<string, mixed> $options Partition options (count for HASH/KEY)
      * @return $this
      */
-    public function partitionBy(string $type, string|array|Literal $columns, array $options = [])
+    public function partitionBy(string $type, string|array|Literal $columns, array $options = []): static
     {
         $partition = new Partition($type, $columns, [], $options['count'] ?? null, $options);
         $this->table->setPartition($partition);
@@ -686,7 +688,7 @@ class Table
      * @param array<string, mixed> $options Additional options (tablespace, table for PG)
      * @return $this
      */
-    public function addPartition(string $name, mixed $value = null, array $options = [])
+    public function addPartition(string $name, mixed $value = null, array $options = []): static
     {
         $partition = $this->table->getPartition();
         if (!$partition instanceof Partition) {
@@ -711,7 +713,7 @@ class Table
      * @param string $name Partition name
      * @return $this
      */
-    public function dropPartition(string $name)
+    public function dropPartition(string $name): static
     {
         $this->actions->addAction(new DropPartition($this->table, $name));
 
@@ -726,7 +728,7 @@ class Table
      * @param array<string, mixed> $options Additional options
      * @return $this
      */
-    public function addPartitionToExisting(string $name, mixed $value, array $options = [])
+    public function addPartitionToExisting(string $name, mixed $value, array $options = []): static
     {
         $definition = new PartitionDefinition(
             $name,
@@ -748,7 +750,7 @@ class Table
      * @param bool $withTimezone Whether to set the timezone option on the added columns
      * @return $this
      */
-    public function addTimestamps(string|false|null $createdAt = 'created', string|false|null $updatedAt = 'updated', bool $withTimezone = false)
+    public function addTimestamps(string|false|null $createdAt = 'created', string|false|null $updatedAt = 'updated', bool $withTimezone = false): static
     {
         $createdAt ??= 'created';
         $updatedAt ??= 'updated';
@@ -790,7 +792,7 @@ class Table
      * @param string|false|null $updatedAt Alternate name for the updated_at column
      * @return $this
      */
-    public function addTimestampsWithTimezone(string|false|null $createdAt = null, string|false|null $updatedAt = null)
+    public function addTimestampsWithTimezone(string|false|null $createdAt = null, string|false|null $updatedAt = null): static
     {
         $this->addTimestamps($createdAt, $updatedAt, true);
 
@@ -808,7 +810,7 @@ class Table
      *              or array("col1" => "value1", "col2" => "anotherValue1")
      * @return $this
      */
-    public function insert(array $data)
+    public function insert(array $data): static
     {
         // handle array of array situations
         $keys = array_keys($data);
@@ -836,7 +838,7 @@ class Table
      * @param array $data array of data in the same format as insert()
      * @return $this
      */
-    public function insertOrSkip(array $data)
+    public function insertOrSkip(array $data): static
     {
         $this->insertMode = InsertMode::IGNORE;
 
@@ -877,7 +879,7 @@ class Table
      * @return $this
      * @throws \RuntimeException When using PostgreSQL or SQLite without specifying conflictColumns
      */
-    public function insertOrUpdate(array $data, array $updateColumns, array $conflictColumns)
+    public function insertOrUpdate(array $data, array $updateColumns, array $conflictColumns): static
     {
         $this->insertMode = InsertMode::UPSERT;
         $this->upsertUpdateColumns = $updateColumns;
@@ -1064,16 +1066,16 @@ class Table
      * @param array<string, mixed> $options View options
      * @return $this
      */
-    public function createView(string $viewName, string $definition, array $options = [])
+    public function createView(string $viewName, string $definition, array $options = []): static
     {
-        $view = new Table\View(
+        $view = new View(
             $viewName,
             $definition,
             $options['replace'] ?? false,
             $options['materialized'] ?? false,
         );
 
-        $action = new Action\CreateView($this->table, $view);
+        $action = new CreateView($this->table, $view);
         $this->actions->addAction($action);
 
         return $this;
@@ -1086,9 +1088,9 @@ class Table
      * @param array<string, mixed> $options View options
      * @return $this
      */
-    public function dropView(string $viewName, array $options = [])
+    public function dropView(string $viewName, array $options = []): static
     {
-        $action = new Action\DropView(
+        $action = new DropView(
             $this->table,
             $viewName,
             $options['materialized'] ?? false,
@@ -1107,17 +1109,17 @@ class Table
      * @param array<string, mixed> $options Trigger options
      * @return $this
      */
-    public function createTrigger(string $triggerName, string|array $event, string $definition, array $options = [])
+    public function createTrigger(string $triggerName, string|array $event, string $definition, array $options = []): static
     {
-        $trigger = new Table\Trigger(
+        $trigger = new Trigger(
             $triggerName,
-            $options['timing'] ?? Table\Trigger::BEFORE,
+            $options['timing'] ?? Trigger::BEFORE,
             $event,
             $definition,
             $options['forEach'] ?? true,
         );
 
-        $action = new Action\CreateTrigger($this->table, $trigger);
+        $action = new CreateTrigger($this->table, $trigger);
         $this->actions->addAction($action);
 
         return $this;
@@ -1129,9 +1131,9 @@ class Table
      * @param string $triggerName Trigger name
      * @return $this
      */
-    public function dropTrigger(string $triggerName)
+    public function dropTrigger(string $triggerName): static
     {
-        $action = new Action\DropTrigger($this->table, $triggerName);
+        $action = new DropTrigger($this->table, $triggerName);
         $this->actions->addAction($action);
 
         return $this;

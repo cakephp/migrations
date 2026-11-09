@@ -167,7 +167,7 @@ class Column extends DatabaseColumn
      * @param string $name Name
      * @return $this
      */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -194,7 +194,7 @@ class Column extends DatabaseColumn
      * @return $this
      * @deprecated 5.0 Use setLength() instead.
      */
-    public function setLimit(?int $limit)
+    public function setLimit(?int $limit): static
     {
         $this->length = $limit;
 
@@ -218,7 +218,7 @@ class Column extends DatabaseColumn
      * @param bool $null Null
      * @return $this
      */
-    public function setNull(bool $null)
+    public function setNull(bool $null): static
     {
         $this->null = $null;
 
@@ -251,7 +251,7 @@ class Column extends DatabaseColumn
      * @param mixed $default Default
      * @return $this
      */
-    public function setDefault(mixed $default)
+    public function setDefault(mixed $default): static
     {
         $this->default = $default;
 
@@ -274,7 +274,7 @@ class Column extends DatabaseColumn
      * @param string|null $generated Generated option
      * @return $this
      */
-    public function setGenerated(?string $generated)
+    public function setGenerated(?string $generated): static
     {
         $this->generated = $generated;
 
@@ -297,7 +297,7 @@ class Column extends DatabaseColumn
      * @param bool $identity Identity
      * @return $this
      */
-    public function setIdentity(bool $identity)
+    public function setIdentity(bool $identity): static
     {
         $this->identity = $identity;
 
@@ -330,7 +330,7 @@ class Column extends DatabaseColumn
      * @param string $after After
      * @return $this
      */
-    public function setAfter(string $after)
+    public function setAfter(string $after): static
     {
         $this->after = $after;
 
@@ -353,7 +353,7 @@ class Column extends DatabaseColumn
      * @param string $update On Update function
      * @return $this
      */
-    public function setUpdate(string $update)
+    public function setUpdate(string $update): static
     {
         $this->update = $update;
 
@@ -379,7 +379,7 @@ class Column extends DatabaseColumn
      * @param int|null $precision Number precision
      * @return $this
      */
-    public function setPrecision(?int $precision)
+    public function setPrecision(?int $precision): static
     {
         $this->setLimit($precision);
 
@@ -406,7 +406,7 @@ class Column extends DatabaseColumn
      * @param int $increment Number increment
      * @return $this
      */
-    public function setIncrement(int $increment)
+    public function setIncrement(int $increment): static
     {
         $this->increment = $increment;
 
@@ -429,7 +429,7 @@ class Column extends DatabaseColumn
      * @param int $seed Number seed
      * @return $this
      */
-    public function setSeed(int $seed)
+    public function setSeed(int $seed): static
     {
         $this->seed = $seed;
 
@@ -455,7 +455,7 @@ class Column extends DatabaseColumn
      * @param int|null $scale Number scale
      * @return $this
      */
-    public function setScale(?int $scale)
+    public function setScale(?int $scale): static
     {
         $this->scale = $scale;
 
@@ -485,7 +485,7 @@ class Column extends DatabaseColumn
      * @param int $scale Number scale
      * @return $this
      */
-    public function setPrecisionAndScale(int $precision, int $scale)
+    public function setPrecisionAndScale(int $precision, int $scale): static
     {
         $this->setLimit($precision);
         $this->scale = $scale;
@@ -499,7 +499,7 @@ class Column extends DatabaseColumn
      * @param string|null $comment Comment
      * @return $this
      */
-    public function setComment(?string $comment)
+    public function setComment(?string $comment): static
     {
         $this->comment = $comment;
 
@@ -561,7 +561,7 @@ class Column extends DatabaseColumn
      * @param bool $unsigned Unsigned
      * @return $this
      */
-    public function setUnsigned(bool $unsigned)
+    public function setUnsigned(bool $unsigned): static
     {
         $this->unsigned = $unsigned;
 
@@ -575,7 +575,7 @@ class Column extends DatabaseColumn
      * @return $this
      * @deprecated 5.0 Use setUnsigned() instead.
      */
-    public function setSigned(bool $signed)
+    public function setSigned(bool $signed): static
     {
         $this->unsigned = !$signed;
 
@@ -600,7 +600,7 @@ class Column extends DatabaseColumn
      * @param bool $timezone Timezone
      * @return $this
      */
-    public function setTimezone(bool $timezone)
+    public function setTimezone(bool $timezone): static
     {
         $this->timezone = $timezone;
 
@@ -633,7 +633,7 @@ class Column extends DatabaseColumn
      * @param array $properties Properties
      * @return $this
      */
-    public function setProperties(array $properties)
+    public function setProperties(array $properties): static
     {
         $this->properties = $properties;
 
@@ -656,7 +656,7 @@ class Column extends DatabaseColumn
      * @param string[]|string $values Value(s)
      * @return $this
      */
-    public function setValues(array|string $values)
+    public function setValues(array|string $values): static
     {
         if (!is_array($values)) {
             $values = preg_split('/,\s*/', $values) ?: [];
@@ -683,7 +683,7 @@ class Column extends DatabaseColumn
      * @return $this
      * @deprecated 5.0 Use setCollate() instead.
      */
-    public function setCollation(string $collation)
+    public function setCollation(string $collation): static
     {
         $this->collate = $collation;
 
@@ -707,7 +707,7 @@ class Column extends DatabaseColumn
      * @param string $encoding Encoding
      * @return $this
      */
-    public function setEncoding(string $encoding)
+    public function setEncoding(string $encoding): static
     {
         $this->encoding = $encoding;
 
@@ -730,7 +730,7 @@ class Column extends DatabaseColumn
      * @param string $algorithm Algorithm
      * @return $this
      */
-    public function setAlgorithm(string $algorithm)
+    public function setAlgorithm(string $algorithm): static
     {
         $this->algorithm = $algorithm;
 
@@ -753,7 +753,7 @@ class Column extends DatabaseColumn
      * @param string $lock Lock mode
      * @return $this
      */
-    public function setLock(string $lock)
+    public function setLock(string $lock): static
     {
         $this->lock = $lock;
 
@@ -778,7 +778,7 @@ class Column extends DatabaseColumn
      * @param bool|null $fixed Fixed
      * @return $this
      */
-    public function setFixed(?bool $fixed)
+    public function setFixed(?bool $fixed): static
     {
         $this->fixed = $fixed;
 
@@ -851,7 +851,7 @@ class Column extends DatabaseColumn
      * @throws \RuntimeException
      * @return $this
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): static
     {
         $validOptions = $this->getValidOptions();
         $aliasOptions = $this->getAliasedOptions();

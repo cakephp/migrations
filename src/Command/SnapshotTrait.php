@@ -13,9 +13,6 @@ declare(strict_types=1);
  */
 namespace Migrations\Command;
 
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
-
 /**
  * Trait needed for all "snapshot" type of bake operations.
  * Snapshot type operations are : baking a snapshot and baking a diff.
@@ -25,15 +22,15 @@ trait SnapshotTrait
     /**
      * @inheritDoc
      */
-    protected function createFile(string $path, string $contents, Arguments $args, ConsoleIo $io): bool
+    protected function createFile(string $path, string $contents): bool
     {
-        $createFile = parent::createFile($path, $contents, $args, $io);
+        $createFile = parent::createFile($path, $contents);
 
-        if ($createFile && !$args->getOption('generate-only')) {
-            $this->markSnapshotApplied($path, $args, $io);
+        if ($createFile && !$this->args->getOption('generate-only')) {
+            $this->markSnapshotApplied($path);
 
-            if (!$args->getOption('no-lock')) {
-                $this->refreshDump($args, $io);
+            if (!$this->args->getOption('no-lock')) {
+                $this->refreshDump();
             }
         }
 
@@ -45,11 +42,9 @@ trait SnapshotTrait
      * full file path.
      *
      * @param string $path Path to the newly created snapshot
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return void
      */
-    protected function markSnapshotApplied(string $path, Arguments $args, ConsoleIo $io): void
+    protected function markSnapshotApplied(string $path): void
     {
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         [$version, ] = explode('_', $fileName, 2);
@@ -59,50 +54,47 @@ trait SnapshotTrait
         $newArgs[] = $version;
         $newArgs[] = '-o';
 
-        $newArgs = array_merge($newArgs, $this->parseOptions($args));
+        $newArgs = array_merge($newArgs, $this->parseOptions());
 
-        $io->out('Marking the migration ' . $fileName . ' as migrated...');
-        $this->executeCommand(MarkMigratedCommand::class, $newArgs, $io);
+        $this->io->out('Marking the migration ' . $fileName . ' as migrated...');
+        $this->executeCommand(MarkMigratedCommand::class, $newArgs);
     }
 
     /**
      * After a file has been successfully created, we refresh the dump of the database
      * to be able to generate a new diff afterward.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return void
      */
-    protected function refreshDump(Arguments $args, ConsoleIo $io): void
+    protected function refreshDump(): void
     {
-        $newArgs = $this->parseOptions($args);
+        $newArgs = $this->parseOptions();
 
-        $io->out('Creating a dump of the new database state...');
-        $this->executeCommand(DumpCommand::class, $newArgs, $io);
+        $this->io->out('Creating a dump of the new database state...');
+        $this->executeCommand(DumpCommand::class, $newArgs);
     }
 
     /**
      * Will parse 'connection', 'plugin' and 'source' options into a new Array
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
      * @return array Array containing the short for the option followed by its value
      */
-    protected function parseOptions(Arguments $args): array
+    protected function parseOptions(): array
     {
         $newArgs = [];
-        if ($args->getOption('connection')) {
+        if ($this->args->getOption('connection')) {
             $newArgs[] = '-c';
-            $newArgs[] = $args->getOption('connection');
+            $newArgs[] = $this->args->getOption('connection');
         }
 
-        if ($args->getOption('plugin')) {
+        if ($this->args->getOption('plugin')) {
             $newArgs[] = '-p';
-            $newArgs[] = $args->getOption('plugin');
+            $newArgs[] = $this->args->getOption('plugin');
         }
 
-        if ($args->getOption('source')) {
+        if ($this->args->getOption('source')) {
             $newArgs[] = '-s';
-            $newArgs[] = $args->getOption('source');
+            $newArgs[] = $this->args->getOption('source');
         }
 
         return $newArgs;

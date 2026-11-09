@@ -8,7 +8,6 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Migrations\Test\TestCase\TestCase;
-use ReflectionProperty;
 
 class ResetCommandTest extends TestCase
 {
@@ -40,11 +39,10 @@ class ResetCommandTest extends TestCase
 
     protected function resetOutput(): void
     {
-        if ($this->_out instanceof StubConsoleOutput) {
-            $property = new ReflectionProperty($this->_out, '_out');
-            $property->setValue($this->_out, []);
+        if ($this->out instanceof StubConsoleOutput) {
+            $this->out->clear();
         }
-        $this->_in = null;
+        $this->in = null;
     }
 
     public function testHelp(): void

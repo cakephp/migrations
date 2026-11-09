@@ -46,13 +46,13 @@ $hasPendingUpdates = false;
 foreach ($files as $file) {
     $serialized = file_get_contents($file);
     if ($serialized === false) {
-        fwrite(STDERR, "Failed to read: {$file}\n");
+        fwrite(STDERR, sprintf('Failed to read: %s%s', $file, PHP_EOL));
         exit(EXIT_ERROR);
     }
 
     $data = @unserialize($serialized);
     if ($data === false && $serialized !== serialize(false)) {
-        fwrite(STDERR, "Failed to unserialize: {$file}\n");
+        fwrite(STDERR, sprintf('Failed to unserialize: %s%s', $file, PHP_EOL));
         exit(EXIT_ERROR);
     }
 
@@ -67,13 +67,13 @@ foreach ($files as $file) {
     $hasPendingUpdates = true;
     if ($write) {
         if (file_put_contents($file, $normalized) === false) {
-            fwrite(STDERR, "Failed to write: {$file}\n");
+            fwrite(STDERR, sprintf('Failed to write: %s%s', $file, PHP_EOL));
             exit(EXIT_ERROR);
         }
         $updatedFiles[] = $file;
-        echo "Updated {$file}\n";
+        echo sprintf('Updated %s%s', $file, PHP_EOL);
     } else {
-        echo "Needs update {$file}\n";
+        echo sprintf('Needs update %s%s', $file, PHP_EOL);
     }
 }
 
@@ -106,7 +106,7 @@ function getFixtureFiles(string $baseDir, array $selectedFiles): array
                 ? $file
                 : realpath(getcwd() . DIRECTORY_SEPARATOR . $file);
             if ($resolved === false || !is_file($resolved)) {
-                fwrite(STDERR, "Invalid --file path: {$file}\n");
+                fwrite(STDERR, sprintf('Invalid --file path: %s%s', $file, PHP_EOL));
                 exit(EXIT_ERROR);
             }
             $files[] = $resolved;
@@ -122,7 +122,7 @@ function getFixtureFiles(string $baseDir, array $selectedFiles): array
             continue;
         }
         $path = $item->getPathname();
-        if (preg_match('/schema-dump-.*\.lock$/', $path) === 1) {
+        if (preg_match('/schema-dump-.*\.lock$/', (string) $path) === 1) {
             $files[] = $path;
         }
     }
@@ -174,7 +174,7 @@ function fixUninitializedTypedProperties(
                 fwrite(
                     STDERR,
                     "Cannot infer default for uninitialized typed property " .
-                    "{$className}::\${$propertyName} in {$file}\n"
+                    sprintf('%s::$%s in %s%s', $className, $propertyName, $file, PHP_EOL)
                 );
                 exit(EXIT_ERROR);
             }

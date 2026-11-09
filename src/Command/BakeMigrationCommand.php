@@ -15,8 +15,6 @@ declare(strict_types=1);
  */
 namespace Migrations\Command;
 
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Event\Event;
@@ -42,7 +40,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    protected function bake(string $name, Arguments $args, ConsoleIo $io): void
+    protected function bake(string $name): void
     {
         EventManager::instance()->on('Bake.initialize', function (Event $event): void {
             /** @var \Bake\View\BakeView $view */
@@ -51,7 +49,7 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
         });
         $this->_name = $name;
 
-        parent::bake($name, $args, $io);
+        parent::bake($name);
     }
 
     /**
@@ -70,18 +68,18 @@ class BakeMigrationCommand extends BakeSimpleMigrationCommand
     /**
      * @inheritDoc
      */
-    public function templateData(Arguments $arguments): array
+    public function templateData(): array
     {
         $className = $this->_name;
         $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
-            $namespace = $this->_pluginNamespace($this->plugin);
+            $namespace = $this->pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
         }
 
         /** @var array<int, string> $args */
-        $args = $arguments->getArguments();
+        $args = $this->args->getArguments();
         unset($args[0]);
         $columnParser = new ColumnParser();
         $fields = $columnParser->parseFields($args);

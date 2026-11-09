@@ -59,7 +59,7 @@ class ChangeColumn extends Action
         $column->setType($type);
         $column->setOptions($options); // map options to column methods
 
-        return new ChangeColumn($table, $columnName, $column);
+        return new self($table, $columnName, $column);
     }
 
     /**

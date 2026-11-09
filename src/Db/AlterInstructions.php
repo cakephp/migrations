@@ -102,7 +102,7 @@ class AlterInstructions
      * @throws \InvalidArgumentException When algorithm or lock specifications conflict
      * @return void
      */
-    public function merge(AlterInstructions $other): void
+    public function merge(self $other): void
     {
         $this->alterParts = array_merge($this->alterParts, $other->getAlterParts());
         $this->postSteps = array_merge($this->postSteps, $other->getPostSteps());

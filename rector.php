@@ -28,7 +28,8 @@ return RectorConfig::configure()
         cacheDirectory: $cacheDir,
     )
 
-    ->withPhpSets()
+    // Keep language modernization separate from the CakePHP 6 API upgrade.
+    ->withPhpSets(php82: true)
     ->withAttributesSets()
 
     ->withSets([

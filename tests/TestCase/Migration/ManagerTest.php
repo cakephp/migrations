@@ -121,7 +121,7 @@ class ManagerTest extends TestCase
      * @param array $paths The paths config to override.
      * @return \Migrations\Db\Adapter\AdapterInterface
      */
-    protected function prepareEnvironment(array $paths = []): AdapterInterface
+    private function prepareEnvironment(array $paths = []): AdapterInterface
     {
         $configArray = $this->getConfigArray();
 

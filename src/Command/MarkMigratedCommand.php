@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use InvalidArgumentException;
 use Migrations\Config\ConfigInterface;
@@ -98,55 +96,49 @@ class MarkMigratedCommand extends Command
     /**
      * Checks for an invalid use of `--exclude` or `--only`
      *
-     * @param \Cake\Console\Arguments $args The console arguments
      * @return bool Returns true when it is an invalid use of `--exclude` or `--only` otherwise false
      */
-    protected function invalidOnlyOrExclude(Arguments $args): bool
+    protected function invalidOnlyOrExclude(): bool
     {
-        if ($args->getOption('exclude') && $args->getOption('only')) {
+        if ($this->args->getOption('exclude') && $this->args->getOption('only')) {
             return true;
         }
 
-        return ($args->getOption('exclude') || $args->getOption('only')) &&
-        $args->getOption('target') === null;
+        return ($this->args->getOption('exclude') || $this->args->getOption('only')) &&
+        $this->args->getOption('target') === null;
     }
 
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
         ]);
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $config = $manager->getConfig();
         $path = $config->getMigrationPath();
-
-        if ($this->invalidOnlyOrExclude($args)) {
-            $io->err(
+        if ($this->invalidOnlyOrExclude()) {
+            $this->io->err(
                 '<error>You should use `--exclude` OR `--only` (not both) along with a `--target` !</error>',
             );
 
             return self::CODE_ERROR;
         }
-
         try {
-            $versions = $manager->getVersionsToMark($args);
+            $versions = $manager->getVersionsToMark($this->args);
         } catch (InvalidArgumentException $e) {
-            $io->err(sprintf('<error>%s</error>', $e->getMessage()));
+            $this->io->err(sprintf('<error>%s</error>', $e->getMessage()));
 
             return self::CODE_ERROR;
         }
-
         $output = $manager->markVersionsAsMigrated($path, $versions);
-        array_map(fn(string $line): ?int => $io->out($line), $output);
+        array_map(fn(string $line): ?int => $this->io->out($line), $output);
 
         return self::CODE_SUCCESS;
     }

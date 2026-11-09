@@ -51,7 +51,7 @@ class AddIndex extends Action
             $index = $columns;
         }
 
-        return new AddIndex($table, $index);
+        return new self($table, $index);
     }
 
     /**

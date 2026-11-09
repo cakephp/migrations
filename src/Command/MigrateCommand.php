@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Event\EventDispatcherTrait;
 use DateTime;
@@ -102,17 +100,15 @@ class MigrateCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $event = $this->dispatchEvent('Migration.beforeMigrate');
         if ($event->isStopped()) {
             return $event->getResult() ? self::CODE_SUCCESS : self::CODE_ERROR;
         }
-        $result = $this->executeMigrations($args, $io);
+        $result = $this->executeMigrations();
         $this->dispatchEvent('Migration.afterMigrate');
 
         return $result;
@@ -121,17 +117,14 @@ class MigrateCommand extends Command
     /**
      * Execute migrations based on console inputs.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    protected function executeMigrations(Arguments $args, ConsoleIo $io): ?int
+    protected function executeMigrations(): ?int
     {
-        $version = $args->getOption('target') !== null ? (int)$args->getOption('target') : null;
-        $date = $args->getOption('date');
-        $fake = (bool)$args->getOption('fake');
-
-        $count = $args->getOption('count') !== null ? (int)$args->getOption('count') : null;
+        $version = $this->args->getOption('target') !== null ? (int)$this->args->getOption('target') : null;
+        $date = $this->args->getOption('date');
+        $fake = (bool)$this->args->getOption('fake');
+        $count = $this->args->getOption('count') !== null ? (int)$this->args->getOption('count') : null;
         if ($count !== null && $count < 1) {
             throw new LogicException('Count must be > 0.');
         }
@@ -141,30 +134,24 @@ class MigrateCommand extends Command
         if ($version && $date) {
             throw new LogicException('Can only use one of `--version` or `--date` options at a time.');
         }
-
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
-            'dry-run' => (bool)$args->getOption('dry-run'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
+            'dry-run' => (bool)$this->args->getOption('dry-run'),
         ]);
-
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $config = $manager->getConfig();
-
         $versionOrder = $config->getVersionOrder();
-
         if ($config->isDryRun()) {
-            $io->info('DRY-RUN mode enabled');
+            $this->io->info('DRY-RUN mode enabled');
         }
-        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
-        $io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
-        $io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
-
+        $this->io->verbose('<info>using connection</info> ' . $this->args->getOption('connection'));
+        $this->io->verbose('<info>using paths</info> ' . $config->getMigrationPath());
+        $this->io->verbose('<info>ordering by</info> ' . $versionOrder . ' time');
         if ($fake) {
-            $io->out('<warning>warning</warning> performing fake migrations');
+            $this->io->out('<warning>warning</warning> performing fake migrations');
         }
-
         try {
             // run the migrations
             $start = microtime(true);
@@ -175,25 +162,23 @@ class MigrateCommand extends Command
             }
             $end = microtime(true);
         } catch (Throwable $e) {
-            $io->err('<error>' . $e->getMessage() . '</error>');
-            $io->verbose($e->getTraceAsString());
+            $this->io->err('<error>' . $e->getMessage() . '</error>');
+            $this->io->verbose($e->getTraceAsString());
 
             return self::CODE_ERROR;
         }
-
-        $io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
-        $io->out('');
+        $this->io->comment('All Done. Took ' . sprintf('%.4fs', $end - $start));
+        $this->io->out('');
 
         $exitCode = self::CODE_SUCCESS;
-
         // Run dump command to generate lock file
-        if (!$args->getOption('no-lock') && !$args->getOption('dry-run')) {
-            $io->verbose('');
-            $io->verbose('Dumping the current schema of the database to be used while baking a diff');
-            $io->verbose('');
+        if (!$this->args->getOption('no-lock') && !$this->args->getOption('dry-run')) {
+            $this->io->verbose('');
+            $this->io->verbose('Dumping the current schema of the database to be used while baking a diff');
+            $this->io->verbose('');
 
-            $newArgs = DumpCommand::extractArgs($args);
-            $exitCode = $this->executeCommand(DumpCommand::class, $newArgs, $io);
+            $newArgs = DumpCommand::extractArgs($this->args);
+            $exitCode = $this->executeCommand(DumpCommand::class, $newArgs);
         }
 
         return $exitCode;

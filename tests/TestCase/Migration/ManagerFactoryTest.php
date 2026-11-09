@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Migrations\Test\TestCase\Migration;
 
 use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleIoInterface;
 use Cake\Console\TestSuite\StubConsoleInput;
 use Cake\Console\TestSuite\StubConsoleOutput;
 use Cake\Database\Connection;
@@ -27,6 +28,22 @@ class ManagerFactoryTest extends TestCase
         $result = $factory->createManager($io);
 
         $this->assertSame('test', $result->getConfig()->getConnection());
+    }
+
+    /**
+     * Command IO implementations can be passed through to migration adapters.
+     *
+     * @return void
+     */
+    public function testConsoleIoInterface(): void
+    {
+        $io = $this->createMock(ConsoleIoInterface::class);
+        $factory = new ManagerFactory(['connection' => 'test']);
+        $manager = $factory->createManager($io);
+
+        $this->assertSame($io, $manager->getIo());
+        $this->assertSame($io, $manager->getEnvironment()->getIo());
+        $this->assertSame($io, $manager->getEnvironment()->getAdapter()->getIo());
     }
 
     public function testCreateConfigPluginAdapter(): void

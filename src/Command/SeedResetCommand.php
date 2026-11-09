@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Migrations\Command;
 
 use Cake\Command\Command;
-use Cake\Console\Arguments;
-use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Migrations\Config\ConfigInterface;
 use Migrations\Migration\ManagerFactory;
@@ -86,36 +84,29 @@ class SeedResetCommand extends Command
     /**
      * Execute the command.
      *
-     * @param \Cake\Console\Arguments $args The command arguments.
-     * @param \Cake\Console\ConsoleIo $io The console io
      * @return int|null The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io): ?int
+    public function execute(): ?int
     {
         $factory = new ManagerFactory([
-            'plugin' => $args->getOption('plugin'),
-            'source' => $args->getOption('source'),
-            'connection' => $args->getOption('connection'),
-            'dry-run' => (bool)$args->getOption('dry-run'),
+            'plugin' => $this->args->getOption('plugin'),
+            'source' => $this->args->getOption('source'),
+            'connection' => $this->args->getOption('connection'),
+            'dry-run' => (bool)$this->args->getOption('dry-run'),
         ]);
-
-        $manager = $factory->createManager($io);
+        $manager = $factory->createManager($this->io);
         $config = $manager->getConfig();
-
         if ($config->isDryRun()) {
-            $io->info('DRY-RUN mode enabled');
+            $this->io->info('DRY-RUN mode enabled');
         }
-
-        $io->verbose('<info>using connection</info> ' . $args->getOption('connection'));
-        $io->verbose('<info>using paths</info> ' . $config->getSeedPath());
+        $this->io->verbose('<info>using connection</info> ' . $this->args->getOption('connection'));
+        $this->io->verbose('<info>using paths</info> ' . $config->getSeedPath());
 
         $seeds = $manager->getSeeds();
         $adapter = $manager->getEnvironment()->getAdapter();
-
         // Filter seeds if --seed option is specified
-        $seedOption = $args->getOption('seed');
+        $seedOption = $this->args->getOption('seed');
         $seedsToReset = $seeds;
-
         if ($seedOption) {
             $requestedSeeds = array_map(trim(...), explode(',', (string)$seedOption));
             $seedsToReset = [];
@@ -123,38 +114,34 @@ class SeedResetCommand extends Command
             foreach ($requestedSeeds as $requestedSeed) {
                 $normalizedName = $manager->normalizeSeedName($requestedSeed, $seeds);
                 if ($normalizedName === null) {
-                    $io->error(sprintf('Seed `%s` does not exist.', $requestedSeed));
+                    $this->io->error(sprintf('Seed `%s` does not exist.', $requestedSeed));
 
                     return self::CODE_ERROR;
                 }
                 $seedsToReset[$normalizedName] = $seeds[$normalizedName];
             }
         }
-
         if ($seedsToReset === []) {
-            $io->warning('No seeds to reset.');
+            $this->io->warning('No seeds to reset.');
 
             return self::CODE_SUCCESS;
         }
-
         // Show what will be reset and ask for confirmation
-        $io->out('');
+        $this->io->out('');
         $resetAllMessage = $seedOption ? '<info>The following seeds will be reset:</info>' : '<info>All seeds will be reset:</info>';
-        $io->out($resetAllMessage);
+        $this->io->out($resetAllMessage);
         foreach ($seedsToReset as $seed) {
-            $io->out('  - ' . Util::getSeedDisplayName($seed->getName()));
+            $this->io->out('  - ' . Util::getSeedDisplayName($seed->getName()));
         }
-        $io->out('');
-
+        $this->io->out('');
         if (!$config->isDryRun()) {
-            $continue = $io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
+            $continue = $this->io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
             if ($continue !== 'y') {
-                $io->warning('Reset operation aborted.');
+                $this->io->warning('Reset operation aborted.');
 
                 return self::CODE_SUCCESS;
             }
         }
-
         // Reset the seeds
         $count = 0;
         foreach ($seedsToReset as $seed) {
@@ -163,18 +150,17 @@ class SeedResetCommand extends Command
                 if (!$config->isDryRun()) {
                     $adapter->removeSeedFromLog($seed);
                 }
-                $io->info(sprintf('Reset: %s seed', $seedName));
+                $this->io->info(sprintf('Reset: %s seed', $seedName));
                 $count++;
             } else {
-                $io->verbose(sprintf('Skipped (not executed): %s seed', $seedName));
+                $this->io->verbose(sprintf('Skipped (not executed): %s seed', $seedName));
             }
         }
-
-        $io->out('');
+        $this->io->out('');
         if ($config->isDryRun()) {
-            $io->success(sprintf('DRY-RUN: Would reset %d seed(s).', $count));
+            $this->io->success(sprintf('DRY-RUN: Would reset %d seed(s).', $count));
         } else {
-            $io->success(sprintf('Reset %d seed(s).', $count));
+            $this->io->success(sprintf('Reset %d seed(s).', $count));
         }
 
         return self::CODE_SUCCESS;
