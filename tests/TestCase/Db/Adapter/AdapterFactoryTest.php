@@ -9,7 +9,6 @@ use Migrations\Db\Adapter\AdapterInterface;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Adapter\TimedOutputAdapter;
 use Migrations\Test\TestCase\Db\Adapter\DefaultAdapterTrait;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;
@@ -94,14 +93,14 @@ class AdapterFactoryTest extends TestCase
         $this->factory->registerWrapper('test', $wrapper);
     }
 
-    private function getAdapterMock(): MockObject
+    private function getAdapterStub(): AdapterInterface
     {
-        return $this->getMockBuilder(AdapterInterface::class)->getMock();
+        return $this->createStub(AdapterInterface::class);
     }
 
     public function testGetWrapper(): void
     {
-        $wrapper = $this->factory->getWrapper('timed', $this->getAdapterMock());
+        $wrapper = $this->factory->getWrapper('timed', $this->getAdapterStub());
 
         $this->assertInstanceOf(TimedOutputAdapter::class, $wrapper);
     }
@@ -111,6 +110,6 @@ class AdapterFactoryTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Wrapper "nope" has not been registered');
 
-        $this->factory->getWrapper('nope', $this->getAdapterMock());
+        $this->factory->getWrapper('nope', $this->getAdapterStub());
     }
 }

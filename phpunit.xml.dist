@@ -3,6 +3,12 @@
          colors="true"
          cacheDirectory=".phpunit.cache"
          bootstrap="tests/bootstrap.php"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true"
+         failOnPhpunitNotice="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         displayDetailsOnPhpunitNotices="true"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.1/phpunit.xsd"
 >
     <testsuites>
