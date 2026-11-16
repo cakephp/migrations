@@ -1146,14 +1146,7 @@ class MysqlAdapter extends AbstractAdapter
      */
     protected function getDropCheckConstraintInstructions(string $tableName, string $constraintName): AlterInstructions
     {
-        // MariaDB uses DROP CONSTRAINT, MySQL uses DROP CHECK
-        $keyword = $this->isMariaDb() ? 'CONSTRAINT' : 'CHECK';
-
-        $alter = sprintf(
-            'DROP %s %s',
-            $keyword,
-            $this->quoteColumnName($constraintName),
-        );
+        $alter = sprintf('DROP CHECK %s', $this->quoteColumnName($constraintName));
 
         return new AlterInstructions([$alter]);
     }
@@ -1573,37 +1566,12 @@ class MysqlAdapter extends AbstractAdapter
 
     /**
      * Whether the server has a native uuid type.
-     * (MariaDB 10.7.0+)
      *
      * @return bool
      */
     protected function hasNativeUuid(): bool
     {
-        // Prevent infinite connect() loop when MysqlAdapter is used as a stub.
-        if (!$this->connection instanceof Connection || !$this->getOption('connection')) {
-            return false;
-        }
-        $connection = $this->getConnection();
-        $version = $connection->getDriver()->version();
-
-        return version_compare($version, '10.7', '>=');
-    }
-
-    /**
-     * Whether the server is MariaDB (as opposed to MySQL).
-     *
-     * @return bool
-     */
-    protected function isMariaDb(): bool
-    {
-        // Prevent infinite connect() loop when MysqlAdapter is used as a stub.
-        if (!$this->connection instanceof Connection || !$this->getOption('connection')) {
-            return false;
-        }
-        $connection = $this->getConnection();
-        $version = $connection->getDriver()->version();
-
-        return stripos($version, 'mariadb') !== false;
+        return false;
     }
 
     /**
