@@ -144,12 +144,28 @@ class BakeMigrationCommandTest extends TestCase
     /**
      * Tests that baking a migration with the name as reserved keyword triggers prefixing.
      */
-    public function testCreateWithReservedKeyword(): void
+    #[DataProvider('reservedMigrationNames')]
+    public function testCreateWithReservedKeyword(string $name, string $className): void
     {
-        $this->exec('bake migration New --connection test', ['Prefix']);
+        $this->exec(sprintf('bake migration %s --connection test', $name), ['Prefix']);
 
+        $files = glob(ROOT . DS . 'config' . DS . 'Migrations' . DS . '*_Prefix' . $className . '.php');
+        $this->generatedFile = current($files);
         $this->assertExitCode(BaseCommand::CODE_SUCCESS);
-        $this->assertOutputRegExp('/Wrote.*?PrefixNew\.php/');
+        $this->assertOutputRegExp('/Wrote.*?Prefix' . $className . '\.php/');
+        $this->assertFileContains('class Prefix' . $className . ' extends BaseMigration', $this->generatedFile);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function reservedMigrationNames(): array
+    {
+        return [
+            'new' => ['New', 'New'],
+            'let' => ['let', 'Let'],
+            'is' => ['IS', 'IS'],
+        ];
     }
 
     public function testCreateBuiltInAlias(): void

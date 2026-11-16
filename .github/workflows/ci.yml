@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.2', '8.5']
+        php-version: ['8.2', '8.5', '8.6']
         db-type: [mariadb, mysql, pgsql, sqlite]
         prefer-lowest: ['']
         legacy-tables: ['']
