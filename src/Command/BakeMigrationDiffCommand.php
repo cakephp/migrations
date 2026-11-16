@@ -312,9 +312,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                         if ($attribute === 'length') {
                             $phinxAttributeName = 'limit';
                         }
-                        if (!isset($changedAttributes[$phinxAttributeName])) {
-                            $changedAttributes[$phinxAttributeName] = $column[$attribute];
-                        }
+                        $changedAttributes[$phinxAttributeName] ??= $column[$attribute];
                     }
 
                     // Only convert unsigned to signed if it actually changed
@@ -352,9 +350,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
                         unset($changedAttributes['limit']);
                     } elseif (isset($changedAttributes['length'])) {
                         // For non-decimal columns, convert 'length' to 'limit'
-                        if (!isset($changedAttributes['limit'])) {
-                            $changedAttributes['limit'] = $changedAttributes['length'];
-                        }
+                        $changedAttributes['limit'] ??= $changedAttributes['length'];
                         unset($changedAttributes['length']);
                     }
 
@@ -363,9 +359,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             }
 
             // columns deletion
-            if (!isset($this->templateData[$table]['columns']['remove'])) {
-                $this->templateData[$table]['columns']['remove'] = [];
-            }
+            $this->templateData[$table]['columns']['remove'] ??= [];
             $removedColumns = array_diff($oldColumns, $currentColumns);
             foreach ($removedColumns as $columnName) {
                 $column = $this->safeGetColumn($this->dumpSchema[$table], $columnName);
@@ -484,9 +478,7 @@ class BakeMigrationDiffCommand extends BakeSimpleMigrationCommand
             }
 
             // indexes deletion
-            if (!isset($this->templateData[$table]['indexes']['remove'])) {
-                $this->templateData[$table]['indexes']['remove'] = [];
-            }
+            $this->templateData[$table]['indexes']['remove'] ??= [];
 
             $removedIndexes = array_diff($oldIndexes, $currentIndexes);
             $parts = [];

@@ -432,14 +432,10 @@ class Plan
             $name = $table->getName();
 
             if ($action instanceof RemoveColumn) {
-                if (!isset($this->columnRemoves[$name])) {
-                    $this->columnRemoves[$name] = new AlterTable($table);
-                }
+                $this->columnRemoves[$name] ??= new AlterTable($table);
                 $this->columnRemoves[$name]->addAction($action);
             } else {
-                if (!isset($this->tableUpdates[$name])) {
-                    $this->tableUpdates[$name] = new AlterTable($table);
-                }
+                $this->tableUpdates[$name] ??= new AlterTable($table);
                 $this->tableUpdates[$name]->addAction($action);
             }
         }
@@ -465,9 +461,7 @@ class Plan
             $table = $action->getTable();
             $name = $table->getName();
 
-            if (!isset($this->tableMoves[$name])) {
-                $this->tableMoves[$name] = new AlterTable($table);
-            }
+            $this->tableMoves[$name] ??= new AlterTable($table);
 
             $this->tableMoves[$name]->addAction($action);
         }
@@ -492,9 +486,7 @@ class Plan
             $table = $action->getTable();
             $name = $table->getName();
 
-            if (!isset($this->indexes[$name])) {
-                $this->indexes[$name] = new AlterTable($table);
-            }
+            $this->indexes[$name] ??= new AlterTable($table);
 
             $this->indexes[$name]->addAction($action);
         }
@@ -522,9 +514,7 @@ class Plan
             $table = $action->getTable();
             $name = $table->getName();
 
-            if (!isset($this->constraints[$name])) {
-                $this->constraints[$name] = new AlterTable($table);
-            }
+            $this->constraints[$name] ??= new AlterTable($table);
 
             $this->constraints[$name]->addAction($action);
         }
@@ -553,9 +543,7 @@ class Plan
             $table = $action->getTable();
             $name = $table->getName();
 
-            if (!isset($this->partitions[$name])) {
-                $this->partitions[$name] = new AlterTable($table);
-            }
+            $this->partitions[$name] ??= new AlterTable($table);
 
             $this->partitions[$name]->addAction($action);
         }
@@ -581,9 +569,7 @@ class Plan
             $table = $action->getTable();
             $name = $table->getName();
 
-            if (!isset($this->viewsAndTriggers[$name])) {
-                $this->viewsAndTriggers[$name] = new AlterTable($table);
-            }
+            $this->viewsAndTriggers[$name] ??= new AlterTable($table);
 
             $this->viewsAndTriggers[$name]->addAction($action);
         }

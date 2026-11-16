@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Migrations\Test\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;

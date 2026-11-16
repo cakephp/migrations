@@ -45,9 +45,7 @@ class PostgresAdapterTest extends TestCase
     {
         static $available;
 
-        if ($available === null) {
-            $available = in_array('pgsql', PDO::getAvailableDrivers(), true);
-        }
+        $available ??= in_array('pgsql', PDO::getAvailableDrivers(), true);
 
         return $available;
     }

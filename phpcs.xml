@@ -18,6 +18,15 @@
 
     <rule ref="./vendor/cakephp/cakephp-codesniffer/CakePHP/ruleset.xml"/>
 
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
+        <include-pattern>*/src/*</include-pattern>
+        <include-pattern>*/tests/*</include-pattern>
+        <properties>
+            <property name="linesCountBeforeDeclare" value="0"/>
+            <property name="linesCountAfterDeclare" value="1"/>
+            <property name="spacesCountAroundEqualsSign" value="0"/>
+        </properties>
+    </rule>
     <!-- Necessary for class aliases used for backwards compat -->
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
         <severity>0</severity>

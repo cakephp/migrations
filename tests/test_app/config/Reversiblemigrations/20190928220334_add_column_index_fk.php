@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Migrations\Db\Table\Column;
 use Migrations\Db\Table\ForeignKey;
 use Migrations\BaseMigration;

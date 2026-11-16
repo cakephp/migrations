@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Cake\I18n\Date;
 use Cake\I18n\DateTime;
 use Migrations\BaseSeed;

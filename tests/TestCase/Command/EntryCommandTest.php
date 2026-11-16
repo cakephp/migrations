@@ -26,11 +26,6 @@ class EntryCommandTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
-
     /**
      * Test execute() generating help
      *
