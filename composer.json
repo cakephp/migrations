@@ -22,7 +22,7 @@
         "source": "https://github.com/cakephp/migrations"
     },
     "require": {
-        "php": ">=8.4",
+        "php": ">=8.5",
         "cakephp/cache": "^6.0",
         "cakephp/database": "^6.0",
         "cakephp/orm": "^6.0"

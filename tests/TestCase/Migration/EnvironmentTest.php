@@ -98,12 +98,9 @@ class EnvironmentTest extends TestCase
 
     public function testCurrentVersion(): void
     {
-        $stub = $this->getMockBuilder(AbstractAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
-        $stub->expects($this->any())
-             ->method('getVersions')
-             ->willReturn([20110301080000]);
+        $stub = $this->createStub(AbstractAdapter::class);
+        $stub->method('getVersions')
+            ->willReturn([20110301080000]);
 
         $this->environment->setAdapter($stub);
 
@@ -463,8 +460,8 @@ class EnvironmentTest extends TestCase
 
     public function testGettingInputObject(): void
     {
-        $mock = $this->getMockBuilder(ConsoleIo::class)->getMock();
-        $this->environment->setIo($mock);
+        $stub = $this->createStub(ConsoleIo::class);
+        $this->environment->setIo($stub);
         $inputObject = $this->environment->getIo();
         $this->assertInstanceOf(ConsoleIo::class, $inputObject);
     }
@@ -505,9 +502,7 @@ class EnvironmentTest extends TestCase
     public function testExecuteSeedInit(): void
     {
         // stub adapter
-        $adapterStub = $this->getMockBuilder(AbstractAdapter::class)
-            ->setConstructorArgs([[]])
-            ->getMock();
+        $adapterStub = $this->createStub(AbstractAdapter::class);
 
         $this->environment->setAdapter($adapterStub);
 

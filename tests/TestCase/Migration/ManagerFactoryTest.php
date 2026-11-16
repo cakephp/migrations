@@ -37,7 +37,7 @@ class ManagerFactoryTest extends TestCase
      */
     public function testConsoleIoInterface(): void
     {
-        $io = $this->createMock(ConsoleIoInterface::class);
+        $io = $this->createStub(ConsoleIoInterface::class);
         $factory = new ManagerFactory(['connection' => 'test']);
         $manager = $factory->createManager($io);
 

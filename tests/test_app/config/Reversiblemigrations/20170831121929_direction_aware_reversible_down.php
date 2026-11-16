@@ -3,6 +3,7 @@
 use Cake\Database\Query;
 use Migrations\Db\Table\Column;
 use Migrations\BaseMigration;
+use function Cake\Database\Expression\like;
 
 class DirectionAwareReversibleDown extends BaseMigration
 {
@@ -20,7 +21,7 @@ class DirectionAwareReversibleDown extends BaseMigration
             $query
                 ->update('change_direction_test')
                 ->set(['subthing' => $query->identifier('thing')])
-                ->where(['thing LIKE' => '%-%'])
+                ->where(['thing' => like('%-%')])
                 ->execute();
         } else {
             $this

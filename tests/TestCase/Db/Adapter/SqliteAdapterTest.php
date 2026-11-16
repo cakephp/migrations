@@ -23,6 +23,8 @@ use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionObject;
 use RuntimeException;
+use function Cake\Database\Expression\greaterThanOrEquals;
+use function Cake\Database\Expression\lessThan;
 
 class SqliteAdapterTest extends TestCase
 {
@@ -2024,7 +2026,7 @@ OUTPUT;
         $stm = $builder
             ->select('*')
             ->from('table1')
-            ->where(['int_col >=' => 2])
+            ->where(['int_col' => greaterThanOrEquals(2)])
             ->execute();
 
         $this->assertEquals(0, $stm->rowCount());
@@ -2036,7 +2038,7 @@ OUTPUT;
         $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
-            ->where(['int_col <' => 2])
+            ->where(['int_col' => lessThan(2)])
             ->execute();
 
         $this->assertEquals(1, $stm->rowCount());

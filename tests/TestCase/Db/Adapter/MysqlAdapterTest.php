@@ -12,6 +12,8 @@ use Cake\Database\Driver\Mysql;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use InvalidArgumentException;
+use Migrations\Db\Adapter\AdapterFactory;
+use Migrations\Db\Adapter\MariadbAdapter;
 use Migrations\Db\Adapter\MysqlAdapter;
 use Migrations\Db\Literal;
 use Migrations\Db\Table;
@@ -26,6 +28,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use function Cake\Database\Expression\greaterThanOrEquals;
+use function Cake\Database\Expression\lessThan;
 
 class MysqlAdapterTest extends TestCase
 {
@@ -40,16 +44,20 @@ class MysqlAdapterTest extends TestCase
     protected function setUp(): void
     {
         $config = ConnectionManager::getConfig('test');
-        if ($config['scheme'] !== 'mysql') {
+        if (!in_array($config['scheme'], ['mysql', 'mariadb'], true)) {
             $this->markTestSkipped('Mysql tests disabled.');
         }
         // Emulate the results of Util::parseDsn()
         $this->config = [
-            'adapter' => 'mysql',
+            'adapter' => $config['scheme'],
             'connection' => ConnectionManager::get('test'),
             'database' => $config['database'],
         ];
-        $this->adapter = new MysqlAdapter($this->config, $this->getConsoleIo());
+        $io = $this->getConsoleIo();
+        $adapter = AdapterFactory::instance()->getAdapter($config['scheme'], $this->config);
+        assert($adapter instanceof MysqlAdapter);
+        $adapter->setIo($io);
+        $this->adapter = $adapter;
 
         // ensure the database is empty for each test
         $this->adapter->dropDatabase($this->config['database']);
@@ -80,26 +88,25 @@ class MysqlAdapterTest extends TestCase
     {
         $version = $this->adapter->getConnection()->getDriver()->version();
 
-        return version_compare($version, '8.0.0', '>=')
-            && version_compare($version, '10.0.0', '<');
+        return !$this->usingMariaDb() && version_compare($version, '8.0.0', '>=');
     }
 
     private function usingMariaDb(): bool
     {
-        $version = $this->adapter->getConnection()->getDriver()->version();
-
-        return str_contains($version, 'MariaDB') || version_compare($version, '10.0.0', '>=');
+        return $this->adapter instanceof MariadbAdapter;
     }
 
     private function usingMariaDbWithUuid(): bool
     {
         $version = $this->adapter->getConnection()->getDriver()->version();
 
-        return version_compare($version, '10.7.0', '>=');
+        return $this->usingMariaDb() && version_compare($version, '10.7.0', '>=');
     }
 
     public function testConnection(): void
     {
+        $expectedClass = $this->config['adapter'] === 'mariadb' ? MariadbAdapter::class : MysqlAdapter::class;
+        $this->assertSame($expectedClass, $this->adapter::class);
         $this->assertInstanceOf(Connection::class, $this->adapter->getConnection());
     }
 
@@ -444,7 +451,8 @@ class MysqlAdapterTest extends TestCase
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
         ];
-        $adapter = new MysqlAdapter($options, $this->io);
+        $adapter = AdapterFactory::instance()->getAdapter($this->config['adapter'], $options);
+        $adapter->setIo($this->io);
 
         $table = new Table('table_with_default_collation', [], $adapter);
         $table->addColumn('name', 'string')
@@ -2476,7 +2484,7 @@ OUTPUT;
         $stm = $builder
             ->select('*')
             ->from('table1')
-            ->where(['int_col >=' => 2])
+            ->where(['int_col' => greaterThanOrEquals(2)])
             ->execute();
 
         $this->assertEquals(1, $stm->rowCount());
@@ -2488,7 +2496,7 @@ OUTPUT;
         $builder = $this->adapter->getDeleteBuilder();
         $stm = $builder
             ->delete('table1')
-            ->where(['int_col <' => 2])
+            ->where(['int_col' => lessThan(2)])
             ->execute();
 
         $this->assertEquals(1, $stm->rowCount());

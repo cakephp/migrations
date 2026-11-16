@@ -8,6 +8,7 @@ use Cake\Datasource\ConnectionManager;
 use Exception;
 use Migrations\Db\Adapter\UnifiedMigrationsTableStorage;
 use Migrations\Test\TestCase\TestCase;
+use function Cake\Database\Expression\equals;
 
 /**
  * Tests for UnifiedMigrationsTableStorage.
@@ -187,7 +188,7 @@ class UnifiedMigrationsTableStorageTest extends TestCase
         $appCount = $connection->selectQuery()
             ->select(['count' => $connection->selectQuery()->func()->count('*')])
             ->from(UnifiedMigrationsTableStorage::TABLE_NAME)
-            ->where(['plugin IS' => null])
+            ->where(['plugin' => equals(null)])
             ->execute()
             ->fetch('assoc');
 
