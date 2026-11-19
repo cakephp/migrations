@@ -39,7 +39,8 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
         'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally', 'for', 'foreach',
         'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'interface',
-        'isset', 'list', 'namespace', 'new', 'or', 'parent', 'private', 'protected', 'public', 'return','static',
+        'is', 'isset', 'let', 'list', 'namespace', 'new', 'or', 'parent', 'private', 'protected', 'public',
+        'return', 'static',
     ];
 
     /**
@@ -181,8 +182,8 @@ abstract class BakeSimpleMigrationCommand extends SimpleBakeCommand
         }
 
         $renderer = new TemplateRenderer($this->theme);
-        $renderer->set('name', $name);
         $renderer->set($this->templateData($args));
+        $renderer->set('name', $name);
 
         $contents = $renderer->generate($this->template());
 

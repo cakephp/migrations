@@ -17,6 +17,7 @@ use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\Class_\TypedPropertyFromCreateMockAssignRector;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnTypeDeclarationBasedOnParentClassMethodRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ReturnTypeFromStrictFluentReturnRector;
 
 $cacheDir = getenv('RECTOR_CACHE_DIR') ?: sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rector';
@@ -45,6 +46,10 @@ return RectorConfig::configure()
     ])
 
     ->withSkip([
+        // Keep Config::offsetGet() compatible with subclasses that omit its return type.
+        AddReturnTypeDeclarationBasedOnParentClassMethodRector::class => [
+            __DIR__ . '/src/Config/Config.php',
+        ],
         ClassPropertyAssignToConstructorPromotionRector::class,
         CatchExceptionNameMatchingTypeRector::class,
         ClosureToArrowFunctionRector::class,
