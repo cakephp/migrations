@@ -198,6 +198,10 @@ To reset all seeds' execution state (allowing them to run again without `--force
 bin/cake seeds reset
 ```
 
+Running all seeds and resetting seeds ask for confirmation. Pass `--yes` (`-y`)
+to skip the prompt in scripts. The `--force` option re-runs already executed
+seeds; it does not skip the prompt.
+
 > [!NOTE]
 > When re-running seeds with `--force`, be careful to ensure your seeds are
 > idempotent (safe to run multiple times) or they may create duplicate data.

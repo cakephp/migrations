@@ -209,6 +209,20 @@ bin/cake migrations migrate
 bin/cake schema_cache clear
 ```
 
+### Non-interactive Commands
+
+Running all seeds with `seeds run`, resetting seeds with `seeds reset`, and
+resetting migrations with `migrations reset` ask for confirmation. Pass `--yes`
+to skip the prompt while keeping normal output. For `seeds run`, `-q` also skips
+the prompt. Without `--yes`, `seeds reset -q` and `migrations reset -q` fail
+with a non-zero exit code.
+
+```bash
+bin/cake migrations migrate
+bin/cake seeds run --yes
+bin/cake schema_cache clear
+```
+
 ## Alert of Missing Migrations
 
 You can use the `Migrations.PendingMigrations` middleware in local development

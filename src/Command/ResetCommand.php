@@ -71,6 +71,7 @@ class ResetCommand extends Command
             '<info>migrations reset</info>',
             '<info>migrations reset -c secondary</info>',
             '<info>migrations reset --dry-run</info>',
+            '<info>migrations reset --yes</info>',
         ])->addOption('plugin', [
             'short' => 'p',
             'help' => 'The plugin to run migrations for',
@@ -88,6 +89,10 @@ class ResetCommand extends Command
             'boolean' => true,
         ])->addOption('no-lock', [
             'help' => 'If present, no lock file will be generated after migrating',
+            'boolean' => true,
+        ])->addOption('yes', [
+            'short' => 'y',
+            'help' => 'Skip the confirmation prompt and continue',
             'boolean' => true,
         ]);
 
@@ -136,8 +141,14 @@ class ResetCommand extends Command
         }
         $io->out('');
 
+        if (!$dryRun && !$args->getOption('yes') && $args->getOption('quiet')) {
+            $io->err('<error>Refusing to drop tables without confirmation in non-interactive mode. Pass --yes to continue.</error>');
+
+            return static::CODE_ERROR;
+        }
+
         // Ask for confirmation (unless dry-run)
-        if (!$dryRun) {
+        if (!$dryRun && !$args->getOption('yes')) {
             $continue = $io->askChoice(
                 'This will permanently delete all data. Do you want to continue?',
                 ['y', 'n'],

@@ -617,6 +617,54 @@ class SeedCommandTest extends TestCase
         $this->assertOutputNotContains('already executed');
     }
 
+    public function testRunAllWithYes(): void
+    {
+        $this->createTables();
+        $this->exec('seeds run -c test --yes');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('The following seeds will be executed:');
+        $this->assertOutputNotContains('Do you want to continue?');
+        $this->assertSame(1, (int)ConnectionManager::get('test')->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0));
+    }
+
+    public function testRunAllWithShortYes(): void
+    {
+        $this->createTables();
+        $this->exec('seeds run -c test -y');
+        $this->assertExitSuccess();
+        $this->assertOutputNotContains('Do you want to continue?');
+        $this->assertSame(1, (int)ConnectionManager::get('test')->execute('SELECT COUNT(*) FROM numbers')->fetchColumn(0));
+    }
+
+    public function testSeedResetWithYes(): void
+    {
+        $this->createTables();
+        $this->exec('seeds run -c test NumbersSeed');
+        $this->exec('seeds reset -c test --yes');
+        $this->assertExitSuccess();
+        $this->assertOutputNotContains('Do you want to continue?');
+        $this->assertSame(0, (int)ConnectionManager::get('test')->execute('SELECT COUNT(*) FROM cake_seeds')->fetchColumn(0));
+    }
+
+    public function testSeedResetQuietRefuses(): void
+    {
+        $this->createTables();
+        $this->exec('seeds run -c test NumbersSeed');
+        $this->exec('seeds reset -c test -q');
+        $this->assertExitError();
+        $this->assertErrorContains('--yes');
+        $this->assertSame(1, (int)ConnectionManager::get('test')->execute('SELECT COUNT(*) FROM cake_seeds')->fetchColumn(0));
+    }
+
+    public function testSeedResetQuietWithYes(): void
+    {
+        $this->createTables();
+        $this->exec('seeds run -c test NumbersSeed');
+        $this->exec('seeds reset -c test -q --yes');
+        $this->assertExitSuccess();
+        $this->assertSame(0, (int)ConnectionManager::get('test')->execute('SELECT COUNT(*) FROM cake_seeds')->fetchColumn(0));
+    }
+
     public function testIdempotentSeed(): void
     {
         $this->createTables();

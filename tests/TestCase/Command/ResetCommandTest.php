@@ -93,6 +93,36 @@ class ResetCommandTest extends TestCase
         $this->assertOutputContains('All Done');
     }
 
+    public function testResetWithYes(): void
+    {
+        $this->exec('migrations migrate -c test --no-lock');
+        $this->assertExitSuccess();
+        $this->resetOutput();
+
+        $this->exec('migrations reset -c test --no-lock --yes');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('Dropped');
+        $this->assertOutputContains('All Done');
+        $this->assertOutputNotContains('Do you want to continue?');
+    }
+
+    public function testResetQuietRefuses(): void
+    {
+        $connection = ConnectionManager::get('test');
+        $tablesBefore = $connection->getSchemaCollection()->listTables();
+
+        $this->exec('migrations reset -c test --no-lock -q');
+        $this->assertExitError();
+        $this->assertErrorContains('--yes');
+        $this->assertSame($tablesBefore, $connection->getSchemaCollection()->listTables());
+    }
+
+    public function testResetQuietDryRun(): void
+    {
+        $this->exec('migrations reset -c test --no-lock --dry-run -q');
+        $this->assertExitSuccess();
+    }
+
     public function testResetWithLock(): void
     {
         $migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
