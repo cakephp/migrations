@@ -88,6 +88,8 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
 
     protected ?Connection $connection = null;
 
+    protected static array $specificColumnTypes = [];
+
     /**
      * Class Constructor.
      *
@@ -423,6 +425,17 @@ abstract class AbstractAdapter implements AdapterInterface, DirectActionInterfac
     public function isValidColumnType(Column $column): bool
     {
         return in_array($column->getType(), $this->getColumnTypes(), true);
+    }
+
+    /**
+     * Add specific column type to adapter.
+     *
+     * @param string $type Adapter column type name.
+     * @return void
+     */
+    public static function addSpecificColumnType(string $type): void
+    {
+        static::$specificColumnTypes[] = $type;
     }
 
     /**
