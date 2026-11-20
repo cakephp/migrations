@@ -838,6 +838,7 @@ class Manager
 
         $environment = new Environment('default', $envOptions);
         $environment->setIo($this->getIo());
+
         $this->environment = $environment;
 
         return $environment;
