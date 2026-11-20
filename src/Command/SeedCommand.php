@@ -65,6 +65,7 @@ class SeedCommand extends Command
             '<info>seeds run Users,Posts</info>',
             '<info>seeds run --plugin Demo</info>',
             '<info>seeds run --connection secondary</info>',
+            '<info>seeds run --yes</info>',
             '',
             'Runs all seeds if no seed names are specified. When running all seeds',
             'in an interactive terminal, a confirmation prompt is shown.',
@@ -97,6 +98,11 @@ class SeedCommand extends Command
             ->addOption('force', [
                 'short' => 'f',
                 'help' => 'Force re-running seeds that have already been executed',
+                'boolean' => true,
+            ])
+            ->addOption('yes', [
+                'short' => 'y',
+                'help' => 'Skip the confirmation prompt and continue',
                 'boolean' => true,
             ])
             ->addOption('fake', [
@@ -227,12 +233,13 @@ class SeedCommand extends Command
                 }
                 $io->out('');
 
-                // Ask for confirmation
-                $continue = $io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
-                if ($continue !== 'y') {
-                    $io->warning('Seed operation aborted.');
+                if (!$args->getOption('yes')) {
+                    $continue = $io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
+                    if ($continue !== 'y') {
+                        $io->warning('Seed operation aborted.');
 
-                    return self::CODE_SUCCESS;
+                        return self::CODE_SUCCESS;
+                    }
                 }
             }
 

@@ -61,6 +61,7 @@ class SeedResetCommand extends Command
             '<info>seeds reset --seed Users,Posts</info>',
             '<info>seeds reset --plugin Demo</info>',
             '<info>seeds reset -c secondary</info>',
+            '<info>seeds reset --yes</info>',
         ])->addOption('seed', [
             'help' => 'Comma-separated list of specific seeds to reset. Resets all seeds if not specified.',
         ])->addOption('plugin', [
@@ -77,6 +78,10 @@ class SeedResetCommand extends Command
         ])->addOption('dry-run', [
             'short' => 'd',
             'help' => 'Show what would be reset without actually doing it',
+            'boolean' => true,
+        ])->addOption('yes', [
+            'short' => 'y',
+            'help' => 'Skip the confirmation prompt and continue',
             'boolean' => true,
         ]);
 
@@ -146,7 +151,13 @@ class SeedResetCommand extends Command
         }
         $io->out('');
 
-        if (!$config->isDryRun()) {
+        if (!$config->isDryRun() && !$args->getOption('yes') && $args->getOption('quiet')) {
+            $io->err('<error>Refusing to reset seeds without confirmation in non-interactive mode. Pass --yes to continue.</error>');
+
+            return static::CODE_ERROR;
+        }
+
+        if (!$config->isDryRun() && !$args->getOption('yes')) {
             $continue = $io->askChoice('Do you want to continue?', ['y', 'n'], 'n');
             if ($continue !== 'y') {
                 $io->warning('Reset operation aborted.');
